@@ -144,11 +144,12 @@ static const int16_t tzone[] = {
   0                   /* Zulu, zero meridian, a.k.a. UTC */
 };
 
-/* two-letter time zones */
-static const int16_t tztwo[] = {
-  660,               /* NT - Nome */ /* spellchecker:disable-line */
-  0,                 /* UT - Universal Time */
-};
+/* two-letter time zones
+
+  11 * 60,              NT - Nome    spellchecker:disable-line
+  0,                    UT - Universal Time
+
+*/
 
 /* three-letter time zones */
 static const struct tzinfo tzthree[] = {
@@ -343,9 +344,9 @@ UNITTEST int checktz(const char *check, size_t len)
     /* two-letter names */
     if(check[1] == 'T') {
       if(check[0] == 'N')
-        return tztwo[0];
+        return 11 * 60 * 60;
       else if(check[0] == 'U')
-        return tztwo[1];
+        return 0;
     }
     return -1; /* nope */
   }
