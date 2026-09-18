@@ -151,7 +151,7 @@ static const int16_t tzone[] = {
 
 */
 
-#define MKTZ(a,b,c,d) ((a<<24) | (b<<16) | (c<<8) | (d))
+#define MKTZ(a,b,c,d) (((a)<<24) | ((b)<<16) | ((c)<<8) | (d))
 
 /* three-letter time zones */
 static const struct tzinfo tzthree[] = {
