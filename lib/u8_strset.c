@@ -117,7 +117,7 @@ static void u8_strset_addn(struct u8_strset *set, uint8_t id, char *val)
 
 static bool u8_strset_grow(struct u8_strset *set)
 {
-  uint8_t i, *prev_ids, nslotbits;
+  uint8_t *prev_ids, nslotbits;
   uint16_t prev_slots;
   char **prev_data;
   size_t nslots;
@@ -152,9 +152,12 @@ static bool u8_strset_grow(struct u8_strset *set)
   set->slotmask = CURL_U8_SLOT_MASK(set->slotbits);
   set->count = 0;
   /* re-add previous entries */
-  for(i = 0; i < CURL_U8_SLOT_CNT(prev_slots); ++i) {
-    if(prev_data[i])
-      u8_strset_addn(set, prev_ids[i], prev_data[i]);
+  {
+    uint16_t i;
+    for(i = 0; i < CURL_U8_SLOT_CNT(prev_slots); ++i) {
+      if(prev_data[i])
+        u8_strset_addn(set, prev_ids[i], prev_data[i]);
+    }
   }
   if(prev_data != set->sdata)
     curlx_free(prev_data);

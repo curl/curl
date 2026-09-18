@@ -119,7 +119,7 @@ static bool u32_ptrset_grow(struct u32_ptrset *set)
   size_t nslots;
   void *d;
 
-  if(set->slotbits >= 32)
+  if(set->slotbits >= 31)
     return FALSE;
   nslotbits = set->slotbits ? (uint8_t)(set->slotbits + 1) : 5;
   nslots = CURL_U32_SLOT_CNT(nslotbits);
