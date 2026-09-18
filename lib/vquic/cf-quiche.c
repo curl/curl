@@ -107,7 +107,7 @@ static void quiche_debug_log(const char *line, void *argp)
 }
 #endif
 
-static void h3_stream_set_free(unsigned int id, void *stream);
+static void h3_stream_set_free(uint32_t id, void *stream);
 
 static CURLcode cf_quiche_ctx_init(struct cf_quiche_ctx *ctx,
                                    struct Curl_peer *origin,

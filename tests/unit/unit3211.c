@@ -203,7 +203,7 @@ static void t3211_check_u8_strset(void)
     fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
                 "wrong get loop5");
   }
-  fail_unless(Curl_u8_strset_count(&set) == 9, "wrong count aftger add 5");
+  fail_unless(Curl_u8_strset_count(&set) == 9, "wrong count after add 5");
 
   Curl_u8_strset_clear(&set);
 
@@ -271,7 +271,7 @@ static void t3211_check_u32_ptrset(void)
   fail_unless(!result, "ptrset add65 failed");
   fail_unless(!t3211_strcmp("add65", Curl_u32_ptrset_get(&set, idx)),
               "ptrset wrong result after add65");
-  fail_unless(Curl_u32_ptrset_count(&set) == 65, "wrong count aftger add65");
+  fail_unless(Curl_u32_ptrset_count(&set) == 65, "wrong count after add65");
 
   Curl_u32_ptrset_clear(&set);
   fail_unless(!Curl_u32_ptrset_count(&set), "ptrset cleared not empty");
