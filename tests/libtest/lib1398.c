@@ -217,6 +217,117 @@ static CURLcode test_lib1398(const char *arg)
   );
   fail_unless(rc == 128, "return code should be 128");
 
+  /* Literal text plus unadorned %s, %c, %d, %u and %% goes through the
+     fast path in mprintf.c; adding a width does not. Formatting the same
+     arguments both ways must produce the same bytes.
+
+     A width of 1 changes no output here: out_string() subtracts the string
+     length from the width before padding and the %c and integer paths do
+     likewise, so a non-empty conversion leaves nothing to pad. */
+  {
+    char fast[600];
+    char gen[600];
+    /* 512 bytes, one byte longer than the staging buffer. Built here rather
+       than written as a literal: C90 requires support for only 509
+       characters in a string literal, and that limit applies after
+       concatenation. */
+    char lstr[513];
+    int rcf, rcg;
+
+    memset(lstr, 'x', sizeof(lstr) - 1);
+    lstr[sizeof(lstr) - 1] = '\0';
+
+    /* a request line */
+    rcf = curl_msnprintf(fast, sizeof(fast), "%s %s HTTP/1.1\r\n",
+                         "POST", "/path");
+    rcg = curl_msnprintf(gen, sizeof(gen), "%1s %1s HTTP/1.1\r\n",
+                         "POST", "/path");
+    fail_unless(rcf == rcg, "fast and general lengths differ");
+    fail_unless(!strcmp(fast, gen), "fast and general output differ");
+    fail_unless(!strcmp(fast, "POST /path HTTP/1.1\r\n"), "wrong output");
+
+    /* %d, including the value whose negation overflows */
+    rcf = curl_msnprintf(fast, sizeof(fast), "[%d][%d][%d]",
+                         0, -1, INT_MIN);
+    rcg = curl_msnprintf(gen, sizeof(gen), "[%1d][%1d][%1d]",
+                         0, -1, INT_MIN);
+    fail_unless(rcf == rcg, "fast and general lengths differ");
+    fail_unless(!strcmp(fast, gen), "fast and general output differ");
+
+    /* %u at the top of its range */
+    rcf = curl_msnprintf(fast, sizeof(fast), "[%u][%u]", 0U, UINT_MAX);
+    rcg = curl_msnprintf(gen, sizeof(gen), "[%1u][%1u]", 0U, UINT_MAX);
+    fail_unless(rcf == rcg, "fast and general output differ");
+    fail_unless(!strcmp(fast, gen), "fast and general output differ");
+
+    /* %c and a literal percent next to conversions */
+    rcf = curl_msnprintf(fast, sizeof(fast), "%c%%%c 100%%", 'o', 'k');
+    rcg = curl_msnprintf(gen, sizeof(gen), "%1c%%%1c 100%%", 'o', 'k');
+    fail_unless(rcf == rcg, "fast and general lengths differ");
+    fail_unless(!strcmp(fast, gen), "fast and general output differ");
+    fail_unless(!strcmp(fast, "o%k 100%"), "wrong output");
+
+    /* a NULL %s renders as (nil) on both paths */
+    rcf = curl_msnprintf(fast, sizeof(fast), "[%s]", (char *)NULL);
+    rcg = curl_msnprintf(gen, sizeof(gen), "[%1s]", (char *)NULL);
+    fail_unless(rcf == rcg, "fast and general lengths differ");
+    fail_unless(!strcmp(fast, gen), "fast and general output differ");
+    fail_unless(!strcmp(fast, "[(nil)]"), "wrong output");
+
+    /* an empty %s, where a width would legitimately differ */
+    rcf = curl_msnprintf(fast, sizeof(fast), "[%s]", "");
+    fail_unless(rcf == 2, "return code should be 2");
+    fail_unless(!strcmp(fast, "[]"), "wrong output");
+
+    /* long enough to flush the staging buffer mid-format */
+    rcf = curl_msnprintf(fast, sizeof(fast), "%s", lstr);
+    rcg = curl_msnprintf(gen, sizeof(gen), "%1s", lstr);
+    fail_unless(rcf == rcg, "fast and general lengths differ");
+    fail_unless(!strcmp(fast, gen), "fast and general output differ");
+    fail_unless(rcf == (int)(sizeof(lstr) - 1), "wrong length");
+
+    /* off_t / size_t conversions the fast path now accepts: %lld %ld %llu
+       %lu %zu, at the boundaries where a wrong va_arg width or sign shows. A
+       '1' width forces the general path. %zd and %ld share the signed path
+       with %lld, and %zu shares the z width, so the two together cover %zd. */
+    {
+      long long ll = -9223372036854775807LL - 1; /* INT64_MIN */
+      unsigned long long ull = 18446744073709551615ULL; /* UINT64_MAX */
+      long lv = -1234567L;
+      unsigned long ulv = 4000000000UL;
+      size_t zv = (size_t)-1; /* SIZE_MAX */
+
+      rcf = curl_msnprintf(fast, sizeof(fast), "[%lld][%llu]", ll, ull);
+      rcg = curl_msnprintf(gen, sizeof(gen), "[%1lld][%1llu]", ll, ull);
+      fail_unless(rcf == rcg, "fast and general lengths differ");
+      fail_unless(!strcmp(fast, gen), "fast and general output differ");
+
+      rcf = curl_msnprintf(fast, sizeof(fast), "[%ld][%lu]", lv, ulv);
+      rcg = curl_msnprintf(gen, sizeof(gen), "[%1ld][%1lu]", lv, ulv);
+      fail_unless(rcf == rcg, "fast and general lengths differ");
+      fail_unless(!strcmp(fast, gen), "fast and general output differ");
+
+      rcf = curl_msnprintf(fast, sizeof(fast), "[%zu]", zv);
+      rcg = curl_msnprintf(gen, sizeof(gen), "[%1zu]", zv);
+      fail_unless(rcf == rcg, "fast and general lengths differ");
+      fail_unless(!strcmp(fast, gen), "fast and general output differ");
+
+      /* the curl_off_t form that lib/http.c emits on every request body */
+      rcf = curl_msnprintf(fast, sizeof(fast),
+                           "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+                           (curl_off_t)5368709120LL);
+      fail_unless(rcf == 28, "wrong length");
+      fail_unless(!strcmp(fast, "Content-Length: 5368709120\r\n"),
+                  "wrong output");
+    }
+
+    /* truncation into a short buffer */
+    rcf = curl_msnprintf(fast, 8, "%s%d", "abc", 4567);
+    rcg = curl_msnprintf(gen, 8, "%1s%1d", "abc", 4567);
+    fail_unless(rcf == rcg, "fast and general lengths differ");
+    fail_unless(!strcmp(fast, gen), "fast and general output differ");
+  }
+
   UNITTEST_END_SIMPLE
 }
 
