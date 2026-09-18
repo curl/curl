@@ -990,11 +990,16 @@ static CURLcode setopt_long_proxy(struct Curl_easy *data, CURLoption option,
 #endif
     s->proxytype = (unsigned char)arg;
     break;
-  case CURLOPT_SOCKS5_AUTH:
-    if(arg & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
+  case CURLOPT_SOCKS5_AUTH: {
+    unsigned long auth = (unsigned long)arg;
+    if(auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI | CURLAUTH_ONLY))
       return CURLE_NOT_BUILT_IN;
-    s->socks5auth = (unsigned char)arg;
+    if((auth & CURLAUTH_ONLY) && !(auth & (CURLAUTH_BASIC | CURLAUTH_GSSAPI)))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    s->socks5auth = (unsigned char)(auth & (CURLAUTH_BASIC | CURLAUTH_GSSAPI));
+    s->socks5_auth_only = !!(auth & CURLAUTH_ONLY);
     break;
+  }
   default:
     return CURLE_UNKNOWN_OPTION;
   }
