@@ -2346,7 +2346,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
     Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
 
-    /* Clone the SSL filer configs into the new connection. */
+    /* Clone the SSL filter configs into the new connection. */
     result = Curl_ssl_conn_config_clone(&match.ssl_config,
 #ifndef CURL_DISABLE_PROXY
                                         &match.proxy_ssl_config,

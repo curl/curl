@@ -470,30 +470,32 @@ static int cpool_check_limits(struct Curl_easy *data,
   if(!max_total && !max_host)
     return CPOOL_LIMIT_OK;
 
-  if(max_host && *pbundle) {
-    size_t live, shutdowns = 0;
+  if(max_host) {
+    size_t live = 0, shutdowns = 0;
     /* if we are at or above `dest_limit`, try to get rid of connections
      * in shutdown and, if that does not lower it, evict idle connections
      * from the pool. */
     admin = Curl_get_admin(data);
-    live = Curl_llist_count(&(*pbundle)->conns);
-    if(live >= max_host) {
-      size_t over = live - max_host + 1;
-      for(; over && *pbundle; --over) {
-        struct connectdata *oldest_idle =
-          cpool_bundle_get_oldest_idle(*pbundle, pnow);
-        if(!oldest_idle)
-          break;
-        /* disconnect the old conn and continue */
-        CURL_TRC_M(admin, "Shutting down connection #%" FMT_OFF_T
-                   " to '%s' due to destination limit of %u",
-                   oldest_idle->connection_id, oldest_idle->destination,
-                   max_host);
-        cpool_evict_conn(cpool, admin, oldest_idle);
-        /* in case the bundle was destroyed in disconnect, look it up again */
-        *pbundle = cpool_find_bundle(cpool, to_add->destination);
+    if(*pbundle) {
+      live = Curl_llist_count(&(*pbundle)->conns);
+      if(live >= max_host) {
+        size_t over = live - max_host + 1;
+        for(; over && *pbundle; --over) {
+          struct connectdata *oldest_idle =
+            cpool_bundle_get_oldest_idle(*pbundle, pnow);
+          if(!oldest_idle)
+            break;
+          /* disconnect the old conn and continue */
+          CURL_TRC_M(admin, "Shutting down connection #%" FMT_OFF_T
+                     " to '%s' due to destination limit of %u",
+                     oldest_idle->connection_id, oldest_idle->destination,
+                     max_host);
+          cpool_evict_conn(cpool, admin, oldest_idle);
+          /* bundle may get destroyed in disconnect, look it up again */
+          *pbundle = cpool_find_bundle(cpool, to_add->destination);
+        }
+        live = *pbundle ? Curl_llist_count(&(*pbundle)->conns) : 0;
       }
-      live = *pbundle ? Curl_llist_count(&(*pbundle)->conns) : 0;
     }
     if(cshutdn) {
       shutdowns = Curl_cshutdn_dest_count(cshutdn, to_add->destination);

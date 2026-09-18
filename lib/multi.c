@@ -742,7 +742,7 @@ static CURLcode multi_done(struct Curl_easy *data,
     result = Curl_req_done(&data->req, data, premature);
 
   if(conn) {
-    /* Detach connection and decided what to do with it. */
+    /* Detach connection and decide what to do with it. */
     struct multi_done_ctx mdctx;
 
     Curl_detach_connection(data);

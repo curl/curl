@@ -101,7 +101,7 @@ typedef enum {
   CPOOL_MATCH_FOUND, /* The passed `conn` matches, stop looking further */
   CPOOL_MATCH_CONT,  /* No match, continue looking */
   CPOOL_MATCH_CLOSE, /* No match, close `conn`, continue looking */
-  CPOOL_MATCH_TOO_OLD /* No mach, `conn` is too old, close when idle */
+  CPOOL_MATCH_TOO_OLD /* No match, `conn` is too old, close when idle */
 } cpool_match_result;
 
 /* Return of conn is suitable. If so, stops iteration. */
