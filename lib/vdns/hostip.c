@@ -658,6 +658,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
       result = CURLE_OK;
   }
 #else
+  (void)pnow;
   result = Curl_resolv_announce_start(data, NULL);
   if(result)
     goto out;
@@ -849,8 +850,8 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
                                      struct Curl_peer *peer,
                                      uint8_t transport,
                                      bool for_proxy,
-                                     timediff_t timeout_ms,
                                      const struct curltime *pnow,
+                                     timediff_t timeout_ms,
                                      uint32_t *presolv_id,
                                      struct Curl_dns_entry **entry)
 {
@@ -1062,7 +1063,8 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     }
     if(timeout_ms && !Curl_doh_wanted(data)) {
       return resolv_alarm_timeout(data, dns_queries, peer, transport,
-                                  for_proxy, timeout_ms, presolv_id, pdns);
+                                  for_proxy, pnow, timeout_ms,
+                                  presolv_id, pdns);
     }
   }
 #endif /* !USE_ALARM_TIMEOUT */
