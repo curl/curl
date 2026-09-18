@@ -3168,6 +3168,15 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
   return result;
 }
 
+/* an implicit TLS scheme implies TLS on both connections */
+static unsigned char ftp_use_ssl(struct connectdata *conn,
+                                 struct ftp_conn *ftpc)
+{
+  if(!ftpc->use_ssl && (conn->scheme->flags & PROTOPT_SSL))
+    return CURLUSESSL_ALL;
+  return ftpc->use_ssl;
+}
+
 static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
                                     struct connectdata *conn)
 {
@@ -3254,7 +3263,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   case FTP_PBSZ:
     result =
       Curl_pp_sendf(data, &ftpc->pp, "PROT %c",
-                    ftpc->use_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
+                    ftp_use_ssl(conn, ftpc) == CURLUSESSL_CONTROL ? 'C' : 'P');
     if(!result)
       ftp_state(data, ftpc, FTP_PROT);
     break;
@@ -3262,10 +3271,11 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   case FTP_PROT:
     if(ftpcode / 100 == 2)
       /* We have enabled SSL for the data connection! */
-      conn->bits.ftp_use_data_ssl = (ftpc->use_ssl != CURLUSESSL_CONTROL);
+      conn->bits.ftp_use_data_ssl =
+        (ftp_use_ssl(conn, ftpc) != CURLUSESSL_CONTROL);
     /* FTP servers typically responds with 500 if they decide to reject
        our 'P' request */
-    else if(ftpc->use_ssl > CURLUSESSL_CONTROL)
+    else if(ftp_use_ssl(conn, ftpc) > CURLUSESSL_CONTROL)
       /* we failed and bails out */
       return CURLE_USE_SSL_FAILED;
 
