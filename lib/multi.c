@@ -746,7 +746,6 @@ static CURLcode multi_done(struct Curl_easy *data,
     struct multi_done_ctx mdctx;
 
     Curl_detach_connection(data);
-    Curl_dnscache_prune(data, pnow);
 
     memset(&mdctx, 0, sizeof(mdctx));
     mdctx.premature = premature;
