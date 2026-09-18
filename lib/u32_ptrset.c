@@ -117,18 +117,20 @@ static bool u32_ptrset_grow(struct u32_ptrset *set)
   uint8_t nslotbits, pslotbits;
   void **prev_data;
   size_t nslots;
+  const size_t slot_size = (sizeof(void *) + (2 * sizeof(uint32_t)));
   void *d;
 
-  if(set->slotbits >= 32)
+  if(set->slotbits >= 31)
     return FALSE;
   nslotbits = set->slotbits ? (uint8_t)(set->slotbits + 1) : 5;
   nslots = CURL_U32_SLOT_CNT(nslotbits);
+  if(nslots > (SIZE_MAX / slot_size)) /* 32-bit arch may trigger here */
+    return FALSE;
 #if CURL_U32_PTRSET_DEBUG
   curl_mfprintf(stderr, "u32_ptrset_grow from bits=%d to %d, slots=%zu\n",
                 set->slotbits, nslotbits, nslots);
 #endif
-  d = curlx_calloc(1, (nslots * sizeof(void *)) +
-                      (2 * nslots * sizeof(uint32_t)));
+  d = curlx_calloc(1, nslots * slot_size);
   if(!d)
     return FALSE;
 
