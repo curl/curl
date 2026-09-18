@@ -3465,8 +3465,15 @@ static CURLcode http_header_p(struct Curl_easy *data,
   }
 #endif
   if((407 == k->httpcode) && HD_IS(hd, hdlen, "Proxy-authenticate:")) {
-    char *auth = Curl_copy_header_value(hd);
-    CURLcode result = auth ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    char *auth;
+    CURLcode result;
+#ifndef CURL_DISABLE_PROXY
+    if(!data->conn->bits.origin_is_proxy)
+      /* this response is not from a forward proxy, not for us */
+      return CURLE_OK;
+#endif
+    auth = Curl_copy_header_value(hd);
+    result = auth ? CURLE_OK : CURLE_OUT_OF_MEMORY;
     if(!result) {
       result = Curl_http_input_auth(data, TRUE, auth);
       curlx_free(auth);
