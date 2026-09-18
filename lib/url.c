@@ -749,6 +749,16 @@ static bool url_match_proxy_use(struct connectdata *conn,
   if(!proxy_info_matches(&m->needle->http_proxy, &conn->http_proxy))
     return FALSE;
 
+  if(m->data->set.socks5_auth_only && !conn->bits.socks5_authenticated &&
+     ((conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ||
+      (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5_HOSTNAME))) {
+    DEBUGF(infof(m->data,
+                 "Connection #%" FMT_OFF_T
+                 " was not SOCKS5 authenticated, cannot reuse",
+                 conn->connection_id));
+    return FALSE;
+  }
+
   if(CURL_PROXY_IS_HTTPS(m->needle->http_proxy.proxytype)) {
     /* https proxies come in different types, http/1.1, h2, ... */
     /* match SSL config to proxy */
