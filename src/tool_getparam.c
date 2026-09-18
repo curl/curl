@@ -3063,8 +3063,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
 
       if(has_leading_unicode((const unsigned char *)nextarg)) {
-        warnf("The argument '%s' starts with a Unicode character. "
-              "Maybe ASCII was intended?", nextarg);
+        if(a->desc & ARG_CLEAR)
+          warnf("The argument to --%s starts with a Unicode character. "
+                "Maybe ASCII was intended?", a->lname);
+        else
+          warnf("The argument '%s' starts with a Unicode character. "
+                "Maybe ASCII was intended?", nextarg);
       }
       switch(ARGTYPE(a->desc)) {
       case ARG_FILE:
