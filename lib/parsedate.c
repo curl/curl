@@ -332,20 +332,24 @@ static int tzcompare(const void *m1, const void *m2)
 UNITTEST int checktz(const char *check, size_t len);
 UNITTEST int checktz(const char *check, size_t len)
 {
+  char first;
   if(len > 4)
     return -1;
-  else if(len == 1) {
+  first = check[0];
+  if(first < 'A')
+    return -1;
+  if(len == 1) {
     /* short-cut single letter names */
-    if((check[0] < 'A') || (check[0] > 'Z') || (check[0] == 'J'))
+    if((first > 'Z') || (first == 'J'))
       return -1; /* no such tz */
-    return tzone[check[0] - 'A'] * 60;
+    return tzone[first - 'A'] * 60;
   }
   else if(len == 2) {
     /* two-letter names */
     if(check[1] == 'T') {
-      if(check[0] == 'N')
+      if(first == 'N')
         return 11 * 60 * 60;
-      else if(check[0] == 'U')
+      else if(first == 'U')
         return 0;
     }
     return -1; /* nope */
@@ -354,7 +358,7 @@ UNITTEST int checktz(const char *check, size_t len)
     /* three-letter name */
     const struct tzinfo *what;
     struct tzinfo find;
-    if((check[0] < 'A') || (check[0] > 'Y'))
+    if(first > 'Y')
       return -1;
     curlx_strcopy(find.name, sizeof(find.name), check, len);
     what = bsearch(&find, tzthree, CURL_ARRAYSIZE(tzthree),
@@ -366,7 +370,7 @@ UNITTEST int checktz(const char *check, size_t len)
     /* four-letter name */
     const struct tzinfo *what;
     struct tzinfo find;
-    if((check[0] < 'A') || (check[0] > 'W'))
+    if(first > 'W')
       return -1;
     curlx_strcopy(find.name, sizeof(find.name), check, len);
     what = bsearch(&find, tzfoura, CURL_ARRAYSIZE(tzfoura),
