@@ -343,9 +343,9 @@ UNITTEST int checktz(const char *check, size_t len)
     /* two-letter names */
     if(check[1] == 'T') {
       if(check[0] == 'N')
-        return tztwo[0] * 60;
+        return tztwo[0];
       else if(check[0] == 'U')
-        return tztwo[1] * 60;
+        return tztwo[1];
     }
     return -1; /* nope */
   }
