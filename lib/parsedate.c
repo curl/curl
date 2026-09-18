@@ -114,40 +114,40 @@ struct tzinfo {
 
 #define tDAYZONE (-60)         /* offset for daylight savings time */
 
-/* alpha-sorted list of single-letter time zones */
-static const struct tzinfo tzone[] = {
-  { "A", -1 * 60 },            /* Alpha */
-  { "B", -2 * 60 },            /* Bravo */
-  { "C", -3 * 60 },            /* Charlie */
-  { "D", -4 * 60 },            /* Delta */
-  { "E", -5 * 60 },            /* Echo */
-  { "F", -6 * 60 },            /* Foxtrot */
-  { "G", -7 * 60 },            /* Golf */
-  { "H", -8 * 60 },            /* Hotel */
-  { "I", -9 * 60 },            /* India */
-  { "", -1 },          /* not a timezone */
-  { "K", -10 * 60 },           /* Kilo */
-  { "L", -11 * 60 },           /* Lima */
-  { "M", -12 * 60 },           /* Mike */
-  { "N",      60 },            /* November */
-  { "O",  2 * 60 },            /* Oscar */
-  { "P",  3 * 60 },            /* Papa */
-  { "Q",  4 * 60 },            /* Quebec */
-  { "R",  5 * 60 },            /* Romeo */
-  { "S",  6 * 60 },            /* Sierra */
-  { "T",  7 * 60 },            /* Tango */
-  { "U",  8 * 60 },            /* Uniform */
-  { "V",  9 * 60 },            /* Victor */
-  { "W", 10 * 60 },            /* Whiskey */
-  { "X", 11 * 60 },            /* X-ray */
-  { "Y", 12 * 60 },            /* Yankee */
-  { "Z",       0 },            /* Zulu, zero meridian, a.k.a. UTC */
+/* alpha-sorted list of single-letter time zones, A - Z */
+static const int16_t tzone[] = {
+  -1 * 60,            /* Alpha */
+  -2 * 60,            /* Bravo */
+  -3 * 60,            /* Charlie */
+  -4 * 60,            /* Delta */
+  -5 * 60,            /* Echo */
+  -6 * 60,            /* Foxtrot */
+  -7 * 60,            /* Golf */
+  -8 * 60,            /* Hotel */
+  -9 * 60,            /* India */
+  -1,                 /* J - not a timezone */
+  -10 * 60,           /* Kilo */
+  -11 * 60,           /* Lima */
+  -12 * 60,           /* Mike */
+  60,                 /* November */
+   2 * 60,            /* Oscar */
+   3 * 60,            /* Papa */
+   4 * 60,            /* Quebec */
+   5 * 60,            /* Romeo */
+   6 * 60,            /* Sierra */
+   7 * 60,            /* Tango */
+   8 * 60,            /* Uniform */
+   9 * 60,            /* Victor */
+  10 * 60,            /* Whiskey */
+  11 * 60,            /* X-ray */
+  12 * 60,            /* Yankee */
+  0                   /* Zulu, zero meridian, a.k.a. UTC */
 };
 
 /* two-letter time zones */
-static const struct tzinfo tztwo[] = {
-  { "NT",    660 },            /* Nome */ /* spellchecker:disable-line */
-  { "UT",      0 },            /* Universal Time */
+static const int16_t tztwo[] = {
+  660,               /* NT - Nome */ /* spellchecker:disable-line */
+  0,                 /* UT - Universal Time */
 };
 
 /* three-letter time zones */
@@ -337,15 +337,15 @@ UNITTEST int checktz(const char *check, size_t len)
     /* short-cut single letter names */
     if((check[0] < 'A') || (check[0] > 'Z') || (check[0] == 'J'))
       return -1; /* no such tz */
-    return tzone[check[0] - 'A'].offset * 60;
+    return tzone[check[0] - 'A'] * 60;
   }
   else if(len == 2) {
     /* two-letter names */
     if(check[1] == 'T') {
       if(check[0] == 'N')
-        return tztwo[0].offset * 60;
+        return tztwo[0] * 60;
       else if(check[0] == 'U')
-        return tztwo[1].offset * 60;
+        return tztwo[1] * 60;
     }
     return -1; /* nope */
   }
