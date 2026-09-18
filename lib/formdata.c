@@ -400,14 +400,25 @@ static CURLFORMcode formadd(struct curl_httppost **httppost,
           retval = CURL_FORMADD_NULL;
       }
       break;
-    case CURLFORM_CONTENTSLENGTH:
-      curr->contentslength = (curl_off_t)(size_t)form_int_arg(long);
+    case CURLFORM_CONTENTSLENGTH: {
+      long clen = form_int_arg(long);
+      if(clen < 0)
+        retval = CURL_FORMADD_INCOMPLETE;
+      else
+        curr->contentslength = (curl_off_t)clen;
       break;
+    }
 
-    case CURLFORM_CONTENTLEN:
-      curr->flags |= CURL_HTTPPOST_LARGE;
-      curr->contentslength = form_int_arg(curl_off_t);
+    case CURLFORM_CONTENTLEN: {
+      curl_off_t clen = form_int_arg(curl_off_t);
+      if(clen < 0)
+        retval = CURL_FORMADD_INCOMPLETE;
+      else {
+        curr->flags |= CURL_HTTPPOST_LARGE;
+        curr->contentslength = clen;
+      }
       break;
+    }
 
       /* Get contents from a given filename */
     case CURLFORM_FILECONTENT:
