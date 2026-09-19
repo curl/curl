@@ -547,6 +547,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         notef("Keeping %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
         if(fflush(outs->stream)) {
           errorf("Failed to flush output file stream");
+          *retryp = FALSE;
           return CURLE_WRITE_ERROR;
         }
         if(outs->bytes >= CURL_OFF_T_MAX - outs->init) {
@@ -554,6 +555,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
                  "%" CURL_FORMAT_CURL_OFF_T " + "
                  "%" CURL_FORMAT_CURL_OFF_T ")",
                  outs->init, outs->bytes);
+          *retryp = FALSE;
           return CURLE_WRITE_ERROR;
         }
         truncate = FALSE;
@@ -577,10 +579,15 @@ static CURLcode retrycheck(struct OperationConfig *config,
         notef("Throwing away %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
 
         /* truncate file at the position where we started appending */
-        if(toolx_ftruncate(fileno(outs->stream), outs->init)) {
+        if(
+#ifdef DEBUGBUILD
+           getenv("CURL_DBG_TRUNCATE_FAIL") ||
+#endif
+           toolx_ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot append as then we
              create something strange, bail out */
           errorf("Failed to truncate file");
+          *retryp = FALSE;
           return CURLE_WRITE_ERROR;
         }
         /* now seek to the end of the file, the position where we
@@ -589,6 +596,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
 
         if(rc) {
           errorf("Failed seeking to end of file");
+          *retryp = FALSE;
           return CURLE_WRITE_ERROR;
         }
         outs->bytes = 0; /* clear for next round */
@@ -693,6 +701,8 @@ static CURLcode post_close_output(struct per_transfer *per,
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
     rc = curlx_fclose(outs->stream);
+    outs->stream = NULL;
+    outs->fopened = FALSE;
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
