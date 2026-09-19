@@ -42,9 +42,9 @@ indicate that it was made for the hostname or address curl connects to, or the
 connection fails. The certificate has to have the same name as is used in the
 URL you operate against.
 
-curl considers the server the intended one when the Common Name field or a
-Subject Alternate Name field in the certificate matches the hostname in the
-URL to which you told curl to connect.
+curl considers the server the intended one when a name in the Subject Alternate
+Name field in the certificate matches the hostname in the URL to which you told
+curl to connect.
 
 When the *verify* value is 0, the connection succeeds regardless of the names
 in the certificate. Use that ability with caution.

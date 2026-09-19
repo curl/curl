@@ -624,3 +624,20 @@ class TestSSLUse:
         r = curl.http_get(url=url, alpn_proto=proto)
         # CURLE_SSL_CONNECT_ERROR or CURLE_PEER_FAILED_VERIFICATION
         assert r.exit_code in [35, 60], f'{r.dump_logs()}'
+
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    def test_17_25_no_common_name_fallback(self, env: Env, proto, httpd, nghttpx):
+        if env.curl_uses_lib('mbedtls') or \
+           env.curl_uses_lib('gnutls') or \
+           env.curl_uses_lib('wolfssl'):
+            pytest.skip("TLS library has not yet been updated for RFC 9525")
+        httpd.set_domain1_cred_name('domain-in-common-name-only')
+        httpd.reload_if_config_changed()
+        if proto == 'h3':
+            nghttpx.set_cred_name('domain-in-common-name-only')
+            nghttpx.reload_if_config_changed()
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto)
+        # CURLE_PEER_FAILED_VERIFICATION
+        assert r.exit_code == 60, f'{r.dump_logs()}'
