@@ -2500,7 +2500,8 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
     if(block) {
       curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
-      (void)SOCKET_READABLE(fd_read, left_ms > 1000 ? 1000 : left_ms);
+      (void)SOCKET_READABLE(fd_read,
+                            (!left_ms || left_ms > 1000) ? 1000 : left_ms);
     }
   }
 
