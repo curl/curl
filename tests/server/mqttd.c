@@ -413,6 +413,25 @@ static int publish(FILE *dump,
 
 static char topic[MAX_TOPIC_LENGTH + 1];
 
+static bool readall(curl_socket_t fd, unsigned char *buffer, size_t len)
+{
+  size_t nread = 0;
+
+  while(nread < len) {
+    ssize_t rc = sread(fd, buffer + nread, len - nread);
+    if(rc <= 0) {
+      if(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal)
+        continue;
+      logmsg("READ %zd bytes [SHORT!]", rc);
+      return FALSE;
+    }
+    logmsg("READ %zd bytes", rc);
+    loghex(buffer + nread, rc);
+    nread += (size_t)rc;
+  }
+  return TRUE;
+}
+
 static bool fixedheader(curl_socket_t fd,
                         unsigned char *bytep,
                         size_t *remaining_lengthp,
@@ -421,23 +440,18 @@ static bool fixedheader(curl_socket_t fd,
   /* get the fixed header */
   unsigned char buffer[10];
 
-  /* get the first two bytes */
-  ssize_t rc = sread(fd, buffer, 2);
   size_t i;
-  if(rc < 2) {
-    logmsg("READ %zd bytes [SHORT!]", rc);
+
+  /* get the first two bytes */
+  if(!readall(fd, buffer, 2))
     return FALSE; /* fail */
-  }
-  logmsg("READ %zd bytes", rc);
-  loghex(buffer, rc);
   *bytep = buffer[0];
 
   /* if the length byte has the top bit set, get the next one too */
   i = 1;
   while(buffer[i] & 0x80) {
     i++;
-    rc = sread(fd, &buffer[i], 1);
-    if(rc != 1) {
+    if(!readall(fd, &buffer[i], 1)) {
       logmsg("Remaining Length broken");
       return FALSE;
     }
@@ -513,14 +527,10 @@ static curl_socket_t mqttit(curl_socket_t fd)
       buffer = newbuffer;
     }
 
-    if(remaining_length) {
-      /* reading variable header and payload into buffer */
-      rc = sread(fd, buffer, remaining_length);
-      if(rc > 0) {
-        logmsg("READ %zd bytes", rc);
-        loghex(buffer, rc);
-      }
-    }
+    /* Read the complete variable header and payload. */
+    if(!readall(fd, buffer, remaining_length))
+      goto end;
+    rc = (ssize_t)remaining_length;
 
     if(byte == MQTT_MSG_CONNECT) {
       logprotocol(FROM_CLIENT, "CONNECT", remaining_length, dump, buffer, rc);
@@ -658,11 +668,9 @@ static curl_socket_t mqttit(curl_socket_t fd)
 #endif
       /* expect a disconnect here */
       /* get the request */
-      rc = sread(fd, &buffer[0], 2);
-
-      logmsg("READ %zd bytes [DISCONNECT]", rc);
-      loghex(buffer, rc);
-      logprotocol(FROM_CLIENT, "DISCONNECT", 0, dump, buffer, rc);
+      if(!readall(fd, buffer, 2))
+        goto end;
+      logprotocol(FROM_CLIENT, "DISCONNECT", 0, dump, buffer, 2);
       goto end;
     }
     else {
