@@ -67,8 +67,10 @@ enum mqttstate {
   MQTT_SUBACK_COMING,     /* 4 - the SUBACK remainder */
   MQTT_PUBWAIT,    /* 5 - wait for publish */
   MQTT_PUB_REMAIN,  /* 6 - wait for the remainder of the publish */
+  MQTT_POST_DRAIN,        /* 7 - finish sending PUBLISH */
+  MQTT_DISCONNECT_DRAIN,  /* 8 - finish sending DISCONNECT */
 
-  MQTT_NOSTATE /* 7 - never used an actual state */
+  MQTT_NOSTATE /* 9 - never used an actual state */
 };
 
 struct mqtt_conn {
@@ -140,24 +142,37 @@ static CURLcode mqtt_send(struct Curl_easy *data,
   if(!mq)
     return CURLE_FAILED_INIT;
 
+  /* A new packet must not replace a previously queued packet tail. */
+  DEBUGASSERT(!curlx_dyn_len(&mq->sendbuf));
   result = Curl_xfer_send(data, buf, len, FALSE, &n);
   if(result)
     return result;
   mq->lastTime = *Curl_pgrs_now(data);
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, n);
-  if(len != n) {
-    size_t nsend = len - n;
-    if(curlx_dyn_len(&mq->sendbuf)) {
-      DEBUGASSERT(curlx_dyn_len(&mq->sendbuf) >= nsend);
-      result = curlx_dyn_tail(&mq->sendbuf, nsend); /* keep this much */
-    }
-    else {
-      result = curlx_dyn_addn(&mq->sendbuf, &buf[n], nsend);
-    }
-  }
-  else
-    curlx_dyn_reset(&mq->sendbuf);
+  if(len != n)
+    result = curlx_dyn_addn(&mq->sendbuf, &buf[n], len - n);
   return result;
+}
+
+/* Send the queued tail, preserving any bytes that still cannot be sent. */
+static CURLcode mqtt_flush(struct Curl_easy *data)
+{
+  struct MQTT *mq = Curl_meta_get(data, CURL_META_MQTT_EASY);
+  size_t len, n;
+  CURLcode result;
+
+  if(!mq)
+    return CURLE_FAILED_INIT;
+  len = curlx_dyn_len(&mq->sendbuf);
+  if(!len)
+    return CURLE_OK;
+
+  result = Curl_xfer_send(data, curlx_dyn_ptr(&mq->sendbuf), len, FALSE, &n);
+  if(result)
+    return result;
+  mq->lastTime = *Curl_pgrs_now(data);
+  Curl_debug(data, CURLINFO_HEADER_OUT, curlx_dyn_ptr(&mq->sendbuf), n);
+  return curlx_dyn_tail(&mq->sendbuf, len - n);
 }
 
 /* Generic function called by the multi interface to figure out what socket(s)
@@ -166,6 +181,9 @@ static CURLcode mqtt_send(struct Curl_easy *data,
 static CURLcode mqtt_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps)
 {
+  struct MQTT *mq = Curl_meta_get(data, CURL_META_MQTT_EASY);
+  if(mq && curlx_dyn_len(&mq->sendbuf))
+    return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
   return Curl_pollset_add_in(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
@@ -637,6 +655,8 @@ static const char * const statenames[] = {
   "MQTT_SUBACK_COMING",
   "MQTT_PUBWAIT",
   "MQTT_PUB_REMAIN",
+  "MQTT_POST_DRAIN",
+  "MQTT_DISCONNECT_DRAIN",
 
   "NOT A STATE"
 };
@@ -843,14 +863,16 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
 
   if(curlx_dyn_len(&mq->sendbuf)) {
     /* send the remainder of an outgoing packet */
-    result = mqtt_send(data, curlx_dyn_ptr(&mq->sendbuf),
-                       curlx_dyn_len(&mq->sendbuf));
-    if(result)
+    result = mqtt_flush(data);
+    /* CURLE_OK can still mean a short write. Wait for writable progress
+       before sending another packet or processing a reply. */
+    if(result || curlx_dyn_len(&mq->sendbuf))
       return result;
   }
 
   result = mqtt_ping(data);
-  if(result)
+  /* Packet processing may send more output, so finish PINGREQ first. */
+  if(result || curlx_dyn_len(&mq->sendbuf))
     return result;
 
   infof(data, "mqtt_doing: state [%d]", (int)mqtt->state);
@@ -935,20 +957,31 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     if(result)
       break;
 
-    if(data->state.httpreq == HTTPREQ_POST) {
-      result = mqtt_publish(data);
-      if(!result) {
-        result = mqtt_disconnect(data);
-        *done = TRUE;
-      }
-      mqtt->nextstate = MQTT_FIRST;
-    }
-    else {
+    if(data->state.httpreq != HTTPREQ_POST) {
       result = mqtt_subscribe(data);
-      if(!result) {
+      if(!result)
         mqstate(data, MQTT_FIRST, MQTT_SUBACK);
-      }
+      break;
     }
+
+    result = mqtt_publish(data);
+    if(result)
+      break;
+    mqstate(data, MQTT_POST_DRAIN, MQTT_NOSTATE);
+    FALLTHROUGH();
+  case MQTT_POST_DRAIN:
+    /* PUBLISH must be complete before DISCONNECT can use the send buffer. */
+    if(curlx_dyn_len(&mq->sendbuf))
+      break;
+    result = mqtt_disconnect(data);
+    if(result)
+      break;
+    mqstate(data, MQTT_DISCONNECT_DRAIN, MQTT_NOSTATE);
+    FALLTHROUGH();
+  case MQTT_DISCONNECT_DRAIN:
+    /* Completing now would discard any DISCONNECT bytes still queued. */
+    if(!curlx_dyn_len(&mq->sendbuf))
+      *done = TRUE;
     break;
 
   case MQTT_SUBACK:
