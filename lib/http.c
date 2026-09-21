@@ -1301,11 +1301,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         (void)curl_url_get(u, CURLUPART_URL, &nocred, CURLU_GET_EMPTY);
       curl_url_cleanup(u);
     }
-    if(nocred) {
-      curlx_free(follow_url);
-      follow_url = nocred;
-    }
-    data->info.wouldredirect = follow_url;
+    curlx_free(follow_url);
+    data->info.wouldredirect = nocred;
 
     if(reachedmax) {
       failf(data, "Maximum (%d) redirects followed", data->set.maxredirs);
