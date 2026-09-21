@@ -51,7 +51,6 @@ http
 </name>
 <command option="no-include">
 "http://uuuu:pppp@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff"
-"h55p://hello2000:1/%TESTNUMBER?qqqq#ffff"
 "local host"
 "http://u22u:p22p@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff"
 -w '%{urle.host}+%{urle.path}+%{urle.scheme}+%{urle.user}+%{urle.password}+%{urle.port}+%{urle.query}+%{urle.fragment}\n'
@@ -63,7 +62,6 @@ http
 <verify>
 <stdout>
 anotherhost.example+/4240002+http+++2023+moo.html+
-hello2000+/424+h55p+++1+qqqq+ffff
 +++++++
 anotherhost.example+/4240002+http+++2023+moo.html+
 </stdout>

@@ -409,6 +409,7 @@ struct PureInfo {
   curl_off_t numconnects; /* how many new connections libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would have been redirected to if asked to */
+  char *effective_url; /* when needed */
   curl_off_t retry_after; /* info from Retry-After: header */
   const char *conn_scheme;
   int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
