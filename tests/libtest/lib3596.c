@@ -68,10 +68,22 @@ static CURLcode test_lib3596(const char *arg)
   fail_unless(result == CURLE_OK, "CURLOPT_MIMEPOST failed");
 
   /* Deep nesting must fail gracefully (CURLE_TOO_LARGE), not crash. */
+  if(!result) {
+    CURL *dup = curl_easy_duphandle(curl);
+    fail_unless(dup == NULL,
+                "curl_easy_duphandle unexpectedly succeeded for nested mime");
+  }
+
   if(!result)
     result = curl_easy_perform(curl);
   fail_unless(result == CURLE_TOO_LARGE,
               "deeply nested mime did not fail with CURLE_TOO_LARGE");
+
+  {
+    CURL *dup = curl_easy_duphandle(curl);
+    fail_unless(dup == NULL,
+                "curl_easy_duphandle unexpectedly succeeded after perform");
+  }
 
   curl_easy_cleanup(curl);
   curl_mime_free(root);
