@@ -276,7 +276,7 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
 static int prefix_reserved(const char *p)
 {
   if(curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) {
-    uint8_t *up = (uint8_t *)CURL_UNCONST(p);
+    const uint8_t *up = (const uint8_t *)p;
     uint8_t super;
     int len;
     if(('1' <= p[3]) && (p[3] <= '9'))
