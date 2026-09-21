@@ -126,6 +126,15 @@ static CURLcode test_tool1604(const char *arg)
     { "com1", 0,
       "_com1", SANITIZE_ERR_OK
     },
+    { "com4", 0,
+      "_com4", SANITIZE_ERR_OK
+    },
+    { "com6", 0,
+      "_com6", SANITIZE_ERR_OK
+    },
+    { "com9", 0,
+      "_com9", SANITIZE_ERR_OK
+    },
     { "com1", SANITIZE_ALLOW_RESERVED,
       "com1", SANITIZE_ERR_OK
     },
@@ -169,6 +178,30 @@ static CURLcode test_tool1604(const char *arg)
     },
     { "COM56", 0,
       "COM56", SANITIZE_ERR_OK
+    },
+    { "COM\xc2\xb9", 0,
+      "_COM\xc2\xb9", SANITIZE_ERR_OK
+    },
+    { "COM\xc2\xb2", 0,
+      "_COM\xc2\xb2", SANITIZE_ERR_OK
+    },
+    { "COM\xc2\xb3", 0,
+      "_COM\xc2\xb3", SANITIZE_ERR_OK
+    },
+    { "COM\xb9", 0,
+      "_COM\xb9", SANITIZE_ERR_OK
+    },
+    { "COM\xb2", 0,
+      "_COM\xb2", SANITIZE_ERR_OK
+    },
+    { "COM\xb3", 0,
+      "_COM\xb3", SANITIZE_ERR_OK
+    },
+    { "lpt\xc2\xb2.txt", 0,
+      "_lpt\xc2\xb2_txt", SANITIZE_ERR_OK
+    },
+    { "COM\xc2\xb3", SANITIZE_ALLOW_RESERVED,
+      "COM\xc2\xb3", SANITIZE_ERR_OK
     },
     { NULL, 0,
       NULL, SANITIZE_ERR_BAD_ARGUMENT

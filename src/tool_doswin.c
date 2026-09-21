@@ -272,6 +272,38 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
 }
 #endif /* MSDOS */
 
+/* return the number of bytes of the reserved prefix, zero if none exists */
+static int prefix_reserved(const char *p)
+{
+  if(curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) {
+    uint8_t super;
+    int len;
+    if(('1' <= p[3]) && (p[3] <= '9'))
+      return 4;
+
+    /* to complicate things, Windows considers superscript 1, 2, 3 to be valid
+       numbers and they can be provided in ISO8859-1 or UTF-8. Avoid either
+       version. */
+    len = (p[3] == 0xc2) ? /* UTF-8 */ 4 : 3;
+    super = p[len];
+
+    switch(super) {
+    case 0xb9: /* superscript '1' */
+    case 0xb2: /* superscript '2' */
+    case 0xb3: /* superscript '3' */
+      return len + 1;
+    }
+    return 0;
+  }
+  else if(curl_strnequal(p, "PRN", 3) ||
+          curl_strnequal(p, "AUX", 3) ||
+          curl_strnequal(p, "NUL", 3))
+    return 3;
+  else if(curl_strnequal(p, "CLOCK$", 6))
+    return 6;
+  return 0;
+}
+
 /*
  * Rename file_name if it is a reserved dos device name.
  *
@@ -333,14 +365,7 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
      https://learn.microsoft.com/windows/win32/fileio/naming-a-file
    */
   for(p = buffer; p; p = (p == buffer && buffer != base ? base : NULL)) {
-    size_t p_len;
-    int x = (curl_strnequal(p, "CON", 3) ||
-             curl_strnequal(p, "PRN", 3) ||
-             curl_strnequal(p, "AUX", 3) ||
-             curl_strnequal(p, "NUL", 3)) ? 3 :
-             curl_strnequal(p, "CLOCK$", 6) ? 6 :
-            (curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) ?
-              (('1' <= p[3] && p[3] <= '9') ? 4 : 3) : 0;
+    size_t p_len = prefix_reserved(p);
 
     if(!x)
       continue;
