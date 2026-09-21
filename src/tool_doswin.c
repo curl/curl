@@ -276,7 +276,7 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
 static int prefix_reserved(const char *p)
 {
   if(curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) {
-    uint8_t *up = (uint8_t *)p;
+    uint8_t *up = (uint8_t *)CURL_UNCONST(p);
     uint8_t super;
     int len;
     if(('1' <= p[3]) && (p[3] <= '9'))
@@ -367,8 +367,7 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
    */
   for(p = buffer; p; p = (p == buffer && buffer != base ? base : NULL)) {
     size_t p_len;
-
-    x = prefix_reserved(p);
+    int x = prefix_reserved(p);
 
     if(!x)
       continue;
