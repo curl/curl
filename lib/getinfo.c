@@ -90,7 +90,9 @@ static CURLcode effective_url(struct Curl_easy *data,
     if(!u)
       return CURLE_OUT_OF_MEMORY;
 
-    uc = curl_url_set(u, CURLUPART_URL, s, 0);
+    uc = curl_url_set(u, CURLUPART_URL, s,
+                      CURLU_NON_SUPPORT_SCHEME |
+                      (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
     if(!uc)
       uc = curl_url_set(u, CURLUPART_USER, NULL, 0);
     if(!uc)
