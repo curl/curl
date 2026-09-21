@@ -103,10 +103,6 @@ const char * const Curl_month[] = {
 #define PARSEDATE_SOONER 2
 #endif
 
-static const char * const weekday[] = {
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-};
-
 struct tzinfo {
   uint32_t tz;
   int16_t offset; /* +/- in minutes */
@@ -248,10 +244,16 @@ UNITTEST int checkday(const char *check, size_t len)
     break;
   }
   if((len > 3) && (day != -1)) {
-    /* when more than three letters are provided, verify the full name case
+    /* when more than three letters are provided, verify the tail name case
        insensitively */
-    size_t wlen = strlen(weekday[day]);
-    if((len != wlen) || !curl_strnequal(&check[3], &weekday[day][3], len - 3))
+    static const char * const daysuffix[] = {
+      /* without the leading three letters */
+      "day", "sday", "nesday", "rsday", "day", "urday", "day"
+    };
+
+    size_t wlen = strlen(daysuffix[day]);
+    if(((len - 3) != wlen) ||
+       !curl_strnequal(&check[3], daysuffix[day], wlen))
       return -1;
   }
   return day;
