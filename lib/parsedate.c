@@ -242,8 +242,10 @@ UNITTEST int checkday(const char *check, size_t len)
     if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[2]) == 't')
       day = 5;
     break;
+  default:
+    return -1; /* not a weekday */
   }
-  if((len > 3) && (day != -1)) {
+  if(len > 3) {
     /* when more than three letters are provided, verify the tail name case
        insensitively */
     static const char * const daysuffix[] = {
