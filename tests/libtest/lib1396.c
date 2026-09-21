@@ -117,5 +117,43 @@ static CURLcode test_lib1396(const char *arg)
     curl_free(out);
   }
 
+  {
+    unsigned char binary[256];
+    char expected[sizeof(binary) * 3 + 1];
+    const char digits[] = "0123456789ABCDEF";
+    size_t encoded_length = 0;
+    unsigned int byte;
+    char *encoded;
+    char *decoded;
+    int decoded_length;
+
+    for(byte = 0; byte < sizeof(binary); byte++) {
+      binary[byte] = (unsigned char)byte;
+      if((byte >= 'a' && byte <= 'z') || (byte >= 'A' && byte <= 'Z') ||
+         (byte >= '0' && byte <= '9') || byte == '-' || byte == '.' ||
+         byte == '_' || byte == '~')
+        expected[encoded_length++] = (char)byte;
+      else {
+        expected[encoded_length++] = '%';
+        expected[encoded_length++] = digits[byte >> 4];
+        expected[encoded_length++] = digits[byte & 15];
+      }
+    }
+    expected[encoded_length] = 0;
+    encoded = curl_easy_escape(easy, (const char *)binary, sizeof(binary));
+    abort_unless(encoded, "binary escape failed");
+    fail_unless(!strcmp(encoded, expected), "wrong binary escape output");
+    decoded = curl_easy_unescape(easy, encoded, 0, &decoded_length);
+    curl_free(encoded);
+    abort_unless(decoded, "binary unescape failed");
+    fail_unless(decoded_length == sizeof(binary), "wrong binary output size");
+    if(decoded_length == sizeof(binary)) {
+      fail_unless(!memcmp(decoded, binary, sizeof(binary)),
+                  "wrong binary data");
+      fail_unless(!decoded[decoded_length], "binary output not terminated");
+    }
+    curl_free(decoded);
+  }
+
   UNITTEST_END(t1396_stop(easy))
 }
