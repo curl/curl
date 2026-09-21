@@ -276,6 +276,7 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
 static int prefix_reserved(const char *p)
 {
   if(curl_strnequal(p, "COM", 3) || curl_strnequal(p, "LPT", 3)) {
+    uint8_t *up = (uint8_t *)p;
     uint8_t super;
     int len;
     if(('1' <= p[3]) && (p[3] <= '9'))
@@ -284,7 +285,7 @@ static int prefix_reserved(const char *p)
     /* to complicate things, Windows considers superscript 1, 2, 3 to be valid
        numbers and they can be provided in ISO8859-1 or UTF-8. Avoid either
        version. */
-    len = (p[3] == 0xc2) ? /* UTF-8 */ 4 : 3;
+    len = (up[3] == 0xc2) ? /* UTF-8 */ 4 : 3;
     super = p[len];
 
     switch(super) {
@@ -365,7 +366,9 @@ static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
      https://learn.microsoft.com/windows/win32/fileio/naming-a-file
    */
   for(p = buffer; p; p = (p == buffer && buffer != base ? base : NULL)) {
-    size_t p_len = prefix_reserved(p);
+    size_t p_len;
+
+    x = prefix_reserved(p);
 
     if(!x)
       continue;
