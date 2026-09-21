@@ -63,6 +63,7 @@ void Curl_initinfo(struct Curl_easy *data)
 
   curlx_safefree(info->contenttype);
   curlx_safefree(info->wouldredirect);
+  curlx_safefree(info->effective_url);
 
   memset(&info->primary, 0, sizeof(info->primary));
   info->retry_after = 0;
@@ -76,15 +77,51 @@ void Curl_initinfo(struct Curl_easy *data)
 #endif
 }
 
+static CURLcode effective_url(struct Curl_easy *data,
+                              const char **param_charp)
+{
+  const char *s = Curl_bufref_ptr(&data->state.url);
+  *param_charp = s ? s : "";
+  if(s) {
+    char *url = NULL;
+    /* Make a copy of the URL without credentials */
+    CURLU *u = curl_url();
+    CURLUcode uc;
+    if(!u)
+      return CURLE_OUT_OF_MEMORY;
+
+    uc = curl_url_set(u, CURLUPART_URL, s,
+                      CURLU_NON_SUPPORT_SCHEME |
+                      (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
+    if(!uc)
+      uc = curl_url_set(u, CURLUPART_USER, NULL, 0);
+    if(!uc)
+      uc = curl_url_set(u, CURLUPART_PASSWORD, NULL, 0);
+    if(!uc)
+      uc = curl_url_get(u, CURLUPART_URL, &url, CURLU_GET_EMPTY);
+
+    curl_url_cleanup(u);
+
+    if(uc || !url)
+      return CURLE_OUT_OF_MEMORY;
+    if(strcmp(url, s)) {
+      /* they are different */
+      curlx_free(data->info.effective_url);
+      data->info.effective_url = url;
+      *param_charp = url;
+    }
+    else
+      curl_free(url);
+  }
+  return CURLE_OK;
+}
+
 static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
                              const char **param_charp)
 {
   switch(info) {
-  case CURLINFO_EFFECTIVE_URL: {
-    const char *s = Curl_bufref_ptr(&data->state.url);
-    *param_charp = s ? s : "";
-  }
-    break;
+  case CURLINFO_EFFECTIVE_URL:
+    return effective_url(data, param_charp);
   case CURLINFO_EFFECTIVE_METHOD: {
     const char *m = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
     if(!m) {
