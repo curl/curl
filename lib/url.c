@@ -874,9 +874,13 @@ static bool websocket_compatible_protocols(struct Curl_easy *data,
                                            struct connectdata *needle,
                                            struct connectdata *conn)
 {
-  /* WebSockets can upgrade only an HTTP/1.1 connection */
+  /* WebSockets can upgrade only an HTTP/1.1 connection.
+   * Curl_conn_http_version() returns 0 for HTTP/1.x, since only the h2 and h3
+   * filters answer CF_QUERY_HTTP_VERSION, so use it to rule out multiplexing
+   * and check httpversion_seen to tell 1.1 from 1.0. */
   if(!(get_protocol_family(conn->origin->scheme) & PROTO_FAMILY_HTTP) ||
-     Curl_conn_http_version(data, conn) != 11) {
+     Curl_conn_http_version(data, conn) >= 20 ||
+     conn->httpversion_seen != 11) {
     return FALSE;
   }
 

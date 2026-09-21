@@ -4241,6 +4241,10 @@ static CURLcode http_on_response(struct Curl_easy *data,
     curlx_safefree(data->req.newurl);
     data->req.ws_upgrade_refused = TRUE;
     ws_refused = TRUE;
+    /* The refused upgrade never handed the socket to the application, so this
+     * is an ordinary HTTP connection. Clear the bit copied from
+     * CURLOPT_CONNECT_ONLY, which would otherwise block reuse. */
+    data->conn->bits.connect_only = FALSE;
   }
 #endif
 
