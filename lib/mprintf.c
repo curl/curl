@@ -1006,7 +1006,15 @@ static bool out_string(void *userp,
     width = 0;
   }
 
-  if(stream_zrun(userp, stream, streamn, str, len, donep))
+  /* With no precision, len is already the exact length; emit it without
+     scanning again. With precision, scan up to len but stop at NUL, since
+     the string may be shorter or the buffer may not be NUL-terminated. */
+  if(prec == -1) {
+    if(stream_run(userp, stream, streamn,
+                  (const unsigned char *)str, len, donep))
+      return TRUE;
+  }
+  else if(stream_zrun(userp, stream, streamn, str, len, donep))
     return TRUE;
   if(flags & FLAGS_LEFT) {
     if(stream_pad(userp, stream, streamn, ' ', width, donep))
