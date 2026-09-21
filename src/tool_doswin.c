@@ -296,7 +296,8 @@ static int prefix_reserved(const char *p)
     }
     return 0;
   }
-  else if(curl_strnequal(p, "PRN", 3) ||
+  else if(curl_strnequal(p, "CON", 3) ||
+          curl_strnequal(p, "PRN", 3) ||
           curl_strnequal(p, "AUX", 3) ||
           curl_strnequal(p, "NUL", 3))
     return 3;
