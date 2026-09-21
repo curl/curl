@@ -253,7 +253,7 @@ UNITTEST int checkday(const char *check, size_t len)
 
     size_t wlen = strlen(daysuffix[day]);
     if(((len - 3) != wlen) ||
-       !curl_strnequal(&check[3], daysuffix[day], len))
+       !curl_strnequal(&check[3], daysuffix[day], wlen))
       return -1;
   }
   return day;

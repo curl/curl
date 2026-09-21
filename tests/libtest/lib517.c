@@ -32,6 +32,10 @@ static CURLcode test_lib517(const char *URL)
 
   static const struct dcheck dates[] = {
     { "Sat May 5 GMT 11:56:27 2035", 2061978987 },
+    { "Sat, May 5 GMT 11:56:27 2035", 2061978987 },
+    { "Saturday, May 5 GMT 11:56:27 2035", 2061978987 },
+    { "Saturdax, May 5 GMT 11:56:27 2035", -1 },
+    { "Saturda, May 5 GMT 11:56:27 2035", -1 },
     { "Sun, 06 Nov 1994 08:49:37 GMT", 784111777 },
     { "Sunday, 06-Nov-94 08:49:37 GMT", 784111777 },
     { "Sun Nov  6 08:49:37 1994", 784111777 },
