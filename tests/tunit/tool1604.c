@@ -197,8 +197,14 @@ static CURLcode test_tool1604(const char *arg)
     { "COM\xb3", 0,
       "_COM\xb3", SANITIZE_ERR_OK
     },
+    { "lpt\xc2\xb9.txt", 0,
+      "_lpt\xc2\xb9_txt", SANITIZE_ERR_OK
+    },
     { "lpt\xc2\xb2.txt", 0,
       "_lpt\xc2\xb2_txt", SANITIZE_ERR_OK
+    },
+    { "lpt\xc2\xb3.txt", 0,
+      "_lpt\xc2\xb3_txt", SANITIZE_ERR_OK
     },
     { "COM\xc2\xb3", SANITIZE_ALLOW_RESERVED,
       "COM\xc2\xb3", SANITIZE_ERR_OK

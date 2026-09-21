@@ -286,7 +286,7 @@ static int prefix_reserved(const char *p)
        numbers and they can be provided in ISO8859-1 or UTF-8. Avoid either
        version. */
     len = (up[3] == 0xc2) ? /* UTF-8 */ 4 : 3;
-    super = p[len];
+    super = up[len];
 
     switch(super) {
     case 0xb9: /* superscript '1' */
