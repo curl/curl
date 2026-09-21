@@ -1739,6 +1739,7 @@ TESTCASES = \
   test1742 \
   test1743 \
   test1744 \
+  test1745 \
   test1790 \
   test1791 \
   test1800 \
