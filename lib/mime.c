@@ -1123,8 +1123,29 @@ void curl_mime_free(curl_mime *mime)
   }
 }
 
-CURLcode Curl_mime_duppart(struct Curl_easy *data,
-                           curl_mimepart *dst, const curl_mimepart *src)
+static bool mime_is_too_deep(const curl_mimepart *part, size_t call_depth)
+{
+  DEBUGASSERT(part);
+
+  if(++call_depth > MAX_MIME_LEVELS)
+    return TRUE;
+
+  if(part->kind == MIMEKIND_MULTIPART && part->arg) {
+    const curl_mime *mime = (const curl_mime *)part->arg;
+    const curl_mimepart *s;
+
+    for(s = mime->firstpart; s; s = s->nextpart) {
+      if(mime_is_too_deep(s, call_depth))
+        return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+static CURLcode mime_duppart(struct Curl_easy *data,
+                             curl_mimepart *dst, const curl_mimepart *src,
+                             size_t call_depth)
 {
   curl_mime *mime;
   curl_mimepart *d;
@@ -1132,6 +1153,10 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(dst);
+  DEBUGASSERT(src);
+
+  if(++call_depth > MAX_MIME_LEVELS)
+    return CURLE_TOO_LARGE;
 
   /* Duplicate content. */
   switch(src->kind) {
@@ -1160,7 +1185,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
     for(s = ((curl_mime *)src->arg)->firstpart; !result && s;
         s = s->nextpart) {
       d = curl_mime_addpart(mime);
-      result = d ? Curl_mime_duppart(data, d, s) : CURLE_OUT_OF_MEMORY;
+      result = d ? mime_duppart(data, d, s, call_depth) : CURLE_OUT_OF_MEMORY;
     }
     break;
   default:  /* Invalid kind: should not occur. */
@@ -1199,6 +1224,18 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
     Curl_mime_cleanpart(dst);
 
   return result;
+}
+
+CURLcode Curl_mime_duppart(struct Curl_easy *data,
+                           curl_mimepart *dst, const curl_mimepart *src)
+{
+  if(!dst || !src)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(mime_is_too_deep(src, 0))
+    return CURLE_TOO_LARGE;
+
+  return mime_duppart(data, dst, src, 0);
 }
 
 /*
