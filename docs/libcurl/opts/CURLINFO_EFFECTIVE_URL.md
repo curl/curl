@@ -37,7 +37,7 @@ free it. It memory gets freed automatically when you call curl_easy_cleanup(3)
 on the corresponding curl handle.
 
 The returned string has limited life-time. It might get destroyed at the next
-libcurl function call involving this sam *handle*.
+libcurl function call involving this same *handle*.
 
 # %PROTOCOLS%
 
