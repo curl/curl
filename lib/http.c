@@ -691,7 +691,8 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
       (proxy && !Curl_checkProxyheaders(data, conn,
                                         STRCONST("Proxy-authorization"))) ||
 #endif
-      (!proxy && !Curl_checkheaders(data, STRCONST("Authorization")))) {
+      (!proxy && !Curl_checkheaders(data, STRCONST("Authorization")) &&
+       Curl_auth_allowed_to_host(data))) {
       auth = "Negotiate";
       result = Curl_output_negotiate(data, conn, proxy);
       if(result)
@@ -704,11 +705,14 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
 #endif
 #ifdef USE_NTLM
   if(authstatus->picked == CURLAUTH_NTLM) {
-    auth = "NTLM";
-    result = Curl_output_ntlm(data, proxy);
-    if(result)
-      return result;
-  }
+    if(proxy || Curl_auth_allowed_to_host(data)) {
+      auth = "NTLM";
+      result = Curl_output_ntlm(data, proxy);
+      if(result)
+        return result;
+    }
+    else
+      authstatus->done = TRUE;
   else
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
