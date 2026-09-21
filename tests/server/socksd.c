@@ -49,6 +49,8 @@
  *                        0 - no auth
  *                        1 - GSSAPI (not supported)
  *                        2 - user + password
+ * "method2 [number]" - connect method to respond with on the second
+ *                      connection, defaults to the "method" one
  * "response [number]" - the decimal number to respond to a connect
  *                       SOCKS5: 0 is OK, SOCKS4: 90 is ok
  *
@@ -58,6 +60,7 @@
 
 static const char *backendaddr = "127.0.0.1";
 static uint16_t backendport = 0; /* default is use client's */
+static unsigned int connections; /* number of clients served */
 
 struct socksd_configurable {
   unsigned char version; /* initial version byte in the request must match
@@ -66,6 +69,7 @@ struct socksd_configurable {
   unsigned char nmethods_max; /* maximum number of nmethods to expect */
   unsigned char responseversion;
   unsigned char responsemethod;
+  unsigned char responsemethod2;
   unsigned char reqcmd;
   unsigned char connectrep;
   uint16_t port; /* backend port */
@@ -79,6 +83,7 @@ struct socksd_configurable {
 #define CONFIG_NMETHODS_MAX    3
 #define CONFIG_RESPONSEVERSION CONFIG_VERSION
 #define CONFIG_RESPONSEMETHOD  0 /* no auth */
+#define CONFIG_RESPONSEMETHOD2 0xff /* unset, use CONFIG_RESPONSEMETHOD */
 #define CONFIG_REQCMD          1 /* CONNECT */
 #define CONFIG_PORT            backendport
 #define CONFIG_ADDR            backendaddr
@@ -96,6 +101,7 @@ static void socksd_resetdefaults(void)
   s_config.nmethods_max = CONFIG_NMETHODS_MAX;
   s_config.responseversion = CONFIG_RESPONSEVERSION;
   s_config.responsemethod = CONFIG_RESPONSEMETHOD;
+  s_config.responsemethod2 = CONFIG_RESPONSEMETHOD2;
   s_config.reqcmd = CONFIG_REQCMD;
   s_config.connectrep = CONFIG_CONNECTREP;
   s_config.port = CONFIG_PORT;
@@ -173,6 +179,13 @@ static void socksd_getconfig(void)
           if(!curlx_str_number(&pval, &num, 0xff)) {
             s_config.responsemethod = (unsigned char)num;
             logmsg("method [%d] set", s_config.responsemethod);
+          }
+        }
+        else if(!strcmp(key, "method2")) {
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            s_config.responsemethod2 = (unsigned char)num;
+            logmsg("method2 [%d] set", s_config.responsemethod2);
           }
         }
         else if(!strcmp(key, "response")) {
@@ -302,6 +315,10 @@ static curl_socket_t sockit(curl_socket_t fd)
   uint16_t s5port;
 
   socksd_getconfig();
+
+  if((++connections == 2) && (s_config.responsemethod2 !=
+                              CONFIG_RESPONSEMETHOD2))
+    s_config.responsemethod = s_config.responsemethod2;
 
   rc = sread(fd, buffer, sizeof(buffer));
   if(rc <= 0) {

@@ -586,6 +586,10 @@ static CURLproxycode socks5_req0_init(struct Curl_cfilter *cf,
     /* disable username/password auth */
     Curl_creds_unlink(&sx->creds);
 
+  if(cf->sockindex == FIRSTSOCKET)
+    /* the reuse of this connection depends on how this negotiation ends */
+    cf->conn->bits.socks5_authenticated = FALSE;
+
   req[0] = 5;   /* version */
   nauths = 0;
   if(!data->set.socks5_auth_only) {
@@ -647,7 +651,8 @@ static CURLproxycode socks5_check_resp0(struct socks_ctx *sx,
     return CURLPX_OK;
   case 1:
     if(data->set.socks5auth & CURLAUTH_GSSAPI) {
-      cf->conn->bits.socks5_authenticated = TRUE;
+      if(cf->sockindex == FIRSTSOCKET)
+        cf->conn->bits.socks5_authenticated = TRUE;
       sxstate(sx, cf, data, SOCKS5_ST_GSSAPI_INIT);
       return CURLPX_OK;
     }
@@ -656,7 +661,8 @@ static CURLproxycode socks5_check_resp0(struct socks_ctx *sx,
   case 2:
     /* regular name + password authentication */
     if(data->set.socks5auth & CURLAUTH_BASIC) {
-      cf->conn->bits.socks5_authenticated = TRUE;
+      if(cf->sockindex == FIRSTSOCKET)
+        cf->conn->bits.socks5_authenticated = TRUE;
       sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
       return CURLPX_OK;
     }

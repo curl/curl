@@ -184,7 +184,7 @@ struct ConnectBits {
   BIT(connect_only);
 #ifndef CURL_DISABLE_PROXY
   BIT(origin_is_proxy);  /* if set, the connection's origin is a proxy */
-  BIT(socks5_authenticated); /* SOCKS5 negotiated an authentication method */
+  BIT(socks5_authenticated); /* SOCKS5 authenticated on FIRSTSOCKET */
 #endif
   /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
