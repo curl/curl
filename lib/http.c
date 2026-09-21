@@ -1287,8 +1287,24 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
   DEBUGASSERT(follow_url);
 
   if(type == FOLLOW_FAKE) {
+    CURLU *u = curl_url();
+    char *nocred = NULL;
+
     /* we are only figuring out the new URL if we would have followed locations
        but now we are done so we can get out! */
+    if(u) {
+      if(!curl_url_set(u, CURLUPART_URL, follow_url,
+                       CURLU_NON_SUPPORT_SCHEME |
+                       (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)) &&
+         !curl_url_set(u, CURLUPART_USER, NULL, 0) &&
+         !curl_url_set(u, CURLUPART_PASSWORD, NULL, 0))
+        (void)curl_url_get(u, CURLUPART_URL, &nocred, CURLU_GET_EMPTY);
+      curl_url_cleanup(u);
+    }
+    if(nocred) {
+      curlx_free(follow_url);
+      follow_url = nocred;
+    }
     data->info.wouldredirect = follow_url;
 
     if(reachedmax) {
