@@ -28,7 +28,7 @@ http
 Pre-request callback for HTTP
 </name>
 <tool>
-lib2082
+lib%TESTNUMBER
 </tool>
 
 <command>
