@@ -23,7 +23,7 @@ ftp
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib520
+lib%TESTNUMBER
 </tool>
 
 <name>

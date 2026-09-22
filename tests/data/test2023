@@ -107,7 +107,7 @@ Finally, this is the real page!
 http
 </server>
 <tool>
-lib2023
+lib%TESTNUMBER
 </tool>
 
 <name>

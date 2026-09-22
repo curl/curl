@@ -76,7 +76,7 @@ SSL
 http
 </server>
 <tool>
-lib2032
+lib%TESTNUMBER
 </tool>
 
 <name>

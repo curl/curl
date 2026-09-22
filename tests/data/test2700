@@ -18,7 +18,7 @@ ws
 http
 </server>
 <tool>
-lib2700
+lib%TESTNUMBER
 </tool>
 <command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
