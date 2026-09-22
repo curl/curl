@@ -23,9 +23,6 @@ http
 <name>
 HSTS read/write callbacks
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER

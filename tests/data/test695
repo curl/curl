@@ -26,9 +26,6 @@ Mime
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 MIME parts reuse as a child part

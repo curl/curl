@@ -26,9 +26,6 @@ ftp
 <name>
 URL API
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 </client>
 
 <verify>

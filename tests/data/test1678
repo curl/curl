@@ -12,9 +12,6 @@ libtest
 <features>
 SSLS-EXPORT
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 SSL session import tests
 </name>

@@ -30,9 +30,6 @@ form-api
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 make an HTTPPOST set to NULL

@@ -24,9 +24,6 @@ We-are: good
 http
 http-proxy
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP request-injection in URL sent over proxy
 </name>

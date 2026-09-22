@@ -29,9 +29,6 @@ Accept-ranges: bytes
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP a file with NOBODY yes and HEADER no
 </name>

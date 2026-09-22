@@ -72,9 +72,6 @@ HTTP with shared cookie list (and dns cache)
 <setenv>
 TZ=GMT
 </setenv>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/jar%TESTNUMBER
 </command>

@@ -25,9 +25,6 @@ Curl-Private: swsclose
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 simple RTSP OPTIONS command

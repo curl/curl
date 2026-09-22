@@ -30,9 +30,6 @@ And you should ignore this data.
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 proxy
 </features>

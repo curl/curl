@@ -9,9 +9,6 @@ libtest
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 curl_multi_remove_handle twice
 </name>

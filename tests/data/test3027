@@ -29,9 +29,6 @@ ftp
 <name>
 Get a file via FTP but 550 after MDTM command
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command option="no-include">
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>

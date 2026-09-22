@@ -54,9 +54,6 @@ http
 <name>
 curl_easy_nextheader on second request after first did redirects
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003

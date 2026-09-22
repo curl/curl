@@ -24,9 +24,6 @@ local-http
 <server>
 https test-localhost.nn.pem
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 VERIFYHOST with VERIFYPEER disabled rejects a mismatching certificate
 </name>

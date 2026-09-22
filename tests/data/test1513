@@ -24,9 +24,6 @@ wait 10
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 return failure immediately from progress callback
 </name>

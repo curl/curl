@@ -34,9 +34,6 @@ wakeup
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 checking curl_multi_fdset on nothing to do
 </name>

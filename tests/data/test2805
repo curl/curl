@@ -17,9 +17,6 @@ libtest
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP wildcards with percent sign in file name
 </name>

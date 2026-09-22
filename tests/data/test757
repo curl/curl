@@ -26,9 +26,6 @@ Mime
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 MIME parts reused as a child part, using data_cb

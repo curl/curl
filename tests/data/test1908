@@ -48,9 +48,6 @@ alt-svc cache save after resetting the handle
 # make Debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 %HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/altsvc-%TESTNUMBER

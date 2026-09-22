@@ -26,9 +26,6 @@ hello
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 simple curl_easy_duplicate() test

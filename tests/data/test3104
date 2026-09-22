@@ -34,9 +34,6 @@ proxy
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 CURLOPT_COOKIELIST with Netscape format
 </name>

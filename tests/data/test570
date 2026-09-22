@@ -42,9 +42,6 @@ CSeq: 1000
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP CSeq and Session Mismatch checks

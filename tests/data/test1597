@@ -15,9 +15,6 @@ libtest
 <name>
 CURLOPT_PROTOCOLS_STR
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 </client>
 
 <verify>

@@ -29,9 +29,6 @@ SSL
 <server>
 https
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 simple HTTPS GET with multi interface
 </name>

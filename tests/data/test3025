@@ -26,9 +26,6 @@ http
 <name>
 CURLOPT_HTTP200ALIASES
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

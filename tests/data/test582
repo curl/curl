@@ -19,9 +19,6 @@ libtest
 <server>
 sftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 SFTP upload using multi interface
 </name>

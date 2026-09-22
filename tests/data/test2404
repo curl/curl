@@ -56,9 +56,6 @@ verbose-strings
 <server>
 http/2
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP/2 using STREAM_WEIGHTs
 </name>

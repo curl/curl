@@ -40,9 +40,6 @@ proxy
 http
 socks5
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 SOCKS5 CURLAUTH_ONLY does not offer the no authentication method
 </name>

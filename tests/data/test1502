@@ -32,9 +32,6 @@ Funny-head: yesyes
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP multi with CURLOPT_RESOLVE, cleanup sequence UA
 </name>

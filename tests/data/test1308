@@ -18,9 +18,6 @@ form-api
 <name>
 formpost tests
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 %LOGDIR/test-%TESTNUMBER
 </command>

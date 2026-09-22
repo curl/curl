@@ -76,9 +76,6 @@ SSL
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 NTLM connection mapping

@@ -16,9 +16,6 @@ ftp
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 cleanup easy without multi_remove_handle
 </name>

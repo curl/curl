@@ -33,9 +33,6 @@ http
 <name>
 application hands over already connected socket
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/file %HOSTIP %HTTPPORT

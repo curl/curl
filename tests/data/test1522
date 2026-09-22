@@ -29,9 +29,6 @@ Funny-head: yesyes
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 CURLINFO_SIZE_UPLOAD with small SO_SNDBUF

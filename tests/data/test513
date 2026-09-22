@@ -18,9 +18,6 @@ libtest
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 send HTTP POST using read callback that returns CURL_READFUNC_ABORT

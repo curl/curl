@@ -32,9 +32,6 @@ Funny-head: yesyes
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 verify connect time with multi interface

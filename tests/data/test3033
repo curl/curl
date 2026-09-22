@@ -34,9 +34,6 @@ http
 <name>
 CURLOPT_FRESH_CONNECT=2
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

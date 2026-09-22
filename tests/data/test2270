@@ -27,9 +27,6 @@ form-api
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 reject HTTP form and MIME upload resume
 </name>

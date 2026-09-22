@@ -26,9 +26,6 @@ Connection: close
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP POST with read callback and unknown data size
 </name>

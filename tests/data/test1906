@@ -28,9 +28,6 @@ http
 <name>
 CURLOPT_CURLU and CURLOPT_PORT
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 # The tool does two requests, the first sets CURLOPT_PORT to 1
 # the second resets the port again and expects that request to work.

@@ -26,9 +26,6 @@ file contents should appear once for each file
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 custom Host with cookie, handle reuse, no custom Host:
 </name>

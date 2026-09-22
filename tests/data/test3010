@@ -40,9 +40,6 @@ http
 <name>
 HTTP retry-after reset
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 %HOSTIP:%HTTPPORT/%TESTNUMBER

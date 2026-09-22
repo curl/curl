@@ -30,9 +30,6 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP dir list PASV with CURLOPT_PORT
 </name>

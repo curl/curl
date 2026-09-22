@@ -29,9 +29,6 @@ http
 <name>
 HTTP POST with trailers at the end
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER
 </command>

@@ -87,9 +87,6 @@ Contents of that second request. Differn.
 http
 </server>
 # tool to use
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 NTLM
 !SSPI

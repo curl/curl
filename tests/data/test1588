@@ -60,9 +60,6 @@ Nice proxy auth sir!
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 !SSPI
 crypto

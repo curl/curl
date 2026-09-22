@@ -21,9 +21,6 @@ over FTP
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP a type=A URL and CURLOPT_PORT set
 </name>

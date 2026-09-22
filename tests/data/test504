@@ -22,9 +22,6 @@ http
 proxy
 </features>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 simple multi through local proxy without listener

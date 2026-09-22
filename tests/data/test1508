@@ -10,9 +10,6 @@ libtest
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Close a multi handle without using it
 </name>

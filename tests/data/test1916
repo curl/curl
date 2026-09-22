@@ -26,9 +26,6 @@ mqtt
 <name>
 MQTT PUBLISH with no POSTFIELDSIZE set
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command option="binary-trace">
 "mqtt://%HOSTIP:%MQTTPORT/%20"
 </command>

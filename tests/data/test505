@@ -18,9 +18,6 @@ libtest
 ftp
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 FTP upload with rename after transfer

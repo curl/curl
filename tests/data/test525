@@ -21,9 +21,6 @@ libtest
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP PORT upload using multi interface
 </name>

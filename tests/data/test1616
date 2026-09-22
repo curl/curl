@@ -57,9 +57,6 @@ proxied one
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 !SSPI
 crypto

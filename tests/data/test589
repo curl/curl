@@ -30,9 +30,6 @@ Mime
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 make an HTTP MIME POST set to NULL

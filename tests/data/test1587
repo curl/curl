@@ -34,9 +34,6 @@ https
 <name>
 CURLINFO_TLS_SESSION and CURLINFO_TLS_SSL_PTR with OpenSSL
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 https://%HOSTIP:%HTTPSPORT/
 </command>

@@ -27,9 +27,6 @@ http
 <name>
 set CURLOPT_XOAUTH2_BEARER and do connection reuse
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

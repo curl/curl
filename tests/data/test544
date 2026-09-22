@@ -26,9 +26,6 @@ OK
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTP POST text data using CURLOPT_COPYPOSTFIELDS

@@ -6,6 +6,7 @@ FTP
 PASV
 RETR
 SOCKS5
+libtest
 </keywords>
 </info>
 
@@ -31,9 +32,6 @@ proxy
 ftp
 socks5
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 SOCKS5 CURLAUTH_ONLY ignores auth done for the FTP data socket
 </name>

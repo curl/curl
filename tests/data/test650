@@ -42,9 +42,6 @@ form-api
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTP formpost using form API - with redirect and re-POST

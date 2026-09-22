@@ -58,9 +58,6 @@ CSeq: 6
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP Session ID parsing

@@ -14,9 +14,6 @@ libtest
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP request, remove handle while resolving, do not block
 </name>

@@ -49,9 +49,6 @@ Content-Type: text/html
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 curl_easy_reset with referer and other strings set

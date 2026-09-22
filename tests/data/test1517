@@ -45,9 +45,6 @@ This is a virtual description of server virtual error.
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP POST, server responds before completed send
 </name>

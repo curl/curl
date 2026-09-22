@@ -11,9 +11,6 @@ libtest
 <features>
 http
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 CURLOPT_OPENSOCKETFUNCTION returns bad socket
 </name>

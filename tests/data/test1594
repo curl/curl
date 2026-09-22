@@ -29,9 +29,6 @@ http
 <name>
 HTTP Retry-After header parsing and extraction
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

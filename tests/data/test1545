@@ -20,9 +20,6 @@ form-api
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 use curl_formadd() data twice with unreadable file

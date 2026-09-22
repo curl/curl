@@ -36,9 +36,6 @@ httpsig
 <name>
 httpsig: Ed25519 POST with headers (RFC test vector)
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <setenv>
 CURL_HTTPSIG_CREATED=1618884473

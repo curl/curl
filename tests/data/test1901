@@ -29,9 +29,6 @@ http
 <name>
 Chunked HTTP POST from callback with CURLOPT_POSTFIELDSIZE set
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/boom

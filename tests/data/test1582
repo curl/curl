@@ -35,9 +35,6 @@ https
 <name>
 Negotiate over HTTPS with channel binding
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 https://%HOSTIP:%HTTPSPORT/
 </command>

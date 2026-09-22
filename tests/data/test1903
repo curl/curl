@@ -31,9 +31,6 @@ http
 <name>
 CURLOPT_COOKIEFILE then reset then set again
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER %LOGDIR/cookiesout%TESTNUMBER
 </command>

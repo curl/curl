@@ -48,9 +48,6 @@ content2
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 GET same URL twice with different users

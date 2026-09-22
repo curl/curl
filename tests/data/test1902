@@ -16,9 +16,6 @@ set COOKIEFILE and COOKIEJAR but make no transfer
 <features>
 cookies
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 %LOGDIR/cookie%TESTNUMBER

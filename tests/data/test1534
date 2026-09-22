@@ -25,9 +25,6 @@ Content-Length: 0
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 CURLINFO_FILETIME init and reset
 </name>

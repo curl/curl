@@ -46,9 +46,6 @@ http-proxy
 <name>
 curl_easy_nextheader with server + CONNECT
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://hello:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT

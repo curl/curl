@@ -41,9 +41,6 @@ http
 <name>
 WebSockets via callback (frame mode) + curl_ws_send()
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

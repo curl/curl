@@ -47,9 +47,6 @@ Mime
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTP multi-part mimepost using read callback for the file part

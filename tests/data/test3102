@@ -24,9 +24,6 @@ SSL
 <server>
 https
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 verify certificate chain order with simple HTTPS GET
 </name>

@@ -23,9 +23,6 @@ moo
 file
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 simple multi file:// get

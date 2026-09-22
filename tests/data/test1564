@@ -17,9 +17,6 @@ libtest
 <features>
 wakeup
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 wakeup before poll with no easy handles
 </name>

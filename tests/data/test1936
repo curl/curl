@@ -46,9 +46,6 @@ aws
 <name>
 HTTP AWS_SIGV4 with two providers, region and service
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT

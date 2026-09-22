@@ -24,9 +24,6 @@ Content-Length: 0
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Test CURLINFO_RESPONSE_CODE CURLINFO_PROTOCOL
 </name>

@@ -10,9 +10,6 @@ libtest
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 curl_easy_escape and curl_easy_unescape
 </name>

@@ -30,9 +30,6 @@ REPLY EPRT 500 we don't like EPRT now
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP multi PORT and 425 on upload
 </name>

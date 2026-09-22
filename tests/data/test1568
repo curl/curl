@@ -63,9 +63,6 @@ digest
 <name>
 HTTP with Digest authorization on custom CURLOPT_PORT
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP/%TESTNUMBER %HTTPPORT
 </command>

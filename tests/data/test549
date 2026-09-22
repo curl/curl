@@ -34,9 +34,6 @@ http
 ftp
 proxy
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE
 </name>

@@ -78,9 +78,6 @@ rtp: part 4 channel 0 size 63
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP RTP Interleaving Test
