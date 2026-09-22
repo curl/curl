@@ -2,7 +2,6 @@
 <testcase>
 <info>
 <keywords>
-unittest
 mprintf
 </keywords>
 </info>
@@ -11,8 +10,10 @@ mprintf
 <client>
 <features>
 win32
-unittest
 </features>
+<tool>
+lib%TESTNUMBER
+</tool>
 <name>
 mprintf %I length modifier unit tests
 </name>
