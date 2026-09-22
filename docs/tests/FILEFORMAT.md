@@ -567,9 +567,16 @@ is skipped and the (single-line) output is displayed as reason for not running
 the test.
 
 ### `<tool>`
+
 Name of tool to invoke instead of "curl". This tool must be built and exist
 either in the `libtest/` directory (if the tool name starts with `lib`) or in
 the `unit/` directory (if the tool name starts with `unit`).
+
+If the keyword `unittest` is set in the test case, the default name for the
+tool is `unit%TESTNUMBER`.
+
+If the keyword `libtest` is set in the test case, the default name for the
+tool is `lib%TESTNUMBER`.
 
 ### `<name>`
 Brief test case description, shown when the test runs.
