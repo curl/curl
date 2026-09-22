@@ -456,7 +456,9 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     char *scheme;
     curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
     per->out_scheme = proto_token(scheme);
+    per->num_headers = 0;
   }
+  per->was_last_header_empty = (ptr[0] == '\r' || ptr[0] == '\n');
 
   /*
    * Write header data when curl option --dump-header (-D) is given.
@@ -503,19 +505,9 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       cd_checked = TRUE;
     }
   }
-  if(hdrcbdata->config->writeout) {
-    const char *value = memchr(ptr, ':', cb);
-    if(value) {
-      if(per->was_last_header_empty)
-        per->num_headers = 0;
-      per->was_last_header_empty = FALSE;
-      per->num_headers++;
-    }
-    else if(ptr[0] == '\r' || ptr[0] == '\n')
-      per->was_last_header_empty = TRUE;
-  }
-  else
-    per->was_last_header_empty = (ptr[0] == '\r' || ptr[0] == '\n');
+
+  if(hdrcbdata->config->writeout && memchr(ptr, ':', cb))
+    per->num_headers++;
 
   if(hdrcbdata->config->show_headers && !outs->out_null &&
      (per->out_scheme == proto_http || per->out_scheme == proto_https ||
