@@ -656,7 +656,17 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
       dupfd = CURL_SOCKET(FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO,
                           FROM_PROTOCOL_INFO, &pi, 0, 0);
 #else
+#ifdef F_DUPFD_CLOEXEC
+    int dupfd = fcntl(conn->sock[FIRSTSOCKET], F_DUPFD_CLOEXEC, 0);
+#else
     int dupfd = dup(conn->sock[FIRSTSOCKET]);
+#ifdef HAVE_FCNTL
+    if((dupfd != CURL_SOCKET_BAD) &&
+       (fcntl(dupfd, F_SETFD, FD_CLOEXEC) < 0)) {
+      sclose(dupfd);
+      dupfd = CURL_SOCKET_BAD;
+    }
+#endif
 #endif
     if(dupfd == CURL_SOCKET_BAD) {
       result = CURLE_COULDNT_CONNECT;
