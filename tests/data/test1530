@@ -3,6 +3,7 @@
 <info>
 <keywords>
 CURLOPT_OPENSOCKETFUNCTION
+libtest
 </keywords>
 </info>
 

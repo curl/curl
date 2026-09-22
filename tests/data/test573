@@ -5,6 +5,7 @@
 HTTP
 multi
 flaky
+libtest
 </keywords>
 </info>
 # Server-side

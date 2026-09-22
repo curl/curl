@@ -7,6 +7,7 @@ POST
 POST callback
 slow callback
 early response
+libtest
 </keywords>
 </info>
 # This test checks to make sure curl can call recv() without failing after a

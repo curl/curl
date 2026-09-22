@@ -7,6 +7,7 @@ CURLOPT_HTTPSIG_ALGORITHM
 RFC9421
 ed25519
 B.2.6
+libtest
 </keywords>
 </info>
 

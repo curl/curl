@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 HTTP GET
+libtest
 </keywords>
 </info>
 # This reproduces the #11101 issue, when the second response comes back

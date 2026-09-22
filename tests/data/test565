@@ -6,6 +6,7 @@ HTTP
 HTTP POST
 HTTP Digest auth
 chunked Transfer-Encoding
+libtest
 </keywords>
 </info>
 # Server-side

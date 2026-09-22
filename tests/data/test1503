@@ -6,6 +6,7 @@ HTTP
 HTTP GET
 multi
 CURLOPT_RESOLVE
+libtest
 </keywords>
 </info>
 

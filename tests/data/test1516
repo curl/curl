@@ -6,6 +6,7 @@
 HTTP
 multi
 resolve
+libtest
 </keywords>
 </info>
 

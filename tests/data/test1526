@@ -8,6 +8,7 @@ HTTP CONNECT
 HTTP proxy
 proxytunnel
 CURLOPT_PROXYHEADER
+libtest
 </keywords>
 </info>
 

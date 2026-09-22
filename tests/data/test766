@@ -6,6 +6,7 @@ FTP
 PORT
 CURLOPT_SOCKOPTFUNCTION
 timing-dependent
+libtest
 </keywords>
 </info>
 

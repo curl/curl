@@ -9,6 +9,7 @@ HTTP proxy
 HTTP proxy Basic auth
 proxytunnel
 multi
+libtest
 </keywords>
 </info>
 

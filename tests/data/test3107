@@ -6,6 +6,7 @@ HTTP
 HTTP GET
 multi
 curl_multi_remove_handle
+libtest
 </keywords>
 </info>
 

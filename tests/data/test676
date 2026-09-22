@@ -8,6 +8,7 @@ HTTP set cookie
 cookies
 CURLOPT_REFERER
 curl_easy_reset
+libtest
 </keywords>
 </info>
 # Server-side

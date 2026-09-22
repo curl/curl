@@ -3,7 +3,7 @@
 <info>
 <keywords>
 getdate
-unittest
+libtest
 </keywords>
 </info>
 # Server-side

@@ -5,6 +5,7 @@
 HTTP
 HTTP GET
 CURLINFO_FILETIME
+libtest
 </keywords>
 </info>
 

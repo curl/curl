@@ -5,6 +5,7 @@
 curl_global_init
 thread-safe
 slow
+libtest
 </keywords>
 </info>
 

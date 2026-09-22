@@ -5,6 +5,7 @@
 HTTP
 HTTP POST
 HTTP Digest auth
+libtest
 </keywords>
 </info>
 # Server-side

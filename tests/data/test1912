@@ -4,6 +4,7 @@
 <keywords>
 curl_easy_option
 typecheck
+libtest
 </keywords>
 </info>
 

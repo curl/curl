@@ -8,6 +8,7 @@ HTTP proxy
 CURLOPT_PROXY
 CURLOPT_NOBODY
 CURLINFO_USED_PROXY
+libtest
 </keywords>
 </info>
 

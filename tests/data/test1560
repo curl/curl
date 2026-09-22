@@ -2,9 +2,9 @@
 <testcase>
 <info>
 <keywords>
-unittest
 urlapi
 url
+libtest
 </keywords>
 </info>
 

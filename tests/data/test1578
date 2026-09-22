@@ -4,6 +4,7 @@
 <keywords>
 CURLFOLLOW_FIRSTONLY
 CURLOPT_FOLLOWLOCATION
+libtest
 </keywords>
 </info>
 # Server-side
