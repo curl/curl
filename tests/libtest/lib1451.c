@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-static CURLcode test_unit1451(const char *arg)
+static CURLcode test_lib1451(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
