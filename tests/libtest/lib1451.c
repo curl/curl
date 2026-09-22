@@ -23,6 +23,11 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 static CURLcode test_lib1451(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -59,3 +64,7 @@ static CURLcode test_lib1451(const char *arg)
 
   UNITTEST_END_SIMPLE
 }
+
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
+#endif
