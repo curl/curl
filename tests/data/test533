@@ -26,9 +26,6 @@ REPLY SIZE 500 Can't check for file existence
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP RETR a non-existing file twice using the multi interface
 </name>

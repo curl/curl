@@ -22,9 +22,6 @@ http
 <name>
 HSTS curl_easy_duphandle
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER

@@ -28,10 +28,6 @@ hej
 http
 </server>
 
-<tool>
-lib%TESTNUMBER
-</tool>
-
 <name>
 Get CURLINFO_REFERER set CURLOPT_REFERER
 </name>

@@ -40,9 +40,6 @@ Mime
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Request pause from mime read callback: multi

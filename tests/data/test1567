@@ -37,9 +37,6 @@ redirected
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 re-run redirected transfer without setting CURLU URL again

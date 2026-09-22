@@ -53,9 +53,6 @@ writedelay: 10
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 CURLINFO timer check
 </name>

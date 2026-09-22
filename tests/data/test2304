@@ -40,9 +40,6 @@ http
 <name>
 WebSockets curl_ws_recv() with closed connection
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

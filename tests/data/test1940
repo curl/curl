@@ -43,9 +43,6 @@ http
 <name>
 curl_easy_header
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

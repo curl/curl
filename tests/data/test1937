@@ -47,9 +47,6 @@ aws
 <name>
 HTTP POST with AWS_SIGV4
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT

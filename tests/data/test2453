@@ -33,9 +33,6 @@ http
 <name>
 CURLMINFO_XFERS_DONE tracks unread completion messages
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

@@ -33,9 +33,6 @@ cookies
 <name>
 Receive expired cookies and CURLINFO_COOKIELIST
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

@@ -16,9 +16,6 @@ libtest
 <name>
 verify that curl_easy_setopt() rejects too long string inputs
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 </client>
 

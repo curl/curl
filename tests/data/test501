@@ -16,9 +16,6 @@ libtest
 http
 </features>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 simple libcurl attempt operation without URL set

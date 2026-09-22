@@ -55,9 +55,6 @@ u=http://www.curl.example.com/fakesdp.ps
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP Authentication check

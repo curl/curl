@@ -13,9 +13,6 @@ libtest
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP connect only option
 </name>

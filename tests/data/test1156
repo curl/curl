@@ -53,9 +53,6 @@ body
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP resume/range fail range-error content-range combinations
 </name>

@@ -32,9 +32,6 @@ Silly-header: %repeat[511 x Z]%
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 use tiny CURLOPT_BUFFERSIZE

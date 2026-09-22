@@ -28,9 +28,6 @@ http
 <name>
 CURLINFO_EFFECTIVE_URL with non-scheme URL
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 %HOSTIP:%HTTPPORT/hello/../%TESTNUMBER

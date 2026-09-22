@@ -28,9 +28,6 @@ chunked data fun%CR
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <server>
 http

@@ -36,9 +36,6 @@ http
 <features>
 cookies
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/ %LOGDIR/cookie%TESTNUMBER

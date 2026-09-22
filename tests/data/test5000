@@ -35,9 +35,6 @@ httpsig
 <name>
 httpsig: basic GET with Ed25519
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://example.com:9000/%TESTNUMBER/resource example.com:9000:%HOSTIP:%HTTPPORT

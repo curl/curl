@@ -25,9 +25,6 @@ ftp
 <name>
 FTP with NOBODY set, getting a missing file
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 ftp://%HOSTIP:%FTPPORT/not-there/%TESTNUMBER

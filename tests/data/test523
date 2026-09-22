@@ -31,9 +31,6 @@ hello
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP GET with proxy and CURLOPT_PORT
 </name>

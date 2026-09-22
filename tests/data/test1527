@@ -45,9 +45,6 @@ ETag: "21025-dc7-39462498"
 http
 http-proxy
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Same headers with CURLOPT_HEADEROPT == CURLHEADER_UNIFIED
 </name>

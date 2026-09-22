@@ -20,9 +20,6 @@ libtest
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP wildcard - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (Unix)
 </name>

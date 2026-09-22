@@ -29,9 +29,6 @@ Funny-head: yesyes
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 First set options to POST and then to make HEAD
 </name>

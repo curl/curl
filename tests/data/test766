@@ -22,9 +22,6 @@ hello
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP PORT with sockopt callback refusing the accept
 </name>

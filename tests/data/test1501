@@ -26,9 +26,6 @@ DELAY TYPE 2
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <killserver>
 ftp
 </killserver>

@@ -71,9 +71,6 @@ http
 <name>
 HTTP with shared connection cache
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

@@ -13,9 +13,6 @@ libtest
 # Client-side
 <client>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 curl_mprintf() testing

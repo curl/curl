@@ -62,9 +62,6 @@ http
 <features>
 http
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 CURLFOLLOW_OBEYCODE with custom POST method, 302 => GET

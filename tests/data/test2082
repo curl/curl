@@ -28,9 +28,6 @@ http
 <name>
 Pre-request callback for HTTP
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 %HOSTIP:%HTTPPORT/%TESTNUMBER

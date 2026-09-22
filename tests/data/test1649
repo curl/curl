@@ -27,9 +27,6 @@ hello
 http
 </server>
 
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Set referer first then NULL it
 </name>

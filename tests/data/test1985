@@ -42,9 +42,6 @@ Digest response when not asked, then use Digest
 crypto
 digest
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://firsthost:%HTTPPORT/%TESTNUMBER http://secondhost:%HTTPPORT/%TESTNUMBER0001 %HTTPPORT %HOSTIP

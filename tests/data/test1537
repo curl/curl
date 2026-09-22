@@ -13,9 +13,6 @@ libtest
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 libcurl URL escape/unescape tests

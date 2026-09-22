@@ -107,9 +107,6 @@ Finally, this is the real page!
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTP authorization retry (Basic)

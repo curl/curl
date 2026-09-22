@@ -42,9 +42,6 @@ http-proxy
 <name>
 curl_easy_cleanup without curl_multi_remove_handle - in CONNECT
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 https://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%PROXYPORT

@@ -33,9 +33,6 @@ http
 <features>
 proxy
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 netrc with redirect using proxy
 </name>

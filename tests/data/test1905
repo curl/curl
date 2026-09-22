@@ -31,9 +31,6 @@ http
 <name>
 CURLOPT_COOKIELIST set to "FLUSH" of a shared cookie object
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER
 </command>

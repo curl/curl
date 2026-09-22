@@ -28,9 +28,6 @@ hello
 http
 </server>
 # tool to use
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 </features>
 <name>

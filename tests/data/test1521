@@ -9,9 +9,6 @@ libtest
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Test all curl_easy_setopt and curl_easy_getinfo options

@@ -25,9 +25,6 @@ hello
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 reject internal easy handle passed to a notify callback
 </name>

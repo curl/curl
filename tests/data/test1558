@@ -15,9 +15,6 @@ libtest
 <features>
 file
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 CURLINFO_PROTOCOL for file:// transfer

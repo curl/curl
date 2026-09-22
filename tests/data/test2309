@@ -38,9 +38,6 @@ proxy
 <name>
 HTTP with .netrc using duped easy handle
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://github.com %LOGDIR/netrc%TESTNUMBER http://%HOSTIP:%HTTPPORT/
 </command>

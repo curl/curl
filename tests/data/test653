@@ -47,9 +47,6 @@ Mime
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Reuse of handle after altering mime data

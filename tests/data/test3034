@@ -23,9 +23,6 @@ Location: /%TESTNUMBER
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Test reset resolves rewind failure
 </name>

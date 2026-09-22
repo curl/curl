@@ -50,9 +50,6 @@ Informational: Empty Options Response
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP Announce (PUT and POST style) test

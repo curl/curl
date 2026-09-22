@@ -13,9 +13,6 @@ libtest
 <name>
 curl_url_set() a URL without guessing a scheme
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER

@@ -12,9 +12,6 @@ libtest
 <features>
 win32
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 mprintf %I length modifier unit tests
 </name>

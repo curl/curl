@@ -52,9 +52,6 @@ http
 <features>
 http
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP GET time conditions in repeated requests
 </name>

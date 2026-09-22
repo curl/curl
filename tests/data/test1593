@@ -28,9 +28,6 @@ http
 <name>
 HTTP custom header overrides CURLOPT_TIMECONDITION
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

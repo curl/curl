@@ -49,9 +49,6 @@ CURL_ENTROPY=12345678
 <name>
 HTTP AWS_SIGV4 for AWS S3: MIMEPOST
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPPORT

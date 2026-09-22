@@ -55,9 +55,6 @@ verbose-strings
 <server>
 http/3
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP GET multiple over HTTP/3
 </name>

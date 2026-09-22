@@ -32,9 +32,6 @@ Long: %repeat[100001 x A]%
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 send long HTTP headers to header callback
 </name>

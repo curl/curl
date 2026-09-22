@@ -15,9 +15,6 @@ wakeup
 </features>
 <server>
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 wakeup, perform and poll needs to exit
 </name>

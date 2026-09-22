@@ -32,9 +32,6 @@ hello
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 CURLINFO_USED_PROXY
 </name>

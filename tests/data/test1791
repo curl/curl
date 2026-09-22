@@ -18,9 +18,6 @@ libtest
 <name>
 blank COPYPOSTFIELDS and duphandle
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 localhost

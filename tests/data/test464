@@ -14,9 +14,6 @@ libtest
 Debug
 asyn-rr
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 https://localhost:%NOLISTENPORT/464
 </command>

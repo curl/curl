@@ -44,9 +44,6 @@ http
 <name>
 CURLOPT_POST after CURLOPT_UPLOAD reusing handle
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

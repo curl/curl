@@ -32,9 +32,6 @@ https test-localhost.pem
 <name>
 HTTPS GET using CURLOPT_CAINFO_BLOB
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 # provide URL and ca-cert
 <command>
 https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt

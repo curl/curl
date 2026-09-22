@@ -36,9 +36,6 @@ stop
 http
 http-proxy
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Separately specified proxy/server headers sent in a proxy GET
 </name>

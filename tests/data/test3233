@@ -34,9 +34,6 @@ Curl-private: swsclose
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP session id is not sent to another origin after a redirect

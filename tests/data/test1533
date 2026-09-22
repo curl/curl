@@ -28,9 +28,6 @@ Early Response
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP with CURLOPT_KEEP_SENDING_ON_ERROR and an early error response
 </name>

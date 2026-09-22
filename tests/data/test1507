@@ -17,9 +17,6 @@ libtest
 <server>
 smtp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 # based on bug report #1184
 <name>

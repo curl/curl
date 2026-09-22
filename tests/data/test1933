@@ -46,9 +46,6 @@ aws
 <name>
 HTTP AWS_SIGV4 with one provider and auth cred via URL
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT

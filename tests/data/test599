@@ -63,9 +63,6 @@ this data is slightly larger than the first piece
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 # Bug 3510057 pointed out that when following a location to a larger chunked
 # encoded page, the first size would still be used in the progress callback

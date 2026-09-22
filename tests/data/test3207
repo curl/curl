@@ -35,9 +35,6 @@ https
 <name>
 concurrent HTTPS GET using shared SSL session cache
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 # provide URL and ca-cert
 <command>
 https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt

@@ -18,9 +18,6 @@ libtest
 <name>
 curl_easy_option_by_name() and curl_easy_option_by_id()
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 </client>
 
