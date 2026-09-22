@@ -1431,6 +1431,7 @@ static CURLcode create_single(struct OperationConfig *config,
     per->config = config;
     per->curl = curl;
     per->urlnum = u->num;
+    per->out_scheme = NULL;
 
     /* default headers output stream is stdout */
     heads = &per->heads;
