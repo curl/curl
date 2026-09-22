@@ -432,7 +432,6 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = ptr + cb;
-  const char *scheme = NULL;
   bool cd_checked = FALSE;
 
   if(!per->config)
@@ -451,6 +450,14 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
 #endif
 
+  /* If the last header was empty, check scheme again as we follow
+   * protocol switches on redirects */
+  if(!per->out_scheme || per->was_last_header_empty) {
+    char *scheme;
+    curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
+    per->out_scheme = proto_token(scheme);
+  }
+
   /*
    * Write header data when curl option --dump-header (-D) is given.
    */
@@ -466,9 +473,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     }
   }
 
-  curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
-  scheme = proto_token(scheme);
-  if((scheme == proto_http || scheme == proto_https)) {
+  if((per->out_scheme == proto_http || per->out_scheme == proto_https)) {
     long response = 0;
     curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
 
@@ -509,9 +514,12 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     else if(ptr[0] == '\r' || ptr[0] == '\n')
       per->was_last_header_empty = TRUE;
   }
+  else
+    per->was_last_header_empty = (ptr[0] == '\r' || ptr[0] == '\n');
+
   if(hdrcbdata->config->show_headers && !outs->out_null &&
-     (scheme == proto_http || scheme == proto_https ||
-      scheme == proto_rtsp || scheme == proto_file)) {
+     (per->out_scheme == proto_http || per->out_scheme == proto_https ||
+      per->out_scheme == proto_rtsp || per->out_scheme == proto_file)) {
     /* bold headers only for selected protocols */
     const char *value = NULL;
 
@@ -519,7 +527,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
        bypass the content-disposition handling above. Do not open the output
        file until the filename decision is complete. Only for HTTP(S). */
     if(hdrcbdata->honor_cd_filename && !cd_checked &&
-       (scheme == proto_http || scheme == proto_https))
+       (per->out_scheme == proto_http || per->out_scheme == proto_https))
       return buffer_header(hdrcbdata, str, cb);
 
     if(!outs->stream && !tool_create_output_file(outs, per->config))

@@ -46,6 +46,7 @@ struct per_transfer {
   char *url;
   curl_off_t urlnum; /* the index of the given URL */
   char *outfile;
+  const char *out_scheme; /* scheme of current header output */
   int infd;
   struct ProgressData progressbar;
   struct OutStruct outs;
