@@ -23,6 +23,25 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#if !defined(CURL_DISABLE_MIME) && !defined(CURL_DISABLE_HTTP)
+static int callback_free_count = 0;
+
+static void test_cb_free(void *ptr)
+{
+  (void)ptr;
+  callback_free_count++;
+}
+
+static size_t test_cb_read(char *buffer, size_t size, size_t nitems, void *arg)
+{
+  (void)buffer;
+  (void)size;
+  (void)nitems;
+  (void)arg;
+  return 0;
+}
+#endif
+
 static CURLcode test_lib3596(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -37,6 +56,8 @@ static CURLcode test_lib3596(const char *arg)
   curl_mimepart *part = NULL;
   int i;
 
+  callback_free_count = 0;
+
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
@@ -50,6 +71,15 @@ static CURLcode test_lib3596(const char *arg)
      stack. */
   root = curl_mime_init(curl);
   fail_unless(root != NULL, "curl_mime_init root failed");
+
+  /* Add a sibling part with a custom free callback before the deep chain
+     to verify that preflight depth rejection does not duplicate callbacks
+     or invoke them during error rollback. */
+  part = curl_mime_addpart(root);
+  fail_unless(part != NULL, "curl_mime_addpart sibling failed");
+  result = curl_mime_data_cb(part, 0, test_cb_read, NULL, test_cb_free, NULL);
+  fail_unless(result == CURLE_OK, "curl_mime_data_cb failed");
+
   current = root;
 
   for(i = 0; i < 50; i++) {
@@ -67,11 +97,14 @@ static CURLcode test_lib3596(const char *arg)
     result = curl_easy_setopt(curl, CURLOPT_MIMEPOST, root);
   fail_unless(result == CURLE_OK, "CURLOPT_MIMEPOST failed");
 
-  /* Deep nesting must fail gracefully (CURLE_TOO_LARGE), not crash. */
+  /* Deep nesting must fail gracefully (CURLE_TOO_LARGE), not crash, and
+     must not invoke copied user free callbacks during error rollback. */
   if(!result) {
     CURL *dup = curl_easy_duphandle(curl);
     fail_unless(dup == NULL,
                 "curl_easy_duphandle unexpectedly succeeded for nested mime");
+    fail_unless(callback_free_count == 0,
+                "free callback invoked during failed duphandle rollback");
   }
 
   if(!result)
@@ -83,10 +116,14 @@ static CURLcode test_lib3596(const char *arg)
     CURL *dup = curl_easy_duphandle(curl);
     fail_unless(dup == NULL,
                 "curl_easy_duphandle unexpectedly succeeded after perform");
+    fail_unless(callback_free_count == 0,
+                "free callback invoked after perform duphandle");
   }
 
   curl_easy_cleanup(curl);
   curl_mime_free(root);
+  fail_unless(callback_free_count == 1,
+              "free callback not invoked during root cleanup");
   curl_global_cleanup();
 #else
   (void)arg;
