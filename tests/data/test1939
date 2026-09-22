@@ -4,6 +4,7 @@
 <keywords>
 CONNECT
 curl_easy_cleanup
+libtest
 </keywords>
 </info>
 

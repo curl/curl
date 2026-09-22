@@ -5,6 +5,7 @@
 HTTP
 verbose logs
 flaky
+libtest
 </keywords>
 </info>
 

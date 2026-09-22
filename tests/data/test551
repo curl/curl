@@ -8,6 +8,7 @@ HTTP POST
 POST callback
 HTTP proxy
 HTTP proxy Digest auth
+libtest
 </keywords>
 </info>
 

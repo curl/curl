@@ -5,6 +5,7 @@
 HTTP
 multi
 verbose logs
+libtest
 </keywords>
 </info>
 

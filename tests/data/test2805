@@ -6,6 +6,7 @@ FTP
 LIST
 wildcardmatch
 ftplistparser
+libtest
 </keywords>
 </info>
 

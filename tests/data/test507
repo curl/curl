@@ -5,6 +5,7 @@
 HTTP
 multi
 non-existing host
+libtest
 </keywords>
 </info>
 

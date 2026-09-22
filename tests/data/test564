@@ -9,6 +9,7 @@ PASV
 RETR
 multi
 SOCKS4
+libtest
 </keywords>
 </info>
 # Server-side

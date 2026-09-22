@@ -4,6 +4,7 @@
 <keywords>
 curl_easy_getinfo
 CURLINFO_PROTOCOL
+libtest
 </keywords>
 </info>
 

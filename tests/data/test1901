@@ -5,6 +5,7 @@
 HTTP
 HTTP POST
 CURLOPT_READFUNCTION
+libtest
 </keywords>
 </info>
 

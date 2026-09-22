@@ -5,6 +5,7 @@
 CURLOPT_READFUNCTION
 curl_easy_reset
 rewind
+libtest
 </keywords>
 </info>
 

@@ -4,6 +4,7 @@
 <keywords>
 strerror
 verbose logs
+libtest
 </keywords>
 </info>
 

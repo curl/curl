@@ -9,6 +9,7 @@ HTTP NTLM auth
 NTLM
 flaky
 timing-dependent
+libtest
 </keywords>
 </info>
 # Server-side

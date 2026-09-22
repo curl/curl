@@ -5,6 +5,7 @@
 HTTP
 HTTP GET
 HTTP Basic auth
+libtest
 </keywords>
 </info>
 # Server-side

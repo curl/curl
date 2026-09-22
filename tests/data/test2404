@@ -6,6 +6,7 @@ HTTP
 HTTP/2
 multi
 verbose logs
+libtest
 </keywords>
 </info>
 

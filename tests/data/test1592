@@ -8,6 +8,7 @@ resolve
 speedcheck
 flaky
 timing-dependent
+libtest
 </keywords>
 </info>
 

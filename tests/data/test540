@@ -7,6 +7,7 @@ HTTP GET
 HTTP proxy
 HTTP proxy Digest auth
 multi
+libtest
 </keywords>
 </info>
 

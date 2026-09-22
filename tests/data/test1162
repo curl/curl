@@ -8,6 +8,7 @@ LIST
 wildcardmatch
 ftplistparser
 flaky
+libtest
 </keywords>
 </info>
 

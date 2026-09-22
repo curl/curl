@@ -3,6 +3,7 @@
 <info>
 <keywords>
 curl_strequal
+libtest
 </keywords>
 </info>
 

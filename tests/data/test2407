@@ -5,6 +5,7 @@
 multi
 HTTP
 HTTP/2
+libtest
 </keywords>
 </info>
 

@@ -3,6 +3,7 @@
 <info>
 <keywords>
 curl_easy_escape
+libtest
 </keywords>
 </info>
 # Server-side

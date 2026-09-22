@@ -6,6 +6,7 @@ HTTP
 HTTP proxy
 HSTS
 curl_easy_duphandle
+libtest
 </keywords>
 </info>
 

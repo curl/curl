@@ -12,6 +12,7 @@ HTTP proxy
 HTTP proxy NTLM auth
 multi
 NTLM
+libtest
 </keywords>
 </info>
 

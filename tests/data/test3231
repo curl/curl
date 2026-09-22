@@ -5,6 +5,7 @@
 HTTP
 CONNECT_ONLY
 CURLMOPT_MAX_HOST_CONNECTIONS
+libtest
 </keywords>
 </info>
 
