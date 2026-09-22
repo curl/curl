@@ -653,7 +653,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
                           &pi))
       ; /* error */
     else
-      dupfd = CURL_SOCKET(pi.iAddressFamily, ip.iSocketType, ip.iProtocol);
+      dupfd = CURL_SOCKET(pi.iAddressFamily, pi.iSocketType, pi.iProtocol);
 #else
 #ifdef F_DUPFD_CLOEXEC
     int dupfd = fcntl(conn->sock[FIRSTSOCKET], F_DUPFD_CLOEXEC, 0);
