@@ -74,8 +74,6 @@ static CURLcode test_lib464(const char *URL)
   int gotpacket = 0;
   bool global_inited = FALSE;
 
-  (void)URL;
-
   dnssock = CURL_SOCKET(AF_INET, SOCK_DGRAM, 0);
   if(dnssock == CURL_SOCKET_BAD) {
     curl_mfprintf(stderr, "socket creation error\n");
@@ -118,8 +116,10 @@ static CURLcode test_lib464(const char *URL)
     goto test_cleanup;
   }
 
-  easy_setopt(curl, CURLOPT_URL, "https://localhost/464");
+  easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
   easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, t464_resolver_start_cb);
 
   /* Vetoing the HTTPS RR side-query only drops that optional lookup, it

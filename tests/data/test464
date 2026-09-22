@@ -17,6 +17,9 @@ asyn-rr
 <tool>
 lib%TESTNUMBER
 </tool>
+<command>
+https://localhost:%NOLISTENPORT/464
+</command>
 
 <name>
 resolver start callback vetoes the HTTPS RR query before it is sent
