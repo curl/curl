@@ -46,7 +46,9 @@
  * each active transfer. We use HTTP/3 flow control and only ACK
  * when we take things out of the buffer.
  * Chunk size is large enough to take a full DATA frame */
-#define PROXY_H3_STREAM_RECV_CHUNKS ((512 * 1024) / H3_STREAM_CHUNK_SIZE)
+#define PROXY_H3_TUNNEL_RX_WIN      (512 * 1024)
+#define PROXY_H3_TUNNEL_RECV_CHUNKS \
+                               (PROXY_H3_TUNNEL_RX_WIN / H3_STREAM_CHUNK_SIZE)
 
 typedef enum {
   H3_TUNNEL_INIT,     /* init/default/no tunnel state */
@@ -75,7 +77,7 @@ static CURLcode h3_tunnel_stream_init(struct h3_tunnel_stream *ts,
   ts->state = H3_TUNNEL_INIT;
   Curl_peer_link(&ts->dest, dest);
   Curl_bufq_init2(&ts->recvbuf, H3_STREAM_CHUNK_SIZE,
-                  PROXY_H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
+                  PROXY_H3_TUNNEL_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   ts->udp = udp;
   /* host:port with IPv6 support */
   ts->authority = curl_maprintf("%s%s%s:%u", dest->ipv6 ? "[" : "",
@@ -271,47 +273,31 @@ static void cf_h3_proxy_upd_rx_win(struct Curl_cfilter *cf,
 {
   struct cf_h3_proxy_ctx *pctx = cf->ctx;
   struct cf_ngtcp2_ctx *ctx = &pctx->ngtcp2_ctx;
-  uint64_t cur_win, wanted_win = H3_STREAM_WINDOW_SIZE_MAX;
-
-  /* how much does rate limiting allow us to acknowledge? */
-  if(Curl_rlimit_active(&data->progress.dl.rlimit)) {
-    int64_t avail;
-
-    /* start rate limit updates only after first bytes arrived */
-    if(!stream->rx_offset)
-      return;
-
-    avail = Curl_rlimit_avail(&data->progress.dl.rlimit, NULL);
-    if(avail <= 0) {
-      /* nothing available, do not extend the rx offset */
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] dl rate limit exhausted (%" PRId64
-                  " tokens)", stream->id, avail);
-      return;
-    }
-    wanted_win = CURLMIN((uint64_t)avail, H3_STREAM_WINDOW_SIZE_MAX);
-  }
+  uint64_t cur_win, wanted_win = 0;
+  size_t rx_buffered;
 
   if(stream->rx_offset_max < stream->rx_offset) {
     DEBUGASSERT(0);
     return;
   }
-  cur_win = stream->rx_offset_max - stream->rx_offset;
-  if(cur_win < wanted_win) {
-    /* We have exhausted the credit we gave the QUIC peer for DATA.
-     * We extend it with the amount we can give (rate limit) */
-    uint64_t ext = wanted_win - cur_win;
 
-    ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, ext);
-    ngtcp2_conn_extend_max_offset(ctx->qconn, ext);
-    stream->rx_offset_max += ext;
-    if(stream->rx_offset_max > stream->window_size_max) {
-      stream->window_size_max = stream->rx_offset_max;
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] max window now -> %" PRIu64,
-                  stream->id, stream->window_size_max);
+  rx_buffered = Curl_bufq_len(&pctx->tunnel.recvbuf);
+  wanted_win = (rx_buffered < PROXY_H3_TUNNEL_RX_WIN) ?
+               (PROXY_H3_TUNNEL_RX_WIN - rx_buffered) : 0;
+  cur_win = stream->rx_offset_max - stream->rx_offset;
+  if(wanted_win > cur_win) {
+    uint64_t delta = wanted_win - cur_win;
+
+    if(UINT64_MAX - delta < stream->rx_offset_max)
+      delta = UINT64_MAX - stream->rx_offset_max;
+    if(delta) {
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] rx window, extend %" PRIu64
+                  " (buffered %zu) by %" PRIu64 " bytes",
+                  stream->id, cur_win, rx_buffered, delta);
+      stream->rx_offset_max += delta;
+      ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, delta);
+      ngtcp2_conn_extend_max_offset(ctx->qconn, delta);
     }
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] rx_offset_max -> %" PRIu64
-                " (ext %" PRIu64 ", win %" PRIu64 ")",
-                stream->id, stream->rx_offset_max, ext, wanted_win);
   }
 }
 
@@ -344,9 +330,7 @@ static int cb_h3_proxy_recv_data(nghttp3_conn *conn, int64_t stream3_id,
     return NGHTTP3_ERR_CALLBACK_FAILURE;
   }
 
-  /* DATA has been moved into our local recv buffer. Update stream offsets
-   * and give QUIC read credit back so long transfers over proxy tunnels
-   * do not stall on stream/connection flow-control limits. */
+  /* DATA has been moved into our local recv buffer. Update stream offsets. */
   stream->rx_offset += buflen;
   if(stream->rx_offset_max < stream->rx_offset)
     stream->rx_offset_max = stream->rx_offset;
@@ -845,6 +829,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
     result = Curl_bufq_cread(&pctx->tunnel.recvbuf, buf, len, pnread);
     if(result)
       goto out;
+    cf_h3_proxy_upd_rx_win(cf, data, pctx->tunnel.stream);
   }
 
   result = Curl_cf_ngtcp2_progress_ingress(cf, data, &pktx);

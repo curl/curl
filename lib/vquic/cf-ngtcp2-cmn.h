@@ -172,7 +172,6 @@ struct h3_stream_ctx {
   curl_off_t rx_total;          /* total number of bytes received */
   uint64_t rx_offset;           /* current receive offset */
   uint64_t rx_offset_max;       /* allowed receive offset */
-  uint64_t window_size_max;     /* max flow control window set for stream */
   size_t tx_in_flight_size;     /* sendbuf data "in flight" */
   size_t tx_in_flight_ideal;    /* ideal amount of un-acked send data */
   int status_code;              /* HTTP status code */

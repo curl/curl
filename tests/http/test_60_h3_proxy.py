@@ -437,7 +437,7 @@ class TestH3Proxy:
         proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True)
         proxy_args.extend(["--parallel", "--parallel-max", f"{count}"])
         r = curl.http_download(
-            urls=[urln], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
+            urls=[urln], alpn_proto="h2", with_stats=True, extra_args=proxy_args
         )
         r.check_response(count=count, http_status=200)
 
