@@ -180,7 +180,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
 static void alive_unit(int *x)
 {
   /* make sure this doesn't wrap */
-  if(*x < (INT_MAX / 1000))
+  if(*x <= (INT_MAX / 1000))
     *x *= 1000;
   else
     /* this is still almost 25 days */
