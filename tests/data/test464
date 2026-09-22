@@ -19,7 +19,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-resolver start callback vetoes the HTTPS RR query before sent
+resolver start callback vetoes the HTTPS RR query before it is sent
 </name>
 </client>
 
