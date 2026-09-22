@@ -642,23 +642,16 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
     else
       dupfd = CURL_SOCKET(FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO,
                           FROM_PROTOCOL_INFO, &pi, 0, 0);
-    if(dupfd == INVALID_SOCKET) {
+#else
+    int dupfd = dup(conn->sock[FIRSTSOCKET]);
+#endif
+    if(dupfd == CURL_SOCKET_BAD) {
       result = CURLE_COULDNT_CONNECT;
       goto out;
     }
     rc = ldap_init_fd((ber_socket_t)dupfd, li->proto, hosturl, &li->ld);
     if(rc)
       sclose(dupfd);
-#else
-    int dupfd = dup(conn->sock[FIRSTSOCKET]);
-    if(dupfd == -1) {
-      result = CURLE_COULDNT_CONNECT;
-      goto out;
-    }
-    rc = ldap_init_fd(dupfd, li->proto, hosturl, &li->ld);
-    if(rc)
-      sclose(dupfd);
-#endif
   }
   if(rc) {
     failf(data, "LDAP local: Cannot connect to %s, %s",
