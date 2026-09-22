@@ -32,6 +32,13 @@ struct Curl_easy;
 #include "curlx/strparse.h"
 #include "curl_printf.h"
 
+#if defined(__x86_64__) && !defined(__INTEL_COMPILER) && \
+  ((defined(__GNUC__) && __GNUC__ >= 9) || \
+   (defined(__clang__) && __clang_major__ >= 10))
+#include <immintrin.h>
+#define URLDECODE_VBMI2 1
+#endif
+
 /* for ABI-compatibility with previous versions */
 char *curl_escape(const char *string, int length)
 {
@@ -220,6 +227,123 @@ char *curl_easy_escape(CURL *curl, const char *string, int length)
  * invokes that used TRUE/FALSE (0 and 1).
  */
 
+#ifdef URLDECODE_VBMI2
+/* Load unaligned bytes without casting the input to a vector pointer. */
+__attribute__((target("avx2")))
+static __m256i urldecode_load(const char *string)
+{
+  __m256i src;
+  memcpy(&src, string, sizeof(src));
+  return src;
+}
+
+/* Valid escapes cannot overlap: '%' is not a hex digit. Treat decoding as
+   vector substitution followed by a filter dropping the two hex lanes. */
+__attribute__((target("avx512vbmi2,avx512vl,avx512bw,avx2,popcnt")))
+static int urldecode_vbmi2(const char **input, size_t *remaining,
+                          char **output, unsigned char reject_limit)
+{
+  const char *string = *input;
+  size_t alloc = *remaining;
+  char *ns = *output;
+
+  while(alloc >= 32) {
+    __m256i src = urldecode_load(string);
+    unsigned int percent = (unsigned int)_mm256_cmpeq_epi8_mask(
+      src, _mm256_set1_epi8('%'));
+    if(!percent) {
+      /* Only use libc after proving a 128-byte literal prefix.
+         A percent in the next vector avoids probing farther ahead. */
+      if(alloc >= 128 && !_mm256_cmpeq_epi8_mask(
+           urldecode_load(string + 32),
+           _mm256_set1_epi8('%')) &&
+         !(_mm256_cmpeq_epi8_mask(
+             urldecode_load(string + 64),
+             _mm256_set1_epi8('%')) |
+           _mm256_cmpeq_epi8_mask(
+             urldecode_load(string + 96),
+             _mm256_set1_epi8('%')))) {
+        const char *p = memchr(string + 128, '%', alloc - 128);
+        size_t n = p ? (size_t)(p - string) : alloc;
+        if(reject_limit) {
+          if(reject_limit == 1) {
+            if(memchr(string, 0, n))
+              return 0;
+          }
+          else {
+            size_t i;
+            for(i = 0; i < n; i++) {
+              if((uint8_t)string[i] < 0x20)
+                return 0;
+            }
+          }
+        }
+        memcpy(ns, string, n);
+        ns += n;
+        string += n;
+        alloc -= n;
+        continue;
+      }
+      if(reject_limit && _mm256_cmp_epu8_mask(
+           src, _mm256_set1_epi8((char)reject_limit), _MM_CMPINT_LT))
+        return 0;
+      memcpy(ns, &src, sizeof(src));
+      ns += 32;
+      string += 32;
+      alloc -= 32;
+    }
+    else {
+      __m256i digit = _mm256_sub_epi8(src, _mm256_set1_epi8('0'));
+      __m256i letter = _mm256_sub_epi8(
+        _mm256_or_si256(src, _mm256_set1_epi8(32)),
+        _mm256_set1_epi8('a'));
+      __mmask32 digit_ok = _mm256_cmp_epu8_mask(
+        digit, _mm256_set1_epi8(9), _MM_CMPINT_LE);
+      __mmask32 letter_ok = _mm256_cmp_epu8_mask(
+        letter, _mm256_set1_epi8(5), _MM_CMPINT_LE);
+      unsigned int hex = (unsigned int)(digit_ok | letter_ok);
+      unsigned int escapes = percent & (hex >> 1) & (hex >> 2);
+      unsigned int consumed = (percent & (1U << 30)) ? 30 :
+        (percent & (1U << 31)) ? 31 : 32;
+      unsigned int keep = (0xffffffffU >> (32 - consumed)) &
+        ~((escapes << 1) | (escapes << 2));
+      __m256i low = _mm256_and_si256(src, _mm256_set1_epi8(15));
+      __m256i nibble = _mm256_mask_add_epi8(
+        low, letter_ok, low, _mm256_set1_epi8(9));
+      /* AVX2 byte shifts are lane-local. Bring the upper half into the
+         lower half, zero the upper half, then align across the boundary. */
+      __m256i upper = _mm256_permute2x128_si256(nibble, nibble, 0x81);
+      __m256i high_nibble = _mm256_alignr_epi8(upper, nibble, 1);
+      __m256i low_nibble = _mm256_alignr_epi8(upper, nibble, 2);
+      __m256i decoded = _mm256_or_si256(
+        _mm256_and_si256(_mm256_slli_epi16(high_nibble, 4),
+                          _mm256_set1_epi8((char)0xf0)),
+        low_nibble);
+      __m256i result = _mm256_mask_mov_epi8(src, (__mmask32)escapes,
+                                           decoded);
+      if(reject_limit && ((unsigned int)_mm256_cmp_epu8_mask(
+           result, _mm256_set1_epi8((char)reject_limit), _MM_CMPINT_LT) &
+                          keep))
+        return 0;
+      /* Register compression plus an ordinary store avoids the masked
+         memory form. The store may write temporary padding, but at least
+         32 input bytes remain and output never exceeds input, so all 32
+         stored bytes fit the original allocation. The next iteration or
+         final terminator replaces padding within the logical output. */
+      result = _mm256_maskz_compress_epi8((__mmask32)keep, result);
+      memcpy(ns, &result, sizeof(result));
+      ns += (unsigned int)__builtin_popcount(keep);
+      string += consumed;
+      alloc -= consumed;
+    }
+  }
+  *input = string;
+  *remaining = alloc;
+  *output = ns;
+  return 1;
+}
+#endif
+
 CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
                         enum urlreject ctrl)
@@ -242,6 +366,18 @@ CURLcode Curl_urldecode(const char *string, size_t length,
 
   reject_limit = (ctrl == REJECT_CTRL) ? 0x20 :
     (ctrl == REJECT_ZERO) ? 1 : 0;
+
+#ifdef URLDECODE_VBMI2
+  if(alloc >= 32 &&
+     __builtin_cpu_supports("avx512vbmi2") &&
+     __builtin_cpu_supports("avx512vl") &&
+     __builtin_cpu_supports("avx512bw") &&
+     __builtin_cpu_supports("avx2") &&
+     __builtin_cpu_supports("popcnt")) {
+    if(!urldecode_vbmi2(&string, &alloc, &ns, reject_limit))
+      goto error;
+  }
+#endif
 
   while(alloc) {
     uint8_t in;
