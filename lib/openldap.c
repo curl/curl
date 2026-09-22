@@ -666,8 +666,10 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
       sclose(dupfd);
       dupfd = CURL_SOCKET_BAD;
     }
-#endif
-#endif
+#endif /* HAVE_FCNTL */
+#endif /* F_DUPFD_CLOEXEC */
+#endif /* _WIN32 */
+
     if(dupfd == CURL_SOCKET_BAD) {
       result = CURLE_COULDNT_CONNECT;
       goto out;
