@@ -305,7 +305,22 @@ CURLcode Curl_urldecode(const char *string, size_t length,
         }
       }
 
-      memcpy(ns, string, n);
+      /* Tiny spans are common between escapes. Constant-sized copies let
+       * the compiler inline them without requiring alignment. */
+      if(n < 4) {
+        if(n < 2)
+          *ns = *string;
+        else {
+          memcpy(ns, string, 2);
+          memcpy(ns + n - 2, string + n - 2, 2);
+        }
+      }
+      else if(n <= 8) {
+        memcpy(ns, string, 4);
+        memcpy(ns + n - 4, string + n - 4, 4);
+      }
+      else
+        memcpy(ns, string, n);
       ns += n;
       string += n;
       alloc -= n;
