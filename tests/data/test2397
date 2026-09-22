@@ -28,7 +28,6 @@ hej
 http
 </server>
 
-
 <name>
 Get CURLINFO_REFERER set CURLOPT_REFERER
 </name>
