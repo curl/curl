@@ -64,6 +64,25 @@ static CURLcode test_lib1396(const char *arg)
     { "%FF%00%ff", 9, "\xff\x00\xff", 3 },
     { "%-2", 0, "%-2", 3 },
     { "%FG", 0, "%FG", 3 },
+    /* Adjacent escapes, malformed pairs, and a truncated second escape. */
+    { "%41%42", 6, "AB", 2 },
+    { "%aB%cD", 6, "\xab\xcd", 2 },
+    { "%00%1f", 6, "\x00\x1f", 2 },
+    { "%1f%00", 6, "\x1f\x00", 2 },
+    { "%G4%41", 6, "%G4A", 4 },
+    { "%4G%41", 6, "%4GA", 4 },
+    { "%41%G4", 6, "A%G4", 4 },
+    { "%41%4G", 6, "A%4G", 4 },
+    { "%41%42", 3, "A", 1 },
+    { "%41%42", 4, "A%", 2 },
+    { "%41%42", 5, "A%4", 3 },
+    { "%41%42%43", 9, "ABC", 3 },
+    { "x%41%42y", 8, "xABy", 4 },
+    { "%41%\x00\xff", 6, "A%\x00\xff", 4 },
+    /* Single-byte raw spans before and between escapes. */
+    { "x%41y%42", 8, "xAyB", 4 },
+    { "\x00%41", 4, "\x00" "A", 2 },
+    { "%41\xff%42", 7, "A\xff" "B", 3 },
     { NULL, 0, NULL, 0 } /* end of list marker */
   };
   /* escape, this => that */
