@@ -2,7 +2,6 @@
 <testcase>
 <info>
 <keywords>
-unittest
 urlapi
 url
 libtest
