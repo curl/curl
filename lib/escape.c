@@ -32,7 +32,9 @@ struct Curl_easy;
 #include "curlx/strparse.h"
 #include "curl_printf.h"
 
+/* clang-cl lacks the runtime backing __builtin_cpu_supports(). */
 #if defined(__x86_64__) && !defined(__INTEL_COMPILER) && \
+  !defined(_MSC_VER) && \
   ((defined(__GNUC__) && __GNUC__ >= 9) || \
    (defined(__clang__) && __clang_major__ >= 10))
 #include <immintrin.h>
@@ -211,34 +213,28 @@ char *curl_easy_escape(CURL *curl, const char *string, int length)
   return encoded;
 }
 
-/*
- * Curl_urldecode() URL decodes the given string.
- *
- * Returns a pointer to a malloced string in *ostring with length given in
- * *olen. If length == 0, the length is assumed to be strlen(string).
- *
- * ctrl options:
- * - REJECT_NADA: accept everything
- * - REJECT_CTRL: rejects control characters (byte codes lower than 32) in
- *                the data
- * - REJECT_ZERO: rejects decoded zero bytes
- *
- * The values for the enum starts at 2, to make the assert detect legacy
- * invokes that used TRUE/FALSE (0 and 1).
- */
-
 #ifdef URLDECODE_VBMI2
-/* Load unaligned bytes without casting the input to a vector pointer. */
-__attribute__((target("avx2")))
-static __m256i urldecode_load(const char *string)
+/* Return a scalar mask: returning a vector by value can give GCC an
+   under-aligned return slot on Win64, including Cygwin (GCC PR54412). */
+__attribute__((target("avx512vl,avx512bw")))
+static unsigned int urldecode_percent_mask(const char *string)
 {
   __m256i src;
   memcpy(&src, string, sizeof(src));
-  return src;
+  return (unsigned int)_mm256_cmpeq_epi8_mask(src, _mm256_set1_epi8('%'));
 }
 
-/* Valid escapes cannot overlap: '%' is not a hex digit. Treat decoding as
-   vector substitution followed by a filter dropping the two hex lanes. */
+/* Decode 32 input bytes at a time. A vector holds those bytes side by side;
+   each bit in a mask describes the byte at the same position (bit 0 is the
+   first byte). Most instructions below operate on all 32 bytes at once.
+
+   For each valid escape, replace '%' with the decoded byte, then remove its
+   two hex digits. For example, "x%41y" becomes "xA41y", then "xAy". Valid
+   escapes cannot overlap because '%' is not a hex digit.
+
+   Return 0 for a rejected byte. On success, update the caller's pointers and
+   remaining length, then return 1. Leave fewer than 32 input bytes for the
+   ordinary decoder to finish. */
 __attribute__((target("avx512vbmi2,avx512vl,avx512bw,avx2,popcnt")))
 static int urldecode_vbmi2(const char **input, size_t *remaining,
                           char **output, unsigned char reject_limit)
@@ -248,23 +244,24 @@ static int urldecode_vbmi2(const char **input, size_t *remaining,
   char *ns = *output;
 
   while(alloc >= 32) {
-    __m256i src = urldecode_load(string);
-    unsigned int percent = (unsigned int)_mm256_cmpeq_epi8_mask(
-      src, _mm256_set1_epi8('%'));
+    __m256i src;
+    unsigned int percent;
+    /* Copy unaligned input into a local vector without a vector return. */
+    memcpy(&src, string, sizeof(src));
+    /* Mark every '%' position. A zero mask means this block is all literal
+       bytes, so there are no escapes to decode. */
+    percent = (unsigned int)_mm256_cmpeq_epi8_mask(src, _mm256_set1_epi8('%'));
     if(!percent) {
-      /* Only use libc after proving a 128-byte literal prefix.
-         A percent in the next vector avoids probing farther ahead. */
-      if(alloc >= 128 && !_mm256_cmpeq_epi8_mask(
-           urldecode_load(string + 32),
-           _mm256_set1_epi8('%')) &&
-         !(_mm256_cmpeq_epi8_mask(
-             urldecode_load(string + 64),
-             _mm256_set1_epi8('%')) |
-           _mm256_cmpeq_epi8_mask(
-             urldecode_load(string + 96),
-             _mm256_set1_epi8('%')))) {
+      /* If the next three blocks also contain no '%', this is a long literal
+         run. Let memchr find its end and memcpy copy it in bulk. Stop the
+         lookahead early when the second block already contains '%'. */
+      if(alloc >= 128 && !urldecode_percent_mask(string + 32) &&
+         !(urldecode_percent_mask(string + 64) |
+           urldecode_percent_mask(string + 96))) {
         const char *p = memchr(string + 128, '%', alloc - 128);
         size_t n = p ? (size_t)(p - string) : alloc;
+        /* Raw bytes obey the same rejection rule as decoded bytes: 0 accepts
+           everything, 1 rejects NUL, and 32 rejects control bytes. */
         if(reject_limit) {
           if(reject_limit == 1) {
             if(memchr(string, 0, n))
@@ -284,6 +281,8 @@ static int urldecode_vbmi2(const char **input, size_t *remaining,
         alloc -= n;
         continue;
       }
+      /* For a shorter literal run, check all 32 bytes at once, then copy the
+         block unchanged. The unsigned comparison accepts bytes above 127. */
       if(reject_limit && _mm256_cmp_epu8_mask(
            src, _mm256_set1_epi8((char)reject_limit), _MM_CMPINT_LT))
         return 0;
@@ -293,6 +292,10 @@ static int urldecode_vbmi2(const char **input, size_t *remaining,
       alloc -= 32;
     }
     else {
+      /* Classify hex digits. Subtracting '0' maps '0'..'9' to 0..9.
+         Setting ASCII bit 5 makes 'A'..'F' lowercase; subtracting 'a' then
+         maps 'a'..'f' to 0..5. Unsigned comparisons reject other characters,
+         including those whose subtraction wrapped around below zero. */
       __m256i digit = _mm256_sub_epi8(src, _mm256_set1_epi8('0'));
       __m256i letter = _mm256_sub_epi8(
         _mm256_or_si256(src, _mm256_set1_epi8(32)),
@@ -302,47 +305,85 @@ static int urldecode_vbmi2(const char **input, size_t *remaining,
       __mmask32 letter_ok = _mm256_cmp_epu8_mask(
         letter, _mm256_set1_epi8(5), _MM_CMPINT_LE);
       unsigned int hex = (unsigned int)(digit_ok | letter_ok);
+      /* Shift the hex masks back to the '%' positions. A bit survives only
+         where '%' has two hex digits after it. Malformed escapes stay raw. */
       unsigned int escapes = percent & (hex >> 1) & (hex >> 2);
+      /* A '%' in the last two positions might start an escape that continues
+         in the next block. Leave it and any later bytes in this block for the
+         next iteration, or the ordinary decoder if fewer than 32 remain. */
       unsigned int consumed = (percent & (1U << 30)) ? 30 :
         (percent & (1U << 31)) ? 31 : 32;
+      /* Keep only the bytes we can consume now, excluding the two hex digits
+         after each valid '%'. Its position will hold the decoded byte. */
       unsigned int keep = (0xffffffffU >> (32 - consumed)) &
         ~((escapes << 1) | (escapes << 2));
+      /* Turn each hex character into its numeric value (a four-bit nibble).
+         The low four bits already give 0..9 for digits and 1..6 for letters;
+         adding 9 at the letter positions gives 10..15. */
       __m256i low = _mm256_and_si256(src, _mm256_set1_epi8(15));
       __m256i nibble = _mm256_mask_add_epi8(
         low, letter_ok, low, _mm256_set1_epi8(9));
-      /* AVX2 byte shifts are lane-local. Bring the upper half into the
-         lower half, zero the upper half, then align across the boundary. */
+      /* Move the next two nibble values back to their '%' position. The shift
+         instructions work in separate 16-byte halves, so first arrange the
+         upper half followed by zeros as a bridge. This also handles escapes
+         whose '%' and digits lie on opposite sides of the 16-byte boundary. */
       __m256i upper = _mm256_permute2x128_si256(nibble, nibble, 0x81);
       __m256i high_nibble = _mm256_alignr_epi8(upper, nibble, 1);
       __m256i low_nibble = _mm256_alignr_epi8(upper, nibble, 2);
+      /* Form candidate decoded bytes: %41 gives (4 << 4) | 1 == 0x41, or 'A'.
+         Only valid '%' positions will use them. The shift acts on pairs of
+         bytes; the mask keeps each byte's high four bits. */
       __m256i decoded = _mm256_or_si256(
         _mm256_and_si256(_mm256_slli_epi16(high_nibble, 4),
                           _mm256_set1_epi8((char)0xf0)),
         low_nibble);
+      /* Replace valid '%' positions; leave all other input bytes intact. */
       __m256i result = _mm256_mask_mov_epi8(src, (__mmask32)escapes,
                                            decoded);
+      /* Check only bytes kept in the output: decoded bytes and literals.
+         Exclude removed hex digits and bytes deferred to the next block. */
       if(reject_limit && ((unsigned int)_mm256_cmp_epu8_mask(
            result, _mm256_set1_epi8((char)reject_limit), _MM_CMPINT_LT) &
                           keep))
         return 0;
-      /* Register compression plus an ordinary store avoids the masked
-         memory form. The store may write temporary padding, but at least
-         32 input bytes remain and output never exceeds input, so all 32
-         stored bytes fit the original allocation. The next iteration or
+      /* Pack the kept bytes together, preserving their order, and fill the
+         unused end of the vector with zeros. Store the whole vector rather
+         than using a masked memory store. This writes temporary padding, but
+         at least 32 input bytes remain and output never exceeds input. Thus
+         the whole store fits the original allocation; later output or the
          final terminator replaces padding within the logical output. */
       result = _mm256_maskz_compress_epi8((__mmask32)keep, result);
       memcpy(ns, &result, sizeof(result));
+      /* Each set bit represents one output byte. Advance by that count, not
+         by the 32 bytes stored; the input advances by the consumed count. */
       ns += (unsigned int)__builtin_popcount(keep);
       string += consumed;
       alloc -= consumed;
     }
   }
+  /* Hand the remaining short tail back to Curl_urldecode(). */
   *input = string;
   *remaining = alloc;
   *output = ns;
   return 1;
 }
 #endif
+
+/*
+ * Curl_urldecode() URL decodes the given string.
+ *
+ * Returns a pointer to a malloced string in *ostring with length given in
+ * *olen. If length == 0, the length is assumed to be strlen(string).
+ *
+ * ctrl options:
+ * - REJECT_NADA: accept everything
+ * - REJECT_CTRL: rejects control characters (byte codes lower than 32) in
+ *                the data
+ * - REJECT_ZERO: rejects decoded zero bytes
+ *
+ * The values for the enum starts at 2, to make the assert detect legacy
+ * invokes that used TRUE/FALSE (0 and 1).
+ */
 
 CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
@@ -368,6 +409,9 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     (ctrl == REJECT_ZERO) ? 1 : 0;
 
 #ifdef URLDECODE_VBMI2
+  /* Use the vector decoder only when the CPU supports every instruction it
+     needs. It updates string, alloc and ns so the loop below can finish the
+     tail, or handle the entire input on CPUs without these features. */
   if(alloc >= 32 &&
      __builtin_cpu_supports("avx512vbmi2") &&
      __builtin_cpu_supports("avx512vl") &&

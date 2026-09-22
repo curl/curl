@@ -2053,6 +2053,9 @@ static int test_sws(int argc, const char *argv[])
         num_sockets -= 1;
       }
     }
+    /* With no clients left, discard the previous test's monitoring setting. */
+    if(num_sockets == 1)
+      req->connmon = FALSE;
 
     if(got_exit_signal)
       goto sws_cleanup;
