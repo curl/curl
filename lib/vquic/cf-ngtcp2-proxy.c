@@ -844,6 +844,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
                   stream->id, len, *pnread, (int)result);
       goto out;
     }
+    cf_h3_proxy_upd_rx_win(cf, data, pctx->tunnel.stream);
   }
 
   if(*pnread) {
