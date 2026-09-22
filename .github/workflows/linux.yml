@@ -58,6 +58,8 @@ env:
   OPENSSL_VERSION: 4.0.2
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
   RUSTLS_VERSION: 0.15.3
+  # renovate: datasource=github-tags depName=simdutf/simdutf versioning=semver registryUrl=https://github.com
+  SIMDUTF_VERSION: 9.2.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   WOLFSSL_VERSION: 5.9.2
 
@@ -216,6 +218,24 @@ jobs:
           - name: 'openssl default'
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
+
+          - name: 'openssl simdutf shared'
+            install_steps: simdutf-shared
+            LDFLAGS: -Wl,-rpath,/home/runner/simdutf/lib
+            configure: --with-openssl --with-simdutf=/home/runner/simdutf --enable-debug
+
+          - name: 'openssl simdutf static'
+            install_steps: simdutf-static
+            PKG_CONFIG_PATH: /home/runner/simdutf/lib/pkgconfig
+            configure: --with-openssl --with-simdutf --enable-debug --enable-static --disable-shared
+
+          - name: 'openssl simdutf shared'
+            install_steps: simdutf-shared
+            generate: -DCURL_USE_SIMDUTF=ON -DCMAKE_PREFIX_PATH=/home/runner/simdutf -DENABLE_DEBUG=ON
+
+          - name: 'openssl simdutf static'
+            install_steps: simdutf-static
+            generate: -DCURL_USE_SIMDUTF=ON -DCMAKE_PREFIX_PATH=/home/runner/simdutf -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF
 
           - name: 'openssl libssh2 sync-resolver valgrind 1 +analyzer'
             image: ubuntu-26.04-arm
@@ -504,6 +524,31 @@ jobs:
           sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin && mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
           cd filc
           ./setup.sh
+
+      - name: 'cache simdutf'
+        if: ${{ contains(matrix.build.install_steps, 'simdutf') }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cache-simdutf
+        with:
+          path: ~/simdutf
+          key: ${{ runner.os }}-${{ runner.arch }}-build-simdutf-${{ env.SIMDUTF_VERSION }}-${{ matrix.build.install_steps }}
+
+      - name: 'build simdutf'
+        if: ${{ contains(matrix.build.install_steps, 'simdutf') && !steps.cache-simdutf.outputs.cache-hit }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location --proto-redir =https "https://github.com/simdutf/simdutf/archive/refs/tags/v${SIMDUTF_VERSION}.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
+          cd "simdutf-${SIMDUTF_VERSION}"
+          simdutf_shared=OFF
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'simdutf-shared'* ]]; then
+            simdutf_shared=ON
+          fi
+          cmake -B . -G Ninja -DSIMDUTF_TESTS=OFF -DSIMDUTF_TOOLS=OFF \
+            -DBUILD_SHARED_LIBS="${simdutf_shared}" -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_PREFIX=/home/runner/simdutf
+          cmake --build .
+          cmake --install .
 
       - name: 'cache libressl (c-arm)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') }}
@@ -877,6 +922,10 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
+
+      - name: 'check simdutf configuration'
+        if: ${{ contains(matrix.build.install_steps, 'simdutf') }}
+        run: grep -qx '#define USE_SIMDUTF 1' bld/lib/curl_config.h
 
       - name: 'test configs'
         run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true

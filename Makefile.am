@@ -50,6 +50,7 @@ CMAKE_DIST =                                     \
   CMake/FindNettle.cmake                         \
   CMake/FindQuiche.cmake                         \
   CMake/FindRustls.cmake                         \
+  CMake/FindSimdutf.cmake                        \
   CMake/FindWolfSSL.cmake                        \
   CMake/FindZstd.cmake                           \
   CMake/Macros.cmake                             \

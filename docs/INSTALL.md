@@ -119,6 +119,30 @@ provide this option to gcc to set a hard-coded path to the runtime linker:
 
     LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-openssl
 
+## simdutf
+
+The optional [simdutf](https://github.com/simdutf/simdutf) dependency accelerates
+Base64 encoding and decoding using its C API and runtime CPU detection. Install
+simdutf 8.0.0 or newer, then enable it with `--with-simdutf`:
+
+```sh
+PKG_CONFIG_PATH=/path/to/simdutf/lib/pkgconfig ./configure --with-openssl --with-simdutf
+```
+
+Alternatively, specify its installation prefix directly:
+
+```sh
+./configure --with-openssl --with-simdutf=/path/to/simdutf
+```
+
+Configure checks that both Base64 C API functions can be linked and fails if the
+requested library is unavailable. For static simdutf, it also tries `libstdc++` and
+`libc++` when needed. If another C++ runtime is required, supply it through `LIBS`.
+curl's sources remain C, and configure does not download simdutf.
+
+Support is disabled by default, or explicitly with `--without-simdutf`. Without
+simdutf, curl uses its built-in Base64 implementation.
+
 ## Static builds
 
 To force a static library compile, disable the shared library creation by

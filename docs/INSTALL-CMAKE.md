@@ -364,6 +364,7 @@ Details via CMake
                                             Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
 - `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS (experimental). Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
+- `CURL_USE_SIMDUTF`:                       Use simdutf 8.0.0 or newer for Base64 encoding and decoding. Default: `OFF`
 - `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `CURL_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`
@@ -372,6 +373,21 @@ Details via CMake
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_QUICHE`:                             Use quiche library for HTTP/3 support (experimental). Default: `OFF`
+
+### simdutf
+
+The optional [simdutf](https://github.com/simdutf/simdutf) dependency accelerates
+Base64 encoding and decoding using its C API and runtime CPU detection. Install
+simdutf 8.0.0 or newer, then configure curl with:
+
+```sh
+cmake -B build -DCURL_USE_SIMDUTF=ON -DCMAKE_PREFIX_PATH=/path/to/simdutf
+```
+
+This option does not download simdutf. A C++ compiler is also required when the
+installed library needs a separate C++ runtime, as is usually the case for static
+simdutf. curl's sources remain C. With the option disabled, curl uses its built-in
+Base64 implementation. For Autotools builds, see [simdutf in INSTALL](INSTALL.md#simdutf).
 
 ## Dependency options (via CMake)
 
@@ -391,6 +407,7 @@ Details via CMake
                                             `<PackageName>` may be:
                                             `c-ares`, `Libssh2`, `MbedTLS`, `NGHTTP2`, `NGHTTP3`,
                                             `NGTCP2` for 1.19.0+ (with non-fork OpenSSL only),
+                                            `simdutf` for 8.0.0+,
                                             `wolfssl` for 5.2.1+, `Zstd` for 1.4.5+.
 
 ## Dependency options (tools)
@@ -463,6 +480,8 @@ Details via CMake
 - `QUICHE_LIBRARY`:                         Absolute path to `quiche` library.
 - `RUSTLS_INCLUDE_DIR`:                     Absolute path to Rustls include directory.
 - `RUSTLS_LIBRARY`:                         Absolute path to `rustls` library.
+- `SIMDUTF_INCLUDE_DIR`:                    Absolute path to simdutf include directory.
+- `SIMDUTF_LIBRARY`:                        Absolute path to `simdutf` library.
 - `WATT_ROOT`:                              Absolute path to the installation root of Watt-32.
 - `WOLFSSL_INCLUDE_DIR`:                    Absolute path to wolfSSL include directory.
 - `WOLFSSL_LIBRARY`:                        Absolute path to `wolfssl` library.
