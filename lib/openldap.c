@@ -634,17 +634,21 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 
   {
 #ifdef _WIN32
-    HANDLE dupfd = INVALID_HANDLE_VALUE;
-    if(!DuplicateHandle(GetCurrentProcess(),
-                        (HANDLE)conn->sock[FIRSTSOCKET],
-                        GetCurrentProcess(), &dupfd, 0, FALSE,
-                        DUPLICATE_SAME_ACCESS)) {
+    SOCKET dupfd = INVALID_SOCKET;
+    WSAPROTOCOL_INFO pi;
+    if(WSADuplicateSocket(conn->sock[FIRSTSOCKET], GetCurrentProcessId(),
+                          &pi))
+      ; /* error */
+    else
+      dupfd = CURL_SOCKET(FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO,
+                          FROM_PROTOCOL_INFO, &pi, 0, 0);
+    if(dupfd == INVALID_SOCKET) {
       result = CURLE_COULDNT_CONNECT;
       goto out;
     }
     rc = ldap_init_fd((ber_socket_t)dupfd, li->proto, hosturl, &li->ld);
     if(rc)
-      CloseHandle(dupfd);
+      sclose(dupfd);
 #else
     int dupfd = dup(conn->sock[FIRSTSOCKET]);
     if(dupfd == -1) {
