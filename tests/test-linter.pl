@@ -233,7 +233,6 @@ for my $t (@l) {
     }
 }
 
-
 my @a = alltests();
 print "- Verify that tests that set lib* in <tool> have 'libtest' as <keyword>\n";
 for my $t (@a) {
