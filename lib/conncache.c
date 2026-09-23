@@ -116,7 +116,7 @@ static bool cpool_bundle_add_id(struct cpool *cpool,
   if(!Curl_uint32_spbset_add(&bundle->ids, pool_id))
     return FALSE;
   if(Curl_uint32_spbset_count(&bundle->ids) == 1) {
-    /* fist one added, register bundle */
+    /* first one added, register bundle */
     struct cpool_bundle *new_ref = NULL;
     cpool_bundle_link(&new_ref, bundle);
     if(!Curl_hash_add(&cpool->dest2bundle,
@@ -195,7 +195,7 @@ static void cpool_discard_conn(struct cpool *cpool,
   DEBUGASSERT(data);
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(cpool);
-  DEBUGASSERT(!conn->bits.in_cpool);
+  DEBUGASSERT(conn->cpid == UINT32_MAX);
 
   admin = Curl_get_admin(data);
   /*
@@ -624,8 +624,10 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
       ncapacity = capacity + growth;
     else
       ncapacity = UINT32_MAX;
-    if(Curl_uint32_tbl_resize(&cpool->conns, ncapacity) ||
-       Curl_uint32_bset_resize(&cpool->idles, ncapacity)) {
+    /* Grow bitset first, so table resize failure does not leave a too
+     * short bitset should that one fail. */
+    if(Curl_uint32_bset_resize(&cpool->idles, ncapacity) ||
+       Curl_uint32_tbl_resize(&cpool->conns, ncapacity)) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
