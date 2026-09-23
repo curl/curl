@@ -3,12 +3,24 @@
 <info>
 <keywords>
 WebSockets
+followlocation
 </keywords>
 </info>
 
 # Server-side
+# "swsbounce" in the first response makes the server answer the second
+# request from <data1> instead of <data>.
 <reply>
 <data crlf="headers" nocheck="yes">
+HTTP/1.1 302 Found swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Location: /path/redirected/%TESTNUMBER
+Content-Length: 11
+
+no upgrade
+</data>
+<data1 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -16,7 +28,7 @@ Connection: close
 Content-Length: 11
 
 no upgrade
-</data>
+</data1>
 </reply>
 
 # Client-side
@@ -37,7 +49,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-Refused WebSocket upgrade, Connection: close, returns CURLE_WS_DENIED
+WS upgrade refused: 3xx not followed, Connection: close honored
 </name>
 <command>
 - %HOSTIP %HTTPPORT
@@ -45,6 +57,9 @@ Refused WebSocket upgrade, Connection: close, returns CURLE_WS_DENIED
 </client>
 
 # Verify data after the test has been "shot"
+# Exactly two requests must be sent. The 3xx of request 1 must NOT be followed
+# even though CURLOPT_FOLLOWLOCATION is enabled, so there must be no request
+# to /path/redirected/%TESTNUMBER.
 <verify>
 <protocol crlf="headers">
 GET /path/ws/%TESTNUMBER HTTP/1.1
@@ -52,21 +67,43 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Upgrade: websocket
 Sec-WebSocket-Version: 13
-Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+Sec-WebSocket-Key: stripped
+Connection: Upgrade
+
+GET /path/ws/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: stripped
 Connection: Upgrade
 
 </protocol>
 <strip>
 ^Host:.*
 </strip>
+# Only the first Sec-WebSocket-Key is reproducible under CURL_ENTROPY, so
+# the nonce is stripped and only its presence is implied by the other headers.
+<strippart>
+s/^Sec-WebSocket-Key: [^\r\n]*/Sec-WebSocket-Key: stripped/
+</strippart>
+### Request 1 keeps the connection alive, request 2 must shut it down because
+### the server asked for it with "Connection: close".
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
+* WebSocket upgrade refused with HTTP 302
+* Switching from ws to http due to refused upgrade: http://%HOSTIP:%HTTPPORT/path/ws/%TESTNUMBER
+* Connection #0 to host %HOSTIP:%HTTPPORT left intact
+* Refused WebSocket upgrade: 302
+Request 1 (WS refused + redirect) completed. CURLcode: 102 (WebSocket denied by server). HTTP Code: 302.
+* Reusing existing ws: connection with host %HOSTIP
 * WebSocket upgrade refused with HTTP 200
+* Switching from ws to http due to refused upgrade: http://%HOSTIP:%HTTPPORT/path/ws/%TESTNUMBER
 * shutting down connection #0
 * Refused WebSocket upgrade: 200
-Request 1 (WS refused + conn close) completed. CURLcode: 102 (WebSocket denied by server). HTTP Code: 200.
+Request 2 (WS refused + conn close) completed. CURLcode: 102 (WebSocket denied by server). HTTP Code: 200.
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) and ($_ !~ /closing connection/) and ($_ !~ /WebSocket upgrade/) and ($_ !~ /Reusing existing/) and ($_ !~ /shutting down/) and ($_ !~ /^Request \d/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /closing connection/) and ($_ !~ /WebSocket upgrade/) and ($_ !~ /Switching from/) and ($_ !~ /Reusing existing/) and ($_ !~ /shutting down/) and ($_ !~ /^Request \d/))
 </stripfile>
 </verify>
 </testcase>

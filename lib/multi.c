@@ -2083,8 +2083,7 @@ static CURLMcode multistate_performing(struct Curl_easy *data,
      */
 
     if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
-       result != CURLE_HTTP2_STREAM &&
-       result != CURLE_WS_DENIED)
+       result != CURLE_HTTP2_STREAM)
       streamclose(data->conn);
 
     multi_posttransfer(data);
@@ -2295,8 +2294,7 @@ static CURLMcode multistate_ratelimiting(struct Curl_easy *data,
 
   if(result) {
     if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
-       result != CURLE_HTTP2_STREAM &&
-       result != CURLE_WS_DENIED)
+       result != CURLE_HTTP2_STREAM)
       streamclose(data->conn);
 
     multi_posttransfer(data);

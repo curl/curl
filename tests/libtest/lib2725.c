@@ -25,6 +25,19 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
+struct t2725_step {
+  CURLcode expect_result;   /* expected transfer result */
+  long expect_code;         /* expected CURLINFO_RESPONSE_CODE */
+  const char *what;         /* description, ends up in the stderr log */
+};
+
+/* The server answers the first request with a 302 and the second, via
+ * "swsbounce", with a 200 carrying "Connection: close". */
+static const struct t2725_step t2725_steps[] = {
+  { CURLE_WS_DENIED, 302L, "WS refused + redirect" },
+  { CURLE_WS_DENIED, 200L, "WS refused + conn close" }
+};
+
 static int t2725_run_multi_loop(CURLM *multi)
 {
   int still_running = 0;
@@ -50,88 +63,103 @@ static int t2725_run_multi_loop(CURLM *multi)
 
   return 0;
 }
+
+/* Drive `multi` until done and check how the transfer on `easy` ended. */
+static CURLcode t2725_check(CURLM *multi, CURL *easy, int num,
+                            const struct t2725_step *step)
+{
+  CURLMsg *msg;
+  int msgs_in_queue;
+  long response_code = 0;
+
+  if(t2725_run_multi_loop(multi))
+    return TEST_ERR_MULTI;
+
+  msg = curl_multi_info_read(multi, &msgs_in_queue);
+  if(!msg || msg->easy_handle != easy || msg->msg != CURLMSG_DONE) {
+    curl_mfprintf(stderr, "TEST FAILURE: Request %d did not complete or "
+                  "multi_info_read failed.\n", num);
+    return TEST_ERR_FAILURE;
+  }
+
+  if(msg->data.result != step->expect_result) {
+    curl_mfprintf(stderr, "TEST FAILURE: Request %d returned CURLcode %d "
+                  "(%s), expected %d.\n", num, (int)msg->data.result,
+                  curl_easy_strerror(msg->data.result),
+                  (int)step->expect_result);
+    return TEST_ERR_FAILURE;
+  }
+
+  curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &response_code);
+
+  curl_mfprintf(stderr, "Request %d (%s) completed. CURLcode: %d (%s). "
+                "HTTP Code: %ld.\n", num, step->what, (int)msg->data.result,
+                curl_easy_strerror(msg->data.result), response_code);
+
+  if(response_code != step->expect_code) {
+    curl_mfprintf(stderr, "TEST FAILURE: Request %d returned HTTP %ld, "
+                  "expected %ld.\n", num, response_code, step->expect_code);
+    return TEST_ERR_FAILURE;
+  }
+
+  return CURLE_OK;
+}
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
 static CURLcode test_lib2725(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
-  /* Test that a WebSocket upgrade refused with Connection: close still
-   * returns CURLE_WS_DENIED and that the connection is properly closed
-   * (not returned to the cache for reuse). */
-  CURL *curl_ws_refused = NULL;
+  /* A refused WebSocket upgrade is terminal for the transfer: the response is
+   * reported as CURLE_WS_DENIED and none of the follow-up handling an
+   * ordinary HTTP response would get is applied. Two responses are checked:
+   *
+   * Request 1: a 3xx with a Location header, with CURLOPT_FOLLOWLOCATION
+   * enabled. The redirect must NOT be followed and CURLINFO_RESPONSE_CODE
+   * must report the 302. The test definition verifies that no request to the
+   * Location target is sent.
+   *
+   * Request 2: a 200 with "Connection: close". The upgrade is refused the
+   * same way, but the close must still be honored. The connection is shut
+   * down rather than returned to the cache, even though a refused upgrade
+   * normally keeps the connection alive (see test 2724).
+   */
+  CURL *easy = NULL;
   CURLM *multi = NULL;
   CURLcode result = CURLE_OK;
-  long response_code = 0;
-  CURLMsg *msg;
-  int msgs_in_queue;
   char target_url[256];
   const char *port = libtest_arg3;
   const char *address = libtest_arg2;
+  size_t i;
   (void)URL;
 
   curl_global_init(CURL_GLOBAL_ALL);
 
   multi_init(multi);
-
-  /* Setup WebSocket upgrade refused with Connection: close */
-
-  easy_init(curl_ws_refused);
+  easy_init(easy);
 
   curl_msnprintf(target_url, sizeof(target_url), "ws://%s:%s/path/ws/2725",
                  address, port);
-  easy_setopt(curl_ws_refused, CURLOPT_URL, target_url);
-  easy_setopt(curl_ws_refused, CURLOPT_VERBOSE, 1L);
+  easy_setopt(easy, CURLOPT_URL, target_url);
+  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  /* A refused upgrade must not follow the 3xx of request 1. Request 2 gets a
+   * 200 without a Location, so this stays a no-op there. */
+  easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 1L);
 
-  multi_add_handle(multi, curl_ws_refused);
+  for(i = 0; i < CURL_ARRAYSIZE(t2725_steps); i++) {
+    multi_add_handle(multi, easy);
 
-  if(t2725_run_multi_loop(multi)) {
-    result = TEST_ERR_MULTI;
-    goto test_cleanup;
-  }
-
-  msg = curl_multi_info_read(multi, &msgs_in_queue);
-  if(msg && msg->easy_handle == curl_ws_refused
-     && msg->msg == CURLMSG_DONE) {
-
-    /* Verify CURLE_WS_DENIED was returned even with Connection: close.  The
-     * test definition will check that the Connection: close results in the
-     * connection shutting down. */
-    if(msg->data.result != CURLE_WS_DENIED) {
-      curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned CURLcode %d "
-                    "(%s), expected CURLE_WS_DENIED (%d).\n",
-                    (int)msg->data.result,
-                    curl_easy_strerror(msg->data.result),
-                    (int)CURLE_WS_DENIED);
-      result = TEST_ERR_FAILURE;
+    result = t2725_check(multi, easy, (int)i + 1, &t2725_steps[i]);
+    if(result)
       goto test_cleanup;
-    }
 
-    curl_easy_getinfo(curl_ws_refused, CURLINFO_RESPONSE_CODE, &response_code);
-
-    curl_mfprintf(stderr, "Request 1 (WS refused + conn close) completed. "
-                  "CURLcode: %d (%s). HTTP Code: %ld.\n",
-                  (int)msg->data.result,
-                  curl_easy_strerror(msg->data.result),
-                  response_code);
-
-    if(response_code != 200) {
-      curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned non-200.\n");
-      result = TEST_ERR_FAILURE;
-      goto test_cleanup;
-    }
-  }
-  else {
-    curl_mfprintf(stderr, "TEST FAILURE: Request 1 did not complete or "
-                  "multi_info_read failed.\n");
-    result = TEST_ERR_FAILURE;
-    goto test_cleanup;
+    multi_remove_handle(multi, easy);
   }
 
 test_cleanup:
-  if(curl_ws_refused)
-    curl_multi_remove_handle(multi, curl_ws_refused);
-  if(curl_ws_refused)
-    curl_easy_cleanup(curl_ws_refused);
+  if(easy) {
+    curl_multi_remove_handle(multi, easy);
+    curl_easy_cleanup(easy);
+  }
   if(multi)
     curl_multi_cleanup(multi);
   curl_global_cleanup();

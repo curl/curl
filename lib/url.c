@@ -1960,23 +1960,6 @@ static void conn_meta_freeentry(void *p)
   DEBUGASSERT(!p);
 }
 
-#ifndef CURL_DISABLE_WEBSOCKETS
-/* If the scheme needs to be updated due to a reused conn.  At the moment only
- * if a websocket is reusing an http connection. */
-static CURLcode update_scheme_if_necessary(struct Curl_easy *data,
-                                           struct connectdata *needle)
-{
-  CURLcode result = CURLE_OK;
-  if(websocket_compatible_protocols(data, needle, data->conn)) {
-    /* Update the reused connection's handler to the WebSocket scheme
-     * requested by conn. */
-    data->conn->origin->scheme = needle->origin->scheme;
-    result = Curl_url_set_conn_scheme(data, data->conn);
-  }
-  return result;
-}
-#endif
-
 static CURLcode url_create_needle(struct Curl_easy *data,
                                   struct connectdata **pneedle)
 {
@@ -2344,6 +2327,9 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       /* We attached an existing connection for this transfer. Copy
        * over transfer specific properties over from needle. */
       struct connectdata *conn = data->conn;
+#ifndef CURL_DISABLE_WEBSOCKETS
+      bool ws_upgrades_conn;
+#endif
       VERBOSE(bool tls_upgraded =
         (!(needle->origin->scheme->flags & PROTOPT_SSL) &&
          Curl_conn_is_ssl(conn, FIRSTSOCKET)));
@@ -2352,12 +2338,23 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       conn->bits.reuse = TRUE;
 
 #ifndef CURL_DISABLE_WEBSOCKETS
-      result = update_scheme_if_necessary(data, needle);
-      if(result)
-        goto out;
+      /* Whether `needle` is a ws/wss request reusing an http/https
+       * connection. Must be determined before url_conn_reuse_adjust()
+       * replaces conn->origin with the one from `needle`. */
+      ws_upgrades_conn = websocket_compatible_protocols(data, needle, conn);
 #endif
 
       url_conn_reuse_adjust(data, needle);
+
+#ifndef CURL_DISABLE_WEBSOCKETS
+      if(ws_upgrades_conn) {
+        /* conn->origin now carries the ws/wss scheme from `needle`. Point
+         * conn->scheme at the matching WebSocket handler. */
+        result = Curl_url_set_conn_scheme(data, conn);
+        if(result)
+          goto out;
+      }
+#endif
 
 #ifndef CURL_DISABLE_PROXY
       infof(data, "Reusing existing %s: connection%s with %s %s",

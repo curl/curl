@@ -3,6 +3,7 @@
 <info>
 <keywords>
 WebSockets
+CURLOPT_CONNECT_ONLY
 </keywords>
 </info>
 
@@ -44,6 +45,9 @@ Refused WebSocket upgrade returns CURLE_WS_DENIED, connection reused
 </client>
 
 # Verify data after the test has been "shot"
+# All three requests must go out on the same connection: the refused upgrade
+# of request 1 leaves an ordinary http connection behind, request 2 reuses it
+# as http: and request 3 reuses it again as ws:.
 <verify>
 <protocol crlf="headers">
 GET /path/ws/%TESTNUMBER HTTP/1.1
@@ -51,30 +55,50 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Upgrade: websocket
 Sec-WebSocket-Version: 13
-Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+Sec-WebSocket-Key: stripped
 Connection: Upgrade
 
 GET /path/http/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
+GET /path/ws/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: stripped
+Connection: Upgrade
+
 </protocol>
 <strip>
 ^Host:.*
 </strip>
-### We don't want to see this:
-# * closing connection #0
+# Only the first Sec-WebSocket-Key is reproducible under CURL_ENTROPY, so
+# the nonce is stripped and only its presence is implied by the other headers.
+<strippart>
+s/^Sec-WebSocket-Key: [^\r\n]*/Sec-WebSocket-Key: stripped/
+</strippart>
+### We must not see "closing connection" anywhere: connection #0 has to
+### survive all three requests.
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 * WebSocket upgrade refused with HTTP 200
+* Switching from ws to http due to refused upgrade: http://%HOSTIP:%HTTPPORT/path/ws/%TESTNUMBER
 * Connection #0 to host %HOSTIP:%HTTPPORT left intact
 * Refused WebSocket upgrade: 200
-Request 1 (WS refused) completed. CURLcode: 102 (WebSocket denied by server). HTTP Code: 200.
+Request 1 (WS refused, CONNECT_ONLY=2) completed. CURLcode: 102 (WebSocket denied by server). HTTP Code: 200.
 * Reusing existing http: connection with host %HOSTIP
 * Connection #0 to host %HOSTIP:%HTTPPORT left intact
-Request 2 (HTTP OK) completed. HTTP Code: 200.
+Request 2 (plain HTTP, reused conn) completed. CURLcode: 0 (No error). HTTP Code: 200.
+* Reusing existing ws: connection with host %HOSTIP
+* WebSocket upgrade refused with HTTP 200
+* Switching from ws to http due to refused upgrade: http://%HOSTIP:%HTTPPORT/path/ws/%TESTNUMBER
+* Connection #0 to host %HOSTIP:%HTTPPORT left intact
+* Refused WebSocket upgrade: 200
+Request 3 (WS refused, reused conn) completed. CURLcode: 102 (WebSocket denied by server). HTTP Code: 200.
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) and ($_ !~ /closing connection/) and ($_ !~ /WebSocket upgrade/) and ($_ !~ /Reusing existing/) and ($_ !~ /shutting down/) and ($_ !~ /^Request \d/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /closing connection/) and ($_ !~ /WebSocket upgrade/) and ($_ !~ /Switching from/) and ($_ !~ /Reusing existing/) and ($_ !~ /shutting down/) and ($_ !~ /^Request \d/))
 </stripfile>
 </verify>
 </testcase>
