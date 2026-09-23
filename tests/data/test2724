@@ -4,6 +4,7 @@
 <keywords>
 WebSockets
 CURLOPT_CONNECT_ONLY
+libtest
 </keywords>
 </info>
 
@@ -33,9 +34,6 @@ CURL_ENTROPY=12345678
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Refused WebSocket upgrade returns CURLE_WS_DENIED, connection reused
 </name>

@@ -4,12 +4,13 @@
 <keywords>
 WebSockets
 followlocation
+libtest
 </keywords>
 </info>
 
 # Server-side
 # "swsbounce" in the first response makes the server answer the second
-# request from <data1> instead of <data>.
+# request from data1 instead of data.
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 302 Found swsbounce
@@ -45,9 +46,6 @@ CURL_ENTROPY=12345678
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 WS upgrade refused: 3xx not followed, Connection: close honored
 </name>
