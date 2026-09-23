@@ -124,7 +124,7 @@ sub unitprotos {
     open(my $fh, "<$root/lib/unitprotos.h") ||
         print STDERR "can't open unitprotos.h\n";
     while(<$fh>) {
-        if(/^UNITTEST .* ([^ )]+)\(/) {
+        if(/^UNITTEST .*[* ]([a-z0-9_]+)\(/i) {
             $protos{$1} = 1;
         }
     }
