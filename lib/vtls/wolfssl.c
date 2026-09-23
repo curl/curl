@@ -230,13 +230,6 @@ static int wssl_bio_cf_create(WOLFSSL_BIO *bio)
   return 1;
 }
 
-static int wssl_bio_cf_destroy(WOLFSSL_BIO *bio)
-{
-  if(!bio)
-    return 0;
-  return 1;
-}
-
 static long wssl_bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
@@ -373,7 +366,6 @@ static int wssl_bio_cf_init_methods(void)
   wolfSSL_BIO_meth_set_read(wssl_bio_cf_method, &wssl_bio_cf_in_read);
   wolfSSL_BIO_meth_set_ctrl(wssl_bio_cf_method, &wssl_bio_cf_ctrl);
   wolfSSL_BIO_meth_set_create(wssl_bio_cf_method, &wssl_bio_cf_create);
-  wolfSSL_BIO_meth_set_destroy(wssl_bio_cf_method, &wssl_bio_cf_destroy);
   return TRUE; /* fine */
 }
 
