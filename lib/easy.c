@@ -1418,8 +1418,11 @@ CURLcode curl_easy_ssls_import(CURL *curl, const char *session_key,
   CURLcode result;
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_ssls_import, &result)) {
-    result = Curl_ssl_session_import((struct Curl_easy *)curl, session_key,
-                                     shmac, shmac_len, sdata, sdata_len);
+    if(!sdata || !sdata_len)
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    else
+      result = Curl_ssl_session_import((struct Curl_easy *)curl, session_key,
+                                       shmac, shmac_len, sdata, sdata_len);
   }
   CURL_EAPI_LEAVE(&guard);
   return result;
@@ -1443,8 +1446,11 @@ CURLcode curl_easy_ssls_export(CURL *curl,
   CURLcode result;
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_ssls_export, &result)) {
-    result = Curl_ssl_session_export((struct Curl_easy *)curl,
-                                     export_fn, userptr);
+    if(!export_fn)
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    else
+      result = Curl_ssl_session_export((struct Curl_easy *)curl,
+                                       export_fn, userptr);
   }
   CURL_EAPI_LEAVE(&guard);
   return result;
