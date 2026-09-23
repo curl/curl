@@ -45,6 +45,10 @@ static CURLcode test_create2413(const char *name,
   }
 
   result = CURLE_FAILED_INIT;
+#ifndef USE_IPV6
+  (void)exp_scopeid;
+#endif
+
   if(peer->scheme != scheme) {
     curl_mfprintf(stderr, "%s: has wrong scheme", name);
   }
