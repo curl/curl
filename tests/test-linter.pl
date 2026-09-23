@@ -173,13 +173,13 @@ sub checkxml {
     my ($num) = @_;
     open(my $fh, "<./data/test$num") ||
         print STDERR "can't open test$num\n";
-    my $bad = 0;
+    my $bad = 1;
     while(<$fh>) {
         if(/^<\?xml/) {
+            $bad = 0;
             last;
         }
         print "data/test$num lacks <xml> tag\n";
-        $bad = 1;
         last;
     }
     close($fh);
