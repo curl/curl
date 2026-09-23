@@ -4,6 +4,7 @@
 <keywords>
 DNS
 HTTPS RR
+libtest
 </keywords>
 </info>
 
@@ -13,9 +14,6 @@ HTTPS RR
 Debug
 asyn-rr
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTPS RR resolve aborted by callback returns CURLE_ABORTED_BY_CALLBACK
