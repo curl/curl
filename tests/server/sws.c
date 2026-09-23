@@ -2131,6 +2131,17 @@ static int test_sws(int argc, const char *argv[])
             goto sws_cleanup;
 
           if(rc < 0) {
+            if(req->testno == DOCNUMBER_NOTHING) {
+              /* The test number is unknown here, so connmon may be left over
+                 from a previous test case, for example when a client closes
+                 a connection without sending anything. Use the setting of
+                 the test case in server.cmd, or disable it without one. */
+              req->connmon = FALSE;
+              parse_cmdfile(req);
+              if(req->testno != DOCNUMBER_NOTHING)
+                sws_parse_servercmd(req);
+            }
+
             logmsg("====> Client disconnect %d", req->connmon);
 
             if(req->connmon) {
