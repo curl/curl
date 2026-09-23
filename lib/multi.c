@@ -825,7 +825,7 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
 
   if(data->set.connect_only) {
     if(data->multi_easy) {
-      if(data->state.lastconnect_id != -1) {
+      if(data->state.last_conn_id != -1) {
         /* Mark any connect-only connection for closure */
         struct connectdata *conn;
         (void)Curl_getconnectinfo(data, &conn);
@@ -943,8 +943,10 @@ void Curl_attach_connection(struct Curl_easy *data,
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->attached_xfers < UINT32_MAX);
   data->conn = conn;
-  if(matched)
-    data->state.lastconnect_id = conn->connection_id;
+  if(matched) {
+    data->state.last_conn_id = conn->connection_id;
+    data->state.last_cpid = conn->cpid;
+  }
   else
     DEBUGASSERT(!data->mid); /* admin handle */
   conn->attached_xfers++;

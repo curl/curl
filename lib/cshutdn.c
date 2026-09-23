@@ -247,7 +247,7 @@ void Curl_cshutdn_terminate(struct Curl_easy *admin,
   /* there must be a connection to close */
   DEBUGASSERT(conn);
   /* it must be removed from the connection pool */
-  DEBUGASSERT(!conn->bits.in_cpool);
+  DEBUGASSERT(conn->cpid == UINT32_MAX);
   /* the transfer must be detached from the connection */
   DEBUGASSERT(admin && !admin->conn);
   DEBUGASSERT(!admin->mid);

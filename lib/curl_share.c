@@ -424,7 +424,8 @@ CURLcode Curl_share_easy_unlink(struct Curl_easy *data)
     if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
       if(data->conn)
         Curl_detach_connection(data);
-      data->state.lastconnect_id = -1;
+      data->state.last_conn_id = -1;
+      data->state.last_cpid = UINT32_MAX;
     }
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)

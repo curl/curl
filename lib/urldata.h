@@ -220,7 +220,6 @@ struct ConnectBits {
   BIT(no_reuse); /* connection should not be reused */
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
-  BIT(in_cpool);     /* connection is kept in a connection pool */
   BIT(dns_resolved); /* DNS records for connection were resolved */
 };
 
@@ -286,7 +285,6 @@ struct connectdata {
    * the connection is cleaned up (see Curl_hash_add2()).*/
   struct Curl_hash meta_hash;
 
-  struct Curl_llist_node cpool_node; /* conncache lists */
   struct Curl_llist_node cshutdn_node; /* cshutdn list */
   char *destination; /* hostname+port, used in conncache */
 
@@ -356,6 +354,8 @@ struct connectdata {
      multiplexing) and it cannot be used by another multi handle! */
 #define CONN_INUSE(c) (!!(c)->attached_xfers)
   uint32_t attached_xfers; /* # of attached easy handles */
+
+  uint32_t cpid; /* connection pool id */
 
 #ifdef USE_IPV6
   uint32_t scope_id;  /* Scope id for IPv6 */
@@ -527,7 +527,6 @@ struct urlpieces {
 };
 
 struct UrlState {
-  curl_off_t lastconnect_id; /* The last assigned connection or -1 */
   /* Origin of the initial (e.g. not followed) request of a transfer.
      Credentials from CURLOPT_* are only valid for this origin.
      Always set once a transfer starts searching for connections. */
@@ -630,6 +629,10 @@ struct UrlState {
   uint32_t rtsp_next_server_CSeq; /* the session's next server CSeq */
   uint32_t rtsp_CSeq_recv; /* most recent CSeq received */
 #endif
+
+  curl_off_t last_conn_id; /* The last assigned connection or -1 */
+  uint32_t last_cpid; /* last connection pool id used */
+
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   int weight; /* shallow copy of data->set */
 #endif
