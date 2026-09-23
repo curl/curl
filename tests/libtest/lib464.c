@@ -59,6 +59,10 @@ static int t464_resolver_start_cb(void *resolver_state, void *reserved,
   return 0;
 }
 
+#ifndef INADDR_LOOPBACK
+#define INADDR_LOOPBACK 0x7f000001
+#endif
+
 static CURLcode test_lib464(const char *URL)
 {
   CURL *curl = NULL;
