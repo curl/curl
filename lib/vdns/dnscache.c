@@ -58,7 +58,7 @@
 
 #define MAX_DNS_CACHE_SIZE 29999
 
-/* @unittest 3217 */
+/* @unittest 3271 */
 UNITTEST void dnsc_peer2id(struct dnsc_id *pid, char type,
                            struct Curl_peer *peer);
 UNITTEST void dnsc_peer2id(struct dnsc_id *pid, char type,
