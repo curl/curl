@@ -1596,18 +1596,19 @@ CURLcode curl_ws_recv(CURL *curl, void *buffer,
   struct Curl_eapi_guard guard;
   CURLcode result = CURLE_OK;
 
-  *recv = 0;
-  *metap = NULL;
   if(CURL_EAPI_ENTER(&guard, curl, ws_recv, &result)) {
     struct Curl_easy *data = curl;
     struct connectdata *conn;
     struct websocket *ws;
     struct ws_collect ctx;
 
-    if(buflen && !buffer) {
+    if(!recv || !metap || (buflen && !buffer)) {
       result = CURLE_BAD_FUNCTION_ARGUMENT;
       goto out;
     }
+
+    *recv = 0;
+    *metap = NULL;
 
     conn = data->conn;
     if(!conn) {
