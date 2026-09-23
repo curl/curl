@@ -27,6 +27,7 @@ static CURLcode test_lib556(const char *URL)
 {
   CURLcode result;
   CURL *curl;
+  size_t ncheck = 0;
   int transfers = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -44,6 +45,15 @@ static CURLcode test_lib556(const char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+  if(curl_easy_recv(NULL, NULL, 0, NULL) != CURLE_BAD_FUNCTION_ARGUMENT ||
+     curl_easy_recv(curl, NULL, 10, &ncheck) != CURLE_BAD_FUNCTION_ARGUMENT ||
+     curl_easy_send(NULL, NULL, 0, NULL) != CURLE_BAD_FUNCTION_ARGUMENT ||
+     curl_easy_send(curl, NULL, 10, &ncheck) != CURLE_BAD_FUNCTION_ARGUMENT) {
+    curl_mfprintf(stderr, "curl_easy_recv/send argument validation failed\n");
+    result = TEST_ERR_FAILURE;
+    goto test_cleanup;
+  }
 
 again:
 
