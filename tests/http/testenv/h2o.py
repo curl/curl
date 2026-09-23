@@ -220,13 +220,13 @@ class H2o:
             url = f"https://{self._domain}:{self._port}/"
         while datetime.now(timezone.utc) < try_until:
             if live:
-                r = curl.http_get(
-                    url=url, extra_args=["--trace", "curl.trace", "--trace-time"]
-                )
+                r = curl.http_get(url=url, extra_args=[
+                    '--trace', 'curl.trace', '--trace-time', '--insecure'
+                ])
                 if r.exit_code == 0:
                     return True
             else:
-                r = curl.http_get(url=url)
+                r = curl.http_get(url=url, extra_args=['--insecure'])
                 if r.exit_code != 0:
                     return True
             time.sleep(0.1)

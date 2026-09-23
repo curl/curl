@@ -182,7 +182,7 @@ class Nghttpx:
         while datetime.now(timezone.utc) < try_until:
             xargs = [
                 '--trace', 'curl.trace', '--trace-time',
-                '--connect-timeout', '1'
+                '--connect-timeout', '1', '--insecure'
             ]
             if self.port_is_quic:
                 xargs.extend(['--http3-only'])
@@ -330,7 +330,7 @@ class NghttpxFwd(Nghttpx):
         try_until = datetime.now(timezone.utc) + timeout
         while datetime.now(timezone.utc) < try_until:
             check_url = f'https://{self.env.proxy_domain}:{self._port}/'
-            r = curl.http_get(url=check_url)
+            r = curl.http_get(url=check_url, extra_args=['--insecure'])
             if r.exit_code != 0:
                 return True
             log.debug(f'waiting for nghttpx-fwd to stop responding: {r}')
