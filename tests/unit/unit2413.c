@@ -24,6 +24,17 @@
 #include "unitcheck.h"
 #include "urldata.h"
 
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+
+#if defined(HAVE_IF_NAMETOINDEX) && defined(USE_WINSOCK)
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR <= 5)
+#include <wincrypt.h>  /* workaround for old mingw-w64 missing to include it */
+#endif
+#include <iphlpapi.h>
+#endif
+
 static CURLcode test_create2413(const char *name,
                                 CURL *curl,
                                 const struct Curl_scheme *scheme,
@@ -31,7 +42,8 @@ static CURLcode test_create2413(const char *name,
                                 uint16_t port,
                                 const char *exp_hostname,
                                 bool exp_ipv6,
-                                const char *exp_zoneid)
+                                const char *exp_zoneid,
+                                int exp_scopeid)
 {
   struct Curl_peer *peer = NULL;
   CURLcode result;
@@ -44,6 +56,10 @@ static CURLcode test_create2413(const char *name,
   }
 
   result = CURLE_FAILED_INIT;
+#ifndef USE_IPV6
+  (void)exp_scopeid;
+#endif
+
   if(peer->scheme != scheme) {
     curl_mfprintf(stderr, "%s: has wrong scheme", name);
   }
@@ -67,6 +83,11 @@ static CURLcode test_create2413(const char *name,
   else if(!exp_zoneid && peer->zoneid)
     curl_mfprintf(stderr, "%s: zoneid=%s, expected nothing", name,
                   peer->zoneid);
+#ifdef USE_IPV6
+  else if((exp_scopeid >= 0) && (peer->scopeid != (uint32_t)exp_scopeid))
+    curl_mfprintf(stderr, "%s: scopeid=%u, expected %d", name,
+                  peer->scopeid, exp_scopeid);
+#endif
   else
     result = CURLE_OK;
 
@@ -74,6 +95,16 @@ out:
   Curl_peer_unlink(&peer);
   fail_unless(!result, "check failed");
   return result;
+}
+
+static uint32_t t2413_scopeid(const char *zone)
+{
+#ifdef HAVE_IF_NAMETOINDEX
+  return (uint32_t)if_nametoindex(zone);
+#else
+  (void)zone;
+  return 0;
+#endif
 }
 
 static CURLcode test_unit2413(const char *arg)
@@ -89,19 +120,23 @@ static CURLcode test_unit2413(const char *arg)
   }
 
   test_create2413("peer1", curl, &Curl_scheme_https, "test.curl.se", 1234,
-                  "test.curl.se", FALSE, NULL);
+                  "test.curl.se", FALSE, NULL, 0);
   test_create2413("peer2", curl, &Curl_scheme_https, "127.0.0.1", 1234,
-                  "127.0.0.1", FALSE, NULL);
+                  "127.0.0.1", FALSE, NULL, 0);
   test_create2413("peer3", curl, &Curl_scheme_https, "::1", 1234,
-                  "::1", TRUE, NULL);
+                  "::1", TRUE, NULL, 0);
   test_create2413("peer4", curl, &Curl_scheme_https, "[::1]", 1234,
-                  "::1", TRUE, NULL);
+                  "::1", TRUE, NULL, 0);
   test_create2413("peer5", curl, &Curl_scheme_https, "test.curl.se.", 1234,
-                  "test.curl.se.", FALSE, NULL);
+                  "test.curl.se.", FALSE, NULL, 0);
   test_create2413("peer6", curl, &Curl_scheme_https, "[::1%tada]", 1234,
-                  "::1", TRUE, "tada");
+                  "::1", TRUE, "tada", t2413_scopeid("tada"));
   test_create2413("peer7", curl, &Curl_scheme_https, "::1%tada", 1234,
-                  "::1", TRUE, "tada");
+                  "::1", TRUE, "tada", t2413_scopeid("tada"));
+  test_create2413("peer8", curl, &Curl_scheme_https, "::1%123", 1234,
+                  "::1", TRUE, "123", 123);
+  test_create2413("peer9", curl, &Curl_scheme_https, "::1%123x", 1234,
+                  "::1", TRUE, "123x", t2413_scopeid("123x"));
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
