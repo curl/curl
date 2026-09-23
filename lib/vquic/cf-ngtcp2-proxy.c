@@ -276,6 +276,8 @@ static void cf_h3_proxy_upd_rx_win(struct Curl_cfilter *cf,
   uint64_t cur_win, wanted_win = 0;
   size_t rx_buffered;
 
+  if(!stream) /* already closed */
+    return;
   if(stream->rx_offset_max < stream->rx_offset) {
     DEBUGASSERT(0);
     return;
