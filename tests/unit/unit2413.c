@@ -31,7 +31,8 @@ static CURLcode test_create2413(const char *name,
                                 uint16_t port,
                                 const char *exp_hostname,
                                 bool exp_ipv6,
-                                const char *exp_zoneid)
+                                const char *exp_zoneid,
+                                uint32_t exp_scopeid)
 {
   struct Curl_peer *peer = NULL;
   CURLcode result;
@@ -67,6 +68,9 @@ static CURLcode test_create2413(const char *name,
   else if(!exp_zoneid && peer->zoneid)
     curl_mfprintf(stderr, "%s: zoneid=%s, expected nothing", name,
                   peer->zoneid);
+  else if(peer->scopeid != exp_scopeid)
+    curl_mfprintf(stderr, "%s: scopeid=%u, expected %u", name,
+                  peer->scopeid, exp_scopeid);
   else
     result = CURLE_OK;
 
@@ -89,19 +93,23 @@ static CURLcode test_unit2413(const char *arg)
   }
 
   test_create2413("peer1", curl, &Curl_scheme_https, "test.curl.se", 1234,
-                  "test.curl.se", FALSE, NULL);
+                  "test.curl.se", FALSE, NULL, 0);
   test_create2413("peer2", curl, &Curl_scheme_https, "127.0.0.1", 1234,
-                  "127.0.0.1", FALSE, NULL);
+                  "127.0.0.1", FALSE, NULL, 0);
   test_create2413("peer3", curl, &Curl_scheme_https, "::1", 1234,
-                  "::1", TRUE, NULL);
+                  "::1", TRUE, NULL, 0);
   test_create2413("peer4", curl, &Curl_scheme_https, "[::1]", 1234,
-                  "::1", TRUE, NULL);
+                  "::1", TRUE, NULL, 0);
   test_create2413("peer5", curl, &Curl_scheme_https, "test.curl.se.", 1234,
-                  "test.curl.se.", FALSE, NULL);
+                  "test.curl.se.", FALSE, NULL, 0);
   test_create2413("peer6", curl, &Curl_scheme_https, "[::1%tada]", 1234,
-                  "::1", TRUE, "tada");
+                  "::1", TRUE, "tada", 0);
   test_create2413("peer7", curl, &Curl_scheme_https, "::1%tada", 1234,
-                  "::1", TRUE, "tada");
+                  "::1", TRUE, "tada", 0);
+  test_create2413("peer8", curl, &Curl_scheme_https, "::1%123", 1234,
+                  "::1", TRUE, "123", 123);
+  test_create2413("peer9", curl, &Curl_scheme_https, "::1%123x", 1234,
+                  "::1", TRUE, "123x", 0);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
