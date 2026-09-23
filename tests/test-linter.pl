@@ -144,7 +144,7 @@ sub checkunit {
                 last;
             }
         }
-        if(/struct (Curl_easy|Curl_multi|connectdata)/) {
+        if(/struct (Curl_|connectdata)/) {
             $private = 1;
             last;
         }
