@@ -576,6 +576,9 @@ the `unit/` directory (if the tool name starts with `unit`).
 If the keyword `unittest` is set in the test case, the default name for the
 tool is `unit%TESTNUMBER`.
 
+If the keyword `tunittest` is set in the test case, the default name for the
+tool is `tool%TESTNUMBER`.
+
 If the keyword `libtest` is set in the test case, the default name for the
 tool is `lib%TESTNUMBER`.
 
