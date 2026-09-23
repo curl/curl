@@ -163,11 +163,15 @@ static void cpool_remove_conn(struct cpool *cpool,
 
   DEBUGASSERT(cpool);
   if(cpid != UINT32_MAX) {
-    struct connectdata *pooled_conn;
     struct cpool_bundle *bundle;
 
-    pooled_conn = Curl_uint32_tbl_get(&cpool->conns, cpid);
-    DEBUGASSERT(conn == pooled_conn);
+#ifdef DEBUGBUILD
+    {
+      struct connectdata *pooled_conn =
+        Curl_uint32_tbl_get(&cpool->conns, cpid);
+      DEBUGASSERT(conn == pooled_conn);
+    }
+#endif
     Curl_uint32_tbl_remove(&cpool->conns, cpid);
     Curl_uint32_bset_remove(&cpool->idles, cpid);
     conn->cpid = UINT32_MAX;
