@@ -239,7 +239,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
 {
   struct Curl_ssl_session *s = NULL;
   const unsigned char *buf = (const unsigned char *)bufv;
-  const unsigned char *end = buf + buflen;
+  const unsigned char *end;
   uint8_t val8, *pval8;
   uint16_t val16;
   uint32_t val32;
@@ -247,10 +247,14 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
   size_t dlen;
   CURLcode result;
 
-  DEBUGASSERT(buf);
-  DEBUGASSERT(buflen);
+  if(!ps)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   *ps = NULL;
 
+  if(!buf || !buflen)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  end = buf + buflen;
   result = spack_dec8(&val8, &buf, end);
   if(result)
     goto out;

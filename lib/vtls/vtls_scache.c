@@ -1218,7 +1218,7 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
   struct Curl_ssl_session *s = NULL;
   CURLcode result;
 
-  if(!scache) {
+  if(!scache || !sdata || !sdata_len) {
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
