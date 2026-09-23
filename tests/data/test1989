@@ -8,9 +8,6 @@ urlapi
 </info>
 
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 curl_url_dup preserves guessed_scheme
 </name>

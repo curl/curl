@@ -244,8 +244,9 @@ for users to skip certain classes of tests, if desired, but a few are treated
 specially by the test harness or build system.
 
 When running a unit test and the keywords include `unittest`, the `<tool>`
-section can be left empty to use the standard unit test tool name `unitN` where
-`N` is the test number.
+section can be left empty to use the standard unit test tool name `unitN`
+where `N` is the test number. Unit tests means *libcurl* unit tests. The
+command line tool's unit tests are marked as `tunittest`.
 
 The `test-ci` make target automatically skips test with the `flaky` keyword.
 
@@ -540,7 +541,7 @@ Features testable here are:
 - `typecheck`
 - `threadsafe`
 - `Unicode`
-- `unittest`
+- `unittest` - that feature needs to be enabled also for the tool unit tests marked as `tunittest`
 - `UnixSockets`
 - `verbose-strings`
 - `wakeup`

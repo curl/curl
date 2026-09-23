@@ -2,7 +2,7 @@
 <testcase>
 <info>
 <keywords>
-unittest
+tunittest
 stripcredentials
 </keywords>
 </info>
@@ -15,8 +15,5 @@ unittest
 <name>
 unit tests for stripcredentials from URL
 </name>
-<tool>
-tool%TESTNUMBER
-</tool>
 </client>
 </testcase>

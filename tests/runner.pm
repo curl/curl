@@ -862,7 +862,10 @@ sub singletest_run {
         $tool = $CMDLINE;
         $disablevalgrind = 1;
     }
-    elsif(!$tool && (!$keywords{"unittest"} && !$keywords{"libtest"})) {
+    elsif(!$tool &&
+          !$keywords{"unittest"} &&
+          !$keywords{"tunittest"} &&
+          !$keywords{"libtest"}) {
         # run curl, add suitable command line options
         my $inc = "";
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-include/)) {
@@ -910,6 +913,10 @@ sub singletest_run {
         # Default the tool to a libtest with the same number as the test
         elsif($keywords{"libtest"} && !$tool) {
             $tool_name = "lib$testnum";
+            $tool = $tool_name . exe_ext('TOOL');
+        }
+        elsif($keywords{"tunittest"} && !$tool) {
+            $tool_name = "tool$testnum";
             $tool = $tool_name . exe_ext('TOOL');
         }
 
