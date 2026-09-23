@@ -2423,6 +2423,9 @@ static int test_api_errors(void)
   if(rc != CURLUE_BAD_HANDLE)
     return 1;
 
+  if(curl_url_dup(NULL))
+    return 4;
+
   /* NULL part pointer */
   rc = curl_url_get(u, CURLUPART_URL, NULL, 0);
   if(rc != CURLUE_BAD_PARTPOINTER)
