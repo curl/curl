@@ -2,7 +2,7 @@
 <testcase>
 <info>
 <keywords>
-unittest
+tunittest
 </keywords>
 </info>
 
@@ -14,8 +14,5 @@ unittest
 <name>
 Test Windows/MS-DOS filename sanitization
 </name>
-<tool>
-tool%TESTNUMBER
-</tool>
 </client>
 </testcase>

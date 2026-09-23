@@ -2,7 +2,7 @@
 <testcase>
 <info>
 <keywords>
-unittest
+tunittest
 </keywords>
 </info>
 
@@ -14,9 +14,6 @@ unittest
 <name>
 create_dir_hierarchy()
 </name>
-<tool>
-tool%TESTNUMBER
-</tool>
 </client>
 
 <verify>

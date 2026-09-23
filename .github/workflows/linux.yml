@@ -76,7 +76,7 @@ jobs:
       matrix:
         build:
           - name: 'awslc'
-            install_steps: awslc pytest
+            install_steps: awslc pytest test-linter
             LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
             configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
 
@@ -925,6 +925,11 @@ jobs:
           else
             make -C bld V=1 -C tests
           fi
+
+      - name: 'test-linter'
+        if: ${{ contains(matrix.build.install_steps, 'test-linter') }}
+        run:
+          cd tests && ./test-linter.pl ../bld
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
