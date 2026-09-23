@@ -463,7 +463,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
   /* most recent connection is not yet defined */
-  data->state.lastconnect_id = -1;
+  data->state.last_conn_id = -1;
+  data->state.last_cpid = UINT32_MAX;
   /* and not assigned an id yet */
   data->id = -1;
   data->mid = UINT32_MAX;
@@ -1129,6 +1130,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->recv_idx = 0; /* default for receiving transfer data */
   conn->send_idx = 0; /* default for sending transfer data */
   conn->connection_id = -1;    /* no ID */
+  conn->cpid = UINT32_MAX;  /* not in connection pool yet */
   conn->attached_xfers = 0;
   conn->shutdown.start_ms[FIRSTSOCKET] =
     conn->shutdown.start_ms[SECONDARYSOCKET] = -1;

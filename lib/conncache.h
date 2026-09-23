@@ -24,6 +24,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "uint-bset.h"
+#include "uint-table.h"
 #include "curlx/timeval.h"
 
 struct connectdata;
@@ -47,15 +49,16 @@ void Curl_conn_close(struct Curl_easy *data,
                      bool aborted);
 
 struct cpool {
-  /* the pooled connections, bundled per destination */
-  struct Curl_hash dest2bundle;
-  size_t num_conn;
+  struct uint32_tbl conns; /* connections added to this pool */
+  struct uint32_bset idles; /* pool_ids of conns being idle */
+  struct Curl_hash dest2bundle; /* conn destination sets */
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
   struct Curl_share *share; /* != NULL if pool belongs to share */
   BIT(locked);
   BIT(initialized);
+  BIT(in_shutdown);
 };
 
 /* Get connection pool instance for data or NULL if none exists */
@@ -76,9 +79,9 @@ void Curl_cpool_destroy(struct cpool *cpool,
  * Assigns `data->id`. */
 void Curl_cpool_xfer_init(struct Curl_easy *data);
 
-/* Get the connection with the given id from `data`'s conn pool. */
-struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
-                                        curl_off_t conn_id);
+/* Get the connection last used by data,
+ * if there was one and it still exists. */
+struct connectdata *Curl_cpool_get_last_conn(struct Curl_easy *data);
 
 /* Add the connection to the pool. */
 CURLcode Curl_cpool_add(struct Curl_easy *data,

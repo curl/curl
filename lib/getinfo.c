@@ -500,7 +500,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = data->id;
     break;
   case CURLINFO_CONN_ID:
-    *param_offt = data->state.lastconnect_id;
+    *param_offt = data->state.last_conn_id;
     break;
   case CURLINFO_EARLYDATA_SENT_T:
     *param_offt = data->progress.earlydata_sent;
