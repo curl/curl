@@ -180,7 +180,7 @@ sub checkxml {
 my $error;
 my @l = libtests();
 
-print "- Verify that tests with source code in libtests/ have 'libtest' as <keyword>\n";
+print "- Tests with source code in libtests/ have 'libtest' as <keyword>\n";
 for my $t (@l) {
     my $lt = 0;
     my @k = keywords($t);
@@ -195,7 +195,7 @@ for my $t (@l) {
     }
 }
 
-print "- Verify that tests with source code in tunit/ have 'tunittest' as <keyword>\n";
+print "- Tests with source code in tunit/ have 'tunittest' as <keyword>\n";
 my @l = tunittests();
 for my $t (@l) {
     my $lt = 0;
@@ -214,7 +214,7 @@ for my $t (@l) {
     }
 }
 
-print "- Verify that tests with source code in unit/ have 'unittest' as <keyword>\n";
+print "- Tests with source code in unit/ have 'unittest' as <keyword>\n";
 my @l = unittests();
 for my $t (@l) {
     my $lt = 0;
@@ -234,7 +234,7 @@ for my $t (@l) {
 }
 
 my @a = alltests();
-print "- Verify that tests that set lib* in <tool> have 'libtest' as <keyword>\n";
+print "- Tests that set lib* in <tool> have 'libtest' as <keyword>\n";
 for my $t (@a) {
     my @k = tool($t);
     for my $w (@k) {
@@ -265,7 +265,7 @@ for my $t (@a) {
     }
 }
 
-print "- Verify that tests that set tool* in <tool> have 'tunittest' as <keyword>\n";
+print "- Tests that set tool* in <tool> have 'tunittest' as <keyword>\n";
 for my $t (@a) {
     my @k = tool($t);
     for my $w (@k) {
@@ -296,7 +296,7 @@ for my $t (@a) {
     }
 }
 
-print "- Verify that tests that set unit* in <tool> have 'unittest' as <keyword>\n";
+print "- Tests that set unit* in <tool> have 'unittest' as <keyword>\n";
 for my $t (@a) {
     my @k = tool($t);
     for my $w (@k) {
@@ -327,14 +327,14 @@ for my $t (@a) {
     }
 }
 
-print "- Verify that unit tests actually use private symbols\n";
+print "- Unit tests actually use private symbols\n";
 my @l = unittests();
 my %protos = unitprotos();
 for my $t (@l) {
     $error += checkunit($t, \%protos);
 }
 
-print "- Verify that all tests have <xml> tag on first line\n";
+print "- All tests have <xml> tag on first line\n";
 for my $t (@a) {
     $error += checkxml($t);
 }
