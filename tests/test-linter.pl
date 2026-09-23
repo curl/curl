@@ -23,6 +23,15 @@
 #
 ###########################################################################
 
+# If the build is done out-of-source-tree, specify the build root dir as an
+# argument to this script. Necessary to find the generated buildprotos.h
+# header file.
+my $root = "..";
+
+if($ARGV[0]) {
+    $root = $ARGV[0];
+}
+
 # return all known test cases
 sub alltests {
     my @a;
@@ -112,7 +121,7 @@ sub tool {
 sub unitprotos {
     my ($num) = @_;
     my %protos;
-    open(my $fh, "<../lib/unitprotos.h") ||
+    open(my $fh, "<$root/lib/unitprotos.h") ||
         print STDERR "can't open unitprotos.h\n";
     while(<$fh>) {
         if(/^UNITTEST .* ([^ )]+)\(/) {
