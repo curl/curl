@@ -126,14 +126,10 @@ static CURLcode test_lib464(const char *URL)
   easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
   easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, t464_resolver_start_cb);
 
-  /* Vetoing the HTTPS RR side-query only drops that optional lookup, it
-   * does not fail the transfer: the plain A/AAAA resolve still succeeds
-   * and curl goes on to (fail to) connect, since nothing listens on the
-   * target port. */
   result = curl_easy_perform(curl);
-  if(result != CURLE_COULDNT_CONNECT) {
+  if(result != CURLE_ABORTED_BY_CALLBACK) {
     curl_mfprintf(stderr, "curl_easy_perform should have returned "
-                  "CURLE_COULDNT_CONNECT but instead returned error %d\n",
+                  "CURLE_ABORTED_BY_CALLBACK but instead returned error %d\n",
                   (int)result);
     if(result == CURLE_OK)
       result = TEST_ERR_FAILURE;
@@ -147,7 +143,7 @@ static CURLcode test_lib464(const char *URL)
     result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
-  if(t464_cb_count != 2) {
+  if(t464_cb_count != 1) {
     curl_mfprintf(stderr, "Unexpected number of callbacks: %d\n",
                   t464_cb_count);
     result = TEST_ERR_FAILURE;

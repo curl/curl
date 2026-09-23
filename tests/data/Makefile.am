@@ -2007,6 +2007,7 @@ TESTCASES = \
   test2723 \
   test2724 \
   test2785 \
+  test2786 \
   test2805 \
   test2824 \
   test2885 \
