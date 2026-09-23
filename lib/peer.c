@@ -464,6 +464,7 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
 {
   struct peer_parse pp;
   const char *portstr = NULL;
+  bool port_switch = FALSE;
   CURLcode result;
 
   Curl_peer_unlink(ppeer);
@@ -494,6 +495,7 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
   }
 
   if(!pp.host_user.len) { /* no hostname found, only port switch */
+    port_switch = TRUE;
     pp.host_user.str = dest->user_hostname;
     pp.host_user.len = strlen(dest->user_hostname);
   }
@@ -501,6 +503,8 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
   result = peer_parse_host(data, &pp, FALSE);
   if(result)
     goto out;
+  /* On a port switch, ipv6 must stay the same */
+  DEBUGASSERT(!port_switch || ((bool)pp.ipv6 == (bool)dest->ipv6));
 
   if(portstr && portstr[1]) {
     const char *p = portstr + 1;
@@ -522,6 +526,13 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
     goto out;
   }
 #endif
+  if(pp.ipv6 && port_switch) {
+    if(dest->zoneid) {
+      pp.zoneid.str = dest->zoneid;
+      pp.zoneid.len = strlen(dest->zoneid);
+    }
+    pp.scopeid = dest->scopeid;
+  }
 
   result = peer_create(&pp, ppeer);
   CURL_TRC_M(data, "connect-to peer_create2 -> %d", (int)result);
