@@ -11,7 +11,7 @@ HTTPS RR
 <client>
 <features>
 Debug
-HTTPSRR
+asyn-rr
 </features>
 <tool>
 lib%TESTNUMBER
