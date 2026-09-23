@@ -68,9 +68,11 @@ static CURLcode test_create2413(const char *name,
   else if(!exp_zoneid && peer->zoneid)
     curl_mfprintf(stderr, "%s: zoneid=%s, expected nothing", name,
                   peer->zoneid);
+#ifdef USE_IPV6
   else if(peer->scopeid != exp_scopeid)
     curl_mfprintf(stderr, "%s: scopeid=%u, expected %u", name,
                   peer->scopeid, exp_scopeid);
+#endif
   else
     result = CURLE_OK;
 
