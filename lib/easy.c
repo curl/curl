@@ -1306,7 +1306,7 @@ CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
   CURLcode result;
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_recv, &result)) {
-    if(!n) {
+    if(!n || (buflen && !buffer)) {
       result = CURLE_BAD_FUNCTION_ARGUMENT;
       goto out;
     }
@@ -1381,7 +1381,7 @@ CURLcode curl_easy_send(CURL *curl, const void *buffer, size_t buflen,
     struct Curl_easy *data = curl;
     size_t written = 0;
 
-    if(!n) {
+    if(!n || (buflen && !buffer)) {
       result = CURLE_BAD_FUNCTION_ARGUMENT;
       goto out;
     }
