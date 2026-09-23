@@ -260,7 +260,7 @@ for my $t (@a) {
             my $lt = 0;
 
             # get the keywords for test $num
-            my @k = keywords($num);
+            my @k = keywords($t);
             for my $w (@k) {
                 if($w eq "libtest") {
                     $lt = 1;
