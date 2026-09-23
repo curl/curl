@@ -1433,7 +1433,12 @@ void curl_url_cleanup(CURLU *u)
 
 CURLU *curl_url_dup(const CURLU *in)
 {
-  struct Curl_URL *u = curlx_calloc(1, sizeof(struct Curl_URL));
+  struct Curl_URL *u;
+
+  if(!in)
+    return NULL;
+
+  u = curlx_calloc(1, sizeof(struct Curl_URL));
   if(u) {
     DUP(u, in, scheme);
     DUP(u, in, user);
