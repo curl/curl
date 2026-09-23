@@ -27,6 +27,7 @@
 
 #include "hash.h"
 #include "curlx/timeval.h"
+#include "curlx/strparse.h"
 
 struct addrinfo;
 struct hostent;
@@ -56,6 +57,19 @@ struct Curl_dns_entry {
   BIT(permanent); /* entry is permanent, e.g. does not time out */
   /* hostname that resolved to addr. may be NULL (Unix domain sockets). */
   char hostname[1];
+};
+
+struct dnsc_id {
+  struct Curl_str name;
+  uint16_t port;
+  char type;
+};
+
+#define MAX_HOSTCACHE_LEN (255 + 3) /* max FQDN + type + port */
+
+struct dnsc_key {
+  uint8_t data[MAX_HOSTCACHE_LEN];
+  size_t len;
 };
 
 /*

@@ -26,7 +26,7 @@
 #include "connect.h"
 #include "curl_addrinfo.h"
 
-static CURLcode t1609_setup(void)
+static CURLcode t3271_setup(void)
 {
   CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
@@ -66,9 +66,9 @@ static CURLcode t1609_setup(void)
    expected result: cached address has zero timestamp and new address
  */
 
-static CURLcode test_unit1609(const char *arg)
+static CURLcode test_unit3271(const char *arg)
 {
-  UNITTEST_BEGIN(t1609_setup())
+  UNITTEST_BEGIN(t3271_setup())
 
   struct testcase {
     /* host:port:address[,address]... */
@@ -76,14 +76,14 @@ static CURLcode test_unit1609(const char *arg)
 
     /* lowercase host and port to retrieve the addresses from hostcache */
     const char *host;
-    int port;
+    uint16_t port;
 
     /* 0 to 9 addresses expected from hostcache */
     const char *address[10];
   };
 
   static const struct testcase tests[] = {
-    /* spaces are not allowed, for now */
+    /* spaces are not allowed */
     { "test.com:80:127.0.0.1",
       "test.com", 80, { "127.0.0.1", }
     },
@@ -97,17 +97,20 @@ static CURLcode test_unit1609(const char *arg)
   struct Curl_easy *easy = NULL;
   struct curl_slist *list = NULL;
 
-  /* important: we setup cache outside of the loop
-     and also clean cache after the loop. In contrast, for example,
-     test 1607 sets up and cleans cache on each iteration. */
+  /* important: we setup cache outside of the loop and also clean cache after
+     the loop. In contrast, for example, test 1607 sets up and cleans cache on
+     each iteration. */
 
   for(i = 0; i < CURL_ARRAYSIZE(tests); ++i) {
     size_t j;
     size_t addressnum = CURL_ARRAYSIZE(tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
-    void *entry_id;
+    struct dnsc_id id;
+    struct dnsc_key key;
+    const char type = CURL_DNST_ADDR;
     bool problem = FALSE;
+    struct Curl_peer *peer = NULL;
     easy = curl_easy_init();
     if(!easy) {
       curl_global_cleanup();
@@ -129,13 +132,13 @@ static CURLcode test_unit1609(const char *arg)
     if(Curl_loadhostpairs(easy))
       goto error;
 
-    entry_id = (void *)curl_maprintf("%s:%d", tests[i].host, tests[i].port);
-    if(!entry_id)
+    if(Curl_peer_create(easy, &Curl_scheme_http,
+                        tests[i].host, tests[i].port, &peer))
       goto error;
 
-    dns = Curl_hash_pick(&multi->dnscache.entries,
-                         entry_id, strlen(entry_id) + 1);
-    curlx_safefree(entry_id);
+    dnsc_peer2id(&id, type, peer);
+    dnsc_id2key(&key, &id);
+    dns = Curl_hash_pick(&multi->dnscache.entries, key.data, key.len);
 
     addr = dns ? dns->addr : NULL;
 
@@ -194,6 +197,7 @@ static CURLcode test_unit1609(const char *arg)
 
       addr = addr->ai_next;
     }
+    Curl_peer_unlink(&peer);
 
     curl_easy_cleanup(easy);
     easy = NULL;

@@ -56,18 +56,13 @@
 #include "curlx/strcopy.h"
 #include "curlx/strparse.h"
 
-#define MAX_HOSTCACHE_LEN (255 + 3) /* max FQDN + type + port */
-
 #define MAX_DNS_CACHE_SIZE 29999
 
-struct dnsc_id {
-  struct Curl_str name;
-  uint16_t port;
-  char type;
-};
-
-static void dnsc_peer2id(struct dnsc_id *pid, char type,
-                         struct Curl_peer *peer)
+/* @unittest 3217 */
+UNITTEST void dnsc_peer2id(struct dnsc_id *pid, char type,
+                           struct Curl_peer *peer);
+UNITTEST void dnsc_peer2id(struct dnsc_id *pid, char type,
+                           struct Curl_peer *peer)
 {
   curlx_str_assign(&pid->name, peer->hostname, strlen(peer->hostname));
   pid->port = peer->port;
@@ -82,16 +77,14 @@ static void dnsc_str2id(struct dnsc_id *pid, char type,
   pid->type = type;
 }
 
-struct dnsc_key {
-  uint8_t data[MAX_HOSTCACHE_LEN];
-  size_t len;
-};
-
 /*
  * Create a hostcache id string for the provided host + port, to be used by
  * the DNS caching. Without alloc. Return length of the id string.
+ *
+ * @unittest 3217
  */
-static void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id)
+UNITTEST void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id);
+UNITTEST void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id)
 {
   size_t namelen = curlx_strlen(&id->name);
   if(namelen > (sizeof(key->data) - 3))

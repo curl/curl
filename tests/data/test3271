@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+CURLOPT_RESOLVE
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+
+# this test extends 1607 - they should probably be combined one day
+<name>
+CURLOPT_RESOLVE override
+</name>
+</client>
+</testcase>
