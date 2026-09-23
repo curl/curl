@@ -929,7 +929,7 @@ jobs:
       - name: 'test-linter'
         if: ${{ contains(matrix.build.install_steps, 'test-linter') }}
         run:
-          cd tests && ./test-linter.pl
+          cd blc/tests && ./test-linter.pl
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
