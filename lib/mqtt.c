@@ -590,6 +590,14 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   if(result)
     goto fail;
 
+  /* silly check for silly analyzers. On 32-bit systems a payload length close
+     to 4GB can wrap, but it is impossible to have such a large buffer in
+     memory on those systems */
+  if((SIZE_MAX - topiclen - 2) < payloadlen) {
+    result = CURLE_TOO_LARGE;
+    goto fail;
+  }
+
   remaininglength = payloadlen + 2 + topiclen;
   encodelen = mqtt_encode_len(encodedbytes, remaininglength);
   if(remaininglength > (MAX_MQTT_MESSAGE_SIZE - encodelen - 1)) {
