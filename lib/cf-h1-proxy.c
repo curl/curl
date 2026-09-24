@@ -308,7 +308,6 @@ static CURLcode on_resp_status(struct Curl_cfilter *cf,
                                const char *header)
 {
   struct SingleRequest *k = &data->req;
-  bool is_udp = h1_proxy_is_udp(cf);
 
   (void)ts;
   if(!strncmp(header, "HTTP/1.", 7) &&
@@ -320,7 +319,7 @@ static CURLcode on_resp_status(struct Curl_cfilter *cf,
     data->info.httpproxycode = k->httpcode = ((header[9] - '0') * 100) +
       ((header[10] - '0') * 10) + (header[11] - '0');
     CURL_TRC_CF(data, cf, "CONNECT%s HTTP status %d",
-                is_udp ? "-UDP" : "", k->httpcode);
+                h1_proxy_is_udp(cf) ? "-UDP" : "", k->httpcode);
     return CURLE_OK;
   }
   failf(data, "Invalid response header");
