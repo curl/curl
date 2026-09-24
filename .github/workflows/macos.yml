@@ -647,8 +647,11 @@ jobs:
           - { image: macos-15, compiler: 'llvm@18' }
           - { image: macos-15, compiler: 'clang' }
           # Reduce build combinations, by dropping less interesting ones
+          - { image: macos-15, compiler: 'gcc-14' }
           - { image: xcode-27, compiler: 'gcc-13' }
-          - { compiler: 'gcc-14' , build: cmake }
+          - { image: xcode-27, compiler: 'gcc-14' }
+          # incompatible combination
+          - { image: xcode-27, compiler: 'gcc-15' }
           # Reduce autotools to only one job that is also build with cmake
           - { compiler: 'gcc-13' , build: autotools }
           - { compiler: 'gcc-14' , build: autotools }
