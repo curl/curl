@@ -187,9 +187,18 @@ my %file_percent_txt = (
     'perm'      => "rw-r--r--"
 );
 
+my %file_slash = (
+    'name'      => "really/special",
+    'content'   => "slash in the name \n",
+    'time'      => "Jan 17 11:01",
+    'dostime'   => "01-17-10  11:01AM",
+    'perm'      => "rw-rw-rw-"
+);
+
 my %lists = (
     '/fully_simulated/percent/' => {
-        'files'   => [ \%file_someothertext_txt, \%file_percent_txt],
+        'files'   => [ \%file_someothertext_txt, \%file_percent_txt,
+            \%file_slash],
         'eol'     => "\r\n",
         'type'    => "unix"
     },

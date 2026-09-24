@@ -323,7 +323,10 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
     compare = Curl_fnmatch;
 
   /* filter pattern-corresponding filenames */
-  {
+  if(strchr(finfo->filename, '/'))
+    add = FALSE;
+  else {
+    /* a real file name cannot contain a slash */
     struct Curl_mapi_guard guard;
     CURL_CBAPI_START(&guard, data, easy_fnmatch_data);
     if(compare(data->set.fnmatch_data, wc->pattern, finfo->filename) == 0) {
