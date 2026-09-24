@@ -639,18 +639,18 @@ jobs:
         build: [autotools, cmake]
         exclude:
           # Combinations not covered by runner images:
-          - { image: macos-14, compiler: 'llvm@18' }
-          - { image: macos-14, compiler: 'llvm@20' }
           - { image: macos-15, compiler: 'llvm@15' }
           - { image: macos-15, compiler: 'llvm@20' }
           - { image: macos-26, compiler: 'llvm@15' }
           - { image: macos-26, compiler: 'llvm@18' }
+          - { image: xcode-27, compiler: 'llvm@15' }
+          - { image: xcode-27, compiler: 'llvm@18' }
           # Covered by the main workflow
           - { image: macos-15, compiler: 'gcc-13' }
           - { image: macos-15, compiler: 'llvm@18' }
           - { image: macos-15, compiler: 'clang' }
           # Reduce build combinations, by dropping less interesting ones
-          - { image: macos-26, compiler: 'gcc-13' }
+          - { image: xcode-27, compiler: 'gcc-13' }
           - { compiler: 'gcc-14' , build: cmake }
           # Reduce autotools to only one job that is also build with cmake
           - { compiler: 'gcc-13' , build: autotools }
