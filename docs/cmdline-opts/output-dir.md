@@ -26,7 +26,6 @@ command line, up until the first --next.
 If the specified target directory does not exist, the operation fails unless
 --create-dirs is also used.
 
-This specified output directory name is prepended to the destination filename
-that would otherwise be used - including the possible directory component.
-There is no attempt done to neutralize `../` sequences or similar from the
-produced name.
+The specified output directory is prepended to the destination filename
+that would otherwise be used, including any directory component. No attempt is
+made to neutralize `../` sequences or similar constructs in the resulting path.
