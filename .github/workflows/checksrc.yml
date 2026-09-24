@@ -231,6 +231,7 @@ jobs:
             --ignore matrix \
             --ignore ubuntu-26.04 \
             --ignore ubuntu-24.04-firewall \
+            --ignore xcode-27 \
             --ignore 'unexpected key "background"' \
             --ignore 'unexpected key "cache-mode"' \
             --ignore 'unexpected key "wait"' \
