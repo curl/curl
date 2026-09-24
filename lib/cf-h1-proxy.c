@@ -302,6 +302,31 @@ out:
   return result;
 }
 
+static CURLcode on_resp_status(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct h1_tunnel_state *ts,
+                               const char *header)
+{
+  struct SingleRequest *k = &data->req;
+  bool is_udp = h1_proxy_is_udp(cf);
+
+  (void)ts;
+  if(!strncmp(header, "HTTP/1.", 7) &&
+          ((header[7] == '0') || (header[7] == '1')) &&
+          (header[8] == ' ') &&
+          ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
+          !ISDIGIT(header[12])) {
+    /* store the HTTP code from the proxy */
+    data->info.httpproxycode = k->httpcode = ((header[9] - '0') * 100) +
+      ((header[10] - '0') * 10) + (header[11] - '0');
+    CURL_TRC_CF(data, cf, "CONNECT%s HTTP status %d",
+                is_udp ? "-UDP" : "", k->httpcode);
+    return CURLE_OK;
+  }
+  failf(data, "Invalid response header");
+  return CURLE_WEIRD_SERVER_REPLY;
+}
+
 static CURLcode on_resp_header(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                struct h1_tunnel_state *ts,
@@ -390,17 +415,6 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
                 is_udp ? "-UDP" : "");
     ts->close_connection = TRUE;
   }
-  else if(!strncmp(header, "HTTP/1.", 7) &&
-          ((header[7] == '0') || (header[7] == '1')) &&
-          (header[8] == ' ') &&
-          ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
-          !ISDIGIT(header[12])) {
-    /* store the HTTP code from the proxy */
-    data->info.httpproxycode = k->httpcode = ((header[9] - '0') * 100) +
-      ((header[10] - '0') * 10) + (header[11] - '0');
-    CURL_TRC_CF(data, cf, "CONNECT%s HTTP status %d",
-                is_udp ? "-UDP" : "", k->httpcode);
-  }
   return result;
 }
 
@@ -441,8 +455,11 @@ static CURLcode single_header(struct Curl_cfilter *cf,
 
   if(ISNEWLINE(linep[0])) {
     /* end of response-headers from the proxy */
-
-    if((407 == k->httpcode) && !data->state.authproblem) {
+    if(ts->headerlines == 1) {
+      ts->keepon = KEEPON_DONE;
+      result = CURLE_WEIRD_SERVER_REPLY;
+    }
+    else if((407 == k->httpcode) && !data->state.authproblem) {
       /* If we get a 407 response code with content length
          when we have no auth problem, we must ignore the
          whole response-body */
@@ -471,7 +488,10 @@ static CURLcode single_header(struct Curl_cfilter *cf,
     return result;
   }
 
-  result = on_resp_header(cf, data, ts, linep);
+  if(ts->headerlines == 1)
+    result = on_resp_status(cf, data, ts, linep);
+  else
+    result = on_resp_header(cf, data, ts, linep);
   if(result)
     return result;
 
