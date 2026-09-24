@@ -3863,18 +3863,24 @@ CURLcode Curl_verify_header(struct Curl_easy *data,
                             const char *hd, size_t hdlen)
 {
   struct SingleRequest *k = &data->req;
-  const char *ptr = memchr(hd, 0x00, hdlen);
-  if(ptr) {
-    /* this is bad, bail out */
-    failf(data, "Nul byte in header");
-    return CURLE_WEIRD_SERVER_REPLY;
-  }
-  if(hdlen > 2) {
-    ptr = memchr(hd, '\r', hdlen - 2);
-    if(ptr) {
-      /* CR may only precede the LF, nothing else */
-      failf(data, "Carriage return found in header");
+  size_t i;
+  bool has_colon = FALSE;
+  for(i = 0; i < hdlen; i++) {
+    switch(hd[i]) {
+    case '\0':
+      /* this is bad, bail out */
+      failf(data, "Nul byte in header");
       return CURLE_WEIRD_SERVER_REPLY;
+    case '\r':
+      if(i < hdlen - 2) {
+        /* CR may only precede the LF, nothing else */
+        failf(data, "Carriage return found in header");
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
+      break;
+    case ':':
+      has_colon = TRUE;
+      break;
     }
   }
   if(k->headerline < 2)
@@ -3883,13 +3889,10 @@ CURLcode Curl_verify_header(struct Curl_easy *data,
   if(((hd[0] == ' ') || (hd[0] == '\t')) && k->headerline > 2)
     /* line folding, cannot happen on line 2 */
     ;
-  else {
-    ptr = memchr(hd, ':', hdlen);
-    if(!ptr) {
-      /* this is bad, bail out */
-      failf(data, "Header without colon");
-      return CURLE_WEIRD_SERVER_REPLY;
-    }
+  else if(!has_colon) {
+    /* this is bad, bail out */
+    failf(data, "Header without colon");
+    return CURLE_WEIRD_SERVER_REPLY;
   }
   return CURLE_OK;
 }
