@@ -67,6 +67,10 @@ void Curl_httpsrr_destroy(struct Curl_https_rrinfo *rrinfo);
 bool Curl_httpsrr_applicable(struct Curl_easy *data,
                              const struct Curl_https_rrinfo *rr);
 
+/* TRUE if the record is applicable to the given peer. */
+bool Curl_httpsrr_is_for_peer(struct Curl_peer *peer,
+                              const struct Curl_https_rrinfo *rr);
+
 /*
  * Code points for DNS wire format SvcParams as per RFC 9460
  */

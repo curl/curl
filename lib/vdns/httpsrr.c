@@ -239,11 +239,19 @@ void Curl_httpsrr_destroy(struct Curl_https_rrinfo *rrinfo)
 bool Curl_httpsrr_applicable(struct Curl_easy *data,
                              const struct Curl_https_rrinfo *rr)
 {
-  if(!data->conn || !rr)
+  if(!data->conn)
+    return FALSE;
+  return Curl_httpsrr_is_for_peer(data->conn->origin, rr);
+}
+
+bool Curl_httpsrr_is_for_peer(struct Curl_peer *peer,
+                              const struct Curl_https_rrinfo *rr)
+{
+  if(!peer || !rr)
     return FALSE;
   return (!rr->target || !rr->target[0] ||
           (rr->target[0] == '.' && !rr->target[1])) &&
-         (!rr->port_set || rr->port == data->conn->origin->port);
+         (!rr->port_set || rr->port == peer->port);
 }
 
 #ifdef USE_ARES
