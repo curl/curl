@@ -2,25 +2,21 @@
 <testcase>
 <info>
 <keywords>
-HTTP
+HTTPS
 HTTP GET
 HTTP CONNECT
 HTTP proxy
-proxytunnel
 </keywords>
 </info>
-
 # Server-side
 <reply>
+<connect nocheck="yes">
+HTTP/1.1 407 Needs proxy authentication
+HTTP/1.1 200 is not the answer: nonono
+Server: test-server/fake swsclose yesyes
+Proxy-Authenticate: Basic "oh please"
 
-# this is returned first since we get no proxy-auth
-<connect>
-<html>
-<h1>400 Bad request</h1>
-swsclose
-</html>
 </connect>
-
 </reply>
 
 # Client-side
@@ -32,27 +28,24 @@ http
 proxy
 </features>
 <name>
-HTTP CONNECT with proxy returning HTML and closing
+HTTP CONNECT with faked status line header
 </name>
 <command>
-http://test.example --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -sS
+http://test.anything.really.com:%TESTNUMBER --proxy %HOSTIP:%HTTPPORT --proxytunnel
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
+<errorcode>
+7
+</errorcode>
 <protocol crlf="headers">
-CONNECT test.example:80 HTTP/1.1
-Host: test.example:80
+CONNECT test.anything.really.com:%TESTNUMBER HTTP/1.1
+Host: test.anything.really.com:%TESTNUMBER
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>
-<errorcode>
-8
-</errorcode>
-<stderr mode="text">
-curl: (8) Invalid response header
-</stderr>
 </verify>
 </testcase>
