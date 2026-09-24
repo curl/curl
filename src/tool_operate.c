@@ -2355,11 +2355,8 @@ static CURLcode run_all_transfers(CURLSH *share,
   bool orig_noprogress = (bool)global->noprogress;
   bool orig_isatty = (bool)global->isatty;
   struct per_transfer *per;
-  if(curlx_nonblock((curl_socket_t)STDIN_FILENO, TRUE) < 0) {
-    char errbuf[STRERROR_LEN];
-    warnf("Failed to set stdin non-blocking: %s",
-          curlx_strerror(errno, errbuf, sizeof(errbuf)));
-  }
+  (void)curlx_nonblock((curl_socket_t)STDIN_FILENO, TRUE);
+  /* fail silently */
 
   /* Time to actually do the transfers */
   if(!result) {
