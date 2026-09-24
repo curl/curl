@@ -620,21 +620,20 @@ jobs:
       fail-fast: false
       matrix:
         # Sources:
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
-        compiler: [gcc-13, gcc-14, gcc-15, llvm@15, llvm@18, llvm@20, clang]
-        # Xcode support matrix as of 2025-10, with default macOS SDK versions and OS names, years:
+        # https://github.com/actions/runner-images/blob/main/images/macos/xcode-27-arm64-Readme.md
+        compiler: [gcc-13, gcc-14, gcc-15, llvm@18, llvm@20, clang]
+        # Xcode support matrix as of 2026-09, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
-        # macos-14: 15.0.1, 15.1, 15.2, 15.3,*15.4
-        # macos-15:                                 16.0, 16.1, 16.2, 16.3,*16.4, 26.0
-        # macos-26:                                                         16.4,*26.6
-        # xcode-27:                                                                             27.0
-        # macOSSDK: 14.0,   14.2, 14.2, 14.4, 14.5, 15.0, 15.1, 15.2, 15.4, 15.5, 26.x          27.x
-        #           Sonoma (2023)                   Sequoia (2024)                Tahoe (2025)  Golden Gate (2026)
+        # macos-15: 16.0, 16.1, 16.2, 16.3,*16.4, 26.0
+        # macos-26:                         16.4,*26.6
+        # xcode-27:                                            *27.0
+        # macOSSDK: 15.0, 15.1, 15.2, 15.4, 15.5, 26.x          27.x
+        #           Sequoia (2024)                Tahoe (2025)  Golden Gate (2026)
         # https://github.com/actions/runner-images/tree/main/images/macos
         # https://en.wikipedia.org/wiki/MacOS_version_history
-        image: [macos-14, macos-15, macos-26, xcode-27]
+        image: [macos-15, macos-26, xcode-27]
         xcode: ['']  # default Xcodes
         macos-version-min: ['']
         build: [autotools, cmake]
@@ -657,11 +656,10 @@ jobs:
           - { compiler: 'gcc-13' , build: autotools }
           - { compiler: 'gcc-14' , build: autotools }
           - { compiler: 'gcc-15' , build: autotools }
-          - { compiler: 'llvm@15', build: autotools }
           - { compiler: 'llvm@18', build: autotools }
           - { compiler: 'llvm@20', build: autotools }
-          - { image: macos-14,     build: autotools }
           - { image: macos-15,     build: autotools }
+          - { image: macos-26,     build: autotools }
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
