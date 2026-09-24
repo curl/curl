@@ -99,11 +99,12 @@ out:
 
 static uint32_t t2413_scopeid(const char *zone)
 {
-  unsigned int scopeid = 0;
 #ifdef HAVE_IF_NAMETOINDEX
-  scopeid = if_nametoindex(zone);
+  return (uint32_t)if_nametoindex(zone);
+#else
+  (void)zone;
+  return 0;
 #endif
-  return (uint32_t)scopeid;
 }
 
 static CURLcode test_unit2413(const char *arg)
