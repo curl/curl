@@ -44,6 +44,7 @@ cache-mode: none
 # - 10.11  El Capitan (2015)    - connectx() (runtime)
 # - 10.12  Sierra (2016)        - clock_gettime() (build-time, runtime)
 # - 10.14  Mojave (2018)        - SecTrustEvaluateWithError() (runtime), GSS Framework
+# - 27.0   Golden Gate (2026)   - pipe2() (build-time, runtime)
 
 env:
   CURL_CI: github
@@ -284,6 +285,8 @@ jobs:
               -DCMAKE_C_STANDARD=90 -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
           - name: 'OpenSSL SecTrust krb5'
+            image: xcode-27  # for pipe2()
+            macos-version-min: '10.15'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest

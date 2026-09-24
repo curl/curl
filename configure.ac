@@ -4221,9 +4221,10 @@ AC_CHECK_FUNCS([\
 ])
 
 if test "$curl_cv_apple" != "yes"; then
-  dnl Apple platforms do not offer pipe2(), but the iPhone Simulator-specific
+  dnl Apple SDK <27 do not offer pipe2(), but the iPhone Simulator-specific
   dnl /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
   dnl detection, omit this feature check for Apple targets.
+  dnl For 27+, detection is done in-source.
   AC_CHECK_FUNCS([\
     pipe2 \
   ])

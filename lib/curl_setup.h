@@ -293,6 +293,30 @@
 
 #include <curl/system.h>
 
+#if !defined(HAVE_PIPE2) && \
+  ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+            __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+            __MAC_OS_X_VERSION_MIN_REQUIRED >= 270000) || \
+   (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+            __IPHONE_OS_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+            __IPHONE_OS_VERSION_MIN_REQUIRED >= 270000) || \
+   (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+            __TV_OS_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__TV_OS_VERSION_MIN_REQUIRED) && \
+            __TV_OS_VERSION_MIN_REQUIRED >= 270000) || \
+   (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+            __WATCH_OS_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__WATCH_OS_VERSION_MIN_REQUIRED) && \
+            __WATCH_OS_VERSION_MIN_REQUIRED >= 270000) || \
+   (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+            __VISION_OS_VERSION_MAX_ALLOWED >= 270000 && \
+    defined(__VISION_OS_VERSION_MIN_REQUIRED) && \
+            __VISION_OS_VERSION_MIN_REQUIRED >= 270000))
+#define HAVE_PIPE2
+#endif
+
 /* Helper macro to expand and concatenate two macros.
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
