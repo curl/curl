@@ -439,6 +439,13 @@ then subsequently fails anyway if that was actually in use.
 
 [curl issue 8112](https://github.com/curl/curl/issues/8112)
 
+## Stdin is not non-blocking on Windows
+
+The telnet handler reads data from stdin by default without needing to
+specify that on the command line, but since Windows is special, reading
+from stdin is not done in a non-blocking manner, meaning that curl might
+block waiting for input without triggering the timeout.
+
 # HTTP/2
 
 ## HTTP/2 prior knowledge over proxy
