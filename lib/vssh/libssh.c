@@ -834,7 +834,8 @@ static int myssh_in_AUTHLIST(struct Curl_easy *data,
   /* For public key auth we need either the private key or
      CURLSSH_AUTH_AGENT. */
   if((sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) &&
-     (sshc->priv_key || (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
+      ((sshc->priv_key && sshc->priv_key[0]) ||
+      (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
     myssh_to(data, sshc, SSH_AUTH_PKEY_INIT);
     infof(data, "Authentication using SSH public key file");
   }
@@ -864,7 +865,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
 
   /* Two choices, (1) private key was given on CMD,
    * (2) use the "default" keys. */
-  if(sshc->priv_key) {
+  if(sshc->priv_key && sshc->priv_key[0]) {
     if(sshc->pubkey && !sshc->passphrase) {
       rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
       if(rc == SSH_AUTH_AGAIN)
