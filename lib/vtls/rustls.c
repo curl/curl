@@ -984,7 +984,8 @@ init_config_builder_ech(struct Curl_easy *data,
     const struct Curl_https_rrinfo *rinfo =
       Curl_conn_dns_get_https(data, cf->sockindex, connssl->peer.origin);
 
-    if(!rinfo || !rinfo->echconfiglist) {
+    if(!Curl_httpsrr_is_for_peer(connssl->peer.origin, rinfo) ||
+       !rinfo->echconfiglist) {
       failf(data, "rustls: ECH requested but no ECHConfig available");
       result = CURLE_SSL_CONNECT_ERROR;
       goto cleanup;
