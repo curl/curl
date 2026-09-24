@@ -293,6 +293,14 @@
 
 #include <curl/system.h>
 
+#if !defined(HAVE_PIPE2) && \
+  (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+          (__MAC_OS_X_VERSION_MIN_REQUIRED >= 260000)) || \
+  (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+          (__IPHONE_OS_VERSION_MIN_REQUIRED >= 260000))
+#define HAVE_PIPE2
+#endif
+
 /* Helper macro to expand and concatenate two macros.
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
