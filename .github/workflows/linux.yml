@@ -891,6 +891,7 @@ jobs:
 
       - name: 'single-use function check'
         if: ${{ (contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc') }}
+        background: true
         run: |
           git config --global --add safe.directory "*"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -928,8 +929,8 @@ jobs:
 
       - name: 'test-linter'
         if: ${{ contains(matrix.build.install_steps, 'test-linter') }}
-        run:
-          cd tests && ./test-linter.pl ../bld
+        background: true
+        run: cd tests && ./test-linter.pl ../bld
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
