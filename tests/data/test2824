@@ -57,6 +57,7 @@ http
 SSL
 proxy
 digest
+!SSPI
 </features>
 <name>
 HTTP proxy CONNECT 2 407s, chunked-encoded and 0-length
