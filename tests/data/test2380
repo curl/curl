@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+libtest
+curl_mprintf errors
+</keywords>
+</info>
+
+<client>
+<name>
+curl_mprintf errors on out of space
+</name>
+<command>
+%LOGDIR/write2380
+</command>
+</client>
+
+<verify>
+</verify>
+</testcase>
