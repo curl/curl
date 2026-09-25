@@ -176,19 +176,23 @@ jobs:
 
           - name: 'rustls valgrind 1'
             install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls
+            install_steps: rust rustls-intel
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=0/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
             install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls
+            install_steps: rust rustls-intel
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=1/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
             install_packages: libnghttp2-dev libldap-dev
-            install_steps: rust rustls skiprun pytest
+            install_steps: rust rustls-intel skiprun pytest
+            LDFLAGS: -Wl,-rpath,/home/runner/rustls/lib
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             configure: --with-rustls --enable-ech --enable-debug
 
           - name: 'wolfssl-all'
@@ -324,7 +328,7 @@ jobs:
           - name: 'clang-tidy'
             image: ubuntu-26.04
             install_packages: clang-22 clang-tidy-22 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev
-            install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
+            install_steps: skiprun mbedtls-latest-intel rustls-intel wolfssl-opensslextra-intel
             install_steps_brew: openssl@4 gsasl
             CC: clang-22
             CFLAGS: -Wunused-macros
@@ -795,28 +799,24 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'cache rustls'
-        if: ${{ contains(matrix.build.install_steps, 'rustls') }}
+      - name: 'cache rustls (intel)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-intel') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-rustls
+        id: cache-rustls-intel
         env:
-          cache-name: cache-rustls
+          cache-name: cache-rustls-intel
         with:
           path: ~/rustls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
 
-      - name: 'fetch rustls deb'
-        if: ${{ contains(matrix.build.install_steps, 'rustls') && !steps.cache-rustls.outputs.cache-hit }}
+      - name: 'install rustls (intel)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-intel') && !steps.cache-rustls-intel.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output pkg.bin
+            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-x86_64-linux-gnu.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
-
-      - name: 'build rustls'
-        # Note: we do not check cache-hit here. If the cache is hit, we need to dpkg install the deb.
-        if: ${{ contains(matrix.build.install_steps, 'rustls') }}
-        run: sudo dpkg -i ~/rustls/"librustls_${RUSTLS_VERSION}_amd64.deb"
+          sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
       - name: 'install Intel compilers'
         if: ${{ contains(matrix.build.install_steps, 'intelc') }}
