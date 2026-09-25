@@ -283,24 +283,26 @@ static int cb_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
     ctx->earlydata_accepted =
       !ngtcp2_conn_get_tls_early_data_rejected2(ctx->qconn);
 #else /* older NGTCP2 */
+    {
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA)
-    int ossl_early_status = SSL_get_early_data_status(ctx->tls.ossl.ssl);
-    if(ossl_early_status == SSL_EARLY_DATA_NOT_SENT)
-      CURL_TRC_CF(data, cf, "OpenSSL did not send early data");
-    ctx->earlydata_accepted = (ossl_early_status == SSL_EARLY_DATA_ACCEPTED);
+      int ossl_early_status = SSL_get_early_data_status(ctx->tls.ossl.ssl);
+      if(ossl_early_status == SSL_EARLY_DATA_NOT_SENT)
+        CURL_TRC_CF(data, cf, "OpenSSL did not send early data");
+      ctx->earlydata_accepted = (ossl_early_status == SSL_EARLY_DATA_ACCEPTED);
 #elif defined(USE_GNUTLS)
-    int flags = gnutls_session_get_flags(ctx->tls.gtls.session);
-    ctx->earlydata_accepted = !!(flags & GNUTLS_SFLAGS_EARLY_DATA);
+      int flags = gnutls_session_get_flags(ctx->tls.gtls.session);
+      ctx->earlydata_accepted = !!(flags & GNUTLS_SFLAGS_EARLY_DATA);
 #elif defined(USE_WOLFSSL)
 #ifdef WOLFSSL_EARLY_DATA
-    ctx->earlydata_accepted =
-      (wolfSSL_get_early_data_status(ctx->tls.wssl.ssl) !=
-       WOLFSSL_EARLY_DATA_REJECTED);
+      ctx->earlydata_accepted =
+        (wolfSSL_get_early_data_status(ctx->tls.wssl.ssl) !=
+         WOLFSSL_EARLY_DATA_REJECTED);
 #else
-    DEBUGASSERT(0); /* should not come here if ED is disabled. */
-    ctx->earlydata_accepted = FALSE;
+      DEBUGASSERT(0); /* should not come here if ED is disabled. */
+      ctx->earlydata_accepted = FALSE;
 #endif /* WOLFSSL_EARLY_DATA */
 #endif /* OPENSSL or GNUTLS or WOLFSSL */
+    }
 #endif /* older NGTCP2 */
     CURL_TRC_CF(data, cf, "server did%s accept %zu bytes of early data",
                 ctx->earlydata_accepted ? "" : " not", ctx->earlydata_skip);
