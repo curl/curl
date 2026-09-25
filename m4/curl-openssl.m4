@@ -265,8 +265,9 @@ if test "x$OPT_OPENSSL" != "xno"; then
       AC_LANG_PROGRAM([[
         #include <openssl/opensslv.h>
       ]],[[
-        int dummy = LIBRESSL_VERSION_NUMBER;
-        (void)dummy;
+        #ifndef LIBRESSL_VERSION_NUMBER
+        #error not LibreSSL
+        #endif
       ]])
     ],[
       AC_MSG_RESULT([yes])
