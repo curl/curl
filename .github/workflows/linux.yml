@@ -64,7 +64,7 @@ env:
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    runs-on: ${{ matrix.build.image || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.build.image || 'ubuntu-26.04' }}
     container: ${{ matrix.build.container }}
     timeout-minutes: 15
     env:
