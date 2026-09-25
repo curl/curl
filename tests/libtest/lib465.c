@@ -23,13 +23,10 @@
  ***************************************************************************/
 
 /*
- * Verify that the resolver-start callback (CURLOPT_RESOLVER_START_FUNCTION)
- * is announced, and can veto the resolve, before the HTTPS RR side-query is
- * sent out on the wire. This binds a UDP socket of its own, points the
- * c-ares HTTPS RR channel at it via the CURL_DNS_SERVER debug hook, and
- * makes the callback abort the moment it sees the HTTPS RR resolver state.
- * If the query had already been dispatched, this local "DNS server" would
- * have received it regardless of the callback's veto.
+ * Verify that when CURLOPT_RESOLVER_START_FUNCTION vetoes the HTTPS RR
+ * side-query for a host, the overall connection attempt is aborted with
+ * CURLE_ABORTED_BY_CALLBACK instead of silently ignoring the veto and
+ * continuing on to the regular A/AAAA resolve and connect.
  */
 
 #include "first.h"
@@ -41,29 +38,26 @@
 #include <arpa/inet.h>
 #endif
 
-static int t464_cb_count = 0;
-static int t464_https_seen = 0;
+static int t465_cb_count = 0;
+static int t465_https_seen = 0;
 
-static int t464_resolver_start_cb(void *resolver_state, void *reserved,
+static int t465_resolver_start_cb(void *resolver_state, void *reserved,
                                   void *userdata)
 {
   (void)reserved;
   (void)userdata;
-  t464_cb_count++;
+  t465_cb_count++;
   if(resolver_state) {
     /* This is the HTTPS RR side-channel announce: veto it. */
-    t464_https_seen = 1;
+    t465_https_seen = 1;
     return 1;
   }
-  /* This is the regular A/AAAA announce: let it proceed. */
+  /* This is the regular A/AAAA announce: let it proceed. Should not
+     happen once the HTTPS RR veto correctly aborts the connection. */
   return 0;
 }
 
-#ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK 0x7f000001
-#endif
-
-static CURLcode test_lib464(const char *URL)
+static CURLcode test_lib465(const char *URL)
 {
   CURL *curl = NULL;
   CURLcode result = CURLE_OK;
@@ -71,12 +65,10 @@ static CURLcode test_lib464(const char *URL)
   struct sockaddr_in sa;
   curl_socklen_t salen = sizeof(sa);
   char envbuf[64];
-  char inbuf[512];
-  fd_set fds;
-  struct timeval tv;
   int port;
-  int gotpacket = 0;
   bool global_inited = FALSE;
+
+  (void)URL;
 
   dnssock = CURL_SOCKET(AF_INET, SOCK_DGRAM, 0);
   if(dnssock == CURL_SOCKET_BAD) {
@@ -120,16 +112,13 @@ static CURLcode test_lib464(const char *URL)
     goto test_cleanup;
   }
 
-  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, "https://localhost/465");
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-  easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, t464_resolver_start_cb);
+  easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, t465_resolver_start_cb);
 
-  /* Vetoing the HTTPS RR side-query only drops that optional lookup, it
-   * does not fail the transfer: the plain A/AAAA resolve still succeeds
-   * and curl goes on to (fail to) connect, since nothing listens on the
-   * target port. */
+  /* Vetoing the HTTPS RR side-query is an explicit application abort of
+   * that resolve and must fail the whole connection attempt before the
+   * regular A/AAAA resolve is ever started. */
   result = curl_easy_perform(curl);
   if(result != CURLE_ABORTED_BY_CALLBACK) {
     curl_mfprintf(stderr, "curl_easy_perform should have returned "
@@ -141,29 +130,16 @@ static CURLcode test_lib464(const char *URL)
   }
   result = CURLE_OK;
 
-  if(!t464_https_seen) {
+  if(!t465_https_seen) {
     curl_mfprintf(stderr, "the HTTPS RR resolver-start announce never "
                   "happened, this test needs asyn-rr support\n");
     result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
-  if(t464_cb_count != 1) {
-    curl_mfprintf(stderr, "Unexpected number of callbacks: %d\n",
-                  t464_cb_count);
-    result = TEST_ERR_FAILURE;
-    goto test_cleanup;
-  }
-
-  FD_ZERO(&fds);
-  FD_SET(dnssock, &fds);
-  tv.tv_sec = 0;
-  tv.tv_usec = 200000;
-  if(select((int)dnssock + 1, &fds, NULL, NULL, &tv) > 0)
-    gotpacket = (recvfrom(dnssock, inbuf, sizeof(inbuf), 0, NULL, NULL) > 0);
-
-  if(gotpacket) {
-    curl_mfprintf(stderr, "the HTTPS RR query was sent on the wire before "
-                  "the resolver-start callback could veto it\n");
+  if(t465_cb_count != 1) {
+    curl_mfprintf(stderr, "Unexpected number of callbacks: %d, "
+                  "the regular A/AAAA resolve should not have been "
+                  "attempted after the HTTPS RR veto\n", t465_cb_count);
     result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
