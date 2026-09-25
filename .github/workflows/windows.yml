@@ -1072,9 +1072,7 @@ jobs:
               [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
               MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
               echo '----------'
-              /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD")" -mindepth 1 -maxdepth 1 -type d -name '*.*'
-              echo '----------'
-              /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*'
+              /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD")" -mindepth 1 -maxdepth 1 -type d -name '*'
               echo '----------'
               MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
               MSVC_ROOTW="$(cygpath --mixed "$MSVC_ROOTU")"
