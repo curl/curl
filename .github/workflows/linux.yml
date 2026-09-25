@@ -175,15 +175,17 @@ jobs:
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'rustls valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls-intel
+            install_steps: rust rustls-arm
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=0/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls-intel
+            install_steps: rust rustls-arm
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=1/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
@@ -815,6 +817,25 @@ jobs:
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-x86_64-linux-gnu.zip" --output pkg.bin
+          sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
+          sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
+
+      - name: 'cache rustls (arm)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-arm') }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cache-rustls-arm
+        env:
+          cache-name: cache-rustls-arm
+        with:
+          path: ~/rustls
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
+
+      - name: 'install rustls (arm)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-arm') && !steps.cache-rustls-arm.outputs.cache-hit }}
+        run: |
+          cd ~
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-arm64-linux-gnu.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
           sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
