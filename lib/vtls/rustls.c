@@ -226,7 +226,10 @@ static CURLcode cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                                      plainlen - *pnread,
                                      &n);
     if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
+      /* A TLS message that carried no plaintext. Break out of the loop
+       * to prevent a server from keeping us here forever. */
       backend->data_in_pending = FALSE;
+      break;
     }
     else if(rresult == RUSTLS_RESULT_UNEXPECTED_EOF) {
       failf(data, "rustls: peer closed TCP connection "
