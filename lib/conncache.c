@@ -933,12 +933,11 @@ struct connectdata *Curl_cpool_get_last_conn(struct Curl_easy *data)
 {
   struct cpool *cpool = cpool_get_instance(data);
   if(cpool && (data->state.last_cpid != UINT32_MAX)) {
-    struct Curl_easy *admin = Curl_get_admin(data);
     struct connectdata *conn;
 
-    CPOOL_LOCK(cpool, admin);
+    CPOOL_LOCK(cpool, data);
     conn = Curl_uint32_tbl_get(&cpool->conns, data->state.last_cpid);
-    CPOOL_UNLOCK(cpool, admin);
+    CPOOL_UNLOCK(cpool, data);
     if(conn && (data->state.last_conn_id == conn->connection_id))
       return conn;
     data->state.last_cpid = UINT32_MAX;
