@@ -191,6 +191,7 @@ jobs:
           - name: 'rustls'
             install_packages: libnghttp2-dev libldap-dev
             install_steps: rust rustls-intel skiprun pytest
+            LDFLAGS: -Wl,-rpath,/home/runner/rustls/lib
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             configure: --with-rustls --enable-ech --enable-debug
 
