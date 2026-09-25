@@ -815,10 +815,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-x86_64-linux-gnu.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
-          cat rustls/lib/pkgconfig/rustls.pc
-          sed -i.bak 's|dist/||g' rustls/lib/pkgconfig/rustls.pc
-          echo '----------'
-          cat rustls/lib/pkgconfig/rustls.pc
+          sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
       - name: 'install Intel compilers'
         if: ${{ contains(matrix.build.install_steps, 'intelc') }}
