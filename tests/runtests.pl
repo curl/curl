@@ -2692,14 +2692,6 @@ if($valgrind) {
         undef $valgrind;
     } else {
 
-        # since valgrind 2.1.x, '--tool' option is mandatory
-        # use it, if it is supported by the version installed on the system
-        # (this happened in 2003, so we could probably do not need to care about
-        # that old version any longer and delete this check)
-        runclient("valgrind --help 2>&1 | grep -- --tool >$dev_null 2>&1");
-        if(($? >> 8)) {
-            $valgrind_tool = "";
-        }
         open(my $curlh, "<", $CURL);
         my $l = <$curlh>;
         if($l =~ /^\#\!/) {
@@ -2707,20 +2699,6 @@ if($valgrind) {
             $valgrind = "../libtool --mode=execute $valgrind";
         }
         close($curlh);
-
-        # valgrind 3 renamed the --logfile option to --log-file!!!
-        # (this happened in 2005, so we could probably do not need to care about
-        # that old version any longer and delete this check)
-        my $ver = join(' ', runclientoutput("valgrind --version"));
-        # cut off all but digits and dots
-        $ver =~ s/[^0-9.]//g;
-
-        if($ver =~ /^(\d+)/) {
-            $ver = $1;
-            if($ver < 3) {
-                $valgrind_logfile = "--logfile";
-            }
-        }
     }
 }
 

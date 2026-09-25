@@ -75,3 +75,4 @@ that do not find the necessary requirements are automatically skipped.
 - pytest
 - Python         3.8 (2019-10-14)
 - stunnel
+- valgrind       3.0.0 (2007-08-03)
