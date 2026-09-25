@@ -1216,6 +1216,7 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct Curl_ssl_scache_peer *peer = NULL;
   struct Curl_ssl_session *s = NULL;
+  bool have_lock = FALSE;
   CURLcode result;
 
   if(!scache || !sdata || !sdata_len) {
@@ -1232,6 +1233,7 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
     goto out;
 
   Curl_ssl_scache_lock(data);
+  have_lock = TRUE;
 
   if(ssl_peer_key) {
     result = cf_ssl_add_peer(data, scache, ssl_peer_key, NULL, &peer);
@@ -1272,7 +1274,7 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
   }
 
 out:
-  if(scache && scache->is_locked)
+  if(scache && have_lock)
     Curl_ssl_scache_unlock(data);
   Curl_ssl_session_destroy(s);
   return result;
