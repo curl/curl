@@ -844,10 +844,9 @@ if(CURL_USE_OPENSSL)
   if(NOT DEFINED HAVE_LIBRESSL AND NOT HAVE_AWSLC AND NOT HAVE_BORINGSSL)
     check_c_source_compiles("
       #include <openssl/opensslv.h>
-      int main(void)
-      {
-        return (int)LIBRESSL_VERSION_NUMBER;
-      }" HAVE_LIBRESSL)
+      #ifndef LIBRESSL_VERSION_NUMBER
+      #error not LibreSSL
+      #endif" HAVE_LIBRESSL)
   endif()
   set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save_2})
   unset(_cmake_try_compile_target_type_save_2)
