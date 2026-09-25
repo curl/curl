@@ -2699,20 +2699,6 @@ if($valgrind) {
             $valgrind = "../libtool --mode=execute $valgrind";
         }
         close($curlh);
-
-        # valgrind 3 renamed the --logfile option to --log-file!!!
-        # (this happened in 2005, so we could probably do not need to care about
-        # that old version any longer and delete this check)
-        my $ver = join(' ', runclientoutput("valgrind --version"));
-        # cut off all but digits and dots
-        $ver =~ s/[^0-9.]//g;
-
-        if($ver =~ /^(\d+)/) {
-            $ver = $1;
-            if($ver < 3) {
-                $valgrind_logfile = "--logfile";
-            }
-        }
     }
 }
 
