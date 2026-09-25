@@ -774,13 +774,14 @@ jobs:
       - name: 'configure'
         env:
           LDFLAGS: '${{ matrix.build.LDFLAGS }}'
+          MATRIX_NAME: '${{ matrix.build.name }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            [[ "${MATRIX_GENERATE}" = *'boringssl'* ]] && options=" -DBORINGSSL_VERSION=${BORINGSSL_VERSION}"
+            [[ "${MATRIX_NAME}" = *'boringssl'* ]] && options=" -DBORINGSSL_VERSION=${BORINGSSL_VERSION}"
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-unknown-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
@@ -790,7 +791,7 @@ jobs:
               -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_GENERATE} ${options}
           else
-            [[ "${MATRIX_CONFIGURE}" = *'boringssl'* ]] && export CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${BORINGSSL_VERSION}\\\""
+            [[ "${MATRIX_NAME}" = *'boringssl'* ]] && export CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${BORINGSSL_VERSION}\\\""
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror --enable-debug --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libuv --enable-ntlm \
