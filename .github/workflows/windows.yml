@@ -1070,15 +1070,19 @@ jobs:
               # facility to pass it via CMake or CLI.
               [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
               MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
-              # List available MSVC versions
+              echo 'Installed MSVC versions'
               /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD")" -mindepth 1 -maxdepth 2 -type d -name '*' || true
               MSVC_EDITION='18/Enterprise/vc/tools/msvc'
+              echo 'Installed MSVC roots'
+              /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*'
               MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
               MSVC_ROOTW="$(cygpath --mixed "$MSVC_ROOTU")"
               MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
               MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
               MSDK_ROOTW="$(cygpath --mixed --short-name "$(printenv 'ProgramFiles(x86)')/Windows Kits")/10"
               MSDK_ROOTU="$(cygpath --unix "$MSDK_ROOTW")"
+              echo 'Installed Windows Kits'
+              /usr/bin/find "$MSDK_ROOTU/lib" -mindepth 1 -maxdepth 1 -type d -name '*.*'
               MSDK_VER="$(basename "$(/usr/bin/find "$MSDK_ROOTU/lib" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)")"
               MSDK_LIBW="$MSDK_ROOTW/lib/$MSDK_VER"
               MSDK_INCW="$MSDK_ROOTW/include/$MSDK_VER"
