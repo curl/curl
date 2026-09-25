@@ -879,6 +879,37 @@ static bool url_match_auth(struct connectdata *conn,
   return TRUE;
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+/* Return true if the scheme/protocol/family of `conn` can be used to upgrade
+ * to the websocket scheme of `needle` */
+static bool websocket_compatible_protocols(struct Curl_easy *data,
+                                           struct connectdata *needle,
+                                           struct connectdata *conn)
+{
+  /* WebSockets can upgrade only an HTTP/1.1 connection.
+   * Curl_conn_http_version() returns 0 for HTTP/1.x, since only the h2 and h3
+   * filters answer CF_QUERY_HTTP_VERSION, so use it to rule out multiplexing
+   * and check httpversion_seen to tell 1.1 from 1.0. */
+  if(!(get_protocol_family(conn->origin->scheme) & PROTO_FAMILY_HTTP) ||
+     Curl_conn_http_version(data, conn) >= 20 ||
+     conn->httpversion_seen != 11) {
+    return FALSE;
+  }
+
+  /* `ws` must use `http` and `wss` must use `https` */
+  if(needle->scheme == &Curl_scheme_ws &&
+    conn->origin->scheme == &Curl_scheme_http) {
+    return TRUE;
+  }
+  else if(needle->scheme == &Curl_scheme_wss &&
+    conn->origin->scheme == &Curl_scheme_https) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+#endif
+
 static bool url_match_destination(struct connectdata *conn,
                                   struct url_conn_match *m)
 {
@@ -888,9 +919,13 @@ static bool url_match_destination(struct connectdata *conn,
 
   if(m->needle->origin->scheme != conn->origin->scheme &&
     /* `needle` and `conn` not having the same scheme.
-     * This is allowed for the same family *if* conn is using TLS.
+     * This is allowed for a compatible websocket upgrade or for
+     * the same family *if* conn is using TLS.
      * - IMAP+STARTTLS works for IMAPS.
      * - IMAPS works for IMAP. */
+#ifndef CURL_DISABLE_WEBSOCKETS
+     !websocket_compatible_protocols(m->data, m->needle, conn) &&
+#endif
      get_protocol_family(conn->origin->scheme) !=
      m->needle->scheme->protocol)
     return FALSE;
@@ -1169,8 +1204,8 @@ error:
   return NULL;
 }
 
-static CURLcode url_set_conn_scheme(struct Curl_easy *data,
-                                    struct connectdata *conn)
+CURLcode Curl_url_set_conn_scheme(struct Curl_easy *data,
+                                  struct connectdata *conn)
 {
   /* URL scheme is usable for connection when it is
    * - allowed
@@ -1457,7 +1492,7 @@ static CURLcode url_set_conn_origin_etc(struct Curl_easy *data,
   Curl_peer_link(&conn->origin, data->state.origin);
 
   /* set the connection scheme */
-  result = url_set_conn_scheme(data, conn);
+  result = Curl_url_set_conn_scheme(data, conn);
   if(result)
     goto out;
 
@@ -2294,24 +2329,45 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
 
   /*************************************************************
    * Reuse of existing connection is not allowed when
-   * - connect_only is set or
+   * - connect_only is set (unless for WebSocket) or
    * - reuse_fresh is set and this is not a follow-up request
    *   (like with HTTP followlocation)
    *************************************************************/
   if((!data->set.reuse_fresh || data->state.followlocation) &&
-     !data->set.connect_only) {
+     (!data->set.connect_only || data->set.connect_only_ws)) {
     /* Ok, try to find and attach an existing one */
     if(url_attach_existing(data, needle, &match, pnow)) {
       /* We attached an existing connection for this transfer. Copy
        * over transfer specific properties over from needle. */
       struct connectdata *conn = data->conn;
+#ifndef CURL_DISABLE_WEBSOCKETS
+      bool ws_upgrades_conn;
+#endif
       VERBOSE(bool tls_upgraded =
         (!(needle->origin->scheme->flags & PROTOPT_SSL) &&
          Curl_conn_is_ssl(conn, FIRSTSOCKET)));
 
       DEBUGASSERT(conn);
       conn->bits.reuse = TRUE;
+
+#ifndef CURL_DISABLE_WEBSOCKETS
+      /* Whether `needle` is a ws/wss request reusing an http/https
+       * connection. Must be determined before url_conn_reuse_adjust()
+       * replaces conn->origin with the one from `needle`. */
+      ws_upgrades_conn = websocket_compatible_protocols(data, needle, conn);
+#endif
+
       url_conn_reuse_adjust(data, needle);
+
+#ifndef CURL_DISABLE_WEBSOCKETS
+      if(ws_upgrades_conn) {
+        /* conn->origin now carries the ws/wss scheme from `needle`. Point
+         * conn->scheme at the matching WebSocket handler. */
+        result = Curl_url_set_conn_scheme(data, conn);
+        if(result)
+          goto out;
+      }
+#endif
 
 #ifndef CURL_DISABLE_PROXY
       infof(data, "Reusing existing %s: connection%s with %s %s",

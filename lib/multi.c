@@ -2697,6 +2697,16 @@ static CURLMcode multistate_done(struct Curl_easy *data, CURLcode *presult)
       *presult = result;
   }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+  /* If the WebSocket upgrade was refused and the response was otherwise
+   * without error, return this specific error for applications that might
+   * want to act on it. */
+  if(!(*presult) && data->req.ws_upgrade_refused) {
+    failf(data, "Refused WebSocket upgrade: %d", data->req.httpcode);
+    *presult = CURLE_WS_DENIED;
+  }
+#endif
+
 #ifndef CURL_DISABLE_FTP
   if(data->state.wildcardmatch) {
     if(data->wildcard->state != CURLWC_DONE) {
