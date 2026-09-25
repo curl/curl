@@ -64,7 +64,7 @@ env:
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    runs-on: ${{ matrix.build.image || 'ubuntu-24.04' }}
+    runs-on: ${{ matrix.build.image || 'ubuntu-latest' }}
     container: ${{ matrix.build.container }}
     timeout-minutes: 15
     env:
@@ -76,16 +76,19 @@ jobs:
       matrix:
         build:
           - name: 'awslc'
+            image: ubuntu-24.04
             install_steps: awslc pytest test-linter
             LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
             configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
 
           - name: 'awslc'
+            image: ubuntu-24.04
             install_packages: libidn2-dev
             install_steps: awslc clean
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
 
           - name: 'boringssl'
+            image: ubuntu-24.04
             install_steps: boringssl pytest
             generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
 
@@ -149,6 +152,7 @@ jobs:
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
+            image: ubuntu-24.04
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
             install_steps: mbedtls-latest-intel pytest
             CC: clang
@@ -156,12 +160,14 @@ jobs:
             configure: --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
+            image: ubuntu-24.04
             install_packages: libssh2-1-dev libnghttp2-dev libuv1-dev
             install_steps: mbedtls-prev pytest
             PKG_CONFIG_PATH: /home/runner/mbedtls-prev/lib/pkgconfig  # Requires v3.6.0
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_USE_LIBUV=ON -DENABLE_DEBUG=ON
 
           - name: 'mbedtls-pkg MultiSSL !pc'
+            image: ubuntu-24.04
             install_packages: libnghttp2-dev libmbedtls-dev
             install_steps: mbedtls-latest-intel skipall
             generate: >-
@@ -191,6 +197,7 @@ jobs:
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
+            image: ubuntu-24.04
             install_packages: libnghttp2-dev libldap-dev
             install_steps: rust rustls-intel skiprun pytest
             LDFLAGS: -Wl,-rpath,/home/runner/rustls/lib
@@ -220,6 +227,7 @@ jobs:
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'openssl default'
+            image: ubuntu-24.04
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
@@ -238,6 +246,7 @@ jobs:
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl intel C89'
+            image: ubuntu-24.04
             install_packages: libssh-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
@@ -249,18 +258,21 @@ jobs:
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh2 --enable-debug --disable-verbose
 
           - name: 'openssl -O3 libssh valgrind 1'
+            image: ubuntu-24.04
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--subset=0/2'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl -O3 libssh valgrind 2'
+            image: ubuntu-24.04
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--subset=1/2'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl clang krb5 openldap static'
+            image: ubuntu-24.04
             install_steps: openldap-static
             install_packages: libidn2-dev libkrb5-dev clang libssl-dev
             CC: clang
@@ -301,18 +313,21 @@ jobs:
               --enable-ntlm
 
           - name: 'openssl torture 1'
+            image: ubuntu-26.04
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             tflags: '-t --shallow=25 --subset=0/2'
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl torture 2'
+            image: ubuntu-26.04
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             tflags: '-t --shallow=25 --subset=1/2'
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl i686'
+            image: ubuntu-24.04
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
             CC: i686-linux-gnu-gcc-14
             LDFLAGS: -L/usr/lib/i386-linux-gnu
@@ -438,6 +453,7 @@ jobs:
             tflags: '--min=1540'
 
           - name: 'event-based'
+            image: ubuntu-24.04
             install_packages: libssh-dev
             configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm
             tflags: '-n --test-event --min=1420'
