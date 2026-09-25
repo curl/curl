@@ -153,9 +153,9 @@ static int dnscache_entry_is_stale(void *datap, void *hc)
  * Prune the DNS cache. This assumes that a lock has already been taken.
  * Returns the 'age' of the oldest still kept entry - in milliseconds.
  */
-static timediff_t dnscache_prune(struct Curl_hash *hostcache,
-                                 timediff_t cache_timeout_ms,
-                                 const struct curltime *pnow)
+static timediff_t dnscache_prune_older(struct Curl_hash *hostcache,
+                                       timediff_t cache_timeout_ms,
+                                       const struct curltime *pnow)
 {
   struct dnscache_prune_data user;
 
@@ -193,13 +193,10 @@ static void dnscache_unlock(struct Curl_easy *data,
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 }
 
-/*
- * Library-wide function for pruning the DNS cache. This function takes and
- * returns the appropriate locks.
- */
-void Curl_dnscache_prune(struct Curl_easy *data, const struct curltime *pnow)
+static void dnscache_prune(struct Curl_dnscache *dnscache,
+                           struct Curl_easy *data,
+                           const struct curltime *pnow)
 {
-  struct Curl_dnscache *dnscache = dnscache_get(data);
   /* the timeout may be set -1 (forever) */
   timediff_t timeout_ms = data->set.dns_cache_timeout_ms;
 
@@ -207,12 +204,10 @@ void Curl_dnscache_prune(struct Curl_easy *data, const struct curltime *pnow)
     /* NULL hostcache means we cannot do it */
     return;
 
-  dnscache_lock(data, dnscache);
-
   do {
     /* Remove outdated and unused entries from the hostcache */
     timediff_t oldest_ms =
-      dnscache_prune(&dnscache->entries, timeout_ms, pnow);
+      dnscache_prune_older(&dnscache->entries, timeout_ms, pnow);
 
     if(Curl_hash_count(&dnscache->entries) > MAX_DNS_CACHE_SIZE)
       /* prune the ones over half this age */
@@ -223,8 +218,6 @@ void Curl_dnscache_prune(struct Curl_easy *data, const struct curltime *pnow)
     /* if the cache size is still too big, use the oldest age as new prune
        limit */
   } while(timeout_ms);
-
-  dnscache_unlock(data, dnscache);
 }
 
 void Curl_dnscache_clear(struct Curl_easy *data)
@@ -242,6 +235,7 @@ static CURLcode fetch_entry(struct Curl_easy *data,
                             struct Curl_dnscache *dnscache,
                             uint8_t dns_queries,
                             struct Curl_peer *peer,
+                            const struct curltime *pnow,
                             struct Curl_dns_entry **pdns)
 {
   struct Curl_dns_entry *dns = NULL;
@@ -277,7 +271,7 @@ static CURLcode fetch_entry(struct Curl_easy *data,
     /* See whether the returned entry is stale. Done before we release lock */
     struct dnscache_prune_data user;
 
-    user.pnow = Curl_pgrs_now(data);
+    user.pnow = pnow;
     user.max_age_ms = data->set.dns_cache_timeout_ms;
     user.oldest_ms = 0;
 
@@ -329,21 +323,31 @@ static CURLcode fetch_entry(struct Curl_easy *data,
 CURLcode Curl_dnscache_get(struct Curl_easy *data,
                            uint8_t dns_queries,
                            struct Curl_peer *peer,
+                           const struct curltime *pnow,
                            struct Curl_dns_entry **pentry)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
   struct Curl_dns_entry *dns = NULL;
   CURLcode result = CURLE_OK;
 
-  dnscache_lock(data, dnscache);
-  result = fetch_entry(data, dnscache, dns_queries, peer, &dns);
-  if(!result && dns)
-    dns->refcount++; /* we pass out a reference */
-  else if(result) {
-    DEBUGASSERT(!dns);
-    dns = NULL;
+  if(dnscache) {
+    dnscache_lock(data, dnscache);
+
+    if((data->set.dns_cache_timeout_ms > 0) &&
+       (curlx_ptimediff_ms(pnow, &dnscache->last_prune) >= 1000)) {
+      dnscache->last_prune = *pnow;
+      dnscache_prune(dnscache, data, pnow);
+    }
+
+    result = fetch_entry(data, dnscache, dns_queries, peer, pnow, &dns);
+    if(!result && dns)
+      dns->refcount++; /* we pass out a reference */
+    else if(result) {
+      DEBUGASSERT(!dns);
+      dns = NULL;
+    }
+    dnscache_unlock(data, dnscache);
   }
-  dnscache_unlock(data, dnscache);
 
   CURL_TRC_DNS(data, "cache lookup %s:%u queries=%s -> %d %sfound",
                peer->hostname, peer->port, Curl_resolv_query_str(dns_queries),

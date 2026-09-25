@@ -105,15 +105,13 @@ void Curl_dns_entry_unlink(struct Curl_easy *data,
 
 struct Curl_dnscache {
   struct Curl_hash entries;
+  struct curltime last_prune;
 };
 
 /* init a new dns cache */
 void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size);
 
 void Curl_dnscache_destroy(struct Curl_dnscache *dns);
-
-/* prune old entries from the DNS cache */
-void Curl_dnscache_prune(struct Curl_easy *data, const struct curltime *pnow);
 
 /* clear the DNS cache */
 void Curl_dnscache_clear(struct Curl_easy *data);
@@ -131,6 +129,7 @@ void Curl_dnscache_clear(struct Curl_easy *data);
 CURLcode Curl_dnscache_get(struct Curl_easy *data,
                            uint8_t dns_queries,
                            struct Curl_peer *peer,
+                           const struct curltime *pnow,
                            struct Curl_dns_entry **pentry);
 
 /*
