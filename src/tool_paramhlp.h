@@ -56,4 +56,6 @@ long delegation(const char *str);
 
 ParameterError str2tls_max(unsigned char *val, const char *str);
 
+void mask_userinfo(char *url);
+
 #endif /* HEADER_CURL_TOOL_PARAMHLP_H */
