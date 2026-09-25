@@ -987,17 +987,16 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
       return CURLE_RECV_ERROR;
 
     /* Only final status code signals the end of header */
-    if(stream->status_code / 100 != 1)
+    if(stream->status_code / 100 != 1) {
+      stream->resp_hds_complete = TRUE;
       stream->bodystarted = TRUE;
+    }
     else
       stream->status_code = -1;
 
     h2_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"),
                           (bool)stream->closed);
 
-    if(stream->status_code / 100 != 1) {
-      stream->resp_hds_complete = TRUE;
-    }
     Curl_multi_mark_dirty(data);
     break;
   case NGHTTP2_PUSH_PROMISE:
