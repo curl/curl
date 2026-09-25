@@ -28,10 +28,15 @@
 
 #include "curlx/base64.h"
 
+#ifdef USE_SIMDUTF
+#include <simdutf_c.h>
+#endif
+
 /* ---- Base64 Encoding/Decoding Table --- */
 const char curlx_base64encdec[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
+#ifndef USE_SIMDUTF
 /* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
    section 5 */
 static const char base64url[] =
@@ -71,6 +76,7 @@ static const unsigned char decodetable[256] = {
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
+#endif
 /*
  * curlx_base64_decode()
  *
@@ -90,12 +96,16 @@ CURLcode curlx_base64_decode(const char *src,
 {
   size_t srclen = 0;
   size_t padding = 0;
-  size_t i;
   size_t numQuantums;
-  size_t fullQuantums;
   size_t rawlen = 0;
-  unsigned char *pos;
   unsigned char *newstr;
+#ifdef USE_SIMDUTF
+  simdutf_result result;
+#else
+  size_t i;
+  size_t fullQuantums;
+  unsigned char *pos;
+#endif
 
   *outptr = NULL;
   *outlen = 0;
@@ -116,7 +126,6 @@ CURLcode curlx_base64_decode(const char *src,
 
   /* Calculate the number of quantums */
   numQuantums = srclen / 4;
-  fullQuantums = numQuantums - (padding ? 1 : 0);
 
   /* Calculate the size of the decoded string */
   rawlen = (numQuantums * 3) - padding;
@@ -126,6 +135,18 @@ CURLcode curlx_base64_decode(const char *src,
   if(!newstr)
     return CURLE_OUT_OF_MEMORY;
 
+#ifdef USE_SIMDUTF
+  /* Like curl's decoder, loose mode accepts nonzero unused padding bits.
+     simdutf skips whitespace, but curl must reject it: with the length and
+     padding checks above, skipped bytes make the output shorter than rawlen.
+     That size also meets simdutf's maximum output buffer requirement. */
+  result = simdutf_base64_to_binary(src, srclen, (char *)newstr,
+                                   SIMDUTF_BASE64_DEFAULT,
+                                   SIMDUTF_LAST_CHUNK_LOOSE);
+  if(result.error != SIMDUTF_ERROR_SUCCESS || result.count != rawlen)
+    goto bad;
+#else
+  fullQuantums = numQuantums - (padding ? 1 : 0);
   pos = newstr;
 
   /* Decode the complete quantums first */
@@ -166,11 +187,11 @@ CURLcode curlx_base64_decode(const char *src,
     if(padding == 1)
       pos[1] = (unsigned char)((x >> 8) & 0xff);
     pos[0] = (unsigned char)((x >> 16) & 0xff);
-    pos += 3 - padding;
   }
+#endif
 
   /* null-terminate */
-  *pos = '\0';
+  newstr[rawlen] = '\0';
 
   /* Return the decoded data */
   *outptr = newstr;
@@ -182,14 +203,17 @@ bad:
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
-static CURLcode base64_encode(const char *table64,
-                              uint8_t padbyte,
+static CURLcode base64_encode(bool urlsafe,
                               const uint8_t *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
   char *output;
   char *base64data;
+#ifndef USE_SIMDUTF
+  const char *table64 = urlsafe ? base64url : curlx_base64encdec;
+  uint8_t padbyte = urlsafe ? 0 : '=';
   const unsigned char *in = (const unsigned char *)inputbuff;
+#endif
 
   *outptr = NULL;
   *outlen = 0;
@@ -206,6 +230,13 @@ static CURLcode base64_encode(const char *table64,
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
+#ifdef USE_SIMDUTF
+  /* simdutf selects the available CPU implementation at runtime. Its URL
+     alphabet omits padding, matching curlx_base64url_encode(). */
+  output += simdutf_binary_to_base64((const char *)inputbuff, insize, output,
+                                    urlsafe ? SIMDUTF_BASE64_URL :
+                                    SIMDUTF_BASE64_DEFAULT);
+#else
   while(insize >= 3) {
     /* Load all three input bytes before storing output, avoiding reloads when
        the compiler cannot rule out aliasing. Extract four 6-bit indices from
@@ -237,6 +268,7 @@ static CURLcode base64_encode(const char *table64,
         *output++ = padbyte;
     }
   }
+#endif
 
   /* null-terminate */
   *output = '\0';
@@ -266,8 +298,7 @@ static CURLcode base64_encode(const char *table64,
 CURLcode curlx_base64_encode(const uint8_t *inputbuff, size_t insize,
                              char **outptr, size_t *outlen)
 {
-  return base64_encode(curlx_base64encdec, '=',
-                       inputbuff, insize, outptr, outlen);
+  return base64_encode(FALSE, inputbuff, insize, outptr, outlen);
 }
 
 /*
@@ -288,5 +319,5 @@ CURLcode curlx_base64_encode(const uint8_t *inputbuff, size_t insize,
 CURLcode curlx_base64url_encode(const uint8_t *inputbuff, size_t insize,
                                 char **outptr, size_t *outlen)
 {
-  return base64_encode(base64url, 0, inputbuff, insize, outptr, outlen);
+  return base64_encode(TRUE, inputbuff, insize, outptr, outlen);
 }

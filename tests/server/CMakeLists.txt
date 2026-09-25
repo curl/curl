@@ -41,6 +41,9 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
 add_dependencies(tt ${BUNDLE})
 target_link_libraries(${BUNDLE} ${CURL_NETWORK_AND_TIME_LIBS})
+if(USE_SIMDUTF)
+  target_link_libraries(${BUNDLE} CURL::simdutf)
+endif()
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h", curlx

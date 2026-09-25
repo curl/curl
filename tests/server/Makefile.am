@@ -55,7 +55,7 @@ $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_servers_SOURCES = $(BUNDLE).c
-LDADD = @CURL_NETWORK_AND_TIME_LIBS@
+LDADD = @CURL_NETWORK_AND_TIME_LIBS@ @LIB_SIMDUTF@
 CLEANFILES = $(BUNDLE).c
 
 CHECKSRC = $(CS_$(V))

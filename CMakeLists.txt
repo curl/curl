@@ -985,6 +985,14 @@ if(ZSTD_FOUND)
   endif()
 endif()
 
+option(CURL_USE_SIMDUTF "Use simdutf for Base64 encoding and decoding" OFF)
+set(USE_SIMDUTF OFF)
+if(CURL_USE_SIMDUTF)
+  find_package(Simdutf 8.0 MODULE REQUIRED)
+  set(USE_SIMDUTF ON)
+  list(APPEND CURL_LIBS CURL::simdutf)
+endif()
+
 # Check function in an OpenSSL-like TLS backend.
 macro(curl_openssl_check_exists)
   cmake_push_check_state()
@@ -2398,6 +2406,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_OPENSSL OPENSSL_VERSION_MAJOR
   #   USE_QUICHE
   #   USE_RUSTLS
+  #   USE_SIMDUTF
   #   USE_WIN32_LDAP CURL_DISABLE_LDAP
   #   USE_WOLFSSL
   configure_package_config_file("CMake/curl-config.in.cmake"
@@ -2434,6 +2443,7 @@ if(NOT CURL_DISABLE_INSTALL)
       "${PROJECT_SOURCE_DIR}/CMake/FindNettle.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindQuiche.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindRustls.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindSimdutf.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindWolfSSL.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindZstd.cmake"
     DESTINATION ${_install_cmake_dir})

@@ -782,6 +782,7 @@ SHOUTcast
 SIGALRM
 SIGCHLD
 SIGPIPE
+simdutf
 singlecwd
 SINIX
 Sintonen

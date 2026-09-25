@@ -172,6 +172,7 @@ dnl initialize all the info variables
         curl_zlib_msg="no       (--with-zlib)"
       curl_brotli_msg="no       (--with-brotli)"
         curl_zstd_msg="no       (--with-zstd)"
+     curl_simdutf_msg="no       (--with-simdutf)"
          curl_gss_msg="no       (--with-gssapi)"
        curl_gsasl_msg="no       (--with-gsasl)"
          curl_res_msg="blocking (--enable-ares / --enable-threaded-resolver)"
@@ -1738,6 +1739,78 @@ if test "x$OPT_ZSTD" != "xno"; then
     LIBS=$CLEANLIBS
   fi
 fi
+
+dnl **********************************************************************
+dnl Check for simdutf
+dnl **********************************************************************
+
+OPT_SIMDUTF=no
+LIB_SIMDUTF=
+AC_ARG_WITH(simdutf,
+AS_HELP_STRING([--with-simdutf=PATH],[Use simdutf for Base64 encoding and decoding; PATH points to the simdutf installation])
+AS_HELP_STRING([--without-simdutf], [disable simdutf (default)]),
+  OPT_SIMDUTF=$withval)
+
+if test "x$OPT_SIMDUTF" != "xno"; then
+  LIB_SIMDUTF="-lsimdutf"
+  SIMDUTF_PCDIR=
+  DIR_SIMDUTF=
+  if test "$OPT_SIMDUTF" != "yes"; then
+    SIMDUTF_PCDIR="$OPT_SIMDUTF/lib$libsuff/pkgconfig"
+    CPPFLAGS="$CPPFLAGS -I$OPT_SIMDUTF/include"
+    LDFLAGS="$LDFLAGS -L$OPT_SIMDUTF/lib$libsuff"
+    LDFLAGSPC="$LDFLAGSPC -L$OPT_SIMDUTF/lib$libsuff"
+    DIR_SIMDUTF="$OPT_SIMDUTF/lib$libsuff"
+  fi
+
+  CURL_CHECK_PKGCONFIG(simdutf, [$SIMDUTF_PCDIR])
+  if test "$PKGCONFIG" != "no"; then
+    LIB_SIMDUTF=`CURL_EXPORT_PCDIR([$SIMDUTF_PCDIR])
+      $PKGCONFIG --libs simdutf`
+    CPP_SIMDUTF=`CURL_EXPORT_PCDIR([$SIMDUTF_PCDIR])
+      $PKGCONFIG --cflags simdutf`
+    DIR_SIMDUTF=`CURL_EXPORT_PCDIR([$SIMDUTF_PCDIR])
+      $PKGCONFIG --variable=libdir simdutf`
+    CPPFLAGS="$CPPFLAGS $CPP_SIMDUTF"
+  fi
+
+  CLEANLIBS="$LIBS"
+  AC_MSG_CHECKING([for the simdutf Base64 C API])
+  for simdutf_runtime in "" "-lstdc++" "-lc++"; do
+    LIBS="$LIB_SIMDUTF $simdutf_runtime $CLEANLIBS"
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        #include <simdutf_c.h>
+      ]], [[
+        char output[8];
+        simdutf_result result;
+        (void)simdutf_binary_to_base64("abc", 3, output,
+                                     SIMDUTF_BASE64_DEFAULT);
+        result = simdutf_base64_to_binary("YWJj", 4, output,
+          SIMDUTF_BASE64_DEFAULT, SIMDUTF_LAST_CHUNK_LOOSE);
+        return (int)result.error;
+      ]])
+    ], [simdutf_c_api=yes], [simdutf_c_api=no])
+    if test "$simdutf_c_api" = "yes"; then
+      break
+    fi
+  done
+  AC_MSG_RESULT([$simdutf_c_api])
+  if test "$simdutf_c_api" != "yes"; then
+    AC_MSG_ERROR([simdutf with its Base64 C API was not found; static libraries may require a C++ runtime in LIBS])
+  fi
+
+  LIB_SIMDUTF="$LIB_SIMDUTF $simdutf_runtime $INITIAL_LIBS"
+  AC_DEFINE(USE_SIMDUTF, 1, [if simdutf is used for Base64 encoding and decoding])
+  curl_simdutf_msg="enabled"
+  LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE simdutf"
+  if test -n "$DIR_SIMDUTF" && test "$cross_compiling" != "yes"; then
+    CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_SIMDUTF"
+    export CURL_LIBRARY_PATH
+    AC_MSG_NOTICE([Added $DIR_SIMDUTF to CURL_LIBRARY_PATH])
+  fi
+fi
+AC_SUBST(LIB_SIMDUTF)
 
 dnl **********************************************************************
 dnl Checks for IPv6
@@ -5571,6 +5644,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   zlib:             ${curl_zlib_msg}
   brotli:           ${curl_brotli_msg}
   zstd:             ${curl_zstd_msg}
+  simdutf:          ${curl_simdutf_msg}
   GSS-API:          ${curl_gss_msg}
   GSASL:            ${curl_gsasl_msg}
   resolver:         ${curl_res_msg}
