@@ -149,7 +149,7 @@ jobs:
 
   win-llvm:
     name: 'Windows llvm (x64)'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     env:
       CW_PKG_NODELETE: '1'
@@ -186,7 +186,7 @@ jobs:
 
   win-gcc-zlibold-x64:
     name: 'Windows gcc zlib-classic (x64)'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
