@@ -735,15 +735,15 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
           fail-on-cache-miss: true
 
-      #- name: 'cache quiche'
-      #  if: ${{ contains(matrix.build.name, 'quiche') }}
-      #  uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      #  id: cache-quiche
-      #  env:
-      #    cache-name: cache-quiche
-      #  with:
-      #    path: ~/quiche
-      #    key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
+      - name: 'cache quiche'
+        if: ${{ contains(matrix.build.name, 'quiche') }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cache-quiche
+        env:
+          cache-name: cache-quiche
+        with:
+          path: ~/quiche
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
         if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache-quiche.outputs.cache-hit }}
