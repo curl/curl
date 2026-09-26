@@ -59,7 +59,6 @@ jobs:
           export CW_CONFIG='-main-werror-unitybatch-nocertdata-linux-a64-x64-gcc'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
-          export CW_CCSUFFIX='-15'
           export CW_GCCSUFFIX='-12'
           sudo podman image trust set --type reject default
           sudo podman image trust set --type accept docker.io/library
