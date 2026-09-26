@@ -264,13 +264,14 @@ static bool should_urlencode(struct Curl_str *service_name)
 {
   /*
    * These services require unmodified (not additionally URL-encoded) URL
-   * paths.
-   * should_urlencode == true is equivalent to should_urlencode_uri_path
-   * from the AWS SDK. Urls are already normalized by the curl URL parser
+   * paths. They are the S3 signing names, which have disableDoubleEncoding
+   * set in the AWS S3 endpoint rules. Urls are already normalized by the curl
+   * URL parser
    */
   if(curlx_str_cmp(service_name, "s3") ||
-     curlx_str_cmp(service_name, "s3-express") ||
-     curlx_str_cmp(service_name, "s3-outposts")) {
+     curlx_str_cmp(service_name, "s3express") ||
+     curlx_str_cmp(service_name, "s3-outposts") ||
+     curlx_str_cmp(service_name, "s3-object-lambda")) {
     return FALSE;
   }
   return TRUE;

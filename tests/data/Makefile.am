@@ -1986,6 +1986,7 @@ TESTCASES = \
   test2413 \
   test2414 \
   test2415 \
+  test2418 \
   test2429 \
   test2453 \
   \
