@@ -897,7 +897,7 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
   if(payload_len < 0) {
     failf(data, "[WS] starting new frame with negative payload length %"
                 FMT_OFF_T, payload_len);
-    return CURLE_SEND_ERROR;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   if(enc->payload_remain > 0) {
@@ -1119,6 +1119,14 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
     result = ws_flush(data, ws, Curl_api_is_in_callback(data));
     if(result)
       return result;
+
+    if(flags & CURLWS_OFFSET) {
+      if((fragsize < 0) || ((curl_off_t)buflen > fragsize)) {
+        failf(data, "[WS] invalid fragsize %" FMT_OFF_T " for buflen %zu",
+              fragsize, buflen);
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+    }
 
     result = ws_enc_write_head(data, ws, &ws->enc, flags,
                                (flags & CURLWS_OFFSET) ?
@@ -1874,6 +1882,12 @@ CURLcode curl_ws_send(CURL *curl, const void *buffer_arg,
       goto out;
     }
 
+    if(buflen > CURL_OFF_T_MAX) {
+      failf(data, "[WS] buflen %zu exceeds maximum frame size", buflen);
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
+
     if(!data->conn && data->set.connect_only) {
       result = Curl_connect_only_attach(data);
       if(result)
@@ -1974,6 +1988,19 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
 
     CURL_TRC_WS(data, "curl_ws_start_frame(flags=%x, frame_len=%" FMT_OFF_T,
                 flags, frame_len);
+
+    if(frame_len < 0) {
+      failf(data, "[WS] negative frame_len %" FMT_OFF_T, frame_len);
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
+
+    if(flags & CURLWS_OFFSET) {
+      failf(data,
+            "[WS] CURLWS_OFFSET flag not supported in curl_ws_start_frame");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
 
     if(!data->conn) {
       failf(data, "[WS] No associated connection");

@@ -238,6 +238,44 @@ static CURLcode test_lib2700(const char *URL)
     goto test_cleanup;
   }
 
+  if(testnum == 2700) {
+    size_t dummy_sent;
+    if(curl_ws_send(curl, "x", 10, &dummy_sent, 5,
+                    CURLWS_TEXT | CURLWS_OFFSET) !=
+       CURLE_BAD_FUNCTION_ARGUMENT) {
+      curl_mfprintf(stderr,
+                    "%s:%d curl_ws_send() accepted buflen > fragsize\n",
+                    __FILE__, __LINE__);
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto test_cleanup;
+    }
+    if(curl_ws_send(curl, "x", 10, &dummy_sent, -1,
+                    CURLWS_TEXT | CURLWS_OFFSET) !=
+       CURLE_BAD_FUNCTION_ARGUMENT) {
+      curl_mfprintf(stderr,
+                    "%s:%d curl_ws_send() accepted negative fragsize\n",
+                    __FILE__, __LINE__);
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto test_cleanup;
+    }
+    if(curl_ws_start_frame(curl, CURLWS_TEXT, -1) !=
+       CURLE_BAD_FUNCTION_ARGUMENT) {
+      curl_mfprintf(stderr,
+                    "%s:%d curl_ws_start_frame() accepted negative "
+                    "frame_len\n", __FILE__, __LINE__);
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto test_cleanup;
+    }
+    if(curl_ws_start_frame(curl, CURLWS_TEXT | CURLWS_OFFSET, 10) !=
+       CURLE_BAD_FUNCTION_ARGUMENT) {
+      curl_mfprintf(stderr,
+                    "%s:%d curl_ws_start_frame() accepted CURLWS_OFFSET\n",
+                    __FILE__, __LINE__);
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto test_cleanup;
+    }
+  }
+
   while(!stop) {
     result = recv_frame(curl, &stop);
     if(result)
