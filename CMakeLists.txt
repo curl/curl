@@ -823,16 +823,33 @@ if(CURL_USE_OPENSSL)
   set(_curl_ca_bundle_supported TRUE)
 
   cmake_push_check_state()
-  list(APPEND CMAKE_REQUIRED_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+  get_target_property(_openssl_include_dirs OpenSSL::Crypto INTERFACE_INCLUDE_DIRECTORIES)
+  list(APPEND CMAKE_REQUIRED_INCLUDES "${_openssl_include_dirs}")
+  set(_cmake_try_compile_target_type_save_2 ${CMAKE_TRY_COMPILE_TARGET_TYPE})
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
   if(NOT DEFINED HAVE_AWSLC)
-    check_symbol_exists("OPENSSL_IS_AWSLC" "openssl/base.h" HAVE_AWSLC)
+    check_c_source_compiles("
+      #include <openssl/base.h>
+      #ifndef OPENSSL_IS_AWSLC
+      #error not AWS-LC
+      #endif" HAVE_AWSLC)
   endif()
   if(NOT DEFINED HAVE_BORINGSSL AND NOT HAVE_AWSLC)
-    check_symbol_exists("OPENSSL_IS_BORINGSSL" "openssl/base.h" HAVE_BORINGSSL)
+    check_c_source_compiles("
+      #include <openssl/base.h>
+      #ifndef OPENSSL_IS_BORINGSSL
+      #error not BoringSSL
+      #endif" HAVE_BORINGSSL)
   endif()
   if(NOT DEFINED HAVE_LIBRESSL AND NOT HAVE_AWSLC AND NOT HAVE_BORINGSSL)
-    check_symbol_exists("LIBRESSL_VERSION_NUMBER" "openssl/opensslv.h" HAVE_LIBRESSL)
+    check_c_source_compiles("
+      #include <openssl/opensslv.h>
+      #ifndef LIBRESSL_VERSION_NUMBER
+      #error not LibreSSL
+      #endif" HAVE_LIBRESSL)
   endif()
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save_2})
+  unset(_cmake_try_compile_target_type_save_2)
   cmake_pop_check_state()
 
   if(HAVE_AWSLC OR HAVE_BORINGSSL)
