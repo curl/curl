@@ -1178,6 +1178,42 @@ static CURLcode imap_state_login_resp(struct Curl_easy *data,
   return result;
 }
 
+/* Data items that never make the server use a literal in the FETCH response.
+   Any other item can come back as a literal, and a literal body must not be
+   parsed as protocol responses. */
+static bool is_literal_free_fetch_item_list(const char *params)
+{
+  static const char * const items[] = {
+    "UID", "FLAGS", "INTERNALDATE", "RFC822.SIZE", "MODSEQ"
+  };
+
+  while(*params) {
+    size_t i;
+    size_t len = 0;
+
+    if(*params == ' ' || *params == '(' || *params == ')') {
+      params++;
+      continue;
+    }
+
+    /* an item ends at a space, a parenthesis or the end of the string */
+    while(params[len] && params[len] != ' ' && params[len] != '(' &&
+          params[len] != ')')
+      len++;
+
+    for(i = 0; i < CURL_ARRAYSIZE(items); i++) {
+      if(strlen(items[i]) == len && curl_strnequal(items[i], params, len))
+        break;
+    }
+    if(i == CURL_ARRAYSIZE(items))
+      /* a content item, or one we do not know */
+      return FALSE;
+
+    params += len;
+  }
+  return TRUE;
+}
+
 /* Detect IMAP listings vs. downloading a single email */
 static bool is_custom_fetch_listing_match(const char *params)
 {
@@ -1190,11 +1226,15 @@ static bool is_custom_fetch_listing_match(const char *params)
     if(*params == 0)
       return FALSE;
   }
-  if(*params == ':')
-    return TRUE;
-  if(*params == ',')
-    return TRUE;
-  return FALSE;
+  if(*params != ':' && *params != ',')
+    return FALSE;
+
+  /* The sequence set spans several messages, but a FETCH that asks for
+     message content is not a listing: the response can contain literals that
+     have to be consumed as data instead of being read as protocol lines. */
+  while(ISDIGIT(*params) || *params == ':' || *params == ',' || *params == '*')
+    params++;
+  return is_literal_free_fetch_item_list(params);
 }
 
 static bool is_custom_fetch_listing(struct IMAP *imap)
