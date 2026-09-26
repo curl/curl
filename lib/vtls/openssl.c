@@ -1989,25 +1989,10 @@ static void ossl_close_all(struct Curl_easy *data)
 
 /* ====================================================== */
 
-/* Quote from RFC2818 section 3.1 "Server Identity"
-
-   If a subjectAltName extension of type dNSName is present, that MUST
-   be used as the identity. Otherwise, the (most specific) Common Name
-   field in the Subject field of the certificate MUST be used. Although
-   the use of the Common Name is existing practice, it is deprecated and
-   Certification Authorities are encouraged to use the dNSName instead.
-
-   Matching is performed using the matching rules specified by
-   [RFC2459]. If more than one identity of a given type is present in
-   the certificate (e.g., more than one dNSName name, a match in any one
-   of the set is considered acceptable.) Names may contain the wildcard
-   character * which is considered to match any single domain name
-   component or component fragment. E.g., *.a.com matches foo.a.com but
-   not bar.foo.a.com. f*.com matches foo.com but not bar.com.
-
-   In some cases, the URI is specified as an IP address rather than a
-   hostname. In this case, the iPAddress subjectAltName must be present
-   in the certificate and must exactly match the IP in the URI.
+/* See RFC9525. Historically, this function checked both subjectAltName and
+   the Common Name in the Subject field. This was deprecated since RFC2818.
+   Checking it was downgraded to a SHOULD in RFC6125 and finally removed in
+   RFC9525.
 
    This function is now used from ngtcp2 (QUIC) as well.
  */
@@ -2026,8 +2011,6 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   struct in_addr addr;
 #endif
   CURLcode result = CURLE_OK;
-  bool dNSName = FALSE; /* if a dNSName field exists in the cert */
-  bool iPAddress = FALSE; /* if an iPAddress field exists in the cert */
   size_t hostlen = strlen(peer->origin->hostname);
 
   (void)conn;
@@ -2076,11 +2059,6 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       /* get a handle to alternative name number i */
       const GENERAL_NAME *check = sk_GENERAL_NAME_value(altnames, i);
 
-      if(check->type == GEN_DNS)
-        dNSName = TRUE;
-      else if(check->type == GEN_IPADD)
-        iPAddress = TRUE;
-
       /* only check alternatives of the same type the target is */
       if(check->type == target) {
         /* get data and length */
@@ -2116,7 +2094,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   if(matched)
     /* an alternative name matched */
     ;
-  else if(dNSName || iPAddress) {
+  else {
     const char *tname = (peer->type == CURL_SSL_PEER_DNS) ? "hostname" :
                         (peer->type == CURL_SSL_PEER_IPV4) ?
                         "IPv4 address" : "IPv6 address";
@@ -2125,74 +2103,6 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     failf(data, "SSL: no alternative certificate subject name matches "
           "target %s '%s'", tname, peer->origin->user_hostname);
     result = CURLE_PEER_FAILED_VERIFICATION;
-  }
-  else {
-    /* we have to look to the last occurrence of a commonName in the
-       distinguished one to get the most significant one. */
-    int i = -1;
-    unsigned char *cn = NULL;
-    int cnlen = 0;
-    bool free_cn = FALSE;
-
-    /* The following is done because of a bug in 0.9.6b */
-    const X509_NAME *name = X509_get_subject_name(server_cert);
-    if(name) {
-      int j;
-      while((j = X509_NAME_get_index_by_NID(name, NID_commonName, i)) >= 0)
-        i = j;
-    }
-
-    /* we have the name entry and we now convert this to a string
-       that we can use for comparison. Doing this we support BMPstring,
-       UTF8, etc. */
-
-    if(i >= 0) {
-      const ASN1_STRING *tmp =
-        X509_NAME_ENTRY_get_data(X509_NAME_get_entry(name, i));
-
-      /* In OpenSSL 0.9.7d and earlier, ASN1_STRING_to_UTF8 fails if the input
-         is already UTF-8 encoded. We check for this case and copy the raw
-         string manually to avoid the problem. This code can be made
-         conditional in the future when OpenSSL has been fixed. */
-      if(tmp) {
-        if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
-          cnlen = ASN1_STRING_length(tmp);
-          cn = (unsigned char *)CURL_UNCONST(ASN1_STRING_get0_data(tmp));
-        }
-        else { /* not a UTF8 name */
-          cnlen = ASN1_STRING_to_UTF8(&cn, tmp);
-          free_cn = TRUE;
-        }
-
-        if((cnlen <= 0) || !cn)
-          result = CURLE_OUT_OF_MEMORY;
-        else if(memchr(cn, '\0', cnlen)) {
-          /* there was a null-terminator before the end of string, this
-             cannot match and we return failure! */
-          failf(data, "SSL: illegal cert name field");
-          result = CURLE_PEER_FAILED_VERIFICATION;
-        }
-      }
-    }
-
-    if(result)
-      /* error already detected, pass through */
-      ;
-    else if(!cn) {
-      failf(data, "SSL: unable to obtain common name from peer certificate");
-      result = CURLE_PEER_FAILED_VERIFICATION;
-    }
-    else if(!Curl_cert_hostcheck((const char *)cn, cnlen,
-                                 peer->origin->hostname, hostlen)) {
-      failf(data, "SSL: certificate subject name '%.*s' does not match "
-            "target hostname '%s'", cnlen, cn, peer->origin->user_hostname);
-      result = CURLE_PEER_FAILED_VERIFICATION;
-    }
-    else {
-      infof(data, " common name: %.*s (matched)", cnlen, cn);
-    }
-    if(free_cn)
-      OPENSSL_free(cn);
   }
 
   return result;
