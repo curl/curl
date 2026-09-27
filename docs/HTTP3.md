@@ -226,7 +226,7 @@ where BoringSSL is to be found vary with version):
      % find target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' boringssl/lib \;
      % find target/release/build/boring-sys-*/out/boringssl -maxdepth 1 \( -name include \) -exec ln -vsf -- '../{}' boringssl \;
 
-Build curl:
+Build curl (with autotools):
 
      % cd ..
      % git clone --depth 1 https://github.com/curl/curl
@@ -236,7 +236,15 @@ Build curl:
      % make
      % make install
 
-If `make install` results in `Permission denied` error, you need to prepend
+Build curl (with CMake):
+
+     % cd ..
+     % git clone --depth 1 https://github.com/curl/curl
+     % cd curl
+     % PKG_CONFIG_PATH=$PWD/../quiche/target/release CC=clang cmake -B bld -DOPENSSL_ROOT_DIR=$PWD/../quiche/boringssl -DOPENSSL_USE_STATIC_LIBS=ON -DUSE_QUICHE=ON
+     % cmake --build bld
+
+If the install step results in `Permission denied` error, you need to prepend
 it with `sudo`.
 
 # `--http3`
