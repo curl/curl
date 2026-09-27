@@ -52,13 +52,8 @@ static int wakeup_eventfd(curl_socket_t socks[2], bool nonblocking)
 #include <fcntl.h>
 #endif
 
-static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
+static int wakeup_pipe_fallback(curl_socket_t socks[2], bool nonblocking)
 {
-#ifdef HAVE_PIPE2
-  int flags = nonblocking ? O_NONBLOCK | O_CLOEXEC : O_CLOEXEC;
-  if(pipe2(socks, flags))
-    return -1;
-#else
   if(pipe(socks))
     return -1;
 #ifdef HAVE_FCNTL
@@ -79,9 +74,27 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
       return -1;
     }
   }
-#endif
-
   return 0;
+}
+
+static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
+{
+#if defined(__APPLE__) && (__MAC_OS_X_VERSION_MAX_ALLOWED >= 270000)
+#ifdef HAVE_BUILTIN_AVAILABLE
+  if(__builtin_available(macOS 27.0, *))
+    return pipe2((nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC, flags) ? -1 : 0;
+  else
+    return wakeup_pipe_fallback(socks, nonblocking);
+#elif __MAC_OS_X_VERSION_MIN_REQUIRED >= 270000
+  return pipe2((nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC, flags) ? -1 : 0;
+#else
+  return wakeup_pipe_fallback(socks, nonblocking);
+#endif
+#elif defined(HAVE_PIPE2)
+  return pipe2((nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC, flags) ? -1 : 0;
+#else
+  return wakeup_pipe_fallback(socks, nonblocking);
+#endif
 }
 
 #elif defined(HAVE_SOCKETPAIR)  /* !USE_EVENTFD && !HAVE_PIPE */
