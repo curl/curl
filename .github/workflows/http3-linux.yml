@@ -751,7 +751,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
-        if: ${{ contains(matrix.build.name, 'quiche') }}
+        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache-quiche.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
