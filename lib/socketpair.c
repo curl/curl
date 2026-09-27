@@ -79,17 +79,16 @@ static int wakeup_pipe_fallback(curl_socket_t socks[2], bool nonblocking)
 
 static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
 {
-#if defined(__APPLE__) && (__MAC_OS_X_VERSION_MAX_ALLOWED >= 270000)
-#ifdef HAVE_BUILTIN_AVAILABLE
-  if(__builtin_available(macOS 27.0, *))
+#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
+  ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+           (__MAC_OS_X_VERSION_MAX_ALLOWED >= 270000)) ||
+   (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+           (__IPHONE_OS_VERSION_MAX_ALLOWED >= 270000)))
+  if(__builtin_available(macOS 27.0, iOS 27.0, tvOS 27.0, watchOS 27.0,
+                         visionOS 27.0, macCatalyst 27.0, *))
     return pipe2((nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC, flags) ? -1 : 0;
   else
     return wakeup_pipe_fallback(socks, nonblocking);
-#elif __MAC_OS_X_VERSION_MIN_REQUIRED >= 270000
-  return pipe2((nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC, flags) ? -1 : 0;
-#else
-  return wakeup_pipe_fallback(socks, nonblocking);
-#endif
 #elif defined(HAVE_PIPE2)
   return pipe2((nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC, flags) ? -1 : 0;
 #else

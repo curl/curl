@@ -294,20 +294,14 @@
 #include <curl/system.h>
 
 #if !defined(HAVE_PIPE2) && \
-  (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+  (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+          (__MAC_OS_X_VERSION_MAX_ALLOWED >= 270000) && \
+   defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
           (__MAC_OS_X_VERSION_MIN_REQUIRED >= 270000)) || \
-  (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+          (__IPHONE_OS_VERSION_MAX_ALLOWED >= 270000) && \
+   defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
           (__IPHONE_OS_VERSION_MIN_REQUIRED >= 270000))
-
-#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-            (__MAC_OS_X_VERSION_MAX_ALLOWED >= 270000) && \
-     defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
-            (__MAC_OS_X_VERSION_MIN_REQUIRED >= 270000)) || \
-    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-            (__IPHONE_OS_VERSION_MAX_ALLOWED >= 270000) && \
-     defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-            (__IPHONE_OS_VERSION_MIN_REQUIRED >= 270000))
-
 #define HAVE_PIPE2
 #endif
 
