@@ -795,7 +795,7 @@ jobs:
 
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
-    runs-on: ubuntu-26.04-arm
+    runs-on: '${{ matrix.image }}'
     timeout-minutes: 10
     cache-mode: none
     env:
@@ -808,9 +808,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { build: 'autotools', compiler: 'gcc' }
-          - { build: 'cmake'    , compiler: 'gcc' }
-          - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-22 clang-tidy-22', CFLAGS: '-Wunused-macros' }
+          - { image: 'ubuntu-26.04-arm', build: 'autotools', compiler: 'gcc' }
+          - { image: 'ubuntu-26.04-arm', build: 'cmake'    , compiler: 'gcc' }
+          - { image: 'ubuntu-26.04-arm', build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-22 clang-tidy-22', CFLAGS: '-Wunused-macros' }
+          - { image: 'ubuntu-26.04'    , build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-22 clang-tidy-22', CFLAGS: '-Wunused-macros' }
     steps:
       - name: 'install prereqs'
         timeout-minutes: 2
@@ -875,7 +876,7 @@ jobs:
       - name: 'build'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld
+            cmake --build bld --verbose
           else
             make -C bld
           fi
@@ -889,7 +890,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target testdeps
+            cmake --build bld --target testdeps --verbose
           else
             make -C bld -C tests
           fi
@@ -898,7 +899,7 @@ jobs:
         if: ${{ matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for clang-tidy
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target curl-examples-build
+            cmake --build bld --target curl-examples-build --verbose
           else
             make -C bld examples
           fi
