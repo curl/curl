@@ -837,7 +837,7 @@ jobs:
               options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
               options+=' -DCMAKE_C_COMPILER=clang-22'
               options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang-22 -dumpversion | cut -d '.' -f 1)"
-              options+=' -DCMAKE_RC_FLAGS=-I/usr/x86_64-w64-mingw32/include' # Required on ubuntu-26.04-arm
+              options+=' -DCMAKE_RC_FLAGS=--target=pe-x86-64' # Required on ubuntu-26.04-arm
             else
               options+=" -DCMAKE_C_COMPILER=${TRIPLET}-gcc"
             fi
