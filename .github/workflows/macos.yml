@@ -296,7 +296,7 @@ jobs:
           - name: 'OpenSSL 27.0 pipe2 gcc'
             image: xcode-27
             macos-version-min: '27.0'
-            compiler: gcc-13
+            compiler: gcc-14
             install: libnghttp3 libngtcp2
             generate: >-
               -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
@@ -314,7 +314,7 @@ jobs:
           - name: 'OpenSSL 27.0 pipe2 gcc 10.15'
             image: xcode-27
             macos-version-min: '10.15'
-            compiler: gcc-13
+            compiler: gcc-14
             install: libnghttp3 libngtcp2
             generate: >-
               -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
