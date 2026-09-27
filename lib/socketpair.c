@@ -55,14 +55,12 @@ static int wakeup_eventfd(curl_socket_t socks[2], bool nonblocking)
 static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
 {
 #ifdef HAVE_PIPE2
-#warning PIPE2_STATIC
   return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;
 #elif defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
   ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
            (__MAC_OS_X_VERSION_MAX_ALLOWED >= 270000)) || \
    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
            (__IPHONE_OS_VERSION_MAX_ALLOWED >= 270000)))
-#warning PIPE2_DYNAMIC
   if(__builtin_available(macOS 27.0, iOS 27.0, tvOS 27.0, watchOS 27.0,
                          visionOS 27.0, macCatalyst 27.0, *))
     return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;

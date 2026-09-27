@@ -293,13 +293,6 @@
 
 #include <curl/system.h>
 
-#define enquote(x) #x
-#define expand(x) enquote(x)
-#pragma message("__MAC_OS_X_VERSION_MAX_ALLOWED=" expand(__MAC_OS_X_VERSION_MAX_ALLOWED))
-#pragma message("__MAC_OS_X_VERSION_MIN_REQUIRED=" expand(__MAC_OS_X_VERSION_MIN_REQUIRED))
-#pragma message("__IPHONE_OS_VERSION_MAX_ALLOWED=" expand(__IPHONE_OS_VERSION_MAX_ALLOWED))
-#pragma message("__IPHONE_OS_VERSION_MIN_REQUIRED=" expand(__IPHONE_OS_VERSION_MIN_REQUIRED))
-
 #if !defined(HAVE_PIPE2) && \
   (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
           (__MAC_OS_X_VERSION_MAX_ALLOWED >= 270000) && \
