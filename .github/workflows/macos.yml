@@ -458,6 +458,8 @@ jobs:
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
+          [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"  # for autotools, and cmake with gcc
+
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
               options=''
@@ -483,7 +485,6 @@ jobs:
               options+=" --with-sysroot=${sysroot}"
               CFLAGS+=" --sysroot=${sysroot}"
             fi
-            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' --with-test-vsftpd=no'  # Skip ~20 tests that stretch run time by 7x on macOS
             mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
@@ -707,6 +708,9 @@ jobs:
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
+          export CFLAGS
+          [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"  # for autotools, and cmake with gcc
+
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && options+=" -DCMAKE_OSX_DEPLOYMENT_TARGET=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, and libssh2
@@ -723,7 +727,6 @@ jobs:
               -DCURL_USE_GSSAPI=ON -DCURL_GSS_FLAVOR=Apple \
               ${options}
           else
-            export CFLAGS
             if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
             fi
@@ -731,7 +734,6 @@ jobs:
               options+=" --with-sysroot=${sysroot}"
               CFLAGS+=" --sysroot=${sysroot}"
             fi
-            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
