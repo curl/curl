@@ -86,13 +86,13 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
            (__IPHONE_OS_VERSION_MAX_ALLOWED >= 270000)))
   if(__builtin_available(macOS 27.0, iOS 27.0, tvOS 27.0, watchOS 27.0,
                          visionOS 27.0, macCatalyst 27.0, *))
-    return pipe2((nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC, flags) ? -1 : 0;
+    return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;
   else
     return wakeup_pipe_fallback(socks, nonblocking);
 #warning PIPE2_DYNAMIC
 #elif defined(HAVE_PIPE2)
 #warning PIPE2_STATIC
-  return pipe2((nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC, flags) ? -1 : 0;
+  return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;
 #else
   return wakeup_pipe_fallback(socks, nonblocking);
 #endif
