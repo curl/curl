@@ -81,7 +81,7 @@ jobs:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
     env:
-      CURL_TEST_MIN: 1850
+      CURL_TEST_MIN: 2000
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
@@ -96,7 +96,7 @@ jobs:
           - { name: 'openssl',
               build: 'cmake', platform: 'x86_64', tflags: '',
               config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON',
-              install: 'libssl-devel libssh2-devel' }
+              install: 'libssl-devel libssh2-devel python3' }
       fail-fast: false
     steps:
       - uses: cygwin/cygwin-install-action@3f0a3f9f988f7e96b8c18098ae05eaec175f5b52 # v6.0.2
