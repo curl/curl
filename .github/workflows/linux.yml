@@ -35,7 +35,7 @@ cache-mode: write
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 1660
+  CURL_TEST_MIN: 1800
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.8.0
@@ -179,7 +179,7 @@ jobs:
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls-arm
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
-            tflags: '--subset=0/2'
+            tflags: '--subset=0/2 --min=880'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
@@ -207,7 +207,7 @@ jobs:
             image: ubuntu-26.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
-            tflags: '--subset=0/2'
+            tflags: '--subset=0/2 --min=880'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
@@ -287,7 +287,7 @@ jobs:
           - name: 'curl_global_init_mem debug valgrind'
             image: ubuntu-24.04-arm
             install_packages: valgrind
-            tflags: '--min=1700'
+            tflags: '--min=1800'
             configure: >-
               --enable-init-mem-debug
               --with-openssl --disable-debug --enable-unity
@@ -295,7 +295,7 @@ jobs:
 
           - name: 'openssl https-only'
             image: ubuntu-24.04-arm
-            tflags: '--min=1260'
+            tflags: '--min=1360'
             configure: >-
               --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
@@ -330,7 +330,7 @@ jobs:
 
           - name: '!ssl !http !smtp !imap'
             image: ubuntu-26.04-arm
-            tflags: '--min=500'
+            tflags: '--min=520'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity --enable-httpsig
 
           - name: 'clang-tidy'
@@ -441,13 +441,13 @@ jobs:
             LDFLAGS: -fsanitize=memory
             LIBS: -ldl
             configure: --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
-            tflags: '--min=1540'
+            tflags: '--min=1640'
 
           - name: 'event-based'
             image: ubuntu-24.04
             install_packages: libssh-dev
             configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm
-            tflags: '-n --test-event --min=1420'
+            tflags: '-n --test-event --min=1520'
 
           - name: 'duphandle'
             image: ubuntu-26.04-arm

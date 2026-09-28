@@ -37,7 +37,7 @@ cache-mode: write
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 1850
+  CURL_TEST_MIN: 2000
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.8.0
@@ -502,7 +502,7 @@ jobs:
               -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl'
-            tflags: '--min=1700'
+            tflags: '--min=1850'
             LDFLAGS: -Wl,-rpath,/home/runner/openssl/build/lib
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
@@ -528,7 +528,7 @@ jobs:
               --with-openssl=/home/runner/openssl-prev/build --with-ngtcp2=/home/runner/ngtcp2-openssl-prev/build --enable-ssls-export
 
           - name: 'openssl-prev'
-            tflags: '--min=1700'
+            tflags: '--min=2000'
             PKG_CONFIG_PATH: "\
               /home/runner/openssl-prev/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
