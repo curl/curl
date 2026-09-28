@@ -1182,9 +1182,8 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 2
         run: |
-          pkgs=''
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
-            pkgs+=' openssh'
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
             if [[ "${MATRIX_IMAGE}" = *'windows-2025'* ]]; then
@@ -1203,7 +1202,6 @@ jobs:
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
           fi
-          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed python ${pkgs}
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
