@@ -113,7 +113,7 @@ typedef CC_MD4_CTX my_md4_ctx;
 
 static int my_md4_init(my_md4_ctx *ctx)
 {
-  return CC_MD4_Init(ctx);
+  return CC_MD4_Init(ctx);  /* always returns 1 */
 }
 
 static void my_md4_update(my_md4_ctx *ctx,

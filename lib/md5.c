@@ -177,9 +177,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
 static CURLcode my_md5_init(void *ctx)
 {
-  if(!CC_MD5_Init(ctx))
-    return CURLE_OUT_OF_MEMORY;
-
+  (void)CC_MD5_Init(ctx);  /* always returns 1 */
   return CURLE_OK;
 }
 
