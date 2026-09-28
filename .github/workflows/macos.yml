@@ -284,43 +284,9 @@ jobs:
               -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
               -DCMAKE_C_STANDARD=90 -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
-          - name: 'OpenSSL 27.0 pipe2'
-            image: xcode-27
-            macos-version-min: '27.0'
-            compiler: clang
-            install: libnghttp3 libngtcp2
-            generate: >-
-              -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
-
-          - name: 'OpenSSL 27.0 pipe2 gcc'
-            image: xcode-27
-            macos-version-min: '27.0'
-            compiler: gcc-14
-            install: libnghttp3 libngtcp2
-            generate: >-
-              -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
-
-          - name: 'OpenSSL 27.0 pipe2 10.15'
-            image: xcode-27
-            macos-version-min: '10.15'
-            compiler: clang
-            install: libnghttp3 libngtcp2
-            generate: >-
-              -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
-
-          - name: 'OpenSSL 27.0 pipe2 gcc 10.15'
-            image: xcode-27
-            macos-version-min: '10.15'
-            compiler: gcc-14
-            install: libnghttp3 libngtcp2
-            generate: >-
-              -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
-
           - name: 'OpenSSL SecTrust krb5'
+            image: xcode-27  # for pipe2()
+            macos-version-min: '10.15'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
