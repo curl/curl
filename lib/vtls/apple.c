@@ -53,7 +53,13 @@
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
              __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
     (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-             __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
+             __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000) || \
+    (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+             __TV_OS_VERSION_MAX_ALLOWED >= 120000) || \
+    (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+             __WATCH_OS_VERSION_MAX_ALLOWED >= 50000) || \
+    (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+             __VISION_OS_VERSION_MAX_ALLOWED >= 10000)
 #define SUPPORTS_SecTrustEvaluateWithError 1
 #endif
 
@@ -61,7 +67,13 @@
   ((defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
             __MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) || \
    (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-            __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
+            __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000) || \
+   (defined(__TV_OS_VERSION_MIN_REQUIRED) && \
+            __TV_OS_VERSION_MIN_REQUIRED >= 120000) || \
+   (defined(__WATCH_OS_VERSION_MIN_REQUIRED) && \
+            __WATCH_OS_VERSION_MIN_REQUIRED >= 50000) || \
+   (defined(__VISION_OS_VERSION_MIN_REQUIRED) && \
+            __VISION_OS_VERSION_MIN_REQUIRED >= 10000))
 #define REQUIRES_SecTrustEvaluateWithError 1
 #endif
 
@@ -74,7 +86,13 @@
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
              __MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
     (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-             __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
+             __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000) || \
+    (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+             __TV_OS_VERSION_MAX_ALLOWED >= 90000) || \
+    (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+             __WATCH_OS_VERSION_MAX_ALLOWED >= 20000) || \
+    (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+             __VISION_OS_VERSION_MAX_ALLOWED >= 10000)
 #define SUPPORTS_SecOCSP 1
 #endif
 
