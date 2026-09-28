@@ -441,10 +441,8 @@ sub getreplydata {
     my ($num) = @_;
     my $testpart = "";
 
-    print STDERR ">>>|$num|\n";
-
     $num =~ s/^([^0-9]*)//;
-    if($num > 10000) {
+    if($num && $num > 10000) {
        $testpart = $num % 10000;
     }
 
