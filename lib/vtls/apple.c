@@ -53,7 +53,13 @@
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
              __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
     (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-             __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
+             __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000) || \
+    (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+             __TV_OS_VERSION_MAX_ALLOWED >= 120000) || \
+    (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+             __WATCH_OS_VERSION_MAX_ALLOWED >= 50000) || \
+    (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+             __VISION_OS_VERSION_MAX_ALLOWED >= 10000)
 #define SUPPORTS_SecTrustEvaluateWithError 1
 #endif
 
@@ -61,7 +67,13 @@
   ((defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
             __MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) || \
    (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-            __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
+            __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000) || \
+   (defined(__TV_OS_VERSION_MIN_REQUIRED) && \
+            __TV_OS_VERSION_MIN_REQUIRED >= 120000) || \
+   (defined(__WATCH_OS_VERSION_MIN_REQUIRED) && \
+            __WATCH_OS_VERSION_MIN_REQUIRED >= 50000) || \
+   (defined(__VISION_OS_VERSION_MIN_REQUIRED) && \
+            __VISION_OS_VERSION_MIN_REQUIRED >= 10000))
 #define REQUIRES_SecTrustEvaluateWithError 1
 #endif
 
@@ -74,7 +86,13 @@
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
              __MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
     (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-             __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
+             __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000) || \
+    (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+             __TV_OS_VERSION_MAX_ALLOWED >= 90000) || \
+    (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+             __WATCH_OS_VERSION_MAX_ALLOWED >= 20000) || \
+    (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+             __VISION_OS_VERSION_MAX_ALLOWED >= 10000)
 #define SUPPORTS_SecOCSP 1
 #endif
 
@@ -128,7 +146,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   {
     if(!conn_config->no_revoke) {
-      if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
+      if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, visionOS 1,
+                             macCatalyst 13.1, *)) {
         /* Even without this set, validation seemingly-unavoidably fails
          * for certificates that trustd already knows to be revoked.
          * This policy further allows trustd to consult CRLs and OCSP data
@@ -202,7 +221,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   if(ocsp_len > 0) {
     bool checked = FALSE;
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
-    if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
+    if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, visionOS 1,
+                           macCatalyst 13.1, *)) {
       CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
       if(!ocspdata) {
         result = CURLE_OUT_OF_MEMORY;
@@ -229,7 +249,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 
 #ifdef SUPPORTS_SecTrustEvaluateWithError
 #ifdef HAVE_BUILTIN_AVAILABLE
-  if(__builtin_available(macOS 10.14, iOS 12, tvOS 12, watchOS 5, *)) {
+  if(__builtin_available(macOS 10.14, iOS 12, tvOS 12, watchOS 5, visionOS 1,
+                         macCatalyst 13.1, *)) {
 #else
   if(1) {
 #endif
