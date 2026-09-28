@@ -341,6 +341,7 @@ jobs:
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
+          path-type: inherit
           # https://packages.msys2.org/search
           install: >-
             gcc
@@ -358,6 +359,7 @@ jobs:
         with:
           msystem: ${{ matrix.sys }}
           update: ${{ contains(matrix.install, 'wolfssl') && 'true' || 'false' }}
+          path-type: inherit
           install: >-
             diffutils
             mingw-w64-${{ matrix.env }}-cc
@@ -522,7 +524,9 @@ jobs:
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
           fi
-          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed python ${pkgs}
+          if [ -n "${pkgs}" ]; then
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed ${pkgs}
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
