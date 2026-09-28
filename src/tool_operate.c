@@ -1221,6 +1221,11 @@ static void check_stdin_upload(struct OperationConfig *config,
     else
       per->infd = (int)f;
 #endif
+    if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0) {
+      char errbuf[STRERROR_LEN];
+      warnf("fcntl failed on fd=%d: %s", per->infd,
+            curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    }
   }
 }
 
@@ -2355,8 +2360,6 @@ static CURLcode run_all_transfers(CURLSH *share,
   bool orig_noprogress = (bool)global->noprogress;
   bool orig_isatty = (bool)global->isatty;
   struct per_transfer *per;
-  (void)curlx_nonblock((curl_socket_t)STDIN_FILENO, TRUE);
-  /* fail silently */
 
   /* Time to actually do the transfers */
   if(!result) {
