@@ -67,8 +67,8 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
             __WATCH_OS_VERSION_MAX_ALLOWED >= 270000) || \
    (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
             __VISION_OS_VERSION_MAX_ALLOWED >= 270000))
-  if(__builtin_available(macOS 27.0, iOS 27.0, tvOS 27.0, watchOS 27.0,
-                         visionOS 27.0, macCatalyst 27.0, *))
+  if(__builtin_available(macOS 27, iOS 27, tvOS 27, watchOS 27, visionOS 27,
+                         macCatalyst 27, *))
     return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;
   else
 #endif

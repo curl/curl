@@ -1380,7 +1380,7 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* while connectx function is available since macOS 10.11 / iOS 9,
        it did not have the interface declared correctly until
        Xcode 9 / macOS SDK 10.13 */
-    if(__builtin_available(macOS 10.11, iOS 9.0, tvOS 9.0, watchOS 2.0, *)) {
+    if(__builtin_available(macOS 10.11, iOS 9, tvOS 9, watchOS 2, *)) {
       sa_endpoints_t endpoints;
       endpoints.sae_srcif = 0;
       endpoints.sae_srcaddr = NULL;
