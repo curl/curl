@@ -45,7 +45,6 @@ class TestVsFTPD:
         yield vsftpd
         vsftpd.stop()
 
-    @pytest.fixture(scope='class')
     @classmethod
     def _make_docs_file(cls, docs_dir: str, fname: str, fsize: int):
         fpath = os.path.join(docs_dir, fname)
