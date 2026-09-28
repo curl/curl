@@ -91,7 +91,8 @@ class CertificateSpec:
                  valid_to: timedelta = timedelta(days=89),
                  client: bool = False,
                  check_valid: bool = True,
-                 sub_specs: Optional[List['CertificateSpec']] = None):
+                 sub_specs: Optional[List['CertificateSpec']] = None,
+                 domain_in_common_name_only: bool = False):
         self._name = name
         self.domains = domains
         self.client = client
@@ -102,6 +103,7 @@ class CertificateSpec:
         self.valid_to = valid_to
         self.sub_specs = sub_specs
         self.check_valid = check_valid
+        self.domain_in_common_name_only = domain_in_common_name_only
 
     @property
     def name(self) -> Optional[str]:
@@ -386,7 +388,8 @@ class TestCA:
         if spec.domains and len(spec.domains):
             return TestCA._make_server_credentials(name=spec.name, domains=spec.domains,
                                                    issuer=issuer, valid_from=valid_from,
-                                                   valid_to=valid_to, key_type=key_type)
+                                                   valid_to=valid_to, key_type=key_type,
+                                                   domain_in_common_name_only=spec.domain_in_common_name_only)
         if spec.client:
             return TestCA._make_client_credentials(name=spec.name, issuer=issuer,
                                                    email=spec.email, valid_from=valid_from,
@@ -468,7 +471,8 @@ class TestCA:
         )
 
     @staticmethod
-    def _add_leaf_usages(csr: Any, domains: List[str], issuer: Credentials) -> Any:
+    def _add_leaf_usages(csr: Any, domains: List[str], issuer: Credentials,
+                         domain_in_common_name_only: bool = False) -> Any:
         names = []
         for name in domains:
             m = re.match(r'dns:(.+)', name)
@@ -480,7 +484,7 @@ class TestCA:
                 except ValueError:
                     names.append(x509.DNSName(name))
 
-        return csr.add_extension(
+        csr = csr.add_extension(
             x509.BasicConstraints(ca=False, path_length=None),
             critical=True,
         ).add_extension(
@@ -488,9 +492,12 @@ class TestCA:
                 issuer.certificate.extensions.get_extension_for_class(
                     x509.SubjectKeyIdentifier).value),
             critical=False
-        ).add_extension(
-            x509.SubjectAlternativeName(names), critical=True,
-        ).add_extension(
+        )
+        if not domain_in_common_name_only:
+            csr = csr.add_extension(
+                x509.SubjectAlternativeName(names), critical=True,
+            )
+        return csr.add_extension(
             x509.ExtendedKeyUsage([
                 ExtendedKeyUsageOID.SERVER_AUTH,
             ]),
@@ -549,13 +556,22 @@ class TestCA:
                                  key_type: Any,
                                  valid_from: timedelta = timedelta(days=-1),
                                  valid_to: timedelta = timedelta(days=89),
+                                 domain_in_common_name_only: bool = False,
                                  ) -> Credentials:
         pkey = _private_key(key_type=key_type)
-        subject = TestCA._make_x509_name(common_name=name, parent=issuer.subject)
+        common_name = name
+        if domain_in_common_name_only:
+            if len(domains) != 1:
+                raise CertError("domain_in_common_name_only requires exactly one domain")
+            # Use the first domain as the common name, instead of `name`. This allows
+            # `name` still be a unique name for reconfiguring the server.
+            common_name = domains[0]
+        subject = TestCA._make_x509_name(common_name=common_name, parent=issuer.subject)
         csr = TestCA._make_csr(subject=subject,
                                issuer_subject=issuer.certificate.subject, pkey=pkey,
                                valid_from_delta=valid_from, valid_until_delta=valid_to)
-        csr = TestCA._add_leaf_usages(csr, domains=domains, issuer=issuer)
+        csr = TestCA._add_leaf_usages(csr, domains=domains, issuer=issuer,
+                                      domain_in_common_name_only=domain_in_common_name_only)
         cert = csr.sign(private_key=issuer.private_key,
                         algorithm=hashes.SHA256(),
                         backend=default_backend())
