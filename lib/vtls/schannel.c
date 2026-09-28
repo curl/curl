@@ -61,8 +61,10 @@
  */
 #ifdef CURL_SCHANNEL_DEV_DEBUG
 #define SCH_DEV(x) x
-#define SCH_DEV_SHOWBOOL(x)                                   \
-  infof(data, "schannel: " #x " %s", (x) ? "TRUE" : "FALSE");
+#define SCH_DEV_SHOWBOOL(x)                                     \
+  do {                                                          \
+    infof(data, "schannel: " #x " %s", (x) ? "TRUE" : "FALSE"); \
+  } while(0)
 #else
 #define SCH_DEV(x) do {} while(0)
 #define SCH_DEV_SHOWBOOL(x) do {} while(0)
