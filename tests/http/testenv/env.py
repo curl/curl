@@ -760,7 +760,7 @@ class Env:
                             '-public_name', domain
                         ], capture_output=True, text=True, check=True)
                         if p.returncode != 0:
-                            raise f"Error generating ECHConfig for {domain}"
+                            raise EnvError(f"Error generating ECHConfig for {domain}")
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)
