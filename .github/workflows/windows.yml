@@ -81,7 +81,7 @@ jobs:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
     env:
-      CURL_TEST_MIN: 2000
+      CURL_TEST_MIN: 2040
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
@@ -95,7 +95,7 @@ jobs:
               install: 'libssl-devel libssh2-devel' }
           - { name: 'openssl',
               build: 'cmake', platform: 'x86_64', tflags: '',
-              config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON',
+              config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_ENABLE_NTLM=ON',
               install: 'libssl-devel libssh2-devel python3' }
       fail-fast: false
     steps:
@@ -262,8 +262,8 @@ jobs:
         include:
           # MSYS
           - { name: '!proxy',
-              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '--min=1620',
-              config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy --enable-ntlm',
+              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '--min=1750',
+              config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy --enable-httpsig --enable-ntlm',
               install: 'openssl-devel libssh2-devel' }
           - { name: 'default',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
