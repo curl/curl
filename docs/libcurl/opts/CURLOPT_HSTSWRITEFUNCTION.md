@@ -49,17 +49,16 @@ This callback function gets called by libcurl repeatedly to allow the
 application to store the in-memory HSTS cache when libcurl is about to discard
 it.
 
-Set the *clientp* argument with the CURLOPT_HSTSWRITEDATA(3) option
-or it is NULL.
-When the callback is invoked, the *sts* pointer points to a populated
-struct: Read the hostname to 'name' (it is *namelen* bytes long and null
-terminated. The *includeSubDomains* field is non-zero if the entry matches
-subdomains. The *expire* string is a date stamp null-terminated string
+Set the *clientp* argument with the CURLOPT_HSTSWRITEDATA(3) option or it is
+NULL. When the callback is invoked, the *sts* pointer points to a populated
+struct: Read the hostname to 'name' (it is *namelen* bytes long and
+null-terminated. The *includeSubDomains* field is non-zero if the entry
+matches subdomains. The *expire* string is a date stamp null-terminated string
 using the syntax YYYYMMDD HH:MM:SS.
 
-The callback should return *CURLSTS_OK* if it succeeded and is prepared to
-be called again (for another host) or *CURLSTS_DONE* if there is nothing
-more to do. It can also return *CURLSTS_FAIL* to signal error.
+The callback should return *CURLSTS_OK* if it succeeded and is prepared to be
+called again (for another host) or *CURLSTS_DONE* if there is nothing more to
+do. It can also return *CURLSTS_FAIL* to signal error.
 
 This option does not enable HSTS, you need to use CURLOPT_HSTS_CTRL(3) to
 do that.
