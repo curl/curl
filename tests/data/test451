@@ -31,7 +31,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-Variable from file that is JSON and URL encoded (with null byte)
+Variable from file that is JSON and URL encoded (with NUL byte)
 </name>
 <file name="%LOGDIR/junk">
 %hex[%01%02%03%00%04%05%06]hex%

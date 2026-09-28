@@ -13,7 +13,7 @@ variables
 http
 </server>
 <name>
-Variable output starting with null byte
+Variable output starting with NUL byte
 </name>
 <file name="%LOGDIR/junk">
 %hex[%00]hex%hello

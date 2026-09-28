@@ -24,7 +24,7 @@ ok!
 http
 </server>
 <name>
-HTTP with -d @file with file containing CR, LF and null byte
+HTTP with -d @file with file containing CR, LF and NUL byte
 </name>
 <file name="%LOGDIR/input463">
 %hex[one%0dtwo%0dthree]hex%

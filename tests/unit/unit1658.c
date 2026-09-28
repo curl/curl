@@ -205,7 +205,7 @@ static CURLcode test_unit1658(const char *arg)
       "r:8|"
     },
     {
-      "rname with null byte",
+      "rname with NUL byte",
       (const unsigned char *)"\x00\x00" /* 16-bit prio */
       "\x04sa\x00e\x04some\x00", /* RNAME */
       13,
