@@ -23,7 +23,7 @@ permissions: {}
 cache-mode: none
 
 env:
-  CURL_TEST_MIN: 1500
+  CURL_TEST_MIN: 1600
   DO_NOT_TRACK: '1'
   MAKEFLAGS: -j 5
 
