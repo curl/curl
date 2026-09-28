@@ -60,7 +60,13 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
   ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
             __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000) || \
    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-            __IPHONE_OS_VERSION_MAX_ALLOWED >= 270000))
+            __IPHONE_OS_VERSION_MAX_ALLOWED >= 270000) || \
+   (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+            __TV_OS_VERSION_MAX_ALLOWED >= 270000) || \
+   (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+            __WATCH_OS_VERSION_MAX_ALLOWED >= 270000) || \
+   (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+            __VISION_OS_VERSION_MAX_ALLOWED >= 270000))
   if(__builtin_available(macOS 27.0, iOS 27.0, tvOS 27.0, watchOS 27.0,
                          visionOS 27.0, macCatalyst 27.0, *))
     return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;
