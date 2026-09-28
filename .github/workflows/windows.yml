@@ -81,7 +81,7 @@ jobs:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
     env:
-      CURL_TEST_MIN: 2000
+      CURL_TEST_MIN: 2040
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
@@ -262,7 +262,7 @@ jobs:
         include:
           # MSYS
           - { name: '!proxy',
-              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '--min=1620',
+              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '--min=1750',
               config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy --enable-httpsig --enable-ntlm',
               install: 'openssl-devel libssh2-devel' }
           - { name: 'default',
