@@ -170,9 +170,9 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
+               __MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
+               __IPHONE_OS_VERSION_MAX_ALLOWED >= 20000)
 #include <CommonCrypto/CommonDigest.h>
 
 typedef CC_SHA256_CTX my_sha256_ctx;
