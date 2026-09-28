@@ -1892,6 +1892,7 @@ sub rundictserver {
 
     my $port = getfreeport($ipvnum);
     my $aflags = "--port $port $flags";
+    print STDERR ">>>11>>>|$srcdir|\n";
     my $cmd = shell_quote("$srcdir/dictserver.py") . " " . $aflags;
     my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
