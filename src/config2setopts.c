@@ -508,12 +508,12 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 
   if(feature_ech) {
     /* only if enabled in libcurl */
-    if(config->ech) /* only if set (optional) */
-      MY_SETOPT_STR(curl, CURLOPT_ECH, config->ech);
     if(config->ech_public) /* only if set (optional) */
       MY_SETOPT_STR(curl, CURLOPT_ECH, config->ech_public);
     if(config->ech_config) /* only if set (optional) */
       MY_SETOPT_STR(curl, CURLOPT_ECH, config->ech_config);
+    if(config->ech) /* only if set (optional) */
+      MY_SETOPT_STR(curl, CURLOPT_ECH, config->ech);
   }
 
   if(config->engine)

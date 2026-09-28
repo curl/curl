@@ -38,6 +38,6 @@ from .dnsd import Dnsd
 from .env import Env
 from .h2o import H2oProxy, H2oServer
 from .httpd import Httpd
-from .nghttpx import Nghttpx, NghttpxFwd, NghttpxQuic
+from .nghttpx import Nghttpx, NghttpxFwd, NghttpxQuic, NghttpxTcp
 from .sshd import Sshd
 from .vsftpd import VsFTPD

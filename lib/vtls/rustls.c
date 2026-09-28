@@ -528,7 +528,8 @@ static void cr_keylog_log_cb(struct rustls_str label,
 }
 
 static CURLcode
-init_config_builder(struct Curl_easy *data,
+init_config_builder(struct Curl_cfilter *cf,
+                    struct Curl_easy *data,
                     const struct ssl_filter_config *conn_config,
                     struct rustls_client_config_builder **config_builder)
 {
@@ -583,11 +584,13 @@ init_config_builder(struct Curl_easy *data,
   }
 
 #ifdef USE_ECH
-  if(CURLECH_ENABLED(data)) {
+  if(Curl_ssl_ech_enabled(cf)) {
     tls_versions[0] = RUSTLS_TLS_VERSION_TLSV1_3;
     tls_versions_len = 1;
     infof(data, "rustls: ECH enabled, forcing TLSv1.3");
   }
+#else
+  (void)cf;
 #endif /* USE_ECH */
 
   cipher_suites = curlx_malloc(sizeof(*cipher_suites) * cipher_suites_len);
@@ -920,21 +923,12 @@ cleanup:
 
 #ifdef USE_ECH
 
-static bool cr_ech_need_httpsrr(struct Curl_easy *data)
-{
-  if(!CURLECH_ENABLED(data))
-    return FALSE;
-  if((data->set.tls_ech == CURLECH_GREASE) ||
-     CURL_EASY_STR(data, STRING_ECH_CONFIG))
-    return FALSE;
-  return TRUE;
-}
-
 static CURLcode
 init_config_builder_ech(struct Curl_easy *data,
                         struct Curl_cfilter *cf,
                         struct rustls_client_config_builder *builder)
 {
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   const rustls_hpke *hpke = rustls_supported_hpke();
   unsigned char *ech_config = NULL;
   size_t ech_config_len = 0;
@@ -950,13 +944,13 @@ init_config_builder_ech(struct Curl_easy *data,
     goto cleanup;
   }
 
-  if(CURL_EASY_STR(data, STRING_ECH_PUBLIC)) {
+  if(conn_config->ech_public) {
     failf(data, "rustls: ECH outername not supported");
     result = CURLE_SSL_CONNECT_ERROR;
     goto cleanup;
   }
 
-  if(data->set.tls_ech == CURLECH_GREASE) {
+  if(conn_config->ech == CURLECH_GREASE) {
     rr = rustls_client_config_builder_enable_ech_grease(builder, hpke);
     if(rr != RUSTLS_RESULT_OK) {
       rustls_failf(data, rr, "rustls: failed to configure ECH GREASE");
@@ -966,10 +960,10 @@ init_config_builder_ech(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  if(data->set.tls_ech && CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
-    const char *b64 = CURL_EASY_STR(data, STRING_ECH_CONFIG);
+  if(conn_config->ech && conn_config->ech_config) {
+    const char *b64 = conn_config->ech_config;
     size_t decode_result;
-    if(!b64) {
+    if(!b64[0]) {
       infof(data, "rustls: ECHConfig from command line empty");
       result = CURLE_SSL_CONNECT_ERROR;
       goto cleanup;
@@ -1008,7 +1002,7 @@ init_config_builder_ech(struct Curl_easy *data,
   }
 cleanup:
   /* if we base64 decoded, we can free now */
-  if(data->set.tls_ech && CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
+  if(conn_config->ech && conn_config->ech_config) {
     curlx_free(ech_config);
   }
   if(dns) {
@@ -1038,7 +1032,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  result = init_config_builder(data, conn_config, &config_builder);
+  result = init_config_builder(cf, data, conn_config, &config_builder);
   if(result != CURLE_OK) {
     return result;
   }
@@ -1087,9 +1081,9 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
   }
 
 #ifdef USE_ECH
-  if(CURLECH_ENABLED(data)) {
+  if(Curl_ssl_ech_enabled(cf)) {
     result = init_config_builder_ech(data, cf, config_builder);
-    if((result != CURLE_OK) && (data->set.tls_ech == CURLECH_HARD)) {
+    if((result != CURLE_OK) && (conn_config->ech == CURLECH_HARD)) {
       rustls_client_config_builder_free(config_builder);
       return result;
     }
@@ -1163,7 +1157,7 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 #ifdef USE_ECH
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
-    if(cr_ech_need_httpsrr(data) &&
+    if(Curl_ssl_need_httpsrr(cf) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex,
                                      connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");

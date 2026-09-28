@@ -1091,14 +1091,16 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
                                    struct Curl_peer *origin,
                                    struct Curl_peer *peer)
 {
+  struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
   (void)data; /* not used in all cases and compilers are stupid */
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  result = Curl_cf_ngtcp2_insert_after(cf_at, origin, peer);
+  result = Curl_cf_ngtcp2_insert_after(cf_at, origin, peer, &cf);
 #elif defined(USE_QUICHE)
-  result = Curl_cf_quiche_insert_after(cf_at, origin, peer);
+  result = Curl_cf_quiche_insert_after(cf_at, origin, peer, &cf);
 #else
+  (void)cf)
   (void)cf_at;
   (void)origin;
   (void)peer;
@@ -1108,12 +1110,9 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
 #if defined(USE_HTTPSRR) && defined(USE_ECH)
   /* When using ECH, kick off the HTTPS-RR resolve */
   if(!result && (origin->scheme->family == CURLPROTO_HTTP) &&
-     CURLECH_ENABLED(data) &&
-     Curl_ssl_supports(data, SSLSUPP_ECH) &&
-     (data->set.tls_ech != CURLECH_GREASE) &&
-     !CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
-    result = Curl_conn_dns_add_https_resolve(data, cf_at->conn,
-                                             cf_at->sockindex, origin);
+     Curl_ssl_need_httpsrr(cf)) {
+    result = Curl_conn_dns_add_https_resolve(data, cf->conn,
+                                             cf->sockindex, origin);
   }
 #endif /* USE_HTTPSRR && USE_ECH */
   return result;

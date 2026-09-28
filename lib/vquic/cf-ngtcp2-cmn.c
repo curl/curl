@@ -692,18 +692,6 @@ static ngtcp2_callbacks ng_callbacks = {
 #pragma warning(pop)
 #endif
 
-static bool cf_ngtcp2_need_httpsrr(struct Curl_easy *data)
-{
-#ifdef USE_OPENSSL
-  return Curl_ossl_need_httpsrr(data);
-#elif defined(USE_WOLFSSL)
-  return Curl_wssl_need_httpsrr(data);
-#else
-  (void)data;
-  return FALSE;
-#endif
-}
-
 #ifdef USE_OPENSSL
 /* The "new session" callback must return zero if the session can be removed
  * or non-zero if the session has been put into the session cache.
@@ -1146,7 +1134,7 @@ CURLcode Curl_cf_ngtcp2_cmn_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
 
-  if(cf_ngtcp2_need_httpsrr(data) &&
+  if(Curl_ssl_need_httpsrr(cf) &&
      !Curl_conn_dns_resolved_https(data, cf->sockindex, ctx->ssl_peer.peer)) {
     CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
     return CURLE_OK;
