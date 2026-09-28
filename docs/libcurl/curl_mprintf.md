@@ -291,3 +291,7 @@ sometimes differ from how the POSIX versions of these functions work.
 
 Since libcurl 8.23.0 curl_mfprintf, curl_mprintf, curl_mvfprintf and
 curl_mvprintf return -1 when the output fails.
+
+Passing a NULL format string, or invalid pointer arguments (such as a NULL
+stream or a NULL buffer with non-zero length), causes these functions to
+return -1 (or NULL for **curl_maprintf** and **curl_mvaprintf**).
