@@ -58,16 +58,17 @@ class TestVsFTPD:
         return flen
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, vsftpd):
+    @classmethod
+    def _class_scope(cls, env, vsftpd):
         if os.path.exists(vsftpd.docs_dir):
             shutil.rmtree(vsftpd.docs_dir)
         if not os.path.exists(vsftpd.docs_dir):
             os.makedirs(vsftpd.docs_dir)
-        self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-0k', fsize=0)
-        self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-1k', fsize=1024)
-        self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-10k', fsize=10 * 1024)
-        self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-1m', fsize=1024 * 1024)
-        self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-10m', fsize=10 * 1024 * 1024)
+        cls._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-0k', fsize=0)
+        cls._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-1k', fsize=1024)
+        cls._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-10k', fsize=10 * 1024)
+        cls._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-1m', fsize=1024 * 1024)
+        cls._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-10m', fsize=10 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-0k", fsize=0)
         env.make_data_file(indir=env.gen_dir, fname="upload-1k", fsize=1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-100k", fsize=100 * 1024)
