@@ -50,18 +50,18 @@
 
 #include <Security/Security.h>
 
-#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
-     __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
-  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&    \
-   __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
+#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+             __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+             __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
 #define SUPPORTS_SecTrustEvaluateWithError 1
 #endif
 
 #if defined(SUPPORTS_SecTrustEvaluateWithError) && \
-  ((defined(__MAC_OS_X_VERSION_MIN_REQUIRED) &&    \
-    __MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) ||  \
-   (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) &&   \
-    __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
+  ((defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+            __MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) || \
+   (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+            __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
 #define REQUIRES_SecTrustEvaluateWithError 1
 #endif
 
@@ -71,10 +71,10 @@
 #undef SUPPORTS_SecTrustEvaluateWithError
 #endif
 
-#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
-     __MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
-  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&    \
-   __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
+#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+             __MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+             __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
 #define SUPPORTS_SecOCSP 1
 #endif
 
