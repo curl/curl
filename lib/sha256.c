@@ -179,7 +179,7 @@ typedef CC_SHA256_CTX my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *ctx)
 {
-  (void)CC_SHA256_Init(ctx);
+  (void)CC_SHA256_Init(ctx);  /* always returns 1 */
   return CURLE_OK;
 }
 
