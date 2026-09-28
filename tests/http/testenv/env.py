@@ -74,6 +74,7 @@ CURLINFO = os.path.join(TOP_PATH, "src", "curlinfo")
 class NghttpxUtil:
     CMD = None
     VERSION_FULL = None
+    CAN_ECH = None
 
     @classmethod
     def version(cls, cmd):
@@ -92,6 +93,20 @@ class NghttpxUtil:
     @staticmethod
     def version_with_h3(version):
         return re.match(r".* ngtcp2/\d+\.\d+\.\d+.*", version) is not None
+
+    @classmethod
+    def can_ech(cls, cmd):
+        if cmd is None:
+            return None
+        if cls.CAN_ECH is None or cmd != cls.CMD:
+            p = subprocess.run(args=[cmd, "-h"], capture_output=True, text=True, check=True)
+            cls.CMD = cmd
+            cls.CAN_ECH = False
+            for line in p.stdout.splitlines(keepends=False):
+                if re.search(r'--ech-config-file', line):
+                    cls.CAN_ECH = True
+                    break
+        return cls.CAN_ECH
 
 
 class EnvConfig:
@@ -230,7 +245,11 @@ class EnvConfig:
             ),
         ]
 
-        self.openssl = "openssl"
+        if "OPENSSL" in os.environ:
+            self.openssl = os.environ["OPENSSL"]
+        else:
+            self.openssl = "openssl"
+        self.openssl_ech = False
         p = subprocess.run(
             args=[self.openssl, "version"], capture_output=True, text=True, check=False
         )
@@ -240,15 +259,19 @@ class EnvConfig:
             self.openssl_version = None
         else:
             self.openssl_version = p.stdout.strip()
+            if re.match(r'OpenSSL 4.*', self.openssl_version):
+                self.openssl_ech = True
 
         self.nghttpx = self.config["nghttpx"]["nghttpx"]
         if len(self.nghttpx.strip()) == 0:
             self.nghttpx = None
+        self.nghttpx_ech = False
         self._nghttpx_version = None
         self.nghttpx_with_h3 = False
         if self.nghttpx is not None:
             self._nghttpx_version = NghttpxUtil.version(self.nghttpx)
             self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
+            self.nghttpx_ech = NghttpxUtil.can_ech(self.nghttpx)
 
         self.caddy = self.config["caddy"]["caddy"]
         self._caddy_version = None
@@ -467,8 +490,16 @@ class Env:
         return Env.CONFIG.openssl is not None
 
     @staticmethod
+    def have_openssl_ech() -> bool:
+        return Env.CONFIG.openssl_ech
+
+    @staticmethod
     def have_nghttpx() -> bool:
         return Env.CONFIG.nghttpx is not None
+
+    @staticmethod
+    def have_nghttpx_ech() -> bool:
+        return Env.CONFIG.nghttpx_ech
 
     @staticmethod
     def have_h3_server() -> bool:
@@ -714,6 +745,15 @@ class Env:
                 self._ca.issue_certs(self.CONFIG.cert_specs)
                 if self.have_openssl():
                     self._ca.create_hashdir(self.openssl)
+                if self.have_openssl_ech():
+                    for domain in [self.domain1, self.domain2]:
+                        p = subprocess.run(args=[
+                            self.openssl, 'ech',
+                            '-out', os.path.join(ca_dir, f'{domain}.echconfig'),
+                            '-public_name', domain
+                        ], capture_output=True, text=True, check=True)
+                        if p.returncode != 0:
+                            raise f"Error generating ECHConfig for {domain}"
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)
@@ -724,6 +764,28 @@ class Env:
         creds = self.ca.get_credentials_for_name(domain)
         if len(creds) > 0:
             return creds[0]
+        return None
+
+    def get_echconfig_file(self, domain) -> Optional[str]:
+        ech_file = os.path.join(self.gen_dir, f"ca/{domain}.echconfig")
+        if os.path.exists(ech_file):
+            return ech_file
+        return None
+
+    def get_echconfig_arg(self, domain) -> Optional[str]:
+        ech_file = self.get_echconfig_file(domain)
+        if ech_file:
+            ech_config = ''
+            in_pem = False
+            with open(ech_file) as fd:
+                for line in fd.read().splitlines():
+                    if not in_pem and line == '-----BEGIN ECHCONFIG-----':
+                        in_pem = True
+                    elif in_pem and line == '-----END ECHCONFIG-----':
+                        break
+                    elif in_pem:
+                        ech_config += line
+            return ech_config
         return None
 
     @property

@@ -1429,10 +1429,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
 #if defined(USE_HTTPSRR) && defined(USE_ECH)
     /* When using ECH, kick off the HTTPS-RR resolve */
     if((origin->scheme->family == CURLPROTO_HTTP) &&
-       CURLECH_ENABLED(data) &&
-       Curl_ssl_supports(data, SSLSUPP_ECH) &&
-       (data->set.tls_ech != CURLECH_GREASE) &&
-       !CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
+       Curl_ssl_need_httpsrr(cf)) {
       result = Curl_conn_dns_add_https_resolve(data, cf->conn, cf->sockindex,
                                                origin);
     }
@@ -1502,6 +1499,30 @@ bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
   (void)data;
   return (Curl_ssl->supports & ssl_option);
 }
+
+#ifdef USE_ECH
+bool Curl_ssl_ech_enabled(struct Curl_cfilter *cf)
+{
+  if(Curl_ssl->supports & SSLSUPP_ECH) {
+    struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+    return !!conn_config->ech;
+  }
+  return FALSE;
+}
+
+bool Curl_ssl_need_httpsrr(struct Curl_cfilter *cf)
+{
+  if(Curl_ssl->supports & SSLSUPP_ECH) {
+    struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+    if(!conn_config->ech)
+      return FALSE;
+    if((conn_config->ech == CURLECH_GREASE) || conn_config->ech_config)
+      return FALSE;
+    return TRUE;
+  }
+  return FALSE;
+}
+#endif
 
 static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,

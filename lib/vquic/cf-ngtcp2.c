@@ -1149,7 +1149,8 @@ out:
 
 CURLcode Curl_cf_ngtcp2_insert_after(struct Curl_cfilter *cf_at,
                                      struct Curl_peer *origin,
-                                     struct Curl_peer *peer)
+                                     struct Curl_peer *peer,
+                                     struct Curl_cfilter **pcf)
 {
   struct cf_ngtcp2_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1175,6 +1176,7 @@ out:
       curlx_free(ctx);
     }
   }
+  *pcf = cf;
   return result;
 }
 

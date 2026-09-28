@@ -33,7 +33,7 @@ from testenv.env import EnvConfig
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
 
-from testenv import Env, Httpd, Nghttpx, NghttpxFwd, NghttpxQuic, Sshd
+from testenv import Env, Httpd, Nghttpx, NghttpxFwd, NghttpxQuic, NghttpxTcp, Sshd
 from testenv.h2o import H2oProxy, H2oServer
 
 log = logging.getLogger(__name__)
@@ -107,6 +107,18 @@ def httpd(env) -> Generator[Httpd, None, None]:
 def nghttpx(env, httpd) -> Generator[Union[Nghttpx, bool], None, None]:
     nghttpx = NghttpxQuic(env=env)
     if nghttpx.exists() and nghttpx.supports_h3() and env.have_h3_curl():
+        nghttpx.clear_logs()
+        assert nghttpx.initial_start()
+        yield nghttpx
+        nghttpx.stop()
+    else:
+        yield False
+
+
+@pytest.fixture(scope="session")
+def nghttpx_tcp(env, httpd) -> Generator[Union[Nghttpx, bool], None, None]:
+    nghttpx = NghttpxTcp(env=env)
+    if nghttpx.exists():
         nghttpx.clear_logs()
         assert nghttpx.initial_start()
         yield nghttpx

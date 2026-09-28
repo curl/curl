@@ -1845,26 +1845,26 @@ static CURLcode setopt_ech(struct Curl_easy *data, const char *ptr)
   CURLcode result = CURLE_OK;
 
   if(!ptr || !strcmp(ptr, "false"))
-    s->tls_ech = CURLECH_DISABLE;
+    s->ssl.ech = CURLECH_DISABLE;
   else {
     size_t plen = strlen(ptr);
     if(plen > CURL_MAX_INPUT_LENGTH)
       result = CURLE_BAD_FUNCTION_ARGUMENT;
     else {
       if(!strcmp(ptr, "grease"))
-        s->tls_ech = CURLECH_GREASE;
+        s->ssl.ech = CURLECH_GREASE;
       else if(!strcmp(ptr, "true"))
-        s->tls_ech = CURLECH_ENABLE;
+        s->ssl.ech = CURLECH_ENABLE;
       else if(!strcmp(ptr, "hard"))
-        s->tls_ech = CURLECH_HARD;
+        s->ssl.ech = CURLECH_HARD;
       else if(plen > 4 && !strncmp(ptr, "ecl:", 4)) {
-        if(!s->tls_ech)
-          s->tls_ech = CURLECH_HARD;
+        if(!s->ssl.ech)
+          s->ssl.ech = CURLECH_HARD;
         result = Curl_setstropt(data, STRING_ECH_CONFIG, ptr + 4);
       }
       else if(plen > 3 && !strncmp(ptr, "pn:", 3)) {
-        if(!s->tls_ech)
-          s->tls_ech = CURLECH_HARD;
+        if(!s->ssl.ech)
+          s->ssl.ech = CURLECH_HARD;
         result = Curl_setstropt(data, STRING_ECH_PUBLIC, ptr + 3);
       }
       else
