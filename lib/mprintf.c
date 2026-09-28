@@ -716,7 +716,7 @@ static bool stream_pad(void *userp,
   return stream_run(userp, stream, streamn, src, (size_t)num, donep);
 }
 
-/* emit the leading NUL-terminated part of a run of at most 'len' bytes.
+/* emit the leading null-terminated part of a run of at most 'len' bytes.
    Returns TRUE to abort formatting.
 
    A byte loop and not memchr(): 'len' is the requested precision, which
@@ -1013,7 +1013,7 @@ static bool out_string(void *userp,
 
   /* With no precision, len is already the exact length; emit it without
      scanning again. With precision, scan up to len but stop at NUL, since
-     the string may be shorter or the buffer may not be NUL-terminated. */
+     the string may be shorter or the buffer may not be null-terminated. */
   if(prec == -1) {
     if(stream_run(userp, stream, streamn,
                   (const unsigned char *)str, len, donep))

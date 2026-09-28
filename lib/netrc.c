@@ -223,7 +223,7 @@ static NETRCcode netrc_lexer_quoted(struct netrc_lexer *lexer)
     }
     else if(c == '\"') {
       ++s; /* pass the ending quote */
-      /* Ensure even an empty literal has a terminating NUL. */
+      /* Ensure even an empty literal has a null-terminator. */
       result = curlx_dyn_addn(&lexer->literal, "", 0);
       rc = curl2netrc(result);
       goto out;
