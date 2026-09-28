@@ -66,7 +66,7 @@ static bool pmatch(const char *hostname, size_t hostlen,
  * Only match on "*" being used for the leftmost label, not "a*", "a*b" nor
  * "*b".
  *
- * The pattern string does not necessarily need to be NUL-terminated.
+ * The pattern string does not necessarily need to be null-terminated.
  *
  * Return TRUE on a match. FALSE if not.
  *

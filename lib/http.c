@@ -1067,7 +1067,7 @@ static CURLcode auth_bearer(struct Curl_easy *data,
  * headers. They are dealt with both in the transfer.c main loop and in the
  * proxy CONNECT loop.
  *
- * The 'auth' line ends with a null byte without CR or LF present.
+ * The 'auth' line ends with a NUL byte without CR or LF present.
  */
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth) /* the first non-space */
@@ -1481,7 +1481,7 @@ bool Curl_compareheader(const char *headerline, /* line to check */
     for(len = curlx_strlen(&val); len >= clen;) {
       struct Curl_str next;
       const char *o = p;
-      /* after a match there must be a comma, space, newline or null byte */
+      /* after a match there must be a comma, space, newline or NUL byte */
       if(curl_strnequal(p, content, clen) &&
          ((p[clen] == ',') || ISBLANK(p[clen]) || ISNEWLINE(p[clen]) ||
           !p[clen]))
@@ -3869,7 +3869,7 @@ CURLcode Curl_verify_header(struct Curl_easy *data,
     switch(hd[i]) {
     case '\0':
       /* this is bad, bail out */
-      failf(data, "Nul byte in header");
+      failf(data, "NUL byte in header");
       return CURLE_WEIRD_SERVER_REPLY;
     case '\r':
       if(i < hdlen - 2) {

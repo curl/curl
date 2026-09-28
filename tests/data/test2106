@@ -30,7 +30,7 @@ chunky-trailer: he%hex[%00]hex%llo%CR
 http
 </server>
 <name>
-HTTP chunked response with a nul byte in the trailer
+HTTP chunked response with a NUL byte in the trailer
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

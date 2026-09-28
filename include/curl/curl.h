@@ -1135,7 +1135,7 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 
 /* CURLOPT aliases that make no runtime difference */
 
-/* 'char *' argument to a string with a trailing zero */
+/* 'char *' argument to a string with a null-terminator */
 #define CURLOPTTYPE_STRINGPOINT CURLOPTTYPE_OBJECTPOINT
 
 /* 'struct curl_slist *' argument */

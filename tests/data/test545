@@ -31,7 +31,7 @@ lib544
 </tool>
 
 <name>
-HTTP POST binary with embedded zero and no trailing zero
+HTTP POST binary with embedded NUL byte and no null-terminator
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

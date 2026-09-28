@@ -22,7 +22,7 @@ ftp
 proxy
 </features>
 <name>
-.netrc with embedded NULL byte
+.netrc with embedded NUL byte
 </name>
 <command>
 --netrc --netrc-file %LOGDIR/netrc%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER

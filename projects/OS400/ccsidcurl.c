@@ -213,7 +213,7 @@ static CURLcode dyn_addn_CCSID(struct dynbuf *db,
   dlen = curlx_dyn_len(db);
 
   if(len == CURL_ZERO_TERMINATED) {
-    /* The null terminator has been converted AND counted as a character.
+    /* The null-terminator has been converted AND counted as a character.
      * Measure it by an additional conversion and drop it. */
     int tlen = convert(buffer, sizeof(buffer), universal_terminator, 1,
                        ASCII_CCSID, ccsidout);

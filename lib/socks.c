@@ -293,7 +293,7 @@ static CURLproxycode socks4_req_add_user(struct socks_ctx *sx,
       failf(data, "Too long SOCKS proxy username");
       return CURLPX_LONG_USER;
     }
-    /* add proxy name WITH trailing zero */
+    /* add proxy name WITH null-terminator */
     result = Curl_bufq_cwrite(&sx->iobuf, sx->creds->user, plen + 1,
                               &nwritten);
     if(result || (nwritten != (plen + 1)))

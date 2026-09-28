@@ -24,7 +24,7 @@ blablabla
 http
 </server>
 <name>
-HTTP POST binary data with embedded NUL
+HTTP POST binary data with embedded NUL byte
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt

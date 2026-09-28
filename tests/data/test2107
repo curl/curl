@@ -33,7 +33,7 @@ http-proxy
 proxy
 </features>
 <name>
-HTTP CONNECT response with a nul byte in a header
+HTTP CONNECT response with a NUL byte in a header
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -p -x http://%HOSTIP:%PROXYPORT

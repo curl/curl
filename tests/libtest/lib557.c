@@ -1280,17 +1280,17 @@ static int test_return_codes(void)
   if(rc != 5)
     return 1;
 
-  /* returns the length excluding the nul byte */
+  /* returns the length excluding the NUL byte */
   rc = curl_msnprintf(buf, 5, "%d", 99999);
   if(rc != 4)
     return 1;
 
-  /* returns the length excluding the nul byte */
+  /* returns the length excluding the NUL byte */
   rc = curl_msnprintf(buf, 5, "%s", "helloooooooo");
   if(rc != 4)
     return 1;
 
-  /* returns the length excluding the nul byte */
+  /* returns the length excluding the NUL byte */
   rc = curl_msnprintf(buf, 6, "%s", "helloooooooo");
   if(rc != 5)
     return 1;

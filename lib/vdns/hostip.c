@@ -395,7 +395,7 @@ static struct Curl_resolv_async *hostip_async_new(struct Curl_easy *data,
     return NULL;
   }
 
-  /* struct size already includes the NUL for hostname */
+  /* struct size already includes the null-terminator for hostname */
   async = curlx_calloc(1, sizeof(*async));
   if(!async)
     return NULL;

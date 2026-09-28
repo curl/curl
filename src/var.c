@@ -300,11 +300,11 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
           }
 
           if(value && vlen > 0) {
-            /* A variable might contain null bytes. Such bytes cannot be shown
+            /* A variable might contain NUL bytes. Such bytes cannot be shown
                using normal means, this is an error. */
             const char *nb = memchr(value, '\0', vlen);
             if(nb) {
-              errorf("variable contains null byte");
+              errorf("variable contains NUL byte");
               return PARAM_EXPAND_ERROR;
             }
           }
@@ -352,7 +352,7 @@ static ParameterError addvariable(const char *name,
   p = curlx_calloc(1, sizeof(struct tool_var) + nlen);
   if(p) {
     memcpy(p->name, name, nlen);
-    /* the null-termination byte is already present from above */
+    /* the null-terminator is already present from above */
 
     p->content = contalloc ? content : curlx_memdup0(content, clen);
     if(p->content) {
