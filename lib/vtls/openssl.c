@@ -4129,7 +4129,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct ssl_easy_config *ssl_config = Curl_ssl_cf_get_easy_config(cf, data);
   int err;
@@ -4288,6 +4287,8 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 
 #if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) && !defined(HAVE_BORINGSSL_LIKE)
     if(Curl_ssl_ech_enabled(cf)) {
+      struct ssl_filter_config *conn_config =
+        Curl_ssl_cf_get_filter_config(cf);
       char *inner = NULL, *outer = NULL;
       int rv;
       VERBOSE(const char *status);
