@@ -125,11 +125,6 @@
 #define SECURITY_WIN32  /* for <sspi.h> */
 #endif
 
-/* Compatibility */
-#ifdef ENABLE_IPV6
-#define USE_IPV6 1
-#endif
-
 /*
  * Include configuration script results or hand-crafted
  * configuration file for platforms which lack config tool.
