@@ -3480,12 +3480,12 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
                                  &ech_config, &ech_config_len);
     if(result || !ech_config) {
       infof(data, "ECH: cannot base64 decode ECHConfig from command line");
-      if(data->set.tls_ech == CURLECH_HARD)
+      if(conn_config->ech == CURLECH_HARD)
         return result;
     }
     if(SSL_set1_ech_config_list(octx->ssl, ech_config, ech_config_len) != 1) {
       infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-      if(data->set.tls_ech == CURLECH_HARD) {
+      if(conn_config->ech == CURLECH_HARD) {
         curlx_free(ech_config);
         return CURLE_SSL_CONNECT_ERROR;
       }
