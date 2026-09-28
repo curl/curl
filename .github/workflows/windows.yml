@@ -278,14 +278,6 @@ jobs:
               config: '--with-openssl --enable-ntlm', install: 'openssl-devel libssh2-devel' }
           # MinGW
           - { name: 'default',
-              build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun',
-              config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib',
-              install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2' }
-          - { name: 'default ucrt',
-              build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
-              config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib',
-              install: 'mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2' }
-          - { name: 'default clang',
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
               config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib',
               install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-libssh2' }
