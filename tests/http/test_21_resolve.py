@@ -39,14 +39,16 @@ log = logging.getLogger(__name__)
 class TestResolve:
 
     @pytest.fixture(scope='class')
-    def dnsd(self, env: Env) -> Generator[Dnsd, None, None]:
+    @classmethod
+    def dnsd(cls, env: Env) -> Generator[Dnsd, None, None]:
         dnsd = Dnsd(env=env)
         assert dnsd.initial_start()
         yield dnsd
         dnsd.stop()
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd):
+    @classmethod
+    def _class_scope(cls, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-0k", fsize=0)
 

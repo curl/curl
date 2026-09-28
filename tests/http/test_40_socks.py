@@ -37,7 +37,8 @@ log = logging.getLogger(__name__)
 class TestSocks:
 
     @pytest.fixture(scope='class')
-    def danted(self, env: Env) -> Generator[Dante, None, None]:
+    @classmethod
+    def danted(cls, env: Env) -> Generator[Dante, None, None]:
         danted = Dante(env=env)
         assert danted.initial_start()
         time.sleep(1)
@@ -45,7 +46,8 @@ class TestSocks:
         danted.stop()
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd):
+    @classmethod
+    def _class_scope(cls, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-10m", fsize=10 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10 * 1024 * 1024)

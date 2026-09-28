@@ -37,7 +37,8 @@ log = logging.getLogger(__name__)
 class TestHTTPSRR:
 
     @pytest.fixture(scope='class')
-    def dnsd(self, env: Env) -> Generator[Dnsd, None, None]:
+    @classmethod
+    def dnsd(cls, env: Env) -> Generator[Dnsd, None, None]:
         dnsd = Dnsd(env=env)
         assert dnsd.initial_start()
         yield dnsd

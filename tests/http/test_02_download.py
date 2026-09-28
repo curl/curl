@@ -38,7 +38,8 @@ log = logging.getLogger(__name__)
 class TestDownload:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd):
+    @classmethod
+    def _class_scope(cls, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-0k", fsize=0)
         env.make_data_file(indir=indir, fname="data-10k", fsize=10 * 1024)

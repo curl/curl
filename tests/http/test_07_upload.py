@@ -40,7 +40,8 @@ log = logging.getLogger(__name__)
 class TestUpload:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
+    @classmethod
+    def _class_scope(cls, env, httpd, nghttpx):
         env.make_data_file(indir=env.gen_dir, fname="data-10k", fsize=10 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="data-63k", fsize=63 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="data-64k", fsize=64 * 1024)

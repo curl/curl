@@ -44,7 +44,8 @@ class TestFtpsVsFTPD:
     SUPPORTS_SSL = True
 
     @pytest.fixture(autouse=True, scope='class')
-    def vsftpds(self, env):
+    @classmethod
+    def vsftpds(cls, env):
         if not TestFtpsVsFTPD.SUPPORTS_SSL:
             pytest.skip('vsftpd does not seem to support SSL')
         vsftpds = VsFTPD(env=env, with_ssl=True, ssl_implicit=True)
@@ -55,7 +56,8 @@ class TestFtpsVsFTPD:
         yield vsftpds
         vsftpds.stop()
 
-    def _make_docs_file(self, docs_dir: str, fname: str, fsize: int):
+    @classmethod
+    def _make_docs_file(cls, docs_dir: str, fname: str, fsize: int):
         fpath = os.path.join(docs_dir, fname)
         data1k = 1024*'x'
         flen = 0
@@ -66,15 +68,16 @@ class TestFtpsVsFTPD:
         return flen
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, vsftpds):
+    @classmethod
+    def _class_scope(cls, env, vsftpds):
         if os.path.exists(vsftpds.docs_dir):
             shutil.rmtree(vsftpds.docs_dir)
         if not os.path.exists(vsftpds.docs_dir):
             os.makedirs(vsftpds.docs_dir)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1k', fsize=1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10k', fsize=10 * 1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1m', fsize=1024 * 1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10m', fsize=10 * 1024 * 1024)
+        cls._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1k', fsize=1024)
+        cls._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10k', fsize=10 * 1024)
+        cls._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1m', fsize=1024 * 1024)
+        cls._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10m', fsize=10 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-1k", fsize=1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-100k", fsize=100 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-1m", fsize=1024 * 1024)
