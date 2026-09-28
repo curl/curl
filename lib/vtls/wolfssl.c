@@ -1247,25 +1247,25 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
                               struct Curl_easy *data,
                               struct ssl_peer *peer)
 {
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   int trying_ech_now = 0;
 
-  if(CURL_EASY_STR(data, STRING_ECH_PUBLIC)) {
+  if(conn_config->ech_public) {
     infof(data, "ECH: outername not (yet) supported"
           " with wolfSSL");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  if(data->set.tls_ech == CURLECH_GREASE) {
-    infof(data, "ECH: GREASE is done by default by"
-          " wolfSSL: no need to ask");
+  if(conn_config->ech == CURLECH_GREASE) {
+    infof(data, "ECH: GREASE is done by default by wolfSSL: no need to ask");
   }
-  if(data->set.tls_ech && CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
-    const char *b64val = CURL_EASY_STR(data, STRING_ECH_CONFIG);
+  if(conn_config->ech && conn_config->ech_config) {
+    const char *b64val = conn_config->ech_config;
     word32 b64len = 0;
 
     b64len = (word32)strlen(b64val);
     if(b64len && wolfSSL_SetEchConfigsBase64(wctx->ssl, CURL_UNCONST(b64val),
                                              b64len) != WOLFSSL_SUCCESS) {
-      if(data->set.tls_ech == CURLECH_HARD)
+      if(conn_config->ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
     }
     else {
@@ -1285,7 +1285,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
       if(wolfSSL_SetEchConfigs(wctx->ssl, ecl, (word32)elen) !=
          WOLFSSL_SUCCESS) {
         infof(data, "ECH: wolfSSL_SetEchConfigs failed");
-        if(data->set.tls_ech == CURLECH_HARD) {
+        if(conn_config->ech == CURLECH_HARD) {
           return CURLE_SSL_CONNECT_ERROR;
         }
       }
@@ -1296,7 +1296,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     }
     else {
       infof(data, "ECH: requested but no ECHConfig available");
-      if(data->set.tls_ech == CURLECH_HARD) {
+      if(conn_config->ech == CURLECH_HARD) {
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
@@ -1438,7 +1438,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     goto out;
 
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
-  if(CURLECH_ENABLED(data)) {
+  if(Curl_ssl_ech_enabled(cf)) {
     result = wssl_init_ech(wctx, cf, data, peer);
     if(result)
       goto out;
@@ -1457,21 +1457,6 @@ out:
     wctx->ssl_ctx = NULL;
   }
   return result;
-}
-
-bool Curl_wssl_need_httpsrr(struct Curl_easy *data)
-{
-#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
-  if(!CURLECH_ENABLED(data))
-    return FALSE;
-  if((data->set.tls_ech == CURLECH_GREASE) ||
-     CURL_EASY_STR(data, STRING_ECH_CONFIG))
-    return FALSE;
-  return TRUE;
-#else
-  (void)data;
-  return FALSE;
-#endif
 }
 
 /*
@@ -2149,7 +2134,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
-    if(Curl_wssl_need_httpsrr(data) &&
+    if(Curl_ssl_need_httpsrr(cf) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex,
                                      connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");

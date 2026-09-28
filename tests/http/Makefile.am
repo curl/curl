@@ -68,6 +68,7 @@ EXTRA_DIST =             \
   test_20_websockets.py  \
   test_21_resolve.py     \
   test_22_httpsrr.py     \
+  test_23_ech.py         \
   test_30_vsftpd.py      \
   test_31_vsftpds.py     \
   test_32_ftps_vsftpd.py \

@@ -1003,9 +1003,6 @@ struct UserDefined {
 #ifndef CURL_DISABLE_RTSP
   uint8_t rtspreq; /* RTSP request type */
 #endif
-#ifdef USE_ECH
-  uint8_t tls_ech;      /* TLS ECH configuration */
-#endif
 #ifndef CURL_DISABLE_NETRC
   uint8_t use_netrc;        /* enum CURL_NETRC_OPTION values */
 #endif
