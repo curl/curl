@@ -56,6 +56,7 @@ class TestFtpsVsFTPD:
         yield vsftpds
         vsftpds.stop()
 
+    @classmethod
     def _make_docs_file(cls, docs_dir: str, fname: str, fsize: int):
         fpath = os.path.join(docs_dir, fname)
         data1k = 1024*'x'
