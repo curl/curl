@@ -37,7 +37,8 @@ log = logging.getLogger(__name__)
 class TestSocks:
 
     @pytest.fixture(scope='class')
-    def danted(self, env: Env) -> Generator[Dante, None, None]:
+    @classmethod
+    def danted(cls, env: Env) -> Generator[Dante, None, None]:
         danted = Dante(env=env)
         assert danted.initial_start()
         time.sleep(1)

@@ -34,7 +34,8 @@ log = logging.getLogger(__name__)
 class TestPush:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd):
+    @classmethod
+    def _class_scope(cls, env, httpd):
         push_dir = os.path.join(httpd.docs_dir, 'push')
         if not os.path.exists(push_dir):
             os.makedirs(push_dir)

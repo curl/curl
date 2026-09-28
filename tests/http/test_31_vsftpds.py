@@ -44,7 +44,8 @@ class TestVsFTPD:
     SUPPORTS_SSL = True
 
     @pytest.fixture(autouse=True, scope='class')
-    def vsftpds(self, env):
+    @classmethod
+    def vsftpds(cls, env):
         if not TestVsFTPD.SUPPORTS_SSL:
             pytest.skip('vsftpd does not seem to support SSL')
         vsftpds = VsFTPD(env=env, with_ssl=True)

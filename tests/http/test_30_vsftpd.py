@@ -38,7 +38,8 @@ log = logging.getLogger(__name__)
 class TestVsFTPD:
 
     @pytest.fixture(autouse=True, scope='class')
-    def vsftpd(self, env):
+    @classmethod
+    def vsftpd(cls, env):
         vsftpd = VsFTPD(env=env)
         assert vsftpd.initial_start()
         yield vsftpd

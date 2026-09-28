@@ -37,7 +37,8 @@ log = logging.getLogger(__name__)
 class TestProxy:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx_fwd):
+    @classmethod
+    def _class_scope(cls, env, httpd, nghttpx_fwd):
         push_dir = os.path.join(httpd.docs_dir, 'push')
         if not os.path.exists(push_dir):
             os.makedirs(push_dir)
