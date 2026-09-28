@@ -352,7 +352,7 @@ static ParameterError addvariable(const char *name,
   p = curlx_calloc(1, sizeof(struct tool_var) + nlen);
   if(p) {
     memcpy(p->name, name, nlen);
-    /* the null-termination byte is already present from above */
+    /* the null-terminator is already present from above */
 
     p->content = contalloc ? content : curlx_memdup0(content, clen);
     if(p->content) {
