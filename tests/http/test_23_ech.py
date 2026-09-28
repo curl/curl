@@ -106,7 +106,7 @@ class TestECH:
             r.check_exit_code(35 if exp_exit else 0)
         else:
             r.check_exit_code(exp_exit)
-            ech_result, inner, outer = self._get_ech_result(r)
+            ech_result, _, _ = self._get_ech_result(r)
             assert ech_result == exp_result, f'{r.dump_logs()}'
 
     @pytest.mark.skipif(condition=Env.curl_uses_lib('rustls-ffi'),

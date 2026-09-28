@@ -49,7 +49,7 @@ struct dynbuf;
 #define SSLSUPP_ISSUERCERT_BLOB (1 << 14) /* CURLOPT_ISSUERCERT_BLOB */
 
 #ifdef USE_ECH
-/* CURLECH_ values for the tls_ech option */
+/* CURLECH_ values for the ech option */
 #define CURLECH_DISABLE    0
 #define CURLECH_GREASE     1
 #define CURLECH_ENABLE     2
