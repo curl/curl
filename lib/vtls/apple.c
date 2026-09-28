@@ -146,8 +146,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   {
     if(!conn_config->no_revoke) {
-      if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, visionOS 1,
-                             macCatalyst 13.1, *)) {
+      if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
         /* Even without this set, validation seemingly-unavoidably fails
          * for certificates that trustd already knows to be revoked.
          * This policy further allows trustd to consult CRLs and OCSP data
@@ -221,8 +220,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   if(ocsp_len > 0) {
     bool checked = FALSE;
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
-    if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, visionOS 1,
-                           macCatalyst 13.1, *)) {
+    if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
       CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
       if(!ocspdata) {
         result = CURLE_OUT_OF_MEMORY;
@@ -249,8 +247,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 
 #ifdef SUPPORTS_SecTrustEvaluateWithError
 #ifdef HAVE_BUILTIN_AVAILABLE
-  if(__builtin_available(macOS 10.14, iOS 12, tvOS 12, watchOS 5, visionOS 1,
-                         macCatalyst 13.1, *)) {
+  if(__builtin_available(macOS 10.14, iOS 12, tvOS 12, watchOS 5, *)) {
 #else
   if(1) {
 #endif
