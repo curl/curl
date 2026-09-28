@@ -272,7 +272,7 @@ jobs:
           - { name: 'default',
               build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: '',
               config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON',
-              install: 'openssl-devel libssh2-devel python' }
+              install: 'openssl-devel libssh2-devel' }
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
               config: '--with-openssl --enable-ntlm',
