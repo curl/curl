@@ -656,6 +656,7 @@ jobs:
       - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
           msystem: ${{ matrix.sys }}
+          suppress-deprecation-warnings: 'msystem-mingw64 msystem-mingw32'
           release: false
           update: false
           cache: false
