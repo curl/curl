@@ -32,14 +32,14 @@ http
 Debug
 httpsig
 </features>
-<file name="log/upload5018">
+<file name="%LOGDIR/upload5018">
 putdata
 </file>
 <name>
 httpsig: PUT upload
 </name>
 <command>
-"http://example.com:5800/%TESTNUMBER/resource" --httpsig-algo "ed25519" --httpsig-key @%SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" -T log/upload5018 --connect-to example.com:5800:%HOSTIP:%HTTPPORT
+"http://example.com:5800/%TESTNUMBER/resource" --httpsig-algo "ed25519" --httpsig-key @%SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" -T %LOGDIR/upload5018 --connect-to example.com:5800:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
