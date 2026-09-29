@@ -988,6 +988,7 @@ jobs:
               -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
           - name: 'schannel U'
+            install-msys2: 'perl'
             install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'arm64'
             env: 'clang-aarch64'
