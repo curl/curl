@@ -23,10 +23,6 @@ telnet
 <name>
 TELNET read stdin without upload file
 </name>
-<stdin>
-GET /we/want/%TESTNUMBER HTTP/1.0
-
-</stdin>
 <command>
 -m 1 telnet://%HOSTIP:%HTTPPORT
 </command>
