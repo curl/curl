@@ -346,7 +346,7 @@ jobs:
           install: >-
             gcc
             ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
-            diffutils
+            perl diffutils
             zlib-devel
             brotli-devel
             libzstd-devel
@@ -359,7 +359,7 @@ jobs:
         with:
           msystem: ${{ matrix.sys }}
           install: >-
-            diffutils
+            perl diffutils
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
             mingw-w64-${{ matrix.env }}-libpsl
