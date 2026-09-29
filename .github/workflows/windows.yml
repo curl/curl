@@ -295,7 +295,7 @@ jobs:
           - { name: 'gnutls libssh', type: 'Debug', openssh: 'OpenSSH-Windows',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_ENABLE_NTLM=ON',
-              install: 'mingw-w64-clang-x86_64-gnutls' }
+              install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-libssh unzip' }
           - { name: 'schannel R', type: 'Release', image: 'windows-11-arm',
               build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun',
               config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON' }
@@ -332,13 +332,12 @@ jobs:
         with:
           msystem: ${{ matrix.sys }}
           install: >-
-            make perl diffutils unzip
+            make perl diffutils
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-autotools
             mingw-w64-${{ matrix.env }}-cmake
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-libssh2
-            mingw-w64-${{ matrix.env }}-libssh
             mingw-w64-${{ matrix.env }}-c-ares
             mingw-w64-${{ matrix.env }}-nghttp3
             mingw-w64-${{ matrix.env }}-ngtcp2
