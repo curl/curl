@@ -657,8 +657,8 @@ class TestDownload:
                     assert n <= max_total_conns
             assert matched_lines > 0
 
-    # 2 parallel transers, pause and resume. Load a 100 MB zip bomb from
-    # the server with "Content-Encoding: gzip" that gets exloded during
+    # 2 parallel transfers, pause and resume. Load a 100 MB zip bomb from
+    # the server with "Content-Encoding: gzip" that gets exploded during
     # response writing to the client. Client pauses after 1MB unzipped data
     # and causes buffers to fill while the server sends more response
     # data.
