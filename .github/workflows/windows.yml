@@ -345,6 +345,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-python
 
       - name: 'install prereqs [TEST]'
+        if: ${{ matrix.install }}
         env:
           MATRIX_INSTALL: '${{ matrix.install }}'
         run: /usr/bin/pacman --noconfirm --noprogressbar --sync --needed ${MATRIX_INSTALL}
