@@ -338,7 +338,7 @@ jobs:
         shell: bash
         run: echo '::group::MSYS2 packages'; /c/msys64/usr/bin/pacman.exe -Q || true; echo '::endgroup::'
 
-      - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -354,11 +354,10 @@ jobs:
             libpsl-devel
             ${{ matrix.install }}
 
-      - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
-          update: ${{ contains(matrix.install, 'wolfssl') && 'true' || 'false' }}
           install: >-
             diffutils
             mingw-w64-${{ matrix.env }}-cc
@@ -658,7 +657,7 @@ jobs:
         shell: bash
         run: echo '::group::MSYS2 packages'; /c/msys64/usr/bin/pacman.exe -Q || true; echo '::endgroup::'
 
-      - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
           msystem: ${{ matrix.sys }}
           release: false
@@ -1008,7 +1007,7 @@ jobs:
         shell: bash
         run: echo '::group::MSYS2 packages'; /c/msys64/usr/bin/pacman.exe -Q || true; echo '::endgroup::'
 
-      - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
           msystem: ${{ matrix.arch == 'arm64' && 'clangarm64' || 'ucrt64' }}
           release: ${{ contains(matrix.image, 'arm') }}
