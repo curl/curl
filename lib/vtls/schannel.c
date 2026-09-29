@@ -926,7 +926,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     int list_start_index = 0;
     unsigned int *extension_len = NULL;
     unsigned short *list_len = NULL;
-    unsigned int uint;
+    const unsigned int uiALPN = SecApplicationProtocolNegotiationExt_ALPN;
     struct alpn_proto_buf proto;
 
     /* The first four bytes is an unsigned int indicating number
@@ -936,8 +936,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The next four bytes are an indicator that this buffer contains
        ALPN data, as opposed to NPN, for example. */
-    uint = SecApplicationProtocolNegotiationExt_ALPN;
-    memcpy(&alpn_buffer[cur], &uint, sizeof(uint));
+    memcpy(&alpn_buffer[cur], &uiALPN, sizeof(uiALPN));
     cur += (int)sizeof(unsigned int);
 
     /* The next two bytes is an unsigned short indicating the number
