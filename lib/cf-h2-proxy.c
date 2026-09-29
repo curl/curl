@@ -725,7 +725,7 @@ static CURLcode proxy_h2_submit(
   CURLcode result;
 
   (void)cf;
-  Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
+  Curl_dynhds_init(&h2_headers, MAX_HTTP_RESP_HEADER_COUNT, DYN_HTTP_REQUEST);
   result = Curl_http_req_to_h2(&h2_headers, req, data);
   if(result)
     goto out;
