@@ -105,7 +105,6 @@ static bool dnsc_peer_matches_entry(struct Curl_peer *peer,
   return dns && peer && (peer->port == dns->port) && !peer->unix_socket &&
          (!strcmp(peer->hostname, dns->hostname) ||
            curl_strequal(peer->hostname, dns->hostname));
-
 }
 
 static void dnscache_entry_free(struct Curl_dns_entry *dns)
