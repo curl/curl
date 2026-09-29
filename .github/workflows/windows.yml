@@ -506,6 +506,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: ${{ contains(matrix.tflags, '-t') && 15 || 10 }}
         env:
+          MATRIX_CONFIG: '${{ matrix.config }}'
           MATRIX_ENV: '${{ matrix.env }}'
           MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
@@ -519,14 +520,14 @@ jobs:
               unset CURL_TEST_SSH_KEYALGO  # libssh2 built with WinCNG does not support ssh-ed25519 hostkeys
               export CURL_TEST_SSH_ENABLE_KEX=diffie-hellman-group-exchange-sha256
             fi
-            if [[ "${MATRIX_INSTALL} " = *'-libssh '* && \
+            if [[ "${MATRIX_CONFIG} " = *'-DCURL_USE_LIBSSH=ON'* && \
                   "${MATRIX_ENV}" = *'x86_64'* ]]; then
               export CURL_TEST_SSH_DISABLE_KEX=mlkem768x25519-sha256  # broken with libssh 0.12.0 Windows x64
             fi
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004 ~3022'  # SCP
-            if [[ "${MATRIX_INSTALL} " = *'libssh '* ]]; then
+            if [[ "${MATRIX_CONFIG} " = *'-DCURL_USE_LIBSSH=ON'* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             fi
           fi
