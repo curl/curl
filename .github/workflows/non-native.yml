@@ -385,16 +385,19 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', platform: '21', name: "!ssl !zstd",
+          - { build: 'autotools', platform: '21', arch: 'arm64', name: "!ssl !zstd",
               options: '--without-ssl --without-libpsl --without-zstd' }
 
-          - { build: 'cmake'    , platform: '21', name: "!ssl !zstd",
+          - { build: 'cmake'    , platform: '21', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
 
-          - { build: 'autotools', platform: '35', name: "!ssl !zstd",
+          - { build: 'cmake'    , platform: '21', arch: 'armeabi-v7a', name: "!ssl !zstd",
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
+
+          - { build: 'autotools', platform: '35', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '--without-ssl --without-libpsl --without-zstd' }
 
-          - { build: 'cmake'    , platform: '35', name: "!ssl !zstd",
+          - { build: 'cmake'    , platform: '35', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
 
       fail-fast: false
@@ -409,25 +412,31 @@ jobs:
 
       - name: 'configure'
         env:
+          MATRIX_ARCH: '${{ matrix.arch }}'
           MATRIX_OPTIONS: '${{ matrix.options }}'
           MATRIX_PLATFORM: '${{ matrix.platform }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
             cmake -B bld -G Ninja \
-              -DANDROID_ABI=arm64-v8a \
+              -DANDROID_ABI="${MATRIX_ARCH}" \
               -DANDROID_PLATFORM="android-${MATRIX_PLATFORM}" \
               -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -DCMAKE_WARN_DEPRECATED=OFF \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               ${MATRIX_OPTIONS}
           else
+            if [ "${MATRIX_ARCH}" = 'armeabi-v7a' ]; then
+              triplet='armv7a-linux-androideabi'
+            else
+              triplet='aarch64-linux-android'
+            fi
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
+              CC="$TOOLCHAIN/bin/${triplet}${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
-              --host="aarch64-linux-android${MATRIX_PLATFORM}" \
+              --host="${triplet}${MATRIX_PLATFORM}" \
               ${MATRIX_OPTIONS}
           fi
 
