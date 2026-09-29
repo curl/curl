@@ -3446,28 +3446,18 @@ static CURLcode ossl_init_session_and_alpns(
 }
 
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
-bool Curl_ossl_need_httpsrr(struct Curl_easy *data)
-{
-  if(!CURLECH_ENABLED(data))
-    return FALSE;
-  if((data->set.tls_ech == CURLECH_GREASE) ||
-     CURL_EASY_STR(data, STRING_ECH_CONFIG))
-    return FALSE;
-  return TRUE;
-}
-
 static CURLcode ossl_init_ech(struct ossl_ctx *octx,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               struct ssl_peer *peer)
 {
-  const char *outername = CURL_EASY_STR(data, STRING_ECH_PUBLIC);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   int trying_ech_now = 0;
 
-  if(!CURLECH_ENABLED(data))
+  if(!Curl_ssl_ech_enabled(cf))
     return CURLE_OK;
 
-  if(data->set.tls_ech == CURLECH_GREASE) {
+  if(conn_config->ech == CURLECH_GREASE) {
     infof(data, "ECH: will GREASE ClientHello");
 #ifdef HAVE_BORINGSSL_LIKE
     SSL_set_enable_ech_grease(octx->ssl, 1);
@@ -3475,28 +3465,27 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
 #endif
   }
-  else if(data->set.tls_ech && CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
+  else if(conn_config->ech && conn_config->ech_config) {
 #ifdef HAVE_BORINGSSL_LIKE
-    /* have to do base64 decode here for BoringSSL */
-    const char *b64 = CURL_EASY_STR(data, STRING_ECH_CONFIG);
     uint8_t *ech_config;
     size_t ech_config_len = 0;
     CURLcode result;
 
-    if(!b64) {
+    if(!conn_config->ech_config[0]) {
       infof(data, "ECH: ECHConfig from command line empty");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    ech_config_len = 2 * strlen(b64);
-    result = curlx_base64_decode(b64, &ech_config, &ech_config_len);
+    ech_config_len = 2 * strlen(conn_config->ech_config);
+    result = curlx_base64_decode(conn_config->ech_config,
+                                 &ech_config, &ech_config_len);
     if(result || !ech_config) {
       infof(data, "ECH: cannot base64 decode ECHConfig from command line");
-      if(data->set.tls_ech == CURLECH_HARD)
+      if(conn_config->ech == CURLECH_HARD)
         return result;
     }
     if(SSL_set1_ech_config_list(octx->ssl, ech_config, ech_config_len) != 1) {
       infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-      if(data->set.tls_ech == CURLECH_HARD) {
+      if(conn_config->ech == CURLECH_HARD) {
         curlx_free(ech_config);
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -3504,18 +3493,17 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     curlx_free(ech_config);
     trying_ech_now = 1;
 #else
-    const char *ech_config = CURL_EASY_STR(data, STRING_ECH_CONFIG);
     size_t ech_config_len = 0;
-    if(!ech_config) {
+    if(!conn_config->ech_config[0]) {
       infof(data, "ECH: ECHConfig from command line empty");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    ech_config_len = strlen(ech_config);
+    ech_config_len = strlen(conn_config->ech_config);
     if(SSL_set1_ech_config_list(octx->ssl,
-                                (const uint8_t *)ech_config,
+                                (const uint8_t *)conn_config->ech_config,
                                 ech_config_len) != 1) {
       infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-      if(data->set.tls_ech == CURLECH_HARD)
+      if(conn_config->ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
     }
     else
@@ -3534,7 +3522,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
       infof(data, "ECH: ECHConfig from HTTPS RR");
       if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
         infof(data, "ECH: SSL_set1_ech_config_list failed");
-        if(data->set.tls_ech == CURLECH_HARD)
+        if(conn_config->ech == CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
       else {
@@ -3544,23 +3532,25 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     }
     else {
       infof(data, "ECH: requested but no ECHConfig available");
-      if(data->set.tls_ech == CURLECH_HARD)
+      if(conn_config->ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
     }
   }
 #ifdef HAVE_BORINGSSL_LIKE
   (void)peer;
-  if(trying_ech_now && outername) {
+  if(trying_ech_now && conn_config->ech_public) {
     infof(data, "ECH: setting public_name not supported with BoringSSL");
     return CURLE_SSL_CONNECT_ERROR;
   }
 #else
-  if(trying_ech_now && outername) {
+  if(trying_ech_now && conn_config->ech_public) {
     int ret;
     infof(data, "ECH: inner: '%s', outer: '%s'",
-          peer->origin->hostname ? peer->origin->hostname : "NULL", outername);
+          peer->origin->hostname ? peer->origin->hostname : "NULL",
+          conn_config->ech_public);
     ret = SSL_ech_set1_server_names(octx->ssl,
-                                    peer->origin->hostname, outername,
+                                    peer->origin->hostname,
+                                    conn_config->ech_public,
                                     0 /* do send outer */);
     if(ret != 1) {
       infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", ret);
@@ -3575,12 +3565,6 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
   }
 
   return CURLE_OK;
-}
-#else /* HAVE_SSL_SET1_ECH_CONFIG_LIST */
-bool Curl_ossl_need_httpsrr(struct Curl_easy *data)
-{
-  (void)data;
-  return FALSE;
 }
 #endif /* else HAVE_SSL_SET1_ECH_CONFIG_LIST */
 
@@ -4062,7 +4046,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
 /* If we have retry configs, then trace those out */
-static int ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
+static int ossl_trace_ech_retry_configs(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data, SSL *ssl,
                                         int reason)
 {
   CURLcode result = CURLE_OK;
@@ -4082,7 +4067,7 @@ static int ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
   NOVERBOSE((void)reason);
 
   /* nothing to trace if not doing ECH */
-  if(!CURLECH_ENABLED(data))
+  if(!Curl_ssl_ech_enabled(cf))
     return rv;
 #ifndef HAVE_BORINGSSL_LIKE
   rv = SSL_ech_get1_retry_config(ssl, &rcs, &rcl);
@@ -4128,13 +4113,13 @@ static int ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
 static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
-  int err;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct ssl_easy_config *ssl_config = Curl_ssl_cf_get_easy_config(cf, data);
+  int err;
+
   DEBUGASSERT(connssl->connecting_state == ssl_connect_2);
   DEBUGASSERT(octx);
-
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
   ERR_clear_error();
 
@@ -4247,10 +4232,10 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 #endif /* HAVE_BORINGSSL_LIKE */
 
         /* trace retry_configs if we got some */
-        ossl_trace_ech_retry_configs(data, octx->ssl, reason);
+        ossl_trace_ech_retry_configs(cf, data, octx->ssl, reason);
 
         result = CURLE_ECH_REQUIRED;
-        failf(data, "ECH required: %s",
+        failf(data, "ECH: rejected, %s",
               ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
 #endif
@@ -4286,7 +4271,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     Curl_ossl_report_handshake(data, octx);
 
 #if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) && !defined(HAVE_BORINGSSL_LIKE)
-    if(CURLECH_ENABLED(data)) {
+    if(Curl_ssl_ech_enabled(cf)) {
+      struct ssl_filter_config *conn_config =
+        Curl_ssl_cf_get_filter_config(cf);
       char *inner = NULL, *outer = NULL;
       int rv;
       VERBOSE(const char *status);
@@ -4318,8 +4305,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         VERBOSE(status = "bad call (unexpected)");
         break;
       case SSL_ECH_STATUS_BAD_NAME: {
-        struct ssl_filter_config *conn_config =
-          Curl_ssl_cf_get_filter_config(cf);
         if(!conn_config->verifypeer && !conn_config->verifyhost &&
            inner && !strcmp(inner, connssl->peer.origin->hostname)) {
           VERBOSE(status = "bad name (tolerated without peer verification)");
@@ -4334,7 +4319,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         VERBOSE(status = "unexpected status");
         infof(data, "ECH: unexpected status %d", rv);
       }
-      infof(data, "ECH: result: status is %s, inner is %s, outer is %s",
+      infof(data, "ECH: result '%s' (inner=%s, outer=%s)",
             (status ? status : "NULL"),
             (inner ? inner : "NULL"),
             (outer ? outer : "NULL"));
@@ -4342,9 +4327,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       OPENSSL_free(outer);
       if(rv == SSL_ECH_STATUS_GREASE_ECH) {
         /* trace retry_configs if we got some */
-        ossl_trace_ech_retry_configs(data, octx->ssl, 0);
+        ossl_trace_ech_retry_configs(cf, data, octx->ssl, 0);
       }
-      if(rv != SSL_ECH_STATUS_SUCCESS && (data->set.tls_ech == CURLECH_HARD)) {
+      if(rv != SSL_ECH_STATUS_SUCCESS && (conn_config->ech == CURLECH_HARD)) {
         infof(data, "ECH: ech-hard failed");
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -4982,7 +4967,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(connssl->connecting_state == ssl_connect_1) {
-    if(Curl_ossl_need_httpsrr(data) &&
+    if(Curl_ssl_need_httpsrr(cf) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex,
                                      connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");

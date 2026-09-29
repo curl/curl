@@ -1399,7 +1399,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  if(Curl_ossl_need_httpsrr(data) &&
+  if(Curl_ssl_need_httpsrr(data) &&
      !Curl_conn_dns_resolved_https(data, cf->sockindex, ctx->ssl_peer.peer)) {
     CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
     return CURLE_OK;
@@ -1682,7 +1682,8 @@ out:
 
 CURLcode Curl_cf_quiche_insert_after(struct Curl_cfilter *cf_at,
                                      struct Curl_peer *origin,
-                                     struct Curl_peer *peer)
+                                     struct Curl_peer *peer,
+                                     struct Curl_cfilter **pcf)
 {
   struct cf_quiche_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1706,7 +1707,7 @@ out:
     if(ctx)
       cf_quiche_ctx_free(ctx);
   }
-
+  *pcf = cf;
   return result;
 }
 
