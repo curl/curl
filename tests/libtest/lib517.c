@@ -257,5 +257,10 @@ static CURLcode test_lib517(const char *URL)
     }
   }
 
+  if(curl_getdate(NULL, NULL) != (time_t)-1) {
+    curl_mprintf("WRONGLY parsed NULL string\n");
+    error++;
+  }
+
   return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
 }
