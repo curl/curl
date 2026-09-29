@@ -97,6 +97,17 @@ UNITTEST void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id)
   key->len = namelen + 3;
 }
 
+static bool dnsc_peer_matches_entry(struct Curl_peer *peer,
+                                    struct Curl_dns_entry *dns)
+{
+  /* Most checks are positive, using the very same hostname.
+   * Use strcmp() first for better performance. */
+  return dns && peer && (peer->port == dns->port) && !peer->unix_socket &&
+         (!strcmp(peer->hostname, dns->hostname) ||
+           curl_strequal(peer->hostname, dns->hostname));
+
+}
+
 static void dnscache_entry_free(struct Curl_dns_entry *dns)
 {
   Curl_freeaddrinfo(dns->addr);
@@ -260,6 +271,11 @@ static CURLcode fetch_entry(struct Curl_easy *data,
 
   /* See if it is already in our dns cache */
   dns = Curl_hash_pick(&dnscache->entries, key.data, key.len);
+
+  if(dns && !dnsc_peer_matches_entry(peer, dns)) {
+    /* May happen on hostnames longer than MAX_HOSTCACHE_LEN */
+    dns = NULL;
+  }
 
   /* No entry found in cache, check if we might have a wildcard entry */
   if(!dns && (type == CURL_DNST_ADDR) && data->state.wildcard_resolve) {
