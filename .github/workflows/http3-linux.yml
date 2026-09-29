@@ -82,15 +82,6 @@ jobs:
           path: ~/awslc/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
-      - name: 'cache boringssl'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-boringssl
-        env:
-          cache-name: cache-boringssl
-        with:
-          path: ~/boringssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
-
       - name: 'cache nettle'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-nettle
@@ -246,7 +237,6 @@ jobs:
           cmake --install .
 
       - name: 'build boringssl'
-        if: ${{ !steps.cache-boringssl.outputs.cache-hit }}
         run: |
           pwd
           cd ~
