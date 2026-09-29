@@ -80,7 +80,7 @@ class TestECH:
             assert ech_result == exp_result, f'{r.dump_logs()}'
             if ech_result == 'succeeded':
                 assert inner == env.domain1, f'{r.dump_logs()}'
-                assert outer == env.domain1, f'{r.dump_logs()}'
+                assert outer == f'public.{env.domain1}', f'{r.dump_logs()}'
 
     @pytest.mark.parametrize("ech_mode, exp_result, exp_exit", [
         ['false', None, 0],
@@ -97,15 +97,13 @@ class TestECH:
             '--ech', ech_mode, '--ech', f'ecl:{ech_config}'
         ])
         if env.curl_uses_lib('wolfssl'):
-            # wolfSSL fails the SNI check here: CURLE_PEER_FAILED_VERIFICATION
-            # it also fails for GREASE mode, different from openssl and rustls
-            r.check_exit_code(60 if exp_exit or ech_mode == 'grease' else 0)
+            # wolfssl ECH errors result in CURLE_PEER_FAILED_VERIFICATION
+            exp_exit = 60 if exp_exit else 0
         elif env.curl_uses_lib('rustls-ffi'):
-            # rustls has no ECH error code when it fails
-            # results in CURLE_SSL_CONNECT_ERROR
-            r.check_exit_code(35 if exp_exit else 0)
-        else:
-            r.check_exit_code(exp_exit)
+            # rustls ECH errors result in CURLE_SSL_CONNECT_ERROR
+            exp_exit = 35 if exp_exit else 0
+        r.check_exit_code(exp_exit)
+        if not env.curl_uses_lib('rustls-ffi') and not env.curl_uses_lib('wolfssl'):
             ech_result, _, _ = self._get_ech_result(r)
             assert ech_result == exp_result, f'{r.dump_logs()}'
 
