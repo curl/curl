@@ -341,6 +341,12 @@ static bool peer_same_hostname(struct Curl_peer *p1, struct Curl_peer *p2)
            curl_strequal(p1->hostname, p2->hostname)));
 }
 
+static bool peer_same_zoneid(const char *z1, const char *z2)
+{
+  return (z1 == z2) ||
+         (z1 && z2 && !strcmp(z1, z2));
+}
+
 bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
 {
   return (p1 == p2) ||
@@ -348,7 +354,7 @@ bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
           (p1->port == p2->port) &&
           peer_same_hostname(p1, p2) &&
           (p1->scopeid == p2->scopeid) &&
-          (p1->scopeid || curl_strequal(p1->zoneid, p2->zoneid)));
+          (p1->scopeid || peer_same_zoneid(p1->zoneid, p2->zoneid)));
 }
 
 CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,

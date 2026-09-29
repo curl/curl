@@ -97,6 +97,51 @@ out:
   return result;
 }
 
+static CURLcode t2413_cmp(const char *name,
+                                CURL *curl,
+                                const struct Curl_scheme *scheme1,
+                                const char *hostname1,
+                                uint16_t port1,
+                                const struct Curl_scheme *scheme2,
+                                const char *hostname2,
+                                uint16_t port2,
+                                bool exp_equal,
+                                bool exp_same_dest)
+{
+  struct Curl_peer *peer1 = NULL;
+  struct Curl_peer *peer2 = NULL;
+  CURLcode result;
+
+  result = Curl_peer_create((struct Curl_easy *)curl,
+                            scheme1, hostname1, port1, &peer1);
+  if(result) {
+    curl_mfprintf(stderr, "%s: create peer1 failed %d", name, (int)result);
+    goto out;
+  }
+  result = Curl_peer_create((struct Curl_easy *)curl,
+                            scheme2, hostname2, port2, &peer2);
+  if(result) {
+    curl_mfprintf(stderr, "%s: create peer2 failed %d", name, (int)result);
+    goto out;
+  }
+
+  result = CURLE_FAILED_INIT;
+  if(exp_equal != Curl_peer_equal(peer1, peer2))
+    curl_mfprintf(stderr, "%s: equal check failed, not %s", name,
+                  exp_equal ? "equal" : "different");
+  else if(exp_same_dest != Curl_peer_same_destination(peer1, peer2))
+    curl_mfprintf(stderr, "%s: same destination, not %s", name,
+                  exp_equal ? "the same" : "different");
+  else
+    result = CURLE_OK;
+
+out:
+  Curl_peer_unlink(&peer1);
+  Curl_peer_unlink(&peer2);
+  fail_unless(!result, "check failed");
+  return result;
+}
+
 static uint32_t t2413_scopeid(const char *zone)
 {
 #ifdef HAVE_IF_NAMETOINDEX
@@ -137,6 +182,25 @@ static CURLcode test_unit2413(const char *arg)
                   "::1", TRUE, "123", 123);
   test_create2413("peer9", curl, &Curl_scheme_https, "::1%123x", 1234,
                   "::1", TRUE, "123x", t2413_scopeid("123x"));
+
+  t2413_cmp("cmp1", curl,
+            &Curl_scheme_https, "test.curl.se", 1234,
+            &Curl_scheme_https, "test.curl.se", 1234, TRUE, TRUE);
+  t2413_cmp("cmp2", curl,
+            &Curl_scheme_https, "Test.curl.se", 1234,
+            &Curl_scheme_https, "test.curl.se", 1234, TRUE, TRUE);
+  t2413_cmp("cmp3", curl,
+            &Curl_scheme_http, "test.curl.se", 1234,
+            &Curl_scheme_https, "test.curl.se", 1234, FALSE, TRUE);
+  t2413_cmp("cmp4", curl,
+            &Curl_scheme_https, "test.curl.se", 1234,
+            &Curl_scheme_https, "test.curl.se", 443,   FALSE, FALSE);
+  t2413_cmp("cmp5", curl,
+            &Curl_scheme_https, "[::1%tada]", 443,
+            &Curl_scheme_https, "[::1%tada]", 443, TRUE, TRUE);
+  t2413_cmp("cmp6", curl,
+            &Curl_scheme_https, "[::1%tada]", 443,
+            &Curl_scheme_https, "[::1%Tada]", 443, FALSE, FALSE);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
