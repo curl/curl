@@ -718,9 +718,13 @@ static int parsedate(const char *date, time_t *output)
 time_t curl_getdate(const char *p, const time_t *unused)
 {
   time_t parsed = -1;
-  int rc = parsedate(p, &parsed);
+  int rc;
   (void)unused; /* legacy argument from the past that we ignore */
 
+  if(!p)
+    return -1;
+
+  rc = parsedate(p, &parsed);
   if(rc == PARSEDATE_OK) {
     if(parsed == (time_t)-1)
       /* avoid returning -1 for a working scenario */
