@@ -282,6 +282,12 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
               ch->last_code = CHUNKE_PASSTHRU_ERROR;
               return result;
             }
+            result = Curl_bump_headersize(data, trlen, FALSE);
+            if(result) {
+              ch->state = CHUNK_FAILED;
+              ch->last_code = CHUNKE_TRAILER_LIMIT;
+              return result;
+            }
           }
           curlx_dyn_reset(&ch->trailer);
           ch->state = CHUNK_TRAILER_CR;
@@ -385,6 +391,8 @@ static const char *Curl_chunked_strerror(CHUNKcode code)
     return "Bad content-encoding found";
   case CHUNKE_OUT_OF_MEMORY:
     return "Out of memory";
+  case CHUNKE_TRAILER_LIMIT:
+    return "trailers exceeded header limit";
   }
 }
 
