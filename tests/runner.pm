@@ -768,8 +768,6 @@ sub singletest_prepare {
             my @ldparts = split(/\//, $LOGDIR);
             my $nparts = @ldparts;
             my @parts = split(/\//, $path);
-            print STDERR "---111---|$testnum|$LOGDIR|\n";
-            print STDERR "---222---|$testnum|$path|$filename|\n";
             if(join("/", @parts[0..$nparts-1]) eq $LOGDIR) {
                 # the file is in $LOGDIR/
                 my $d = shift @parts;
