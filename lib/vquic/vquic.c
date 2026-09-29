@@ -1058,11 +1058,11 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
     if(!result) {
       int qlogfd = curlx_open(curlx_dyn_ptr(&fname),
                               O_WRONLY | O_CREAT | CURL_O_BINARY,
-                              data->set.new_file_perms
+                              CURLX_FILE_MODE(data->set.new_file_perms
 #ifdef _WIN32
-                              & (_S_IREAD | _S_IWRITE)
+                                              & (_S_IREAD | _S_IWRITE)
 #endif
-                              );
+                                              ));
       if(qlogfd != -1)
         *qlogfdp = qlogfd;
     }
