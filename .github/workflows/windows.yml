@@ -262,20 +262,12 @@ jobs:
         include:
           # MSYS
           - { name: '!proxy',
-              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '--min=1750',
-              config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy --enable-httpsig --enable-ntlm',
-              install: 'openssl-devel libssh2-devel' }
-          - { name: 'default',
-              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
-              config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-ntlm',
-              install: 'openssl-devel libssh2-devel' }
-          - { name: 'default',
-              build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: '',
-              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON',
+              build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
+              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON -DCURL_ENABLE_NTLM=ON',
               install: 'openssl-devel libssh2-devel' }
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
-              config: '--with-openssl --enable-ntlm',
+              config: '--with-openssl --enable-httpsig --enable-ntlm',
               install: 'openssl-devel libssh2-devel' }
           # MinGW
           - { name: 'default',
