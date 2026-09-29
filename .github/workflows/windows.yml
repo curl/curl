@@ -319,8 +319,7 @@ jobs:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
           install: >-
-            gcc perl diffutils
-            ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
+            gcc autotools make cmake ninja perl diffutils
             zlib-devel brotli-devel libzstd-devel libpsl-devel libnghttp2-devel
             openssl-devel libssh2-devel
 
