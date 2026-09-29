@@ -7,6 +7,7 @@ HTTP proxy
 CURLOPT_PROXY_TRANSFER_MODE
 CURLOPT_PROXY
 type=
+libtest
 </keywords>
 </info>
 

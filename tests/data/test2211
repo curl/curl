@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+MQTT
+MQTT PUBLISH
+MQTTS
+</keywords>
+</info>
+
+<reply>
+<data>
+</data>
+</reply>
+
+<client>
+<features>
+mqtts
+Debug
+</features>
+<server>
+mqtts
+</server>
+<name>
+MQTTS PUBLISH with partial writes
+</name>
+<setenv>
+# Split MQTT packets, including DISCONNECT, without fragmenting TLS handshakes.
+CURL_SMALLSENDS=1
+</setenv>
+<command option="binary-trace">
+mqtts://%HOSTIP:%MQTTSPORT/%TESTNUMBER -d something --insecure --max-time 10
+</command>
+</client>
+
+<verify>
+# Strip the random part of the client ID.
+<strippart>
+s/^(.* 00044d5154540402003c000c6375726c).*/$1/
+</strippart>
+<protocol>
+client CONNECT 18 00044d5154540402003c000c6375726c
+server CONNACK 2 20020000
+client PUBLISH f 000432323131736f6d657468696e67
+client DISCONNECT 0 e000
+</protocol>
+</verify>
+</testcase>

@@ -4,6 +4,7 @@
 <keywords>
 FTP
 UPLOAD
+libtest
 </keywords>
 </info>
 
@@ -16,9 +17,6 @@ UPLOAD
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP upload with target URL ending with slash
 </name>

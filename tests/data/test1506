@@ -5,6 +5,7 @@
 HTTP
 multi
 verbose logs
+libtest
 </keywords>
 </info>
 
@@ -52,9 +53,6 @@ http
 <features>
 verbose-strings
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP GET connection cache limit (CURLMOPT_MAXCONNECTS)
 </name>

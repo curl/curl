@@ -3,6 +3,7 @@
 <info>
 <keywords>
 FTP
+libtest
 </keywords>
 </info>
 
@@ -18,9 +19,6 @@ FTP
 ftp
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Avoid redundant CWDs

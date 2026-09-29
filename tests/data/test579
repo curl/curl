@@ -5,6 +5,7 @@
 HTTP
 HTTP POST
 HTTP Digest auth
+libtest
 </keywords>
 </info>
 # Server-side
@@ -61,9 +62,6 @@ crypto
 digest
 </features>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 small chunked HTTP POSTs with digest auth and progress callback

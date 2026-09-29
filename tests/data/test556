@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 HTTP GET
+libtest
 </keywords>
 </info>
 
@@ -24,9 +25,6 @@ Connection: close
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 send and recv HTTP
 </name>

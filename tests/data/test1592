@@ -8,14 +8,12 @@ resolve
 speedcheck
 flaky
 timing-dependent
+libtest
 </keywords>
 </info>
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP request, remove handle while resolving, do not block
 </name>

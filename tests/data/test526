@@ -6,6 +6,7 @@ FTP
 PASV
 RETR
 multi
+libtest
 </keywords>
 </info>
 
@@ -27,9 +28,6 @@ file contents should appear once for each file
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP RETR same file using different handles but same connection
 </name>

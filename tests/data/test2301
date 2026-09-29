@@ -3,6 +3,7 @@
 <info>
 <keywords>
 WebSockets
+libtest
 </keywords>
 </info>
 
@@ -40,9 +41,6 @@ http
 <name>
 WebSockets via callback (raw mode) + curl_ws_send()
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

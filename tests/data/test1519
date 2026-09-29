@@ -3,6 +3,7 @@
 <info>
 <keywords>
 HTTP
+libtest
 </keywords>
 </info>
 # This reproduces issue #3340

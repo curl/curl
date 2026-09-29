@@ -303,14 +303,6 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     return bytes;
 
 #ifdef DEBUGBUILD
-  {
-    char *tty = curl_getenv("CURL_ISATTY");
-    if(tty) {
-      is_tty = TRUE;
-      curl_free(tty);
-    }
-  }
-
   if(config->show_headers) {
     if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
       warnf("Header data size exceeds write limit");

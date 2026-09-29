@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+MQTT
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+mqtt
+</features>
+<name>
+MQTT partial sends, would-block, polling and packet ordering
+</name>
+</client>
+</testcase>

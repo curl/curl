@@ -7,6 +7,7 @@ HTTP GET
 HTTP CONNECT
 HTTP proxy
 proxytunnel
+libtest
 </keywords>
 </info>
 
@@ -51,9 +52,6 @@ http
 http-proxy
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 proxy
 </features>

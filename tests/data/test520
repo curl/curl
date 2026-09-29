@@ -3,6 +3,7 @@
 <info>
 <keywords>
 FTP
+libtest
 </keywords>
 </info>
 
@@ -22,9 +23,6 @@ REPLY MDTM 213 20030405060708
 ftp
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib520
-</tool>
 
 <name>
 FTP RETR with FILETIME

@@ -163,3 +163,4 @@ s/Qriist.*/Qriist on github/
 s/Viktor Szakatas/Viktor Szakats/
 s/Val S\./Valerie Snyder/
 s/Andrew Nesbit$/Andrew Nesbitt/
+s/^https:\/\/.*//

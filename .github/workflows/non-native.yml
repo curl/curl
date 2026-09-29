@@ -36,7 +36,7 @@ cache-mode: none
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1820
+  CURL_TEST_MIN: 1940
   DO_NOT_TRACK: '1'
 
 jobs:

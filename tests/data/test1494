@@ -11,7 +11,7 @@ DELAY
 # Server-side
 <reply>
 <data crlf="headers">
-HTTP/1.1 200 funky chunky!
+HTTP/1.1 200 funky chunky! swsclose
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: identity, identity
 Content-Length: 19

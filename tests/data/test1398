@@ -3,14 +3,12 @@
 <info>
 <keywords>
 curl_msnprintf
+libtest
 </keywords>
 </info>
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 curl_msnprintf tests
 </name>

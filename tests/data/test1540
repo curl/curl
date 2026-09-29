@@ -8,6 +8,7 @@ CURLPAUSE_RECV
 chunked Transfer-Encoding
 Trailer:
 DELAY
+libtest
 </keywords>
 </info>
 
@@ -45,9 +46,6 @@ writedelay: 10
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 chunked with trailers and pausing the receive
 </name>

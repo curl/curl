@@ -834,7 +834,8 @@ static int myssh_in_AUTHLIST(struct Curl_easy *data,
   /* For public key auth we need either the private key or
      CURLSSH_AUTH_AGENT. */
   if((sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) &&
-     (sshc->priv_key || (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
+      ((sshc->priv_key && sshc->priv_key[0]) ||
+      (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
     myssh_to(data, sshc, SSH_AUTH_PKEY_INIT);
     infof(data, "Authentication using SSH public key file");
   }
@@ -864,7 +865,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
 
   /* Two choices, (1) private key was given on CMD,
    * (2) use the "default" keys. */
-  if(sshc->priv_key) {
+  if(sshc->priv_key && sshc->priv_key[0]) {
     if(sshc->pubkey && !sshc->passphrase) {
       rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
       if(rc == SSH_AUTH_AGAIN)
@@ -2626,7 +2627,8 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
     if(block) {
       curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
-      (void)SOCKET_READABLE(fd_read, left_ms > 1000 ? 1000 : left_ms);
+      (void)SOCKET_READABLE(fd_read,
+                            (!left_ms || left_ms > 1000) ? 1000 : left_ms);
     }
   }
 
@@ -2890,7 +2892,7 @@ static CURLcode myssh_done(struct Curl_easy *data,
   else
     result = status;
 
-  if(Curl_pgrsDone(data))
+  if(Curl_pgrsDone(data, Curl_pgrs_now(data)))
     return CURLE_ABORTED_BY_CALLBACK;
 
   CURL_REQ_CLEAR_IO(data);

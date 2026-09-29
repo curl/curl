@@ -276,7 +276,7 @@ static bool cf_hc_may_h3(struct Curl_cfilter *cf,
   struct cf_hc_ctx *ctx = cf->ctx;
   if(!ctx->checked_h3) {
     ctx->check_h3_result =
-      Curl_conn_may_http3(data, cf->conn, ctx->def_transport);
+      Curl_conn_may_http3(data, cf->conn);
     ctx->checked_h3 = TRUE;
   }
   return !ctx->check_h3_result;

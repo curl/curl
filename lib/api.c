@@ -196,7 +196,7 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
   guard->depth = 0;
 
   /* Verify that we got an easy handle we can work with. */
-  if(!GOOD_EASY_HANDLE(data)) {
+  if(!GOOD_EASY_HANDLE(data) || data->state.internal) {
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }

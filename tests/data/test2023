@@ -5,6 +5,7 @@
 HTTP
 HTTP GET
 HTTP Basic auth
+libtest
 </keywords>
 </info>
 # Server-side
@@ -106,9 +107,6 @@ Finally, this is the real page!
 <server>
 http
 </server>
-<tool>
-lib2023
-</tool>
 
 <name>
 HTTP authorization retry (Basic)

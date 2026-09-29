@@ -139,6 +139,11 @@ struct asprintf {
   unsigned char stage[ASPRINTF_STAGE_SIZE];
 };
 
+struct ioprintf {
+  FILE *fd;
+  bool error;
+};
+
 /* the provided input number is 1-based but this returns the number 0-based.
  *
  * returns -1 if no valid number was provided.
@@ -252,7 +257,7 @@ static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
         fmt += 2;
       }
       else {
-#if SIZEOF_CURL_OFF_T > SIZEOF_LONG
+#if SIZEOF_SIZE_T > SIZEOF_LONG
         flags |= FLAGS_LONGLONG;
 #else
         flags |= FLAGS_LONG;
@@ -1006,7 +1011,15 @@ static bool out_string(void *userp,
     width = 0;
   }
 
-  if(stream_zrun(userp, stream, streamn, str, len, donep))
+  /* With no precision, len is already the exact length; emit it without
+     scanning again. With precision, scan up to len but stop at NUL, since
+     the string may be shorter or the buffer may not be NUL-terminated. */
+  if(prec == -1) {
+    if(stream_run(userp, stream, streamn,
+                  (const unsigned char *)str, len, donep))
+      return TRUE;
+  }
+  else if(stream_zrun(userp, stream, streamn, str, len, donep))
     return TRUE;
   if(flags & FLAGS_LEFT) {
     if(stream_pad(userp, stream, streamn, ' ', width, donep))
@@ -1441,37 +1454,55 @@ int curl_msprintf(char *buffer, const char *format, ...)
 
 static int fputc_wrapper(unsigned char outc, void *f)
 {
+  struct ioprintf *i = f;
   int out = outc;
-  FILE *s = f;
+  FILE *s = i->fd;
   int rc = fputc(out, s);
-  return rc == EOF;
+  i->error = (rc == EOF);
+  return (rc == EOF);
 }
 
 /* block variant of fputc_wrapper */
 static size_t fwrite_wrapper(const unsigned char *buf, size_t len, void *f)
 {
-  FILE *s = f;
-  return fwrite(buf, 1, len, s);
+  struct ioprintf *i = f;
+  size_t n;
+  FILE *s = i->fd;
+  n = fwrite(buf, 1, len, s);
+  i->error = (n != len);
+  return n;
 }
 
-int curl_mprintf(const char *format, ...)
+int curl_mvfprintf(FILE *fd, const char *format, va_list args)
 {
-  int retcode;
-  va_list args; /* argument pointer */
-  va_start(args, format);
-  retcode = formatf(stdout, fputc_wrapper, fwrite_wrapper, NULL, format, args);
-  va_end(args);
-  return retcode;
+  struct ioprintf info;
+  int n;
+  info.fd = fd;
+  info.error = FALSE;
+  n = formatf(&info, fputc_wrapper, fwrite_wrapper, NULL, format, args);
+  if(info.error)
+    return -1;
+  return n;
 }
 
 int curl_mfprintf(FILE *fd, const char *format, ...)
 {
-  int retcode;
   va_list args; /* argument pointer */
+  int n;
   va_start(args, format);
-  retcode = formatf(fd, fputc_wrapper, fwrite_wrapper, NULL, format, args);
+  n = curl_mvfprintf(fd, format, args);
   va_end(args);
-  return retcode;
+  return n;
+}
+
+int curl_mprintf(const char *format, ...)
+{
+  va_list args; /* argument pointer */
+  int n;
+  va_start(args, format);
+  n = curl_mvfprintf(stdout, format, args);
+  va_end(args);
+  return n;
 }
 
 int curl_mvsprintf(char *buffer, const char *format, va_list args)
@@ -1483,10 +1514,5 @@ int curl_mvsprintf(char *buffer, const char *format, va_list args)
 
 int curl_mvprintf(const char *format, va_list args)
 {
-  return formatf(stdout, fputc_wrapper, fwrite_wrapper, NULL, format, args);
-}
-
-int curl_mvfprintf(FILE *fd, const char *format, va_list args)
-{
-  return formatf(fd, fputc_wrapper, fwrite_wrapper, NULL, format, args);
+  return curl_mvfprintf(stdout, format, args);
 }

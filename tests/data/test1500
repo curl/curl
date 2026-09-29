@@ -5,6 +5,7 @@
 HTTP
 HTTP GET
 multi
+libtest
 </keywords>
 </info>
 
@@ -31,9 +32,6 @@ http
 http
 </features>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 curl_multi_wait

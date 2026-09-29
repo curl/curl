@@ -5,6 +5,7 @@
 HTTP
 CURLOPT_AWS_SIGV4
 aws-sigv4
+libtest
 </keywords>
 </info>
 
@@ -33,9 +34,6 @@ aws
 <name>
 HTTP AWS_SIGV4 canonical request duplicate header test
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
 </command>

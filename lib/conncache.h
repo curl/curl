@@ -24,6 +24,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "uint-bset.h"
+#include "uint-table.h"
 #include "curlx/timeval.h"
 
 struct connectdata;
@@ -47,15 +49,16 @@ void Curl_conn_close(struct Curl_easy *data,
                      bool aborted);
 
 struct cpool {
-  /* the pooled connections, bundled per destination */
-  struct Curl_hash dest2bundle;
-  size_t num_conn;
+  struct uint32_tbl conns; /* connections added to this pool */
+  struct uint32_bset idles; /* pool_ids of conns being idle */
+  struct Curl_hash dest2bundle; /* conn destination sets */
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
   struct Curl_share *share; /* != NULL if pool belongs to share */
   BIT(locked);
   BIT(initialized);
+  BIT(in_shutdown);
 };
 
 /* Get connection pool instance for data or NULL if none exists */
@@ -76,13 +79,15 @@ void Curl_cpool_destroy(struct cpool *cpool,
  * Assigns `data->id`. */
 void Curl_cpool_xfer_init(struct Curl_easy *data);
 
-/* Get the connection with the given id from `data`'s conn pool. */
-struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
-                                        curl_off_t conn_id);
+/* Get the connection last used by data,
+ * if there was one and it still exists. */
+struct connectdata *Curl_cpool_get_last_conn(struct Curl_easy *data);
 
 /* Add the connection to the pool. */
 CURLcode Curl_cpool_add(struct Curl_easy *data,
                         struct connectdata *conn,
+                        uint32_t max_total,
+                        uint32_t max_host,
                         const struct curltime *pnow) WARN_UNUSED_RESULT;
 
 /* Connection was used at the given time. */
@@ -95,21 +100,16 @@ timediff_t Curl_cpool_conn_age_ms(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   const struct curltime *pnow);
 
-/**
- * Return if the pool has reached its configured limits for adding
- * the given connection. Try to discard the oldest, idle connections
- * to make space.
- */
-#define CPOOL_LIMIT_OK     0
-#define CPOOL_LIMIT_DEST   1
-#define CPOOL_LIMIT_TOTAL  2
-int Curl_cpool_check_limits(struct Curl_easy *data,
-                            struct connectdata *conn,
-                            const struct curltime *pnow);
+typedef enum {
+  CPOOL_MATCH_FOUND, /* The passed `conn` matches, stop looking further */
+  CPOOL_MATCH_CONT,  /* No match, continue looking */
+  CPOOL_MATCH_CLOSE, /* No match, close `conn`, continue looking */
+  CPOOL_MATCH_TOO_OLD /* No match, `conn` is too old, close when idle */
+} cpool_match_result;
 
 /* Return of conn is suitable. If so, stops iteration. */
-typedef bool Curl_cpool_conn_match_cb(struct connectdata *conn,
-                                      void *userdata);
+typedef cpool_match_result
+ Curl_cpool_conn_match_cb(struct connectdata *conn, void *userdata);
 
 /* Act on the result of the find, may override it. */
 typedef bool Curl_cpool_done_match_cb(void *userdata);
@@ -119,6 +119,8 @@ typedef bool Curl_cpool_done_match_cb(void *userdata);
  * All callbacks are invoked while the pool's lock is held.
  * @param data        current transfer
  * @param destination match against `conn->destination` in pool
+ * @param prune_dead  perform reaping of dead connections at start
+ * @param pnow        timestamp of operation
  * @param conn_cb     must be present, called for each connection in the
  *                    bundle until it returns TRUE
  * @return combined result of last conn_db and result_cb or FALSE if no
@@ -126,36 +128,28 @@ typedef bool Curl_cpool_done_match_cb(void *userdata);
  */
 bool Curl_cpool_find(struct Curl_easy *data,
                      const char *destination,
+                     bool prune_dead,
+                     const struct curltime *pnow,
                      Curl_cpool_conn_match_cb *conn_cb,
                      Curl_cpool_done_match_cb *done_cb,
                      void *userdata);
-
-/*
- * A connection (already in the pool) is now idle. Do any
- * cleanups in regard to the pool's limits.
- *
- * Return TRUE if idle connection kept in pool, FALSE if closed.
- */
-bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              const struct curltime *pnow);
-
-/**
- * Scans the connection pool for half-open/dead
- * connections, closes and removes them.
- * The cleanup is done at most once per second.
- */
-void Curl_cpool_prune_dead(struct cpool *cpool,
-                           struct Curl_easy *data);
 
 /**
  * Perform upkeep actions on connections in the transfer's pool.
  */
 CURLcode Curl_cpool_upkeep(struct Curl_easy *data);
 
-typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
-                                   struct Curl_easy *data,
-                                   void *cbdata);
+typedef enum {
+  CPOOL_DO_KEEP, /* Keep the connection, still in use */
+  CPOOL_DO_IDLE, /* Connection is idle, may get closed now */
+  CPOOL_DO_CLOSE, /* Close the connection (clean) */
+  CPOOL_DO_TERMINATE /* Terminate the connection (unclean) */
+} cpool_do_result;
+
+typedef cpool_do_result Curl_cpool_return_cb(struct Curl_easy *data,
+                                             struct connectdata *conn,
+                                             void *cbdata,
+                                             const struct curltime *pnow);
 
 /**
  * Invoked the callback for the given data + connection under the
@@ -163,9 +157,10 @@ typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
  * The callback is always invoked, even if the transfer has no connection
  * pool associated.
  */
-void Curl_cpool_do_locked(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          Curl_cpool_conn_do_cb *cb, void *cbdata);
+void Curl_cpool_return(struct Curl_easy *data,
+                       struct connectdata *conn,
+                       Curl_cpool_return_cb *cb, void *cbdata,
+                       const struct curltime *pnow);
 
 /* Close all unused connections, prevent reuse of existing ones. */
 void Curl_cpool_nw_changed(struct cpool *cpool, struct Curl_easy *admin);

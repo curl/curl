@@ -74,6 +74,7 @@ EXTRA_DIST =         \
   servers.pm         \
   sshhelp.pm         \
   sshserver.pl       \
+  test-linter.pl     \
   testcurl.pl        \
   testutil.pm        \
   tftpserver.pl      \

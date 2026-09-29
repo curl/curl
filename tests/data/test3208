@@ -31,9 +31,6 @@ Funny-head: yesyes
 https
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 easy_perform, multi_perform, easy_perform the same handle

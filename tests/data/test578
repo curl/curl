@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 HTTP POST
+libtest
 </keywords>
 </info>
 # Server-side
@@ -30,9 +31,6 @@ Funny-head: yesyes
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTP POST lower than MAX_INITIAL_POST_SIZE with progress callback

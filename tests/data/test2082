@@ -3,6 +3,7 @@
 <info>
 <keywords>
 HTTP
+libtest
 </keywords>
 </info>
 
@@ -27,9 +28,6 @@ http
 <name>
 Pre-request callback for HTTP
 </name>
-<tool>
-lib2082
-</tool>
 
 <command>
 %HOSTIP:%HTTPPORT/%TESTNUMBER

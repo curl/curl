@@ -61,7 +61,7 @@ static void mnfty_chunk_destroy(struct mntfy_chunk *chunk)
 
 static void mnfty_chunk_reset(struct mntfy_chunk *chunk)
 {
-  memset(chunk, 0, sizeof(*chunk));
+  chunk->r_offset = chunk->w_offset = 0;
 }
 
 static bool mntfy_chunk_append(struct mntfy_chunk *chunk,

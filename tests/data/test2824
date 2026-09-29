@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+HTTP proxy Digest auth
+chunked Transfer-Encoding
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+connection-monitor
+</servercmd>
+
+# this is returned first since we get no proxy-auth
+<connect crlf="yes">
+HTTP/1.1 407 Authorization Required to proxy me my dear swsbounce
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+Proxy-Connection: Keep-Alive
+Transfer-Encoding: chunked
+
+20
+And you should ignore this data.
+FA0
+%repeat[4000 x X]%
+0
+
+</connect>
+
+# then this is returned when we get proxy-auth
+<connect1  crlf="yes">
+HTTP/1.1 407 Authorization Required to proxy me my dear swsbounce
+Proxy-Authenticate: Basic
+Content-Length: 0
+
+</connect1>
+
+<connect2  crlf="yes">
+HTTP/1.1 403 Denied
+Content-Length: 0
+
+</connect2>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+SSL
+proxy
+digest
+!SSPI
+</features>
+<name>
+HTTP proxy CONNECT 2 407s, chunked-encoded and 0-length
+</name>
+<command>
+http://test.remote.example.com.%TESTNUMBER:1024/path/%TESTNUMBER0003 --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-anyauth --proxytunnel --connect-timeout 10
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+CONNECT test.remote.example.com.%TESTNUMBER:1024 HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:1024
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+CONNECT test.remote.example.com.%TESTNUMBER:1024 HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:1024
+Proxy-Authorization: Digest username="testuser", realm="weirdorealm", nonce="12345", uri="test.remote.example.com.%TESTNUMBER:1024", response="9d235aa1a02467aca00179549f1d2a62"
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+CONNECT test.remote.example.com.%TESTNUMBER:1024 HTTP/1.1
+Host: test.remote.example.com.%TESTNUMBER:1024
+Proxy-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+[DISCONNECT]
+</protocol>
+<errorcode>
+7
+</errorcode>
+</verify>
+</testcase>

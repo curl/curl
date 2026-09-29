@@ -142,6 +142,8 @@ static int inet_pton6(const char *src, unsigned char *dst)
         colonp = tp;
         continue;
       }
+      if(!*src)
+        return 0;
       if(tp + INT16SZ > endp)
         return 0;
       *tp++ = (unsigned char)((val >> 8) & 0xff);

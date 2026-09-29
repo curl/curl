@@ -5,6 +5,7 @@
 FTP
 PASV
 RETR
+libtest
 </keywords>
 </info>
 # Server-side
@@ -30,9 +31,6 @@ ftp
 <name>
 FTP first type=A then regular URL
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 "ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=A" ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>

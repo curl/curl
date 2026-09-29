@@ -4,6 +4,7 @@
 <keywords>
 CURLINFO_REFERER
 CURLOPT_REFERER
+libtest
 </keywords>
 </info>
 
@@ -26,10 +27,6 @@ hej
 <server>
 http
 </server>
-
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Get CURLINFO_REFERER set CURLOPT_REFERER

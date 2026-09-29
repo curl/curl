@@ -6,6 +6,7 @@ FTP
 PORT
 STOR
 multi
+libtest
 </keywords>
 </info>
 

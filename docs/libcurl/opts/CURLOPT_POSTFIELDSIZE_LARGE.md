@@ -30,11 +30,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTFIELDSIZE_LARGE,
 
 # DESCRIPTION
 
-If you want to post static data to the server without having libcurl do a
-strlen() to measure the data size, this option must be used. When this option
-is used you can post fully binary data, which otherwise is likely to fail. If
-this size is set to -1, libcurl uses strlen() to get the size or relies on the
+Set the *size* of the data buffer to POST to prevent libcurl from doing a
+strlen() to figure out the data size. When this option is used you can post
+fully binary data, which otherwise is likely to fail. If this size is set to
+-1, libcurl uses strlen() to get the size or relies on the
 CURLOPT_READFUNCTION(3) (if used) to signal the end of data.
+
+You *must* make sure that the set size is not larger than the provided buffer.
 
 # DEFAULT
 

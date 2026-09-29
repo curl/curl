@@ -7,6 +7,7 @@ HTTP GET
 HTTP proxy
 HTTP proxy Digest auth
 multi
+libtest
 </keywords>
 </info>
 
@@ -59,9 +60,6 @@ Nice proxy auth sir!
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 !SSPI
 crypto

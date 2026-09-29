@@ -4,6 +4,7 @@
 <keywords>
 curl_easy_header
 CONNECT
+libtest
 </keywords>
 </info>
 
@@ -45,9 +46,6 @@ http-proxy
 <name>
 curl_easy_nextheader with server + CONNECT
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://hello:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT

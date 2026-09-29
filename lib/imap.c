@@ -1271,7 +1271,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
           pp->nfinal = 0; /* done */
 
           /* Limit chunk to the literal size */
-          if(chunk > (size_t)size)
+          if((curl_off_t)chunk > size)
             chunk = (size_t)size;
 
           if(chunk) {
@@ -1439,7 +1439,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       curlx_dyn_tail(&pp->recvbuf, chunk);
       pp->nfinal = 0; /* done */
 
-      if(chunk > (size_t)size)
+      if((curl_off_t)chunk > size)
         /* The conversion from curl_off_t to size_t is always fine here */
         chunk = (size_t)size;
 

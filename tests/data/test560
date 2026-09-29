@@ -5,6 +5,7 @@
 HTTPS
 HTTP GET
 multi
+libtest
 </keywords>
 </info>
 
@@ -28,9 +29,6 @@ SSL
 <server>
 https
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 simple HTTPS GET with multi interface
 </name>

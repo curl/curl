@@ -4,6 +4,7 @@
 <keywords>
 SMTP
 multi
+libtest
 </keywords>
 </info>
 
@@ -16,9 +17,6 @@ multi
 <server>
 smtp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 # based on bug report #1184
 <name>

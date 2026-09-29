@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+netrc
+CURLINFO_REDIRECT_URL
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 301 redir
+Content-Length: 0
+Content-Type: text/html
+Location: %TESTNUMBER0002
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+verify no credentials present in redirect URL after redirect
+</name>
+<file name="%LOGDIR/netrc">
+machine %HOSTIP
+login netrcuser
+password netrcSECRET123
+</file>
+
+<command option="no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --netrc-optional --netrc-file %LOGDIR/netrc -w 'REDIRECT_URL=%{redirect_url}\n'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Basic %b64[netrcuser:netrcSECRET123]b64%
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+REDIRECT_URL=http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
+</stdout>
+</verify>
+</testcase>

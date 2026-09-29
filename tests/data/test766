@@ -6,6 +6,7 @@ FTP
 PORT
 CURLOPT_SOCKOPTFUNCTION
 timing-dependent
+libtest
 </keywords>
 </info>
 
@@ -21,9 +22,6 @@ hello
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP PORT with sockopt callback refusing the accept
 </name>

@@ -5,6 +5,7 @@
 FTP
 CURLOPT_NOBODY
 CURLOPT_FILETIME
+libtest
 </keywords>
 </info>
 

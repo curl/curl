@@ -35,14 +35,14 @@ cache-mode: write
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 1660
+  CURL_TEST_MIN: 1790
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.8.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20260903.0
   # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
-  FIL_C_VERSION: 0.684
+  FIL_C_VERSION: 0.685
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.3.2
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
@@ -57,9 +57,9 @@ env:
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
   OPENSSL_VERSION: 4.0.2
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
-  RUSTLS_VERSION: 0.15.3
+  RUSTLS_VERSION: 0.15.4
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  WOLFSSL_VERSION: 5.9.2
+  WOLFSSL_VERSION: 5.9.4
 
 jobs:
   linux:
@@ -76,7 +76,7 @@ jobs:
       matrix:
         build:
           - name: 'awslc'
-            install_steps: awslc pytest
+            install_steps: awslc pytest test-linter
             LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
             configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
 
@@ -175,20 +175,26 @@ jobs:
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'rustls valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls
-            tflags: '--subset=0/2'
+            install_steps: rust rustls-arm
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
+            tflags: '--subset=0/2 --min=880'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls
+            install_steps: rust rustls-arm
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=1/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
             install_packages: libnghttp2-dev libldap-dev
-            install_steps: rust rustls skiprun pytest
+            install_steps: rust rustls-intel skiprun pytest
+            LDFLAGS: -Wl,-rpath,/home/runner/rustls/lib
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             configure: --with-rustls --enable-ech --enable-debug
 
           - name: 'wolfssl-all'
@@ -201,7 +207,7 @@ jobs:
             image: ubuntu-26.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
-            tflags: '--subset=0/2'
+            tflags: '--subset=0/2 --min=880'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
@@ -214,6 +220,7 @@ jobs:
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'openssl default'
+            image: ubuntu-24.04
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
@@ -232,6 +239,7 @@ jobs:
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl intel C89'
+            image: ubuntu-24.04
             install_packages: libssh-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
@@ -243,18 +251,21 @@ jobs:
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh2 --enable-debug --disable-verbose
 
           - name: 'openssl -O3 libssh valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--subset=0/2'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl -O3 libssh valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--subset=1/2'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl clang krb5 openldap static'
+            image: ubuntu-24.04
             install_steps: openldap-static
             install_packages: libidn2-dev libkrb5-dev clang libssl-dev
             CC: clang
@@ -276,7 +287,7 @@ jobs:
           - name: 'curl_global_init_mem debug valgrind'
             image: ubuntu-24.04-arm
             install_packages: valgrind
-            tflags: '--min=1700'
+            tflags: '--min=1800'
             configure: >-
               --enable-init-mem-debug
               --with-openssl --disable-debug --enable-unity
@@ -284,7 +295,7 @@ jobs:
 
           - name: 'openssl https-only'
             image: ubuntu-24.04-arm
-            tflags: '--min=1260'
+            tflags: '--min=1360'
             configure: >-
               --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
@@ -307,6 +318,7 @@ jobs:
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl i686'
+            image: ubuntu-24.04
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
             CC: i686-linux-gnu-gcc-14
             LDFLAGS: -L/usr/lib/i386-linux-gnu
@@ -318,13 +330,13 @@ jobs:
 
           - name: '!ssl !http !smtp !imap'
             image: ubuntu-26.04-arm
-            tflags: '--min=500'
+            tflags: '--min=520'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity --enable-httpsig
 
           - name: 'clang-tidy'
             image: ubuntu-26.04
             install_packages: clang-22 clang-tidy-22 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev
-            install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
+            install_steps: skiprun mbedtls-latest-intel rustls-intel wolfssl-opensslextra-intel
             install_steps_brew: openssl@4 gsasl
             CC: clang-22
             CFLAGS: -Wunused-macros
@@ -429,12 +441,13 @@ jobs:
             LDFLAGS: -fsanitize=memory
             LIBS: -ldl
             configure: --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
-            tflags: '--min=1540'
+            tflags: '--min=1640'
 
           - name: 'event-based'
+            image: ubuntu-24.04
             install_packages: libssh-dev
             configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm
-            tflags: '-n --test-event --min=1420'
+            tflags: '-n --test-event --min=1520'
 
           - name: 'duphandle'
             image: ubuntu-26.04-arm
@@ -795,28 +808,43 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'cache rustls'
-        if: ${{ contains(matrix.build.install_steps, 'rustls') }}
+      - name: 'cache rustls (intel)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-intel') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-rustls
+        id: cache-rustls-intel
         env:
-          cache-name: cache-rustls
+          cache-name: cache-rustls-intel
         with:
           path: ~/rustls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
 
-      - name: 'fetch rustls deb'
-        if: ${{ contains(matrix.build.install_steps, 'rustls') && !steps.cache-rustls.outputs.cache-hit }}
+      - name: 'install rustls (intel)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-intel') && !steps.cache-rustls-intel.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output pkg.bin
+            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-x86_64-linux-gnu.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
+          sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
-      - name: 'build rustls'
-        # Note: we do not check cache-hit here. If the cache is hit, we need to dpkg install the deb.
-        if: ${{ contains(matrix.build.install_steps, 'rustls') }}
-        run: sudo dpkg -i ~/rustls/"librustls_${RUSTLS_VERSION}_amd64.deb"
+      - name: 'cache rustls (arm)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-arm') }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cache-rustls-arm
+        env:
+          cache-name: cache-rustls-arm
+        with:
+          path: ~/rustls
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
+
+      - name: 'install rustls (arm)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-arm') && !steps.cache-rustls-arm.outputs.cache-hit }}
+        run: |
+          cd ~
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-arm64-linux-gnu.zip" --output pkg.bin
+          sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
+          sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
       - name: 'install Intel compilers'
         if: ${{ contains(matrix.build.install_steps, 'intelc') }}
@@ -891,6 +919,7 @@ jobs:
 
       - name: 'single-use function check'
         if: ${{ (contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc') }}
+        background: true
         run: |
           git config --global --add safe.directory "*"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -926,9 +955,14 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
+      - name: 'test-linter'
+        if: ${{ contains(matrix.build.install_steps, 'test-linter') }}
+        background: true
+        run: cd tests && ./test-linter.pl ../bld
+
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 20 || 10 }}
+        timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 15 || 10 }}
         env:
           TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
@@ -936,6 +970,7 @@ jobs:
           if [ "${TEST_TARGET}" = 'test-ci' ] && [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
             TFLAGS+=' -j6'
             TFLAGS+=' !776'  # skip long-running flaky test
+            TFLAGS+=' !1674'  # skip long-running test
             if [[ "${MATRIX_INSTALL_PACKAGES}" = *'libgss-dev'* ]]; then
               TFLAGS+=' ~2077 ~2078'  # memory leaks from Curl_auth_decode_spnego_message() -> gss_init_sec_context()
             fi

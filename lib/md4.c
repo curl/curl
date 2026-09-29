@@ -100,13 +100,13 @@ static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
+               __MAC_OS_X_VERSION_MAX_ALLOWED >= 1040 && \
        defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
-              (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
+               __MAC_OS_X_VERSION_MIN_REQUIRED < 101500) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
+               __IPHONE_OS_VERSION_MAX_ALLOWED >= 20000 && \
        defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
+               __IPHONE_OS_VERSION_MIN_REQUIRED < 130000)
 #include <CommonCrypto/CommonDigest.h>
 
 typedef CC_MD4_CTX my_md4_ctx;

@@ -6,6 +6,7 @@ HTTP
 HTTP/2
 multi
 verbose logs
+libtest
 </keywords>
 </info>
 
@@ -55,9 +56,6 @@ verbose-strings
 <server>
 http/2
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP GET multiple files over HTTP/2 using HTTPS
 </name>

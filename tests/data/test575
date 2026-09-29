@@ -7,6 +7,7 @@ RETR
 multi
 wildcardmatch
 ftplistparser
+libtest
 </keywords>
 </info>
 
@@ -21,9 +22,6 @@ ftplistparser
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP wildcard download - dup_handle and multi interface
 </name>

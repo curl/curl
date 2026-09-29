@@ -41,9 +41,10 @@ static void digest_flush_stale(struct Curl_easy *data,
                                struct Curl_creds *creds)
 {
   bool flush = FALSE;
-  if(digest->origin && !Curl_peer_equal(peer, digest->origin)) {
+  if(!digest->origin || !Curl_peer_equal(peer, digest->origin)) {
     CURL_TRC_M(data, "http_digest, reset on peer change to %s:%u",
-               peer->hostname, peer->port);
+               peer ? peer->hostname : "-",
+               (unsigned int)(peer ? peer->port : 0));
     flush = TRUE;
   }
   else if(digest->creds && !Curl_creds_same(creds, digest->creds)) {

@@ -3,6 +3,7 @@
 <info>
 <keywords>
 CURLOPT_PROTOCOLS_STR
+libtest
 </keywords>
 </info>
 
@@ -14,9 +15,6 @@ CURLOPT_PROTOCOLS_STR
 <name>
 CURLOPT_PROTOCOLS_STR
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 </client>
 
 <verify>

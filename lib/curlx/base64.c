@@ -207,10 +207,15 @@ static CURLcode base64_encode(const char *table64,
     return CURLE_OUT_OF_MEMORY;
 
   while(insize >= 3) {
-    *output++ = table64[in[0] >> 2];
-    *output++ = table64[((in[0] & 0x03) << 4) | (in[1] >> 4)];
-    *output++ = table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)];
-    *output++ = table64[in[2] & 0x3F];
+    /* Load all three input bytes before storing output, avoiding reloads when
+       the compiler cannot rule out aliasing. Extract four 6-bit indices from
+       the packed value; byte-wise loads avoid alignment and endian issues. */
+    uint32_t bits = ((uint32_t)in[0] << 16) |
+      ((uint32_t)in[1] << 8) | in[2];
+    *output++ = table64[bits >> 18];
+    *output++ = table64[(bits >> 12) & 0x3F];
+    *output++ = table64[(bits >> 6) & 0x3F];
+    *output++ = table64[bits & 0x3F];
     insize -= 3;
     in += 3;
   }

@@ -6,6 +6,7 @@ HTTP
 HTTP POST
 POST callback
 huge request header
+libtest
 </keywords>
 </info>
 # Server-side
@@ -27,9 +28,6 @@ hello
 http
 </server>
 # tool to use
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 </features>
 <name>

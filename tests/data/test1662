@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 HTTP POST
+libtest
 </keywords>
 </info>
 
@@ -45,9 +46,6 @@ http
 <name>
 HTTP formpost from callback and a redirect and switch to GET
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

@@ -177,6 +177,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
+  if(Curl_hash_global_init()) {
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_hash_global_init failed\n"));
+    goto fail;
+  }
+
   if(!Curl_vquic_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_vquic_init failed\n"));
     goto fail;
@@ -1025,7 +1030,8 @@ CURL *curl_easy_duphandle(CURL *curl)
     Curl_netrc_init(&outcurl->state.netrc);
 
     /* the connection pool is setup on demand */
-    outcurl->state.lastconnect_id = -1;
+    outcurl->state.last_conn_id = -1;
+    outcurl->state.last_cpid = UINT32_MAX;
     outcurl->id = -1;
     outcurl->mid = UINT32_MAX;
     outcurl->master_mid = UINT32_MAX;
@@ -1143,7 +1149,8 @@ void curl_easy_reset(CURL *curl)
   if(CURL_EAPI_ENTER(&guard, curl, easy_reset, NULL)) {
     struct Curl_easy *data = curl;
 
-    data->state.lastconnect_id = -1; /* clear remembered connection id */
+    data->state.last_conn_id = -1; /* clear remembered connection id */
+    data->state.last_cpid = UINT32_MAX;
     Curl_req_hard_reset(&data->req, data);
     Curl_hash_clean(&data->meta_hash);
 
@@ -1262,7 +1269,7 @@ static CURLcode easy_connection(struct Curl_easy *data,
 
   if(sfd == CURL_SOCKET_BAD) {
     failf(data, "Failed to get last socket used for connection #%" FMT_OFF_T,
-          data->state.lastconnect_id);
+          data->state.last_conn_id);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
@@ -1299,8 +1306,13 @@ CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
   CURLcode result;
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_recv, &result)) {
+    if(!n || (buflen && !buffer)) {
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
     result = Curl_easy_recv(curl, buffer, buflen, n);
   }
+out:
   CURL_EAPI_LEAVE(&guard);
   return result;
 }
@@ -1369,9 +1381,14 @@ CURLcode curl_easy_send(CURL *curl, const void *buffer, size_t buflen,
     struct Curl_easy *data = curl;
     size_t written = 0;
 
+    if(!n || (buflen && !buffer)) {
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
     result = Curl_senddata(data, buffer, buflen, &written);
     *n = written;
   }
+out:
   CURL_EAPI_LEAVE(&guard);
   return result;
 }
@@ -1401,8 +1418,11 @@ CURLcode curl_easy_ssls_import(CURL *curl, const char *session_key,
   CURLcode result;
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_ssls_import, &result)) {
-    result = Curl_ssl_session_import((struct Curl_easy *)curl, session_key,
-                                     shmac, shmac_len, sdata, sdata_len);
+    if(!sdata || !sdata_len)
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    else
+      result = Curl_ssl_session_import((struct Curl_easy *)curl, session_key,
+                                       shmac, shmac_len, sdata, sdata_len);
   }
   CURL_EAPI_LEAVE(&guard);
   return result;
@@ -1426,8 +1446,11 @@ CURLcode curl_easy_ssls_export(CURL *curl,
   CURLcode result;
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_ssls_export, &result)) {
-    result = Curl_ssl_session_export((struct Curl_easy *)curl,
-                                     export_fn, userptr);
+    if(!export_fn)
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    else
+      result = Curl_ssl_session_export((struct Curl_easy *)curl,
+                                       export_fn, userptr);
   }
   CURL_EAPI_LEAVE(&guard);
   return result;

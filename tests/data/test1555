@@ -4,6 +4,7 @@
 <keywords>
 RECURSIVE_API_CALL
 DELAY
+libtest
 </keywords>
 </info>
 
@@ -23,9 +24,6 @@ wait 10
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 verify api is protected against calls from callbacks
 </name>

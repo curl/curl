@@ -16,14 +16,6 @@ before?
 
 Ideally these tests run without using any servers.
 
-## `urlparser`
-
-Provide this test with a list of many URLs and it times how fast it can parse
-them: `./perf urlparser URLs.txt [loops]`
-
-A test sample of 100K URLs can be found
-[here](https://raw.githubusercontent.com/ada-url/url-various-datasets/refs/heads/main/top100/top100.txt)
-
 ## `base64enc`
 
 This test base64 encodes a 256-byte buffer that has every different byte octet
@@ -38,12 +30,12 @@ provided number of times:
 
     ./perf base64dec [loops]
 
-## `snprintf`
+## `dateparser`
 
-This test repeatedly formats a representative string and measures the time per
-call:
+Runs through 180+ date strings and parses them (converts them to epoch time)
+`loops` number of times:
 
-    ./perf snprintf [loops]
+    ./perf dateparser [loops]
 
 ## `maprintf`
 
@@ -54,6 +46,14 @@ test does not:
 
     ./perf maprintf [loops]
 
+## `numparser`
+
+This test repeatedly converts over a hundred different numbers from a string
+to binary. Decimal, hexadecimal and octal numbers, each with a set cap. Many
+numbers hit the cap, some numbers are not syntactically correct.
+
+    ./perf numparser [loops]
+
 ## `simpleformat`
 
 This test repeatedly formats a commonly used simple message with
@@ -62,6 +62,13 @@ with no width or precision. Where `snprintf` measures an elaborate format,
 this measures the common one:
 
     ./perf simpleformat [loops]
+
+## `snprintf`
+
+This test repeatedly formats a representative string and measures the time per
+call:
+
+    ./perf snprintf [loops]
 
 ## `urlencode`
 
@@ -76,3 +83,11 @@ This test URL (percent) decodes a 600+ byte buffer. Repeatedly in a loop the
 provided number of times:
 
     ./perf urldecode [loops]
+
+## `urlparser`
+
+Provide this test with a list of many URLs and it times how fast it can parse
+them: `./perf urlparser URLs.txt [loops]`
+
+A test sample of 100K URLs can be found
+[here](https://raw.githubusercontent.com/ada-url/url-various-datasets/refs/heads/main/top100/top100.txt)

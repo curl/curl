@@ -3168,6 +3168,15 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
   return result;
 }
 
+/* an implicit TLS scheme implies TLS on both connections */
+static unsigned char ftp_use_ssl(struct connectdata *conn,
+                                 struct ftp_conn *ftpc)
+{
+  if(!ftpc->use_ssl && (conn->scheme->flags & PROTOPT_SSL))
+    return CURLUSESSL_ALL;
+  return ftpc->use_ssl;
+}
+
 static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
                                     struct connectdata *conn)
 {
@@ -3254,7 +3263,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   case FTP_PBSZ:
     result =
       Curl_pp_sendf(data, &ftpc->pp, "PROT %c",
-                    ftpc->use_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
+                    ftp_use_ssl(conn, ftpc) == CURLUSESSL_CONTROL ? 'C' : 'P');
     if(!result)
       ftp_state(data, ftpc, FTP_PROT);
     break;
@@ -3262,10 +3271,11 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   case FTP_PROT:
     if(ftpcode / 100 == 2)
       /* We have enabled SSL for the data connection! */
-      conn->bits.ftp_use_data_ssl = (ftpc->use_ssl != CURLUSESSL_CONTROL);
+      conn->bits.ftp_use_data_ssl =
+        (ftp_use_ssl(conn, ftpc) != CURLUSESSL_CONTROL);
     /* FTP servers typically responds with 500 if they decide to reject
        our 'P' request */
-    else if(ftpc->use_ssl > CURLUSESSL_CONTROL)
+    else if(ftp_use_ssl(conn, ftpc) > CURLUSESSL_CONTROL)
       /* we failed and bails out */
       return CURLE_USE_SSL_FAILED;
 
@@ -4016,15 +4026,6 @@ static CURLcode init_wc_data(struct Curl_easy *data,
     goto fail;
   }
 
-  /* backup old write_function */
-  ftpwc->backup.write_function = data->set.fwrite_func;
-  /* parsing write function */
-  data->set.fwrite_func = Curl_ftp_parselist;
-  /* backup old file descriptor */
-  ftpwc->backup.file_descriptor = data->set.out;
-  /* let the writefunc callback know the transfer */
-  data->set.out = data;
-
   infof(data, "Wildcard - Parsing started");
   return CURLE_OK;
 
@@ -4060,10 +4061,6 @@ static CURLcode wc_statemach(struct Curl_easy *data,
       /* In this state is LIST response successfully parsed, so lets restore
          previous WRITEFUNCTION callback and WRITEDATA pointer */
       struct ftp_wc *ftpwc = wildcard->ftpwc;
-      data->set.fwrite_func = ftpwc->backup.write_function;
-      data->set.out = ftpwc->backup.file_descriptor;
-      ftpwc->backup.write_function = ZERO_NULL;
-      ftpwc->backup.file_descriptor = NULL;
       wildcard->state = CURLWC_DOWNLOADING;
 
       if(Curl_ftp_parselist_geterror(ftpwc->parser)) {

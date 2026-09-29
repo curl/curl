@@ -3,14 +3,12 @@
 <info>
 <keywords>
 mime
+libtest
 </keywords>
 </info>
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 curl_mime_free
 </name>

@@ -151,13 +151,13 @@ static CURLcode peer_create(struct peer_parse *pp,
     if(!peer->scopeid) {
       const char *p = peer->zoneid;
       curl_off_t scope;
-      if(!curlx_str_number(&p, &scope, UINT_MAX)) {
+      if(!curlx_str_number(&p, &scope, UINT_MAX) && !*p) {
         /* A plain number, use it directly as a scope id. */
         peer->scopeid = (uint32_t)scope;
       }
 #ifdef HAVE_IF_NAMETOINDEX
       else {
-        /* Zone identifier is not numeric */
+        /* Zone identifier is not fully numeric */
         unsigned int idx = 0;
         idx = if_nametoindex(peer->zoneid);
         if(idx) {
@@ -333,9 +333,12 @@ static bool peer_same_hostname(struct Curl_peer *p1, struct Curl_peer *p2)
   return (p1->unix_socket == p2->unix_socket) &&
          (p1->abstract_uds == p2->abstract_uds) &&
          (p1->ipv6 == p2->ipv6) &&
-         (p1->unix_socket ?
-          !strcmp(p1->hostname, p2->hostname) :
-          curl_strequal(p1->hostname, p2->hostname));
+         /* unix_socket paths are case-sensitive, hostnames are not.
+          * Do strcmp() first on both, since we do a lot of matches
+          * on the same names and platform strcmp is way faster. */
+         (!strcmp(p1->hostname, p2->hostname) ||
+          (!p1->unix_socket &&
+           curl_strequal(p1->hostname, p2->hostname)));
 }
 
 bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
@@ -461,6 +464,7 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
 {
   struct peer_parse pp;
   const char *portstr = NULL;
+  bool port_switch = FALSE;
   CURLcode result;
 
   Curl_peer_unlink(ppeer);
@@ -491,6 +495,7 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
   }
 
   if(!pp.host_user.len) { /* no hostname found, only port switch */
+    port_switch = TRUE;
     pp.host_user.str = dest->user_hostname;
     pp.host_user.len = strlen(dest->user_hostname);
   }
@@ -498,6 +503,8 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
   result = peer_parse_host(data, &pp, FALSE);
   if(result)
     goto out;
+  /* On a port switch, ipv6 must stay the same */
+  DEBUGASSERT(!port_switch || ((bool)pp.ipv6 == (bool)dest->ipv6));
 
   if(portstr && portstr[1]) {
     const char *p = portstr + 1;
@@ -519,6 +526,13 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
     goto out;
   }
 #endif
+  if(pp.ipv6 && port_switch) {
+    if(dest->zoneid) {
+      pp.zoneid.str = dest->zoneid;
+      pp.zoneid.len = strlen(dest->zoneid);
+    }
+    pp.scopeid = dest->scopeid;
+  }
 
   result = peer_create(&pp, ppeer);
   CURL_TRC_M(data, "connect-to peer_create2 -> %d", (int)result);

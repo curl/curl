@@ -41,6 +41,7 @@
 #include "curlx/strdup.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
+#include "peer.h"
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_RTSP_EASY   "meta:proto:rtsp:easy"
@@ -457,6 +458,12 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   result = rtsp_setup_request(data, &block,  rtspreq);
   if(result)
     goto out;
+
+  if(block.session_id && data->state.rtsp_session_origin &&
+     !data->set.allow_auth_to_other_hosts &&
+     !Curl_peer_equal(data->state.origin, data->state.rtsp_session_origin))
+    block.session_id = NULL;
+
   /*
    * Sanity check the custom headers
    */
@@ -1014,6 +1021,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
       if(!mem ||
          CURL_EASY_STR_SETN(data, STRING_RTSP_SESSION_ID, mem))
         return CURLE_OUT_OF_MEMORY;
+      Curl_peer_link(&data->state.rtsp_session_origin, data->state.origin);
     }
   }
   else if(checkprefix("Transport:", header)) {

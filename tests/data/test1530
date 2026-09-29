@@ -3,6 +3,7 @@
 <info>
 <keywords>
 CURLOPT_OPENSOCKETFUNCTION
+libtest
 </keywords>
 </info>
 
@@ -10,9 +11,6 @@ CURLOPT_OPENSOCKETFUNCTION
 <features>
 http
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 CURLOPT_OPENSOCKETFUNCTION returns bad socket
 </name>

@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 CURLOPT_CURLU
+libtest
 </keywords>
 </info>
 # Similar to 1518 but using CURLOPT_CURLU

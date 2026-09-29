@@ -5,6 +5,7 @@
 curl_global_init
 thread-safe
 slow
+libtest
 </keywords>
 </info>
 
@@ -23,9 +24,6 @@ threaded-resolver
 <name>
 curl_global_init thread-safety
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 </client>
 
 # Verify data after the test has been "shot"

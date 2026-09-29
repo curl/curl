@@ -3315,7 +3315,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
         fd_write = sock;
       /* wait for the socket to become ready */
       (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
-                              left_ms > 1000 ? 1000 : left_ms);
+                              (!left_ms || left_ms > 1000) ? 1000 : left_ms);
     }
   }
 
@@ -3732,7 +3732,7 @@ static CURLcode ssh_done(struct Curl_easy *data, CURLcode status)
   else
     result = status;
 
-  if(Curl_pgrsDone(data))
+  if(Curl_pgrsDone(data, Curl_pgrs_now(data)))
     return CURLE_ABORTED_BY_CALLBACK;
 
   CURL_REQ_CLEAR_IO(data);

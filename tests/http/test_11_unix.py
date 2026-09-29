@@ -86,8 +86,9 @@ Content-Length: 19
 
 class TestUnix:
 
-    @pytest.fixture(scope="class")
-    def uds_faker(self, env: Env) -> Generator[UDSFaker, None, None]:
+    @pytest.fixture(scope='class')
+    @classmethod
+    def uds_faker(cls, env: Env) -> Generator[UDSFaker, None, None]:
         uds_path = os.path.join(env.gen_dir, 'uds_11.sock')
         faker = UDSFaker(path=uds_path)
         faker.start()

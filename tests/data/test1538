@@ -4,6 +4,7 @@
 <keywords>
 strerror
 verbose logs
+libtest
 </keywords>
 </info>
 
@@ -16,9 +17,6 @@ verbose logs
 <features>
 verbose-strings
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 libcurl strerror API call tests

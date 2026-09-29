@@ -4,6 +4,7 @@
 <keywords>
 curl_easy_option
 typecheck
+libtest
 </keywords>
 </info>
 
@@ -16,9 +17,6 @@ typecheck
 <name>
 Cross validate that gcc-typecheck macros match the option types.
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 </client>
 

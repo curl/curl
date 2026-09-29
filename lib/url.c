@@ -244,6 +244,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_ssl_close_all(data);
   Curl_peer_unlink(&data->state.origin);
   Curl_peer_unlink(&data->state.initial_origin);
+#ifndef CURL_DISABLE_RTSP
+  Curl_peer_unlink(&data->state.rtsp_session_origin);
+#endif
   Curl_ssl_free_certinfo(data);
 
   Curl_bufref_free(&data->state.referer);
@@ -267,6 +270,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   curlx_safefree(data->state.most_recent_ftp_entrypath);
   curlx_safefree(data->info.contenttype);
   curlx_safefree(data->info.wouldredirect);
+  curlx_safefree(data->info.effective_url);
 
   /* No longer a dirty share, if it exists */
   if(Curl_share_easy_unlink(data))
@@ -459,7 +463,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
   /* most recent connection is not yet defined */
-  data->state.lastconnect_id = -1;
+  data->state.last_conn_id = -1;
+  data->state.last_cpid = UINT32_MAX;
   /* and not assigned an id yet */
   data->id = -1;
   data->mid = UINT32_MAX;
@@ -690,14 +695,16 @@ static bool url_match_multiplex_limits(struct connectdata *conn,
     /* If multiplexed, make sure we do not go over concurrency limit */
     if(conn->attached_xfers >=
             Curl_multi_max_concurrent_streams(m->data->multi)) {
-      infof(m->data, "client side MAX_CONCURRENT_STREAMS reached"
-            ", skip (%u)", conn->attached_xfers);
+      infof(m->data, "connection #%" FMT_OFF_T " reached "
+            "MAX_CONCURRENT_STREAMS(%u), skip",
+            conn->connection_id, conn->attached_xfers);
       return FALSE;
     }
     if(conn->attached_xfers >=
        Curl_conn_get_max_concurrent(m->data, conn, FIRSTSOCKET)) {
-      infof(m->data, "MAX_CONCURRENT_STREAMS reached, skip (%u)",
-            conn->attached_xfers);
+      infof(m->data, "connection #%" FMT_OFF_T "reached "
+            "MAX_CONCURRENT_STREAMS(%u), skip",
+            conn->connection_id, conn->attached_xfers);
       return FALSE;
     }
     /* When not multiplexed, we have a match here! */
@@ -743,6 +750,16 @@ static bool url_match_proxy_use(struct connectdata *conn,
 
   if(!proxy_info_matches(&m->needle->http_proxy, &conn->http_proxy))
     return FALSE;
+
+  if(m->data->set.socks5_auth_only && !conn->bits.socks5_authenticated &&
+     ((conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ||
+      (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5_HOSTNAME))) {
+    DEBUGF(infof(m->data,
+                 "Connection #%" FMT_OFF_T
+                 " was not SOCKS5 authenticated, cannot reuse",
+                 conn->connection_id));
+    return FALSE;
+  }
 
   if(CURL_PROXY_IS_HTTPS(m->needle->http_proxy.proxytype)) {
     /* https proxies come in different types, http/1.1, h2, ... */
@@ -978,50 +995,51 @@ static bool url_match_auth_nego(struct connectdata *conn,
 #define url_match_auth_nego(c, m) ((void)(c), (void)(m), TRUE)
 #endif
 
-static bool url_match_conn(struct connectdata *conn, void *userdata)
+static cpool_match_result url_match_conn(struct connectdata *conn,
+                                         void *userdata)
 {
   struct url_conn_match *m = userdata;
   bool wait_pipe = FALSE;
 
   /* general connect config setting match? */
   if(!url_match_connect_config(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   /* match for destination and protocol? */
   if(!url_match_destination(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_fully_connected(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_multiplex_needs(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_ssl_use(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_proxy_use(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
   if(!url_match_ssl_config(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_http_multiplex(conn, m, &wait_pipe))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_auth(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_proto_config(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_auth_ntlm(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_auth_nego(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   if(!url_match_multiplex_limits(conn, m))
-    return FALSE;
+    return CPOOL_MATCH_CONT;
 
   /* The connection matches all conditions, but do we want to use it? */
   if(wait_pipe) {
@@ -1029,16 +1047,14 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
      * yet. Put the transfer into PENDING and wait for conn state change. */
     DEBUGASSERT(!m->found);
     m->wait_pipe = TRUE;
-    return TRUE;
+    return CPOOL_MATCH_FOUND;
   }
 
   if(m->data->set.conn_max_age_ms > 0) {
     timediff_t age_ms = Curl_cpool_conn_age_ms(m->data, conn, &m->now);
     if(age_ms > m->data->set.conn_max_age_ms) {
       /* Transfer is looking for a younger connection. */
-      if(!CONN_INUSE(conn))
-        Curl_conn_close(m->data, conn, FALSE);
-      return FALSE;
+      return CPOOL_MATCH_TOO_OLD;
     }
   }
 
@@ -1048,13 +1064,12 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
      !Curl_cpool_conn_seems_healthy(conn, m->data, &m->now)) {
     infof(m->data, "Connection %" FMT_OFF_T " seems to be dead, terminating",
           conn->connection_id);
-    Curl_conn_close(m->data, conn, FALSE);
-    return FALSE;
+    return CPOOL_MATCH_CLOSE;
   }
 
   /* conn matches our needs. */
   m->found = conn;
-  return TRUE;
+  return CPOOL_MATCH_FOUND;
 }
 
 static bool url_match_result(void *userdata)
@@ -1091,21 +1106,13 @@ static bool url_match_result(void *userdata)
  */
 static bool url_attach_existing(struct Curl_easy *data,
                                 struct connectdata *needle,
-                                struct url_conn_match *m)
+                                struct url_conn_match *m,
+                                const struct curltime *pnow)
 {
-  struct cpool *cpool = Curl_cpool_get_instance(data);
-  bool success;
-
-  DEBUGASSERT(!data->conn);
-
-  Curl_cpool_prune_dead(cpool, data);
-
   /* Find a connection in the pool that matches what "data + needle"
    * requires. If a suitable candidate is found, it is attached to "data". */
-  success = Curl_cpool_find(data, needle->destination,
-                            url_match_conn, url_match_result, m);
-
-  return success;
+  return Curl_cpool_find(data, needle->destination, TRUE, pnow,
+                         url_match_conn, url_match_result, m);
 }
 
 /*
@@ -1123,6 +1130,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->recv_idx = 0; /* default for receiving transfer data */
   conn->send_idx = 0; /* default for sending transfer data */
   conn->connection_id = -1;    /* no ID */
+  conn->cpid = UINT32_MAX;  /* not in connection pool yet */
   conn->attached_xfers = 0;
   conn->shutdown.start_ms[FIRSTSOCKET] =
     conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
@@ -1517,10 +1525,9 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
                                            struct connectdata *conn)
 {
   struct Curl_peer *peer = NULL;
-  CURLcode result;
 
   if(conn->scheme->run->setup_connection) {
-    result = conn->scheme->run->setup_connection(data, conn);
+    CURLcode result = conn->scheme->run->setup_connection(data, conn);
     if(result)
       return result;
   }
@@ -1551,10 +1558,10 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   if(data->set.scope_id)
     conn->scope_id = data->set.scope_id;
   else {
-    struct Curl_peer *first = Curl_conn_get_first_peer(conn, FIRSTSOCKET);
-    if(!first)
+    peer = Curl_conn_get_first_peer(conn, FIRSTSOCKET);
+    if(!peer)
       return CURLE_FAILED_INIT;
-    conn->scope_id = first->scopeid;
+    conn->scope_id = peer->scopeid;
   }
 #endif
 
@@ -2264,7 +2271,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       goto out;
 
     /* Setup a "faked" transfer that will do nothing */
-    result = Curl_cpool_add(data, needle, pnow);
+    result = Curl_cpool_add(data, needle, 0, 0, pnow);
     Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
     if(!result) {
@@ -2294,40 +2301,42 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
   if((!data->set.reuse_fresh || data->state.followlocation) &&
      !data->set.connect_only) {
     /* Ok, try to find and attach an existing one */
-    url_attach_existing(data, needle, &match);
-  }
+    if(url_attach_existing(data, needle, &match, pnow)) {
+      /* We attached an existing connection for this transfer. Copy
+       * over transfer specific properties over from needle. */
+      struct connectdata *conn = data->conn;
+      VERBOSE(bool tls_upgraded =
+        (!(needle->origin->scheme->flags & PROTOPT_SSL) &&
+         Curl_conn_is_ssl(conn, FIRSTSOCKET)));
 
-  if(data->conn) {
-    /* We attached an existing connection for this transfer. Copy
-     * over transfer specific properties over from needle. */
-    struct connectdata *conn = data->conn;
-    VERBOSE(bool tls_upgraded =
-      (!(needle->origin->scheme->flags & PROTOPT_SSL) &&
-       Curl_conn_is_ssl(conn, FIRSTSOCKET)));
-
-    conn->bits.reuse = TRUE;
-    url_conn_reuse_adjust(data, needle);
+      DEBUGASSERT(conn);
+      conn->bits.reuse = TRUE;
+      url_conn_reuse_adjust(data, needle);
 
 #ifndef CURL_DISABLE_PROXY
-    infof(data, "Reusing existing %s: connection%s with %s %s",
-          conn->origin->scheme->name,
-          tls_upgraded ? " (upgraded to SSL)" : "",
-          (conn->socks_proxy.peer || conn->http_proxy.peer) ? "proxy" : "host",
-          conn->socks_proxy.peer ? conn->socks_proxy.peer->user_hostname :
-          conn->http_proxy.peer ? conn->http_proxy.peer->user_hostname :
-          conn->origin->hostname);
+      infof(data, "Reusing existing %s: connection%s with %s %s",
+            conn->origin->scheme->name,
+            tls_upgraded ? " (upgraded to SSL)" : "",
+            (conn->socks_proxy.peer || conn->http_proxy.peer) ?
+            "proxy" : "host",
+            conn->socks_proxy.peer ? conn->socks_proxy.peer->user_hostname :
+            conn->http_proxy.peer ? conn->http_proxy.peer->user_hostname :
+            conn->origin->hostname);
 #else
-    infof(data, "Reusing existing %s: connection%s with host %s",
-          conn->origin->scheme->name,
-          tls_upgraded ? " (upgraded to SSL)" : "",
-          conn->origin->hostname);
+      infof(data, "Reusing existing %s: connection%s with host %s",
+            conn->origin->scheme->name,
+            tls_upgraded ? " (upgraded to SSL)" : "",
+            conn->origin->hostname);
 #endif
+    }
   }
-  else {
-    /* We have decided that we want a new connection. We may not be able to do
-       that if we have reached the limit of how many connections we are
-       allowed to open. */
 
+  if(!data->conn) {
+    /* We have not attached an existing connection. `needle` may become
+     * the connection to use, if
+     * - we are not waiting on an existing connection result
+     * - the total/host limits on active connections allow it
+     */
     if(match.wait_pipe) {
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
@@ -2335,49 +2344,33 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       result = CURLE_NO_CONNECTION_AVAILABLE;
       goto out;
     }
-    else {
-      switch(Curl_cpool_check_limits(data, needle, pnow)) {
-      case CPOOL_LIMIT_DEST:
-        infof(data, "No more connections allowed to host");
-        result = CURLE_NO_CONNECTION_AVAILABLE;
-        goto out;
-      case CPOOL_LIMIT_TOTAL:
-        if(data->master_mid != UINT32_MAX)
-          CURL_TRC_M(data, "Allowing sub-requests (like DoH) to override "
-                     "max connection limit");
-        else {
-          infof(data, "No connections available, total of %u reached.",
-                data->multi->max_total_connections);
-          result = CURLE_NO_CONNECTION_AVAILABLE;
-          goto out;
-        }
-        break;
-      default:
-        break;
-      }
-    }
 
-    /* Convert needle into a full connection by cloning the
-     * ssl filter config used in matching into the connection. */
+    /* Add needle to conn pool, observing the limits.
+     * Initializes connection_id.
+     * May fail due to limits with CURLE_NO_CONNECTION_AVAILABLE. */
+    result = Curl_cpool_add(data, needle,
+                            data->multi->max_total_connections,
+                            data->multi->max_host_connections,
+                            pnow);
+    if(result)
+      goto out;
+
+    /* All fine, attach it and forget needle */
+    Curl_attach_connection(data, needle, TRUE);
+    needle = NULL;
+
+    /* Clone the SSL filter configs into the new connection. */
     result = Curl_ssl_conn_config_clone(&match.ssl_config,
 #ifndef CURL_DISABLE_PROXY
                                         &match.proxy_ssl_config,
 #else
                                         NULL,
 #endif
-                                        needle);
+                                        data->conn);
     if(result) {
       DEBUGF(infof(data, "Error: clone connection SSL config"));
       goto out;
     }
-
-    /* Add needle to conn pool, which assigns the connection id.
-     * Attach regardless of result, for correct handling. */
-    result = Curl_cpool_add(data, needle, pnow);
-    Curl_attach_connection(data, needle, TRUE);
-    needle = NULL;
-    if(result)
-      goto out;
 
 #ifdef USE_NTLM
     /* If NTLM is requested in a part of this connection, make sure we do not
@@ -2398,6 +2391,8 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
     }
 #endif
   }
+
+  /* COMMON setup code for reused and new connections from here on. */
 
   /* Setup and init stuff before DO starts, in preparing for the transfer. */
   result = Curl_init_transfer(data, data->conn);

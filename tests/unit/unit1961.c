@@ -144,12 +144,55 @@ static int test_pton(void)
   return 0;
 }
 
+struct pton6_case {
+  const char *addr;
+  int valid;
+};
+
+static const struct pton6_case pton6_cases[] = {
+  { "1:2:3:4:5:6:7:8:", 0 }, /* AISLE-2026-0115-00325 */
+  { "::1:", 0 },             /* AISLE-2026-0115-00290 */
+  { "1:2:3:", 0 },
+  { "1:", 0 },
+  { ":1", 0 },
+  { ":::", 0 },
+  { "1:2:3:4:5:6:7:8::", 0 },
+  { "1:2:3:4:5:6:7::8:9", 0 },
+  { "", 0 },
+  { "::", 1 },
+  { "::1", 1 },
+  { "1::", 1 },
+  { "1::8", 1 },
+  { "1:2:3:4:5:6:7:8", 1 },
+  { "1:2:3:4:5:6::", 1 },
+  { "1:2:3:4:5:6::8", 1 },
+  { "fe80::1", 1 },
+  { "::ffff:192.0.2.1", 1 },
+  { "::127.0.0.1", 1 }
+};
+
+static int test_pton_cases(void)
+{
+  unsigned char ipv6a[16];
+  size_t i;
+
+  for(i = 0; i < CURL_ARRAYSIZE(pton6_cases); i++) {
+    int rc = curlx_inet_pton(AF_INET6, pton6_cases[i].addr, ipv6a);
+    int got_valid = (rc == 1);
+    if(got_valid != pton6_cases[i].valid)
+      return 1; /* fail */
+  }
+
+  return 0;
+}
+
 static CURLcode test_unit1961(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
   fail_if(test_ntop(), "curlx_inet_ntop()");
   fail_if(test_pton(), "curlx_inet_pton()");
+  fail_if(test_pton_cases(), "curlx_inet_pton() IPv6 edge cases");
 
   UNITTEST_END_SIMPLE
 }

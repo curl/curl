@@ -8,6 +8,7 @@ HTTP set cookie
 cookies
 CURLOPT_REFERER
 curl_easy_reset
+libtest
 </keywords>
 </info>
 # Server-side
@@ -48,9 +49,6 @@ Content-Type: text/html
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 curl_easy_reset with referer and other strings set

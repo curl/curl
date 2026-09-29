@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+RTSP
+OPTIONS
+libtest
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
+Content-Length: 18
+
+No-More: sessions
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+rtsp
+</server>
+<tool>
+lib567
+</tool>
+<name>
+RTSP OPTIONS response with a body, CURLOPT_NOBODY set
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
+CSeq: 1
+User-Agent: test567
+Test-Number: 567
+
+</protocol>
+<stdout>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
+Content-Length: 18
+
+</stdout>
+</verify>
+</testcase>

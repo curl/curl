@@ -4,6 +4,7 @@
 <keywords>
 CURLINFO_LOW_SPEED_LIMIT
 DELAY
+libtest
 </keywords>
 </info>
 
@@ -27,9 +28,6 @@ writedelay: 1000
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 CURLINFO_LOW_SPEED_LIMIT

@@ -2,7 +2,7 @@
 <testcase>
 <info>
 <keywords>
-unittest
+tunittest
 tool-sizeparser
 </keywords>
 </info>
@@ -15,9 +15,6 @@ unittest
 <name>
 the size parser for --limit-rate
 </name>
-<tool>
-tool%TESTNUMBER
-</tool>
 </client>
 
 <verify>

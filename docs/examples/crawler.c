@@ -136,13 +136,20 @@ static size_t follow_links(CURLM *multi, struct memory *mem, const char *url)
     return 0;
   xpath = (xmlChar *)"//a/@href";
   context = xmlXPathNewContext(doc);
+  if(!context) {
+    xmlFreeDoc(doc);
+    return 0;
+  }
   object = xmlXPathEvalExpression(xpath, context);
   xmlXPathFreeContext(context);
-  if(!object)
+  if(!object) {
+    xmlFreeDoc(doc);
     return 0;
+  }
   nodeset = object->nodesetval;
   if(xmlXPathNodeSetIsEmpty(nodeset)) {
     xmlXPathFreeObject(object);
+    xmlFreeDoc(doc);
     return 0;
   }
   count = 0;
@@ -158,16 +165,22 @@ static size_t follow_links(CURLM *multi, struct memory *mem, const char *url)
       xmlFree(orig);
     }
     link = (char *)href;
-    if(!link || strlen(link) < 20)
+    if(!link || strlen(link) < 20) {
+      xmlFree(link);
       continue;
+    }
     if(!strncmp(link, "http://", 7) || !strncmp(link, "https://", 8)) {
-      curl_multi_add_handle(multi, make_handle(link));
-      if(count++ == max_link_per_page)
+      if(count >= max_link_per_page) {
+        xmlFree(link);
         break;
+      }
+      curl_multi_add_handle(multi, make_handle(link));
+      count++;
     }
     xmlFree(link);
   }
   xmlXPathFreeObject(object);
+  xmlFreeDoc(doc);
   return count;
 }
 

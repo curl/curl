@@ -79,11 +79,6 @@ struct ftp_parselist_data; /* defined later in ftplistparser.c */
 
 struct ftp_wc {
   struct ftp_parselist_data *parser;
-
-  struct {
-    curl_write_callback write_function;
-    FILE *file_descriptor;
-  } backup;
 };
 
 /* This FTP struct is used in the Curl_easy. All FTP data that is

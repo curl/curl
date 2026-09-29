@@ -5,6 +5,7 @@
 HTTP
 CONNECT_ONLY
 CURLMOPT_MAX_HOST_CONNECTIONS
+libtest
 </keywords>
 </info>
 
@@ -27,9 +28,6 @@ http
 <name>
 CONNECT_ONLY survives the per-host connection limit
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

@@ -4,6 +4,7 @@
 <keywords>
 urlapi
 curl_url_set
+libtest
 </keywords>
 </info>
 
@@ -11,9 +12,6 @@ curl_url_set
 <name>
 curl_url_set() different schemes
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 </client>
 
 # Verify data after the test has been "shot"

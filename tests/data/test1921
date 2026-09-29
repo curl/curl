@@ -3,6 +3,7 @@
 <info>
 <keywords>
 urlapi
+libtest
 </keywords>
 </info>
 
@@ -12,9 +13,6 @@ urlapi
 <name>
 Set a URL without scheme, then redirect with default scheme
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 -

@@ -3,6 +3,7 @@
 <info>
 <keywords>
 curl_easy_header
+libtest
 </keywords>
 </info>
 
@@ -42,9 +43,6 @@ http
 <name>
 curl_easy_header
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

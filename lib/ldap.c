@@ -230,27 +230,30 @@ static ULONG ldap_win_bind(struct Curl_easy *data, LDAP *server,
 }
 #endif /* USE_WIN32_LDAP */
 
+/* RFC 2849: a string that is not a SAFE-STRING (leading ':' or '<', leading or
+   trailing space, or any non-printable byte such as CR/LF) cannot go into LDIF
+   as-is. DNs and values get base64-encoded instead; an attribute type has no
+   base64 form in LDIF and is rejected by the caller. */
+static bool ldap_str_needs_base64(const char *s, size_t len)
+{
+  size_t i;
+  if(!len)
+    return FALSE;
+  if((s[0] == ':') || (s[0] == '<') || ISBLANK(s[0]) || ISBLANK(s[len - 1]))
+    return TRUE;
+  for(i = 0; i < len; i++)
+    if(!ISPRINT(s[i]))
+      return TRUE;
+  return FALSE;
+}
+
 static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
                                     const BerValue *val)
 {
-  ber_len_t j;
-
   if((attr_len > 7) && curl_strequal(";binary", attr + attr_len - 7))
     return TRUE;
 
-  /* check for a leading ':' or '<' (not a SAFE-INIT-CHAR per RFC 2849) or
-     leading or trailing whitespace */
-  if(val->bv_len && ((val->bv_val[0] == ':') || (val->bv_val[0] == '<') ||
-                     ISBLANK(val->bv_val[0]) ||
-                     ISBLANK(val->bv_val[val->bv_len - 1])))
-    return TRUE;
-
-  /* check for unprintable characters */
-  for(j = 0; j < val->bv_len; j++)
-    if(!ISPRINT(val->bv_val[j]))
-      return TRUE;
-
-  return FALSE;
+  return ldap_str_needs_base64(val->bv_val, val->bv_len);
 }
 
 #ifdef USE_WIN32_LDAP
@@ -270,6 +273,14 @@ static CURLcode show_vals(struct Curl_easy *data, BerValue **vals,
   CURLcode result = CURLE_OK;
   int i;
   size_t attr_len = strlen(attr);
+
+  /* An attribute type has no base64 form in LDIF, so a type carrying control
+     bytes (CR/LF etc.) would let a hostile server inject lines. A conformant
+     type name never contains them, so reject it. */
+  if(ldap_str_needs_base64(attr, attr_len)) {
+    failf(data, "LDAP local: attribute type contains illegal bytes");
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
 
   for(i = 0; vals[i] && !result; i++) {
     result = Curl_client_write(data, CLIENTWRITE_BODY, "\t", 1);
@@ -534,12 +545,28 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         result = dn ? CURLE_OUT_OF_MEMORY : CURLE_FAILED_INIT;
       else {
         name_len = strlen(name);
-        result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
+        if(ldap_str_needs_base64(name, name_len)) {
+          char *dn_b64 = NULL;
+          size_t dn_b64_sz = 0;
+
+          /* A DN with e.g. CR/LF would inject LDIF lines, so encode it */
+          result = curlx_base64_encode((uint8_t *)name, name_len,
+                                       &dn_b64, &dn_b64_sz);
+          if(!result)
+            result = Curl_client_write(data, CLIENTWRITE_BODY, "DN:: ", 5);
+          if(!result)
+            result = Curl_client_write(data, CLIENTWRITE_BODY, dn_b64,
+                                       dn_b64_sz);
+          curlx_free(dn_b64);
+        }
+        else {
+          result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
+          if(!result)
+            result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
+        }
+        if(!result)
+          result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       }
-      if(!result)
-        result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
-      if(!result)
-        result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       FREE_ON_WINLDAP(name);
       ldap_memfree(dn);
       if(result)

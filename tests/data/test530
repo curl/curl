@@ -4,6 +4,7 @@
 <keywords>
 multi
 HTTP
+libtest
 </keywords>
 </info>
 
@@ -31,9 +32,6 @@ Funny-head: yesyes
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 multi_socket interface transfer with callbacks returning error
 </name>

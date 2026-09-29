@@ -5,6 +5,7 @@
 CURLOPT_READFUNCTION
 curl_easy_reset
 rewind
+libtest
 </keywords>
 </info>
 
@@ -22,9 +23,6 @@ Location: /%TESTNUMBER
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Test reset resolves rewind failure
 </name>

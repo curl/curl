@@ -3,6 +3,7 @@
 <info>
 <keywords>
 MULTI
+libtest
 </keywords>
 </info>
 <reply>
@@ -13,9 +14,6 @@ MULTI
 # Client-side
 <client>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 multi - add many easy handles

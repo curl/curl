@@ -890,6 +890,18 @@ static const struct urltestcase get_url_list[] = {
   {"https://[::%25fakeit];80/moo",
    "",
    0, 0, CURLUE_BAD_PORT_NUMBER},
+  {"https://[::%25fa keit]:80/moo",
+   "",
+   0, 0, CURLUE_BAD_IPV6},
+  {"https://[::%25fa%\x7fkeit]:80/moo",
+   "",
+   0, 0, CURLUE_BAD_IPV6},
+  {"https://[::%25fa keit]:80/moo",
+   "",
+   CURLU_ALLOW_SPACE, 0, CURLUE_BAD_IPV6},
+  {"https://[::%25fake\tit]:80/moo",
+   "",
+   0, 0, CURLUE_BAD_HOSTNAME},
   {"https://[fe80::20c:29ff:fe9c:409b]-80/moo",
    "",
    0, 0, CURLUE_BAD_PORT_NUMBER},
@@ -1285,7 +1297,7 @@ static const struct setcase set_parts_list[] = {
   {"https://example.com/",
    "host=0xff,", /* '++' there is no automatic URL decode when setting this
                   part */
-   "https://0xff/",
+   "https://0.0.0.255/",
    0, /* get */
    0, /* set */
    CURLUE_OK, CURLUE_OK},
@@ -2410,6 +2422,9 @@ static int test_api_errors(void)
   rc = curl_url_set(NULL, CURLUPART_URL, "http://example.com", 0);
   if(rc != CURLUE_BAD_HANDLE)
     return 1;
+
+  if(curl_url_dup(NULL))
+    return 4;
 
   /* NULL part pointer */
   rc = curl_url_get(u, CURLUPART_URL, NULL, 0);

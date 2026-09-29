@@ -42,7 +42,7 @@ CURL_ISATTY=yes
 Okay binary output to terminal
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --output -
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --output - --no-styled-output
 </command>
 </client>
 

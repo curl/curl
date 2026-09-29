@@ -115,12 +115,6 @@ this library to download.
 
 See [curl issue 5176](https://github.com/curl/curl/issues/5176)
 
-## `curl-config --libs` contains private details
-
-`curl-config --libs` include details set in `LDFLAGS` when configure is run
-that might be needed only for building libcurl. Further, `curl-config
---cflags` suffers from the same effects with `CFLAGS`/`CPPFLAGS`.
-
 ## `LDFLAGS` passed too late making libs linked incorrectly
 
 Compiling latest curl on HP-UX and linking against a custom OpenSSL (which is
@@ -347,13 +341,6 @@ The struct needs to be expanded and code added to store this info.
 
 See [curl issue 13492](https://github.com/curl/curl/issues/13492)
 
-## error buffer not set if connection to multiple addresses fails
-
-If you ask libcurl to resolve a hostname like example.com to IPv6 addresses
-when you only have IPv4 connectivity. libcurl fails with
-`CURLE_COULDNT_CONNECT`, but the error buffer set by `CURLOPT_ERRORBUFFER`
-remains empty. Issue: [curl issue 544](https://github.com/curl/curl/issues/544)
-
 ## HTTP test server 'connection-monitor' problems
 
 The `connection-monitor` feature of the HTTP test server does not work
@@ -446,6 +433,13 @@ then subsequently fails anyway if that was actually in use.
 
 [curl issue 8112](https://github.com/curl/curl/issues/8112)
 
+## Stdin is not non-blocking on Windows
+
+The telnet handler reads data from stdin by default without needing to
+specify that on the command line, but since Windows is special, reading
+from stdin is not done in a non-blocking manner, meaning that curl might
+block waiting for input without triggering the timeout.
+
 # HTTP/2
 
 ## HTTP/2 prior knowledge over proxy
@@ -490,13 +484,3 @@ See https://curl.se/mail/lib-2024-05/0026.html and
 The transfer ends with error "QUIC connection is draining".
 
 [curl issue 12037](https://github.com/curl/curl/issues/12037)
-
-# RTSP
-
-## Some methods do not support response bodies
-
-The RTSP implementation is written to assume that a number of RTSP methods
-always get responses without bodies, even though there seems to be no
-indication in the RFC that this is always the case.
-
-[curl issue 12414](https://github.com/curl/curl/issues/12414)

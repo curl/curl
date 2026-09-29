@@ -5,6 +5,7 @@
 HTTP
 HTTP GET
 multi
+libtest
 </keywords>
 </info>
 

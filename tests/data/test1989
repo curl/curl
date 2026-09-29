@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+libtest
+urlapi
+</keywords>
+</info>
+
+<client>
+<name>
+curl_url_dup preserves guessed_scheme
+</name>
+</client>
+</testcase>

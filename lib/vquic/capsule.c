@@ -256,7 +256,7 @@ size_t Curl_capsule_process_udp_raw(struct Curl_cfilter *cf,
     *err = CURLE_RECV_ERROR;
     return 0;
   }
-  if(capsule_length - 1 >= (uint64_t)SIZE_MAX) {
+  if(capsule_length - 1 > (uint64_t)(SIZE_MAX - offset)) {
     infof(data, "Error! Capsule length too large: %" CURL_FORMAT_CURL_OFF_T,
           (curl_off_t)capsule_length);
     *err = CURLE_RECV_ERROR;
@@ -264,16 +264,22 @@ size_t Curl_capsule_process_udp_raw(struct Curl_cfilter *cf,
   }
   payload_len = (size_t)(capsule_length - 1);
 
-  if(Curl_bufq_len(recvbufq) < offset + payload_len) {
-    *err = CURLE_AGAIN;
-    return 0;
-  }
-
   if(payload_len > len) {
     infof(data, "UDP payload does not fit destination buffer: %zu > %zu",
           payload_len, len);
     Curl_bufq_skip(recvbufq, offset + payload_len);
     *err = CURLE_RECV_ERROR;
+    return 0;
+  }
+
+  if(Curl_bufq_len(recvbufq) < offset + payload_len) {
+    if(Curl_bufq_is_full(recvbufq)) {
+      infof(data, "Error! Capsule does not fit the receive buffer: %zu",
+            payload_len);
+      *err = CURLE_RECV_ERROR;
+      return 0;
+    }
+    *err = CURLE_AGAIN;
     return 0;
   }
 

@@ -241,6 +241,41 @@ static void test_capsule_decode_paths(void)
 
   Curl_bufq_free(&q);
 }
+
+static void test_capsule_full_buffer_reject(void)
+{
+  /* A capsule whose payload can never fit the bounded bufq must fail
+     instead of asking for more data forever. */
+  struct bufq q;
+  unsigned char out[256];
+  unsigned char cap[128];
+  CURLcode err = CURLE_OK;
+  size_t nread;
+  /* type 0x00, length 201 as a 2-byte varint, context 0x00 */
+  static const unsigned char hdr[] = { 0x00, 0x40, 0xC9, 0x00 };
+
+  Curl_bufq_init2(&q, 32, 4, BUFQ_OPT_NONE);
+
+  memset(cap, 0x5A, sizeof(cap));
+  memcpy(cap, hdr, sizeof(hdr));
+
+  /* the queue can still grow, so wait for the rest */
+  queue_bytes(&q, cap, 64);
+  nread = Curl_capsule_process_udp_raw(NULL, NULL, &q, out, sizeof(out), &err);
+  fail_unless(err == CURLE_AGAIN, "partial capsule should return AGAIN");
+  fail_unless(nread == 0, "partial capsule should read zero bytes");
+
+  /* the queue is full and the capsule is still short, it never completes */
+  queue_bytes(&q, cap + 64, sizeof(cap) - 64);
+  fail_unless(Curl_bufq_is_full(&q), "queue should be full");
+  nread = Curl_capsule_process_udp_raw(NULL, NULL, &q, out, sizeof(out), &err);
+  fail_unless(err == CURLE_RECV_ERROR,
+              "unbufferable capsule should return RECV_ERROR");
+  fail_unless(nread == 0, "unbufferable capsule should read zero bytes");
+
+  Curl_bufq_free(&q);
+}
+
 #endif /* USE_NGTCP2 && !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
 static CURLcode test_unit3400(const char *arg)
@@ -257,6 +292,7 @@ static CURLcode test_unit3400(const char *arg)
   test_capsule_encode_decode_roundtrip();
   test_capsule_decode_paths();
   test_capsule_sequential_decode();
+  test_capsule_full_buffer_reject();
 #endif
 
   UNITTEST_END_SIMPLE

@@ -69,7 +69,7 @@
 #include "request.h"
 #include "ratelimit.h"
 #include "netrc.h"
-#include "uint-hashset.h"
+#include "u8_strset.h"
 #include "vdns/asyn.h"
 #include "vdns/hostip.h"
 #include "vtls/vtls_config.h"
@@ -184,6 +184,7 @@ struct ConnectBits {
   BIT(connect_only);
 #ifndef CURL_DISABLE_PROXY
   BIT(origin_is_proxy);  /* if set, the connection's origin is a proxy */
+  BIT(socks5_authenticated); /* SOCKS5 authenticated on FIRSTSOCKET */
 #endif
   /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
@@ -219,7 +220,6 @@ struct ConnectBits {
   BIT(no_reuse); /* connection should not be reused */
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
-  BIT(in_cpool);     /* connection is kept in a connection pool */
   BIT(dns_resolved); /* DNS records for connection were resolved */
 };
 
@@ -285,7 +285,6 @@ struct connectdata {
    * the connection is cleaned up (see Curl_hash_add2()).*/
   struct Curl_hash meta_hash;
 
-  struct Curl_llist_node cpool_node; /* conncache lists */
   struct Curl_llist_node cshutdn_node; /* cshutdn list */
   char *destination; /* hostname+port, used in conncache */
 
@@ -356,6 +355,8 @@ struct connectdata {
 #define CONN_INUSE(c) (!!(c)->attached_xfers)
   uint32_t attached_xfers; /* # of attached easy handles */
 
+  uint32_t cpid; /* connection pool id */
+
 #ifdef USE_IPV6
   uint32_t scope_id;  /* Scope id for IPv6 */
 #endif
@@ -408,6 +409,7 @@ struct PureInfo {
   curl_off_t numconnects; /* how many new connections libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would have been redirected to if asked to */
+  char *effective_url; /* when needed */
   curl_off_t retry_after; /* info from Retry-After: header */
   const char *conn_scheme;
   int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
@@ -525,7 +527,6 @@ struct urlpieces {
 };
 
 struct UrlState {
-  curl_off_t lastconnect_id; /* The last assigned connection or -1 */
   /* Origin of the initial (e.g. not followed) request of a transfer.
      Credentials from CURLOPT_* are only valid for this origin.
      Always set once a transfer starts searching for connections. */
@@ -620,12 +621,18 @@ struct UrlState {
 #endif
 #ifndef CURL_DISABLE_RTSP
   /* This RTSP state information survives requests and connections */
+  struct Curl_peer *rtsp_session_origin; /* origin that issued the session id,
+                                            NULL when set by the application */
   uint8_t rtp_channel_mask[32]; /* for the correctness checking of the
                                          interleaved data */
   uint32_t rtsp_next_client_CSeq; /* the session's next client CSeq */
   uint32_t rtsp_next_server_CSeq; /* the session's next server CSeq */
   uint32_t rtsp_CSeq_recv; /* most recent CSeq received */
 #endif
+
+  curl_off_t last_conn_id; /* The last assigned connection or -1 */
+  uint32_t last_cpid; /* last connection pool id used */
+
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   int weight; /* shallow copy of data->set */
 #endif
@@ -1105,6 +1112,7 @@ struct UserDefined {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   BIT(socks5_gssapi_nec); /* Flag to support NEC SOCKS5 server */
 #endif
+  BIT(socks5_auth_only); /* SOCKS5 must authenticate */
   BIT(sasl_ir);         /* Enable/disable SASL initial response */
   BIT(tcp_keepalive);  /* use TCP keepalives */
   BIT(tcp_fastopen);   /* use TCP Fast Open */

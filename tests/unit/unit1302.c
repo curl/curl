@@ -162,6 +162,30 @@ static CURLcode test_unit1302(const char *arg)
     curlx_safefree(decoded);
   }
 
+  {
+    unsigned char binary[256];
+    size_t length;
+    for(i = 0; i < sizeof(binary); i++)
+      binary[i] = (unsigned char)i;
+    for(length = 1; length <= sizeof(binary); length++) {
+      char *encoded;
+      unsigned char *decoded;
+      size_t enclen;
+      size_t declen;
+      result = curlx_base64_encode(binary, length, &encoded, &enclen);
+      abort_unless(result == CURLE_OK, "binary encoding failed");
+      fail_unless(enclen == (length + 2) / 3 * 4, "wrong encoded size");
+      fail_unless(!encoded[enclen], "encoded data is not terminated");
+      result = curlx_base64_decode(encoded, &decoded, &declen);
+      curlx_free(encoded);
+      abort_unless(result == CURLE_OK, "binary decoding failed");
+      fail_unless(declen == length, "wrong decoded size");
+      fail_unless(!memcmp(decoded, binary, length), "wrong decoded data");
+      fail_unless(!decoded[declen], "decoded data is not terminated");
+      curlx_free(decoded);
+    }
+  }
+
   for(i = 0; i < CURL_ARRAYSIZE(url); i++) {
     const struct etest *e = &url[i];
     char *out;

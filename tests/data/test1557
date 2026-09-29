@@ -4,6 +4,7 @@
 <keywords>
 multi
 crash
+libtest
 </keywords>
 </info>
 
@@ -11,9 +12,6 @@ crash
 </reply>
 
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Remove easy handle in pending connections, no dangling entry

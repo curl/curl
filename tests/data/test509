@@ -3,6 +3,7 @@
 <info>
 <keywords>
 memory callbacks
+libtest
 </keywords>
 </info>
 # Server-side
@@ -15,9 +16,6 @@ memory callbacks
 http
 </features>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 initialization with memory callbacks and actual usage

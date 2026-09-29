@@ -6,6 +6,7 @@ HTTP
 HTTP POST
 HTTP MIME
 Resume
+libtest
 </keywords>
 </info>
 
@@ -26,9 +27,6 @@ form-api
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 reject HTTP form and MIME upload resume
 </name>

@@ -56,4 +56,5 @@ int main(void)
 
 # RETURN VALUE
 
-Returns a pointer to a new `CURLU` handle or NULL if out of memory.
+Returns a pointer to a new `CURLU` handle or NULL if out of memory or if
+*inhandle* is NULL.

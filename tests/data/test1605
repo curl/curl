@@ -3,14 +3,12 @@
 <info>
 <keywords>
 curl_easy_escape
+libtest
 </keywords>
 </info>
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Test negative data lengths as input to libcurl functions
 </name>

@@ -121,31 +121,15 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp)
 {
-  DEBUGASSERT(data);
-
   /* this works for an easy handle:
    * - that has been used for curl_easy_perform()
    * - that is associated with a multi handle, and whose connection
    *   was detached with CURLOPT_CONNECT_ONLY
    */
-  if(data->state.lastconnect_id != -1) {
-    struct connectdata *conn;
-
-    conn = Curl_cpool_get_conn(data, data->state.lastconnect_id);
-    if(!conn) {
-      data->state.lastconnect_id = -1;
-      if(connp)
-        *connp = NULL;
-      return CURL_SOCKET_BAD;
-    }
-
-    if(connp)
-      *connp = conn;
-    return conn->sock[FIRSTSOCKET];
-  }
+  struct connectdata *conn = Curl_cpool_get_last_conn(data);
   if(connp)
-    *connp = NULL;
-  return CURL_SOCKET_BAD;
+    *connp = conn;
+  return conn ? conn->sock[FIRSTSOCKET] : CURL_SOCKET_BAD;
 }
 
 void Curl_conncontrol(struct connectdata *conn, int ctrl)

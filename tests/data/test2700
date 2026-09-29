@@ -3,6 +3,7 @@
 <info>
 <keywords>
 WebSockets
+libtest
 </keywords>
 </info>
 
@@ -17,9 +18,6 @@ ws
 <server>
 http
 </server>
-<tool>
-lib2700
-</tool>
 <command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

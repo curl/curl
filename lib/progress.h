@@ -45,7 +45,7 @@ typedef enum {
 /* Get the current timestamp of the transfer */
 const struct curltime *Curl_pgrs_now(struct Curl_easy *data);
 
-int Curl_pgrsDone(struct Curl_easy *data);
+int Curl_pgrsDone(struct Curl_easy *data, const struct curltime *pnow);
 void Curl_pgrsStart(struct Curl_easy *data, const struct curltime *pnow);
 void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size);

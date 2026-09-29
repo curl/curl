@@ -131,6 +131,10 @@ you also set the CURLU_URLENCODE flag.
 
 Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed to set.
 
+A numeric IPv4 address (in dotted decimal or a legacy form such as a single
+decimal, octal or hexadecimal number) is normalized to dotted decimal, the
+same way it is when libcurl parses a full URL.
+
 ## CURLUPART_ZONEID
 
 If the hostname is a numeric IPv6 address, this field can also be set.

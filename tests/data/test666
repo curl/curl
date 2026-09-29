@@ -6,6 +6,7 @@ HTTP
 HTTP POST
 HTTP MIME POST
 MIME
+libtest
 </keywords>
 </info>
 
@@ -37,9 +38,6 @@ Mime
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTP mime post with binary-encoded huge data contents

@@ -5,6 +5,7 @@
 HTTP
 HSTS
 CURLOPT_HSTSREADFUNCTION
+libtest
 </keywords>
 </info>
 
@@ -22,9 +23,6 @@ http
 <name>
 HSTS read/write callbacks
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER

@@ -51,7 +51,7 @@ cache-mode: none
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 1560
+  CURL_TEST_MIN: 1680
   DEBIAN_FRONTEND: noninteractive
   DO_NOT_TRACK: '1'
 

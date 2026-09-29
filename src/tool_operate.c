@@ -547,6 +547,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         notef("Keeping %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
         if(fflush(outs->stream)) {
           errorf("Failed to flush output file stream");
+          *retryp = FALSE;
           return CURLE_WRITE_ERROR;
         }
         if(outs->bytes >= CURL_OFF_T_MAX - outs->init) {
@@ -554,6 +555,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
                  "%" CURL_FORMAT_CURL_OFF_T " + "
                  "%" CURL_FORMAT_CURL_OFF_T ")",
                  outs->init, outs->bytes);
+          *retryp = FALSE;
           return CURLE_WRITE_ERROR;
         }
         truncate = FALSE;
@@ -577,10 +579,15 @@ static CURLcode retrycheck(struct OperationConfig *config,
         notef("Throwing away %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
 
         /* truncate file at the position where we started appending */
-        if(toolx_ftruncate(fileno(outs->stream), outs->init)) {
+        if(
+#ifdef DEBUGBUILD
+           getenv("CURL_DBG_TRUNCATE_FAIL") ||
+#endif
+           toolx_ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot append as then we
              create something strange, bail out */
           errorf("Failed to truncate file");
+          *retryp = FALSE;
           return CURLE_WRITE_ERROR;
         }
         /* now seek to the end of the file, the position where we
@@ -589,6 +596,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
 
         if(rc) {
           errorf("Failed seeking to end of file");
+          *retryp = FALSE;
           return CURLE_WRITE_ERROR;
         }
         outs->bytes = 0; /* clear for next round */
@@ -693,6 +701,8 @@ static CURLcode post_close_output(struct per_transfer *per,
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
     rc = curlx_fclose(outs->stream);
+    outs->stream = NULL;
+    outs->fopened = FALSE;
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
@@ -1211,11 +1221,6 @@ static void check_stdin_upload(struct OperationConfig *config,
     else
       per->infd = (int)f;
 #endif
-    if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0) {
-      char errbuf[STRERROR_LEN];
-      warnf("fcntl failed on fd=%d: %s", per->infd,
-            curlx_strerror(errno, errbuf, sizeof(errbuf)));
-    }
   }
 }
 
@@ -1242,10 +1247,11 @@ static CURLcode setup_input_file(struct OperationConfig *config,
     if(!config->globoff && !glob_inuse(&state->inglob))
       result = glob_url(&state->inglob, u->infile, &state->upnum, err);
     if(!result && !state->uploadfile) {
-      if(glob_inuse(&state->inglob))
+      if(glob_inuse(&state->inglob) &&
+         !glob_is_literal(&state->inglob))
         result = glob_next_url(&state->uploadfile, &state->inglob);
       else if(!state->upidx) {
-        /* copy the allocated string */
+        /* take ownership of the allocated string */
         state->uploadfile = u->infile;
         u->infile = NULL;
       }
@@ -1305,7 +1311,8 @@ static CURLcode select_next_url(struct State *state,
                                 char **url)
 {
   CURLcode result = CURLE_OK;
-  if(glob_inuse(&state->urlglob))
+  if(glob_inuse(&state->urlglob) &&
+     !glob_is_literal(&state->urlglob))
     result = glob_next_url(url, &state->urlglob);
   else if(!state->urlidx) {
     *url = curlx_strdup(u->url);
@@ -1335,6 +1342,18 @@ static CURLcode setup_transfer_upload(struct OperationConfig *config,
       config->resume_from = -1; /* -1 then forces get-it-yourself */
   }
   return result;
+}
+
+/* returns TRUE if the given stream is a terminal */
+static bool stream_isatty(FILE *stream)
+{
+#ifdef DEBUGBUILD
+  /* the test suite sets CURL_ISATTY to make curl act as if the output goes
+     to a terminal */
+  if(getenv("CURL_ISATTY"))
+    return TRUE;
+#endif
+  return !!isatty(fileno(stream));
 }
 
 /* create a transfer */
@@ -1407,6 +1426,7 @@ static CURLcode create_single(struct OperationConfig *config,
     per->config = config;
     per->curl = curl;
     per->urlnum = u->num;
+    per->out_scheme = NULL;
 
     /* default headers output stream is stdout */
     heads = &per->heads;
@@ -1439,7 +1459,7 @@ static CURLcode create_single(struct OperationConfig *config,
       return result;
 
     if(!outs->out_null && output_expected(per->url, per->uploadfile) &&
-       outs->stream && isatty(fileno(outs->stream)))
+       outs->stream && stream_isatty(outs->stream))
       /* we send the output to a tty, therefore we switch off the progress
          meter */
       per->noprogress = global->noprogress = global->isatty = TRUE;
@@ -2335,6 +2355,8 @@ static CURLcode run_all_transfers(CURLSH *share,
   bool orig_noprogress = (bool)global->noprogress;
   bool orig_isatty = (bool)global->isatty;
   struct per_transfer *per;
+  (void)curlx_nonblock((curl_socket_t)STDIN_FILENO, TRUE);
+  /* fail silently */
 
   /* Time to actually do the transfers */
   if(!result) {

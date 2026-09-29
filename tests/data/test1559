@@ -4,6 +4,7 @@
 <keywords>
 CURLOPT_URL
 verbose logs
+libtest
 </keywords>
 </info>
 
@@ -17,9 +18,6 @@ verbose logs
 http
 verbose-strings
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Set excessive URL lengths

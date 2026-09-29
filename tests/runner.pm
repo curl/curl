@@ -64,8 +64,6 @@ BEGIN {
         $gdbxwin
         $shallow
         $tortalloc
-        $valgrind_logfile
-        $valgrind_tool
     );
 
     # these are for debugging only
@@ -115,8 +113,6 @@ use memanalyzer;
 # Global variables set elsewhere but used only by this package
 # These may only be set *before* runner_init is called
 our $DBGCURL = $CURL; #"../src/.libs/curl";  # alternative for debugging
-our $valgrind_logfile = "--log-file";  # the option name for valgrind >=3
-our $valgrind_tool = "--tool=memcheck";
 our $gdb = checktestcmd("gdb");
 our $gdbthis = 0;  # run test case with debugger (gdb or lldb)
 our $gdbxwin;      # use windowed gdb when using gdb
@@ -862,7 +858,10 @@ sub singletest_run {
         $tool = $CMDLINE;
         $disablevalgrind = 1;
     }
-    elsif(!$tool && !$keywords{"unittest"}) {
+    elsif(!$tool &&
+          !$keywords{"unittest"} &&
+          !$keywords{"tunittest"} &&
+          !$keywords{"libtest"}) {
         # run curl, add suitable command line options
         my $inc = "";
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-include/)) {
@@ -905,6 +904,15 @@ sub singletest_run {
         # Default the tool to a unit test with the same name as the test spec
         if($keywords{"unittest"} && !$tool) {
             $tool_name = "unit$testnum";
+            $tool = $tool_name . exe_ext('TOOL');
+        }
+        # Default the tool to a libtest with the same number as the test
+        elsif($keywords{"libtest"} && !$tool) {
+            $tool_name = "lib$testnum";
+            $tool = $tool_name . exe_ext('TOOL');
+        }
+        elsif($keywords{"tunittest"} && !$tool) {
+            $tool_name = "tool$testnum";
             $tool = $tool_name . exe_ext('TOOL');
         }
 
@@ -982,12 +990,12 @@ sub singletest_run {
 
     if(use_valgrind() && !$disablevalgrind) {
         my $valgrindcmd = "$valgrind ";
-        $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
+        $valgrindcmd .= "--tool=memcheck ";  # valgrind 2.1.x+
         $valgrindcmd .= "--quiet --leak-check=yes ";
         $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
         # $valgrindcmd .= "--gen-suppressions=all ";
         $valgrindcmd .= "--num-callers=16 ";
-        $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
+        $valgrindcmd .= "--log-file=$LOGDIR/valgrind$testnum";  # valgrind >=3
         $CMDLINE = "$valgrindcmd $CMDLINE";
     }
 

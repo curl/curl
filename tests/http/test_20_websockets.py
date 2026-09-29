@@ -111,7 +111,8 @@ class WsServer:
 class TestWebsockets:
 
     @pytest.fixture(autouse=True, scope='class')
-    def ws_echo(self, env):
+    @classmethod
+    def ws_echo(cls, env):
         cmd = os.path.join(env.project_dir,
                            'tests/http/testenv/ws_echo_server.py')
         server = WsServer('ws_echo', env, cmd)
@@ -120,7 +121,8 @@ class TestWebsockets:
         server.shutdown()
 
     @pytest.fixture(autouse=True, scope='class')
-    def ws_4frames(self, env):
+    @classmethod
+    def ws_4frames(cls, env):
         cmd = os.path.join(env.project_dir,
                            'tests/http/testenv/ws_4frames_server.py')
         server = WsServer('ws_4frames', env, cmd)

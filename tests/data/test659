@@ -6,6 +6,7 @@ HTTP
 HTTP GET
 CURLOPT_CURLU
 proxy
+libtest
 </keywords>
 </info>
 <reply>
@@ -28,9 +29,6 @@ Funny-head: yesyes
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 CURLOPT_CURLU without the path set - over proxy
 </name>

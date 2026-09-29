@@ -42,7 +42,7 @@ CURL_ISATTY=yes
 Refuse binary output to terminal
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-styled-output
 </command>
 </client>
 

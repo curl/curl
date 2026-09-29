@@ -226,7 +226,10 @@ static CURLcode cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                                      plainlen - *pnread,
                                      &n);
     if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
+      /* A TLS message that carried no plaintext. Break out of the loop
+       * to prevent a server from keeping us here forever. */
       backend->data_in_pending = FALSE;
+      break;
     }
     else if(rresult == RUSTLS_RESULT_UNEXPECTED_EOF) {
       failf(data, "rustls: peer closed TCP connection "
@@ -984,7 +987,8 @@ init_config_builder_ech(struct Curl_easy *data,
     const struct Curl_https_rrinfo *rinfo =
       Curl_conn_dns_get_https(data, cf->sockindex, connssl->peer.origin);
 
-    if(!rinfo || !rinfo->echconfiglist) {
+    if(!Curl_httpsrr_is_for_peer(connssl->peer.origin, rinfo) ||
+       !rinfo->echconfiglist) {
       failf(data, "rustls: ECH requested but no ECHConfig available");
       result = CURLE_SSL_CONNECT_ERROR;
       goto cleanup;

@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 HTTP GET
+libtest
 </keywords>
 </info>
 
@@ -29,9 +30,6 @@ Content-Length: 7
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 get curlinfo on last header in callback
 </name>

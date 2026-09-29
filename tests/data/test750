@@ -49,10 +49,10 @@ Proxy-Connection: Keep-Alive
 
 </protocol>
 <errorcode>
-43
+8
 </errorcode>
 <stderr mode="text">
-curl: (43) Invalid response header
+curl: (8) Invalid response header
 </stderr>
 </verify>
 </testcase>

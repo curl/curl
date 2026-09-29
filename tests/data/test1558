@@ -4,6 +4,7 @@
 <keywords>
 curl_easy_getinfo
 CURLINFO_PROTOCOL
+libtest
 </keywords>
 </info>
 
@@ -14,9 +15,6 @@ CURLINFO_PROTOCOL
 <features>
 file
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 CURLINFO_PROTOCOL for file:// transfer

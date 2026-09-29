@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+RETR
+SOCKS5
+libtest
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+silly content
+</data>
+<servercmd>
+method 0
+method2 2
+user silly
+password person
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<features>
+proxy
+</features>
+<server>
+ftp
+socks5
+</server>
+<name>
+SOCKS5 CURLAUTH_ONLY ignores auth done for the FTP data socket
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %HOSTIP:%SOCKSPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+97
+</errorcode>
+<protocol crlf="yes">
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+</testcase>

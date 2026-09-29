@@ -51,6 +51,11 @@ and curl_multi_cleanup(3) it may call all other methods on the
 multi and easy handles. This includes adding and removing easy
 handles to/from the multi handle.
 
+Internal handles are owned by libcurl and the public API rejects them: the
+easy interface functions fail with CURLE_BAD_FUNCTION_ARGUMENT, and
+curl_multi_add_handle(3) and curl_multi_remove_handle(3) return
+CURLM_BAD_EASY_HANDLE.
+
 This callback may get invoked at any time when interacting with libcurl.
 This may even happen after all transfers are done and *may also*
 happen *during* a call to curl_multi_cleanup(3) when cached connections

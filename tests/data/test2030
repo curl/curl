@@ -7,6 +7,7 @@ HTTP GET
 HTTP Digest auth
 HTTP NTLM auth
 NTLM
+libtest
 </keywords>
 </info>
 # Server-side

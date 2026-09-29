@@ -3,7 +3,7 @@
 <info>
 <keywords>
 getdate
-unittest
+libtest
 </keywords>
 </info>
 # Server-side
@@ -13,9 +13,6 @@ unittest
 # Client-side
 <client>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 curl_getdate() testing

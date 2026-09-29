@@ -29,12 +29,15 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_EFFECTIVE_URL, char **urlp);
 
 Pass in a pointer to a char pointer and get the last used effective URL.
 
-In cases when you have asked libcurl to follow redirects, it may not be the same
-value you set with CURLOPT_URL(3).
+In cases when you have asked libcurl to follow redirects, it may not be the
+same value you set with CURLOPT_URL(3).
 
 The **urlp** pointer is NULL or points to private memory. You **must not**
 free it. It memory gets freed automatically when you call curl_easy_cleanup(3)
 on the corresponding curl handle.
+
+The returned string has limited life-time. It might get destroyed at the next
+libcurl function call involving this same *handle*.
 
 # %PROTOCOLS%
 

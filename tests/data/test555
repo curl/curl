@@ -12,6 +12,7 @@ HTTP proxy
 HTTP proxy NTLM auth
 multi
 NTLM
+libtest
 </keywords>
 </info>
 
@@ -78,9 +79,6 @@ Contents of that page you requested, sir.
 http
 </server>
 # tool to use
-<tool>
-lib%TESTNUMBER
-</tool>
 <features>
 NTLM
 SSL

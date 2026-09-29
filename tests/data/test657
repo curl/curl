@@ -2,35 +2,58 @@
 <testcase>
 <info>
 <keywords>
-SSH
+RTSP
+OPTIONS
+libtest
 </keywords>
 </info>
+
+# Server-side
+<reply>
+<data>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
+Content-Length: 18
+
+No-More: sessions
+</data>
+</reply>
 
 # Client-side
 <client>
 <server>
-ssh
+rtsp
 </server>
+<tool>
+lib567
+</tool>
 <name>
-SSH command execution
+RTSP OPTIONS response with a body
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -X "echo hello" ssh://%HOSTIP:%SSHPORT/ --insecure --next --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -X cat -T %LOGDIR/file%TESTNUMBER.txt ssh://%HOSTIP:%SSHPORT/ --insecure --next --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -X cat -T %LOGDIR/file%TESTNUMBER.txt ssh://%HOSTIP:%SSHPORT/ --insecure
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 </command>
-<file name="%LOGDIR/file%TESTNUMBER.txt">
-upload data
-for ssh exec test
-</file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<stdout mode="text">
-hello
-upload data
-for ssh exec test
-upload data
-for ssh exec test
+<protocol crlf="headers">
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
+CSeq: 1
+User-Agent: test567
+Test-Number: 567
+
+</protocol>
+<stdout>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
+Content-Length: 18
+
+No-More: sessions
 </stdout>
 </verify>
 </testcase>

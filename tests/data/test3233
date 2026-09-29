@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+RTSP
+SESSION_ID
+followlocation
+libtest
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data1>
+RTSP/1.0 302 Found
+Server: RTSPD/libcurl-test
+CSeq: 1
+Session: SHOULD-NOT-LEAK
+Location: rtsp://example.com:%RTSPPORT/%TESTNUMBER
+Curl-private: swsbounce swsclose
+
+</data1>
+<data2>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 2
+Curl-private: swsclose
+
+</data2>
+</reply>
+
+# Client-Side
+<client>
+<server>
+rtsp
+</server>
+
+<name>
+RTSP session id is not sent to another origin after a redirect
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 example.com:%RTSPPORT:%HOSTIP
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
+CSeq: 1
+
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
+CSeq: 2
+
+</protocol>
+</verify>
+
+</testcase>

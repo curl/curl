@@ -142,8 +142,14 @@ static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
   switch(otype) {
   case CW_OUT_BODY:
   case CW_OUT_BODY_0LEN:
-    *pwcb = data->set.fwrite_func;
-    *pwcb_data = data->set.out;
+    if(Curl_ftp_listmode(data)) {
+      *pwcb = Curl_ftp_parselist;
+      *pwcb_data = data;
+    }
+    else {
+      *pwcb = data->set.fwrite_func;
+      *pwcb_data = data->set.out;
+    }
     *pmax_write = CURL_MAX_WRITE_SIZE;
     /* if we ever want buffering of BODY output, we can set `min_write`
      * the preferred size. The default should always be to pass data
@@ -261,6 +267,12 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       *pconsumed += nwritten;
       blen -= nwritten;
       buf += nwritten;
+      /* write functions/data may have been re-setopt'ed. sigh. */
+      cw_get_writefunc(data, otype, &wcb, &wcb_data, &max_write, &min_write);
+      if(!wcb) {
+        *pconsumed += blen;
+        break;
+      }
     }
   }
   return CURLE_OK;

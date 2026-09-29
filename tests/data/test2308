@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 HTTP GET
+libtest
 </keywords>
 </info>
 # This reproduces the #13669 issue
@@ -29,9 +30,6 @@ Funny-head: yesyes
 http
 </server>
 # tool to run
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 verify return code when write callback returns error

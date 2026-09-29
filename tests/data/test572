@@ -4,6 +4,7 @@
 <keywords>
 RTSP
 GET_PARAMETER
+libtest
 </keywords>
 </info>
 
@@ -64,9 +65,6 @@ Informational: Empty Options Response
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP GET_PARAMETER (Put/Heartbeat/Post)

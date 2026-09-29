@@ -6,6 +6,7 @@ HTTP
 HTTP GET
 CURLMINFO_XFERS_DONE
 curl_multi_info_read
+libtest
 </keywords>
 </info>
 
@@ -32,9 +33,6 @@ http
 <name>
 CURLMINFO_XFERS_DONE tracks unread completion messages
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

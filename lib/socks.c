@@ -586,9 +586,16 @@ static CURLproxycode socks5_req0_init(struct Curl_cfilter *cf,
     /* disable username/password auth */
     Curl_creds_unlink(&sx->creds);
 
+  if(cf->sockindex == FIRSTSOCKET)
+    /* the reuse of this connection depends on how this negotiation ends */
+    cf->conn->bits.socks5_authenticated = FALSE;
+
   req[0] = 5;   /* version */
-  nauths = 1;
-  req[1 + nauths] = 0;   /* 1. no authentication */
+  nauths = 0;
+  if(!data->set.socks5_auth_only) {
+    ++nauths;
+    req[1 + nauths] = 0; /* no authentication */
+  }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   if(auth & CURLAUTH_GSSAPI) {
     ++nauths;
@@ -598,6 +605,10 @@ static CURLproxycode socks5_req0_init(struct Curl_cfilter *cf,
   if(sx->creds) {
     ++nauths;
     req[1 + nauths] = 2; /* username/password */
+  }
+  if(!nauths) {
+    failf(data, "SOCKS5: no acceptable authentication method is available.");
+    return CURLPX_NO_AUTH;
   }
   req[1] = nauths;
   req_len = 2 + nauths;
@@ -631,11 +642,17 @@ static CURLproxycode socks5_check_resp0(struct socks_ctx *sx,
 
   switch(auth_mode) {
   case 0:
+    if(data->set.socks5_auth_only) {
+      failf(data, "SOCKS5 proxy selected no authentication.");
+      return CURLPX_NO_AUTH;
+    }
     /* DONE! No authentication needed. Send request. */
     sxstate(sx, cf, data, SOCKS5_ST_REQ1_INIT);
     return CURLPX_OK;
   case 1:
     if(data->set.socks5auth & CURLAUTH_GSSAPI) {
+      if(cf->sockindex == FIRSTSOCKET)
+        cf->conn->bits.socks5_authenticated = TRUE;
       sxstate(sx, cf, data, SOCKS5_ST_GSSAPI_INIT);
       return CURLPX_OK;
     }
@@ -644,6 +661,8 @@ static CURLproxycode socks5_check_resp0(struct socks_ctx *sx,
   case 2:
     /* regular name + password authentication */
     if(data->set.socks5auth & CURLAUTH_BASIC) {
+      if(cf->sockindex == FIRSTSOCKET)
+        cf->conn->bits.socks5_authenticated = TRUE;
       sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
       return CURLPX_OK;
     }

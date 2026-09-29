@@ -169,8 +169,6 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
   result = Curl_gtls_verifyserver(
     cf, data, ctx->gtls.session, conn_config, &data->set.ssl, peer,
     CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY));
-  if(result)
-    return result;
 #elif defined(USE_WOLFSSL)
   (void)data;
   if(conn_config->verifyhost) {

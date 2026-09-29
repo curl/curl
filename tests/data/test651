@@ -5,6 +5,7 @@
 HTTP
 HTTP POST
 FORM
+libtest
 </keywords>
 </info>
 
@@ -30,9 +31,6 @@ form-api
 http
 </server>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 curl_formadd with huge COPYCONTENTS

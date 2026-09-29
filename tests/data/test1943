@@ -4,6 +4,7 @@
 <keywords>
 curl_easy_header
 CONNECT
+libtest
 </keywords>
 </info>
 

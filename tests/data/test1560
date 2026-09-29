@@ -2,9 +2,9 @@
 <testcase>
 <info>
 <keywords>
-unittest
 urlapi
 url
+libtest
 </keywords>
 </info>
 
@@ -26,9 +26,6 @@ ftp
 <name>
 URL API
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 </client>
 
 <verify>

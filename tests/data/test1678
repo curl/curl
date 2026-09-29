@@ -3,6 +3,7 @@
 <info>
 <keywords>
 ssls-import
+libtest
 </keywords>
 </info>
 
@@ -11,9 +12,6 @@ ssls-import
 <features>
 SSLS-EXPORT
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 SSL session import tests
 </name>

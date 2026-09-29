@@ -5,6 +5,7 @@
 FTP
 PASV
 RETR
+libtest
 </keywords>
 </info>
 # Server-side

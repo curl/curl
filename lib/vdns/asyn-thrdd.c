@@ -212,15 +212,40 @@ static void async_thrdd_rr_done(void *user_data, ares_status_t status,
     async->result = Curl_httpsrr_from_ares(dnsrec, &async->httpsrr);
 }
 
+/* Initialize the c-ares channel used for the HTTPS RR side-query, without
+ * submitting any query on it yet. */
+static CURLcode async_rr_init(struct Curl_easy *data,
+                              struct Curl_resolv_async *async)
+{
+  struct async_thrdd_ctx *thrdd = &async->thrdd;
+  int status;
+
+  (void)data;
+  DEBUGASSERT(!thrdd->rr.channel);
+  status = ares_init_options(&thrdd->rr.channel, NULL, 0);
+  if(status != ARES_SUCCESS) {
+    thrdd->rr.channel = NULL;
+    return CURLE_FAILED_INIT;
+  }
+#ifdef DEBUGBUILD
+  if(getenv("CURL_DNS_SERVER")) {
+    const char *servers = getenv("CURL_DNS_SERVER");
+    status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
+    if(status)
+      return CURLE_FAILED_INIT;
+  }
+#endif
+  return CURLE_OK;
+}
+
+/* Submit the HTTPS RR query on the already initialized channel. */
 static CURLcode async_rr_start(struct Curl_easy *data,
                                struct Curl_resolv_async *async)
 {
   struct async_thrdd_ctx *thrdd = &async->thrdd;
   char *https_name = NULL;
-  int status;
   CURLcode result = CURLE_OK;
 
-  DEBUGASSERT(!thrdd->rr.channel);
   if(async->peer->port != 443) {
     https_name = curl_maprintf("_%u._https.%s",
                                async->peer->port, async->peer->hostname);
@@ -229,22 +254,6 @@ static CURLcode async_rr_start(struct Curl_easy *data,
       goto out;
     }
   }
-  status = ares_init_options(&thrdd->rr.channel, NULL, 0);
-  if(status != ARES_SUCCESS) {
-    thrdd->rr.channel = NULL;
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
-#ifdef DEBUGBUILD
-  if(getenv("CURL_DNS_SERVER")) {
-    const char *servers = getenv("CURL_DNS_SERVER");
-    status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
-    if(status) {
-      result = CURLE_FAILED_INIT;
-      goto out;
-    }
-  }
-#endif
 
   async->queries_ongoing++;
   ares_query_dnsrec(thrdd->rr.channel,
@@ -639,7 +648,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 #ifdef USE_HTTPSRR_ARES
   DEBUGASSERT(!async->thrdd.rr.channel);
   if((async->dns_queries & CURL_DNSQ_HTTPS) && !async->is_ipaddr) {
-    result = async_rr_start(data, async);
+    result = async_rr_init(data, async);
     if(result)
       goto out;
     resolver = async->thrdd.rr.channel;
@@ -649,6 +658,14 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
   result = Curl_resolv_announce_start(data, resolver);
   if(result)
     return result;
+
+#ifdef USE_HTTPSRR_ARES
+  if(resolver) {
+    result = async_rr_start(data, async);
+    if(result)
+      goto out;
+  }
+#endif
 
 #ifdef CURLRES_IPV6
   /* Do not start an AAAA query for an IPv4 address when

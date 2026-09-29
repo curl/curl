@@ -181,6 +181,8 @@ static const char *server_unix_socket = NULL;
 static uint16_t server_port = 0;
 static const char *socket_type = "IPv4";
 static int socket_domain = AF_INET;
+/* file in which additional instructions may be found */
+extern const char *cmdfile;
 
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 

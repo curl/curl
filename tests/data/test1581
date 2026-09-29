@@ -4,6 +4,7 @@
 <keywords>
 CURLFOLLOW_OBEYCODE
 CURLOPT_FOLLOWLOCATION
+libtest
 </keywords>
 </info>
 # Server-side

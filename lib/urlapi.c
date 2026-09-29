@@ -440,6 +440,20 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
   return CURLUE_OK;
 }
 
+/* characters not allowed in hostnames:
+   " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%|" */
+
+static const bool invalid_host_char[256] = {
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* 0x00-0x0F */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* 0x10-0x1F */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, /* 0x20-0x2F */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, /* 0x30-0x3F */
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x40-0x4F */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, /* 0x50-0x5F */
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x60-0x6F */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1  /* 0x70-0x7F */
+};
+
 /* This function assumes 'hostname' now starts with [. It trims 'hostname' in
  * place and it sets u->zoneid if present.
  *
@@ -470,7 +484,8 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
       /* pass '25' if present and is a URL encoded percent sign */
       if(!strncmp(h, "25", 2) && h[2] && (h[2] != ']'))
         h += 2;
-      while(*h && (*h != ']') && (i < (MAX_ZONEID_LEN - 1)))
+      while(!invalid_host_char[(unsigned char)*h] && (*h != ']') &&
+            (i < (MAX_ZONEID_LEN - 1)))
         zoneid[i++] = *h++;
       if(!i || (']' != *h))
         return CURLUE_BAD_IPV6;
@@ -500,20 +515,6 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
   }
   return CURLUE_OK;
 }
-
-/* characters not allowed in hostnames:
-   " \r\n\t/:#?!@{}[]\\$\'\"^`*<>=;,+&()%|" */
-
-static const bool invalid_host_char[256] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* 0x00-0x0F */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, /* 0x10-0x1F */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, /* 0x20-0x2F */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, /* 0x30-0x3F */
-  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x40-0x4F */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, /* 0x50-0x5F */
-  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x60-0x6F */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1  /* 0x70-0x7F */
-};
 
 /* the input is a confirmed hostname, never an IPv6 address */
 static CURLUcode hostname_check(char *hostname, size_t hlen)
@@ -1432,7 +1433,12 @@ void curl_url_cleanup(CURLU *u)
 
 CURLU *curl_url_dup(const CURLU *in)
 {
-  struct Curl_URL *u = curlx_calloc(1, sizeof(struct Curl_URL));
+  struct Curl_URL *u;
+
+  if(!in)
+    return NULL;
+
+  u = curlx_calloc(1, sizeof(struct Curl_URL));
   if(u) {
     DUP(u, in, scheme);
     DUP(u, in, user);
@@ -1447,6 +1453,7 @@ CURLU *curl_url_dup(const CURLU *in)
     u->port_present = in->port_present;
     u->fragment_present = in->fragment_present;
     u->query_present = in->query_present;
+    u->guessed_scheme = in->guessed_scheme;
   }
   return u;
 fail:
@@ -2055,9 +2062,23 @@ static CURLUcode url_sethost(CURLU *u, struct dynbuf *encp,
     CURLcode result = Curl_urldecode(newp, n, &decoded, &dlen, REJECT_CTRL);
     if(result || hostname_check6(u, decoded, dlen))
       bad = TRUE;
+    else {
+      struct dynbuf dbuf;
+      curlx_dyn_init(&dbuf, CURL_MAX_INPUT_LENGTH);
+      if(curlx_dyn_addn(&dbuf, decoded, dlen))
+        bad = TRUE;
+      else if(ipv4_normalize(&dbuf) == HOST_IPV4) {
+        curlx_dyn_reset(encp);
+        if(curlx_dyn_addn(encp, curlx_dyn_ptr(&dbuf), curlx_dyn_len(&dbuf)))
+          bad = TRUE;
+      }
+      curlx_dyn_free(&dbuf);
+    }
     curlx_free(decoded);
   }
   else if(hostname_check6(u, newp, n))
+    bad = TRUE;
+  else if(ipv4_normalize(encp) == HOST_ERROR)
     bad = TRUE;
   if(bad) {
     curlx_dyn_free(encp);
@@ -2142,7 +2163,9 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     const char *newp = NULL;
     struct dynbuf enc;
     CURLUcode status;
-    curlx_dyn_init(&enc, (nalloc * 3) + 1 + leadingslash);
+    curlx_dyn_init(&enc, (what == CURLUPART_HOST) ?
+                   CURLMAX((nalloc * 3) + 1 + leadingslash, 16) :
+                   (nalloc * 3) + 1 + leadingslash);
 
     if(leadingslash && (part[0] != '/')) {
       CURLcode result = curlx_dyn_addn(&enc, "/", 1);

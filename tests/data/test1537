@@ -3,6 +3,7 @@
 <info>
 <keywords>
 URL escape
+libtest
 </keywords>
 </info>
 
@@ -12,9 +13,6 @@ URL escape
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 libcurl URL escape/unescape tests

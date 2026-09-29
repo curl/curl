@@ -5,6 +5,7 @@
 HTTP
 HTTP Basic
 CURLOPT_FOLLOWLOCATION
+libtest
 </keywords>
 </info>
 
@@ -39,9 +40,6 @@ http
 <name>
 HTTP credentials with newline and redirect
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 %HOSTIP:%HTTPPORT/%TESTNUMBER

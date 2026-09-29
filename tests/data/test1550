@@ -3,6 +3,7 @@
 <info>
 <keywords>
 multi
+libtest
 </keywords>
 </info>
 
@@ -13,9 +14,6 @@ multi
 # Client-side
 <client>
 # tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 verify setting pipelining blocklisting options

@@ -6,6 +6,7 @@ FTP
 LIST
 wildcardmatch
 ftplistparser
+libtest
 </keywords>
 </info>
 
@@ -16,9 +17,6 @@ ftplistparser
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP wildcards with percent sign in file name
 </name>

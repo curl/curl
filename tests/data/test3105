@@ -3,14 +3,12 @@
 <info>
 <keywords>
 curl_multi_remove_handle
+libtest
 </keywords>
 </info>
 
 # Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 curl_multi_remove_handle twice
 </name>

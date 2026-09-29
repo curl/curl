@@ -68,6 +68,7 @@ TESTS_C = \
   cli_ws_pingpong.c \
   cli_ws_write_err.c \
   \
+  lib464.c \
   lib500.c \
   lib501.c \
   lib502.c \
@@ -169,6 +170,7 @@ TESTS_C = \
   lib1308.c \
   lib1396.c \
   lib1398.c \
+  lib1451.c \
   lib1485.c \
   lib1500.c \
   lib1501.c \
@@ -237,12 +239,16 @@ TESTS_C = \
   lib1598.c \
   lib1599.c \
   lib1605.c \
+  lib1616.c \
   lib1647.c \
   lib1648.c \
   lib1649.c \
   lib1662.c \
   lib1678.c \
   lib1686.c \
+  lib1742.c \
+  lib1744.c \
+  lib1745.c \
   lib1791.c \
   lib1900.c \
   lib1901.c \
@@ -292,6 +298,7 @@ TESTS_C = \
   lib1977.c \
   lib1978.c \
   lib1985.c \
+  lib1989.c \
   lib2023.c \
   lib2032.c \
   lib2082.c \
@@ -303,6 +310,7 @@ TESTS_C = \
   lib2306.c \
   lib2308.c \
   lib2309.c \
+  lib2380.c \
   lib2397.c \
   lib2402.c \
   lib2404.c \
@@ -316,6 +324,7 @@ TESTS_C = \
   lib2506.c \
   lib2700.c \
   lib2805.c \
+  lib2924.c \
   lib3010.c \
   lib3025.c \
   lib3026.c \
@@ -328,9 +337,12 @@ TESTS_C = \
   lib3103.c \
   lib3104.c \
   lib3105.c \
+  lib3107.c \
   lib3207.c \
   lib3208.c \
   lib3231.c \
+  lib3233.c \
   lib3595.c \
+  lib3596.c \
   lib5000.c \
   lib5004.c

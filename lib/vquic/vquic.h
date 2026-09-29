@@ -86,7 +86,6 @@ extern struct Curl_cftype Curl_cft_h3_proxy;
 #endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
-                             const struct connectdata *conn,
-                             unsigned char transport);
+                             struct connectdata *conn);
 
 #endif /* HEADER_CURL_VQUIC_QUIC_H */

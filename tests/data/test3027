@@ -5,6 +5,7 @@
 FTP
 CURLOPT_FILETIME
 MDTM fail
+libtest
 </keywords>
 </info>
 
@@ -28,9 +29,6 @@ ftp
 <name>
 Get a file via FTP but 550 after MDTM command
 </name>
-<tool>
-lib3027
-</tool>
 <command option="no-include">
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>

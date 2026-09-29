@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 HTTP Basic auth
+libtest
 </keywords>
 </info>
 
@@ -59,9 +60,6 @@ https
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTP auth without redirection protocols

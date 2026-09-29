@@ -64,7 +64,8 @@ class TLSDefs:
 class TestSSLUse:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
+    @classmethod
+    def _class_scope(cls, env, httpd, nghttpx):
         env.make_data_file(indir=httpd.docs_dir, fname="data-10k", fsize=10 * 1024)
 
     def test_17_01_sslinfo_plain(self, env: Env, httpd):

@@ -1283,7 +1283,12 @@ do_send:
    * loses bytes, e.g. reporting all was sent but they were not.
    * Remember the blocked length and use that when set. */
   if(backend->send_blocked) {
-    DEBUGASSERT(backend->send_blocked_len <= len);
+    if(backend->send_blocked_len > len) {
+      DEBUGASSERT(0);
+      failf(data, "re-send data shorter than previously");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> previously blocked "
                 "on %zu bytes", len, backend->send_blocked_len);
     len = backend->send_blocked_len;
@@ -1326,6 +1331,7 @@ do_send:
     }
   }
 
+out:
   CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> %d, %zu",
               len, (int)result, *pnwritten);
   return result;

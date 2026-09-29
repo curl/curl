@@ -149,7 +149,8 @@ bool Curl_uint32_tbl_add(struct uint32_tbl *tbl, void *entry, uint32_t *pkey)
 
 void Curl_uint32_tbl_remove(struct uint32_tbl *tbl, uint32_t key)
 {
-  uint32_tbl_clear_rows(tbl, key, key + 1);
+  if(key < tbl->nrows)
+    uint32_tbl_clear_rows(tbl, key, key + 1);
 }
 
 bool Curl_uint32_tbl_contains(struct uint32_tbl *tbl, uint32_t key)

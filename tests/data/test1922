@@ -6,6 +6,7 @@ HTTP
 HTTP proxy
 HSTS
 curl_easy_duphandle
+libtest
 </keywords>
 </info>
 
@@ -51,9 +52,6 @@ CURL_HSTS_HTTP=yes
 <name>
 curl_easy_duphandle copies HSTS cache, auto upgrading HTTP to HTTPS.
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 - %HOSTIP %HTTPPORT %PROXYPORT
 </command>
