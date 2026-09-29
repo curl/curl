@@ -231,6 +231,14 @@ CURLcode Curl_urldecode(const char *string, size_t length,
   DEBUGASSERT(string);
   DEBUGASSERT(ctrl >= REJECT_NADA); /* crash on TRUE/FALSE */
 
+  if(olen)
+    *olen = 0;
+  if(!ostring)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  *ostring = NULL;
+  if(!string)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   alloc = (length ? length : strlen(string));
   ns = curlx_malloc(alloc + 1);
 
@@ -314,6 +322,10 @@ char *curl_easy_unescape(CURL *curl, const char *string, int inlength,
 {
   char *str = NULL;
   (void)curl;
+
+  if(outlength)
+    *outlength = 0;
+
   if(string && (inlength >= 0)) {
     size_t inputlen = (size_t)inlength;
     size_t outputlen;
@@ -325,9 +337,11 @@ char *curl_easy_unescape(CURL *curl, const char *string, int inlength,
     if(outlength) {
       if(outputlen <= (size_t)INT_MAX)
         *outlength = curlx_uztosi(outputlen);
-      else
+      else {
         /* too large to return in an int, fail! */
         curlx_safefree(str);
+        *outlength = 0;
+      }
     }
   }
   return str;
@@ -351,6 +365,8 @@ void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
                     unsigned char *out, size_t olen) /* output buffer size */
 {
   DEBUGASSERT(src && len && (olen >= 3));
+  if(!out || !olen)
+    return;
   if(src && len && (olen >= 3)) {
     while(len-- && (olen >= 3)) {
       out[0] = Curl_ldigits[*src >> 4];
@@ -361,8 +377,9 @@ void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
     }
     *out = 0;
   }
-  else if(olen)
+  else {
     *out = 0;
+  }
 }
 
 /* Curl_hexbyte
@@ -372,6 +389,8 @@ void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
 void Curl_hexbyte(unsigned char *dest, /* must fit two bytes */
                   unsigned char val)
 {
+  if(!dest)
+    return;
   dest[0] = Curl_udigits[val >> 4];
   dest[1] = Curl_udigits[val & 0x0F];
 }

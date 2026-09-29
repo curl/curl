@@ -37,10 +37,10 @@ If the **length** argument is set to 0 (zero), curl_easy_unescape(3)
 uses strlen() on **input** to find out the size.
 
 If **outlength** is non-NULL, the function writes the length of the returned
-string in the integer it points to. This allows proper handling even for
-strings containing %00. Since this is a pointer to an *int* type, it can
-only return a value up to *INT_MAX* so no longer string can be returned in
-this parameter.
+string in the integer it points to. If the function fails or NULL is returned,
+this integer is set to zero. This allows proper handling even for strings
+containing %00. Since this is a pointer to an *int* type, it can only return a
+value up to *INT_MAX* so no longer string can be returned in this parameter.
 
 Since 7.82.0, the **curl** parameter is ignored. Prior to that there was
 per-handle character conversion support for some old operating systems such as

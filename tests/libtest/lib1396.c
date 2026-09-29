@@ -155,5 +155,36 @@ static CURLcode test_lib1396(const char *arg)
     curl_free(decoded);
   }
 
+  {
+    int dummy_len = 42;
+    char *res;
+
+    res = curl_easy_unescape(easy, NULL, 0, &dummy_len);
+    fail_unless(!res, "unescape NULL input should return NULL");
+    fail_unless(dummy_len == 0, "unescape NULL input should zero outlength");
+
+    dummy_len = 42;
+    res = curl_easy_unescape(easy, "valid", -1, &dummy_len);
+    fail_unless(!res, "unescape negative length should return NULL");
+    fail_unless(dummy_len == 0,
+                "unescape negative length should zero outlength");
+
+    res = curl_easy_unescape(easy, NULL, 0, NULL);
+    fail_unless(!res,
+                "unescape NULL input with NULL outlength should return NULL");
+
+    res = curl_easy_escape(easy, NULL, 0);
+    fail_unless(!res, "escape NULL input should return NULL");
+
+    res = curl_easy_escape(easy, "valid", -1);
+    fail_unless(!res, "escape negative length should return NULL");
+
+    res = curl_escape(NULL, 0);
+    fail_unless(!res, "curl_escape NULL input should return NULL");
+
+    res = curl_unescape(NULL, 0);
+    fail_unless(!res, "curl_unescape NULL input should return NULL");
+  }
+
   UNITTEST_END(t1396_stop(easy))
 }
