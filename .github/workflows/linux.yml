@@ -511,9 +511,7 @@ jobs:
       - name: 'install Fil-C'
         if: ${{ contains(matrix.build.install_steps, 'filc') }}
         run: |
-          pwd
           cd /home/runner
-          pwd
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" --output pkg.bin
           sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin && mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
@@ -809,23 +807,39 @@ jobs:
           cmake --build .
           cmake --install .
 
+      - name: 'cache rustls (intel)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-intel') }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cache-rustls-intel
+        env:
+          cache-name: cache-rustls-intel
+        with:
+          path: ~/rustls
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
+
       - name: 'install rustls (intel)'
         if: ${{ contains(matrix.build.install_steps, 'rustls-intel') && !steps.cache-rustls-intel.outputs.cache-hit }}
         run: |
-          pwd
           cd ~
-          pwd
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-x86_64-linux-gnu.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
           sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
+      - name: 'cache rustls (arm)'
+        if: ${{ contains(matrix.build.install_steps, 'rustls-arm') }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cache-rustls-arm
+        env:
+          cache-name: cache-rustls-arm
+        with:
+          path: ~/rustls
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
+
       - name: 'install rustls (arm)'
         if: ${{ contains(matrix.build.install_steps, 'rustls-arm') && !steps.cache-rustls-arm.outputs.cache-hit }}
         run: |
-          pwd
           cd ~
-          pwd
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-arm64-linux-gnu.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
