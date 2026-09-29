@@ -263,12 +263,10 @@ jobs:
           # MSYS
           - { name: '!proxy',
               build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON -DCURL_ENABLE_NTLM=ON',
-              install: 'openssl-devel libssh2-devel' }
+              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON -DCURL_ENABLE_NTLM=ON' }
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
-              config: '--with-openssl --enable-httpsig --enable-ntlm',
-              install: 'openssl-devel libssh2-devel' }
+              config: '--with-openssl --enable-httpsig --enable-ntlm' }
           # MinGW
           - { name: 'default',
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
@@ -332,14 +330,10 @@ jobs:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
           install: >-
-            gcc
+            gcc perl diffutils
             ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
-            perl diffutils
-            zlib-devel
-            brotli-devel
-            libzstd-devel
-            libnghttp2-devel
-            libpsl-devel
+            zlib-devel brotli-devel libzstd-devel libpsl-devel libnghttp2-devel
+            openssl-devel libssh2-devel
             ${{ matrix.install }}
 
       - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
