@@ -375,7 +375,7 @@ jobs:
           fi
 
   android:
-    name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
+    name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -385,7 +385,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', platform: '21', arch: 'arm64', name: "!ssl !zstd",
+          - { build: 'autotools', platform: '21', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '--without-ssl --without-libpsl --without-zstd' }
 
           - { build: 'cmake'    , platform: '21', arch: 'arm64-v8a'  , name: "!ssl !zstd",
