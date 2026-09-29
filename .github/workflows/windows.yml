@@ -325,7 +325,6 @@ jobs:
             ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
             zlib-devel brotli-devel libzstd-devel libpsl-devel libnghttp2-devel
             openssl-devel libssh2-devel
-            ${{ matrix.install }}
 
       - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         if: ${{ matrix.sys != 'msys' }}
@@ -344,7 +343,13 @@ jobs:
             mingw-w64-${{ matrix.env }}-gnutls
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-python
-            ${{ matrix.install }}
+
+      - name: 'install prereqs [TEST]'
+        env:
+          MATRIX_INSTALL: '${{ matrix.install }}'
+        run: |
+          which pacboy
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed ${MATRIX_INSTALL}
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
