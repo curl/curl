@@ -98,15 +98,15 @@ out:
 }
 
 static CURLcode t2413_cmp(const char *name,
-                                CURL *curl,
-                                const struct Curl_scheme *scheme1,
-                                const char *hostname1,
-                                uint16_t port1,
-                                const struct Curl_scheme *scheme2,
-                                const char *hostname2,
-                                uint16_t port2,
-                                bool exp_equal,
-                                bool exp_same_dest)
+                          CURL *curl,
+                          const struct Curl_scheme *scheme1,
+                          const char *hostname1,
+                          uint16_t port1,
+                          const struct Curl_scheme *scheme2,
+                          const char *hostname2,
+                          uint16_t port2,
+                          bool exp_equal,
+                          bool exp_same_dest)
 {
   struct Curl_peer *peer1 = NULL;
   struct Curl_peer *peer2 = NULL;
