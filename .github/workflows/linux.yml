@@ -793,9 +793,8 @@ jobs:
             --location --proto-redir =https "https://github.com/google/boringssl/releases/download/${BORINGSSL_VERSION}/boringssl-${BORINGSSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "boringssl-${BORINGSSL_VERSION}"
-          export LDFLAGS=-v
           cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl -DBUILD_TESTING=OFF
-          cmake --build . --verbose
+          cmake --build .
           cmake --install .
 
       - name: 'cache rustls (intel)'
