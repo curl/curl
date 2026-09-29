@@ -232,17 +232,18 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
     do {
       ssize_t nread;
 
+      /* Do not block forever */
+      if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
+        goto error;
+
       pfd[0].fd = socks[1];
       pfd[0].events = POLLIN;
       pfd[0].revents = 0;
       (void)Curl_poll(pfd, 1, 1000); /* one second */
 
       nread = sread(socks[1], p, s);
-      if(nread == -1) {
+      if((nread == -1) || !nread) { /* error or close */
         int sockerr = SOCKERRNO;
-        /* Do not block forever */
-        if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
-          goto error;
         if(SOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
            || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
