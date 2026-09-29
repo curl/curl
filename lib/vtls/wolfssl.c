@@ -1251,14 +1251,14 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
   int trying_ech_now = 0;
 
   if(conn_config->ech_public) {
-    infof(data, "ECH: outername not (yet) supported"
-          " with wolfSSL");
+    infof(data, "ECH: outername not supported with wolfSSL");
     return CURLE_SSL_CONNECT_ERROR;
   }
+
   if(conn_config->ech == CURLECH_GREASE) {
     infof(data, "ECH: GREASE is done by default by wolfSSL: no need to ask");
   }
-  if(conn_config->ech && conn_config->ech_config) {
+  else if(conn_config->ech && conn_config->ech_config) {
     const char *b64val = conn_config->ech_config;
     word32 b64len = 0;
 

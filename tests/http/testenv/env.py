@@ -750,7 +750,7 @@ class Env:
                         p = subprocess.run(args=[
                             self.openssl, 'ech',
                             '-out', os.path.join(ca_dir, f'{domain}.echconfig'),
-                            '-public_name', domain
+                            '-public_name', f'public.{domain}'
                         ], capture_output=True, text=True, check=True)
                         if p.returncode != 0:
                             raise EnvError(f"Error generating ECHConfig for {domain}")
