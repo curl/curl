@@ -263,10 +263,12 @@ jobs:
           # MSYS
           - { name: '!proxy',
               build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON -DCURL_ENABLE_NTLM=ON' }
+              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON -DCURL_ENABLE_NTLM=ON',
+              install: 'cmake ninja' }
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
-              config: '--with-openssl --enable-httpsig --enable-ntlm' }
+              config: '--with-openssl --enable-httpsig --enable-ntlm',
+              install: 'autotools make diffutils' }
           # MinGW
           - { name: 'default',
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
@@ -319,7 +321,7 @@ jobs:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
           install: >-
-            gcc autotools make cmake ninja perl diffutils
+            gcc perl
             zlib-devel brotli-devel libzstd-devel libpsl-devel libnghttp2-devel
             openssl-devel libssh2-devel
 
@@ -343,7 +345,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-python
 
-      - name: 'install prereqs [TEST]'
+      - name: 'install prereqs'
         if: ${{ matrix.install }}
         env:
           MATRIX_INSTALL: '${{ matrix.install }}'
