@@ -87,7 +87,7 @@ jobs:
 
           - name: 'boringssl'
             install_steps: boringssl pytest
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DOPENSSL_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
 
           - name: 'libressl krb5'
             image: ubuntu-24.04-arm
@@ -786,6 +786,16 @@ jobs:
           cmake --build .
           cmake --install .
 
+      - name: 'cache boringssl'
+        if: ${{ contains(matrix.build.install_steps, 'boringssl') }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: cache-boringssl
+        env:
+          cache-name: cache-boringssl
+        with:
+          path: ~/boringssl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+
       - name: 'build boringssl'
         if: ${{ contains(matrix.build.install_steps, 'boringssl') && !steps.cache-boringssl.outputs.cache-hit }}
         run: |
@@ -793,7 +803,7 @@ jobs:
             --location --proto-redir =https "https://github.com/google/boringssl/releases/download/${BORINGSSL_VERSION}/boringssl-${BORINGSSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "boringssl-${BORINGSSL_VERSION}"
-          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl -DBUILD_TESTING=OFF
+          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
