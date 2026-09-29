@@ -808,6 +808,8 @@ if(_use_core_foundation_and_core_services)
   list(APPEND CURL_LIBS "-framework CoreServices")
 endif()
 
+set(_cxx_lib "stdc++")
+
 if(CURL_USE_OPENSSL)
   find_package(OpenSSL REQUIRED)
   set(_ssl_enabled ON)
@@ -848,7 +850,7 @@ if(CURL_USE_OPENSSL)
     endif()
     if(OPENSSL_USE_STATIC_LIBS AND
        (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
-      list(APPEND CURL_LIBS "stdc++")
+      list(APPEND CURL_LIBS "${_cxx_lib}")
     endif()
   endif()
 
@@ -998,7 +1000,7 @@ macro(curl_openssl_check_exists)
     endif()
     if((HAVE_AWSLC OR HAVE_BORINGSSL) AND OPENSSL_USE_STATIC_LIBS AND
        (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${_cxx_lib}")
     endif()
   endif()
   if(USE_WOLFSSL)
