@@ -376,7 +376,7 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     env:
       LDFLAGS: -s
@@ -430,7 +430,10 @@ jobs:
             else
               triplet='aarch64-linux-android'
             fi
-            TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
+            echo '---------------'
+            ls -lA ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt || true
+            echo '---------------'
+            TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-aarch64"
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
               --disable-dependency-tracking --enable-option-checking=fatal \
               CC="$TOOLCHAIN/bin/${triplet}${MATRIX_PLATFORM}-clang" \
