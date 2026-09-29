@@ -88,7 +88,8 @@ typedef enum {
   CHUNKE_BAD_CHUNK,
   CHUNKE_BAD_ENCODING,
   CHUNKE_OUT_OF_MEMORY,
-  CHUNKE_PASSTHRU_ERROR /* Curl_httpchunk_read() returns a CURLcode to use */
+  CHUNKE_PASSTHRU_ERROR, /* Curl_httpchunk_read() returns a CURLcode to use */
+  CHUNKE_TRAILER_LIMIT /* Max header limit exceeded by trailers */
 } CHUNKcode;
 
 struct Curl_chunker {
