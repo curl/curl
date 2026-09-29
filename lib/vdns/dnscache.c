@@ -87,14 +87,27 @@ UNITTEST void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id);
 UNITTEST void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id)
 {
   size_t namelen = curlx_strlen(&id->name);
-  if(namelen > (sizeof(key->data) - 3))
-    namelen = sizeof(key->data) - 3;
+  if(namelen > (MAX_HOSTCACHE_LEN - 3))
+    namelen = MAX_HOSTCACHE_LEN - 3;
   /* store and lower case the name */
   key->data[0] = id->type;
   key->data[1] = (uint8_t)((id->port >> 8) & 0xff);
   key->data[2] = (uint8_t)(id->port & 0xff);
   Curl_strntolower((char *)key->data + 3, curlx_str(&id->name), namelen);
   key->len = namelen + 3;
+}
+
+static bool dnsc_id_matches_entry(struct dnsc_id *id,
+                                  struct Curl_dns_entry *dns)
+{
+  return dns &&
+         /* hash key was not truncated  OR */
+         ((dns->hostlen <= (MAX_HOSTCACHE_LEN - 3)) ||
+          /* port and host string are the same, case insensitive */
+          ((id->port == dns->port) && (id->name.len == dns->hostlen) &&
+           /* for most lookups, case is the same, try that first */
+           (!strcmp(id->name.str, dns->hostname) ||
+            curl_strequal(id->name.str, dns->hostname))));
 }
 
 static void dnscache_entry_free(struct Curl_dns_entry *dns)
@@ -260,6 +273,11 @@ static CURLcode fetch_entry(struct Curl_easy *data,
 
   /* See if it is already in our dns cache */
   dns = Curl_hash_pick(&dnscache->entries, key.data, key.len);
+
+  if(dns && !dnsc_id_matches_entry(&id, dns)) {
+    /* May happen on hostnames longer than MAX_HOSTCACHE_LEN */
+    dns = NULL;
+  }
 
   /* No entry found in cache, check if we might have a wildcard entry */
   if(!dns && (type == CURL_DNST_ADDR) && data->state.wildcard_resolve) {
