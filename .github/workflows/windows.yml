@@ -270,8 +270,7 @@ jobs:
           # MinGW
           - { name: 'default',
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
-              config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib',
-              install: 'mingw-w64-clang-x86_64-openssl' }
+              config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib' }
           - { name: 'wolfssl c-ares U',
               build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '',
               config: '--enable-debug --with-wolfssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native --enable-ntlm',
@@ -301,12 +300,10 @@ jobs:
               config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON' }
           - { name: 'openssl', type: 'Debug', chkprefill: '_chkprefill',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DUSE_PROXY_HTTP3=ON',
-              install: 'mingw-w64-clang-x86_64-openssl' }
+              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DUSE_PROXY_HTTP3=ON' }
           - { name: 'openssl', type: 'Release', test: 'uwp',
               build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
-              config: '-DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON',
-              install: 'mingw-w64-ucrt-x86_64-openssl' }
+              config: '-DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON' }
           # { name: 'schannel', type: 'Release', test: 'uwp',
           #   build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
           #   config: '--without-debug --with-schannel --disable-static' }
@@ -346,6 +343,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-nghttp3
             mingw-w64-${{ matrix.env }}-ngtcp2
             mingw-w64-${{ matrix.env }}-gnutls
+            mingw-w64-${{ matrix.env }}-openssl
             ${{ matrix.install }}
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
