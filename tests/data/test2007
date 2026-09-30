@@ -20,7 +20,7 @@ sftp
 SFTP quote rmdir command with trailing junk
 </name>
 <command>
---hostpubmd5 %SSHSRVMD5 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt -Q "mkdir /tmp/test trailing_garbage"
+--hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt -Q "mkdir /tmp/test trailing_garbage"
 </command>
 </client>
 
