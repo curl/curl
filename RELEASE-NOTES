@@ -127,7 +127,7 @@ This release includes the following bugfixes:
  o openssl: use non-deprecated API for MD5/MD4 [69]
  o os400: document curl_formadd_CCSID multi-chunk peculiarity [5]
  o os400: restore HAVE_FCHMOD [181]
- o ossl_verifyhost: remove assumption of null termination of ASN1_STRING. [26]
+ o ossl_verifyhost: remove assumption of null-termination of ASN1_STRING. [26]
  o output-dir.md: expand on its behavior [151]
  o parsedate: find day names, months and time zones faster [68]
  o parsedate: remove the unused leading three letters [106]
