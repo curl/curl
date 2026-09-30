@@ -759,17 +759,17 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     }
   }
 
-  if((type & CLIENTWRITE_EOS) && !Curl_bufq_is_empty(&ctx->buf)) {
-    failf(data, "[WS] decode ending with %zu frame bytes remaining",
-          Curl_bufq_len(&ctx->buf));
-    result = CURLE_RECV_ERROR;
-  }
-
 out:
   if(!result) {
     result = ws_flush(data, ws, Curl_api_is_in_callback(data));
     if(result == CURLE_AGAIN)
       result = CURLE_OK;
+  }
+
+  if(!result && (type & CLIENTWRITE_EOS) &&
+     (!Curl_bufq_is_empty(&ctx->buf) || (ws->dec.state != WS_DEC_INIT))) {
+    failf(data, "[WS] decode ended with incomplete frame");
+    result = CURLE_RECV_ERROR;
   }
   return result;
 }
