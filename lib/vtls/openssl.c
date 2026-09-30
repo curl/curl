@@ -172,6 +172,14 @@ typedef unsigned long sslerr_t;
 #endif
 #define ossl_valsize_t numcert_t
 
+#if OPENSSL_VERSION_NUMBER < 0x40100000L
+static size_t ASN1_STRING_get_length(const ASN1_STRING *str)
+{
+   const int length = ASN1_STRING_length(str);
+   return length >= 0 ? (size_t)length : 0;
+}
+#endif
+
 static CURLcode push_certinfo(struct Curl_easy *data,
                               BIO *mem, const char *label, int num)
   WARN_UNUSED_RESULT;
@@ -398,11 +406,9 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     result = CURLE_OUT_OF_MEMORY;
 
   for(i = 0; !result && (i < (int)numcerts); i++) {
-    ASN1_INTEGER *num;
-    const unsigned char *numdata;
     X509 *x = sk_X509_value(sk, (ossl_valsize_t)i);
     EVP_PKEY *pubkey = NULL;
-    int j;
+    size_t j;
     const ASN1_BIT_STRING *psig = NULL;
 
     X509_NAME_print_ex(mem, X509_get_subject_name(x), 0, XN_FLAG_ONELINE);
@@ -420,12 +426,15 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(result)
       break;
 
-    num = X509_get_serialNumber(x);
-    if(ASN1_STRING_type(num) == V_ASN1_NEG_INTEGER)
-      BIO_puts(mem, "-");
-    numdata = ASN1_STRING_get0_data(num);
-    for(j = 0; j < ASN1_STRING_length(num); j++)
-      BIO_printf(mem, "%02x", numdata[j]);
+    {
+      ASN1_INTEGER *num = X509_get_serialNumber(x);
+      const unsigned char *numdata = ASN1_STRING_get0_data(num);
+      const size_t numlen = ASN1_STRING_get_length(num);
+      if(ASN1_STRING_type(num) == V_ASN1_NEG_INTEGER)
+        BIO_puts(mem, "-");
+      for(j = 0; j < numlen; j++)
+        BIO_printf(mem, "%02x", numdata[j]);
+    }
     result = push_certinfo(data, mem, "Serial Number", i);
     if(result)
       break;
@@ -495,7 +504,8 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
     if(!result && psig) {
       const unsigned char *psigdata = ASN1_STRING_get0_data(psig);
-      for(j = 0; j < ASN1_STRING_length(psig); j++)
+      const size_t psiglen = ASN1_STRING_get_length(psig);
+      for(j = 0; j < psiglen; j++)
         BIO_printf(mem, "%02x:", psigdata[j]);
       result = push_certinfo(data, mem, "Signature", i);
     }
@@ -2085,7 +2095,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       if(check->type == target) {
         /* get data and length */
         const char *altptr = (const char *)ASN1_STRING_get0_data(check->d.ia5);
-        size_t altlen = (size_t)ASN1_STRING_length(check->d.ia5);
+        size_t altlen = ASN1_STRING_get_length(check->d.ia5);
 
         switch(target) {
         case GEN_DNS: /* name/pattern comparison */
@@ -2131,7 +2141,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
        distinguished one to get the most significant one. */
     int i = -1;
     unsigned char *cn = NULL;
-    int cnlen = 0;
+    size_t cnlen = 0;
     bool free_cn = FALSE;
 
     /* The following is done because of a bug in 0.9.6b */
@@ -2156,15 +2166,19 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
          conditional in the future when OpenSSL has been fixed. */
       if(tmp) {
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
-          cnlen = ASN1_STRING_length(tmp);
+          cnlen = ASN1_STRING_get_length(tmp);
           cn = (unsigned char *)CURL_UNCONST(ASN1_STRING_get0_data(tmp));
         }
         else { /* not a UTF8 name */
-          cnlen = ASN1_STRING_to_UTF8(&cn, tmp);
+          const int utf8len = ASN1_STRING_to_UTF8(&cn, tmp);
+          if(utf8len < 0)
+            cnlen = 0;
+          else
+            cnlen = (size_t)utf8len;
           free_cn = TRUE;
         }
 
-        if((cnlen <= 0) || !cn)
+        if((cnlen == 0) || !cn)
           result = CURLE_OUT_OF_MEMORY;
         else if(memchr(cn, '\0', cnlen)) {
           /* there was a null-terminator before the end of string, this
@@ -2185,11 +2199,12 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     else if(!Curl_cert_hostcheck((const char *)cn, cnlen,
                                  peer->origin->hostname, hostlen)) {
       failf(data, "SSL: certificate subject name '%.*s' does not match "
-            "target hostname '%s'", cnlen, cn, peer->origin->user_hostname);
+            "target hostname '%s'", (int)cnlen, cn,
+            peer->origin->user_hostname);
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else {
-      infof(data, " common name: %.*s (matched)", cnlen, cn);
+      infof(data, " common name: %.*s (matched)", (int)cnlen, cn);
     }
     if(free_cn)
       OPENSSL_free(cn);
