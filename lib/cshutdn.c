@@ -96,11 +96,6 @@ void Curl_cshutdn_clear_timer(struct Curl_easy *data, int8_t sockindex)
   data->conn->shutdown.start_ms[sockindex] = -1;
 }
 
-bool Curl_cshutdn_has_started(struct connectdata *conn, int8_t sockindex)
-{
-  return conn->shutdown.start_ms[sockindex] >= 0;
-}
-
 static void cshutdn_run_conn_handler(struct Curl_easy *data,
                                      struct connectdata *conn)
 {
@@ -152,7 +147,7 @@ CURLcode Curl_cshutdn_try_once_idx(struct Curl_easy *data,
   }
 
   *done = FALSE;
-  if(!Curl_cshutdn_has_started(data->conn, sockindex)) {
+  if(!CURL_CONN_IN_SHUTDOWN(data->conn, sockindex)) {
     Curl_cshutdn_start_timer(data, sockindex, 0);
   }
   else {
@@ -195,7 +190,7 @@ static void cshutdn_run_once(struct Curl_easy *data,
   /* We expect to be attached when called */
   DEBUGASSERT(data->conn == conn);
 
-  if(!Curl_cshutdn_has_started(conn, FIRSTSOCKET)) {
+  if(!CURL_CONN_IN_SHUTDOWN(conn, FIRSTSOCKET)) {
     Curl_cshutdn_start_timer(data, FIRSTSOCKET, 0);
   }
 

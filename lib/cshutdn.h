@@ -54,8 +54,7 @@ timediff_t Curl_cshutdn_timeleft_ms(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int8_t sockindex);
 
-/* TRUE iff shutdown at sockindex has been started */
-bool Curl_cshutdn_has_started(struct connectdata *conn, int8_t sockindex);
+#define CURL_CONN_IN_SHUTDOWN(c,i)   ((c)->shutdown.start_ms[(i)] >= 0)
 
 /* Shutdown the connection at `sockindex` non-blocking.
  * Will start the shutdown timer if not already set.
