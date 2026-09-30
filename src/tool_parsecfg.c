@@ -352,7 +352,7 @@ static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
         return FALSE; /* error */
       }
 
-      else if(b[rlen-1] == '\n') {
+      else if(b[rlen - 1] == '\n') {
         /* end of the line, drop the newline */
         size_t len = curlx_dyn_len(buf);
         if(len)
