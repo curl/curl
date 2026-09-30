@@ -117,7 +117,7 @@ CURLcode create_dir_hierarchy(const char *outfile)
     size_t seplen = strspn(outfile, PATH_DELIMITERS);
     size_t len = strcspn(&outfile[seplen], PATH_DELIMITERS);
 
-    /* the last path component is the file and it ends with a NUL byte */
+    /* the last path component is the file and it ends with a zero byte */
     if(!outfile[len + seplen])
       break;
 
