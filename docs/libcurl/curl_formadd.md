@@ -98,7 +98,7 @@ followed by a curl_off_t value giving the length of the contents. Note that
 for *CURLFORM_STREAM* contents, this option is mandatory.
 
 If you pass a 0 (zero) for this option, libcurl calls strlen() on the contents
-to figure out the size. If you really want to send a zero byte content then
+to figure out the size. If you really want to send a zero-length content then
 you must make sure strlen() on the data pointer returns zero.
 
 ## CURLFORM_CONTENTSLENGTH
@@ -109,7 +109,7 @@ followed by a long giving the length of the contents. Note that for
 *CURLFORM_STREAM* contents, this option is mandatory.
 
 If you pass a 0 (zero) for this option, libcurl calls strlen() on the contents
-to figure out the size. If you really want to send a zero byte content then
+to figure out the size. If you really want to send a zero-length content then
 you must make sure strlen() on the data pointer returns zero.
 
 ## CURLFORM_NAMELENGTH
@@ -119,8 +119,8 @@ the length of *CURLFORM_COPYNAME* and *CURLFORM_PTRNAME* strings, if they are
 not null-terminated.
 
 If you pass a 0 (zero) for this option, libcurl calls strlen() on the name to
-figure out the size. If you really want to send a zero byte name then you must
-make sure strlen() on the name pointer returns zero.
+figure out the size. If you really want to send a zero-length name then you
+must make sure strlen() on the name pointer returns zero.
 
 ## CURLFORM_FILECONTENT
 
