@@ -44,9 +44,11 @@ pushes are denied automatically.
 The callback gets its arguments like this:
 
 *parent* is the handle of the stream on which this push arrives. The new
-handle has been duplicated from the parent, meaning that it has gotten all its
-options inherited. It is then up to the application to alter any options if
-desired.
+handle has the following options duplicated from the parent:
+`CURLOPT_WRITEFUNCTION(3)`, `CURLOPT_WRITEDATA(3)`, `CURLOPT_HEADERFUNCTION(3)`,
+`CURLOPT_HEADERDATA(3)`, `CURLOPT_DEBUGFUNCTION(3)` and `CURLOPT_DEBUGDATA(3)`.
+
+It is then up to the application to alter/set any options if desired.
 
 *easy* is a newly created handle that represents this upcoming transfer.
 
