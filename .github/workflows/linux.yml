@@ -404,7 +404,7 @@ jobs:
             install_packages: clang-22 libubsan1 libasan8 libtsan2
             install_steps: pytest
             install_steps_brew: openssl libssh2 libngtcp2 libnghttp3 c-ares
-            tflags: '!664 !665 !2007'  # MD5 support is disabled in Homebrew since libssh2 1.11.1_6
+            tflags: '!664 !665'  # MD5 support is disabled in Homebrew since libssh2 1.11.1_6
             CC: clang-22
             CFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
