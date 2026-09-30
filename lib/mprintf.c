@@ -1106,6 +1106,9 @@ static int formatf(void *userp, /* untouched by format(), sent to the
   struct va_input input[MAX_PARAMETERS];
   char work[BUFFSIZE + 2];
 
+  if(!format)
+    return 0;
+
   /* Parse the format string */
   if(parsefmt(format, output, input, &ocount, &icount, ap_save))
     return 0;
@@ -1250,6 +1253,9 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
   int retcode;
   struct nsprintf info;
 
+  if(!format || (!buffer && maxlength))
+    return -1;
+
   info.buffer = buffer;
   info.length = 0;
   info.max = maxlength;
@@ -1273,6 +1279,8 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 {
   int retcode;
   va_list args; /* argument pointer */
+  if(!format || (!buffer && maxlength))
+    return -1;
   va_start(args, format);
   retcode = curl_mvsnprintf(buffer, maxlength, format, args);
   va_end(args);
@@ -1377,6 +1385,8 @@ static size_t alloc_addrun(const unsigned char *buf, size_t len, void *f)
 int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list args)
 {
   struct asprintf info;
+  if(!dyn || !format)
+    return -1;
   info.b = dyn;
   info.merr = MERR_OK;
   info.nstage = 0;
@@ -1396,6 +1406,8 @@ char *curl_mvaprintf(const char *format, va_list args)
 {
   struct asprintf info;
   struct dynbuf dyn;
+  if(!format)
+    return NULL;
   info.b = &dyn;
   curlx_dyn_init(info.b, DYN_APRINTF);
   info.merr = MERR_OK;
@@ -1418,6 +1430,8 @@ char *curl_maprintf(const char *format, ...)
 {
   va_list args;
   char *s;
+  if(!format)
+    return NULL;
   va_start(args, format);
   s = curl_mvaprintf(format, args);
   va_end(args);
@@ -1445,6 +1459,8 @@ int curl_msprintf(char *buffer, const char *format, ...)
 {
   va_list args; /* argument pointer */
   int retcode;
+  if(!buffer || !format)
+    return -1;
   va_start(args, format);
   retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
   va_end(args);
@@ -1477,6 +1493,8 @@ int curl_mvfprintf(FILE *fd, const char *format, va_list args)
 {
   struct ioprintf info;
   int n;
+  if(!fd || !format)
+    return -1;
   info.fd = fd;
   info.error = FALSE;
   n = formatf(&info, fputc_wrapper, fwrite_wrapper, NULL, format, args);
@@ -1489,6 +1507,8 @@ int curl_mfprintf(FILE *fd, const char *format, ...)
 {
   va_list args; /* argument pointer */
   int n;
+  if(!fd || !format)
+    return -1;
   va_start(args, format);
   n = curl_mvfprintf(fd, format, args);
   va_end(args);
@@ -1499,6 +1519,8 @@ int curl_mprintf(const char *format, ...)
 {
   va_list args; /* argument pointer */
   int n;
+  if(!format)
+    return -1;
   va_start(args, format);
   n = curl_mvfprintf(stdout, format, args);
   va_end(args);
@@ -1507,12 +1529,17 @@ int curl_mprintf(const char *format, ...)
 
 int curl_mvsprintf(char *buffer, const char *format, va_list args)
 {
-  int retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
+  int retcode;
+  if(!buffer || !format)
+    return -1;
+  retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 
 int curl_mvprintf(const char *format, va_list args)
 {
+  if(!format)
+    return -1;
   return curl_mvfprintf(stdout, format, args);
 }

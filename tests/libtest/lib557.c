@@ -1270,6 +1270,7 @@ static int test_oct_hex_formatting(void)
 static int test_return_codes(void)
 {
   char buf[128];
+  char *str;
   int rc;
 
   rc = curl_msnprintf(buf, 100, "%d", 9999);
@@ -1294,6 +1295,44 @@ static int test_return_codes(void)
   rc = curl_msnprintf(buf, 6, "%s", "helloooooooo");
   if(rc != 5)
     return 1;
+
+  /* NULL format string returns error */
+  rc = curl_msnprintf(buf, sizeof(buf), NULL);
+  if(rc != -1)
+    return 1;
+
+  /* NULL buffer with non-zero length returns error */
+  rc = curl_msnprintf(NULL, 10, "%s", "test");
+  if(rc != -1)
+    return 1;
+
+  /* NULL format or buffer in curl_msprintf returns error */
+  rc = curl_msprintf(NULL, "%s", "test");
+  if(rc != -1)
+    return 1;
+  rc = curl_msprintf(buf, NULL);
+  if(rc != -1)
+    return 1;
+
+  /* NULL stream or format in curl_mfprintf returns error */
+  rc = curl_mfprintf(NULL, "%s", "test");
+  if(rc != -1)
+    return 1;
+  rc = curl_mfprintf(stderr, NULL);
+  if(rc != -1)
+    return 1;
+
+  /* NULL format in curl_mprintf returns error */
+  rc = curl_mprintf(NULL);
+  if(rc != -1)
+    return 1;
+
+  /* NULL format in curl_maprintf returns NULL */
+  str = curl_maprintf(NULL);
+  if(str) {
+    curl_free(str);
+    return 1;
+  }
 
   return 0;
 }
@@ -1360,6 +1399,58 @@ static int var557(int expected_len, const char *format, ...)
   if(len != expected_len) {
     curl_mfprintf(stderr, "curl_mvaprintf: expected length %d but got %d\n",
                   expected_len, len);
+    goto error;
+  }
+
+  /* check NULL checks on v-functions */
+  va_end(arg);
+  va_start(arg, format);
+  if(curl_mvfprintf(NULL, format, arg) != -1) {
+    curl_mfprintf(stderr, "curl_mvfprintf with NULL stream did not fail\n");
+    goto error;
+  }
+  va_end(arg);
+  va_start(arg, format);
+  if(curl_mvfprintf(stderr, NULL, arg) != -1) {
+    curl_mfprintf(stderr, "curl_mvfprintf with NULL format did not fail\n");
+    goto error;
+  }
+  va_end(arg);
+  va_start(arg, format);
+  if(curl_mvsnprintf(NULL, sizeof(buffer), format, arg) != -1) {
+    curl_mfprintf(stderr, "curl_mvsnprintf with NULL buffer did not fail\n");
+    goto error;
+  }
+  va_end(arg);
+  va_start(arg, format);
+  if(curl_mvsnprintf(buffer, sizeof(buffer), NULL, arg) != -1) {
+    curl_mfprintf(stderr, "curl_mvsnprintf with NULL format did not fail\n");
+    goto error;
+  }
+  va_end(arg);
+  va_start(arg, format);
+  if(curl_mvsprintf(NULL, format, arg) != -1) {
+    curl_mfprintf(stderr, "curl_mvsprintf with NULL buffer did not fail\n");
+    goto error;
+  }
+  va_end(arg);
+  va_start(arg, format);
+  if(curl_mvsprintf(buffer, NULL, arg) != -1) {
+    curl_mfprintf(stderr, "curl_mvsprintf with NULL format did not fail\n");
+    goto error;
+  }
+  va_end(arg);
+  va_start(arg, format);
+  if(curl_mvprintf(NULL, arg) != -1) {
+    curl_mfprintf(stderr, "curl_mvprintf with NULL format did not fail\n");
+    goto error;
+  }
+  va_end(arg);
+  va_start(arg, format);
+  ptr = curl_mvaprintf(NULL, arg);
+  if(ptr) {
+    curl_free(ptr);
+    curl_mfprintf(stderr, "curl_mvaprintf with NULL format did not fail\n");
     goto error;
   }
 
