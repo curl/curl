@@ -27,7 +27,7 @@ SCP correct sha256 host key
 --hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/file%TESTNUMBER.txt
 </command>
 <setenv>
-# Needed for MSYS2 to not treat the argument as a POSIX path list
+# Needed for MSYS2 to not treat the base64 hash argument as a POSIX path list
 # that has to be converted to Windows paths
 MSYS2_ARG_CONV_EXCL=*
 </setenv>
