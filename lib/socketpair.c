@@ -242,7 +242,10 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
       (void)Curl_poll(pfd, 1, 1000); /* one second */
 
       nread = sread(socks[1], p, s);
-      if((nread == -1) || !nread) { /* error or close */
+      if(!nread) { /* unexpected close before getting complete `check` */
+        goto error;
+      }
+      else if(nread == -1) { /* error or close */
         int sockerr = SOCKERRNO;
         if(SOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
