@@ -79,7 +79,6 @@ jobs:
             install_steps: libressl
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generator: Xcode
-            xcode: ''  # default Xcode. Set it once to silence actionlint.
             options: --config Debug
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
@@ -235,7 +234,6 @@ jobs:
             compiler: gcc-13
             configure: --without-ssl --with-brotli --with-zstd --with-apple-idn
             tflags: '--min=1620'
-            xcode: ''  # default Xcode. Set it once to silence actionlint.
 
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
