@@ -144,7 +144,7 @@ static int convert(char *d, size_t dlen, const char *s, size_t slen,
 
   i = dlen;
 
-  if((int)iconv(cd, (char **) &s, &lslen, &d, &dlen) < 0)
+  if((int)iconv(cd, (char **)&s, &lslen, &d, &dlen) < 0)
     i = -1;
   else
     i -= dlen;
@@ -181,7 +181,7 @@ static CURLcode dyn_addn_CCSID(struct dynbuf *db,
     int err = 0;
 
     dlen = sizeof(buffer);
-    if((int)iconv(cd, (char **) &mem,
+    if((int)iconv(cd, (char **)&mem,
                   len == CURL_ZERO_TERMINATED ? &dummylen : &len,
                   &dptr, &dlen) < 0) {
       /* !checksrc! disable ERRNOVAR 1 */
@@ -421,7 +421,7 @@ time_t curl_getdate_ccsid(const char *p, const time_t *unused,
   s = curl_from_ccsid(p, ccsid);
 
   if(!s)
-    return (time_t) -1;
+    return (time_t)-1;
 
   t = curl_getdate(s, unused);
   untyped_free(s);
@@ -1041,7 +1041,7 @@ static size_t formget_callback_ccsid(void *arg, const char *buf, size_t len)
   curlx_dyn_init(&db, MAX_CONV_EXPANSION * CURL_MAX_INPUT_LENGTH);
 
   if(dyn_addn_CCSID(&db, buf, len, ASCII_CCSID, p->ccsid))
-    return (size_t) -1;
+    return (size_t)-1;
 
   olen = curlx_dyn_len(&db);
   ret = p->append(p->arg, curlx_dyn_ptr(&db), olen);
@@ -1057,7 +1057,7 @@ int curl_formget_ccsid(struct curl_httppost *form, void *arg,
   lcfc.append = append;
   lcfc.arg = arg;
   lcfc.ccsid = ccsid;
-  return curl_formget(form, (void *) &lcfc, formget_callback_ccsid);
+  return curl_formget(form, (void *)&lcfc, formget_callback_ccsid);
 }
 
 CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
