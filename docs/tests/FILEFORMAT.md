@@ -279,7 +279,7 @@ number and instead returns `<data1>`. If `<data1>` contains keyword
 auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server "sends" the data even if the size
-is zero bytes. Used to verify curl's behavior on zero bytes transfers.
+is zero bytes. Used to verify curl's behavior on zero-length transfers.
 
 `nonewline=yes` means that the last byte (the trailing newline character)
 should be cut off from the data before sending or comparing it.
