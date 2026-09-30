@@ -1013,7 +1013,7 @@ jobs:
         with:
           msystem: ${{ matrix.arch == 'arm64' && 'clangarm64' || 'ucrt64' }}
           release: false
-          cache: ${{ contains(matrix.image, 'arm') }}
+          cache: ${{ matrix.tflags != 'skiprun' }}
           path-type: inherit
           install: >-
             mingw-w64-${{ matrix.env }}-libpsl
