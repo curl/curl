@@ -27,7 +27,7 @@ static size_t t3234_write(char *ptr, size_t size, size_t nmemb, void *userp)
     if(!X509_STORE_up_ref(store))
       return 0;
     s->store = store;
-    s->resumed = SSL_session_reused(ssl);
+    s->resumed = SSL_session_reused(ssl) != 0;
   }
   return size * nmemb;
 }
