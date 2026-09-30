@@ -254,6 +254,7 @@ jobs:
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_ENV: '${{ matrix.env }}'
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_SYS: '${{ matrix.sys }}'
       MATRIX_TEST: '${{ matrix.test }}'
@@ -263,12 +264,11 @@ jobs:
           # MSYS
           - { name: '!proxy',
               build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON -DCURL_ENABLE_NTLM=ON',
-              install: 'cmake ninja' }
+              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON -DCURL_ENABLE_NTLM=ON' }
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
               config: '--with-openssl --enable-httpsig --enable-ntlm',
-              install: 'autotools diffutils' }
+              install: 'diffutils' }
           # MinGW
           - { name: 'default',
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
@@ -336,8 +336,6 @@ jobs:
           install: >-
             perl diffutils
             mingw-w64-${{ matrix.env }}-cc
-            mingw-w64-${{ matrix.env }}-autotools
-            mingw-w64-${{ matrix.env }}-cmake
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-c-ares
@@ -346,10 +344,23 @@ jobs:
             mingw-w64-${{ matrix.env }}-openssl
 
       - name: 'install prereqs'
-        if: ${{ matrix.install }}
         env:
           MATRIX_INSTALL: '${{ matrix.install }}'
-        run: /usr/bin/pacman --noconfirm --noprogressbar --sync --needed ${MATRIX_INSTALL}
+        run: |
+          if [ "${MATRIX_SYS}" = 'msys' ]; then
+            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+              pkgs='cmake ninja'
+            else
+              pkgs='autotools'
+            fi
+          else
+            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+              pkgs="mingw-w64-${MATRIX_ENV}-cmake"
+            else
+              pkgs="mingw-w64-${MATRIX_ENV}-autotools"
+            fi
+          fi
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed ${pkgs} ${MATRIX_INSTALL}
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -366,7 +377,6 @@ jobs:
           CPPFLAGS: '${{ matrix.cppflags }}'
           MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
           MATRIX_CONFIG: '${{ matrix.config }}'
-          MATRIX_ENV: '${{ matrix.env }}'
           MATRIX_TYPE: '${{ matrix.type }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
@@ -513,7 +523,6 @@ jobs:
         timeout-minutes: ${{ contains(matrix.tflags, '-t') && 15 || 10 }}
         env:
           MATRIX_CONFIG: '${{ matrix.config }}'
-          MATRIX_ENV: '${{ matrix.env }}'
           MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
