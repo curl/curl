@@ -245,7 +245,7 @@ March: security vulnerability: libcurl Arbitrary File Access
 
 April: added CMake support
 
-August: security vulnerability: libcurl embedded NUL byte in cert name
+August: security vulnerability: libcurl embedded zero byte in cert name
 
 December: Added support for IMAP, POP3 and SMTP
 
