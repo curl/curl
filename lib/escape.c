@@ -199,7 +199,7 @@ char *curl_easy_escape(CURL *curl, const char *string, int length)
     memcpy(target, f, nappend);
     target += nappend;
   }
-  *target = '\0'; /* null terminate */
+  *target = '\0'; /* null-terminate */
 
   return encoded;
 }
