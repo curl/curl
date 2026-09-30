@@ -127,7 +127,7 @@ struct nsprintf {
 };
 
 /* Output bytes are staged here and appended to the dynbuf in chunks: the
-   dynbuf append overhead (bounds checks, growth, memcpy, null termination)
+   dynbuf append overhead (bounds checks, growth, memcpy, null-termination)
    once per byte dominates formatting. 512 bytes of stack holds a typical
    request line or header in a single flush. */
 #define ASPRINTF_STAGE_SIZE 512
