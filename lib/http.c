@@ -945,7 +945,7 @@ static CURLcode auth_spnego(struct Curl_easy *data,
     if(authp->picked == CURLAUTH_NEGOTIATE) {
       struct connectdata *conn = data->conn;
       CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
-      curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
+      uint8_t *negstate = proxy ? &conn->proxy_negotiate_state :
         &conn->http_negotiate_state;
       if(!result) {
         curlx_free(data->req.newurl);

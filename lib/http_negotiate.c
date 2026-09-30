@@ -157,7 +157,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 {
   struct negotiatedata *neg_ctx;
   struct auth *authp;
-  curlnegotiate *state;
+  uint8_t *state;
   char *base64 = NULL;
   size_t len = 0;
   char *userp;
