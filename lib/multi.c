@@ -87,12 +87,6 @@ static void multi_xfer_tbl_dump(struct Curl_multi *multi);
 /* Get the # of transfers current in process/pending. */
 static uint32_t multi_xfers_running(struct Curl_multi *multi);
 
-static const struct curltime *multi_now(struct Curl_multi *multi)
-{
-  curlx_pnow(&multi->now);
-  return &multi->now;
-}
-
 /* function pointer called once when entering a state */
 typedef void (*mstate_enter_func)(struct Curl_easy *data,
                                   CURLMstate from_state);
@@ -230,6 +224,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t dnssize,   /* dns hash */
                                      size_t sesssize)  /* TLS session cache */
 {
+  struct curltime created;
   struct Curl_multi *multi = curlx_calloc(1, sizeof(struct Curl_multi));
 
   if(!multi)
@@ -250,8 +245,8 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   multi->admin->state.internal = TRUE;
 
   /* Now we can use curlx_* things safely */
-  curlx_pnow(&multi->now);
-  Curl_timeouts_init(&multi->timeouts, &multi->now);
+  curlx_pnow(&created);
+  Curl_timeouts_init(&multi->timeouts, &created);
   multi_timeouts_init(multi->admin);
 
   Curl_dnscache_init(&multi->dnscache, dnssize);
@@ -2896,10 +2891,11 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
                                int *running_handles)
 {
   CURLMcode returncode = CURLM_OK;
-  struct curltime start = *multi_now(multi);
+  struct curltime start;
   uint32_t mid;
   struct Curl_sigpipe_ctx sigpipe_ctx;
 
+  curlx_pnow(&start);
   sigpipe_init(&sigpipe_ctx);
 
   if(Curl_uint32_bset_first(&multi->process, &mid)) {
@@ -2948,7 +2944,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
     if(data->mstate == MSTATE_PENDING) {
       bool stream_unused;
       CURLcode result_unused;
-      if(multi_handle_timeout(data, multi_now(multi),
+      if(multi_handle_timeout(data, Curl_pgrs_now(data),
                               &stream_unused, &result_unused)) {
         infof(data, "PENDING handle timeout");
         move_pending_to_connect(multi, data);
@@ -3250,6 +3246,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 {
   CURLMcode mresult = CURLM_OK;
   struct Curl_sigpipe_ctx pipe_ctx;
+  struct curltime now;
   uint32_t run_xfers;
 
   (void)ev_bitmask;
@@ -3287,7 +3284,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       goto out;
   }
 
-  multi_mark_expired_as_dirty(multi, multi_now(multi));
+  curlx_pnow(&now);
+  multi_mark_expired_as_dirty(multi, &now);
   mresult = multi_run_dirty(multi, &pipe_ctx, &run_xfers);
   if(mresult)
     goto out;
@@ -3298,7 +3296,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
      * to set a 0 timeout and call us again, we run them here.
      * Do that only once or it might be unfair to transfers on other
      * sockets. */
-    multi_mark_expired_as_dirty(multi, &multi->now);
+    curlx_pnow(&now);
+    multi_mark_expired_as_dirty(multi, &now);
     mresult = multi_run_dirty(multi, &pipe_ctx, &run_xfers);
   }
 
@@ -3526,17 +3525,20 @@ static void multi_timeout(struct Curl_multi *multi,
   }
 
   if(multi_has_dirties(multi)) {
-    if(pexire_offset_us)
-      *pexire_offset_us = Curl_timeouts_offset_us(&multi->timeouts,
-                                                  multi_now(multi));
+    if(pexire_offset_us) {
+      struct curltime now;
+      curlx_pnow(&now);
+      *pexire_offset_us = Curl_timeouts_offset_us(&multi->timeouts, &now);
+    }
     *timeout_ms = 0;
     return;
   }
   else {
-    const struct curltime *pnow = multi_now(multi);
+    struct curltime now;
     uint32_t mid;
 
-    *timeout_ms = Curl_timeouts_next_ms(&multi->timeouts, pnow,
+    curlx_pnow(&now);
+    *timeout_ms = Curl_timeouts_next_ms(&multi->timeouts, &now,
                                         pexire_offset_us, &mid);
 #ifdef CURLVERBOSE
     if(mid != UINT32_MAX) {

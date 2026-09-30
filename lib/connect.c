@@ -73,7 +73,7 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
 
-  if(data->conn && Curl_cshutdn_has_started(data->conn, FIRSTSOCKET))
+  if(data->conn && CURL_CONN_IN_SHUTDOWN(data->conn, FIRSTSOCKET))
     return Curl_cshutdn_timeleft_ms(data, data->conn, FIRSTSOCKET);
   else if(Curl_is_connecting(data)) {
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?

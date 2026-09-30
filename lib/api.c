@@ -431,21 +431,12 @@ void Curl_cbapi_enter(struct Curl_mapi_guard *guard,
     return;
   }
   DEBUGASSERT(cbapi_fn_props[fn - CURL_CBAPI_FN_START].fn == fn);
-  if(multi->callstack.count) {
-    size_t i;
-    for(i = multi->callstack.count; i; --i) {
-      if(multi->callstack.calls[i - 1] == fn) {
-        /* recursive invocation of the same callback */
-        DEBUGASSERT(0);
-        return;
-      }
-    }
-  }
-
   /* all fine, add to data's callstack */
   /* if multi callstack already at max depth, leave */
-  if(multi->callstack.count >= CURL_MAPI_MAX_RECURSION)
+  if(multi->callstack.count >= CURL_MAPI_MAX_RECURSION) {
+    DEBUGASSERT(0);
     return;
+  }
   multi->callstack.calls[multi->callstack.count] = (uint8_t)fn;
   ++multi->callstack.count;
   guard->depth = multi->callstack.count;

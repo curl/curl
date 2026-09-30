@@ -106,8 +106,6 @@ struct Curl_multi {
 
   struct Curl_mapi_stack callstack; /* multi api calls ongoing */
 
-  /* current time for transfers running in this multi handle */
-  struct curltime now;
   /* expiration times for all attached easy handles */
   struct Curl_timeouts timeouts;
 
