@@ -268,7 +268,7 @@ jobs:
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
               config: '--with-openssl --enable-httpsig --enable-ntlm',
-              install: 'autotools make diffutils' }
+              install: 'autotools diffutils' }
           # MinGW
           - { name: 'default',
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
@@ -334,7 +334,7 @@ jobs:
         with:
           msystem: ${{ matrix.sys }}
           install: >-
-            make perl diffutils
+            perl diffutils
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-autotools
             mingw-w64-${{ matrix.env }}-cmake
