@@ -198,14 +198,13 @@ static void cpool_discard_conn(struct cpool *cpool,
   DEBUGASSERT(conn->cpid == UINT32_MAX);
 
   admin = Curl_get_admin(data);
-  /*
-   * If this connection is not marked to force-close, leave it open if there
-   * are other users of it
-   */
-  if(CONN_INUSE(conn) && !aborted) {
+  /* We MUST NOT discard a connection that is still in use and would
+   * trigger Use-After-Free. */
+  if(CONN_INUSE(conn)) {
     CURL_TRC_M(admin, "[CPOOL] not discarding #%" FMT_OFF_T
                " still in use by %u transfers", conn->connection_id,
                conn->attached_xfers);
+    DEBUGASSERT(0);
     return;
   }
 
