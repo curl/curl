@@ -1061,7 +1061,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 #ifdef _WIN32
                               data->set.new_file_perms & (_S_IREAD | _S_IWRITE)
 #else
-                              CURLX_FILE_MODE(data->set.new_file_perms)
+                              (mode_t)data->set.new_file_perms
 #endif
                               );
       if(qlogfd != -1)
