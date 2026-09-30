@@ -1739,8 +1739,8 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
      * CA certificate
      */
     result = Curl_setstropt(data, STRING_SSL_CAFILE_PROXY, ptr);
-    s->proxy_ssl.custom_cafile =
-      !!CURL_EASY_STR(data, STRING_SSL_CAFILE_PROXY);
+    if(!result)
+      s->proxy_ssl.custom_cafile = TRUE;
     return result;
   case CURLOPT_PROXY_CRLFILE:
     /*
@@ -1766,8 +1766,8 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
       result = Curl_setstropt(data, STRING_SSL_CAPATH_PROXY, ptr);
-      s->proxy_ssl.custom_capath =
-        !!CURL_EASY_STR(data, STRING_SSL_CAPATH_PROXY);
+      if(!result)
+        s->proxy_ssl.custom_capath = TRUE;
       return result;
     }
 #endif
@@ -1883,7 +1883,8 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * Set CA info for SSL connection. Specify filename of the CA certificate
      */
     result = Curl_setstropt(data, STRING_SSL_CAFILE, ptr);
-    data->set.ssl.custom_cafile = !!CURL_EASY_STR(data, STRING_SSL_CAFILE);
+    if(!result)
+      data->set.ssl.custom_cafile = TRUE;
     return result;
   case CURLOPT_CAPATH:
     /*
@@ -1893,7 +1894,8 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
       result = Curl_setstropt(data, STRING_SSL_CAPATH, ptr);
-      data->set.ssl.custom_capath = !!CURL_EASY_STR(data, STRING_SSL_CAPATH);
+      if(!result)
+        data->set.ssl.custom_capath = TRUE;
       return result;
     }
     return CURLE_NOT_BUILT_IN;
@@ -2827,7 +2829,8 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
       CURLcode result = Curl_setblobopt(&s->blobs[BLOB_CAINFO_PROXY], blob);
-      s->proxy_ssl.custom_cablob = !!s->blobs[BLOB_CAINFO_PROXY];
+      if(!result)
+        s->proxy_ssl.custom_cablob = TRUE;
       return result;
     }
 #endif
@@ -2853,7 +2856,8 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
       CURLcode result = Curl_setblobopt(&s->blobs[BLOB_CAINFO], blob);
-      s->ssl.custom_cablob = !!s->blobs[BLOB_CAINFO];
+      if(!result)
+        s->ssl.custom_cablob = TRUE;
       return result;
     }
 #endif
