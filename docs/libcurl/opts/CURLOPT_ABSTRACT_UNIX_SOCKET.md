@@ -30,9 +30,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ABSTRACT_UNIX_SOCKET,
 Enables the use of an abstract Unix domain socket instead of establishing a
 TCP connection to a host. The parameter should be a char * to a
 null-terminated string holding the path of the socket. The path is set to
-*path* prefixed by a NUL byte. This is the convention for abstract
+*path* prefixed by a NULL byte. This is the convention for abstract
 sockets, however it should be stressed that the path passed to this function
-should not contain a leading NUL byte.
+should not contain a leading NULL byte.
 
 On non-supporting platforms, the abstract address is interpreted as an empty
 string and fails gracefully, generating a runtime error.
