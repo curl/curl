@@ -708,6 +708,18 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
     second->state.weight = data->state.weight;
     if(data->share)
       (void)Curl_share_easy_link(second, data->share);
+    /* copy a range of options from the parent handle */
+    second->set.fwrite_func = data->set.fwrite_func;
+    second->set.out = data->set.out;
+    second->set.fwrite_header = data->set.fwrite_header;
+    second->set.writeheader = data->set.writeheader;
+    second->set.fdebug = data->set.fdebug;
+    second->set.debugdata = data->set.debugdata;
+    second->set.fxferinfo = data->set.fxferinfo;
+    second->set.fprogress = data->set.fprogress;
+    second->set.progress_client = data->set.progress_client;
+    second->progress.hide = data->progress.hide;
+    second->progress.callback = data->progress.callback;
   }
   return second;
 }
