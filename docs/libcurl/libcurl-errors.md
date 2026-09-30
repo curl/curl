@@ -131,7 +131,7 @@ does not match the previously given size.
 
 ## CURLE_FTP_COULDNT_RETR_FILE (19)
 
-This was either a weird reply to a 'RETR' command or a zero byte transfer
+This was either a weird reply to a 'RETR' command or a zero-length transfer
 complete.
 
 ## Obsolete error (20)
