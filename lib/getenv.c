@@ -56,7 +56,7 @@ char *curl_getenv(const char *variable)
       return NULL;
     }
 
-    /* if rc < bufsize then rc is bytes written not including null */
+    /* if rc < bufsize then rc is bytes written not including NUL */
     if(rc < bufsize)
       return buf;
 
