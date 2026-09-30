@@ -407,7 +407,7 @@ jobs:
               [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
-                -DCMAKE_INSTALL_PREFIX="${HOME}"/curl-install \
+                -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
                 -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
