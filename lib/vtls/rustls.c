@@ -855,29 +855,60 @@ init_config_builder_client_auth(struct Curl_easy *data,
   rustls_result rr;
   const struct rustls_certified_key *certified_key = NULL;
   CURLcode result = CURLE_OK;
+  const bool have_cert = conn_config->clientcert || conn_config->cert_blob;
+  const bool have_key = conn_config->key || conn_config->key_blob;
 
-  if(conn_config->clientcert && !conn_config->key) {
-    failf(data, "rustls: must provide key with certificate '%s'",
-          conn_config->clientcert);
+  if(have_cert && !have_key) {
+    failf(data, "rustls: must provide key with certificate");
     return CURLE_SSL_CERTPROBLEM;
   }
-  else if(!conn_config->clientcert && conn_config->key) {
-    failf(data, "rustls: must provide certificate with key '%s'",
-          conn_config->key);
+  else if(!have_cert && have_key) {
+    failf(data, "rustls: must provide certificate with key");
+    return CURLE_SSL_CERTPROBLEM;
+  }
+
+  if(conn_config->cert_type && !curl_strequal(conn_config->cert_type, "PEM")) {
+    failf(data, "rustls: unsupported certificate type '%s', only 'PEM' is "
+          "supported", conn_config->cert_type);
+    return CURLE_SSL_CERTPROBLEM;
+  }
+  if(conn_config->key_type && !curl_strequal(conn_config->key_type, "PEM")) {
+    failf(data, "rustls: unsupported key type '%s', only 'PEM' is supported",
+          conn_config->key_type);
     return CURLE_SSL_CERTPROBLEM;
   }
 
   curlx_dyn_init(&cert_contents, DYN_CERTFILE_SIZE);
   curlx_dyn_init(&key_contents, DYN_KEYFILE_SIZE);
 
-  if(!read_file_into(conn_config->clientcert, &cert_contents)) {
+  if(conn_config->cert_blob) {
+    result = curlx_dyn_addn(&cert_contents,
+                            conn_config->cert_blob->data,
+                            conn_config->cert_blob->len);
+    if(result) {
+      failf(data, "rustls: failed to copy client certificate blob (%s)",
+            result == CURLE_TOO_LARGE ? "too large" : "out of memory");
+      goto cleanup;
+    }
+  }
+  else if(!read_file_into(conn_config->clientcert, &cert_contents)) {
     failf(data, "rustls: failed to read client certificate file: '%s'",
           conn_config->clientcert);
     result = CURLE_SSL_CERTPROBLEM;
     goto cleanup;
   }
 
-  if(!read_file_into(conn_config->key, &key_contents)) {
+  if(conn_config->key_blob) {
+    result = curlx_dyn_addn(&key_contents,
+                            conn_config->key_blob->data,
+                            conn_config->key_blob->len);
+    if(result) {
+      failf(data, "rustls: failed to copy key blob (%s)",
+            result == CURLE_TOO_LARGE ? "too large" : "out of memory");
+      goto cleanup;
+    }
+  }
+  else if(!read_file_into(conn_config->key, &key_contents)) {
     failf(data, "rustls: failed to read key file: '%s'",
           conn_config->key);
     result = CURLE_SSL_CERTPROBLEM;
@@ -1070,7 +1101,8 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     }
   }
 
-  if(conn_config->clientcert || conn_config->key) {
+  if(conn_config->clientcert || conn_config->cert_blob ||
+     conn_config->key || conn_config->key_blob) {
     result = init_config_builder_client_auth(data,
                                              conn_config,
                                              config_builder);
