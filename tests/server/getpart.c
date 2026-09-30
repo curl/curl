@@ -37,7 +37,7 @@
  * line_length()
  *
  * Counts the number of characters in a line including a new line.
- * Unlike strlen() it does not stop at nul bytes.
+ * Unlike strlen() it does not stop at NUL bytes.
  *
  */
 static size_t line_length(const char *buffer, int bytestocheck)

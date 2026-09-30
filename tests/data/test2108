@@ -18,7 +18,7 @@ REPLY PASS 230 logged\x00 in
 ftp
 </server>
 <name>
-FTP rejects a nul byte in a server response line
+FTP rejects a NUL byte in a server response line
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER

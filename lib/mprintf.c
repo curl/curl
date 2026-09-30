@@ -1261,7 +1261,7 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
       /* we are at maximum, scrap the last letter */
       info.buffer[-1] = 0;
       DEBUGASSERT(retcode);
-      retcode--; /* do not count the nul byte */
+      retcode--; /* do not count the NUL byte */
     }
     else
       info.buffer[0] = 0;
