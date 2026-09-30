@@ -105,7 +105,7 @@ jobs:
       - name: 'pyrefly'
         background: true
         run: |
-          source ~/venv/bin/activate
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           cd tests/http/
           pyrefly check --python-version=3.8 --preset=basic --check-unannotated-defs --summary
 
