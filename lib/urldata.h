@@ -169,13 +169,11 @@ typedef enum {
   NTLMSTATE_LAST
 } curlntlm;
 
-typedef enum {
-  GSS_AUTHNONE,
-  GSS_AUTHRECV,
-  GSS_AUTHSENT,
-  GSS_AUTHDONE,
-  GSS_AUTHSUCC
-} curlnegotiate;
+#define CURL_NEGO_AUTH_NONE   0U
+#define CURL_NEGO_AUTH_RECV   1U
+#define CURL_NEGO_AUTH_SENT   2U
+#define CURL_NEGO_AUTH_DONE   3U
+#define CURL_NEGO_AUTH_SUCC   4U
 
 /*
  * Boolean values that concerns this connection.
@@ -299,11 +297,11 @@ struct connectdata {
   struct proxy_info http_proxy;
 #endif
 
+  /* A connection can have one or two sockets and connection filters.
+   * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
   struct Curl_cfilter *cfilter[2]; /* connection filters */
   Curl_recv *recv[2];
   Curl_send *send[2];
-  /* A connection can have one or two sockets and connection filters.
-   * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
   curl_socket_t sock[2];
 
 #define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
@@ -330,11 +328,6 @@ struct connectdata {
 #ifdef USE_NTLM
   curlntlm http_ntlm_state;
   curlntlm proxy_ntlm_state;
-#endif
-
-#ifdef USE_SPNEGO
-  curlnegotiate http_negotiate_state;
-  curlnegotiate proxy_negotiate_state;
 #endif
 
   /* When this connection is created, store the conditions for the local end
@@ -373,7 +366,10 @@ struct connectdata {
    * 0 at start, then one of 09, 10, 11, etc. */
   uint8_t httpversion_seen;
   uint8_t gssapi_delegation; /* inherited from set.gssapi_delegation */
-
+#ifdef USE_SPNEGO
+  uint8_t http_negotiate_state;
+  uint8_t proxy_negotiate_state;
+#endif
 };
 
 #ifndef CURL_DISABLE_PROXY

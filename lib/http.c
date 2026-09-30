@@ -446,8 +446,8 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
       VERBOSE(ongoing_auth = "NEGOTIATE");
-      if((conn->http_negotiate_state != GSS_AUTHNONE) ||
-         (conn->proxy_negotiate_state != GSS_AUTHNONE)) {
+      if((conn->http_negotiate_state != CURL_NEGO_AUTH_NONE) ||
+         (conn->proxy_negotiate_state != CURL_NEGO_AUTH_NONE)) {
         /* The NEGOTIATE-negotiation has started, keep on sending.
          * Need to do further work on same connection */
         abort_upload = FALSE;
@@ -945,7 +945,7 @@ static CURLcode auth_spnego(struct Curl_easy *data,
     if(authp->picked == CURLAUTH_NEGOTIATE) {
       struct connectdata *conn = data->conn;
       CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
-      curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
+      uint8_t *negstate = proxy ? &conn->proxy_negotiate_state :
         &conn->http_negotiate_state;
       if(!result) {
         curlx_free(data->req.newurl);
@@ -954,7 +954,7 @@ static CURLcode auth_spnego(struct Curl_easy *data,
           return CURLE_OUT_OF_MEMORY;
         data->state.authproblem = FALSE;
         /* we received a GSS auth token and we dealt with it fine */
-        *negstate = GSS_AUTHRECV;
+        *negstate = CURL_NEGO_AUTH_RECV;
       }
       else
         data->state.authproblem = TRUE;
@@ -4043,19 +4043,19 @@ static void http_check_auth_closure(struct Curl_easy *data,
 #ifdef USE_SPNEGO
   if(conn->bits.close &&
     (((data->req.httpcode == 401) &&
-      (conn->http_negotiate_state == GSS_AUTHRECV)) ||
+      (conn->http_negotiate_state == CURL_NEGO_AUTH_RECV)) ||
      ((data->req.httpcode == 407) &&
-      (conn->proxy_negotiate_state == GSS_AUTHRECV)))) {
+      (conn->proxy_negotiate_state == CURL_NEGO_AUTH_RECV)))) {
     infof(data, "Connection closure while negotiating auth (HTTP 1.0?)");
     data->state.authproblem = TRUE;
   }
-  if((conn->http_negotiate_state == GSS_AUTHDONE) &&
+  if((conn->http_negotiate_state == CURL_NEGO_AUTH_DONE) &&
      (data->req.httpcode != 401)) {
-    conn->http_negotiate_state = GSS_AUTHSUCC;
+    conn->http_negotiate_state = CURL_NEGO_AUTH_SUCC;
   }
-  if((conn->proxy_negotiate_state == GSS_AUTHDONE) &&
+  if((conn->proxy_negotiate_state == CURL_NEGO_AUTH_DONE) &&
      (data->req.httpcode != 407)) {
-    conn->proxy_negotiate_state = GSS_AUTHSUCC;
+    conn->proxy_negotiate_state = CURL_NEGO_AUTH_SUCC;
   }
 #endif
 }
