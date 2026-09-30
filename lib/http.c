@@ -3869,7 +3869,7 @@ CURLcode Curl_verify_header(struct Curl_easy *data,
     switch(hd[i]) {
     case '\0':
       /* this is bad, bail out */
-      failf(data, "Nul byte in header");
+      failf(data, "NUL byte in header");
       return CURLE_WEIRD_SERVER_REPLY;
     case '\r':
       if(i < hdlen - 2) {
