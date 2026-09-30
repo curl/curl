@@ -123,7 +123,7 @@ UNITTEST DOHcode doh_req_encode(const char *host,
    * Each [ label, dot ] pair is encoded as [ length, label ],
    * preserving overall length. A final [ label ] without a dot is
    * also encoded as [ length, label ], increasing overall length
-   * by one. The encoding is completed by appending a zero byte,
+   * by one. The encoding is completed by appending a NUL byte,
    * representing the zero-length root label, again increasing
    * the overall length by one.
    */
