@@ -706,7 +706,7 @@ static ParameterError data_urlencode(const char *nextarg,
   }
 
   if(!postdata) {
-    /* no data from the file, point to a zero byte string to make this
+    /* no data from the file, point to a zero-length string to make this
        get sent as a POST anyway */
     postdata = curlx_strdup("");
     if(!postdata)
@@ -985,7 +985,7 @@ static ParameterError set_data(cmdline_t cmd,
       return err;
 
     if(!postdata) {
-      /* no data from the file, point to a zero byte string to make this
+      /* no data from the file, point to a zero-length string to make this
          get sent as a POST anyway */
       postdata = curlx_strdup("");
       if(!postdata)
