@@ -54,7 +54,7 @@ This release includes the following bugfixes:
  o docs: add the missing .html to the url-encode book link [3]
  o doh: reject undersized HTTPS RDATA [11]
  o dynhds: grow header array geometrically [73]
- o easy: duplicating a zero byte memory area needs no malloc [91]
+ o easy: duplicating a zero-length memory area needs no malloc [91]
  o easy: make ca_cache_timeout standalone [51]
  o easy: validate buffer pointer in curl_easy_recv and curl_easy_send [152]
  o escape: polish encoding and decoding for speed [37]
