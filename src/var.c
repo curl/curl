@@ -300,7 +300,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
           }
 
           if(value && vlen > 0) {
-            /* A variable might contain NUL bytes. Such bytes cannot be shown
+            /* A variable might contain zero bytes. Such bytes cannot be shown
                using normal means, this is an error. */
             const char *nb = memchr(value, '\0', vlen);
             if(nb) {
