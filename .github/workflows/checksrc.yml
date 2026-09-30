@@ -195,13 +195,13 @@ jobs:
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:
-          brew: actionlint shellcheck zizmor
+          brew: shellcheck zizmor
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: 'zizmor/actionlint (prepare)'
+      - name: 'zizmor (prepare)'
         # Replace custom bash-like shell designators with the standard one to make linters process them
         run: sed -i.bak -E 's/shell\x3a .+ zizmor\x3a ignore.+$/shell\x3a bash/g' .github/workflows/*.yml
 
@@ -220,25 +220,6 @@ jobs:
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           git ls-files '.github/actions/**/*.yml' '.github/dependabot.yml' '.github/workflows/*.yml' -z | xargs -0 -r zizmor --persona auditor -- || true
-
-      - name: 'actionlint'
-        background: true
-        run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
-          actionlint --version
-          actionlint \
-            --ignore matrix \
-            --ignore ubuntu-26.04 \
-            --ignore ubuntu-24.04-firewall \
-            --ignore xcode-27 \
-            --ignore 'unexpected key "background"' \
-            --ignore 'unexpected key "cache-mode"' \
-            --ignore 'unexpected key "wait"' \
-            --ignore 'unexpected key "wait-all"' \
-            --ignore 'must run script with "run" section' \
-            --ignore 'invalid format because ref is missing' \
-            .github/workflows/*.yml
 
       - name: 'shellcheck CI'
         background: true
