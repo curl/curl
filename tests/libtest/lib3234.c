@@ -55,6 +55,8 @@ static bool t3234_copy_ca(const char *source, const char *target)
       ok = FALSE;
       break;
     }
+    if(n < sizeof(buf))
+      break;
   }
   if(ferror(src))
     ok = FALSE;
