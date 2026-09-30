@@ -541,7 +541,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
 
     /* CertGetNameString guarantees that the returned name does not contain
-     * embedded zero bytes. This appears to be undocumented behavior.
+     * embedded NUL bytes. This appears to be undocumented behavior.
      */
     cert_hostname_buff = curlx_malloc(len * sizeof(TCHAR));
     if(!cert_hostname_buff) {
