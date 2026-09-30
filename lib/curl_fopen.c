@@ -128,7 +128,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
                   _S_IREAD | _S_IWRITE);
 #else
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  CURLX_FILE_MODE(S_IRUSR | S_IWUSR | 0600));
+                  (mode_t)(S_IRUSR | S_IWUSR | 0600));
 #endif
   if(fd == -1)
     goto fail;
@@ -139,7 +139,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     if((curlx_fstat(fd, &nsb) != -1) &&
        (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
       /* if the user and group are the same, clone the original mode */
-      if(fchmod(fd, CURLX_FILE_MODE(sb.st_mode)) == -1)
+      if(fchmod(fd, (mode_t)sb.st_mode) == -1)
         goto fail;
     }
   }

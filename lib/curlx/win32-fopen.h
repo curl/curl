@@ -72,13 +72,6 @@ int curlx_win32_rename(const char *oldpath, const char *newpath);
 #define curlx_rename            rename
 #endif
 
-#if (defined(ANDROID) || defined(__ANDROID__)) && \
-  (defined(__i386__) || defined(__arm__))
-#define CURLX_FILE_MODE(x) ((mode_t)(x))
-#else
-#define CURLX_FILE_MODE(x) (x)
-#endif
-
 #ifdef CURL_MEMDEBUG
 #define curlx_fopen(file, mode) curl_dbg_fopen(file, mode, __LINE__, __FILE__)
 #define curlx_freopen(file, mode, fh) \
