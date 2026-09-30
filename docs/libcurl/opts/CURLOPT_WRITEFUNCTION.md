@@ -52,7 +52,7 @@ When CURLOPT_FOLLOWLOCATION(3) is enabled, libcurl automatically handles
 intermediate 3xx redirects, meaning their HTTP bodies are skipped and not
 passed to this callback.
 
-This function may be called with zero bytes data if the transferred file is
+This function may be called with zero-length data if the transferred file is
 empty.
 
 Set the *userdata* argument with the CURLOPT_WRITEDATA(3) option.
