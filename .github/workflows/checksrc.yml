@@ -67,12 +67,12 @@ jobs:
         background: true
         run: scripts/perlcheck.sh
 
-      - name: 'install typos-cli'
+      - name: 'install brew packages'
         background: true
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:
-          brew: typos-cli
+          brew: pyrefly typos-cli
 
       - name: 'install prereqs'
         uses: $/.github/actions/pkg-install
@@ -99,15 +99,15 @@ jobs:
           source ~/venv/bin/activate
           scripts/pythonlint.sh
 
+      - name: 'wait-all'
+        wait-all:
+
       - name: 'pyrefly'
         background: true
         run: |
-          source ~/venv/bin/activate
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           cd tests/http/
           pyrefly check --python-version=3.8 --preset=basic --check-unannotated-defs --summary
-
-      - name: 'wait-all'
-        wait-all:
 
       - name: filter off code from all C and H files
         run: |

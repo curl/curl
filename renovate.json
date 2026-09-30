@@ -49,7 +49,6 @@
       "description": "Schedule package updates on the 10th of each month",
       "matchPackageNames": [
         "/codeql/i",
-        "/pyrefly/i",
         "/ruff/i"
       ],
       "groupName": "monthly updates by name",
