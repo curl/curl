@@ -29,12 +29,12 @@ https
 Share parsed CA stores across independent multi handles
 </name>
 <command>
-https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt
+https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt %LOGDIR/ca%TESTNUMBER.crt
 </command>
 </client>
 <verify>
 <stdout mode="text">
-CA sharing: OK; connections and TLS sessions isolated
+CA sharing: OK
 </stdout>
 </verify>
 </testcase>
