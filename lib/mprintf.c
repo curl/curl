@@ -1256,7 +1256,7 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
 
   retcode = formatf(&info, addbyter, addrun, NULL, format, args);
   if(info.max) {
-    /* we terminate this with a zero byte */
+    /* we null-terminate this */
     if(info.max == info.length) {
       /* we are at maximum, scrap the last letter */
       info.buffer[-1] = 0;
@@ -1448,7 +1448,7 @@ int curl_msprintf(char *buffer, const char *format, ...)
   va_start(args, format);
   retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
   va_end(args);
-  *buffer = 0; /* we terminate this with a zero byte */
+  *buffer = 0; /* we null-terminate this */
   return retcode;
 }
 
@@ -1508,7 +1508,7 @@ int curl_mprintf(const char *format, ...)
 int curl_mvsprintf(char *buffer, const char *format, va_list args)
 {
   int retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
-  *buffer = 0; /* we terminate this with a zero byte */
+  *buffer = 0; /* we null-terminate this */
   return retcode;
 }
 
