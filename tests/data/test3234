@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTPS
+CURLSHOPT_SHARE
+CURL_LOCK_DATA_CA
+libtest
+</keywords>
+</info>
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 3
+
+ok
+</data>
+</reply>
+<client>
+<features>
+SSL
+OpenSSL
+</features>
+<server>
+http
+https
+</server>
+<name>
+Share parsed CA stores across independent multi handles
+</name>
+<command>
+https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt
+</command>
+</client>
+<verify>
+<stdout mode="text">
+CA sharing: OK; connections and TLS sessions isolated
+</stdout>
+</verify>
+</testcase>
