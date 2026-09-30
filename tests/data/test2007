@@ -22,6 +22,10 @@ SFTP quote rmdir command with trailing junk
 <command>
 --hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt -Q "mkdir /tmp/test trailing_garbage"
 </command>
+<setenv>
+# Needed for MSYS2 to not treat the base64 hash as a path
+MSYS2_ARG_CONV_EXCL=*
+</setenv>
 </client>
 
 <verify>
