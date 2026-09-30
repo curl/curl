@@ -612,8 +612,8 @@ static bool multi_conn_should_close(struct connectdata *conn,
           conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
 #endif
 #ifdef USE_SPNEGO
-     && !(conn->http_negotiate_state == GSS_AUTHRECV ||
-          conn->proxy_negotiate_state == GSS_AUTHRECV)
+     && !(conn->http_negotiate_state == CURL_NEGO_AUTH_RECV ||
+          conn->proxy_negotiate_state == CURL_NEGO_AUTH_RECV)
 #endif
     )
     return TRUE;

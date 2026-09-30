@@ -169,13 +169,11 @@ typedef enum {
   NTLMSTATE_LAST
 } curlntlm;
 
-typedef enum {
-  GSS_AUTHNONE,
-  GSS_AUTHRECV,
-  GSS_AUTHSENT,
-  GSS_AUTHDONE,
-  GSS_AUTHSUCC
-} curlnegotiate;
+#define CURL_NEGO_AUTH_NONE   0U
+#define CURL_NEGO_AUTH_RECV   1U
+#define CURL_NEGO_AUTH_SENT   2U
+#define CURL_NEGO_AUTH_DONE   3U
+#define CURL_NEGO_AUTH_SUCC   4U
 
 /*
  * Boolean values that concerns this connection.
@@ -368,13 +366,10 @@ struct connectdata {
    * 0 at start, then one of 09, 10, 11, etc. */
   uint8_t httpversion_seen;
   uint8_t gssapi_delegation; /* inherited from set.gssapi_delegation */
-
 #ifdef USE_SPNEGO
   uint8_t http_negotiate_state;
   uint8_t proxy_negotiate_state;
 #endif
-
-
 };
 
 #ifndef CURL_DISABLE_PROXY

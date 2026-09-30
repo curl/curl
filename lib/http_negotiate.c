@@ -39,9 +39,9 @@ static void http_auth_nego_reset(struct connectdata *conn,
                                  bool proxy)
 {
   if(proxy)
-    conn->proxy_negotiate_state = GSS_AUTHNONE;
+    conn->proxy_negotiate_state = CURL_NEGO_AUTH_NONE;
   else {
-    conn->http_negotiate_state = GSS_AUTHNONE;
+    conn->http_negotiate_state = CURL_NEGO_AUTH_NONE;
     Curl_peer_unlink(&conn->creds_origin);
     Curl_creds_unlink(&conn->creds);
   }
@@ -61,7 +61,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 
   /* Point to the correct struct with this */
   struct negotiatedata *neg_ctx;
-  curlnegotiate state;
+  uint8_t state;
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
@@ -89,11 +89,11 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   len = strlen(header);
   neg_ctx->havenegdata = len != 0;
   if(!len) {
-    if(state == GSS_AUTHSUCC) {
+    if(state == CURL_NEGO_AUTH_SUCC) {
       infof(data, "Negotiate auth restarted");
       http_auth_nego_reset(conn, neg_ctx, proxy);
     }
-    else if(state != GSS_AUTHNONE) {
+    else if(state != CURL_NEGO_AUTH_NONE) {
       /* The server rejected our authentication and has not supplied any more
       negotiation mechanisms */
       http_auth_nego_reset(conn, neg_ctx, proxy);
@@ -181,21 +181,21 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
   authp->done = FALSE;
 
-  if(*state == GSS_AUTHRECV) {
+  if(*state == CURL_NEGO_AUTH_RECV) {
     if(neg_ctx->havenegdata) {
       neg_ctx->havemultiplerequests = TRUE;
     }
   }
-  else if(*state == GSS_AUTHSUCC) {
+  else if(*state == CURL_NEGO_AUTH_SUCC) {
     if(!neg_ctx->havenoauthpersist) {
       neg_ctx->noauthpersist = !neg_ctx->havemultiplerequests;
     }
   }
 
   if(neg_ctx->noauthpersist ||
-     (*state != GSS_AUTHDONE && *state != GSS_AUTHSUCC)) {
+     (*state != CURL_NEGO_AUTH_DONE && *state != CURL_NEGO_AUTH_SUCC)) {
 
-    if(neg_ctx->noauthpersist && *state == GSS_AUTHSUCC) {
+    if(neg_ctx->noauthpersist && *state == CURL_NEGO_AUTH_SUCC) {
       infof(data, "Curl_output_negotiate, "
             "no persistent authentication: cleanup existing context");
       http_auth_nego_reset(conn, neg_ctx, proxy);
@@ -236,23 +236,23 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     }
 
-    *state = GSS_AUTHSENT;
+    *state = CURL_NEGO_AUTH_SENT;
 #ifdef HAVE_GSSAPI
     if(neg_ctx->status == GSS_S_COMPLETE ||
        neg_ctx->status == GSS_S_CONTINUE_NEEDED) {
-      *state = GSS_AUTHDONE;
+      *state = CURL_NEGO_AUTH_DONE;
     }
 #else
 #ifdef USE_WINDOWS_SSPI
     if(neg_ctx->status == SEC_E_OK ||
        neg_ctx->status == SEC_I_CONTINUE_NEEDED) {
-      *state = GSS_AUTHDONE;
+      *state = CURL_NEGO_AUTH_DONE;
     }
 #endif
 #endif
   }
 
-  if(*state == GSS_AUTHDONE || *state == GSS_AUTHSUCC) {
+  if(*state == CURL_NEGO_AUTH_DONE || *state == CURL_NEGO_AUTH_SUCC) {
     /* connection is already authenticated,
      * do not send a header in future requests */
     authp->done = TRUE;

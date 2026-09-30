@@ -958,7 +958,7 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
 static bool url_match_auth_nego(struct connectdata *conn,
                                 struct url_conn_match *m)
 {
-  if(conn->http_negotiate_state != GSS_AUTHNONE) {
+  if(conn->http_negotiate_state != CURL_NEGO_AUTH_NONE) {
     /* Connection is using Negotiate. We cannot reuse if transfer
      * has different Auth input parameters. */
     if(!m->want_nego_http ||
@@ -978,7 +978,7 @@ static bool url_match_auth_nego(struct connectdata *conn,
 
 #ifndef CURL_DISABLE_PROXY
   /* Same for Proxy Negotiate authentication */
-  if(conn->proxy_negotiate_state != GSS_AUTHNONE) {
+  if(conn->proxy_negotiate_state != CURL_NEGO_AUTH_NONE) {
     if(!m->want_proxy_nego_http ||
        !Curl_creds_same(m->needle->http_proxy.creds, conn->http_proxy.creds))
       return FALSE;
