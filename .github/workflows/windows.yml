@@ -323,6 +323,7 @@ jobs:
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
+          release: false
           # https://packages.msys2.org/search
           # Packages that are used by most jobs. They each inflate cache size and come with a per-job install overhead.
           # Add individual package requirements to the matrix `install:` entry instead.
@@ -335,6 +336,7 @@ jobs:
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
+          release: false
           # Packages that are used by most jobs. They each inflate cache size and come with a per-job install overhead.
           # Add individual package requirements to the matrix `install:` entry instead.
           install: >-
