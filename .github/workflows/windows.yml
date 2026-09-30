@@ -268,7 +268,7 @@ jobs:
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
               config: '--with-openssl --enable-httpsig --enable-ntlm',
-              install: 'diffutils' }
+              install: 'diffutils' }  # for tests
           # MinGW
           - { name: 'default',
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
@@ -280,7 +280,7 @@ jobs:
           - { name: 'schannel c-ares U', type: 'Debug',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '--min=1850',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON -DCURL_DROP_UNUSED=ON',
-              install: 'mingw-w64-clang-x86_64-python' }
+              install: 'mingw-w64-clang-x86_64-python' }  # for dict and telnet tests
           # MinGW torture
           - { name: 'schannel U torture 1', type: 'Debug',
               build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '-t --shallow=13 --subset=0/2 --min=920',
@@ -324,6 +324,8 @@ jobs:
         with:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
+          # Packages that are used by most jobs. They each inflate cache size and come with a per-job install overhead.
+          # Add individual package requirements to the matrix `install:` entry instead.
           install: >-
             gcc perl
             zlib-devel brotli-devel libzstd-devel libpsl-devel libnghttp2-devel
@@ -333,6 +335,8 @@ jobs:
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
+          # Packages that are used by most jobs. They each inflate cache size and come with a per-job install overhead.
+          # Add individual package requirements to the matrix `install:` entry instead.
           install: >-
             perl diffutils
             mingw-w64-${{ matrix.env }}-cc
@@ -347,6 +351,7 @@ jobs:
         env:
           MATRIX_INSTALL: '${{ matrix.install }}'
         run: |
+          # Install build tools in a separate step to avoid inflating shared cache size and being installed even if unused.
           if [ "${MATRIX_SYS}" = 'msys' ]; then
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               pkgs='cmake ninja'
