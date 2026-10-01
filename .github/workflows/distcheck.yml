@@ -279,7 +279,9 @@ jobs:
           update: false
           cache: false
           path-type: inherit
-          install: perl mingw-w64-ucrt-x86_64-zlib mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-libpsl mingw-w64-ucrt-x86_64-libssh2 mingw-w64-ucrt-x86_64-nghttp2 mingw-w64-ucrt-x86_64-openssl
+          install: >-
+            perl mingw-w64-ucrt-x86_64-zlib mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-libpsl
+            mingw-w64-ucrt-x86_64-libssh2 mingw-w64-ucrt-x86_64-nghttp2 mingw-w64-ucrt-x86_64-openssl
 
       - name: 'install prereqs'
         if: ${{ !contains(matrix.image, 'windows') }}
