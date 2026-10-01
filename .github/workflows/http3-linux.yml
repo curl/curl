@@ -284,7 +284,7 @@ jobs:
             PKG_CONFIG_PATH=/home/runner/nettle/build/lib/pkgconfig \
             LDFLAGS=-Wl,-rpath,/home/runner/nettle/build/lib \
             --with-included-libtasn1 --with-included-unistring \
-            --disable-guile --disable-doc --disable-tests --disable-tools
+            --disable-doc --disable-tests --disable-tools
           make install
 
       - name: 'build libressl'
