@@ -464,7 +464,6 @@ jobs:
             install_steps: intelc
             CC: icc
             configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi --enable-httpsig
-            tflags: '!crypto'
 
           - name: 'Slackware GnuTLS gssapi gcc'
             # Flags used to build the curl Slackware package:
