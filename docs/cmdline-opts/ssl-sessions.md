@@ -40,11 +40,11 @@ experimental SSL session import/export feature (SSLS-EXPORT) enabled.
 
 The sessions in he file identify origin and used TLS configurations.
 Configuration parameters identified by a file path are only matched to the
-path, not the file's content. Updates to CA, CRL or key file contents will
-not invalidate previous sessions.
+path, not the file's content. Updates to CA, CRL or key file contents do
+not invalidate previously saved sessions.
 
 Most TLS sessions handed out by servers have a short lifetime, which
-limits the risk. Also, curl will not persist TLS session in this file
+limits the risk. Also, curl does not persist TLS session in this file
 that are tied to authentication, e.g. a client certificate. If that all
 is not acceptable, ssl session files should be cleared when older than
 the CA/CRL file used or not used at all.
