@@ -260,7 +260,7 @@ static struct curl_slist *slist_convert(struct curl_slist *from,
     nl = Curl_slist_append_nodup(to, s);
     if(!nl) {
       curl_slist_free_all(to);
-      free(s);
+      untyped_free(s);
       return NULL;
     }
     to = nl;
