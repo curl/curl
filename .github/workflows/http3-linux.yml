@@ -544,20 +544,20 @@ jobs:
             install_steps: skipall
             CC: clang
             CFLAGS: -fPIC
-            LDFLAGS: -Wl,-rpath,/home/runner/quiche/target/release -lstdc++
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/quiche/release -lstdc++
             PKG_CONFIG_PATH: /home/runner/pkg/nghttp2/lib/pkgconfig
             configure: >-
-              --with-openssl=/home/runner/quiche/boringssl
-              --with-quiche=/home/runner/quiche/target/release
+              --with-openssl=/home/runner/pkg/quiche/boringssl
+              --with-quiche=/home/runner/pkg/quiche/release
               --with-ca-fallback
               --enable-unity
 
           - name: 'quiche'
             install_packages: clang
             CC: clang
-            PKG_CONFIG_PATH: /home/runner/pkg/nghttp2/lib/pkgconfig:/home/runner/quiche/target/release
+            PKG_CONFIG_PATH: /home/runner/pkg/nghttp2/lib/pkgconfig:/home/runner/pkg/quiche/release
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/quiche/boringssl -DOPENSSL_USE_STATIC_LIBS=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/pkg/quiche/boringssl -DOPENSSL_USE_STATIC_LIBS=ON
               -DUSE_QUICHE=ON
               -DCURL_CA_FALLBACK=ON -DCURL_DISABLE_HTTPSIG=OFF
 
@@ -748,7 +748,7 @@ jobs:
         env:
           cache-name: cache1-quiche
         with:
-          path: ~/quiche
+          path: ~/pkg/quiche
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
@@ -757,21 +757,19 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
           cd quiche
-          cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
-          ln -s libquiche.so target/release/libquiche.so.0
-          cd ..
-          mkdir -p quiche/boringssl/lib
-          find quiche/target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' quiche/boringssl/lib \;
-          find quiche/target/release/build/boring-sys-*/out/boringssl -maxdepth 1 \( -name include \) -exec ln -vsf -- '../../{}' quiche/boringssl \;
+          cargo build -vv --package quiche --release --features ffi,pkg-config-meta,qlog --target-dir /home/runner/pkg/quiche
+          cd /home/runner/pkg/quiche
+          ln -s libquiche.so release/libquiche.so.0
+          mkdir -p boringssl/lib
+          find release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' boringssl/lib \;
+          find release/build/boring-sys-*/out/boringssl -maxdepth 1 \( -name include \) -exec ln -vsf -- '../{}' boringssl \;
           # Reduce cached blob size
-          rm -rf quiche/target/release/build/boring-sys-*/out/build/CMakeFiles
-          rm -rf quiche/target/release/deps
-          du -t 4MB quiche
+          rm -rf release/build/boring-sys-*/out/build/CMakeFiles
+          rm -rf release/deps
+          du -t 4MB .
 
-          # include dir
-          # /home/runner/quiche/boringssl/include
-          # lib dir
-          # /home/runner/quiche/boringssl/lib
+          # include dir: /home/runner/pkg/quiche/boringssl/include
+          # lib dir:     /home/runner/pkg/quiche/boringssl/lib
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
