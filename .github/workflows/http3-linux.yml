@@ -44,7 +44,7 @@ env:
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20260929.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver-coerced extractVersion=^nettle_?(?<version>.+)_release_.+$ registryUrl=https://github.com
-  NETTLE_VERSION: 3.10.2
+  NETTLE_VERSION: '4.0'
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
   GNUTLS_VERSION: 3.8.13
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
