@@ -474,7 +474,6 @@ jobs:
             container: andy5995/slackware-build-essential:15.0@sha256:c5aeede463b4a52b5f4650078418718f2447bdb23f9a4cac0d5fb262e7b8dc84
 
           - name: 'Alpine MUSL https-rr'
-            image: ubuntu-26.04-arm
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --enable-threaded-resolver
             container: alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 # 3.24.2
 
