@@ -79,7 +79,7 @@ jobs:
         env:
           cache-name: cache-awslc
         with:
-          path: ~/awslc/build
+          path: ~/pkg/awslc
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
       - name: 'cache boringssl'
@@ -88,7 +88,7 @@ jobs:
         env:
           cache-name: cache-boringssl
         with:
-          path: ~/boringssl/build
+          path: ~/pkg/boringssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
 
       - name: 'cache nettle'
@@ -97,7 +97,7 @@ jobs:
         env:
           cache-name: cache-nettle
         with:
-          path: ~/nettle/build
+          path: ~/pkg/nettle
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
 
       - name: 'cache gnutls'
@@ -106,7 +106,7 @@ jobs:
         env:
           cache-name: cache-gnutls
         with:
-          path: ~/gnutls/build
+          path: ~/pkg/gnutls
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
 
       - name: 'cache libressl'
@@ -115,7 +115,7 @@ jobs:
         env:
           cache-name: cache-libressl
         with:
-          path: ~/libressl/build
+          path: ~/pkg/libressl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'cache openssl'
@@ -124,7 +124,7 @@ jobs:
         env:
           cache-name: cache-openssl-http3-no-deprecated
         with:
-          path: ~/openssl/build
+          path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'cache openssl-prev'
@@ -133,7 +133,7 @@ jobs:
         env:
           cache-name: cache-openssl-prev-http3
         with:
-          path: ~/openssl-prev/build
+          path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
 
       - name: 'cache wolfssl'
@@ -142,7 +142,7 @@ jobs:
         env:
           cache-name: cache-wolfssl
         with:
-          path: ~/wolfssl/build
+          path: ~/pkg/wolfssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache nghttp3'
@@ -151,7 +151,7 @@ jobs:
         env:
           cache-name: cache-nghttp3
         with:
-          path: ~/nghttp3/build
+          path: ~/pkg/nghttp3
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
 
       - name: 'cache ngtcp2'
@@ -160,7 +160,7 @@ jobs:
         env:
           cache-name: cache-ngtcp2
         with:
-          path: ~/ngtcp2/build
+          path: ~/pkg/ngtcp2
           key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
             ${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}"
 
@@ -170,7 +170,7 @@ jobs:
         env:
           cache-name: cache-ngtcp2-boringssl
         with:
-          path: ~/ngtcp2-boringssl/build
+          path: ~/pkg/ngtcp2-boringssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
 
       - name: 'cache ngtcp2 openssl-prev'
@@ -179,7 +179,7 @@ jobs:
         env:
           cache-name: cache-ngtcp2-openssl-prev
         with:
-          path: ~/ngtcp2-openssl-prev/build
+          path: ~/pkg/ngtcp2-openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
 
       - name: 'cache nghttp2'
@@ -188,7 +188,7 @@ jobs:
         env:
           cache-name: cache-nghttp2
         with:
-          path: ~/nghttp2/build
+          path: ~/pkg/nghttp2
           key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
             ${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}"
 
@@ -198,7 +198,7 @@ jobs:
         env:
           cache-name: cache-h2o
         with:
-          path: ~/h2o/build
+          path: ~/pkg/h2o
           key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}"
 
       - id: settings
@@ -241,7 +241,7 @@ jobs:
             --location --proto-redir =https "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "aws-lc-${AWSLC_VERSION}"
-          cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DBUILD_TOOL=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build
+          cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DBUILD_TOOL=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/awslc
           cmake --build .
           cmake --install .
 
@@ -253,7 +253,7 @@ jobs:
             --location --proto-redir =https "https://github.com/google/boringssl/releases/download/${BORINGSSL_VERSION}/boringssl-${BORINGSSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "boringssl-${BORINGSSL_VERSION}"
-          cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl/build
+          cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/boringssl
           cmake --build .
           cmake --install .
 
@@ -266,7 +266,7 @@ jobs:
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "nettle-${NETTLE_VERSION}"
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix=/home/runner/nettle/build \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/nettle \
             --disable-static --disable-openssl --disable-documentation
           make install
 
@@ -280,9 +280,9 @@ jobs:
           cd "gnutls-${GNUTLS_VERSION}"
           autoreconf -fi
           # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
-          ./configure --disable-dependency-tracking --prefix=/home/runner/gnutls/build \
-            PKG_CONFIG_PATH=/home/runner/nettle/build/lib/pkgconfig \
-            LDFLAGS=-Wl,-rpath,/home/runner/nettle/build/lib \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/gnutls \
+            PKG_CONFIG_PATH=/home/runner/pkg/nettle/lib/pkgconfig \
+            LDFLAGS=-Wl,-rpath,/home/runner/pkg/nettle/lib \
             --with-included-libtasn1 --with-included-unistring \
             --disable-doc --disable-tests --disable-tools
           make install
@@ -295,7 +295,7 @@ jobs:
             "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
-          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl/build
+          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/libressl
           cmake --build .
           cmake --install .
 
@@ -305,7 +305,7 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
+          ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
 
@@ -317,7 +317,7 @@ jobs:
             --location --proto-redir =https "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${OPENSSL_PREV_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
-          ./config --prefix=/home/runner/openssl-prev/build --libdir=lib no-makedepend no-apps no-docs no-tests
+          ./config --prefix=/home/runner/pkg/openssl-prev --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
@@ -328,7 +328,7 @@ jobs:
           git clone --quiet --depth 1 --branch "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl
           cd wolfssl
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-all --enable-quic \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/wolfssl --enable-all --enable-quic \
             --disable-benchmark --disable-crypttests --disable-examples
           make
           make install
@@ -341,7 +341,7 @@ jobs:
           cd nghttp3
           git submodule update --init --depth 1
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/nghttp3 --enable-lib-only
           make
           make install
 
@@ -353,19 +353,19 @@ jobs:
           git clone --quiet --depth 1 --branch "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
           cd ngtcp2
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
-            PKG_CONFIG_PATH=/home/runner/libressl/build/lib/pkgconfig \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/ngtcp2 --enable-lib-only \
+            PKG_CONFIG_PATH=/home/runner/pkg/libressl/lib/pkgconfig \
             --with-openssl
           make install
           make clean
-          export PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig
-          PKG_CONFIG_PATH+=:/home/runner/nettle/build/lib/pkgconfig
-          PKG_CONFIG_PATH+=:/home/runner/gnutls/build/lib/pkgconfig
-          PKG_CONFIG_PATH+=:/home/runner/wolfssl/build/lib/pkgconfig
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
+          export PKG_CONFIG_PATH=/home/runner/pkg/openssl/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/pkg/nettle/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/pkg/gnutls/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/pkg/wolfssl/lib/pkgconfig
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/ngtcp2 --enable-lib-only \
             --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
-            BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
-            BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include'
+            BORINGSSL_LIBS='-L/home/runner/pkg/awslc/lib -lssl -lcrypto' \
+            BORINGSSL_CFLAGS='-I/home/runner/pkg/awslc/include'
           make install
 
       - name: 'build ngtcp2 openssl-prev'
@@ -375,8 +375,8 @@ jobs:
           git clone --quiet --depth 1 --branch "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-openssl-prev
           cd ngtcp2-openssl-prev
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
-            PKG_CONFIG_PATH=/home/runner/openssl-prev/build/lib/pkgconfig \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/ngtcp2-openssl-prev --enable-lib-only \
+            PKG_CONFIG_PATH=/home/runner/pkg/openssl-prev/lib/pkgconfig \
             --with-openssl
           make install
 
@@ -387,10 +387,10 @@ jobs:
           git clone --quiet --depth 1 --branch "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-boringssl
           cd ngtcp2-boringssl
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/ngtcp2-boringssl --enable-lib-only \
             --with-openssl=no --with-boringssl \
-            BORINGSSL_LIBS='-L/home/runner/boringssl/build/lib -lssl -lcrypto' \
-            BORINGSSL_CFLAGS='-I/home/runner/boringssl/build/include'
+            BORINGSSL_LIBS='-L/home/runner/pkg/boringssl/lib -lssl -lcrypto' \
+            BORINGSSL_CFLAGS='-I/home/runner/pkg/boringssl/include'
           make install
 
       - name: 'build nghttp2'
@@ -403,11 +403,11 @@ jobs:
           autoreconf -fi
           # required (for nghttpx application): libc-ares-dev libev-dev zlib1g-dev
           # optional (for nghttpx application): libbrotli-dev
-          export PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig
-          PKG_CONFIG_PATH+=:/home/runner/nghttp3/build/lib/pkgconfig
-          PKG_CONFIG_PATH+=:/home/runner/ngtcp2/build/lib/pkgconfig
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-app --enable-http3 \
-            LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib \
+          export PKG_CONFIG_PATH=/home/runner/pkg/openssl/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/pkg/nghttp3/lib/pkgconfig
+          PKG_CONFIG_PATH+=:/home/runner/pkg/ngtcp2/lib/pkgconfig
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/nghttp2 --enable-app --enable-http3 \
+            LDFLAGS=-Wl,-rpath,/home/runner/pkg/openssl/lib \
             --with-libbrotlienc --with-libbrotlidec
           make install
 
@@ -419,7 +419,7 @@ jobs:
             --location --proto-redir =https "https://github.com/h2o/h2o/archive/${H2O_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${H2O_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
           cd "h2o-${H2O_VERSION}"
-          cmake -B . -G Ninja -DWITHOUT_LIBS=ON -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build
+          cmake -B . -G Ninja -DWITHOUT_LIBS=ON -DOPENSSL_ROOT_DIR=/home/runner/pkg/openssl-prev -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/h2o
           cmake --build .
           cmake --install .
 
@@ -437,106 +437,106 @@ jobs:
         build:
           - name: 'awslc'
             install_steps: skipall
-            LDFLAGS: -Wl,-rpath,/home/runner/awslc/build/lib
-            PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/awslc/lib
+            PKG_CONFIG_PATH: /home/runner/pkg/awslc/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             # Intentionally using bare '--with-ngtcp2' + 'PKG_CONFIG_PATH' to test this way of configuration, in addition to '--with-ngtcp2=<path>' in other jobs.
             configure: >-
-              --with-openssl=/home/runner/awslc/build --with-ngtcp2 --enable-ssls-export
+              --with-openssl=/home/runner/pkg/awslc --with-ngtcp2 --enable-ssls-export
 
           - name: 'awslc'
-            PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/pkg/awslc/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
+              -DOPENSSL_ROOT_DIR=/home/runner/pkg/awslc -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
               -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'boringssl'
             install_steps: skipall
-            LDFLAGS: -Wl,-rpath,/home/runner/boringssl/build/lib
-            PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/boringssl/lib
+            PKG_CONFIG_PATH: /home/runner/pkg/boringssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             configure: >-
-              --with-openssl=/home/runner/boringssl/build --with-ngtcp2=/home/runner/ngtcp2-boringssl/build --enable-ssls-export
+              --with-openssl=/home/runner/pkg/boringssl --with-ngtcp2=/home/runner/pkg/ngtcp2-boringssl --enable-ssls-export
 
           - name: 'boringssl'
             PKG_CONFIG_PATH: "\
-              /home/runner/boringssl/build/lib/pkgconfig:\
-              /home/runner/nghttp3/build/lib/pkgconfig:\
-              /home/runner/ngtcp2-boringssl/build/lib/pkgconfig:\
-              /home/runner/nghttp2/build/lib/pkgconfig"
+              /home/runner/pkg/boringssl/lib/pkgconfig:\
+              /home/runner/pkg/nghttp3/lib/pkgconfig:\
+              /home/runner/pkg/ngtcp2-boringssl/lib/pkgconfig:\
+              /home/runner/pkg/nghttp2/lib/pkgconfig"
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
+              -DOPENSSL_ROOT_DIR=/home/runner/pkg/boringssl -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
               -DCMAKE_UNITY_BUILD=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'gnutls'
             install_packages: libp11-kit-dev libssh-dev
             install_steps: skipall
-            LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib -Wl,-rpath,/home/runner/nettle/build/lib -Wl,-rpath,/home/runner/ngtcp2/build/lib
-            PKG_CONFIG_PATH: /home/runner/nettle/build/lib/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/gnutls/lib -Wl,-rpath,/home/runner/pkg/nettle/lib -Wl,-rpath,/home/runner/pkg/ngtcp2/lib
+            PKG_CONFIG_PATH: /home/runner/pkg/nettle/lib/pkgconfig:/home/runner/pkg/gnutls/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             configure: >-
-              --with-gnutls=/home/runner/gnutls/build --with-ngtcp2=/home/runner/ngtcp2/build --with-libssh --enable-ssls-export --enable-httpsig --disable-ntlm
+              --with-gnutls=/home/runner/pkg/gnutls --with-ngtcp2=/home/runner/pkg/ngtcp2 --with-libssh --enable-ssls-export --enable-httpsig --disable-ntlm
 
           - name: 'gnutls'
             tflags: '--min=1900'
             install_packages: libp11-kit-dev libssh-dev
-            LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/gnutls/lib
             PKG_CONFIG_PATH: "\
-              /home/runner/nettle/build/lib/pkgconfig:\
-              /home/runner/gnutls/build/lib/pkgconfig:\
-              /home/runner/nghttp3/build/lib/pkgconfig:\
-              /home/runner/ngtcp2/build/lib/pkgconfig:\
-              /home/runner/nghttp2/build/lib/pkgconfig"
+              /home/runner/pkg/nettle/lib/pkgconfig:\
+              /home/runner/pkg/gnutls/lib/pkgconfig:\
+              /home/runner/pkg/nghttp3/lib/pkgconfig:\
+              /home/runner/pkg/ngtcp2/lib/pkgconfig:\
+              /home/runner/pkg/nghttp2/lib/pkgconfig"
             generate: >-
               -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH=ON
               -DCMAKE_UNITY_BUILD=ON -DCURL_DISABLE_HTTPSIG=OFF -DCURL_ENABLE_NTLM=OFF
 
           - name: 'libressl'
             install_steps: skipall
-            LDFLAGS: -Wl,-rpath,/home/runner/libressl/build/lib
-            PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/libressl/lib
+            PKG_CONFIG_PATH: /home/runner/pkg/libressl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             # Intentionally using '--with-ngtcp2=<path>' to test this way of configuration, in addition to bare '--with-ngtcp2' + 'PKG_CONFIG_PATH' in other jobs.
             configure: >-
-              --with-openssl=/home/runner/libressl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ssls-export
+              --with-openssl=/home/runner/pkg/libressl --with-ngtcp2=/home/runner/pkg/ngtcp2 --enable-ssls-export
               --enable-unity
 
           - name: 'libressl'
-            PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/pkg/libressl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON -DCURL_DISABLE_HTTPSIG=OFF
+              -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DUSE_NGTCP2=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl'
             tflags: '--min=1850'
-            LDFLAGS: -Wl,-rpath,/home/runner/openssl/build/lib
-            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/openssl/lib
+            PKG_CONFIG_PATH: /home/runner/pkg/openssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             configure: >-
-              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export --enable-proxy-http3 --enable-httpsig
+              --with-openssl=/home/runner/pkg/openssl --with-ngtcp2=/home/runner/pkg/ngtcp2 --enable-ech --enable-ssls-export --enable-proxy-http3 --enable-httpsig
 
           - name: 'openssl'
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/pkg/openssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_NGTCP2=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/pkg/openssl -DUSE_NGTCP2=ON
               -DCURL_DISABLE_LDAP=ON
               -DUSE_ECH=ON -DUSE_PROXY_HTTP3=ON
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'openssl-prev'
             install_steps: skipall
-            LDFLAGS: -Wl,-rpath,/home/runner/openssl-prev/build/lib
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/openssl-prev/lib
             PKG_CONFIG_PATH: "\
-              /home/runner/openssl-prev/build/lib/pkgconfig:\
-              /home/runner/nghttp3/build/lib/pkgconfig:\
-              /home/runner/nghttp2/build/lib/pkgconfig"
+              /home/runner/pkg/openssl-prev/lib/pkgconfig:\
+              /home/runner/pkg/nghttp3/lib/pkgconfig:\
+              /home/runner/pkg/nghttp2/lib/pkgconfig"
             configure: >-
-              --with-openssl=/home/runner/openssl-prev/build --with-ngtcp2=/home/runner/ngtcp2-openssl-prev/build --enable-ssls-export
+              --with-openssl=/home/runner/pkg/openssl-prev --with-ngtcp2=/home/runner/pkg/ngtcp2-openssl-prev --enable-ssls-export
 
           - name: 'openssl-prev'
             tflags: '--min=2000'
             PKG_CONFIG_PATH: "\
-              /home/runner/openssl-prev/build/lib/pkgconfig:\
-              /home/runner/nghttp3/build/lib/pkgconfig:\
-              /home/runner/nghttp2/build/lib/pkgconfig:\
-              /home/runner/ngtcp2-openssl-prev/build/lib/pkgconfig"
+              /home/runner/pkg/openssl-prev/lib/pkgconfig:\
+              /home/runner/pkg/nghttp3/lib/pkgconfig:\
+              /home/runner/pkg/nghttp2/lib/pkgconfig:\
+              /home/runner/pkg/ngtcp2-openssl-prev/lib/pkgconfig"
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DUSE_NGTCP2=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/pkg/openssl-prev -DUSE_NGTCP2=ON
               -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'quiche'
@@ -545,7 +545,7 @@ jobs:
             CC: clang
             CFLAGS: -fPIC
             LDFLAGS: -Wl,-rpath,/home/runner/quiche/target/release -lstdc++
-            PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/pkg/nghttp2/lib/pkgconfig
             configure: >-
               --with-openssl=/home/runner/quiche/boringssl
               --with-quiche=/home/runner/quiche/target/release
@@ -555,7 +555,7 @@ jobs:
           - name: 'quiche'
             install_packages: clang
             CC: clang
-            PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig:/home/runner/quiche/target/release
+            PKG_CONFIG_PATH: /home/runner/pkg/nghttp2/lib/pkgconfig:/home/runner/quiche/target/release
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quiche/boringssl -DOPENSSL_USE_STATIC_LIBS=ON
               -DUSE_QUICHE=ON
@@ -564,16 +564,16 @@ jobs:
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
             install_steps: skipall
-            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl/build/lib
-            PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/wolfssl/lib
+            PKG_CONFIG_PATH: /home/runner/pkg/wolfssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             configure: >-
-              --with-wolfssl=/home/runner/wolfssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --with-libssh2 --enable-ssls-export
+              --with-wolfssl=/home/runner/pkg/wolfssl --with-ngtcp2=/home/runner/pkg/ngtcp2 --enable-ech --with-libssh2 --enable-ssls-export
               --enable-unity
 
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
             tflags: '--min=1900'
-            PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/pkg/wolfssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DUSE_ECH=ON -DCURL_DISABLE_HTTPSIG=OFF
@@ -598,7 +598,7 @@ jobs:
         env:
           cache-name: cache-awslc
         with:
-          path: ~/awslc/build
+          path: ~/pkg/awslc
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
           fail-on-cache-miss: true
 
@@ -609,7 +609,7 @@ jobs:
         env:
           cache-name: cache-boringssl
         with:
-          path: ~/boringssl/build
+          path: ~/pkg/boringssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
           fail-on-cache-miss: true
 
@@ -620,7 +620,7 @@ jobs:
         env:
           cache-name: cache-nettle
         with:
-          path: ~/nettle/build
+          path: ~/pkg/nettle
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
           fail-on-cache-miss: true
 
@@ -631,7 +631,7 @@ jobs:
         env:
           cache-name: cache-gnutls
         with:
-          path: ~/gnutls/build
+          path: ~/pkg/gnutls
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
           fail-on-cache-miss: true
 
@@ -642,7 +642,7 @@ jobs:
         env:
           cache-name: cache-libressl
         with:
-          path: ~/libressl/build
+          path: ~/pkg/libressl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
           fail-on-cache-miss: true
 
@@ -652,7 +652,7 @@ jobs:
         env:
           cache-name: cache-openssl-http3-no-deprecated
         with:
-          path: ~/openssl/build
+          path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
           fail-on-cache-miss: true
 
@@ -663,7 +663,7 @@ jobs:
         env:
           cache-name: cache-openssl-prev-http3
         with:
-          path: ~/openssl-prev/build
+          path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
           fail-on-cache-miss: true
 
@@ -674,7 +674,7 @@ jobs:
         env:
           cache-name: cache-wolfssl
         with:
-          path: ~/wolfssl/build
+          path: ~/pkg/wolfssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
@@ -684,7 +684,7 @@ jobs:
         env:
           cache-name: cache-nghttp3
         with:
-          path: ~/nghttp3/build
+          path: ~/pkg/nghttp3
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
@@ -694,7 +694,7 @@ jobs:
         env:
           cache-name: cache-ngtcp2
         with:
-          path: ~/ngtcp2/build
+          path: ~/pkg/ngtcp2
           key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
             ${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}"
           fail-on-cache-miss: true
@@ -706,7 +706,7 @@ jobs:
         env:
           cache-name: cache-ngtcp2-boringssl
         with:
-          path: ~/ngtcp2-boringssl/build
+          path: ~/pkg/ngtcp2-boringssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
           fail-on-cache-miss: true
 
@@ -717,7 +717,7 @@ jobs:
         env:
           cache-name: cache-ngtcp2-openssl-prev
         with:
-          path: ~/ngtcp2-openssl-prev/build
+          path: ~/pkg/ngtcp2-openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
           fail-on-cache-miss: true
 
@@ -727,7 +727,7 @@ jobs:
         env:
           cache-name: cache-nghttp2
         with:
-          path: ~/nghttp2/build
+          path: ~/pkg/nghttp2
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
@@ -737,7 +737,7 @@ jobs:
         env:
           cache-name: cache-h2o
         with:
-          path: ~/h2o/build
+          path: ~/pkg/h2o
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
           fail-on-cache-miss: true
 
@@ -799,17 +799,17 @@ jobs:
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-unknown-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
               -DCURL_USE_LIBUV=ON -DCURL_ENABLE_NTLM=ON \
-              -DTEST_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
-              -DH2O=/home/runner/h2o/build/bin/h2o \
-              -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
+              -DTEST_NGHTTPX=/home/runner/pkg/nghttp2/bin/nghttpx \
+              -DH2O=/home/runner/pkg/h2o/bin/h2o \
+              -DHTTPD_NGHTTPX=/home/runner/pkg/nghttp2/bin/nghttpx \
               ${MATRIX_GENERATE} ${options}
           else
             [[ "${MATRIX_NAME}" = *'boringssl'* ]] && export CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${BORINGSSL_VERSION}\\\""
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror --enable-debug --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libuv --enable-ntlm \
-              --with-test-h2o=/home/runner/h2o/build/bin/h2o \
-              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx \
+              --with-test-h2o=/home/runner/pkg/h2o/bin/h2o \
+              --with-test-nghttpx=/home/runner/pkg/nghttp2/bin/nghttpx \
               ${MATRIX_CONFIGURE}
           fi
 
