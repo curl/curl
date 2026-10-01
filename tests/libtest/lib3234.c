@@ -50,7 +50,10 @@ static bool t3234_copy_ca(const char *source, const char *target)
     curlx_fclose(src);
     return FALSE;
   }
-  while((n = fread(buf, 1, sizeof(buf), src))) {
+  while(TRUE) {
+    n = fread(buf, 1, sizeof(buf), src);
+    if(!n)
+      break;
     if(fwrite(buf, 1, n, dst) != n) {
       ok = FALSE;
       break;
