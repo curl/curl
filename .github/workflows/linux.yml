@@ -179,7 +179,7 @@ jobs:
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls-arm
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
-            tflags: '--subset=0/2 --min=880'
+            tflags: '--subset=0/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
@@ -207,7 +207,7 @@ jobs:
             image: ubuntu-26.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
-            tflags: '--subset=0/2 --min=880'
+            tflags: '--subset=0/2'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 

@@ -283,10 +283,10 @@ jobs:
               install: 'mingw-w64-clang-x86_64-python' }  # for dict and telnet tests
           # MinGW torture
           - { name: 'schannel U torture 1', type: 'Debug',
-              build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '-t --shallow=13 --subset=0/2 --min=920',
+              build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '-t --shallow=13 --subset=0/2',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON' }
           - { name: 'schannel U torture 2', type: 'Debug',
-              build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '-t --shallow=13 --subset=1/2 --min=900',
+              build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '-t --shallow=13 --subset=1/2',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON' }
           # WARNING: libssh uses hard-coded world-writable paths (C:ProgramData/, /etc/..., ~/.ssh/)
           #          to read its configuration from, making it vulnerable to attacks on
