@@ -274,12 +274,12 @@ jobs:
       - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         if: ${{ contains(matrix.image, 'windows') }}
         with:
-          msystem: mingw64
+          msystem: ucrt64
           release: false
           update: false
           cache: false
           path-type: inherit
-          install: perl mingw-w64-x86_64-zlib mingw-w64-x86_64-zstd mingw-w64-x86_64-libpsl mingw-w64-x86_64-libssh2 mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-openssl
+          install: perl mingw-w64-ucrt-x86_64-zlib mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-libpsl mingw-w64-ucrt-x86_64-libssh2 mingw-w64-ucrt-x86_64-nghttp2 mingw-w64-ucrt-x86_64-openssl
 
       - name: 'install prereqs'
         if: ${{ !contains(matrix.image, 'windows') }}
@@ -330,7 +330,7 @@ jobs:
         if: ${{ contains(matrix.image, 'windows') }}
         run: |
           export TEST_CMAKE_FLAGS_PROVIDER='-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON -DCURL_ZSTD=OFF'
-          TEST_CMAKE_FLAGS_PROVIDER+=' -DNGHTTP2_INCLUDE_DIR=C:/msys64/mingw64/include -DNGHTTP2_LIBRARY=C:/msys64/mingw64/lib/libnghttp2.dll.a'
+          TEST_CMAKE_FLAGS_PROVIDER+=' -DNGHTTP2_INCLUDE_DIR=C:/msys64/ucrt64/include -DNGHTTP2_LIBRARY=C:/msys64/ucrt64/lib/libnghttp2.dll.a'
           export TEST_CMAKE_FLAGS_CONSUMER="${TEST_CMAKE_FLAGS_PROVIDER}"
           ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
@@ -356,7 +356,7 @@ jobs:
           fi
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
-            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
+            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/ucrt64'
           fi
           ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
@@ -369,7 +369,7 @@ jobs:
           fi
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
-            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
+            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/ucrt64'
           fi
           ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
