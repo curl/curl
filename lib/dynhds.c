@@ -33,8 +33,9 @@ static struct dynhds_entry *entry_new(const char *name, size_t namelen,
   struct dynhds_entry *e;
   char *p;
 
-  DEBUGASSERT(name);
-  DEBUGASSERT(value);
+  /* namelen + valuelen <= SIZE_MAX has already been checked by caller */
+  if((SIZE_MAX - namelen - valuelen) < (sizeof(*e) + 2))
+    return NULL;
   e = curlx_calloc(1, sizeof(*e) + namelen + valuelen + 2);
   if(!e)
     return NULL;
@@ -135,8 +136,15 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
   struct dynhds_entry *entry = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(dynhds);
+  if(!dynhds || !name || !namelen || !value) {
+    DEBUGASSERT(0);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
   if(dynhds->max_entries && dynhds->hds_len >= dynhds->max_entries)
+    return CURLE_OUT_OF_MEMORY;
+  if((SIZE_MAX - namelen) < valuelen)
+    return CURLE_OUT_OF_MEMORY;
+  if((SIZE_MAX - namelen - valuelen) < dynhds->strs_len)
     return CURLE_OUT_OF_MEMORY;
   if(dynhds->strs_len + namelen + valuelen > dynhds->max_strs_size)
     return CURLE_OUT_OF_MEMORY;
@@ -347,10 +355,15 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
     return result;
 
   for(i = 0; i < dynhds->hds_len; ++i) {
-    result = curlx_dyn_addf(dbuf, "%.*s: %.*s\r\n",
-                            (int)dynhds->hds[i]->namelen, dynhds->hds[i]->name,
-                            (int)dynhds->hds[i]->valuelen,
-                            dynhds->hds[i]->value);
+    result = curlx_dyn_addn(dbuf, dynhds->hds[i]->name,
+                            dynhds->hds[i]->namelen);
+    if(!result)
+      result = curlx_dyn_addn(dbuf, STRCONST(": "));
+    if(!result)
+      result = curlx_dyn_addn(dbuf, dynhds->hds[i]->value,
+                              dynhds->hds[i]->valuelen);
+    if(!result)
+      result = curlx_dyn_addn(dbuf, STRCONST("\r\n"));
     if(result)
       break;
   }
