@@ -524,7 +524,7 @@ jobs:
             PKG_CONFIG_PATH: "\
               /home/runner/openssl-prev/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
-              /home/runner/nghttp2-openssl-prev/build/lib/pkgconfig"
+              /home/runner/nghttp2/build/lib/pkgconfig"
             configure: >-
               --with-openssl=/home/runner/openssl-prev/build --with-ngtcp2=/home/runner/ngtcp2-openssl-prev/build --enable-ssls-export
 
@@ -533,8 +533,8 @@ jobs:
             PKG_CONFIG_PATH: "\
               /home/runner/openssl-prev/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
-              /home/runner/ngtcp2-openssl-prev/build/lib/pkgconfig:\
-              /home/runner/nghttp2/build/lib/pkgconfig"
+              /home/runner/nghttp2/build/lib/pkgconfig:\
+              /home/runner/ngtcp2-openssl-prev/build/lib/pkgconfig"
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DUSE_NGTCP2=ON
               -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_HTTPSIG=OFF
