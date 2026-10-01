@@ -46,7 +46,9 @@ The callback gets its arguments like this:
 *parent* is the handle of the stream on which this push arrives. The new
 handle has the following options duplicated from the parent:
 CURLOPT_WRITEFUNCTION(3), CURLOPT_WRITEDATA(3), CURLOPT_HEADERFUNCTION(3),
-CURLOPT_HEADERDATA(3), CURLOPT_DEBUGFUNCTION(3) and CURLOPT_DEBUGDATA(3).
+CURLOPT_HEADERDATA(3), CURLOPT_DEBUGFUNCTION(3), CURLOPT_DEBUGDATA(3)
+CURLOPT_PROGRESSFUNCTION(3), CURLOPT_XFERINFOFUNCTION(3) and
+CURLOPT_XFERINFODATA(3).
 
 It is then up to the application to alter/set any options if desired.
 

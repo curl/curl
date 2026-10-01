@@ -714,6 +714,11 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
     second->set.writeheader = data->set.writeheader;
     second->set.fdebug = data->set.fdebug;
     second->set.debugdata = data->set.debugdata;
+    second->set.fxferinfo = data->set.fxferinfo;
+    second->set.fprogress = data->set.fprogress;
+    second->set.progress_client = data->set.progress_client;
+    second->progress.hide = data->progress.hide;
+    second->progress.callback = data->progress.callback;
   }
   return second;
 }
