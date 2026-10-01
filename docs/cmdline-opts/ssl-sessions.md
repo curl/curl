@@ -43,7 +43,7 @@ Configuration parameters identified by a file path are only matched to the
 path, not the file's content. Updates to CA, CRL or key file contents will
 not invalidate previous sessions.
 
-Most TLS sessions handed out by servers have a very limited lifetime, which
+Most TLS sessions handed out by servers have a short lifetime, which
 limits the risk. Also, curl will not persist TLS session in this file
 that are tied to authentication, e.g. a client certificate. If that all
 is not acceptable, ssl session files should be cleared when older than

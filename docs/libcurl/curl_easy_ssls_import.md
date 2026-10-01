@@ -51,7 +51,7 @@ CA, CRL or key files, e.g. discarding previous sessions. Otherwise,
 imported sessions may establish trusted connections to servers that would fail
 to verify otherwise.
 
-Most TLS sessions handed out by servers have a very limited lifetime. If
+Most TLS sessions handed out by servers have a short lifetime. If
 continued use of these sessions is acceptable can only be decided by
 the application. Also, TLS session that are tied to client authentication,
 e.g. a client certificate, are never exported by libcurl.
