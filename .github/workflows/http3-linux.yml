@@ -768,10 +768,8 @@ jobs:
           rm -rf quiche/target/release/deps
           du -t 4MB quiche
 
-          # include dir
-          # /home/runner/quiche/boringssl/include
-          # lib dir
-          # /home/runner/quiche/boringssl/lib
+          # include dir: /home/runner/quiche/boringssl/include
+          # lib dir:     /home/runner/quiche/boringssl/lib
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
