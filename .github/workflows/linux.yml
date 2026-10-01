@@ -478,6 +478,7 @@ jobs:
             container: alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 # 3.24.2
 
           - name: 'Alpine MUSL https-rr c-ares'
+            image: ubuntu-26.04
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --disable-threaded-resolver
             container: alpine:3.21@sha256:af59f3a93641cb9278a6086ea68036e09183b66d8ac7ec9347c30c56f1c80a13 # 3.21.8
 
