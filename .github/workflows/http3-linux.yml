@@ -475,6 +475,7 @@ jobs:
               --with-gnutls=/home/runner/gnutls/build --with-ngtcp2=/home/runner/ngtcp2/build --with-libssh --enable-ssls-export --enable-httpsig --disable-ntlm
 
           - name: 'gnutls'
+            tflags: '--min=1900'
             install_packages: libp11-kit-dev libssh-dev
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
             PKG_CONFIG_PATH: "\
