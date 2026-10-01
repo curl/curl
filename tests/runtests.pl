@@ -2739,6 +2739,8 @@ if(!$mintotalany && $ENV{"CURL_TEST_MIN"}) {
     $mintotal = $ENV{"CURL_TEST_MIN"};
     if($useshares) {
         $mintotal /= $useshares;
+        # add safety margin to avoid potential underruns
+        $mintotal = $mintotal - 30 < 1 ? 1 : $mintotal - 30;
     }
 }
 
