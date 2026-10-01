@@ -460,10 +460,10 @@ jobs:
             tflags: '-n --test-duphandle'
 
           - name: 'IntelC openssl'
-            install_packages: libssl-dev libssh2-1-dev libnghttp2-dev
+            install_packages: libssl-dev libssh2-1-dev libnghttp2-dev libidn2-dev libldap-dev libkrb5-dev
             install_steps: intelc
             CC: icc
-            configure: --enable-debug --with-openssl --with-libssh2 --enable-httpsig
+            configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi --enable-httpsig
 
           - name: 'Slackware GnuTLS gssapi gcc'
             # Flags used to build the curl Slackware package:
