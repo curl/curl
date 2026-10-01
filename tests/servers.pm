@@ -175,11 +175,11 @@ sub checkcmd {
 # return the port number
 #
 sub getfreeport {
-    my ($ipnum) = @_;
+    my ($ipnum, $reuse) = @_;
     my $server = IO::Socket->new(LocalPort => 0,
                                  Domain => $ipnum == 6 ? AF_INET6 : AF_INET,
                                  Type      => SOCK_STREAM,
-                                 Reuse     => 1,
+                                 Reuse     => $reuse,
                                  Listen    => 10 )
         or die "Could not create tcp server socket: $@\n";
 
@@ -1044,8 +1044,8 @@ sub runhttp2server {
     $flags .= "--connect $HOSTIP:" . protoport("http") . " ";
     $flags .= $verbose_flag if($debugprotocol);
 
-    my $port = getfreeport($ipvnum);
-    my $port2 = getfreeport($ipvnum);
+    my $port = getfreeport($ipvnum, 0);
+    my $port2 = getfreeport($ipvnum, 0);
     my $aflags = "--port $port --port2 $port2 $flags";
     my $cmd = "$exe $aflags";
     my ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -1106,7 +1106,7 @@ sub runhttp3server {
     $flags .= "--cert \"$cert\" " if($cert);
     $flags .= $verbose_flag if($debugprotocol);
 
-    my $port = getfreeport($ipvnum);
+    my $port = getfreeport($ipvnum, 0);
     my $aflags = "--port $port $flags";
     my $cmd = "$exe $aflags";
     my ($http3pid, $pid3) = startnew($cmd, $pidfile, 15, 0);
@@ -1190,7 +1190,7 @@ sub runhttpsserver {
         $flags .= "--connect " . protoport("httpproxy");
     }
 
-    my $port = getfreeport($ipvnum);
+    my $port = getfreeport($ipvnum, 1);
     my $options = "$flags --accept $port";
     my $cmd = "$perl " . shell_quote("$srcdir/secureserver.pl") . " " . $options;
     my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -1333,7 +1333,7 @@ sub runsecureserver {
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
     $flags .= "--connect $clearport";
 
-    my $port = getfreeport($ipvnum);
+    my $port = getfreeport($ipvnum, 1);
     my $options = "$flags --accept $port";
 
     my $cmd = "$perl " . shell_quote("$srcdir/secureserver.pl") . " " . $options;
@@ -1636,7 +1636,7 @@ sub runsshserver {
     }
 
     my @tports;
-    my $port = getfreeport($ipvnum);
+    my $port = getfreeport($ipvnum, 1);
 
     push @tports, $port;
 
@@ -1890,7 +1890,7 @@ sub rundictserver {
     $flags .= "--srcdir \"$srcdir\" ";
     $flags .= "--host $HOSTIP";
 
-    my $port = getfreeport($ipvnum);
+    my $port = getfreeport($ipvnum, 1);
     my $aflags = "--port $port $flags";
     my $cmd = "$srcdir/dictserver.py $aflags";
     my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -1950,7 +1950,7 @@ sub runnegtelnetserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--srcdir \"$srcdir\"";
 
-    my $port = getfreeport($ipvnum);
+    my $port = getfreeport($ipvnum, 1);
     my $aflags = "--port $port $flags";
     my $cmd = "$srcdir/negtelnetserver.py $aflags";
     my ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
