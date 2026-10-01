@@ -757,7 +757,7 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
           cd quiche
-          cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
+          cargo build --package quiche --release --features ffi,pkg-config-meta,qlog -vv
           ln -s libquiche.so target/release/libquiche.so.0
           cd ..
           mkdir -p quiche/boringssl/lib
