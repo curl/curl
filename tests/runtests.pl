@@ -2739,6 +2739,7 @@ if(!$mintotalany && $ENV{"CURL_TEST_MIN"}) {
     $mintotal = $ENV{"CURL_TEST_MIN"};
     if($useshares) {
         $mintotal /= $useshares;
+        $mintotal += 10;  # add safety buffer
     }
 }
 
