@@ -35,7 +35,7 @@ cache-mode: write
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 1790
+  CURL_TEST_MIN: 1800
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.8.0
@@ -460,10 +460,10 @@ jobs:
             tflags: '-n --test-duphandle'
 
           - name: 'IntelC openssl'
-            install_packages: libssl-dev
+            install_packages: libssl-dev libssh2-1-dev libnghttp2-dev libidn2-dev libldap-dev libkrb5-dev
             install_steps: intelc
             CC: icc
-            configure: --enable-debug --with-openssl
+            configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi --enable-httpsig
 
           - name: 'Slackware GnuTLS gssapi gcc'
             # Flags used to build the curl Slackware package:
