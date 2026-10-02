@@ -429,7 +429,7 @@ jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     needs: build-cache
-    runs-on: ubuntu-26.04
+    runs-on: ${{ matrix.build.image || 'ubuntu-26.04' }}
     timeout-minutes: 10
     env:
       CURL_TRACE_PKG_CONFIG: '1'
