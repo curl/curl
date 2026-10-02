@@ -141,7 +141,7 @@ jobs:
 
   check-windows:
     name: 'Windows'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-26.04-arm
     env:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
