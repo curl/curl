@@ -169,7 +169,7 @@ jobs:
 
   verify-out-of-tree-cmake:
     name: 'CM out-of-tree !perl'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
@@ -191,7 +191,7 @@ jobs:
 
   verify-in-tree-cmake:
     name: 'CM in-tree !perl'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
@@ -230,7 +230,7 @@ jobs:
 
   reproducible-releases:
     name: 'reproducible releases'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

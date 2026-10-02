@@ -38,6 +38,7 @@ if(!$cmake) {
 my %remove = (
     '#define CURL_EXTERN_SYMBOL' => 1,
     '#define CURL_OS "Linux"' => 1,
+    '#define CURL_OS "aarch64-unknown-linux-gnu"' => 1,
     '#define CURL_OS "x86_64-pc-linux-gnu"' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 int' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 size_t' => 1,
