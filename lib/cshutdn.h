@@ -24,6 +24,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "ptrarray.h"
+
 struct connectdata;
 struct Curl_easy;
 struct curl_pollfds;
@@ -75,7 +77,7 @@ void Curl_cshutdn_try_once(struct Curl_easy *admin,
  * the connections to be shut down. It registers timers and
  * sockets to monitor via the multi handle. */
 struct cshutdn {
-  struct Curl_llist list;    /* connections being shut down */
+  struct ptrarray conns;    /* connections being shut down */
 };
 
 /* Init as part of the given multi handle. */

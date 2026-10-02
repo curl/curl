@@ -283,7 +283,6 @@ struct connectdata {
    * the connection is cleaned up (see Curl_hash_add2()).*/
   struct Curl_hash meta_hash;
 
-  struct Curl_llist_node cshutdn_node; /* cshutdn list */
   char *destination; /* hostname+port, used in conncache */
 
   struct curltime created; /* creation time */
