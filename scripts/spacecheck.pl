@@ -50,8 +50,8 @@ my @double_empty_lines = (
 );
 
 my @longline = (
-    '\.github/workflows/windows\.yml$',
-    '^renovate\.json$',
+    '^\.github/renovate\.json$',
+    '^\.github/workflows/windows\.yml$',
     '^docs/DISTROS\.md$',
     '^projects/Windows/tmpl/.+\.vcxproj$',
     '^tests/data/test',
