@@ -41,6 +41,7 @@ static CURLcode test_unit1700(const char *arg)
 
   /* grab the data */
   data = (struct Curl_easy *)easy;
+  (void)data; /* used in the conditional block below, add the void for the compiler */
 
   /* Only include this test if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
@@ -178,6 +179,8 @@ static CURLcode test_unit1700(const char *arg)
 
   curlx_free((char *)data->state.range);
 
+#else
+  fail(arg); /* avoid unused warning */
 #endif /* !CURL_DISABLE_FTP || !CURL_DISABLE_FILE */
 
   /* clean up after we're done */
@@ -186,3 +189,4 @@ static CURLcode test_unit1700(const char *arg)
 
   UNITTEST_END_SIMPLE
 }
+
