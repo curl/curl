@@ -48,7 +48,7 @@ static CURLcode test_unit1700(const char *arg)
   /* TC 1: Make sure Curl_range doesn't do anything unless the range
    * request data is properly initialized.
    *
-   * The use_range and range variables are ANDed together within the
+   * The use_range and range variables are ANDead together within the
    * Curl_range function for this check, so for 3 out of 4 scenarios the
    * initialization could be incorrect. */
 
