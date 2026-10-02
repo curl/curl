@@ -38,7 +38,7 @@ still check if a specific hostname matches one of the values.
 This feature requires that the underlying libcurl was built with the
 experimental SSL session import/export feature (SSLS-EXPORT) enabled.
 
-The sessions in he file identify origin and used TLS configurations.
+The sessions in the file identify origin and used TLS configurations.
 Configuration parameters identified by a file path are only matched to the
 path, not the file's content. Updates to CA, CRL or key file contents do
 not invalidate previously saved sessions.
