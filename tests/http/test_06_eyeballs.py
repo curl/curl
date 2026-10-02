@@ -70,6 +70,26 @@ class TestEyeballs:
         r.check_response(count=1, http_status=200)
         assert r.stats[0]['http_version'] == '1.1'
 
+    # download using HTTP/3 on a server that silently drops UDP: fallback on
+    # h2 at the soft timeout, since QUIC never sees any data
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
+    def test_06_05_h3_silent_fallback_h2(self, env: Env, httpd, nghttpx):
+        curl = CurlClient(env=env)
+        urln = f'https://{env.domain1}:{env.https_only_tcp_port}/data.json'
+        # take the UDP port without reading it, so that packets are not refused
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.bind(('127.0.0.1', env.https_only_tcp_port))
+            r = curl.http_download(urls=[urln], extra_args=[
+                '--http3', '--happy-eyeballs-timeout-ms', '200',
+                '--trace-config', 'https-connect'
+            ])
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['http_version'] == '2'
+        soft_timeouts = [line for line in r.trace_lines
+                         if re.match(r'.*h3 has not seen any data after 100ms', line)]
+        assert len(soft_timeouts) == 1, f'{r.dump_logs()}'
+
     # download using HTTP/3 on a server that answers UDP with junk: QUIC has
     # seen data, fallback on h2 at the hard timeout
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
