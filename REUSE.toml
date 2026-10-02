@@ -14,6 +14,7 @@ SPDX-PackageDownloadLocation = "https://curl.se/"
 [[annotations]]
 path = [
   ".github/pull_request_template.md",
+  ".github/renovate.json",
   "docs/INSTALL",
   "docs/libcurl/symbols-in-versions",
   "docs/options-in-versions",
@@ -29,7 +30,6 @@ path = [
   "projects/Windows/**",
   "README",
   "RELEASE-NOTES",
-  "renovate.json",
   "tests/certs/**",
   "tests/data/data**",
   "tests/data/test**",

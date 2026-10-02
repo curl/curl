@@ -15,7 +15,6 @@ gitonly=".git*
 ^appveyor.*
 ^GIT-INFO.md
 ^README.md
-^renovate.json
 ^REUSE.toml
 ^SECURITY.md
 ^LICENSES/*
