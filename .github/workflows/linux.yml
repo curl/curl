@@ -667,7 +667,7 @@ jobs:
           cache-name: cache-mbedtls-prev
         with:
           path: ~/mbedtls-prev
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_PREV_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_PREV_VERSION }}-${{ runner.arch }}
 
       - name: 'build mbedtls (prev)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && !steps.cache-mbedtls-prev.outputs.cache-hit }}
@@ -691,7 +691,7 @@ jobs:
           cache-name: cache-openldap-static
         with:
           path: ~/openldap-static
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENLDAP_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENLDAP_VERSION }}-${{ runner.arch }}
 
       - name: 'build openldap (static)'
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') && !steps.cache-openldap-static.outputs.cache-hit }}
@@ -712,7 +712,7 @@ jobs:
           cache-name: cache-openssl-tsan
         with:
           path: ~/openssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
 
       - name: 'build openssl (thread sanitizer)'
         if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') && !steps.cache-openssl-tsan.outputs.cache-hit }}
@@ -731,7 +731,7 @@ jobs:
           cache-name: cache-awslc
         with:
           path: ~/awslc
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}-${{ runner.arch }}
 
       - name: 'build awslc'
         if: ${{ contains(matrix.build.install_steps, 'awslc') && !steps.cache-awslc.outputs.cache-hit }}
@@ -752,7 +752,7 @@ jobs:
           cache-name: cache-boringssl
         with:
           path: ~/boringssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}-${{ runner.arch }}
 
       - name: 'build boringssl'
         if: ${{ contains(matrix.build.install_steps, 'boringssl') && !steps.cache-boringssl.outputs.cache-hit }}
