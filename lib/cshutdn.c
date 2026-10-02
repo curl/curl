@@ -277,24 +277,24 @@ static size_t cshutdn_destroy_oldest(struct cshutdn *cshutdn,
                                      const char *destination,
                                      size_t count)
 {
-  struct Curl_llist_node *e = Curl_llist_head(&cshutdn->list), *next;
   struct Curl_sigpipe_ctx sigpipe_ctx;
-  size_t n = 0;
+  size_t removed = 0;
+  uint32_t i = 0;
 
   sigpipe_init(&sigpipe_ctx);
-  while(e && (n < count)) {
-    struct connectdata *conn = Curl_node_elem(e);
-    next = Curl_node_next(e);
+  while((removed < count) && (i < CURL_PTRARRAY_COUNT(&cshutdn->conns))) {
+    struct connectdata *conn = CURL_PTRARRAY_GET(&cshutdn->conns, i);
     if(!destination || !strcmp(destination, conn->destination)) {
-      Curl_node_remove(e);
+      Curl_ptrarray_remove(&cshutdn->conns, i);
       sigpipe_apply(admin, &sigpipe_ctx);
       Curl_cshutdn_terminate(admin, conn, FALSE);
-      ++n;
+      ++removed;
     }
-    e = next;
+    else
+      ++i;
   }
   sigpipe_restore(&sigpipe_ctx);
-  return n;
+  return removed;
 }
 
 size_t Curl_cshutdn_close_oldest(struct cshutdn *cshutdn,
@@ -335,34 +335,32 @@ static void cshutdn_perform(struct cshutdn *cshutdn,
                             struct Curl_easy *admin,
                             struct Curl_sigpipe_ctx *sigpipe_ctx)
 {
-  struct Curl_llist_node *e = Curl_llist_head(&cshutdn->list);
-  struct Curl_llist_node *enext;
   struct connectdata *conn;
   timediff_t next_expire_ms = 0, ms;
+  uint32_t i = 0;
   bool done;
 
-  if(!e)
+  if(!CURL_PTRARRAY_COUNT(&cshutdn->conns))
     return;
 
-  CURL_TRC_M(admin, "[SHUTDOWN] perform on %zu connections",
-             Curl_llist_count(&cshutdn->list));
+  CURL_TRC_M(admin, "[SHUTDOWN] perform on %u connections",
+             CURL_PTRARRAY_COUNT(&cshutdn->conns));
   sigpipe_apply(admin, sigpipe_ctx);
-  while(e) {
-    enext = Curl_node_next(e);
-    conn = Curl_node_elem(e);
+  while(i < CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
+    conn = CURL_PTRARRAY_GET(&cshutdn->conns, i);
     Curl_cshutdn_try_once(admin, conn, &done);
     if(done) {
-      Curl_node_remove(e);
+      Curl_ptrarray_remove(&cshutdn->conns, i);
       Curl_cshutdn_terminate(admin, conn, FALSE);
     }
     else {
+      ++i;
       /* idata has one timer list, but maybe more than one connection.
        * Set EXPIRE_SHUTDOWN to the smallest time left for all. */
       ms = cshutdn_conn_timeleft(admin, conn);
       if(ms && (!next_expire_ms || (ms < next_expire_ms)))
         next_expire_ms = ms;
     }
-    e = enext;
   }
 
   if(next_expire_ms)
@@ -374,19 +372,18 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
                                   int timeout_ms)
 {
   struct curltime started = *Curl_pgrs_now(admin);
-  struct Curl_llist_node *e;
   struct Curl_sigpipe_ctx sigpipe_ctx;
 
   CURL_TRC_M(admin, "[SHUTDOWN] shutdown all");
   sigpipe_init(&sigpipe_ctx);
 
-  while(Curl_llist_head(&cshutdn->list)) {
+  while(CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
     timediff_t spent_ms;
     int remain_ms;
 
     cshutdn_perform(cshutdn, admin, &sigpipe_ctx);
 
-    if(!Curl_llist_head(&cshutdn->list)) {
+    if(!CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
       CURL_TRC_M(admin, "[SHUTDOWN] shutdown finished cleanly");
       break;
     }
@@ -407,21 +404,18 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
   }
 
   /* Terminate any remaining. */
-  e = Curl_llist_head(&cshutdn->list);
-  while(e) {
-    struct connectdata *conn = Curl_node_elem(e);
-    Curl_node_remove(e);
+  while(CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
+    struct connectdata *conn = Curl_ptrarray_remove(&cshutdn->conns, 0);
     Curl_cshutdn_terminate(admin, conn, FALSE);
-    e = Curl_llist_head(&cshutdn->list);
   }
-  DEBUGASSERT(!Curl_llist_count(&cshutdn->list));
+  DEBUGASSERT(!CURL_PTRARRAY_COUNT(&cshutdn->conns));
 
   sigpipe_restore(&sigpipe_ctx);
 }
 
 void Curl_cshutdn_init(struct cshutdn *cshutdn)
 {
-  Curl_llist_init(&cshutdn->list, NULL);
+  Curl_ptrarray_init(&cshutdn->conns);
 }
 
 void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
@@ -440,9 +434,9 @@ void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
       }
     }
 #endif
-    if(Curl_llist_count(&cshutdn->list)) {
-      CURL_TRC_M(admin, "[SHUTDOWN] destroy, %zu connections, timeout=%dms",
-                 Curl_llist_count(&cshutdn->list), timeout_ms);
+    if(CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
+      CURL_TRC_M(admin, "[SHUTDOWN] destroy, %u connections, timeout=%dms",
+                 CURL_PTRARRAY_COUNT(&cshutdn->conns), timeout_ms);
       cshutdn_terminate_all(cshutdn, admin, timeout_ms);
     }
   }
@@ -451,7 +445,7 @@ void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
 size_t Curl_cshutdn_count(struct cshutdn *cshutdn)
 {
   if(cshutdn) {
-    return Curl_llist_count(&cshutdn->list);
+    return CURL_PTRARRAY_COUNT(&cshutdn->conns);
   }
   return 0;
 }
@@ -461,12 +455,11 @@ size_t Curl_cshutdn_dest_count(struct cshutdn *cshutdn,
 {
   if(cshutdn) {
     size_t n = 0;
-    struct Curl_llist_node *e = Curl_llist_head(&cshutdn->list);
-    while(e) {
-      struct connectdata *conn = Curl_node_elem(e);
+    uint32_t i = 0;
+    for(i = 0; i < CURL_PTRARRAY_COUNT(&cshutdn->conns); ++i) {
+      struct connectdata *conn = CURL_PTRARRAY_GET(&cshutdn->conns, i);
       if(!strcmp(destination, conn->destination))
         ++n;
-      e = Curl_node_next(e);
     }
     return n;
   }
@@ -492,7 +485,7 @@ void Curl_cshutdn_add(struct cshutdn *cshutdn,
 
   /* Add the connection to our shutdown list for non-blocking shutdown
    * during multi processing. */
-  if(max_shutdowns <= Curl_llist_count(&cshutdn->list)) {
+  if(max_shutdowns <= CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
     CURL_TRC_M(admin, "[SHUTDOWN] discarding oldest shutdown connection "
                "due to shutdown limit of %zu", max_shutdowns);
     cshutdn_destroy_oldest(cshutdn, admin, NULL, 1);
@@ -505,10 +498,15 @@ void Curl_cshutdn_add(struct cshutdn *cshutdn,
     return;
   }
 
-  Curl_llist_append(&cshutdn->list, conn, &conn->cshutdn_node);
+  if(Curl_ptrarray_add(&cshutdn->conns, conn)) {
+    CURL_TRC_M(admin, "[SHUTDOWN] adding failed, discarding #%"
+               FMT_OFF_T, conn->connection_id);
+    Curl_cshutdn_terminate(admin, conn, FALSE);
+    return;
+  }
   CURL_TRC_M(admin, "[SHUTDOWN] added #%" FMT_OFF_T
-             " to shutdowns, now %zu conns in shutdown",
-             conn->connection_id, Curl_llist_count(&cshutdn->list));
+             " to shutdowns, now %u conns in shutdown",
+             conn->connection_id, CURL_PTRARRAY_COUNT(&cshutdn->conns));
 }
 
 void Curl_cshutdn_perform(struct cshutdn *cshutdn,
@@ -524,14 +522,14 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
                          fd_set *read_fd_set, fd_set *write_fd_set,
                          int *maxfd)
 {
-  if(Curl_llist_head(&cshutdn->list)) {
-    struct Curl_llist_node *e;
+  if(CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
     struct easy_pollset ps;
+    uint32_t i;
 
     Curl_pollset_init(&ps);
-    for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
-      unsigned int i;
-      struct connectdata *conn = Curl_node_elem(e);
+    for(i = 0; i < CURL_PTRARRAY_COUNT(&cshutdn->conns); ++i) {
+      unsigned int j;
+      struct connectdata *conn = CURL_PTRARRAY_GET(&cshutdn->conns, i);
       CURLcode result;
 
       Curl_pollset_reset(&ps);
@@ -542,15 +540,15 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
       if(result)
         continue;
 
-      for(i = 0; i < ps.n; i++) {
-        curl_socket_t sock = ps.sockets[i];
+      for(j = 0; j < ps.n; j++) {
+        curl_socket_t sock = ps.sockets[j];
         if(!FDSET_SOCK(sock))
           continue;
-        if(ps.actions[i] & CURL_POLL_IN)
+        if(ps.actions[j] & CURL_POLL_IN)
           FD_SET(sock, read_fd_set);
-        if(ps.actions[i] & CURL_POLL_OUT)
+        if(ps.actions[j] & CURL_POLL_OUT)
           FD_SET(sock, write_fd_set);
-        if((ps.actions[i] & (CURL_POLL_OUT | CURL_POLL_IN)) &&
+        if((ps.actions[j] & (CURL_POLL_OUT | CURL_POLL_IN)) &&
            ((int)sock > *maxfd))
           *maxfd = (int)sock;
       }
@@ -566,15 +564,15 @@ unsigned int Curl_cshutdn_add_waitfds(struct cshutdn *cshutdn,
 {
   unsigned int need = 0;
 
-  if(Curl_llist_head(&cshutdn->list)) {
-    struct Curl_llist_node *e;
+  if(CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
     struct easy_pollset ps;
     struct connectdata *conn;
+    uint32_t i;
     CURLcode result;
 
     Curl_pollset_init(&ps);
-    for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
-      conn = Curl_node_elem(e);
+    for(i = 0; i < CURL_PTRARRAY_COUNT(&cshutdn->conns); ++i) {
+      conn = CURL_PTRARRAY_GET(&cshutdn->conns, i);
       Curl_pollset_reset(&ps);
       Curl_attach_connection(admin, conn, FALSE);
       result = Curl_conn_adjust_pollset(admin, conn, &ps);
@@ -594,14 +592,14 @@ CURLcode Curl_cshutdn_add_pollfds(struct cshutdn *cshutdn,
 {
   CURLcode result = CURLE_OK;
 
-  if(Curl_llist_head(&cshutdn->list)) {
-    struct Curl_llist_node *e;
+  if(CURL_PTRARRAY_COUNT(&cshutdn->conns)) {
     struct easy_pollset ps;
     struct connectdata *conn;
+    uint32_t i;
 
     Curl_pollset_init(&ps);
-    for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
-      conn = Curl_node_elem(e);
+    for(i = 0; i < CURL_PTRARRAY_COUNT(&cshutdn->conns); ++i) {
+      conn = CURL_PTRARRAY_GET(&cshutdn->conns, i);
       Curl_pollset_reset(&ps);
       Curl_attach_connection(admin, conn, FALSE);
       result = Curl_conn_adjust_pollset(admin, conn, &ps);

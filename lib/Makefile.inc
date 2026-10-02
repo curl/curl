@@ -265,6 +265,7 @@ LIB_CFILES =         \
   protocol.c         \
   proxy.c            \
   psl.c              \
+  ptrarray.c         \
   rand.c             \
   ratelimit.c        \
   request.c          \
@@ -396,6 +397,7 @@ LIB_HFILES =         \
   protocol.h         \
   proxy.h            \
   psl.h              \
+  ptrarray.h         \
   rand.h             \
   ratelimit.h        \
   request.h          \

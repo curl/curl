@@ -26,6 +26,7 @@
 #include "uint-bset.h"
 #include "u8_strset.h"
 #include "u32_ptrset.h"
+#include "ptrarray.h"
 #include "curl_trc.h"
 
 static void t3211_check_bset(const char *name, uint32_t capacity,
@@ -277,6 +278,46 @@ static void t3211_check_u32_ptrset(void)
   fail_unless(!Curl_u32_ptrset_count(&set), "ptrset cleared not empty");
 }
 
+static void t3211_check_ptrarray(void)
+{
+  struct ptrarray pa;
+  CURLcode result;
+  char d0 = '0', d1 = '1';
+  uint32_t i;
+
+  Curl_ptrarray_init(&pa);
+  fail_unless(!Curl_ptrarray_count(&pa), "ptrarray init not empty");
+
+  result = Curl_ptrarray_add(&pa, &d0);
+  fail_unless(!result, "ptrarray ad&d0 failed");
+  fail_unless(Curl_ptrarray_get(&pa, 0) == &d0, "ptrarray get0 failed");
+  fail_unless(Curl_ptrarray_count(&pa) == 1, "ptrarray ad&d0 count wrong");
+  result = Curl_ptrarray_add(&pa, &d1);
+  fail_unless(!result, "ptrarray add1 failed");
+  fail_unless(Curl_ptrarray_get(&pa, 1) == &d1, "ptrarray get1 failed");
+  fail_unless(Curl_ptrarray_count(&pa) == 2, "ptrarray add1 count wrong");
+  Curl_ptrarray_remove(&pa, 0);
+  fail_unless(Curl_ptrarray_count(&pa) == 1, "ptrarray rem count wrong");
+  fail_unless(Curl_ptrarray_get(&pa, 1) == NULL, "ptrarray rem+get1 not NULL");
+  fail_unless(Curl_ptrarray_get(&pa, 0) == &d1, "ptrarray rem+get0 failed");
+  Curl_ptrarray_remove(&pa, 0);
+  fail_unless(Curl_ptrarray_count(&pa) == 0, "ptrarray rem2 count wrong");
+
+  for(i = 0; i < 300; ++i) {
+    result = Curl_ptrarray_add(&pa, (i & 0x1) ? &d1 : &d0);
+    fail_unless(!result, "ptrarray loop add failed");
+  }
+  fail_unless(Curl_ptrarray_count(&pa) == 300, "ptrarray loop count wrong");
+  for(i = 0; i < 300; ++i) {
+    result = Curl_ptrarray_add(&pa, (i & 0x1) ? &d1 : &d0);
+    fail_unless(Curl_ptrarray_get(&pa, i) == ((i & 0x1) ? &d1 : &d0),
+                "ptrarray loop get failed");
+  }
+
+  Curl_ptrarray_clear(&pa);
+  fail_unless(!Curl_ptrarray_count(&pa), "ptrarray clear not empty");
+}
+
 static CURLcode test_unit3211(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -302,6 +343,7 @@ static CURLcode test_unit3211(const char *arg)
 
   t3211_check_u8_strset();
   t3211_check_u32_ptrset();
+  t3211_check_ptrarray();
 
   UNITTEST_END_SIMPLE
 }
