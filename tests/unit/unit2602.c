@@ -87,6 +87,10 @@ static CURLcode test_unit2602(const char *arg)
   Curl_dynhds_init(&hds, 128, 4 * 1024);
   fail_if(Curl_dynhds_add(&hds, "test1", 5, "123", 3), "add failed");
   fail_if(Curl_dynhds_add(&hds, "test1", 5, "123", 3), "add failed");
+  fail_if(Curl_dynhds_add(&hds, "test2", 5, NULL, 0), "add failed");
+  fail_if(Curl_dynhds_cadd(&hds, "test2", NULL), "add failed");
+  fail_unless(dynhds_ccontains(&hds, "test2"), "should");
+  fail_unless(dynhds_ccount_name(&hds, "test2") == 2, "should");
   fail_if(Curl_dynhds_cadd(&hds, "blablabla", "thingies"), "add failed");
   fail_if(Curl_dynhds_h1_cadd_line(&hds, "blablabla: thingies"), "add failed");
   fail_unless(dynhds_ccount_name(&hds, "blablabla") == 2, "should");

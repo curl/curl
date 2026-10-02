@@ -43,8 +43,10 @@ static struct dynhds_entry *entry_new(const char *name, size_t namelen,
   memcpy(p, name, namelen);
   e->namelen = namelen;
   e->value = p += namelen + 1; /* leave a \0 at the end of name */
-  memcpy(p, value, valuelen);
-  e->valuelen = valuelen;
+  if(valuelen) {
+    memcpy(p, value, valuelen);
+    e->valuelen = valuelen;
+  }
   if(opts & DYNHDS_OPT_LOWERCASE)
     Curl_strntolower(e->name, e->name, e->namelen);
   return e;
@@ -136,17 +138,15 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
   struct dynhds_entry *entry = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  if(!dynhds || !name || !namelen || !value) {
+  /* Accept NULL value with length 0, name must have length */
+  if(!dynhds || !name || !namelen || (!value && valuelen)) {
     DEBUGASSERT(0);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  if(dynhds->max_entries && dynhds->hds_len >= dynhds->max_entries)
-    return CURLE_OUT_OF_MEMORY;
-  if((SIZE_MAX - namelen) < valuelen)
-    return CURLE_OUT_OF_MEMORY;
-  if((SIZE_MAX - namelen - valuelen) < dynhds->strs_len)
-    return CURLE_OUT_OF_MEMORY;
-  if(dynhds->strs_len + namelen + valuelen > dynhds->max_strs_size)
+  /* Does the new header fit into the limits? */
+  if((dynhds->max_entries && (dynhds->hds_len >= dynhds->max_entries)) ||
+     (dynhds->max_strs_size - dynhds->strs_len < namelen) ||
+     (dynhds->max_strs_size - dynhds->strs_len - namelen < valuelen))
     return CURLE_OUT_OF_MEMORY;
 
   entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
@@ -185,7 +185,8 @@ out:
 CURLcode Curl_dynhds_cadd(struct dynhds *dynhds,
                           const char *name, const char *value)
 {
-  return Curl_dynhds_add(dynhds, name, strlen(name), value, strlen(value));
+  return Curl_dynhds_add(dynhds, name, strlen(name),
+                         value, value ? strlen(value) : 0);
 }
 
 CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
