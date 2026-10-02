@@ -363,7 +363,7 @@ jobs:
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-22
 
           - name: 'clang-tidy H3 c-ares !examples'
-            image: ubuntu-26.04
+            image: ubuntu-26.04-arm
             install_packages: clang-22 clang-tidy-22 libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skiprun
             install_steps_brew: libngtcp2 libnghttp3 c-ares
