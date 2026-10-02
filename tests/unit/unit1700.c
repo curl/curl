@@ -41,7 +41,10 @@ static CURLcode test_unit1700(const char *arg)
 
   /* grab the data */
   data = (struct Curl_easy *)easy;
-  (void)data; /* used in the conditional block below, add the void for the compiler */
+
+  /* used in the conditional block below, add the void
+   * for the compiler */
+  (void)data;
 
   /* Only include this test if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
