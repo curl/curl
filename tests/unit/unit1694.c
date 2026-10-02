@@ -25,26 +25,36 @@
 #include "urldata.h"
 #include "curl_range.h"
 
-static CURLcode test_unit1700(const char *arg)
+static CURLcode t1694_setup(struct Curl_easy **data)
 {
   CURL *easy;
-  struct Curl_easy *data;
   CURLcode result;
 
-  UNITTEST_BEGIN_SIMPLE
-
-  /* Initialize the easy handle */
   result = curl_global_init(CURL_GLOBAL_ALL);
-  abort_unless(result == CURLE_OK, "curl_global_init failed");
+  if(result)
+    return result; /* init failed us */
+
   easy = curl_easy_init();
-  abort_unless(easy != NULL, "curl_easy_init failed");
+  if(!easy) {
+    curl_global_cleanup();   /* roll back the half we did succeed at */
+    return CURLE_OUT_OF_MEMORY;
+  }
 
-  /* grab the data */
-  data = (struct Curl_easy *)easy;
+  *data = (struct Curl_easy *)easy; /* grab the data */
+  return CURLE_OK;
+}
 
-  /* used in the conditional block below, add the void
-   * for the compiler */
-  (void)data;
+static void t1694_stop(struct Curl_easy *data)
+{
+  curl_easy_cleanup(data);
+  curl_global_cleanup();
+}
+
+static CURLcode test_unit1694(const char *arg)
+{
+  struct Curl_easy *data;
+
+  UNITTEST_BEGIN(t1694_setup(&data))
 
   /* Only include this test if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
@@ -186,9 +196,5 @@ static CURLcode test_unit1700(const char *arg)
   puts("not tested");
 #endif /* !CURL_DISABLE_FTP || !CURL_DISABLE_FILE */
 
-  /* clean up after we're done */
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
-
-  UNITTEST_END_SIMPLE
+  UNITTEST_END(t1694_stop(data))
 }
