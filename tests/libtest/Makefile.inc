@@ -303,6 +303,7 @@ TESTS_C = \
   lib2032.c \
   lib2082.c \
   lib2118.c \
+  lib2120.c \
   lib2270.c \
   lib2301.c \
   lib2302.c \
