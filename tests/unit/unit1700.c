@@ -183,7 +183,7 @@ static CURLcode test_unit1700(const char *arg)
   curlx_free((char *)data->state.range);
 
 #else
-  void(arg); /* avoid unused warning */
+  (void)arg; /* avoid unused warning */
   fail_unless(1, "test skipped");
 #endif /* !CURL_DISABLE_FTP || !CURL_DISABLE_FILE */
 
