@@ -24,6 +24,8 @@
 #
 import logging
 import re
+import socket
+import threading
 
 import pytest
 from testenv import CurlClient, Env
@@ -67,6 +69,69 @@ class TestEyeballs:
         r = curl.http_download(urls=[urln], extra_args=['--http3'])
         r.check_response(count=1, http_status=200)
         assert r.stats[0]['http_version'] == '1.1'
+
+    # download using HTTP/3 on a server that silently drops UDP: fallback on
+    # h2 at the soft timeout, since QUIC never sees any data
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
+    def test_06_05_h3_silent_fallback_h2(self, env: Env, httpd, nghttpx):
+        curl = CurlClient(env=env)
+        urln = f'https://{env.domain1}:{env.https_only_tcp_port}/data.json'
+        # take the UDP port without reading it, so that packets are not refused
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.bind(('127.0.0.1', env.https_only_tcp_port))
+            r = curl.http_download(urls=[urln], extra_args=[
+                '--http3', '--happy-eyeballs-timeout-ms', '200',
+                '--trace-config', 'https-connect'
+            ])
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['http_version'] == '2'
+        soft_timeouts = [line for line in r.trace_lines
+                         if re.match(r'.*h3 has not seen any data after 100ms', line)]
+        assert len(soft_timeouts) == 1, f'{r.dump_logs()}'
+
+    # download using HTTP/3 on a server that answers UDP with junk: QUIC has
+    # seen data, fallback on h2 at the hard timeout
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
+    @pytest.mark.skipif(condition=not Env.curl_uses_lib('ngtcp2'), reason="requires ngtcp2 packet handling")
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
+    def test_06_06_h3_stalled_fallback_h2(self, env: Env, httpd, nghttpx):
+        curl = CurlClient(env=env)
+        urln = f'https://{env.domain1}:{env.https_only_tcp_port}/data.json'
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.bind(('127.0.0.1', env.https_only_tcp_port))
+            sock.settimeout(0.1)
+            done = threading.Event()
+
+            def answer_junk():
+                while not done.is_set():
+                    try:
+                        _, addr = sock.recvfrom(65536)
+                        sock.sendto(b'\0', addr)
+                    except socket.timeout:
+                        pass
+
+            t = threading.Thread(target=answer_junk)
+            t.start()
+            try:
+                r = curl.http_download(urls=[urln], extra_args=[
+                    '--http3', '--happy-eyeballs-timeout-ms', '200',
+                    '--trace-config', 'https-connect,timer'
+                ])
+            finally:
+                done.set()
+                t.join()
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['http_version'] == '2'
+        hard_timeouts = [line for line in r.trace_lines
+                         if re.match(r'.*h3 inconclusive after 200', line)]
+        assert len(hard_timeouts) == 1, f'{r.dump_logs()}'
+        # the timer is set again for the hard timeout, QUIC does not wake us
+        # up before its retransmission after about one second
+        he_timers_set = [line for line in r.trace_lines
+                         if re.match(r'.*\[TIMER] \[ALPN_EYEBALLS] set for', line)]
+        assert len(he_timers_set) >= 2, f'{r.dump_logs()}'
+        assert r.stats[0]['time_connect'] < 0.8, f'{r.stats[0]}'
 
     # make a successful https: transfer and observer the timer stats
     def test_06_10_stats_success(self, env: Env, httpd, nghttpx):
