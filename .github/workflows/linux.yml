@@ -337,7 +337,7 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity --enable-httpsig
 
           - name: 'clang-tidy'
-            image: ubuntu-26.04
+            image: ubuntu-26.04-arm
             install_packages: clang-22 clang-tidy-22 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev
             install_steps: skiprun mbedtls-latest rustls wolfssl-opensslextra
             install_steps_brew: openssl@4 gsasl
