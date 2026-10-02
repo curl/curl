@@ -192,4 +192,3 @@ static CURLcode test_unit1700(const char *arg)
 
   UNITTEST_END_SIMPLE
 }
-
