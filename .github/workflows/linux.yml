@@ -552,7 +552,7 @@ jobs:
           cache-name: cache-libressl-filc
         with:
           path: ~/libressl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ env.FIL_C_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ env.FIL_C_VERSION }}-${{ runner.arch }}
 
       - name: 'build libressl (filc)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && !steps.cache-libressl-filc.outputs.cache-hit }}
@@ -574,7 +574,7 @@ jobs:
           cache-name: cache-nghttp2-filc
         with:
           path: ~/nghttp2
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.FIL_C_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.FIL_C_VERSION }}-${{ runner.arch }}
 
       - name: 'build nghttp2 (filc)'
         if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') && !steps.cache-nghttp2-filc.outputs.cache-hit }}
