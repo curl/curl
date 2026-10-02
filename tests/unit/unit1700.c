@@ -190,7 +190,5 @@ static CURLcode test_unit1700(const char *arg)
   curl_easy_cleanup(easy);
   curl_global_cleanup();
 
-  return CURLE_OK;
-
   UNITTEST_END_SIMPLE
 }
