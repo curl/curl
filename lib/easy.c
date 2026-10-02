@@ -555,49 +555,36 @@ static void events_setup(struct Curl_multi *multi, struct events *ev)
   curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, ev);
 }
 
-/* populate_fds()
- *
- * populate the fds[] array
- */
-static unsigned int populate_fds(struct pollfd *fds, size_t maxfds,
-                                 struct events *ev)
+static CURLcode populate_cpfds(struct curl_pollfds *cpfds, struct events *ev)
 {
-  unsigned int numfds = 0;
-  struct pollfd *f;
   struct socketmonitor *m;
+  CURLcode result = CURLE_OK;
 
-  f = &fds[0];
-  for(m = ev->list; m && (numfds < maxfds); m = m->next) {
-    f->fd = m->socket.fd;
-    f->events = m->socket.events;
-    f->revents = 0;
+  Curl_pollfds_reset(cpfds);
+  for(m = ev->list; m && !result; m = m->next) {
+    result = Curl_pollfds_add_sock(cpfds, m->socket.fd, m->socket.events);
 #if DEBUG_EV_POLL
-    curl_mfprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
+    curl_mfprintf(stderr, "poll() %d check socket %d\n",
+                  cpfds->n, cpfds->pfds[cpfds->n - 1].fd);
 #endif
-    f++;
-    numfds++;
   }
-  return numfds;
+  return result;
 }
 
-/* poll_fds()
- *
- * poll the fds[] array
- */
-static CURLcode poll_fds(struct events *ev,
-                         struct pollfd *fds,
-                         const unsigned int numfds,
-                         int *pollrc)
+static CURLcode poll_cpfds(struct events *ev,
+                           struct curl_pollfds *cpfds,
+                           int *pollrc)
 {
-  if(numfds) {
+  if(cpfds->n) {
     /* wait for activity or timeout */
 #if DEBUG_EV_POLL
-    curl_mfprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n", numfds, ev->ms);
+    curl_mfprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n",
+                  cpfds->n, ev->ms);
 #endif
-    *pollrc = Curl_poll(fds, numfds, ev->ms);
+    *pollrc = Curl_poll(cpfds->pfds, cpfds->n, ev->ms);
 #if DEBUG_EV_POLL
     curl_mfprintf(stderr, "poll(numfds=%u, timeout=%ldms) -> %d\n",
-                  numfds, ev->ms, *pollrc);
+                  cpfds->n, ev->ms, *pollrc);
 #endif
     if(*pollrc < 0)
       return CURLE_UNRECOVERABLE_POLL;
@@ -619,30 +606,35 @@ static CURLcode poll_fds(struct events *ev,
  */
 static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 {
+  struct pollfd fds_on_stack[8];
+  struct curl_pollfds cpfds;
   bool done = FALSE;
   CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
 
+  Curl_pollfds_init(&cpfds, fds_on_stack, CURL_ARRAYSIZE(fds_on_stack));
   while(!done) {
     CURLMsg *msg;
-    struct pollfd fds[8];
     int pollrc;
     struct curltime start;
-    const unsigned int numfds = populate_fds(fds, CURL_ARRAYSIZE(fds), ev);
+
+    result = populate_cpfds(&cpfds, ev);
+    if(result)
+      goto out;
 
     /* get the time stamp to use to figure out how long poll takes */
     curlx_pnow(&start);
 
-    result = poll_fds(ev, fds, numfds, &pollrc);
+    result = poll_cpfds(ev, &cpfds, &pollrc);
     if(result)
-      return result;
+      goto out;
 
     ev->msbump = FALSE; /* reset here */
 
     if(!pollrc) {
       /* timeout! */
       ev->ms = 0;
-#if 0
+#if DEBUG_EV_POLL
       curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n");
 #endif
       mresult = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
@@ -652,15 +644,15 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       /* here pollrc is > 0 */
       /* loop over the monitored sockets to see which ones had activity */
       unsigned int i;
-      for(i = 0; i < numfds; i++) {
-        if(fds[i].revents) {
+      for(i = 0; i < cpfds.n; i++) {
+        if(cpfds.pfds[i].revents) {
           /* socket activity, tell libcurl */
-          int act = poll2cselect(fds[i].revents); /* convert */
+          int act = poll2cselect(cpfds.pfds[i].revents); /* convert */
 
           /* sending infof "randomly" to the first easy handle */
           infof(multi->admin, "call curl_multi_socket_action(socket "
-                "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
-          mresult = curl_multi_socket_action(multi, fds[i].fd, act,
+                "%" FMT_SOCKET_T ")", (curl_socket_t)cpfds.pfds[i].fd);
+          mresult = curl_multi_socket_action(multi, cpfds.pfds[i].fd, act,
                                              &ev->running_handles);
         }
       }
@@ -683,8 +675,10 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       }
     }
 
-    if(mresult)
-      return CURLE_URL_MALFORMAT;
+    if(mresult) {
+      result = CURLE_URL_MALFORMAT;
+      goto out;
+    }
 
     /* we do not really care about the "msgs_in_queue" value returned in the
        second argument */
@@ -694,7 +688,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       done = TRUE;
     }
   }
-
+out:
+  Curl_pollfds_cleanup(&cpfds);
   return result;
 }
 
