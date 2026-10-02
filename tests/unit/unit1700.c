@@ -182,13 +182,13 @@ static CURLcode test_unit1700(const char *arg)
 
   curlx_free((char *)data->state.range);
 
-  /* clean up after we're done */
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
-
 #else
   puts("not tested");
 #endif /* !CURL_DISABLE_FTP || !CURL_DISABLE_FILE */
+
+  /* clean up after we're done */
+  curl_easy_cleanup(easy);
+  curl_global_cleanup();
 
   UNITTEST_END_SIMPLE
 }
