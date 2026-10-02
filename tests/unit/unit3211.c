@@ -309,7 +309,6 @@ static void t3211_check_ptrarray(void)
   }
   fail_unless(Curl_ptrarray_count(&pa) == 300, "ptrarray loop count wrong");
   for(i = 0; i < 300; ++i) {
-    result = Curl_ptrarray_add(&pa, (i & 0x1) ? &d1 : &d0);
     fail_unless(Curl_ptrarray_get(&pa, i) == ((i & 0x1) ? &d1 : &d0),
                 "ptrarray loop get failed");
   }
