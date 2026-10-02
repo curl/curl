@@ -125,7 +125,7 @@ while(my $filename = <$git_ls_files>) {
     if(!fn_match($filename, @executable)) {
         my $mode = (stat($filename))[2];
         if($mode & 0111) {
-            push @err, sprintf('file has exec attribute set: %o', $mode);
+            push @err, sprintf('file has executable bit(s) set: %o', $mode);
         }
     }
 
