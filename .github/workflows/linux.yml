@@ -92,28 +92,28 @@ jobs:
           - name: 'libressl krb5'
             image: ubuntu-24.04-arm
             install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
-            install_steps: libressl-c-arm pytest codeset-test1
+            install_steps: libressl-c pytest codeset-test1
             LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
             configure: --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: 'libressl krb5 valgrind 1'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
-            install_steps: libressl-c-arm
+            install_steps: libressl-c
             tflags: '--subset=0/2'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
 
           - name: 'libressl krb5 valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
-            install_steps: libressl-c-arm
+            install_steps: libressl-c
             tflags: '--subset=1/2'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
 
           - name: 'libressl clang'
             image: ubuntu-24.04-arm
             install_packages: clang
-            install_steps: libressl-c-arm
+            install_steps: libressl-c
             CC: clang
             LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
             configure: --with-openssl=/home/runner/libressl --enable-debug
@@ -133,7 +133,7 @@ jobs:
           - name: 'mbedtls gss valgrind 1'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls-latest-arm
+            install_steps: mbedtls-latest
             tflags: '--subset=0/2'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
@@ -142,7 +142,7 @@ jobs:
           - name: 'mbedtls gss valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls-latest-arm
+            install_steps: mbedtls-latest
             tflags: '--subset=1/2'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
@@ -177,7 +177,7 @@ jobs:
           - name: 'rustls valgrind 1'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls-arm
+            install_steps: rust rustls
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=0/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
@@ -185,7 +185,7 @@ jobs:
           - name: 'rustls valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls-arm
+            install_steps: rust rustls
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=1/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
@@ -199,14 +199,14 @@ jobs:
 
           - name: 'wolfssl-all'
             image: ubuntu-26.04-arm
-            install_steps: wolfssl-all-arm
+            install_steps: wolfssl-all
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-all/lib
             configure: --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 1'
             image: ubuntu-26.04-arm
             install_packages: valgrind
-            install_steps: wolfssl-opensslextra-arm
+            install_steps: wolfssl-opensslextra
             tflags: '--subset=0/2'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
@@ -214,7 +214,7 @@ jobs:
           - name: 'wolfssl-opensslextra valgrind 2'
             image: ubuntu-26.04-arm
             install_packages: valgrind
-            install_steps: wolfssl-opensslextra-arm
+            install_steps: wolfssl-opensslextra
             tflags: '--subset=1/2'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
@@ -523,18 +523,18 @@ jobs:
           cd filc
           ./setup.sh
 
-      - name: 'cache libressl (c-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') }}
+      - name: 'cache libressl (c)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-c') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-libressl-c-arm
+        id: cache-libressl-c
         env:
-          cache-name: cache-libressl-c-arm
+          cache-name: cache-libressl-c
         with:
           path: ~/libressl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ runner.arch }}
 
-      - name: 'build libressl (c-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') && !steps.cache-libressl-c-arm.outputs.cache-hit }}
+      - name: 'build libressl (c)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-c') && !steps.cache-libressl-c.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
@@ -589,18 +589,18 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'cache wolfssl (all-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') }}
+      - name: 'cache wolfssl (all)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-wolfssl-all-arm
+        id: cache-wolfssl-all
         env:
-          cache-name: cache-wolfssl-all-arm
+          cache-name: cache-wolfssl-all
         with:
           path: ~/wolfssl-all
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}-${{ runner.arch }}
 
-      - name: 'build wolfssl (all-arm)'  # does not support `OPENSSL_COEXIST`
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') && !steps.cache-wolfssl-all-arm.outputs.cache-hit }}
+      - name: 'build wolfssl (all)'  # does not support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') && !steps.cache-wolfssl-all.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
@@ -635,18 +635,18 @@ jobs:
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 
-      - name: 'cache wolfssl (opensslextra-arm)'  # does support `OPENSSL_COEXIST`
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') }}
+      - name: 'cache wolfssl (opensslextra)'  # does support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-wolfssl-opensslextra-arm
+        id: cache-wolfssl-opensslextra
         env:
-          cache-name: cache-wolfssl-opensslextra-arm
+          cache-name: cache-wolfssl-opensslextra
         with:
           path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}-${{ runner.arch }}
 
-      - name: 'build wolfssl (opensslextra-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') && !steps.cache-wolfssl-opensslextra-arm.outputs.cache-hit }}
+      - name: 'build wolfssl (opensslextra)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') && !steps.cache-wolfssl-opensslextra.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
@@ -682,18 +682,18 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'cache mbedtls (latest-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') }}
+      - name: 'cache mbedtls (latest)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-mbedtls-latest-arm
+        id: cache-mbedtls-latest
         env:
-          cache-name: cache-mbedtls-latest-arm
+          cache-name: cache-mbedtls-latest
         with:
           path: ~/mbedtls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}-${{ runner.arch }}
 
-      - name: 'build mbedtls (latest-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') && !steps.cache-mbedtls-latest-arm.outputs.cache-hit }}
+      - name: 'build mbedtls (latest)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest') && !steps.cache-mbedtls-latest.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
@@ -831,22 +831,27 @@ jobs:
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
           sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
-      - name: 'cache rustls (arm)'
-        if: ${{ contains(matrix.build.install_steps, 'rustls-arm') }}
+      - name: 'cache rustls'
+        if: ${{ contains(matrix.build.install_steps, 'rustls') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-rustls-arm
+        id: cache-rustls
         env:
-          cache-name: cache-rustls-arm
+          cache-name: cache-rustls
         with:
           path: ~/rustls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}-${{ runner.arch }}
 
-      - name: 'install rustls (arm)'
-        if: ${{ contains(matrix.build.install_steps, 'rustls-arm') && !steps.cache-rustls-arm.outputs.cache-hit }}
+      - name: 'install rustls'
+        if: ${{ contains(matrix.build.install_steps, 'rustls') && !steps.cache-rustls.outputs.cache-hit }}
         run: |
           cd ~
+          if [ "$(uname -m)" = 'aarch64' ]; then
+            arch='arm64'
+          else
+            arch='x86_64'
+          fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-arm64-linux-gnu.zip" --output pkg.bin
+            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-${arch}-linux-gnu.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
           sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
