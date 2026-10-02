@@ -28,6 +28,12 @@ use warnings;
 
 use File::Basename;
 
+my @executable = (
+    '\.(pl|py|sh)$',
+    '^\.github/scripts/',
+    '^scripts/',
+);
+
 my @tabs = (
     '^m4/zz40-xc-ovr\.m4$',
     'Makefile\.(am|example)$',
@@ -115,6 +121,13 @@ while(my $filename = <$git_ls_files>) {
     chomp $filename;
 
     my @err = ();
+
+    if(!fn_match($filename, @executable)) {
+        my $mode = (stat($filename))[2];
+        if($mode & 0111) {
+            push @err, sprintf('file has exec attribute set: %o', $mode);
+        }
+    }
 
     if(length($filename) > $max_path_len) {
         push @err, sprintf('long (%d > %d) path', length($filename), $max_path_len);
