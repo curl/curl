@@ -280,8 +280,7 @@ jobs:
           cache: false
           path-type: inherit
           install: >-
-            perl mingw-w64-ucrt-x86_64-cmake
-            mingw-w64-ucrt-x86_64-zlib mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-libpsl
+            perl mingw-w64-ucrt-x86_64-zlib mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-libpsl
             mingw-w64-ucrt-x86_64-libssh2 mingw-w64-ucrt-x86_64-nghttp2 mingw-w64-ucrt-x86_64-openssl
 
       - name: 'install prereqs'
@@ -352,10 +351,7 @@ jobs:
 
       - name: 'via add_subdirectory OpenSSL (old cmake)'
         run: |
-          which cmake
-          echo '------------------'
-          env
-          echo '------------------'
+          unset PKG_CONFIG_PATH
           export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
@@ -369,9 +365,7 @@ jobs:
 
       - name: 'via find_package OpenSSL (old cmake)'
         run: |
-          echo '------------------'
-          env
-          echo '------------------'
+          unset PKG_CONFIG_PATH
           export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
