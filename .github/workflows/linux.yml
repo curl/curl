@@ -386,7 +386,7 @@ jobs:
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-22
 
           - name: 'address-sanitizer'
-            image: ubuntu-26.04-arm
+            image: ubuntu-26.04
             install_packages: clang-22 libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             install_steps_brew: openssl@4
