@@ -259,13 +259,17 @@ static bool time_to_start_baller2(struct Curl_cfilter *cf,
                 ctx->hard_eyeballs_timeout_ms, ctx->ballers[1].name);
     return TRUE;
   }
-  else if(elapsed_ms >= ctx->soft_eyeballs_timeout_ms &&
-          cf_hc_baller_reply_ms(&ctx->ballers[0], data) < 0) {
-    CURL_TRC_CF(data, cf, "%s has not seen any data after %"
-                FMT_TIMEDIFF_T "ms, starting %s",
-                ctx->ballers[0].name, ctx->soft_eyeballs_timeout_ms,
-                ctx->ballers[1].name);
-    return TRUE;
+  else if(elapsed_ms >= ctx->soft_eyeballs_timeout_ms) {
+    if(cf_hc_baller_reply_ms(&ctx->ballers[0], data) < 0) {
+      CURL_TRC_CF(data, cf, "%s has not seen any data after %"
+                  FMT_TIMEDIFF_T "ms, starting %s",
+                  ctx->ballers[0].name, ctx->soft_eyeballs_timeout_ms,
+                  ctx->ballers[1].name);
+      return TRUE;
+    }
+    /* set the effective hard timeout again */
+    Curl_expire_set(data, EXPIRE_ALPN_EYEBALLS,
+                    ctx->hard_eyeballs_timeout_ms - elapsed_ms, pnow);
   }
   return FALSE;
 }
