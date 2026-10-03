@@ -262,7 +262,7 @@ static CURLcode test_unit1307(const char *arg)
     { "?*?*?.?",                  "abcdef.c",               MATCH },
     { "?*?*?.?",                  "abcdef.cd",              NOMATCH },
 
-    /* U+00e4 Latin Small Letter A with Diaeresis */
+    /* U+00E4 Latin Small Letter A with Diaeresis */
     { "Lindm\xc3\xa4tarv",        "Lindm\xc3\xa4tarv",      MATCH },
 
     { "",                         "",                       MATCH},

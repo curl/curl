@@ -313,9 +313,9 @@ static const struct testcase get_parts_list[] = {
     0, CURLU_URLDECODE, CURLUE_OK },
 #ifdef USE_IDN
   /* https://sv.wikipedia.org/wiki/R%c3%a4ksm%c3%b6rg%c3%a5s
-     U+00e4 Latin Small Letter A with Diaeresis
-     U+00f6 Latin Small Letter O with Diaeresis
-     U+00e5 Latin Small Letter A with Ring Above
+     U+00E4 Latin Small Letter A with Diaeresis
+     U+00F6 Latin Small Letter O with Diaeresis
+     U+00E5 Latin Small Letter A with Ring Above
    */
   { "https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
     "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
@@ -335,12 +335,12 @@ static const struct testcase get_parts_list[] = {
     0, CURLU_PUNYCODE, CURLUE_OK },
 #endif
   /* U+2102  Double-Struck Capital C
-     U+1d64  Latin Subscript Small Letter U
-     U+24c7  Circled Latin Capital Letter R
+     U+1D64  Latin Subscript Small Letter U
+     U+24C7  Circled Latin Capital Letter R
      U+2112  Script Capital L
      U+3002  Ideographic Full Stop
-     U+1d412 Mathematical Bold Capital S
-     U+1f134 Squared Latin Capital Letter E
+     U+1D412 Mathematical Bold Capital S
+     U+1F134 Squared Latin Capital Letter E
    */
   {"https://"
    "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
