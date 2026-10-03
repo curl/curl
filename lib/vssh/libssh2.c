@@ -1681,9 +1681,13 @@ static CURLcode ssh_state_auth_agent(struct Curl_easy *data,
 
   if(rc == LIBSSH2_ERROR_NONE) {
     sshc->authed = TRUE;
-    infof(data, "SSH: agent authenticated user '%s' with key '%s'",
-          Curl_creds_user(data->conn->creds),
-          sshc->sshagent_identity->comment);
+    /* Both the username and the agent identity's comment are credentials-
+       adjacent data (the comment often embeds the absolute path to the
+       private key file, e.g. '/home/user/.ssh/id_ed25519'). Trace-level
+       only, matching the SSH_AUTH_AGENT_LIST trace above. */
+    CURL_TRC_SSH(data, "SSH: agent authenticated user '%s' with key '%s'",
+                 Curl_creds_user(data->conn->creds),
+                 sshc->sshagent_identity->comment);
     myssh_to(data, sshc, SSH_AUTH_DONE);
   }
   else {
@@ -3400,7 +3404,14 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   if(!sshc)
     return CURLE_FAILED_INIT;
 
-  infof(data, "SSH: user '%s'", Curl_creds_user(conn->creds));
+  /* The SSH username is part of the connection credentials and may reveal
+     sensitive information (cloud-provider default users like 'ec2-user',
+     corporate SSO identities, etc.). Log it only at SSH-trace level, not
+     unconditionally via infof, to match the gating already applied to the
+     password just below and to the agent-auth trace at the SSH_AUTH_AGENT
+     state. This is consistent with curl's policy of stripping userinfo from
+     URLs in verbose output. */
+  CURL_TRC_SSH(data, "SSH: user '%s'", Curl_creds_user(conn->creds));
 #ifdef CURL_LIBSSH2_DEBUG
   infof(data, "SSH: password %s", Curl_creds_passwd(conn->creds));
   sock = conn->sock[FIRSTSOCKET];
