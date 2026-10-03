@@ -890,6 +890,14 @@ jobs:
             make -C bld V=1 install
           fi
 
+      - name: 'randcurl'
+        if: ${{ contains(matrix.build.install_steps, 'randcurl') }}
+        background: true
+        run: |
+          mkdir run
+          cd run
+          ../.github/scripts/randcurl.pl 60 ../bld/src/curl
+
       - name: 'build tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
         run: |
@@ -955,13 +963,6 @@ jobs:
           else
             make -C bld V=1 pytest-ci
           fi
-
-      - name: 'randcurl'
-        if: ${{ contains(matrix.build.install_steps, 'randcurl') }}
-        run: |
-          mkdir run
-          cd run
-          ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'
         if: ${{ !contains(matrix.build.install_packages, 'valgrind') && !contains(matrix.build.name, '!examples') }}
