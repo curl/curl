@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+FTP
+timeout
+multi_socket
+libtest
+</keywords>
+</info>
+
+<reply>
+<servercmd>
+DELAY USER 5
+</servercmd>
+</reply>
+
+<client>
+<features>
+ftp
+</features>
+<server>
+ftp
+</server>
+<killserver>
+ftp
+</killserver>
+<name>
+FTP server response timeout with the socket action API
+</name>
+<tool>
+cli_ev_download
+</tool>
+# The test's own deadline must not drive libcurl's timeout handling.
+<command>
+-n 1 -t 1000 -m 3000 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<errorcode>
+28
+</errorcode>
+</verify>
+</testcase>

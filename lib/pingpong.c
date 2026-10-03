@@ -80,8 +80,11 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     if(timeout_ms < interval_ms)
       interval_ms = timeout_ms;
   }
-  else
+  else {
     interval_ms = 0; /* immediate */
+    /* Wake the multi socket API even when the server sends no response. */
+    Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
+  }
 
   if(Curl_conn_data_pending(data, FIRSTSOCKET))
     rc = 1;
