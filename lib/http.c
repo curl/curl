@@ -1177,73 +1177,47 @@ static void http_switch_to_get(struct Curl_easy *data, int code)
    (data)->state.httpreq == HTTPREQ_POST_FORM || \
    (data)->state.httpreq == HTTPREQ_POST_MIME)
 
-CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
-                          followtype type)
+static CURLcode set_auto_referer(struct Curl_easy *data)
 {
-  bool disallowport = FALSE;
-  bool reachedmax = FALSE;
-  char *follow_url = NULL;
+  CURLU *u;
+  char *referer = NULL;
   CURLUcode uc;
-  CURLcode rewind_result;
-  bool switch_to_get = FALSE;
 
-  DEBUGASSERT(type != FOLLOW_NONE);
+  /* We are asked to automatically set the previous URL as the referer
+     when we get the next URL. We pick the ->url field, which may or may
+     not be 100% correct */
+  Curl_bufref_free(&data->state.referer);
 
-  if(type != FOLLOW_FAKE)
-    data->state.requests++; /* count all real follows */
-  if(type == FOLLOW_REDIR) {
-    if((data->set.maxredirs != -1) &&
-       (data->state.followlocation >= data->set.maxredirs)) {
-      reachedmax = TRUE;
-      type = FOLLOW_FAKE; /* switch to fake to store the would-be-redirected
-                             to URL */
-    }
-    else {
-      data->state.followlocation++; /* count redirect-followings, including
-                                       auth reloads */
+  /* Make a copy of the URL without credentials and fragment */
+  u = curl_url();
+  if(!u)
+    return CURLE_OUT_OF_MEMORY;
 
-      if(data->set.http_auto_referer) {
-        CURLU *u;
-        char *referer = NULL;
+  uc = curl_url_set(u, CURLUPART_URL,
+                    Curl_bufref_ptr(&data->state.url), 0);
+  if(!uc)
+    uc = curl_url_set(u, CURLUPART_FRAGMENT, NULL, 0);
+  if(!uc)
+    uc = curl_url_set(u, CURLUPART_USER, NULL, 0);
+  if(!uc)
+    uc = curl_url_set(u, CURLUPART_PASSWORD, NULL, 0);
+  if(!uc)
+    uc = curl_url_get(u, CURLUPART_URL, &referer, 0);
 
-        /* We are asked to automatically set the previous URL as the referer
-           when we get the next URL. We pick the ->url field, which may or may
-           not be 100% correct */
-        Curl_bufref_free(&data->state.referer);
+  curl_url_cleanup(u);
 
-        /* Make a copy of the URL without credentials and fragment */
-        u = curl_url();
-        if(!u)
-          return CURLE_OUT_OF_MEMORY;
+  if(uc || !referer)
+    return CURLE_OUT_OF_MEMORY;
 
-        uc = curl_url_set(u, CURLUPART_URL,
-                          Curl_bufref_ptr(&data->state.url), 0);
-        if(!uc)
-          uc = curl_url_set(u, CURLUPART_FRAGMENT, NULL, 0);
-        if(!uc)
-          uc = curl_url_set(u, CURLUPART_USER, NULL, 0);
-        if(!uc)
-          uc = curl_url_set(u, CURLUPART_PASSWORD, NULL, 0);
-        if(!uc)
-          uc = curl_url_get(u, CURLUPART_URL, &referer, 0);
+  Curl_bufref_set(&data->state.referer, referer, 0, curl_free);
+  return CURLE_OK;
+}
 
-        curl_url_cleanup(u);
-
-        if(uc || !referer)
-          return CURLE_OUT_OF_MEMORY;
-
-        Curl_bufref_set(&data->state.referer, referer, 0, curl_free);
-      }
-    }
-  }
-
-  if((type != FOLLOW_RETRY) &&
-     (data->req.httpcode != 401) && (data->req.httpcode != 407) &&
-     Curl_is_absolute_url(newurl, NULL, 0, FALSE)) {
-    /* If this is not redirect due to a 401 or 407 response and an absolute
-       URL: do not allow a custom port number */
-    disallowport = TRUE;
-  }
+static CURLcode follow_parse_url(struct Curl_easy *data, const char *newurl,
+                                 followtype type, char **follow_urlp,
+                                 CURLUcode *ucp)
+{
+  CURLUcode uc;
 
   DEBUGASSERT(data->state.uh);
   uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl, (unsigned int)
@@ -1251,6 +1225,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
                      ((type == FOLLOW_REDIR) ? CURLU_URLENCODE : 0) |
                      CURLU_ALLOW_SPACE |
                      (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)));
+  *ucp = uc;
   if(uc) {
     if((uc == CURLUE_OUT_OF_MEMORY) || (type != FOLLOW_FAKE)) {
       failf(data, "The redirect target URL could not be parsed: %s",
@@ -1260,8 +1235,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
 
     /* the URL could not be parsed for some reason, but since this is FAKE
        mode, duplicate the field as-is */
-    follow_url = curlx_strdup(newurl);
-    if(!follow_url)
+    *follow_urlp = curlx_strdup(newurl);
+    if(!*follow_urlp)
       return CURLE_OUT_OF_MEMORY;
   }
   else {
@@ -1272,7 +1247,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
                       Curl_bufref_ptr(&data->state.url),
                       CURLU_URLENCODE | CURLU_ALLOW_SPACE);
     if(!uc)
-      uc = curl_url_get(data->state.uh, CURLUPART_URL, &follow_url, 0);
+      uc = curl_url_get(data->state.uh, CURLUPART_URL, follow_urlp, 0);
     if(uc) {
       curl_url_cleanup(u);
       return Curl_uc_to_curlcode(uc);
@@ -1289,73 +1264,50 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     curl_url_cleanup(u);
 #endif
   }
-  DEBUGASSERT(follow_url);
+  return CURLE_OK;
+}
 
-  if(type == FOLLOW_FAKE) {
-    /* we are only figuring out the new URL if we would have followed locations
-       but now we are done so we can get out! */
-    if(!uc) {
-      CURLU *u = curl_url();
-      char *nocred = NULL;
+static CURLcode follow_fake(struct Curl_easy *data, char *follow_url,
+                            CURLUcode uc, bool reachedmax)
+{
+  /* we are only figuring out the new URL if we would have followed locations
+     but now we are done so we can get out! */
+  if(!uc) {
+    CURLU *u = curl_url();
+    char *nocred = NULL;
 
-      if(!u) {
-        curlx_free(follow_url);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      if(!curl_url_set(u, CURLUPART_URL, follow_url,
-                       CURLU_NON_SUPPORT_SCHEME |
-                       (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)) &&
-         !curl_url_set(u, CURLUPART_USER, NULL, 0) &&
-         !curl_url_set(u, CURLUPART_PASSWORD, NULL, 0))
-        (void)curl_url_get(u, CURLUPART_URL, &nocred, CURLU_GET_EMPTY);
-      curl_url_cleanup(u);
-      if(nocred) {
-        curlx_free(follow_url);
-        follow_url = nocred;
-      }
+    if(!u) {
+      curlx_free(follow_url);
+      return CURLE_OUT_OF_MEMORY;
     }
-    data->info.wouldredirect = follow_url;
-
-    if(reachedmax) {
-      failf(data, "Maximum (%d) redirects followed", data->set.maxredirs);
-      return CURLE_TOO_MANY_REDIRECTS;
+    if(!curl_url_set(u, CURLUPART_URL, follow_url,
+                     CURLU_NON_SUPPORT_SCHEME |
+                     (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)) &&
+       !curl_url_set(u, CURLUPART_USER, NULL, 0) &&
+       !curl_url_set(u, CURLUPART_PASSWORD, NULL, 0))
+      (void)curl_url_get(u, CURLUPART_URL, &nocred, CURLU_GET_EMPTY);
+    curl_url_cleanup(u);
+    if(nocred) {
+      curlx_free(follow_url);
+      follow_url = nocred;
     }
-    return CURLE_OK;
   }
+  data->info.wouldredirect = follow_url;
 
-  if(disallowport)
-    data->state.allow_port = FALSE;
-
-  Curl_bufref_set(&data->state.url, follow_url, 0, curl_free);
-  rewind_result = Curl_req_soft_reset(&data->req, data);
-  infof(data, "Issue another request to this URL: '%s'", follow_url);
-  if((data->set.http_follow_mode == CURLFOLLOW_FIRSTONLY) &&
-     !data->state.http_ignorecustom &&
-     CURL_EASY_STR(data, STRING_CUSTOMREQUEST)) {
-    data->state.http_ignorecustom = TRUE;
-    infof(data, "Drop custom request method for next request");
+  if(reachedmax) {
+    failf(data, "Maximum (%d) redirects followed", data->set.maxredirs);
+    return CURLE_TOO_MANY_REDIRECTS;
   }
+  return CURLE_OK;
+}
 
+static bool follow_switch_get(struct Curl_easy *data)
+{
   /*
-   * We get here when the HTTP code is 300-399 (and 401). We need to perform
-   * differently based on exactly what return code there was.
-   *
-   * News from 7.10.6: we can also get here on a 401 or 407, in case we act on
-   * an HTTP (proxy-) authentication scheme other than Basic.
+   * We get here when the HTTP code is 300-399 and 401 or 407. We need to
+   * perform differently based on exactly what return code there was.
    */
   switch(data->info.httpcode) {
-    /* 401 - Act on a WWW-Authenticate, we keep on moving and do the
-       Authorization: XXXX header in the HTTP request code snippet */
-    /* 407 - Act on a Proxy-Authenticate, we keep on moving and do the
-       Proxy-Authorization: XXXX header in the HTTP request code snippet */
-    /* 300 - Multiple Choices */
-    /* 306 - Not used */
-    /* 307 - Temporary Redirect */
-  default: /* for all above (and the unknown ones) */
-    /* Some codes are explicitly mentioned since I have checked RFC2616 and
-     * they seem to be OK to POST to.
-     */
-    break;
   case 301: /* Moved Permanently */
     /* (quote from RFC7231, section 6.4.2)
      *
@@ -1375,7 +1327,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
      */
     if(HTTPREQ_IS_POST(data) && !data->set.post301) {
       http_switch_to_get(data, 301);
-      switch_to_get = TRUE;
+      return TRUE;
     }
     break;
   case 302: /* Found */
@@ -1397,10 +1349,9 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
      */
     if(HTTPREQ_IS_POST(data) && !data->set.post302) {
       http_switch_to_get(data, 302);
-      switch_to_get = TRUE;
+      return TRUE;
     }
     break;
-
   case 303: /* See Other */
     /* 'See Other' location is not the resource but a substitute for the
      * resource. In this case we switch the method to GET/HEAD, unless the
@@ -1408,24 +1359,92 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
      */
     if(!HTTPREQ_IS_POST(data) || !data->set.post303) {
       http_switch_to_get(data, 303);
-      switch_to_get = TRUE;
+      return TRUE;
     }
     break;
-  case 304: /* Not Modified */
+
     /* 304 means we did a conditional request and it was "Not modified".
      * We should not get any Location: header in this response!
      */
-    break;
-  case 305: /* Use Proxy */
-    /* (quote from RFC2616, section 10.3.6):
+
+    /* 305 (quote from RFC2616, section 10.3.6):
      * "The requested resource MUST be accessed through the proxy given
      * by the Location field. The Location field gives the URI of the
      * proxy. The recipient is expected to repeat this single request
      * via the proxy. 305 responses MUST only be generated by origin
      * servers."
      */
+  default:
     break;
   }
+  return FALSE;
+}
+
+CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
+                          followtype type)
+{
+  bool disallowport = FALSE;
+  bool reachedmax = FALSE;
+  char *follow_url = NULL;
+  CURLUcode uc;
+  CURLcode result;
+  CURLcode rewind_result;
+  bool switch_to_get;
+
+  DEBUGASSERT(type != FOLLOW_NONE);
+
+  if(type != FOLLOW_FAKE)
+    data->state.requests++; /* count all real follows */
+  if(type == FOLLOW_REDIR) {
+    if((data->set.maxredirs != -1) &&
+       (data->state.followlocation >= data->set.maxredirs)) {
+      reachedmax = TRUE;
+      type = FOLLOW_FAKE; /* switch to fake to store the would-be-redirected
+                             to URL */
+    }
+    else {
+      data->state.followlocation++; /* count redirect-followings, including
+                                       auth reloads */
+
+      if(data->set.http_auto_referer) {
+        result = set_auto_referer(data);
+        if(result)
+          return result;
+      }
+    }
+  }
+
+  if((type != FOLLOW_RETRY) &&
+     (data->req.httpcode != 401) && (data->req.httpcode != 407) &&
+     Curl_is_absolute_url(newurl, NULL, 0, FALSE)) {
+    /* If this is not redirect due to a 401 or 407 response and an absolute
+       URL: do not allow a custom port number */
+    disallowport = TRUE;
+  }
+
+  result = follow_parse_url(data, newurl, type, &follow_url, &uc);
+  if(result)
+    return result;
+
+  DEBUGASSERT(follow_url);
+
+  if(type == FOLLOW_FAKE)
+    return follow_fake(data, follow_url, uc, reachedmax);
+
+  if(disallowport)
+    data->state.allow_port = FALSE;
+
+  Curl_bufref_set(&data->state.url, follow_url, 0, curl_free);
+  rewind_result = Curl_req_soft_reset(&data->req, data);
+  infof(data, "Issue another request to this URL: '%s'", follow_url);
+  if((data->set.http_follow_mode == CURLFOLLOW_FIRSTONLY) &&
+     !data->state.http_ignorecustom &&
+     CURL_EASY_STR(data, STRING_CUSTOMREQUEST)) {
+    data->state.http_ignorecustom = TRUE;
+    infof(data, "Drop custom request method for next request");
+  }
+
+  switch_to_get = follow_switch_get(data);
 
   /* When rewind of upload data failed and we are not switching to GET,
    * we need to fail the follow, as we cannot send the data again. */
