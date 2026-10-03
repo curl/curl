@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+FETCH
+CUSTOMREQUEST
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data1 crlf="yes">
+From: attacker@evil
+To: victim@nowhere
+
+A004 OK FETCH completed
+A005 OK [READ-WRITE] SELECT completed
+* 1 FETCH (BODY[] {27}
+LEAKED-FROM-FIRST-MESSAGE
+</data1>
+<data2 crlf="yes">
+From: me@somewhere
+To: fake@nowhere
+
+GENUINE-SECOND-MESSAGE
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+imap
+</server>
+<name>
+IMAP custom FETCH listing literal must not desync the connection
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER0001' -u user:secret -X 'UID FETCH 1:* BODY[]' --next 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER0002' -u user:secret -X 'FETCH 1 BODY[]'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout crlf="yes">
+* 1 FETCH (BODY[] {64}
+From: me@somewhere
+To: fake@nowhere
+
+GENUINE-SECOND-MESSAGE
+</stdout>
+<protocol crlf="yes">
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT %TESTNUMBER0001
+A004 UID FETCH 1:* BODY[]
+A005 SELECT %TESTNUMBER0002
+A006 FETCH 1 BODY[]
+A007 LOGOUT
+</protocol>
+</verify>
+</testcase>
