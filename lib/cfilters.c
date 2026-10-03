@@ -699,7 +699,7 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
                                   struct easy_pollset *ps)
 {
   CURLcode result = CURLE_OK;
-  bool want_io = !!ps->n;
+  const bool want_io = !!ps->n;
   int8_t i;
 
   DEBUGASSERT(data);
@@ -719,8 +719,8 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
    * of its own. */
   for(i = 0; (i < (int)CURL_ARRAYSIZE(conn->cfilter)) && !result; ++i) {
     if(conn->cfilter[i] &&
-       (want_io || !Curl_conn_is_connected(conn, i) ||
-        Curl_cshutdn_has_started(conn, i)))
+       (want_io || !conn->cfilter[i]->connected ||
+        CURL_CONN_IN_SHUTDOWN(conn, i)))
       result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
   }
   return result;
