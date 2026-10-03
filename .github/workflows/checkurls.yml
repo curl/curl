@@ -32,7 +32,6 @@ jobs:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
     name: 'linkcheck'
     runs-on: ubuntu-slim
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -40,12 +39,8 @@ jobs:
 
       - name: 'mdlinkcheck (dry run)'
         if: ${{ github.event_name != 'schedule' }}
-        run: |
-          curl --version
-          scripts/mdlinkcheck --dry-run
+        run: ./scripts/mdlinkcheck --dry-run
 
       - name: 'mdlinkcheck'
-        #if: ${{ github.event_name == 'schedule' }}
-        run: |
-          curl --version
-          scripts/mdlinkcheck
+        if: ${{ github.event_name == 'schedule' }}
+        run: ./scripts/mdlinkcheck
