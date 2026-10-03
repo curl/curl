@@ -345,7 +345,8 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
         goto out;
 
       rc = Curl_poll(cpfds.pfds, cpfds.n,
-                     CURLMIN(timeout_ms, (cpfds.n ? 1000 : 10)));
+                     CURLMIN(timeout_ms ? timeout_ms : 1000,
+                             (cpfds.n ? 1000 : 10)));
       CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), Curl_poll() -> %d",
                   rc);
       if(rc < 0) {
