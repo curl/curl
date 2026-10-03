@@ -78,7 +78,6 @@ my %whitelist = (
     'https://github.com/curl/curl-www' => 1,
     'https://github.com/curl/curl/wcurl' => 1,
 
-    'bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi.ipfs.dweb.link' => 1,
     );
 
 my %url;
