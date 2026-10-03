@@ -64,7 +64,7 @@ my @longline = (
 );
 
 my @non_ascii_allowed = (
-    '\xC3\xB6',  # UTF-8 for https://codepoints.net/U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
+    '\xC3\xB6',  # UTF-8 for U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
 );
 
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
