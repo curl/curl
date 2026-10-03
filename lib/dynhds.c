@@ -33,8 +33,9 @@ static struct dynhds_entry *entry_new(const char *name, size_t namelen,
   struct dynhds_entry *e;
   char *p;
 
-  DEBUGASSERT(name);
-  DEBUGASSERT(value);
+  /* namelen + valuelen <= SIZE_MAX has already been checked by caller */
+  if((SIZE_MAX - namelen - valuelen) < (sizeof(*e) + 2))
+    return NULL;
   e = curlx_calloc(1, sizeof(*e) + namelen + valuelen + 2);
   if(!e)
     return NULL;
@@ -42,8 +43,10 @@ static struct dynhds_entry *entry_new(const char *name, size_t namelen,
   memcpy(p, name, namelen);
   e->namelen = namelen;
   e->value = p += namelen + 1; /* leave a \0 at the end of name */
-  memcpy(p, value, valuelen);
-  e->valuelen = valuelen;
+  if(valuelen) {
+    memcpy(p, value, valuelen);
+    e->valuelen = valuelen;
+  }
   if(opts & DYNHDS_OPT_LOWERCASE)
     Curl_strntolower(e->name, e->name, e->namelen);
   return e;
@@ -135,10 +138,15 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
   struct dynhds_entry *entry = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(dynhds);
-  if(dynhds->max_entries && dynhds->hds_len >= dynhds->max_entries)
-    return CURLE_OUT_OF_MEMORY;
-  if(dynhds->strs_len + namelen + valuelen > dynhds->max_strs_size)
+  /* Accept NULL value with length 0, name must have length */
+  if(!dynhds || !name || !namelen || (!value && valuelen)) {
+    DEBUGASSERT(0);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  /* Does the new header fit into the limits? */
+  if((dynhds->max_entries && (dynhds->hds_len >= dynhds->max_entries)) ||
+     (dynhds->max_strs_size - dynhds->strs_len < namelen) ||
+     (dynhds->max_strs_size - dynhds->strs_len - namelen < valuelen))
     return CURLE_OUT_OF_MEMORY;
 
   entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
@@ -177,7 +185,8 @@ out:
 CURLcode Curl_dynhds_cadd(struct dynhds *dynhds,
                           const char *name, const char *value)
 {
-  return Curl_dynhds_add(dynhds, name, strlen(name), value, strlen(value));
+  return Curl_dynhds_add(dynhds, name, strlen(name),
+                         value, value ? strlen(value) : 0);
 }
 
 CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
@@ -347,10 +356,15 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
     return result;
 
   for(i = 0; i < dynhds->hds_len; ++i) {
-    result = curlx_dyn_addf(dbuf, "%.*s: %.*s\r\n",
-                            (int)dynhds->hds[i]->namelen, dynhds->hds[i]->name,
-                            (int)dynhds->hds[i]->valuelen,
-                            dynhds->hds[i]->value);
+    result = curlx_dyn_addn(dbuf, dynhds->hds[i]->name,
+                            dynhds->hds[i]->namelen);
+    if(!result)
+      result = curlx_dyn_addn(dbuf, STRCONST(": "));
+    if(!result)
+      result = curlx_dyn_addn(dbuf, dynhds->hds[i]->value,
+                              dynhds->hds[i]->valuelen);
+    if(!result)
+      result = curlx_dyn_addn(dbuf, STRCONST("\r\n"));
     if(result)
       break;
   }
