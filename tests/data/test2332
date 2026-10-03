@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+POP3
+timeout
+multi_socket
+libtest
+</keywords>
+</info>
+
+<reply>
+<servercmd>
+DELAY CAPA 5
+</servercmd>
+</reply>
+
+<client>
+<features>
+pop3
+</features>
+<server>
+pop3
+</server>
+<killserver>
+pop3
+</killserver>
+<name>
+POP3 server response timeout with the socket action API
+</name>
+<tool>
+cli_ev_download
+</tool>
+# The test's own deadline must not drive libcurl's timeout handling.
+<command>
+-n 1 -t 1000 -m 3000 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<errorcode>
+28
+</errorcode>
+</verify>
+</testcase>

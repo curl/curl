@@ -504,6 +504,7 @@ typedef enum {
   EXPIRE_FTP_ACCEPT,
   EXPIRE_ALPN_EYEBALLS,
   EXPIRE_SHUTDOWN,
+  EXPIRE_SERVER_RESPONSE,
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
