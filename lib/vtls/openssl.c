@@ -45,6 +45,7 @@
 #include "vtls/hostcheck.h"
 #include "transfer.h"
 #include "multiif.h"
+#include "curl_share.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 #include "curlx/strcopy.h"
@@ -3162,7 +3163,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
   return result;
 }
 
-/* key to use at `multi->proto_hash` */
+/* Key in the multi-local or share-owned CA cache. */
 #define MPROTO_OSSL_X509_KEY  "tls:ossl:x509:share"
 
 struct ossl_x509_share {
@@ -3213,25 +3214,42 @@ static bool ossl_cached_x509_store_different(struct Curl_cfilter *cf,
   return strcmp(mb->CAfile, conn_config->CAfile);
 }
 
+static bool ossl_ca_shared(struct Curl_easy *data)
+{
+  return data->share &&
+    (data->share->specifier & (1 << CURL_LOCK_DATA_CA));
+}
+
+static struct Curl_hash *ossl_ca_cache(struct Curl_easy *data)
+{
+  if(ossl_ca_shared(data))
+    return &data->share->ca_cache;
+  return data->multi ? &data->multi->proto_hash : NULL;
+}
+
 static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
                                               struct Curl_easy *data,
                                               bool *pempty)
 {
-  struct Curl_multi *multi = data->multi;
+  struct Curl_hash *cache = ossl_ca_cache(data);
   struct ossl_x509_share *share;
   X509_STORE *store = NULL;
+  bool shared = ossl_ca_shared(data);
 
-  DEBUGASSERT(multi);
   *pempty = TRUE;
-  share = multi ? Curl_hash_pick(&multi->proto_hash,
-                                 MPROTO_OSSL_X509_KEY,
+  if(shared)
+    Curl_share_lock(data, CURL_LOCK_DATA_CA, CURL_LOCK_ACCESS_SHARED);
+  share = cache ? Curl_hash_pick(cache, MPROTO_OSSL_X509_KEY,
                                  CURL_CSTRLEN(MPROTO_OSSL_X509_KEY)) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
-     !ossl_cached_x509_store_different(cf, data, share)) {
+     !ossl_cached_x509_store_different(cf, data, share) &&
+     X509_STORE_up_ref(share->store)) {
     store = share->store;
     *pempty = (bool)share->store_is_empty;
   }
+  if(shared)
+    Curl_share_unlock(data, CURL_LOCK_DATA_CA);
 
   return store;
 }
@@ -3242,26 +3260,28 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
                                        bool is_empty)
 {
   struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
-  struct Curl_multi *multi = data->multi;
+  struct Curl_hash *cache = ossl_ca_cache(data);
   struct ossl_x509_share *share;
+  bool shared = ossl_ca_shared(data);
 
-  DEBUGASSERT(multi);
-  if(!multi)
+  if(!cache)
     return;
-  share = Curl_hash_pick(&multi->proto_hash,
+  if(shared)
+    Curl_share_lock(data, CURL_LOCK_DATA_CA, CURL_LOCK_ACCESS_SINGLE);
+  share = Curl_hash_pick(cache,
                          MPROTO_OSSL_X509_KEY,
                          CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
 
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
     if(!share)
-      return;
-    if(!Curl_hash_add2(&multi->proto_hash,
+      goto out;
+    if(!Curl_hash_add2(cache,
                        MPROTO_OSSL_X509_KEY,
                        CURL_CSTRLEN(MPROTO_OSSL_X509_KEY),
                        share, oss_x509_share_free)) {
       curlx_free(share);
-      return;
+      goto out;
     }
   }
 
@@ -3272,7 +3292,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
       CAfile = curlx_strdup(conn_config->CAfile);
       if(!CAfile) {
         X509_STORE_free(store);
-        return;
+        goto out;
       }
     }
 
@@ -3287,6 +3307,9 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     share->CAfile = CAfile;
     share->no_partialchain = conn_config->no_partialchain;
   }
+out:
+  if(shared)
+    Curl_share_unlock(data, CURL_LOCK_DATA_CA);
 }
 
 CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
@@ -3296,7 +3319,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
   struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result = CURLE_OK;
   X509_STORE *cached_store;
-  bool cache_criteria_met, is_empty;
+  bool cache_criteria_met, is_empty = TRUE;
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
      or no source is provided and we are falling back to OpenSSL's built-in
@@ -3310,8 +3333,9 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 
   ERR_set_mark();
 
-  cached_store = ossl_get_cached_x509_store(cf, data, &is_empty);
-  if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
+  cached_store = cache_criteria_met ?
+    ossl_get_cached_x509_store(cf, data, &is_empty) : NULL;
+  if(cached_store) {
     SSL_CTX_set_cert_store(octx->ssl_ctx, cached_store);
     octx->store_is_empty = is_empty;
   }

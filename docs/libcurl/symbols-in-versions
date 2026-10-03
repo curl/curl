@@ -73,6 +73,7 @@ CURL_ISOCPP                     7.10.2        -           8.14.1
 CURL_LOCK_ACCESS_NONE           7.10.3
 CURL_LOCK_ACCESS_SHARED         7.10.3
 CURL_LOCK_ACCESS_SINGLE         7.10.3
+CURL_LOCK_DATA_CA               8.23.0
 CURL_LOCK_DATA_CONNECT          7.10.3
 CURL_LOCK_DATA_COOKIE           7.10.3
 CURL_LOCK_DATA_DNS              7.10.3

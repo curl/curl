@@ -64,6 +64,16 @@ server.
 Note that when you use the multi interface, all easy handles added to the same
 multi handle share the SSL session cache by default without using this option.
 
+## CURL_LOCK_DATA_CA
+
+Parsed CA certificate stores are shared across the easy handles using this
+shared object. Supported by OpenSSL. See CURLOPT_CA_CACHE_TIMEOUT(3).
+
+Added in 8.23.0.
+
+Note that when you use the multi interface, all easy handles added to the same
+multi handle share the CA cache by default without using this option.
+
 ## CURL_LOCK_DATA_CONNECT
 
 Put the connection cache in the share object and make all easy handles using
