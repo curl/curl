@@ -109,15 +109,15 @@ requests to [subdomain
 based](https://docs.ipfs.tech/how-to/address-ipfs-on-web/#subdomain-gateway)
 ones. A request using:
 
-    curl ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi --ipfs-gateway https://inbrowser.link/
+    curl ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi --ipfs-gateway https://dweb.link
 
 Which would be translated to:
 
-    https://inbrowser.link/ipfs/bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
+    https://dweb.link/ipfs/bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi
 
 redirects to:
 
-    https://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi.ipfs.inbrowser.link/
+    https://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi.ipfs.dweb.link
 
 If you trust this behavior from your gateway of choice then passing the `-L`
 option follows the redirect.
