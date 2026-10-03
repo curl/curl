@@ -42,7 +42,7 @@ to include from the contents. For example, asking for offset "2-10" means
 offset two to offset ten, inclusive, resulting in 9 bytes in total. `2-2`
 means a single byte at offset 2. Not providing a second number implies to the
 end of data. The start offset cannot be larger than the end offset. Asking for
-a range that is outside of the file size makes the variable contents empty.
+a range that is outside of the source size makes the variable contents empty.
 For example, getting the first one hundred bytes from a given file:
 
     curl --variable "fraction[0-99]@filename"
