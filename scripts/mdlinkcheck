@@ -191,7 +191,7 @@ sub checkurl {
     my @content;
 
     printf STDERR "checking: $url\n";
-    if(open(my $fh, '-|', 'curl', '--disable', '--http1.1', '-ILfsm10', '-vvvv', '--retry', '2', '--retry-delay', '5', '--connect-timeout', '10',
+    if(open(my $fh, '-|', 'curl', '--disable', '-ILfsm10', '-vvvv', '--retry', '2', '--retry-delay', '5', '--connect-timeout', '10',
                           '-A', 'Mozilla/curl.se link-probe', $url)) {
         @content = <$fh>;
         close $fh;
