@@ -916,7 +916,7 @@ sub singletest_run {
             $tool = $tool_name . exe_ext('TOOL');
         }
 
-        if($tool =~ /^lib/) {
+        if($tool =~ /^(lib|cli_)/) {
             $tool = "libtests" . exe_ext('TOOL');
             $CMDLINE = $LIBDIR . $tool;
         }
