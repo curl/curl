@@ -549,6 +549,7 @@ else {
 #  PermitRootLogin                  : OpenSSH 1.2.1 and later
 #  PermitTunnel                     : OpenSSH 4.3.0 and later
 #  PermitUserEnvironment            : OpenSSH 3.5.0 and later
+#  PerSourcePenalties               : OpenSSH 9.8.0 and later
 #  PidFile                          : OpenSSH 2.1.0 and later
 #  Port                             : OpenSSH 1.2.1 and later
 #  PrintLastLog                     : OpenSSH 2.9.0 and later
@@ -641,6 +642,9 @@ push @cfgarr, 'MaxStartups 5';
 push @cfgarr, 'PasswordAuthentication no';
 push @cfgarr, 'PermitEmptyPasswords no';
 push @cfgarr, 'PermitRootLogin no';
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 980)) {
+    push @cfgarr, 'PerSourcePenalties no';
+}
 push @cfgarr, 'PrintLastLog no';
 push @cfgarr, 'PrintMotd no';
 push @cfgarr, 'PubkeyAuthentication yes';
