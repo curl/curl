@@ -78,7 +78,6 @@ my %whitelist = (
     'https://github.com/curl/curl-www' => 1,
     'https://github.com/curl/curl/wcurl' => 1,
 
-    'https://ipfs.io/ipfs/bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi' => 1,  # 429 with 'retry-after: 900'
     );
 
 my %url;
