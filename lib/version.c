@@ -186,8 +186,9 @@ char *curl_version(void)
   int j;
 
 #ifdef DEBUGBUILD
-  /* Override version string when environment variable CURL_VERSION is set */
-  const char *debugversion = getenv("CURL_VERSION");
+  /* Override version string when environment variable CURL_DEBUG_VERSION is
+     set */
+  const char *debugversion = getenv("CURL_DEBUG_VERSION");
   if(debugversion) {
     curl_msnprintf(out, sizeof(out), "%s", debugversion);
     return out;

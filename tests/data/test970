@@ -37,7 +37,7 @@ proxy
 <setenv>
 CURL_TIME=13
 CURL_DEBUG_SIZE=4019
-CURL_VERSION=curl-unit-test-fake-version
+CURL_DEBUG_VERSION=curl-unit-test-fake-version
 </setenv>
 <name>
 HTTP GET with JSON output
