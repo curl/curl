@@ -93,6 +93,7 @@ class TestEyeballs:
     # download using HTTP/3 on a server that answers UDP with junk: QUIC has
     # seen data, fallback on h2 at the hard timeout
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
+    @pytest.mark.skipif(condition=not Env.curl_uses_lib('ngtcp2'), reason="requires ngtcp2 packet handling")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     def test_06_06_h3_stalled_fallback_h2(self, env: Env, httpd, nghttpx):
         curl = CurlClient(env=env)
