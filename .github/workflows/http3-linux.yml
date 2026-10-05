@@ -131,9 +131,9 @@ jobs:
 
       - name: 'cache openssl-prev'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache4-openssl-prev-http3
+        id: cache1-openssl-prev-http3
         env:
-          cache-name: cache4-openssl-prev-http3
+          cache-name: cache1-openssl-prev-http3
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
@@ -211,7 +211,7 @@ jobs:
               !steps.cache1-gnutls.outputs.cache-hit ||
               !steps.cache1-libressl.outputs.cache-hit ||
               !steps.cache1-openssl-http3-no-deprecated.outputs.cache-hit ||
-              !steps.cache4-openssl-prev-http3.outputs.cache-hit ||
+              !steps.cache1-openssl-prev-http3.outputs.cache-hit ||
               !steps.cache1-wolfssl.outputs.cache-hit ||
               !steps.cache1-nghttp3.outputs.cache-hit ||
               !steps.cache1-ngtcp2-boringssl.outputs.cache-hit ||
@@ -315,7 +315,7 @@ jobs:
           make -j1 install_sw
 
       - name: 'build openssl-prev'
-        if: ${{ !steps.cache4-openssl-prev-http3.outputs.cache-hit }}
+        if: ${{ !steps.cache1-openssl-prev-http3.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
@@ -674,9 +674,9 @@ jobs:
       - name: 'cache openssl-prev'
         if: ${{ contains(matrix.build.name, 'openssl-prev') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache4-openssl-prev-http3
+        id: cache1-openssl-prev-http3
         env:
-          cache-name: cache4-openssl-prev-http3
+          cache-name: cache1-openssl-prev-http3
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
@@ -759,15 +759,15 @@ jobs:
       - name: 'cache quiche'
         if: ${{ contains(matrix.build.name, 'quiche') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache3-quiche
+        id: cache1-quiche
         env:
-          cache-name: cache3-quiche
+          cache-name: cache1-quiche
         with:
           path: ~/quiche
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}-${{ runner.arch }}
 
       - name: 'build quiche and boringssl'
-        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache3-quiche.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache1-quiche.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
