@@ -185,6 +185,8 @@ out:
 CURLcode Curl_dynhds_cadd(struct dynhds *dynhds,
                           const char *name, const char *value)
 {
+  if(!name)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   return Curl_dynhds_add(dynhds, name, strlen(name),
                          value, value ? strlen(value) : 0);
 }

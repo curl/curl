@@ -74,6 +74,10 @@ static CURLcode test_unit2602(const char *arg)
   fail_unless(dynhds_ccount_name(&hds, "TEST2") == 1, "should");
   fail_unless(dynhds_ccontains(&hds, "TesT2"), "should");
   fail_unless(dynhds_contains(&hds, "TeSt2", 5), "should");
+
+  /* Check overflow detection */
+  fail_unless(Curl_dynhds_add(&hds, "test1", SIZE_MAX / 2,
+                              "123", SIZE_MAX / 2), "overflow check failed");
   Curl_dynhds_free(&hds);
 
   /* add header exceeding max overall length */
