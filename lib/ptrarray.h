@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-/* A set of pointers, kept in an array with up to UINT32_MAX entries */
+/* An array of pointers with up to UINT32_MAX entries */
 struct ptrarray {
   void **data; /* #capacity array of pointers */
   uint32_t n;

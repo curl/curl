@@ -6,7 +6,7 @@ unittest
 uint_bset
 u8_strset
 u32_ptrset
-aptrset
+ptrarray
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ aptrset
 unittest
 </features>
 <name>
-uint_bset, u8_strset, u32_ptrset and aptrset unit tests
+uint_bset, u8_strset, u32_ptrset and ptrarray unit tests
 </name>
 </client>
 </testcase>

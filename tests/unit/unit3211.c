@@ -289,9 +289,9 @@ static void t3211_check_ptrarray(void)
   fail_unless(!Curl_ptrarray_count(&pa), "ptrarray init not empty");
 
   result = Curl_ptrarray_add(&pa, &d0);
-  fail_unless(!result, "ptrarray ad&d0 failed");
+  fail_unless(!result, "ptrarray add0 failed");
   fail_unless(Curl_ptrarray_get(&pa, 0) == &d0, "ptrarray get0 failed");
-  fail_unless(Curl_ptrarray_count(&pa) == 1, "ptrarray ad&d0 count wrong");
+  fail_unless(Curl_ptrarray_count(&pa) == 1, "ptrarray add0 count wrong");
   result = Curl_ptrarray_add(&pa, &d1);
   fail_unless(!result, "ptrarray add1 failed");
   fail_unless(Curl_ptrarray_get(&pa, 1) == &d1, "ptrarray get1 failed");
