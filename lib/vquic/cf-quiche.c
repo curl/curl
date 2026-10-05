@@ -176,7 +176,7 @@ struct h3_stream_ctx {
   uint64_t id;             /* HTTP/3 protocol stream identifier */
   struct h1_req_parser h1; /* h1 request parsing */
   uint64_t error3;         /* HTTP/3 stream error code */
-  int status_code;         /* HTTP status code */
+  int32_t status_code;     /* HTTP status code */
   CURLcode xfer_result;    /* result from cf_quiche_write_(hd/body) */
   BIT(opened);             /* TRUE after stream has been opened */
   BIT(closed);             /* TRUE on stream close */

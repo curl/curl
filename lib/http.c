@@ -4737,10 +4737,10 @@ out:
 }
 
 /* Decode HTTP status code string. */
-CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len)
+CURLcode Curl_http_decode_status(int32_t *pstatus, const char *s, size_t len)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-  int status = 0;
+  int32_t status = 0;
   int i;
 
   if(len != 3)

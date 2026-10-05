@@ -176,7 +176,7 @@ struct h3_stream_ctx {
   size_t tx_in_flight_size;     /* sendbuf data "in flight" */
   size_t tx_in_flight_ideal;    /* ideal amount of un-acked send data */
   uint32_t mid;                 /* `mid` of transfer owning this stream */
-  int status_code;              /* HTTP status code */
+  int32_t status_code;              /* HTTP status code */
   CURLcode xfer_result;         /* result from xfer_resp_write(_hd) */
   BIT(resp_hds_complete);       /* we have a complete, final response */
   BIT(closed);                  /* TRUE on stream close */

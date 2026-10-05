@@ -580,7 +580,7 @@ static int proxy_h2_on_header(nghttp2_session *session,
 
   if(namelen == CURL_CSTRLEN(HTTP_PSEUDO_STATUS) &&
      !memcmp(HTTP_PSEUDO_STATUS, name, namelen)) {
-    int http_status;
+    int32_t http_status;
     struct http_resp *resp;
 
     /* status: always comes first, we might get more than one response,
