@@ -153,6 +153,29 @@ void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx)
   }
 }
 
+struct Curl_easy *Curl_cf_ngtcp2_get_xfer(struct Curl_cfilter *cf,
+                                          void *stream_user_data,
+                                          struct h3_stream_ctx **pstream)
+{
+  struct h3_stream_ctx *stream = stream_user_data;
+
+  if(pstream)
+    *pstream = stream;
+  if(stream && (stream->mid != UINT32_MAX)) {
+    struct Curl_easy *data, *call_data = CF_DATA_CURRENT(cf);
+    if(!call_data || !call_data->multi) {
+      DEBUGASSERT(0);
+      return NULL;
+    }
+    data = Curl_multi_get_easy(call_data->multi, stream->mid);
+    if(data && (data->id == stream->xfer_id))
+      return data;
+    curl_mfprintf(stderr, "H3 stream xfer is NULL\n");
+    DEBUGASSERT(0);
+  }
+  return NULL;
+}
+
 static ngtcp2_conn *get_conn(ngtcp2_crypto_conn_ref *conn_ref)
 {
   struct Curl_cfilter *cf = conn_ref->user_data;
@@ -323,10 +346,11 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   nghttp3_ssize rc;
   uint64_t nconsumed;
   int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
-  struct Curl_easy *data = stream_user_data;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  (void)offset;
+  struct h3_stream_ctx *stream;
+  struct Curl_easy *data =
+    Curl_cf_ngtcp2_get_xfer(cf, stream_user_data, &stream);
 
+  (void)offset;
   rc = nghttp3_conn_read_stream(ctx->h3conn, stream_id, buf, buflen, fin);
   if(rc < 0) {
     if(data && stream) {
@@ -378,7 +402,7 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Curl_easy *data = Curl_cf_ngtcp2_get_xfer(cf, stream_user_data, NULL);
   int rv;
 
   (void)tconn;
@@ -412,7 +436,7 @@ static int cb_stream_close2(ngtcp2_conn *tconn, uint32_t flags,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Curl_easy *data = Curl_cf_ngtcp2_get_xfer(cf, stream_user_data, NULL);
   uint64_t h3_app_error_code = NGHTTP3_H3_NO_ERROR;
   int rv;
 
@@ -445,14 +469,15 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct Curl_easy *data = stream_user_data;
+  struct Curl_easy *data = Curl_cf_ngtcp2_get_xfer(cf, stream_user_data, NULL);
   int rv;
   (void)tconn;
   (void)final_size;
   (void)app_error_code;
 
   rv = nghttp3_conn_shutdown_stream_read(ctx->h3conn, stream_id);
-  CURL_TRC_CF(data, cf, "[%" PRId64 "] reset -> %d", stream_id, rv);
+  if(data)
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] reset -> %d", stream_id, rv);
   if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -501,8 +526,9 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct Curl_easy *s_data = stream_user_data;
   struct h3_stream_ctx *stream;
+  struct Curl_easy *data =
+    Curl_cf_ngtcp2_get_xfer(cf, stream_user_data, &stream);
   int rv;
   (void)tconn;
   (void)max_data;
@@ -511,11 +537,11 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
-  stream = H3_STREAM_CTX(ctx, s_data);
   if(stream && stream->quic_flow_blocked) {
-    CURL_TRC_CF(s_data, cf, "[%" PRId64 "] unblock quic flow", stream_id);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] unblock quic flow", stream_id);
     stream->quic_flow_blocked = FALSE;
-    Curl_multi_mark_dirty(s_data);
+    if(data)
+      Curl_multi_mark_dirty(data);
   }
   return 0;
 }
@@ -1408,14 +1434,7 @@ static struct h3_stream_ctx *cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx,
 static struct h3_stream_ctx *cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx,
                                                   int64_t stream_id)
 {
-  struct Curl_easy *data =
-    ngtcp2_conn_get_stream_user_data(ctx->qconn, stream_id);
-
-  if(!data) {
-    return NULL;
-  }
-
-  return H3_STREAM_CTX(ctx, data);
+  return ngtcp2_conn_get_stream_user_data(ctx->qconn, stream_id);
 }
 #endif
 
@@ -1875,22 +1894,28 @@ static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
 }
 
 CURLcode Curl_cf_ngtcp2_h3_stream_setup(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data)
+                                        struct Curl_easy *data,
+                                        struct h3_stream_ctx **pstream)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
+  *pstream = NULL;
   if(!data)
     return CURLE_FAILED_INIT;
 
-  if(stream)
+  if(stream) {
+    *pstream = stream;
     return CURLE_OK;
+  }
 
   stream = curlx_calloc(1, sizeof(*stream));
   if(!stream)
     return CURLE_OUT_OF_MEMORY;
 
   stream->id = -1;
+  stream->xfer_id = data->id;
+  stream->mid = data->mid;
   stream->rx_offset = 0;
   stream->rx_offset_max = H3_STREAM_WINDOW_SIZE_INITIAL;
   stream->tx_in_flight_ideal = H3_STREAM_SEND_BUF_INITIAL;
@@ -1909,6 +1934,7 @@ CURLcode Curl_cf_ngtcp2_h3_stream_setup(struct Curl_cfilter *cf,
   if(Curl_u32_ptrset_count(&ctx->streams) == 1)
     cf_ngtcp2_setup_keep_alive(cf, data);
 
+  *pstream = stream;
   return CURLE_OK;
 }
 
