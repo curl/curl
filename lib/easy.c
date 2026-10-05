@@ -565,7 +565,7 @@ static CURLcode populate_cpfds(struct curl_pollfds *cpfds, struct events *ev)
     result = Curl_pollfds_add_sock(cpfds, m->socket.fd, m->socket.events);
 #if DEBUG_EV_POLL
     curl_mfprintf(stderr, "poll() %d check socket %d\n",
-                  cpfds->n, cpfds->pfds[cpfds->n - 1].fd);
+                  cpfds->n - 1, cpfds->pfds[cpfds->n - 1].fd);
 #endif
   }
   return result;
