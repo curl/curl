@@ -617,7 +617,7 @@ parse_cookie_header(struct Curl_easy *data,
       }
 
       /* whether there's separator or not */
-      if(curlx_str_casecompare(&name, "secure")) {
+      else if(curlx_str_casecompare(&name, "secure")) {
         if(secure_origin || !ci->running)
           co->secure = TRUE;
         else {
