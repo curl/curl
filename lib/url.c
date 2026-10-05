@@ -2061,7 +2061,7 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   CURLU *uh;
-  CURLUcode uc;
+  CURLUcode uc = CURLUE_OK;
   bool use_set_uh = (data->set.uh && !data->state.this_is_a_follow);
   uint16_t port_override = data->state.allow_port ? data->set.use_port : 0;
   uint32_t scope_id = 0;
@@ -2086,41 +2086,78 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
     goto out;
   }
 
-  /* Calculate the *real* URL this transfer uses, applying defaults
-   * where information is missing. */
-  if(CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL) &&
-     !Curl_is_absolute_url(Curl_bufref_ptr(&data->state.url), NULL, 0, TRUE)) {
-    char *url = curl_maprintf("%s://%s",
-                              CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL),
-                              Curl_bufref_ptr(&data->state.url));
-    if(!url) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
-    Curl_bufref_set(&data->state.url, url, 0, curl_free);
-  }
-
   if(!use_set_uh) {
-    char *newurl;
-    uc = curl_url_set(uh, CURLUPART_URL, Curl_bufref_ptr(&data->state.url),
-                      (unsigned int)(CURLU_GUESS_SCHEME |
-                       CURLU_NON_SUPPORT_SCHEME |
-                       (data->set.disallow_username_in_url ?
-                        CURLU_DISALLOW_USER : 0) |
-                       (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)));
-    if(uc) {
-      failf(data, "URL rejected: %s", curl_url_strerror(uc));
-      result = Curl_uc_to_curlcode(uc);
-      goto out;
+    bool prepend_sheme = FALSE;
+    /* special-case when 'file' is default as a normal path is not a valid URL
+       without the 'file' scheme present */
+    if(curl_strequal("file", CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL)) &&
+       !Curl_is_absolute_url(Curl_bufref_ptr(&data->state.url), NULL, 0, TRUE))
+      prepend_sheme = TRUE;
+    else {
+      uc = curl_url_set(uh, CURLUPART_URL, Curl_bufref_ptr(&data->state.url),
+                        (unsigned int)
+                        CURLU_GUESS_SCHEME |
+                        CURLU_NON_SUPPORT_SCHEME |
+                        (data->set.disallow_username_in_url ?
+                         CURLU_DISALLOW_USER : 0) |
+                        (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
+      if(uc) {
+        failf(data, "URL rejected: %s", curl_url_strerror(uc));
+        result = Curl_uc_to_curlcode(uc);
+        goto out;
+      }
+
+      if(CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL)) {
+        /* check if we there was a scheme provided */
+        char *scheme;
+        uc = curl_url_get(uh, CURLUPART_SCHEME, &scheme,
+                          CURLU_NO_GUESS_SCHEME);
+        if(uc == CURLUE_NO_SCHEME)
+          prepend_sheme = TRUE;
+        curl_free(scheme);
+        if(uc && uc != CURLUE_NO_SCHEME) {
+          result = Curl_uc_to_curlcode(uc);
+          goto out;
+        }
+      }
     }
 
-    /* after it was parsed, get the generated normalized version */
-    uc = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_GET_EMPTY);
-    if(uc) {
-      result = Curl_uc_to_curlcode(uc);
-      goto out;
+    if(prepend_sheme) {
+      char *url = curl_maprintf("%s://%s",
+                                CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL),
+                                Curl_bufref_ptr(&data->state.url));
+      if(!url) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
+      uc = curl_url_set(uh, CURLUPART_URL, url,
+                        (unsigned int)
+                        CURLU_GUESS_SCHEME |
+                        CURLU_NON_SUPPORT_SCHEME |
+                        (data->set.disallow_username_in_url ?
+                         CURLU_DISALLOW_USER : 0) |
+                        (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
+      curl_free(url);
+      if(uc) {
+        failf(data, "URL rejected: %s", curl_url_strerror(uc));
+        result = Curl_uc_to_curlcode(uc);
+        goto out;
+      }
     }
-    Curl_bufref_set(&data->state.url, newurl, 0, curl_free);
+    {
+      char *newurl;
+      /* after it was parsed, and possibly given a new scheme, get the
+         normalized version */
+      uc = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_GET_EMPTY);
+      if(uc) {
+        result = Curl_uc_to_curlcode(uc);
+        goto out;
+      }
+      if(prepend_sheme)
+        infof(data, "Applied default protocol '%s'",
+              CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL));
+      Curl_bufref_set(&data->state.url, newurl, 0, curl_free);
+    }
   }
 
 #ifdef USE_IPV6

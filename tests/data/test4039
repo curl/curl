@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+--proto-default
+</keywords>
+</info>
+
+<client>
+<features>
+http
+</features>
+<name>
+--proto-default http with an invalid URL
+</name>
+<command>
+/example.com/ --proto-default http
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>
