@@ -52,7 +52,7 @@ env:
   # renovate: datasource=github-tags depName=nghttp2/nghttp2
   NGHTTP2_VERSION: 1.70.0
   # renovate: datasource=github-tags depName=openldap/openldap versioning=regex:^(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)$ extractVersion=^OPENLDAP_REL_ENG_(?<version>.+)$
-  OPENLDAP_VERSION: 2.6.10
+  OPENLDAP_VERSION: 2_6_10
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
   OPENSSL_VERSION: 4.0.3
   # renovate: datasource=github-tags depName=rustls/rustls-ffi
@@ -697,9 +697,9 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') && !steps.cache1-openldap-static.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
+            "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION//_/.}.tgz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
-          cd "openldap-${OPENLDAP_VERSION}"
+          cd "openldap-${OPENLDAP_VERSION//_/.}"
           autoreconf -fi
           ./configure --prefix=/home/runner/pkg/openldap-static --enable-static --disable-shared --disable-slapd
           make install
