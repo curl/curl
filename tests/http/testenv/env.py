@@ -352,7 +352,7 @@ class EnvConfig:
             if p.returncode != 0:
                 self.sshd = None
             else:
-                m = re.match(r"^OpenSSH_(\d+\.\d+.*),.*", p.stderr)
+                m = re.match(r"^OpenSSH_(\d+\.\d+).*,.*", p.stderr)
                 assert m, f"version: {p.stderr}"
                 if m:
                     self._sshd_version = m.group(1)
@@ -438,6 +438,10 @@ class EnvConfig:
     @property
     def h2o_version(self):
         return self._h2o_version
+
+    @property
+    def sshd_version(self):
+        return self._sshd_version
 
     @property
     def tcpdump(self) -> Optional[str]:
@@ -657,6 +661,10 @@ class Env:
     @classmethod
     def h2o_version(cls) -> str:
         return cls.CONFIG.h2o_version
+
+    @classmethod
+    def sshd_version(cls) -> str:
+        return cls.CONFIG.sshd_version
 
     @classmethod
     def caddy_is_at_least(cls, minv) -> bool:

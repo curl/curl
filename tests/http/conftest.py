@@ -57,6 +57,8 @@ def pytest_report_header(config):
         report.extend([f"  h2o: {env.h2o_version()}"])
     if env.has_caddy():
         report.extend([f"  Caddy: {env.caddy_version()}"])
+    if env.has_sshd():
+        report.extend([f"  sshd: {env.sshd_version()}"])
     if env.has_vsftpd():
         report.extend([f"  VsFTPD: {env.vsftpd_version()}"])
     buildinfo_fn = os.path.join(env.build_dir, "buildinfo.txt")
