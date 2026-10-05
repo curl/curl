@@ -27,7 +27,6 @@ MooMoo
 SSL
 !Schannel
 !GnuTLS
-!mbedtls
 local-http
 </features>
 <server>
