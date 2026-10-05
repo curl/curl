@@ -497,6 +497,7 @@ class Env:
     @classmethod
     def have_h3_server(cls) -> bool:
         return cls.CONFIG.nghttpx_with_h3
+
     @staticmethod
     def have_openssl_ech() -> bool:
         return Env.CONFIG.openssl_ech
