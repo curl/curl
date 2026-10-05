@@ -51,8 +51,8 @@ env:
   LIBRESSL_VERSION: 4.3.3
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
   OPENSSL_VERSION: 4.0.3
-  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>3\..+)$ registryUrl=https://github.com
-  OPENSSL_PREV_VERSION: 3.6.5
+  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>3\.5\..+)$ registryUrl=https://github.com
+  OPENSSL_PREV_VERSION: 3.5.9
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
   QUICHE_VERSION: 0.30.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
