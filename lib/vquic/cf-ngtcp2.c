@@ -679,15 +679,9 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   *pnwritten = 0;
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
-  result = Curl_cf_ngtcp2_h3_stream_setup(cf, data);
+  result = Curl_cf_ngtcp2_h3_stream_setup(cf, data, &stream);
   if(result)
     goto out;
-  stream = H3_STREAM_CTX(ctx, data);
-  DEBUGASSERT(stream);
-  if(!stream) {
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
 
   result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
     !data->state.http_ignorecustom ?
@@ -724,7 +718,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
     nva[i].flags = NGHTTP3_NV_FLAG_NONE;
   }
 
-  rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &sid, data);
+  rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &sid, stream);
   if(rc) {
     failf(data, "cannot open bidi streams");
     result = CURLE_SEND_ERROR;
