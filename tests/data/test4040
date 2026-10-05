@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+--proto-default
+</keywords>
+</info>
+
+<client>
+<name>
+--proto-default file and invalid URL
+</name>
+<features>
+file
+</features>
+<command>
+--proto-default file remote.example/etc/passwd
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>
