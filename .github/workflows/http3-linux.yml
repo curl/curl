@@ -782,6 +782,7 @@ jobs:
           rm -rf quiche/target/release/build/boring-sys-*/out/build/CMakeFiles
           rm -rf quiche/target/release/deps
           du -t 4MB quiche
+          /home/runner/.rustup/toolchains/stable-aarch64-unknown-linux-gnu/bin/rustc --version
 
           # include dir: /home/runner/quiche/boringssl/include
           # lib dir:     /home/runner/quiche/boringssl/lib
