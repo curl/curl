@@ -1281,7 +1281,6 @@ static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
   int32_t stream_id = frame->hd.stream_id;
 
   (void)session;
-  data = cf_h2_get_stream_xfer(cf, stream_id, NULL);
   data = cf_h2_get_stream_xfer(cf, stream_id, &stream);
   if(data) {
 #ifdef CURLVERBOSE
