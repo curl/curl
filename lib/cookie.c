@@ -630,8 +630,9 @@ parse_cookie_header(struct Curl_easy *data,
         /* only if a separating equals sign is present */
         if(curlx_str_casecompare(&name, "path"))
           cookie[COOKIE_PATH] = val;
-        else if(curlx_str_casecompare(&name, "domain") && curlx_strlen(&val)) {
-          if(!parse_domain(data, co, &cookie[COOKIE_DOMAIN], &val, &domain))
+        else if(curlx_str_casecompare(&name, "domain")) {
+          if(curlx_strlen(&val) &&
+             !parse_domain(data, co, &cookie[COOKIE_DOMAIN], &val, &domain))
             return CURLE_OK;
         }
         else if(curlx_str_casecompare(&name, "max-age") && curlx_strlen(&val))
