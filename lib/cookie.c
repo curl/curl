@@ -448,29 +448,6 @@ static bool parse_first_pair(struct Curl_easy *data, struct Cookie *co,
   return TRUE;
 }
 
-static bool parse_flag(struct Curl_easy *data, struct Cookie *co,
-                       const struct CookieInfo *ci,
-                       struct Curl_str *name, bool secure)
-{
-  /*
-   * secure cookies are only allowed to be set when the connection is
-   * using a secure protocol, or when the cookie is being set by
-   * reading from file
-   */
-  if(curlx_str_casecompare(name, "secure")) {
-    if(secure || !ci->running)
-      co->secure = TRUE;
-    else {
-      infof(data, "skipped cookie because not 'secure'");
-      return FALSE;
-    }
-  }
-  else if(curlx_str_casecompare(name, "httponly"))
-    co->httponly = TRUE;
-
-  return TRUE;
-}
-
 static bool parse_domain(struct Curl_easy *data, struct Cookie *co,
                          struct Curl_str *cookie_domain,
                          struct Curl_str *val,
@@ -638,20 +615,31 @@ parse_cookie_header(struct Curl_easy *data,
         if(!parse_first_pair(data, co, cookie, &name, &val, sep))
           return CURLE_OK;
       }
-      else if(!sep) {
-        if(!parse_flag(data, co, ci, &name, secure_origin))
-          return CURLE_OK;
+
+      /* whether there's separator or not */
+      if(curlx_str_casecompare(&name, "secure")) {
+        if(secure_origin || !ci->running)
+          co->secure = TRUE;
+        else {
+          infof(data, "skipped cookie because not 'secure'");
+          return FALSE;
+        }
       }
-      else if(curlx_str_casecompare(&name, "path"))
-        cookie[COOKIE_PATH] = val;
-      else if(curlx_str_casecompare(&name, "domain") && curlx_strlen(&val)) {
-        if(!parse_domain(data, co, &cookie[COOKIE_DOMAIN], &val, &domain))
-          return CURLE_OK;
+      else if(curlx_str_casecompare(&name, "httponly"))
+        co->httponly = TRUE;
+      else if(sep) {
+        /* only if a separating equals sign is present */
+        if(curlx_str_casecompare(&name, "path"))
+          cookie[COOKIE_PATH] = val;
+        else if(curlx_str_casecompare(&name, "domain") && curlx_strlen(&val)) {
+          if(!parse_domain(data, co, &cookie[COOKIE_DOMAIN], &val, &domain))
+            return CURLE_OK;
+        }
+        else if(curlx_str_casecompare(&name, "max-age") && curlx_strlen(&val))
+          parse_maxage(co, &val, &now);
+        else if(curlx_str_casecompare(&name, "expires") && curlx_strlen(&val))
+          parse_expires(co, &val, &now);
       }
-      else if(curlx_str_casecompare(&name, "max-age") && curlx_strlen(&val))
-        parse_maxage(co, &val, &now);
-      else if(curlx_str_casecompare(&name, "expires") && curlx_strlen(&val))
-        parse_expires(co, &val, &now);
     }
   } while(!curlx_str_single(&ptr, ';'));
 
