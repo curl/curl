@@ -42,8 +42,8 @@ env:
   OPENSSH_WINDOWS_VERSION: 10.0.0.0p2-Preview
   OPENSSH_WINDOWS_SHA256_ARM64: 698c6aec31c1dd0fb996206e8741f4531a97355686b5431ef347d531b07fcd42
   OPENSSH_WINDOWS_SHA256_WIN64: 23f50f3458c4c5d0b12217c6a5ddfde0137210a30fa870e98b29827f7b43aba5
-  STUNNEL_VERSION: '5.82'
-  STUNNEL_SHA256: 722c1ad626919af2b0034666b4d19cc4795e925c32f60e8f3c59af4fb3ad2dfc
+  # renovate: datasource=github-tags depName=mtrojnar/stunnel versioning=semver-coerced extractVersion=^stunnel-(?<version>.+)$
+  STUNNEL_VERSION: 5.82
 
 jobs:
   build-cache:
@@ -69,7 +69,7 @@ jobs:
           cd /c && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pkg.bin
-          sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${STUNNEL_SHA256}" && 7z x -y pkg.bin >/dev/null && rm -f pkg.bin && ls -l && bin/tstunnel -version
+          sha256sum pkg.bin && 7z x -y pkg.bin >/dev/null && rm -f pkg.bin && ls -l && bin/tstunnel -version
 
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
