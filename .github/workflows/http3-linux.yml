@@ -760,21 +760,21 @@ jobs:
       - name: 'cache quiche'
         if: ${{ contains(matrix.build.name, 'quiche') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache4-quiche
+        id: cache3-quiche
         env:
-          cache-name: cache4-quiche
+          cache-name: cache3-quiche
         with:
           path: ~/quiche
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}-${{ runner.arch }}
 
       - name: 'build quiche and boringssl'
-        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache4-quiche.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache3-quiche.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
           cd quiche
           if [ "$(uname -m)" = 'aarch64' ]; then
-            export CARGO_PROFILE_RELEASE_OPT_LEVEL=1  # to avoid test 2500-2503 valgrind failing with llvm/clang arm64 non-debug quiche 0.30.0 builds
+            export CARGO_PROFILE_RELEASE_OPT_LEVEL=0  # to avoid test 2500-2503 valgrind failing with llvm/clang arm64 non-debug quiche 0.30.0 builds
           fi
           cargo build --package quiche --release --features ffi,pkg-config-meta,qlog -vv
           ln -s libquiche.so target/release/libquiche.so.0
