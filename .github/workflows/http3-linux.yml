@@ -760,15 +760,15 @@ jobs:
       - name: 'cache quiche'
         if: ${{ contains(matrix.build.name, 'quiche') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache3-quiche
+        id: cache1-quiche
         env:
-          cache-name: cache3-quiche
+          cache-name: cache1-quiche
         with:
           path: ~/quiche
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}-${{ runner.arch }}
 
       - name: 'build quiche and boringssl'
-        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache3-quiche.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache1-quiche.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
