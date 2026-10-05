@@ -493,7 +493,7 @@ jobs:
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
-      # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced registryUrl=https://github.com
+      # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced
       TOOLCHAIN_VERSION: '3.4'
       TOOLCHAIN_SHA256: 8464f17017d6ab1b2bb2df4ed82357b5bf692e6e2b7fee37e315638f3d505f00
     strategy:
