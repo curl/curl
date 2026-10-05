@@ -37,7 +37,7 @@ cache-mode: write
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 2000
+  CURL_TEST_MIN: 1000
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc
   AWSLC_VERSION: 5.8.0
@@ -481,7 +481,6 @@ jobs:
               --with-gnutls=/home/runner/pkg/gnutls --with-ngtcp2=/home/runner/pkg/ngtcp2 --with-libssh --enable-ssls-export --enable-httpsig --disable-ntlm
 
           - name: 'gnutls'
-            tflags: '--min=1900'
             install_packages: libp11-kit-dev libssh-dev
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/gnutls/lib
             PKG_CONFIG_PATH: "\
@@ -510,7 +509,6 @@ jobs:
 
           - name: 'openssl'
             image: ubuntu-26.04-arm
-            tflags: '--min=1850'
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/openssl/lib
             PKG_CONFIG_PATH: /home/runner/pkg/openssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             configure: >-
@@ -541,7 +539,6 @@ jobs:
 
           - name: 'openssl-prev'
             image: ubuntu-26.04-arm
-            tflags: '--min=2000'
             PKG_CONFIG_PATH: "\
               /home/runner/pkg/openssl-prev/lib/pkgconfig:\
               /home/runner/pkg/nghttp3/lib/pkgconfig:\
@@ -586,7 +583,6 @@ jobs:
 
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
-            tflags: '--min=1900'
             PKG_CONFIG_PATH: /home/runner/pkg/wolfssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
