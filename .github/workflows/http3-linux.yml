@@ -307,10 +307,8 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          if [ "$(uname -m)" = 'aarch64' ]; then
-            export CFLAGS=-O2  # override default -O3 to avoid test 2500-2503 valgrind failing with gcc-15/16 non-debug OpenSSL 3/4 builds
-          fi
-          ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
+          # Prefer clang to avoid test 2500-2503 failing valgrind with gcc-15/16 arm64 non-debug OpenSSL 3/4 builds
+          CC=clang ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
 
@@ -322,10 +320,8 @@ jobs:
             --location --proto-redir =https "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
-          if [ "$(uname -m)" = 'aarch64' ]; then
-            export CFLAGS=-O2  # override default -O3 to avoid test 2500-2503 valgrind failing with gcc-15/16 non-debug OpenSSL 3/4 builds
-          fi
-          ./config --prefix=/home/runner/pkg/openssl-prev --libdir=lib no-makedepend no-apps no-docs no-tests
+          # Prefer clang to avoid test 2500-2503 failing valgrind with gcc-15/16 arm64 non-debug OpenSSL 3/4 builds
+          CC=clang ./config --prefix=/home/runner/pkg/openssl-prev --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
