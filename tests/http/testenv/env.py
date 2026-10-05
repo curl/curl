@@ -502,16 +502,8 @@ class Env:
         return Env.CONFIG.openssl_ech
 
     @staticmethod
-    def have_nghttpx() -> bool:
-        return Env.CONFIG.nghttpx is not None
-
-    @staticmethod
     def have_nghttpx_ech() -> bool:
         return Env.CONFIG.nghttpx_ech
-
-    @staticmethod
-    def have_h3_server() -> bool:
-        return Env.CONFIG.nghttpx_with_h3
 
     @classmethod
     def have_h2o(cls) -> bool:

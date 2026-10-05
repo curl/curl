@@ -160,10 +160,9 @@ class TestECH:
         curl = CurlClient(env=env, run_env=run_env)
         url1 = f'https://{env.domain1}:{nghttpx_tcp.port}/data1.json'
         url2 = f'https://{env.domain1}:{nghttpx_tcp.port}/data2.json'
-        ech_config = env.get_echconfig_arg(env.domain1)
         r = curl.http_download(urls=[url1, url2], with_stats=True, url_options={
             url1: ['--ech', 'true'],
-            url2: ['--ech', 'true', '--ech', f'pn:innocent.invalid']
+            url2: ['--ech', 'true', '--ech', 'pn:innocent.invalid']
         })
         r.check_exit_code(0), f'{r}'
         r.check_response(http_status=404, count=2, connect_count=2)
