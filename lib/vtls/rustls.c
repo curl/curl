@@ -340,7 +340,7 @@ static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
      * buffer is shorter than what we already buffered, honoring it would make
      * us report more bytes written than were offered, underflowing the
      * caller's remaining length and reading out of bounds. Reject it. */
-    if(backend->plain_out_buffered > plainlen) {
+    if(plainbuf && (backend->plain_out_buffered > plainlen)) {
       failf(data, "rustls: send retried with less data (%zu) than the %zu "
             "bytes already buffered", plainlen, backend->plain_out_buffered);
       return CURLE_BAD_FUNCTION_ARGUMENT;
