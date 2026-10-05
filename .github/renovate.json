@@ -65,6 +65,16 @@
       "schedule": [
         "* * 10 * *"
       ]
+    },
+    {
+      "description": "Schedule package updates on the 10th of January",
+      "matchSourceUrls": [
+        "**/amissl/**"
+      ],
+      "groupName": "yearly updates by URL",
+      "schedule": [
+        "* * 10 1 *"
+      ]
     }
   ],
   "customManagers": [
