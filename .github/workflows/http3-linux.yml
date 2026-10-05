@@ -308,7 +308,9 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          export CC=clang
+          if [ "$(uname -m)" = 'aarch64' ]; then
+            export CC=clang  # prefer clang over gcc-15/16 to avoid runtests 2500-2503 valgrind fails with non-debug OpenSSL 3/4 builds
+          fi
           ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
@@ -321,6 +323,9 @@ jobs:
             --location --proto-redir =https "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
+          if [ "$(uname -m)" = 'aarch64' ]; then
+            export CC=clang  # prefer clang over gcc-15/16 to avoid runtests 2500-2503 valgrind fails with non-debug OpenSSL 3/4 builds
+          fi
           ./config --prefix=/home/runner/pkg/openssl-prev --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
