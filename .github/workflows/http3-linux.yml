@@ -122,18 +122,18 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-http3-no-deprecated
+        id: cache2-openssl-http3-no-deprecated
         env:
-          cache-name: cache1-openssl-http3-no-deprecated
+          cache-name: cache2-openssl-http3-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
 
       - name: 'cache openssl-prev'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-prev-http3
+        id: cache2-openssl-prev-http3
         env:
-          cache-name: cache1-openssl-prev-http3
+          cache-name: cache2-openssl-prev-http3
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
@@ -210,8 +210,8 @@ jobs:
               !steps.cache1-nettle.outputs.cache-hit ||
               !steps.cache1-gnutls.outputs.cache-hit ||
               !steps.cache1-libressl.outputs.cache-hit ||
-              !steps.cache1-openssl-http3-no-deprecated.outputs.cache-hit ||
-              !steps.cache1-openssl-prev-http3.outputs.cache-hit ||
+              !steps.cache2-openssl-http3-no-deprecated.outputs.cache-hit ||
+              !steps.cache2-openssl-prev-http3.outputs.cache-hit ||
               !steps.cache1-wolfssl.outputs.cache-hit ||
               !steps.cache1-nghttp3.outputs.cache-hit ||
               !steps.cache1-ngtcp2-boringssl.outputs.cache-hit ||
@@ -302,24 +302,26 @@ jobs:
           cmake --install .
 
       - name: 'build openssl'
-        if: ${{ !steps.cache1-openssl-http3-no-deprecated.outputs.cache-hit }}
+        if: ${{ !steps.cache2-openssl-http3-no-deprecated.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
+          # Prefer clang to avoid test 2500-2503 failing valgrind with gcc-15/16 arm64 non-debug OpenSSL 3/4 builds
+          CC=clang ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
 
       - name: 'build openssl-prev'
-        if: ${{ !steps.cache1-openssl-prev-http3.outputs.cache-hit }}
+        if: ${{ !steps.cache2-openssl-prev-http3.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
-          ./config --prefix=/home/runner/pkg/openssl-prev --libdir=lib no-makedepend no-apps no-docs no-tests
+          # Prefer clang to avoid test 2500-2503 failing valgrind with gcc-15/16 arm64 non-debug OpenSSL 3/4 builds
+          CC=clang ./config --prefix=/home/runner/pkg/openssl-prev --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
@@ -523,6 +525,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'openssl-prev'
+            image: ubuntu-26.04-arm
             install_steps: skipall
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/openssl-prev/lib
             PKG_CONFIG_PATH: "\
@@ -533,6 +536,7 @@ jobs:
               --with-openssl=/home/runner/pkg/openssl-prev --with-ngtcp2=/home/runner/pkg/ngtcp2-openssl-prev --enable-ssls-export
 
           - name: 'openssl-prev'
+            image: ubuntu-26.04-arm
             tflags: '--min=2000'
             PKG_CONFIG_PATH: "\
               /home/runner/pkg/openssl-prev/lib/pkgconfig:\
@@ -652,9 +656,9 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-http3-no-deprecated
+        id: cache2-openssl-http3-no-deprecated
         env:
-          cache-name: cache1-openssl-http3-no-deprecated
+          cache-name: cache2-openssl-http3-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
@@ -663,9 +667,9 @@ jobs:
       - name: 'cache openssl-prev'
         if: ${{ contains(matrix.build.name, 'openssl-prev') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-prev-http3
+        id: cache2-openssl-prev-http3
         env:
-          cache-name: cache1-openssl-prev-http3
+          cache-name: cache2-openssl-prev-http3
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
@@ -761,6 +765,9 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
           cd quiche
+          if [ "$(uname -m)" = 'aarch64' ]; then
+            export CARGO_PROFILE_RELEASE_OPT_LEVEL=0  # to avoid test 2500-2503 failing valgrind with arm64 non-debug quiche 0.30.0 builds
+          fi
           cargo build --package quiche --release --features ffi,pkg-config-meta,qlog -vv
           ln -s libquiche.so target/release/libquiche.so.0
           cd ..
