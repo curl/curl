@@ -122,18 +122,18 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-http3-no-deprecated
+        id: cache2-openssl-http3-no-deprecated
         env:
-          cache-name: cache1-openssl-http3-no-deprecated
+          cache-name: cache2-openssl-http3-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
 
       - name: 'cache openssl-prev'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-prev-http3
+        id: cache2-openssl-prev-http3
         env:
-          cache-name: cache1-openssl-prev-http3
+          cache-name: cache2-openssl-prev-http3
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
@@ -210,8 +210,8 @@ jobs:
               !steps.cache1-nettle.outputs.cache-hit ||
               !steps.cache1-gnutls.outputs.cache-hit ||
               !steps.cache1-libressl.outputs.cache-hit ||
-              !steps.cache1-openssl-http3-no-deprecated.outputs.cache-hit ||
-              !steps.cache1-openssl-prev-http3.outputs.cache-hit ||
+              !steps.cache2-openssl-http3-no-deprecated.outputs.cache-hit ||
+              !steps.cache2-openssl-prev-http3.outputs.cache-hit ||
               !steps.cache1-wolfssl.outputs.cache-hit ||
               !steps.cache1-nghttp3.outputs.cache-hit ||
               !steps.cache1-ngtcp2-boringssl.outputs.cache-hit ||
@@ -302,7 +302,7 @@ jobs:
           cmake --install .
 
       - name: 'build openssl'
-        if: ${{ !steps.cache1-openssl-http3-no-deprecated.outputs.cache-hit }}
+        if: ${{ !steps.cache2-openssl-http3-no-deprecated.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
@@ -315,7 +315,7 @@ jobs:
           make -j1 install_sw
 
       - name: 'build openssl-prev'
-        if: ${{ !steps.cache1-openssl-prev-http3.outputs.cache-hit }}
+        if: ${{ !steps.cache2-openssl-prev-http3.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
@@ -664,9 +664,9 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-http3-no-deprecated
+        id: cache2-openssl-http3-no-deprecated
         env:
-          cache-name: cache1-openssl-http3-no-deprecated
+          cache-name: cache2-openssl-http3-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
@@ -675,9 +675,9 @@ jobs:
       - name: 'cache openssl-prev'
         if: ${{ contains(matrix.build.name, 'openssl-prev') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-prev-http3
+        id: cache2-openssl-prev-http3
         env:
-          cache-name: cache1-openssl-prev-http3
+          cache-name: cache2-openssl-prev-http3
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
