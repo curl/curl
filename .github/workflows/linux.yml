@@ -37,27 +37,27 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1800
   DO_NOT_TRACK: '1'
-  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver
   AWSLC_VERSION: 5.8.0
-  # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=google/boringssl versioning=semver
   BORINGSSL_VERSION: 0.20260929.0
-  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
+  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced
   FIL_C_VERSION: 0.686
-  # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=libressl/portable versioning=semver
   LIBRESSL_VERSION: 4.3.3
-  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver
   MBEDTLS_VERSION: 4.2.0
-  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver extractVersion=^v?(?<version>3\..+)$ registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver extractVersion=^v?(?<version>3\..+)$
   MBEDTLS_PREV_VERSION: 3.6.7
-  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver
   NGHTTP2_VERSION: 1.70.0
   # renovate: datasource=github-tags depName=openldap/openldap versioning=regex:^(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)$ extractVersion=^OPENLDAP_REL_ENG_(?<version>.+)$
   OPENLDAP_VERSION: 2.6.10
-  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
+  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$
   OPENSSL_VERSION: 4.0.3
-  # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver
   RUSTLS_VERSION: 0.15.4
-  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$
   WOLFSSL_VERSION: 5.9.4
 
 jobs:
