@@ -949,7 +949,7 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
   preader = &reader;
 
   rc = nghttp3_conn_submit_request(ctx->h3conn, stream->id,
-                                   nva, nheader, preader, data);
+                                   nva, nheader, preader, stream);
 
   if(rc) {
     switch(rc) {
