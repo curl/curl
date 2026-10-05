@@ -37,28 +37,27 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1800
   DO_NOT_TRACK: '1'
-  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=awslabs/aws-lc
   AWSLC_VERSION: 5.8.0
-  # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=google/boringssl
   BORINGSSL_VERSION: 0.20260929.0
-  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
-  FIL_C_VERSION: 0.685
-  # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced
+  FIL_C_VERSION: 0.686
+  # renovate: datasource=github-tags depName=libressl/portable
   LIBRESSL_VERSION: 4.3.3
-  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls
   MBEDTLS_VERSION: 4.2.0
-  # manually bumped
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls extractVersion=^v?(?<version>3\..+)$
   MBEDTLS_PREV_VERSION: 3.6.7
-  MBEDTLS_PREV_SHA256: a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6
-  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=nghttp2/nghttp2
   NGHTTP2_VERSION: 1.70.0
-  # handled in renovate.json
-  OPENLDAP_VERSION: 2.6.10
-  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=openldap/openldap versioning=regex:^(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)$ extractVersion=^OPENLDAP_REL_ENG_(?<version>.+)$
+  OPENLDAP_VERSION: 2_7_1
+  # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
   OPENSSL_VERSION: 4.0.3
-  # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=rustls/rustls-ffi
   RUSTLS_VERSION: 0.15.4
-  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssl extractVersion=^v?(?<version>.+)-stable$
   WOLFSSL_VERSION: 5.9.4
 
 jobs:
@@ -471,15 +470,15 @@ jobs:
             # Current curl no longer supports OpenSSL 1.1.0, thus build with GnuTLS instead:
             configure: --enable-debug --with-gnutls --with-libssh2 --with-gssapi --enable-ares --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
-            container: andy5995/slackware-build-essential:15.0@sha256:c5aeede463b4a52b5f4650078418718f2447bdb23f9a4cac0d5fb262e7b8dc84
+            container: andy5995/slackware-build-essential:15.0@sha256:c5aeede463b4a52b5f4650078418718f2447bdb23f9a4cac0d5fb262e7b8dc84  # manually bumped
 
           - name: 'Alpine MUSL https-rr'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --enable-threaded-resolver
-            container: alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 # 3.24.2
+            container: alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 # 3.24.2 (manually bumped)
 
           - name: 'Alpine MUSL https-rr c-ares'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --disable-threaded-resolver
-            container: alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc # 3.20.10
+            container: alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc # 3.20.10 (manually bumped, a previous minor version)
 
     steps:
       - name: 'install prereqs'
@@ -675,7 +674,7 @@ jobs:
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_PREV_VERSION}/mbedtls-${MBEDTLS_PREV_VERSION}.tar.bz2" --output pkg.bin
-          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${MBEDTLS_PREV_SHA256}" && tar -xjf pkg.bin && rm -f pkg.bin
+          sha256sum pkg.bin && tar -xjf pkg.bin && rm -f pkg.bin
           cd "mbedtls-${MBEDTLS_PREV_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
@@ -698,9 +697,9 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') && !steps.cache1-openldap-static.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
+            "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION//_/.}.tgz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
-          cd "openldap-${OPENLDAP_VERSION}"
+          cd "openldap-${OPENLDAP_VERSION//_/.}"
           autoreconf -fi
           ./configure --prefix=/home/runner/pkg/openldap-static --enable-static --disable-shared --disable-slapd
           make install

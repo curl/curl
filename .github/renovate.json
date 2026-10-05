@@ -65,6 +65,16 @@
       "schedule": [
         "* * 10 * *"
       ]
+    },
+    {
+      "description": "Schedule package updates on the 10th of January",
+      "matchSourceUrls": [
+        "**/amissl/**"
+      ],
+      "groupName": "yearly updates by URL",
+      "schedule": [
+        "* * 10 1 *"
+      ]
     }
   ],
   "customManagers": [
@@ -79,19 +89,6 @@
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
       "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/^\\.github/workflows/linux\\.yml$/"
-      ],
-      "matchStrings": [
-        "OPENLDAP_VERSION: (?<currentValue>.*)\\s"
-      ],
-      "datasourceTemplate": "github-tags",
-      "depNameTemplate": "openldap/openldap",
-      "versioningTemplate": "semver",
-      "extractVersionTemplate": "^OPENLDAP_REL_ENG_(?<major>\\d+)_(?<minor>\\d+)_(?<patch>\\d+)$"
     }
   ]
 }
