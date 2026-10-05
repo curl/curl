@@ -564,7 +564,6 @@ static void parse_expires(struct Cookie *co, struct Curl_str *val,
 static CURLcode
 parse_cookie_header(struct Curl_easy *data,
                     struct Cookie *co,
-                    const struct CookieInfo *ci,
                     bool *okay, /* if the cookie was fine */
                     const char *ptr, /* the header */
                     const char *domain, /* default domain */
@@ -618,7 +617,7 @@ parse_cookie_header(struct Curl_easy *data,
 
       /* whether there's separator or not */
       else if(curlx_str_casecompare(&name, "secure")) {
-        if(secure_origin || !ci->running)
+        if(secure_origin)
           co->secure = TRUE;
         else {
           infof(data, "skipped cookie because not 'secure'");
@@ -1006,7 +1005,7 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   memset(co, 0, sizeof(comem));
 
   if(flags & COOKIE_HTTPHEADER)
-    result = parse_cookie_header(data, co, ci, &okay,
+    result = parse_cookie_header(data, co, &okay,
                                  lineptr, domain, path, flags & COOKIE_SECURE);
   else
     result = parse_netscape(co, ci, &okay, lineptr, flags & COOKIE_SECURE);
