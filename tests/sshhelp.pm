@@ -383,7 +383,7 @@ sub sshversioninfo {
                 $minor = $2;
                 $patch = $4 ? $4 : 0;
                 $sshid = 'OpenSSH';
-                $versnum = (100*$major) + (10*$minor) + $patch;
+                $versnum = (100 * $major) + (10 * $minor) + $patch;
                 $versstr = "$sshid $major.$minor.$patch";
                 $error = undef;
                 last;
@@ -393,7 +393,7 @@ sub sshversioninfo {
                 $minor = $2;
                 $patch = $4 ? $4 : 0;
                 $sshid = 'OpenSSH-Windows';
-                $versnum = (100*$major) + (10*$minor) + $patch;
+                $versnum = (100 * $major) + (10 * $minor) + $patch;
                 $versstr = "$sshid $major.$minor.$patch";
                 $error = undef;
                 last;
@@ -403,7 +403,7 @@ sub sshversioninfo {
                 $minor = $2;
                 $patch = $4 ? $4 : 0;
                 $sshid = 'SunSSH';
-                $versnum = (100*$major) + (10*$minor) + $patch;
+                $versnum = (100 * $major) + (10 * $minor) + $patch;
                 $versstr = "$sshid $major.$minor.$patch";
                 $error = undef;
                 last;

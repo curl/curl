@@ -233,7 +233,7 @@ if((!$ver_major) || !defined($ver_minor)) {
     }
     exit 1;
 }
-$stunnel_version = (100*$ver_major) + $ver_minor;
+$stunnel_version = (100 * $ver_major) + $ver_minor;
 
 #***************************************************************************
 # Verify minimum stunnel required version
