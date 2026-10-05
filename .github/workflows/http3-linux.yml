@@ -229,7 +229,6 @@ jobs:
         with:
           apt: >-
             clang
-            gcc-16
             libtool autoconf automake pkgconf
             libbrotli-dev libzstd-dev zlib1g-dev
             libev-dev
@@ -309,7 +308,7 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          export CC=gcc-16
+          export CC=clang
           ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
@@ -519,8 +518,7 @@ jobs:
 
           - name: 'openssl'
             image: ubuntu-26.04-arm
-            install_steps: clang
-            CC: clang
+            install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/pkg/openssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/pkg/openssl -DUSE_NGTCP2=ON
@@ -530,8 +528,7 @@ jobs:
 
           - name: 'openssl-prev'
             image: ubuntu-26.04-arm
-            install_steps: clang
-            CC: clang
+            install_steps: skipall
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/openssl-prev/lib
             PKG_CONFIG_PATH: "\
               /home/runner/pkg/openssl-prev/lib/pkgconfig:\
