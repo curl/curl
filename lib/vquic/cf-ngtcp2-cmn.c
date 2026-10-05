@@ -476,11 +476,10 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
   (void)app_error_code;
 
   rv = nghttp3_conn_shutdown_stream_read(ctx->h3conn, stream_id);
-  if(data) {
+  if(data)
     CURL_TRC_CF(data, cf, "[%" PRId64 "] reset -> %d", stream_id, rv);
-    if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
-      return NGTCP2_ERR_CALLBACK_FAILURE;
-    }
+  if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
+    return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
   return 0;
@@ -541,7 +540,8 @@ static int cb_extend_max_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   if(stream && stream->quic_flow_blocked) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] unblock quic flow", stream_id);
     stream->quic_flow_blocked = FALSE;
-    Curl_multi_mark_dirty(data);
+    if(data)
+      Curl_multi_mark_dirty(data);
   }
   return 0;
 }
