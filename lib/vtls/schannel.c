@@ -1320,7 +1320,8 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
 
     /* setup input buffers */
     InitSecBuffer(&inbuf[0], SECBUFFER_TOKEN,
-                  curlx_malloc(backend->encdata.offset),
+                  curlx_memdup0((const char *)backend->encdata.buffer,
+                                backend->encdata.offset),
                   curlx_uztoul(backend->encdata.offset));
     InitSecBuffer(&inbuf[1], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, inbuf, 2);
@@ -1335,10 +1336,6 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
-
-    /* copy received handshake data into input buffer */
-    memcpy(inbuf[0].pvBuffer, backend->encdata.buffer,
-           backend->encdata.offset);
 
     /* The socket must be writable (or a poll error occurred) before we call
        InitializeSecurityContext to continue processing the received TLS
