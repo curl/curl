@@ -122,9 +122,9 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache4-openssl-http3-no-deprecated
+        id: cache5-openssl-http3-no-deprecated
         env:
-          cache-name: cache4-openssl-http3-no-deprecated
+          cache-name: cache5-openssl-http3-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
@@ -210,7 +210,7 @@ jobs:
               !steps.cache1-nettle.outputs.cache-hit ||
               !steps.cache1-gnutls.outputs.cache-hit ||
               !steps.cache1-libressl.outputs.cache-hit ||
-              !steps.cache4-openssl-http3-no-deprecated.outputs.cache-hit ||
+              !steps.cache5-openssl-http3-no-deprecated.outputs.cache-hit ||
               !steps.cache4-openssl-prev-http3.outputs.cache-hit ||
               !steps.cache1-wolfssl.outputs.cache-hit ||
               !steps.cache1-nghttp3.outputs.cache-hit ||
@@ -229,6 +229,7 @@ jobs:
         with:
           apt: >-
             clang
+            gcc-16
             libtool autoconf automake pkgconf
             libbrotli-dev libzstd-dev zlib1g-dev
             libev-dev
@@ -303,12 +304,12 @@ jobs:
           cmake --install .
 
       - name: 'build openssl'
-        if: ${{ !steps.cache4-openssl-http3-no-deprecated.outputs.cache-hit }}
+        if: ${{ !steps.cache5-openssl-http3-no-deprecated.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          export CC=clang
+          export CC=gcc-16
           ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
@@ -658,9 +659,9 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache4-openssl-http3-no-deprecated
+        id: cache5-openssl-http3-no-deprecated
         env:
-          cache-name: cache4-openssl-http3-no-deprecated
+          cache-name: cache5-openssl-http3-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
