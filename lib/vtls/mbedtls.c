@@ -701,16 +701,23 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
     else {
       const struct curl_blob *ssl_key_blob = conn_config->key_blob;
       const char *passwd = conn_config->key_passwd;
+      const bool is_der = conn_config->key_type &&
+                          curl_strequal(conn_config->key_type, "DER");
       /* Unfortunately, mbedtls_pk_parse_key() requires the data to be
          null-terminated if the data is PEM encoded (even when provided the
          exact length). */
       unsigned char *newblob = curlx_memdup0(ssl_key_blob->data,
                                              ssl_key_blob->len);
+      /* mbedtls_pk_parse_key() requires the terminator to be counted in the
+         length for PEM input, while the DER parsers require the exact
+         length: a DER key with the terminator counted in is rejected with
+         MBEDTLS_ERR_ASN1_LENGTH_MISMATCH. */
+      size_t keylen = is_der ? ssl_key_blob->len : ssl_key_blob->len + 1;
       if(!newblob)
         return CURLE_OUT_OF_MEMORY;
 
 #if MBEDTLS_VERSION_NUMBER >= 0x04000000
-      ret = mbedtls_pk_parse_key(&backend->pk, newblob, ssl_key_blob->len,
+      ret = mbedtls_pk_parse_key(&backend->pk, newblob, keylen,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0);
       if(ret == 0 &&
@@ -722,7 +729,7 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
                                  PSA_KEY_USAGE_SIGN_HASH)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #else
-      ret = mbedtls_pk_parse_key(&backend->pk, newblob, ssl_key_blob->len,
+      ret = mbedtls_pk_parse_key(&backend->pk, newblob, keylen,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0,
                                  mbedtls_ctr_drbg_random,
