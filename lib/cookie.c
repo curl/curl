@@ -622,7 +622,7 @@ parse_cookie_header(struct Curl_easy *data,
           co->secure = TRUE;
         else {
           infof(data, "skipped cookie because not 'secure'");
-          return FALSE;
+          return CURLE_OK;
         }
       }
       else if(curlx_str_casecompare(&name, "httponly"))
