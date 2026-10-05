@@ -305,7 +305,6 @@ static struct Curl_easy *cf_h2_get_stream_xfer(struct Curl_cfilter *cf,
     if(data && (data->id == stream->xfer_id))
       return data;
   }
-  curl_mfprintf(stderr, "HTTP/2 xfer for stream %d not found\n", stream_id);
   return NULL;
 }
 
