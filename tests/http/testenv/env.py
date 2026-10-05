@@ -440,6 +440,10 @@ class EnvConfig:
         return self._h2o_version
 
     @property
+    def sshd_version(self):
+        return self._sshd_version
+
+    @property
     def tcpdump(self) -> Optional[str]:
         return self._tcpdump
 
@@ -657,6 +661,10 @@ class Env:
     @classmethod
     def h2o_version(cls) -> str:
         return cls.CONFIG.h2o_version
+
+    @classmethod
+    def sshd_version(cls) -> str:
+        return cls.CONFIG.sshd_version
 
     @classmethod
     def caddy_is_at_least(cls, minv) -> bool:
