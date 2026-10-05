@@ -259,7 +259,8 @@ class EnvConfig:
             self.openssl_version = None
         else:
             self.openssl_version = p.stdout.strip()
-            if re.match(r'OpenSSL 4.*', self.openssl_version):
+            m = re.match(r'OpenSSL (\d+).*', self.openssl_version)
+            if m and int(m.group(1)) >= 4:
                 self.openssl_ech = True
 
         self.nghttpx = self.config["nghttpx"]["nghttpx"]
