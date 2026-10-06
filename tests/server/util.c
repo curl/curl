@@ -33,8 +33,8 @@
 #include <share.h>
 #endif
 
-#if defined(CURL_WINDOWS_UWP) && !defined(CURL_DEBUG_NO_WIN32_WND)
-#define CURL_DEBUG_NO_WIN32_WND
+#if defined(CURL_WINDOWS_UWP) && !defined(CURL_DBG_NO_WIN32_WND)
+#define CURL_DBG_NO_WIN32_WND
 #endif
 
 void loghex(const unsigned char *buffer, ssize_t len)
@@ -442,7 +442,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)  /* keep signal-safe */
   return TRUE;
 }
 
-#ifndef CURL_DEBUG_NO_WIN32_WND
+#ifndef CURL_DBG_NO_WIN32_WND
 static DWORD thread_main_id = 0;
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
@@ -530,7 +530,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   hidden_main_window = NULL;
   return (DWORD)msg.wParam;
 }
-#endif /* !CURL_DEBUG_NO_WIN32_WND */
+#endif /* !CURL_DBG_NO_WIN32_WND */
 #endif /* !_WIN32 */
 
 void install_signal_handlers(bool keep_sigalrm)
@@ -584,7 +584,7 @@ void install_signal_handlers(bool keep_sigalrm)
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
 
-#ifndef CURL_DEBUG_NO_WIN32_WND
+#ifndef CURL_DBG_NO_WIN32_WND
   thread_main_window = CreateThread(NULL, 0, &main_window_loop,
                                     GetModuleHandle(NULL), 0, &thread_main_id);
   if(!thread_main_window || !thread_main_id)
@@ -621,7 +621,7 @@ void restore_signal_handlers(bool keep_sigalrm)
 #endif
 #else /* _WIN32 */
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#ifndef CURL_DEBUG_NO_WIN32_WND
+#ifndef CURL_DBG_NO_WIN32_WND
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {
