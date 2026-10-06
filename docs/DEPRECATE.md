@@ -55,7 +55,7 @@ HTTP/2 Server Push gets removed in March 2027.
 
 The Common Name, (`CN`) field is deprecated since RFC 2818. It was downgraded
 to a SHOULD in RFC 6125 and finally removed in RFC 9525. Browsers have not
-support this field since 2012.
+Browsers have not supported this field since 2012.
 
 In the release after 8.23.0 curl removes support for this field in code we
 control - which primarily means in the OpenSSL (and forks) backend. The other
