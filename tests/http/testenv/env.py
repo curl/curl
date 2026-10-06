@@ -352,7 +352,7 @@ class EnvConfig:
             if p.returncode != 0:
                 self.sshd = None
             else:
-                m = re.match(r"^OpenSSH_(\d+\.\d+.*),.*", p.stderr)
+                m = re.match(r"^OpenSSH_(\d+\.\d+).*,.*", p.stderr)
                 assert m, f"version: {p.stderr}"
                 if m:
                     self._sshd_version = m.group(1)

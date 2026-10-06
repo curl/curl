@@ -277,7 +277,7 @@ class Sshd:
             f'AuthorizedKeysFile {self._auth_keys}',
             f'PidFile {self._pid_file}',
         ]
-        if Env.CONFIG.versiontuple(self.env.sshd_version().split('p', 1)[0]) >= Env.CONFIG.versiontuple('9.8'):
+        if Env.CONFIG.versiontuple(self.env.sshd_version()) >= Env.CONFIG.versiontuple('9.8'):
             conf.append('PerSourcePenalties no')
         conf.extend([f'HostKey {key_file}' for key_file in self._host_key_files])
         if self._sftpd:
