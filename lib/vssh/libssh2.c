@@ -1681,7 +1681,7 @@ static CURLcode ssh_state_auth_agent(struct Curl_easy *data,
 
   if(rc == LIBSSH2_ERROR_NONE) {
     sshc->authed = TRUE;
-     /* key comment may embed private key path; trace-only like above */
+    /* key comment may embed private key path; trace-only like above */
     CURL_TRC_SSH(data, "SSH: agent authenticated user '%s' with key '%s'",
                  Curl_creds_user(data->conn->creds),
                  sshc->sshagent_identity->comment);
