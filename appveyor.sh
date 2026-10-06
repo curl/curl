@@ -118,7 +118,7 @@ fi
 if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   cp -p /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
   echo 'Checking that https works (it should find curl-ca-bundle.crt if needed)'
-  "${curl}" -v -fsS --retry 6 --retry-all-errors -o /dev/null https://curl.se/
+  "${curl}" --disable --verbose --fail --silent --show-error --retry 6 --retry-all-errors --out-null https://curl.se/
   if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER:-}" ]; then
     archive="curl_pr${APPVEYOR_PULL_REQUEST_NUMBER}_${APPVEYOR_PULL_REQUEST_HEAD_COMMIT}.zip"
   else
