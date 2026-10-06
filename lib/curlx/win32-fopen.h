@@ -61,7 +61,7 @@ int curlx_win32_mkdir(const char *path);
 #define curlx_open              curlx_win32_open
 #define curlx_close             _close
 #define curlx_rename            curlx_win32_rename
-#define curlx_mkdir(x, y)       toolx_win32_mkdir(x)
+#define curlx_mkdir(x, y)       curlx_win32_mkdir(x)
 #else
 #define curlx_fstat             fstat
 #define curlx_struct_stat       struct stat

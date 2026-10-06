@@ -481,7 +481,7 @@ int curlx_win32_mkdir(const char *path)
       target = fixed;
     else
       target = path_w;
-    res = _wmkdir(path_w);
+    res = _wmkdir(target);
     curlx_free(path_w);
   }
   else
