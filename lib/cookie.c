@@ -835,12 +835,11 @@ static bool is_public_suffix(struct Curl_easy *data,
             co->tailmatch = FALSE;
         }
         else {
-          /* libpsl says localhost is a PSL, we think not */
-          acceptable =
-            curl_strequal(lcookie, "localhost") ||
-            /* note that this PSL function returns the opposite value than
-               psl_is_cookie_domain_acceptable() does */
-            !psl_is_public_suffix(psl, lcookie);
+          bool suffix = psl_is_public_suffix(psl, lcookie);
+          acceptable = TRUE;
+          if(suffix)
+            /* switch off tailmatching when set for a PSL domain */
+            co->tailmatch = FALSE;
         }
         Curl_psl_release(data);
       }
