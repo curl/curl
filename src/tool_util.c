@@ -112,17 +112,17 @@ FILE *tool_execpath(const char *filename, char **pathp)
 {
   static char filebuffer[512];
 #ifdef UNICODE
-  TCHAR tfilebuffer[sizeof(filebuffer)];
+  TCHAR filebuffer_t[sizeof(filebuffer)];
 #else
-#define tfilebuffer filebuffer
+  TCHAR *filebuffer_t = filebuffer;
 #endif
   unsigned long len;
   /* Get the filename of our executable. GetModuleFileName is already declared
      via inclusions done in setup header file. */
-  len = GetModuleFileName(0, tfilebuffer, sizeof(filebuffer));
+  len = GetModuleFileName(0, filebuffer_t, sizeof(filebuffer));
   if(len > 0 && len < sizeof(filebuffer)) {
 #ifdef UNICODE
-    char *fn = curlx_convert_tchar_to_UTF8(tfilebuffer);
+    char *fn = curlx_convert_tchar_to_UTF8(filebuffer_t);
     if(fn) {
       size_t fn_len = strlen(fn);
       if(fn_len >= sizeof(filebuffer)) {
