@@ -204,7 +204,7 @@ CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
     return CURLE_OK;
 
   p = memchr(line, ':', line_len);
-  if(!p)
+  if(!p || p == line)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   name = line;
   namelen = p - line;

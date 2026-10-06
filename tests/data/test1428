@@ -49,7 +49,7 @@ http-proxy
 HTTP over proxy-tunnel with --proxy-header and --header
 </name>
 <command>
-http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --user 'iam:my:;self' --header "header-type: server" --proxy-header "header-type: proxy"
+http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --user 'iam:my:;self' --header "header-type: server" --proxy-header "header-type: proxy" --proxy-header " : ignored"
 </command>
 <features>
 proxy

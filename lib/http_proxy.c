@@ -132,6 +132,8 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
       /* trim surrounding whitespace so a padded field name (e.g.
          `Authorization :`) cannot slip past the Authorization/Cookie check */
       curlx_str_trimblanks(&name);
+      if(!curlx_strlen(&name))
+        continue;
       if(data->state.http_host &&
          /* a Host: header was sent already, do not pass on any custom Host:
             header as that will produce *two* in the same request! */
