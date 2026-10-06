@@ -468,6 +468,37 @@ int curlx_win32_stat(const char *path, curlx_struct_stat *buffer)
   return res;
 }
 
+int curlx_win32_mkdir(const char *path)
+{
+  int res = -1;
+  TCHAR *fixed = NULL;
+  const TCHAR *target = NULL;
+
+#ifdef _UNICODE
+  wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
+  if(path_w) {
+    if(fix_excessive_path(path_w, &fixed))
+      target = fixed;
+    else
+      target = path_w;
+    res = _wmkdir(path_w);
+    curlx_free(path_w);
+  }
+  else
+    /* !checksrc! disable ERRNOVAR 1 */
+    errno = EINVAL;
+#else
+  if(fix_excessive_path(path, &fixed))
+    target = fixed;
+  else
+    target = path;
+  res = _mkdir(target);
+#endif
+
+  CURLX_FREE(fixed);
+  return res;
+}
+
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES) || \
   !defined(CURL_DISABLE_ALTSVC)
 /* rename() on Windows does not overwrite, so we cannot use it here.
@@ -533,26 +564,6 @@ int curlx_win32_rename(const char *oldpath, const char *newpath)
   return res;
 }
 #endif
-
-int curlx_win32_mkdir(const char *path)
-{
-  int res = -1;
-
-#ifdef _UNICODE
-  wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
-  if(path_w) {
-    res = _wmkdir(path_w);
-    curlx_free(path_w);
-  }
-  else
-    /* !checksrc! disable ERRNOVAR 1 */
-    errno = EINVAL;
-#else
-  res = _mkdir(path);
-#endif
-
-  return res;
-}
 
 #undef CURLX_MALLOC
 #undef CURLX_FREE
