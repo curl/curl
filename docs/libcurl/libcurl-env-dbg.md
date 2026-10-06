@@ -232,3 +232,7 @@ Set the `max_total_connections` for a `multi` handle.
 ## `CURL_DBG_FTP_WILDCARD`
 
 Simulate CURLOPT_WILDCARDMATCH being set.
+
+## `CURL_DBG_SCHANNEL_DEV`
+
+Enable extra-verbose schannel_recv messages in Schannel.
