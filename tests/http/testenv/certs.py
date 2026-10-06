@@ -213,7 +213,7 @@ class Credentials:
 
     def get_first(self, name) -> Optional['Credentials']:
         creds = self._store.get_credentials_for_name(name) if self._store else []
-        return creds[0] if len(creds) else None
+        return creds[0] if creds else None
 
     def get_credentials_for_name(self, name) -> List['Credentials']:
         return self._store.get_credentials_for_name(name) if self._store else []

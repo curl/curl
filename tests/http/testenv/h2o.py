@@ -86,8 +86,8 @@ class H2o:
                       "-------------------------------------------"])
         self._dump_file(self._stderr, lines)
         lines.extend(["",
-                     f"errorlog of {self._name}",
-                     "-------------------------------------------"])
+                      f"errorlog of {self._name}",
+                      "-------------------------------------------"])
         self._dump_file(self._error_log, lines)
         lines.append("")
         return lines

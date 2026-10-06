@@ -55,9 +55,9 @@ class RunProfile:
         stats = [p.stats for p in profiles]
         for key in cls.STAT_KEYS:
             vals = [s[key] for s in stats]
-            avg[key] = mean(vals) if len(vals) else 0.0
+            avg[key] = mean(vals) if vals else 0.0
         vals = [s['rss-max'] for s in [p.stats for p in profiles]]
-        avg['rss-max'] = mean(vals) if len(vals) else 0
+        avg['rss-max'] = mean(vals) if vals else 0
         return avg
 
     def __init__(self, pid: int, started_at: datetime, run_dir):
@@ -380,7 +380,7 @@ class ExecResult:
 
     @property
     def total_connects(self) -> Optional[int]:
-        if len(self.stats):
+        if self.stats:
             n = 0
             for stat in self.stats:
                 n += stat['num_connects']

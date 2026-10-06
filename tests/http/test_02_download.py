@@ -318,10 +318,7 @@ class TestDownload:
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
         max_parallel = 5
-        if proto in Env.http_mplx_protos():
-            pause_offset = 64 * 1024
-        else:
-            pause_offset = 12 * 1024
+        pause_offset = 1024 * (64 if proto in Env.http_mplx_protos() else 12)
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='cli_hx_download', env=env)
@@ -344,10 +341,7 @@ class TestDownload:
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
         max_parallel = 5
-        if proto in Env.http_mplx_protos():
-            abort_offset = 64 * 1024
-        else:
-            abort_offset = 12 * 1024
+        abort_offset = 1024 * (64 if proto in Env.http_mplx_protos() else 12)
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='cli_hx_download', env=env)
@@ -370,10 +364,7 @@ class TestDownload:
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
         max_parallel = 5
-        if proto in Env.http_mplx_protos():
-            fail_offset = 64 * 1024
-        else:
-            fail_offset = 12 * 1024
+        fail_offset = 1024 * (64 if proto in Env.http_mplx_protos() else 12)
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='cli_hx_download', env=env)
@@ -732,11 +723,11 @@ class TestDownload:
             '/curltest/tweak/?&delay=3s'
         url2 = f'https://{env.authority_for(env.domain1, proto)}/data.json'
         r = curl.http_download(urls=[url1, url2], alpn_proto=proto, extra_args=[
-            '--http1.1',  '--parallel'
-       ], url_options={
-            url1: ['--max-time', '10'],
-            url2: ['--max-time', '1']
-       })
+                               '--http1.1',  '--parallel'],
+                               url_options={
+                                    url1: ['--max-time', '10'],
+                                    url2: ['--max-time', '1']
+                               })
         r.check_exit_code(28)
         xfers = {stat['xfer_id']: stat for stat in r.stats}
         assert xfers[0]['http_code'] == 200, f'{r.stats[0]}'  # succeeded
