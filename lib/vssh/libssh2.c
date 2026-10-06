@@ -3401,7 +3401,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   if(!sshc)
     return CURLE_FAILED_INIT;
 
-   /* gate username like the password below */
+  /* gate username like the password below */
   CURL_TRC_SSH(data, "SSH: user '%s'", Curl_creds_user(conn->creds));
 #ifdef CURL_LIBSSH2_DEBUG
   infof(data, "SSH: password %s", Curl_creds_passwd(conn->creds));
