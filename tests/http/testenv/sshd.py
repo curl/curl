@@ -277,14 +277,11 @@ class Sshd:
             f'AuthorizedKeysFile {self._auth_keys}',
             f'PidFile {self._pid_file}',
         ]
-        log.debug(f"sshd_version||{self.env.sshd_version()}||{Env.CONFIG.sshd_version}||")
         if Env.CONFIG.versiontuple(self.env.sshd_version().split('p', 1)[0]) >= Env.CONFIG.versiontuple('9.8'):
             conf.append('PerSourcePenalties no')
         conf.extend([f'HostKey {key_file}' for key_file in self._host_key_files])
         if self._sftpd:
             conf.append(f'Subsystem sftp {self._sftpd}')
         conf.append('\n')
-        config_str = "\n".join(conf)
-        log.debug(f"sshd_config: {config_str}")
         with open(self._conf_file, 'w') as fd:
             fd.write("\n".join(conf))
