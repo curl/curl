@@ -28,11 +28,7 @@
 
 #ifdef UNITTESTS
 #define toolx_mkdir(x, y) create_dir_hierarchy_trace_mkdir(x)
-#else
-#include "toolx/tool_file.h"
-#endif
 
-#ifdef UNITTESTS
 static struct dynbuf mkdir_results;
 
 UNITTEST struct dynbuf *create_dir_hierarchy_trace_dynres(void)
@@ -46,6 +42,8 @@ static int create_dir_hierarchy_trace_mkdir(const char *dir)
     curlx_dyn_add(&mkdir_results, dir) ||
     curlx_dyn_add(&mkdir_results, "|") ? -1 : 0;
 }
+#else
+#define toolx_mkdir curlx_mkdir
 #endif
 
 static void show_dir_errno(const char *name)

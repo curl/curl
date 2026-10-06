@@ -53,6 +53,8 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp);
 int curlx_win32_stat(const char *path, curlx_struct_stat *buffer);
 int curlx_win32_open(const char *filename, int oflag, ...);
 int curlx_win32_rename(const char *oldpath, const char *newpath);
+int curlx_win32_mkdir(const char *path);
+#define curlx_mkdir(x, y)       toolx_win32_mkdir(x)
 #define CURLX_FOPEN_LOW         curlx_win32_fopen
 #define CURLX_FREOPEN_LOW       curlx_win32_freopen
 #define CURLX_FDOPEN_LOW        _fdopen
@@ -70,6 +72,11 @@ int curlx_win32_rename(const char *oldpath, const char *newpath);
 #define curlx_open              open
 #define curlx_close             close
 #define curlx_rename            rename
+#if defined(MSDOS) && !defined(__DJGPP__)
+#define curlx_mkdir(x, y)       mkdir(x)
+#else
+#define curlx_mkdir             mkdir
+#endif
 #endif
 
 #ifdef CURL_MEMDEBUG
