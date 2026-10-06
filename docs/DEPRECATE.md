@@ -51,6 +51,18 @@ We estimate that barely any libcurl users still use this feature.
 
 HTTP/2 Server Push gets removed in March 2027.
 
+## Common Name support in TLS certificates for OpenSSL
+
+The Common Name, (`CN`) field is deprecated since RFC 2818. It was downgraded
+to a SHOULD in RFC 6125 and finally removed in RFC 9525. Browsers have not
+supported this field since 2012.
+
+In the release after 8.23.0 curl removes support for this field in code we
+control - which primarily means in the OpenSSL (and forks) backend. The other
+TLS libraries provide their own functions for verification.
+
+Pending PR: https://github.com/curl/curl/pull/22845
+
 ## Past removals
 
 - axTLS (removed in 7.63.0)
