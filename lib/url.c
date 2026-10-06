@@ -2115,6 +2115,10 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
         if(uc == CURLUE_NO_SCHEME)
           prepend_sheme = TRUE;
         curl_free(scheme);
+        if(uc && uc != CURLUE_NO_SCHEME) {
+          result = Curl_uc_to_curlcode(uc);
+          goto out;
+        }
       }
     }
 
@@ -2149,8 +2153,9 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
         result = Curl_uc_to_curlcode(uc);
         goto out;
       }
-      infof(data, "Applied default protocol '%s'",
-            CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL));
+      if(prepend_sheme)
+        infof(data, "Applied default protocol '%s'",
+              CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL));
       Curl_bufref_set(&data->state.url, newurl, 0, curl_free);
     }
   }
