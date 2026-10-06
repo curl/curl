@@ -864,6 +864,17 @@ init_config_builder_client_auth(struct Curl_easy *data,
     return CURLE_SSL_CERTPROBLEM;
   }
 
+  if(conn_config->cert_type && !curl_strequal(conn_config->cert_type, "PEM")) {
+    failf(data, "rustls: unsupported certificate type '%s', only 'PEM' is "
+          "supported", conn_config->cert_type);
+    return CURLE_SSL_CERTPROBLEM;
+  }
+  if(conn_config->key_type && !curl_strequal(conn_config->key_type, "PEM")) {
+    failf(data, "rustls: unsupported key type '%s', only 'PEM' is supported",
+          conn_config->key_type);
+    return CURLE_SSL_CERTPROBLEM;
+  }
+
   curlx_dyn_init(&cert_contents, DYN_CERTFILE_SIZE);
   curlx_dyn_init(&key_contents, DYN_KEYFILE_SIZE);
 
