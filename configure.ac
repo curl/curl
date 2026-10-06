@@ -2263,6 +2263,9 @@ AS_HELP_STRING([--disable-ca-search-safe],[Disable safe CA bundle search]),
       AC_MSG_RESULT([no])
       ca_search_safe=0
       ;;
+    yes)
+      AC_MSG_RESULT([yes])
+      ;;
     *)
       if test "$ca_native_opt" = "1"; then
         AC_MSG_RESULT([no])
