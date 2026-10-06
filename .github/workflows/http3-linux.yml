@@ -509,7 +509,6 @@ jobs:
               -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DUSE_NGTCP2=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl'
-            image: ubuntu-26.04-arm
             tflags: '--min=1850'
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/openssl/lib
             PKG_CONFIG_PATH: /home/runner/pkg/openssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
@@ -517,7 +516,6 @@ jobs:
               --with-openssl=/home/runner/pkg/openssl --with-ngtcp2=/home/runner/pkg/ngtcp2 --enable-ech --enable-ssls-export --enable-proxy-http3 --enable-httpsig
 
           - name: 'openssl'
-            image: ubuntu-26.04-arm
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/pkg/openssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
@@ -527,7 +525,6 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'openssl-prev'
-            image: ubuntu-26.04-arm
             install_steps: skipall
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/openssl-prev/lib
             PKG_CONFIG_PATH: "\
@@ -538,7 +535,6 @@ jobs:
               --with-openssl=/home/runner/pkg/openssl-prev --with-ngtcp2=/home/runner/pkg/ngtcp2-openssl-prev --enable-ssls-export
 
           - name: 'openssl-prev'
-            image: ubuntu-26.04-arm
             tflags: '--min=2000'
             PKG_CONFIG_PATH: "\
               /home/runner/pkg/openssl-prev/lib/pkgconfig:\
@@ -550,7 +546,6 @@ jobs:
               -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'quiche'
-            image: ubuntu-26.04-arm
             install_packages: clang
             install_steps: skipall
             CC: clang
@@ -564,7 +559,6 @@ jobs:
               --enable-unity
 
           - name: 'quiche'
-            image: ubuntu-26.04-arm
             install_packages: clang
             CC: clang
             PKG_CONFIG_PATH: /home/runner/pkg/nghttp2/lib/pkgconfig:/home/runner/quiche/target/release
@@ -782,7 +776,6 @@ jobs:
           rm -rf quiche/target/release/build/boring-sys-*/out/build/CMakeFiles
           rm -rf quiche/target/release/deps
           du -t 4MB quiche
-          /home/runner/.rustup/toolchains/stable-aarch64-unknown-linux-gnu/bin/rustc --version
 
           # include dir: /home/runner/quiche/boringssl/include
           # lib dir:     /home/runner/quiche/boringssl/lib
