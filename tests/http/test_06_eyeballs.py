@@ -133,7 +133,7 @@ class TestEyeballs:
         # timeouts being set here
         failed_attempts = [line for line in r.trace_lines
                            if re.match(r'.*checked connect attempts: 0 ongoing', line)]
-        if len(failed_attempts):
+        if failed_attempts:
             # github CI fails right away with "Network is unreachable", slackers...
             assert len(failed_attempts) == 3, f'found: {"".join(failed_attempts)}\n{r.dump_logs()}'
         else:
