@@ -2007,6 +2007,7 @@ out:
 
 const struct Curl_protocol Curl_protocol_ws = {
   ws_setup_conn,                        /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */

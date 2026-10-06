@@ -2308,6 +2308,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
  */
 const struct Curl_protocol Curl_protocol_imap = {
   imap_setup_connection,            /* setup_connection */
+  ZERO_NULL,                        /* setup_filters */
   imap_do,                          /* do_it */
   imap_done,                        /* done */
   ZERO_NULL,                        /* do_more */

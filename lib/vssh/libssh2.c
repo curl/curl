@@ -3925,6 +3925,7 @@ static void ssh_attach(struct Curl_easy *data, struct connectdata *conn)
  */
 const struct Curl_protocol Curl_protocol_scp = {
   ssh_setup_connection,                 /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   ssh_do,                               /* do_it */
   scp_done,                             /* done */
   ZERO_NULL,                            /* do_more */
@@ -3948,6 +3949,7 @@ const struct Curl_protocol Curl_protocol_scp = {
  */
 const struct Curl_protocol Curl_protocol_sftp = {
   ssh_setup_connection,                 /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   ssh_do,                               /* do_it */
   sftp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
