@@ -2252,7 +2252,7 @@ dnl --------------------
 dnl check safe CA search
 dnl --------------------
 
-if test "$curl_cv_native_windows" = "yes"; then
+if test "$curl_cv_native_windows" = "yes" && test "$curl_cv_winuwp" != "yes"; then
   ca_search_safe=1
   AC_MSG_CHECKING([whether to enable safe CA bundle search (within the curl tool directory) on Windows])
   AC_ARG_ENABLE(ca-search-safe,
