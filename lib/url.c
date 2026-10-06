@@ -2139,19 +2139,19 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
         result = Curl_uc_to_curlcode(uc);
         goto out;
       }
-      else {
-        char *newurl;
-        /* after it was parsed, and possibly given a new scheme, get the
-           normalized version */
-        uc = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_GET_EMPTY);
-        if(uc) {
-          result = Curl_uc_to_curlcode(uc);
-          goto out;
-        }
-        infof(data, "Applied default protocol '%s'",
-              CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL));
-        Curl_bufref_set(&data->state.url, newurl, 0, curl_free);
+    }
+    {
+      char *newurl;
+      /* after it was parsed, and possibly given a new scheme, get the
+         normalized version */
+      uc = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_GET_EMPTY);
+      if(uc) {
+        result = Curl_uc_to_curlcode(uc);
+        goto out;
       }
+      infof(data, "Applied default protocol '%s'",
+            CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL));
+      Curl_bufref_set(&data->state.url, newurl, 0, curl_free);
     }
   }
 
