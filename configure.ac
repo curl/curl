@@ -2213,7 +2213,7 @@ dnl check unsafe CA search
 dnl ----------------------
 
 dnl this is only used when safe CA search is disabled
-if test "$curl_cv_native_windows" = "yes"; then
+if test "$curl_cv_native_windows" = "yes" && test "$curl_cv_winuwp" != "yes"; then
   ca_search=1
   AC_MSG_CHECKING([whether to enable unsafe CA bundle search in PATH on Windows])
   AC_ARG_ENABLE(ca-search,
