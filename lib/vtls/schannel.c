@@ -55,11 +55,11 @@
 #include "curl_sha256.h"
 
 /* Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
- * and only shown if CURL_DEBUG_SCHANNEL_DEV was defined at build time. These
+ * and only shown if CURL_DBG_SCHANNEL_DEV was defined at build time. These
  * messages are extra verbose and intended for curl developers debugging
  * Schannel recv decryption and renegotiation.
  */
-#ifdef CURL_DEBUG_SCHANNEL_DEV
+#ifdef CURL_DBG_SCHANNEL_DEV
 #define SCH_DEV(x) x
 #define SCH_DEV_SHOWBOOL(x)                                     \
   do {                                                          \
@@ -2124,7 +2124,7 @@ static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
    * cleanup.
    *
    * Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
-   * and only shown if CURL_DEBUG_SCHANNEL_DEV was defined at build time. These
+   * and only shown if CURL_DBG_SCHANNEL_DEV was defined at build time. These
    * messages are extra verbose and intended for curl developers debugging
    * Schannel recv decryption.
    *
