@@ -1,4 +1,26 @@
 {
+   openssl_3_conditional_jump_gcc_15_o3_arm64
+   Memcheck:Cond
+   fun:OPENSSL_strlcpy
+   fun:OBJ_obj2txt
+   fun:get_legacy_cipher_names
+   ...
+}
+
+{
+   quiche_stream_recv_cond_rust_o1_arm64
+   Memcheck:Cond
+   fun:*do_stream_recv*
+   fun:*stream_recv_buf*
+   fun:*stream_recv*
+   fun:*try_fill_buffer*
+   fun:*process_readable_stream*
+   fun:*poll*
+   fun:quiche_h3_conn_poll
+   ...
+}
+
+{
    zstd_decompression-1.3.3-on-Ubuntu-18.04
    Memcheck:Cond
    fun:ZSTD_decompressStream
