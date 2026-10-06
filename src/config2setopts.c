@@ -541,9 +541,10 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
     struct dynbuf cookies;
     struct curl_slist *cl;
 
-    /* The maximum size needs to match MAX_NAME in cookie.h */
-#define MAX_COOKIE_LINE 8200
-    curlx_dyn_init(&cookies, MAX_COOKIE_LINE);
+    /* cap the size of the generated cookie header to avoid servers from going
+       sour on us */
+#define MAX_REQUEST_COOKIE 8200
+    curlx_dyn_init(&cookies, MAX_REQUEST_COOKIE);
     for(cl = config->cookies; cl; cl = cl->next) {
       if(cl == config->cookies)
         result = curlx_dyn_add(&cookies, cl->data);
@@ -552,7 +553,7 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
                                 ISBLANK(cl->data[0]) ? "" : " ", cl->data);
       if(result) {
         warnf("skipped provided cookie, the cookie header "
-              "would go over %d bytes", MAX_COOKIE_LINE);
+              "would go over %d bytes", MAX_REQUEST_COOKIE);
         return result;
       }
     }
