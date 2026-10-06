@@ -536,22 +536,22 @@ int curlx_win32_rename(const char *oldpath, const char *newpath)
 
 int curlx_win32_mkdir(const char *path)
 {
-  int result = -1;
+  int res = -1;
 
 #ifdef _UNICODE
   wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
   if(path_w) {
-    result = _wmkdir(path_w);
+    res = _wmkdir(path_w);
     curlx_free(path_w);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
 #else
-  result = _mkdir(path);
+  res = _mkdir(path);
 #endif
 
-  return result;
+  return res;
 }
 
 #undef CURLX_MALLOC
