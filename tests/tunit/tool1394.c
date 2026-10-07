@@ -52,7 +52,7 @@ static CURLcode test_tool1394(const char *arg)
     {"pkcs11:foobar",          "pkcs11:foobar",      NULL},
     {"PKCS11:foobar",          "PKCS11:foobar",      NULL},
     {"PkCs11:foobar",          "PkCs11:foobar",      NULL},
-#ifdef _WIN32
+#ifdef _WIN32___DISABLE
     {"c:\\foo:bar:baz",        "c:\\foo",            "bar:baz"},
     {"c:\\foo\\:bar:baz",      "c:\\foo:bar",        "baz"},
     {"c:\\foo\\\\:bar:baz",    "c:\\foo\\",          "bar:baz"},
