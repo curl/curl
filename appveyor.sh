@@ -73,7 +73,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
     # shellcheck disable=SC2086
     time cmake -B "_bld${_chkprefill}" \
-      -DENABLE_DEBUG=ON \
       -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
       -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
       -DCURL_STATIC_CRT=ON \
