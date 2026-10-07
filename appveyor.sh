@@ -71,10 +71,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
     [[ "${CMAKE_GENERATE:-}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
     [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
-    [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && options=' -DENABLE_DEBUG=OFF'
     # shellcheck disable=SC2086
     time cmake -B "_bld${_chkprefill}" \
-      -DENABLE_DEBUG=ON \
       -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
       -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
       -DCURL_STATIC_CRT=ON \
