@@ -32,6 +32,13 @@
 #include "hsts.h"
 #include "url.h"
 
+/* CA cache entries must supply their backend-specific destructor. */
+static void ca_cache_free(void *p)
+{
+  (void)p;
+  DEBUGASSERT(!p);
+}
+
 static void share_destroy(struct Curl_share *share)
 {
   if(!share)
@@ -42,6 +49,7 @@ static void share_destroy(struct Curl_share *share)
   }
 
   Curl_dnscache_destroy(&share->dnscache);
+  Curl_hash_destroy(&share->ca_cache);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   Curl_cookie_cleanup(share->cookies);
@@ -79,6 +87,7 @@ CURLSH *curl_share_init(void)
 #endif
     share->ref_count = 1;
     Curl_dnscache_init(&share->dnscache, 23);
+    Curl_hash_init(&share->ca_cache, 7, CURL_HASH_TYPE_BYTES, ca_cache_free);
     share->admin = curl_easy_init();
     if(!share->admin) {
       share_destroy(share);
@@ -261,6 +270,12 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 #endif
       break;
 
+    case CURL_LOCK_DATA_CA:
+#ifndef USE_OPENSSL
+      res = CURLSHE_NOT_BUILT_IN;
+#endif
+      break;
+
     case CURL_LOCK_DATA_CONNECT:
       /* It is safe to set this option several times on a share. */
       if(!share->cpool.initialized) {
@@ -315,6 +330,14 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         Curl_ssl_scache_destroy(share->ssl_scache);
         share->ssl_scache = NULL;
       }
+#else
+      res = CURLSHE_NOT_BUILT_IN;
+#endif
+      break;
+
+    case CURL_LOCK_DATA_CA:
+#ifdef USE_OPENSSL
+      Curl_hash_clean(&share->ca_cache);
 #else
       res = CURLSHE_NOT_BUILT_IN;
 #endif

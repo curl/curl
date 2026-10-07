@@ -30,6 +30,7 @@
 #include "psl.h"
 #include "urldata.h"
 #include "conncache.h"
+#include "hash.h"
 
 struct Curl_easy;
 struct Curl_ssl_scache;
@@ -74,6 +75,8 @@ struct Curl_share {
 #ifdef USE_SSL
   struct Curl_ssl_scache *ssl_scache;
 #endif
+  /* Backend-private parsed CA stores, protected by CURL_LOCK_DATA_CA. */
+  struct Curl_hash ca_cache;
 };
 
 CURLSHcode Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
