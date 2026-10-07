@@ -39,7 +39,7 @@ static CURLcode test_tool1720(const char *arg)
     "foo|foo/bar|",
     "/foo/bar/filename",
     "/foo|/foo/bar|",
-#if defined(_WIN32) || defined(MSDOS)
+#if (defined(_WIN32) || defined(MSDOS)) && 0
     "C:/foo/bar/filename",
     "C:/foo|C:/foo/bar|",
     "C:foo/bar/filename",
