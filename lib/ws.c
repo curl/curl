@@ -123,6 +123,7 @@ struct websocket {
   struct curl_ws_frame recvframe;  /* the current WS FRAME received */
   struct ws_cntrl_frame pending; /* a control frame pending to be sent */
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
+  BIT(using_reader);      /* sending WS data is handled via a client reader */
 };
 
 #ifdef CURLVERBOSE
@@ -617,13 +618,6 @@ struct ws_cw_dec_ctx {
 
 static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
                          bool blocking);
-static CURLcode ws_enc_send(struct Curl_easy *data,
-                            struct websocket *ws,
-                            const uint8_t *buffer,
-                            size_t buflen,
-                            curl_off_t fragsize,
-                            unsigned int flags,
-                            size_t *pnsent);
 static CURLcode ws_enc_add_pending(struct Curl_easy *data,
                                    struct websocket *ws);
 
@@ -760,7 +754,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
   }
 
 out:
-  if(!result) {
+  if(!result && !ws->using_reader) {
     result = ws_flush(data, ws, Curl_api_is_in_callback(data));
     if(result == CURLE_AGAIN)
       result = CURLE_OK;
@@ -1284,13 +1278,22 @@ out:
   return result;
 }
 
+static curl_off_t cr_ws_total_length(struct Curl_easy *data,
+                                     struct Curl_creader *reader)
+{
+  /* this reader changes length depending on input */
+  (void)data;
+  (void)reader;
+  return -1;
+}
+
 static const struct Curl_crtype ws_cr_encode = {
   "ws-encode",
   cr_ws_init,
   cr_ws_read,
   cr_ws_close,
   Curl_creader_def_needs_rewind,
-  Curl_creader_def_total_length,
+  cr_ws_total_length,
   Curl_creader_def_resume_from,
   Curl_creader_def_cntrl,
   Curl_creader_def_is_paused,
@@ -1480,6 +1483,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
         if(result)
           goto out;
         ws_enc_reader = NULL; /* owned by transfer now */
+        ws->using_reader = TRUE;
       }
 
       /* start over with sending */
@@ -1687,7 +1691,7 @@ CURLcode curl_ws_recv(CURL *curl, void *buffer,
                 ws->recvframe.bytesleft);
     /* all's well, try to send any pending control. we do not know
      * when the application will call `curl_ws_send()` again. */
-    if(!data->set.ws_raw_mode && ws->pending.type) {
+    if(!data->set.ws_raw_mode && !ws->using_reader && ws->pending.type) {
       CURLcode r2 = ws_enc_add_pending(data, ws);
       if(!r2)
         (void)ws_flush(data, ws, Curl_api_is_in_callback(data));
