@@ -5107,8 +5107,14 @@ static CURLcode ossl_send(struct Curl_cfilter *cf,
   octx->blocked_ssl_write_len = 0;
   nwritten = SSL_write(octx->ssl, mem, memlen);
 
-  if(nwritten > 0)
+  if(nwritten > 0) {
+    if(nwritten > memlen) {
+      failf(data, "SSL_write(len=%d) returned %d", memlen, nwritten);
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
     *pnwritten = (size_t)nwritten;
+  }
   else {
     err = SSL_get_error(octx->ssl, nwritten);
 
