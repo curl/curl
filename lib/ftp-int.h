@@ -142,6 +142,7 @@ struct ftp_conn {
   BIT(cwdfail);     /* set TRUE if a CWD command fails, as then we must prevent
                        caching the current directory */
   BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
+  BIT(quit_started); /* started to send final QUIT command */
 };
 
 /* meta key for storing `struct FTP` as easy meta data */

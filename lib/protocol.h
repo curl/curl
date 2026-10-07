@@ -119,9 +119,10 @@ struct Curl_protocol {
                                struct connectdata *conn);
 
   /* After IP/Proxy connectivity has been established, add protocol
-   * specific filters underneath `cf`, if so desired.
+   * specific filters underneath `cf_at`, if so desired.
    * Called once during connection setup. */
-  CURLcode (*setup_filters)(struct Curl_easy *data, struct Curl_cfilter *cf);
+  CURLcode (*setup_filters)(struct Curl_easy *data,
+                            struct Curl_cfilter *cf_at);
 
   /* These two functions MUST be set to be protocol dependent */
   CURLcode (*do_it)(struct Curl_easy *data, bool *done);

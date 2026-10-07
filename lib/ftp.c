@@ -3187,8 +3187,9 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   struct pingpong *pp;
   size_t nread = 0;
 
-  if(!ftpc || !ftp)
+  if(!ftpc || (!ftp && (ftpc->state != FTP_QUIT)))
     return CURLE_FAILED_INIT;
+
   pp = &ftpc->pp;
   if(pp->sendleft)
     return Curl_pp_flushsend(data, pp);
@@ -3220,12 +3221,21 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
       /* this was BLOCKING, keep it so for now */
       bool done;
       if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-        result = Curl_ssl_cfilter_add(
-          data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
+        struct Curl_cfilter *cf_ftp =
+          Curl_conn_get_first_cf(conn, FIRSTSOCKET, &Curl_cft_ftp);
+        if(!cf_ftp) {
+          failf(data, "FTP filter not present");
+          return CURLE_FAILED_INIT;
+        }
+        result = Curl_cf_ssl_insert_after(cf_ftp, data,
+          Curl_conn_get_origin(conn, FIRSTSOCKET),
+          Curl_conn_get_destination(conn, FIRSTSOCKET));
         if(result) {
           /* we failed and bail out */
           return CURLE_USE_SSL_FAILED;
         }
+        cf_ftp->connected = FALSE;
+        VERBOSE(Curl_conn_trc_filters(data, FIRSTSOCKET, "ssl insert"));
       }
       /* BLOCKING */
       result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, &done);
@@ -3505,23 +3515,6 @@ static CURLcode ftp_multi_statemach(struct Curl_easy *data,
 {
   struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
   return ftpc ? ftp_statemach(data, ftpc, done) : CURLE_FAILED_INIT;
-}
-
-static CURLcode ftp_block_statemach(struct Curl_easy *data,
-                                    struct ftp_conn *ftpc)
-{
-  struct pingpong *pp = &ftpc->pp;
-  CURLcode result = CURLE_OK;
-
-  while(ftpc->state != FTP_STOP) {
-    if(CURL_CONN_IN_SHUTDOWN(data->conn, FIRSTSOCKET))
-      CURL_TRC_FTP(data, "in shutdown, waiting for server response");
-    result = Curl_pp_statemach(data, pp, TRUE, TRUE /* disconnecting */);
-    if(result)
-      break;
-  }
-
-  return result;
 }
 
 /*
@@ -4279,44 +4272,6 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
   return result;
 }
 
-/***********************************************************************
- *
- * ftp_disconnect()
- *
- * Disconnect from an FTP server. Cleanup protocol-specific per-connection
- * resources. BLOCKING.
- */
-static CURLcode ftp_disconnect(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               bool dead_connection)
-{
-  struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
-
-  if(!ftpc)
-    return CURLE_FAILED_INIT;
-  /* We cannot send quit unconditionally. If this connection is stale or
-     bad in any way, sending quit and waiting around here will make the
-     disconnect wait in vain and cause more problems than we need to. */
-  DEBUGASSERT(CURL_CONN_IN_SHUTDOWN(conn, FIRSTSOCKET));
-  if(!dead_connection && ftpc->ctl_valid &&
-     !Curl_pp_needs_flush(data, &ftpc->pp)) {
-    CURLcode result = Curl_pp_sendf(data, &ftpc->pp, "%s", "QUIT");
-    CURL_TRC_FTP(data, "sending QUIT to close session -> %d", (int)result);
-    if(!result) {
-      ftp_state(data, ftpc, FTP_QUIT);
-      (void)ftp_block_statemach(data, ftpc);  /* ignore errors on the QUIT */
-    }
-    else {
-      infof(data, "Failure sending QUIT command: %s",
-            curl_easy_strerror(result));
-      ftpc->ctl_valid = FALSE; /* mark control connection as bad */
-      connclose(data->conn); /* mark for closure */
-      ftp_state(data, ftpc, FTP_STOP);
-    }
-  }
-  return CURLE_OK;
-}
-
 /* called from multi.c while DOing */
 static CURLcode ftp_doing(struct Curl_easy *data,
                           bool *dophase_done)
@@ -4465,12 +4420,88 @@ bool Curl_ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
   }
 }
 
+static void cf_ftp_destroy(struct Curl_cfilter *cf,
+                           struct Curl_easy *data)
+{
+  (void)cf;
+  (void)data;
+}
+
+static CURLcode cf_ftp_shutdown(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                bool *done)
+{
+  struct ftp_conn *ftpc = Curl_conn_meta_get(cf->conn, CURL_META_FTP_CONN);
+  CURLcode result;
+
+  CURL_TRC_CF(data, cf, "shutdown");
+  if(ftpc && ftpc->ctl_valid && !Curl_pp_needs_flush(data, &ftpc->pp)) {
+    if(!ftpc->quit_started) {
+      ftpc->quit_started = TRUE;
+      result = Curl_pp_sendf(data, &ftpc->pp, "%s", "QUIT");
+      CURL_TRC_CF(data, cf, "shutdown, send QUIT -> %d", (int)result);
+      if(result) {
+        ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+        ftp_state(data, ftpc, FTP_STOP);
+        return result;
+      }
+      ftp_state(data, ftpc, FTP_QUIT);
+    }
+
+    if(Curl_pp_needs_flush(data, &ftpc->pp)) {
+      result = Curl_pp_flushsend(data, &ftpc->pp);
+      if(result) {
+        CURL_TRC_CF(data, cf, "flushing QUIT failed -> %d", (int)result);
+        return result;
+      }
+    }
+    return ftp_statemach(data, ftpc, done);
+  }
+  *done = TRUE;
+  return CURLE_OK;
+}
+
+struct Curl_cftype Curl_cft_ftp = {
+  "FTP",
+  0,
+  0,
+  cf_ftp_destroy,
+  Curl_cf_def_connect,
+  cf_ftp_shutdown,
+  Curl_cf_def_adjust_pollset,
+  Curl_cf_def_data_pending,
+  Curl_cf_def_send,
+  Curl_cf_def_recv,
+  Curl_cf_def_cntrl,
+  Curl_cf_def_conn_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  Curl_cf_def_query,
+};
+
+
+static CURLcode ftp_setup_filters(struct Curl_easy *data,
+                                  struct Curl_cfilter *cf_at)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+
+  (void)data;
+  if(cf_at->sockindex == FIRSTSOCKET) {
+    result = Curl_cf_create(&cf, &Curl_cft_ftp, NULL);
+    if(result)
+      goto out;
+    Curl_conn_cf_insert_after(cf_at, cf);
+  }
+out:
+  return result;
+}
+
 /*
  * FTP protocol.
  */
 const struct Curl_protocol Curl_protocol_ftp = {
   ftp_setup_connection,            /* setup_connection */
-  ZERO_NULL,                       /* setup_filters */
+  ftp_setup_filters,               /* setup_filters */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
   ftp_do_more,                     /* do_more */
@@ -4481,7 +4512,7 @@ const struct Curl_protocol Curl_protocol_ftp = {
   ftp_pollset,                     /* doing_pollset */
   ftp_domore_pollset,              /* domore_pollset */
   ZERO_NULL,                       /* perform_pollset */
-  ftp_disconnect,                  /* disconnect */
+  ZERO_NULL,                       /* disconnect */
   ZERO_NULL,                       /* write_resp */
   ZERO_NULL,                       /* write_resp_hd */
   ZERO_NULL,                       /* connection_is_dead */

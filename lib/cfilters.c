@@ -512,6 +512,21 @@ bool Curl_conn_is_tunneling(struct connectdata *conn, int8_t sockindex)
 }
 #endif /* CURL_DISABLE_PROXY */
 
+struct Curl_cfilter *Curl_conn_get_first_cf(struct connectdata *conn,
+                                            int8_t sockindex,
+                                            struct Curl_cftype *cft)
+{
+  struct Curl_cfilter *cf;
+
+  if(CONN_SOCK_IDX_VALID(sockindex)) {
+    for(cf = conn->cfilter[sockindex]; cf; cf = cf->next) {
+      if(cf->cft == cft)
+        return cf;
+    }
+  }
+  return NULL;
+}
+
 static bool cf_is_ssl(struct Curl_cfilter *cf)
 {
   for(; cf; cf = cf->next) {
