@@ -125,6 +125,8 @@ static void mstate_enter_completed(struct Curl_easy *data,
     Curl_pgrsTime(data, TIMER_POSTRANSFER);
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
   }
+  /* multi_done() should have run and detached any connection already */
+  DEBUGASSERT(!data->conn);
   Curl_pgrsCompleted(data);
   if(from_state < MSTATE_DONE)
     CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
@@ -2400,9 +2402,9 @@ static CURLcode is_finished(struct Curl_multi *multi,
            connection */
         streamclose(data->conn);
 
-        /* if not yet in DONE state, go there, otherwise COMPLETED */
-        multistate(data, (data->mstate < MSTATE_DONE) ?
-                   MSTATE_DONE : MSTATE_COMPLETED);
+        /* if not yet in DONE state, go there. */
+        if(data->mstate < MSTATE_DONE)
+          multistate(data, MSTATE_DONE);
         return result;
       }
     }
