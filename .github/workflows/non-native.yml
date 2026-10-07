@@ -144,23 +144,17 @@ jobs:
               sudo mport index | grep -v -E 'Downloading.+%'
               sudo mport upgrade | grep -v -E '(Downloading.+%|^/usr/local)'
             fi
-            log=$(mktemp) || exit $?
-            sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} > "${log}" 2>&1 || true
+            packages="pkgconf brotli libnghttp2 ${MATRIX_INSTALL}"
+            log=$(mktemp)
+            sudo mport install ${packages} > "${log}" 2>&1 || true
             # mport can return nonzero after success; check installed packages.
-            missing=''
-            for package in pkgconf brotli libnghttp2 ${MATRIX_INSTALL}; do
+            for package in ${packages}; do
               if ! sudo mport -U info "${package}" > /dev/null 2>&1; then
-                missing="${missing} ${package}"
+                cat "${log}"
+                exit 1
               fi
             done
-            if [ -n "${missing}" ]; then
-              cat "${log}"
-              rm -f "${log}"
-              echo "Missing prerequisites:${missing}" >&2
-              exit 1
-            fi
             grep -v -E '(Downloading.+%|^/usr/local)' "${log}" || true
-            rm -f "${log}"
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
