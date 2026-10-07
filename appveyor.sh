@@ -141,6 +141,16 @@ fi
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+
+  # run unit tests
+
+  if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
+    TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
+  elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
+    TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
+  fi
+  TFLAGS+=' tunittest unittest'
+  time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
 fi
 
 # build examples
