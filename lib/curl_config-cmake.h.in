@@ -695,7 +695,7 @@ ${SIZEOF_TIME_T_CODE}
 /* if libpsl is in use */
 #cmakedefine USE_LIBPSL 1
 
-/* if you want to use OpenLDAP code instead of legacy ldap implementation */
+/* if you want to use OpenLDAP code instead of legacy LDAP implementation */
 #cmakedefine USE_OPENLDAP 1
 
 /* if OpenSSL is in use */
