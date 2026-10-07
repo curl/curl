@@ -118,18 +118,6 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 16 2019'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
 
-    # temp
-    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-      CMAKE_GENERATOR: 'Visual Studio 16 2019'
-      CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON'
-
-    # temp
-    - job_name: 'CM VS2019, Release, x64, OpenSSL 3.0 + Schannel, Shared, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-      CMAKE_GENERATOR: 'Visual Studio 16 2019'
-      CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON'
-
     - job_name: 'CM VS2026, Debug, x64, OpenSSL 3.6 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
       CMAKE_VERSION: 4.2.1  # manually bumped (first minor version to support VS2026)
@@ -142,6 +130,12 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON'
+
+    # temp
+    - job_name: 'CM VS2022, Debug, x64, Schannel, Shared, Unicode, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON -DENABLE_DEBUG=ON'
 
     # temp
     - job_name: 'CM VS2026, Debug, x64, !ssl, Static, Build-tests'
