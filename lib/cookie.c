@@ -587,7 +587,8 @@ parse_cookie_header(struct Curl_easy *data,
     struct Curl_str name;
 
     /* we have a <name>=<value> pair or a stand-alone word here */
-    if(!curlx_str_cspn(&ptr, &name, ";\r\n=")) {
+    int rc = curlx_str_cspn(&ptr, &name, ";\r\n=");
+    if(!rc || (rc == STRE_SHORT)) {
       struct Curl_str val;
       bool sep = FALSE;
       curlx_str_trimblanks(&name);
