@@ -140,7 +140,7 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   echo 'Creating artifact'
   time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
   rm files.tmp
-  appveyor PushArtifact "${archive}"
+  appveyor PushArtifact "${archive}" &
 fi
 
 # build tests
@@ -160,6 +160,24 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       "_bld/tests/server/${PRJ_CFG}/servers.exe" --dump-module-paths | sort -f
       "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
       "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
+    fi
+
+    # run unit tests
+
+    unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
+    TFLAGS="~1096 ${TFLAGS:-}"
+    if [ -n "${RUN_TESTS_VIA_CMAKE:-}" ]; then  # just to document the differences
+      export TFLAGS="-j10 ${TFLAGS}"
+      time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
+    else
+      export CURL_DIRSUFFIX="${PRJ_CFG}"
+      TFLAGS="!1119 !1167 ${TFLAGS:-}"  # skip tests that need a configured cl.exe
+      (
+        cd _bld/tests
+        # This command must use the same Perl as detected in the CMake configuration step.
+        # shellcheck disable=SC2086
+        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ${TFLAGS:-}
+      )
     fi
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
