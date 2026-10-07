@@ -40,9 +40,9 @@
    This function returns a pointer to malloc'ed memory.
 
    The input path to this function is expected to have a filename part.
- */
 
-/* @unittest 1688 */
+   @unittest 1688
+ */
 UNITTEST char *dirslash(const char *path);
 UNITTEST char *dirslash(const char *path)
 {
