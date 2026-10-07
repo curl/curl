@@ -181,6 +181,18 @@ curlx_str_newline
 8: (%0d) 0, line 1
 9: (%0c) 6, line 0
 10: (%00) 6, line 0
+curlx_str_newline [TEST]
+0: (%61) 6, line 0
+1: (%61) 6, line 0
+2: (%41) 6, line 0
+3: (%62) 6, line 0
+4: (%5c) 6, line 0
+5: (%20) 6, line 0
+6: (%0a) 0, line 1
+7: (%0d) 0, line 1
+8: (%0d) 0, line 1
+9: (%0c) 6, line 0
+10: (%00) 6, line 0
 curlx_str_hex
 0: ("1") 0, [1] line 1
 1: ("1000") 0, [4096] line 4

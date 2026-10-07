@@ -372,6 +372,31 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
+    static const char * const newl[] = {
+      "a",
+      "aa",
+      "A",
+      "b",
+      "\\",
+      " ",
+      "\n",
+      "\r",
+      "\r\n",
+      "\x0c",
+      "",
+      NULL
+    };
+    curl_mprintf("curlx_str_newline [TEST]\n");
+    for(i = 0; newl[i]; i++) {
+      const char *line = newl[i];
+      const char *orgline = line;
+      int rc = curlx_str_newline(&line);
+      curl_mprintf("%d: (%%%02x) %d, line %d\n",
+                   i, (unsigned int)newl[i][0], rc, (int)(line - orgline));
+    }
+  }
+
+  {
     static const char * const nums[] = {
       "1",
       "1000",
