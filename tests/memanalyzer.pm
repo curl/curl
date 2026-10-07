@@ -113,8 +113,8 @@ sub memanalyze {
         chomp $_;
         my $line = $_;
         $lnum++;
-        if($line =~ /^BT/) {
-            # back-trace, ignore
+        if($line =~ /^(BT|RECV|SEND)/) {
+            # back-trace, recv/send, ignore
         }
         elsif($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
             # new memory limit test prefix
