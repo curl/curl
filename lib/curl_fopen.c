@@ -42,17 +42,6 @@
    The input path to this function is expected to have a filename part.
  */
 
-#ifdef _WIN32
-#define PATHSEP   "\\"
-#define IS_SEP(x) (((x) == '/') || ((x) == '\\'))
-#elif defined(MSDOS) || defined(OS2)
-#define PATHSEP   "\\"
-#define IS_SEP(x) ((x) == '\\')
-#else
-#define PATHSEP   "/"
-#define IS_SEP(x) ((x) == '/')
-#endif
-
 /* @unittest 1688 */
 UNITTEST char *dirslash(const char *path);
 UNITTEST char *dirslash(const char *path)
