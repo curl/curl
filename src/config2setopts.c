@@ -1237,7 +1237,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   gen_cb_setopts(config, per, curl);
 
   result = proxy_setopts(config, curl);
-  if(setopt_bad(result) || config->synthetic_error)
+  if(setopt_bad(result))
     return result;
 
   result = credentials_and_headers_setopts(config, curl);
@@ -1251,5 +1251,9 @@ CURLcode config2setopts(struct OperationConfig *config,
     result = mail_and_sasl_setopts(config, curl);
   if(!setopt_bad(result))
     result = misc_setopts(config, curl);
+
+  if(!result && config->synthetic_error)
+    result = CURLE_FAILED_INIT;
+
   return result;
 }
