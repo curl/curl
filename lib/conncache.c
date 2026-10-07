@@ -35,7 +35,6 @@
 #include "curl_share.h"
 #include "sigpipe.h"
 #include "uint-spbset.h"
-#include "curlx/wait.h"
 
 
 #define CPOOL_IS_LOCKED(c)    ((c) && (c)->locked)
@@ -282,10 +281,6 @@ void Curl_cpool_destroy(struct cpool *cpool, struct Curl_easy *admin)
       sigpipe_restore(&pipe_ctx);
     }
     CPOOL_UNLOCK(cpool, admin);
-    if(cpool->share)
-      /* test, if small delay is what Window CI seems to need */
-      curlx_wait_ms(100);
-
     Curl_hash_destroy(&cpool->dest2bundle);
     Curl_uint32_bset_destroy(&cpool->idles);
     Curl_uint32_tbl_destroy(&cpool->conns);
