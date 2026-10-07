@@ -1914,6 +1914,11 @@ TESTCASES = \
   test2092 \
   test2093 \
   test2094 \
+  test2095 \
+  test2096 \
+  test2097 \
+  test2098 \
+  test2099 \
   test2100 \
   test2101 \
   test2102 \

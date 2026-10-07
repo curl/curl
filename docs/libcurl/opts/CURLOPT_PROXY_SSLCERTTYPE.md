@@ -37,7 +37,8 @@ Pass a pointer to a null-terminated string as parameter. The string should be
 the format of your client certificate used when connecting to an HTTPS proxy.
 
 Supported formats are "PEM" and "DER", except with Schannel. OpenSSL and
-Schannel support "P12" for PKCS#12-encoded files.
+Schannel support "P12" for PKCS#12-encoded files. OpenSSL supports "PROV" to
+use a store provider (added in 8.12.0).
 
 The application does not have to keep the string around after setting this
 option.
@@ -47,7 +48,8 @@ previous ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 
-"PEM"
+"PROV" when using non-fork OpenSSL with provider support,
+"PEM" otherwise.
 
 # %PROTOCOLS%
 

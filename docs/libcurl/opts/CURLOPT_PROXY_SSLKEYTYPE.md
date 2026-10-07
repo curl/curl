@@ -42,6 +42,11 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
+# DEFAULT
+
+"PROV" when using non-fork OpenSSL with provider support,
+"PEM" otherwise.
+
 # %PROTOCOLS%
 
 # EXAMPLE
