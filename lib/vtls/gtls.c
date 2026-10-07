@@ -2095,8 +2095,13 @@ static CURLcode gtls_send(struct Curl_cfilter *cf,
     nwritten = gnutls_record_send(backend->gtls.session, buf, remain);
 
     if(nwritten >= 0) {
+      if((size_t)nwritten > remain) {
+        DEBUGASSERT(0);
+        failf(data, "gnutls_record_send(len=%zu) returned %zd",
+              remain, nwritten);
+        return CURLE_SEND_ERROR;
+      }
       *pnwritten += (size_t)nwritten;
-      DEBUGASSERT((size_t)nwritten <= remain);
       buf = (char *)CURL_UNCONST(buf) + (size_t)nwritten;
       remain -= (size_t)nwritten;
     }
