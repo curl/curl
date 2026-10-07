@@ -361,6 +361,33 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
+    curl_mprintf("curlx_str_newline [PRINTF]\n");
+    for(i = 0; newl[i]; i++) {
+      const char *line = newl[i];
+      const char *orgline = line;
+      int rc = curlx_str_newline(&line);
+      /* !checksrc! disable BANNEDFUNC 1 */
+      printf("%d: (%%%02x) %d, line %d\n",
+                   i, (unsigned int)*orgline,
+                   rc, (int)(line - orgline));
+    }
+  }
+
+  {
+    static const char * const newl[] = {
+      "a",
+      "aa",
+      "A",
+      "b",
+      "\\",
+      " ",
+      "\n",
+      "\r",
+      "\r\n",
+      "\x0c",
+      "",
+      NULL
+    };
     curl_mprintf("curlx_str_newline\n");
     for(i = 0; newl[i]; i++) {
       const char *line = newl[i];
