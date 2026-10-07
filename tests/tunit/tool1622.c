@@ -97,5 +97,7 @@ static CURLcode test_tool1622(const char *arg)
     fail_unless(!strcmp(buffer, datacases[i].output), datacases[i].output);
   }
 
+  fflush(stdout);
+
   UNITTEST_END_SIMPLE
 }
