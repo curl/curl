@@ -72,9 +72,7 @@ static CURLcode test_tool1622(const char *arg)
     secs++;
   }
 
-#ifdef _WIN32
-  _flushall();  /* flush buffers of all streams regardless of mode */
-#endif
+  fflush(stdout);
 
   puts("max5data");
   for(i = 0, secs = 0; i < 63; i++) {
