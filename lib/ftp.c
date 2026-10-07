@@ -68,6 +68,7 @@
 #include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curlx/wait.h"
 #include "curl_ctype.h"
 
 #ifndef NI_MAXHOST
@@ -4468,6 +4469,8 @@ static CURLcode cf_ftp_shutdown(struct Curl_cfilter *cf,
         return result;
       }
       ftp_state(data, ftpc, FTP_QUIT);
+      /* test, if small delay is what Window CI seems to need */
+      curlx_wait_ms(200);
     }
 
     if(Curl_pp_needs_flush(data, &ftpc->pp)) {
