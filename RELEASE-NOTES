@@ -5,7 +5,7 @@ curl and libcurl 8.23.0
  curl_easy_setopt() options:   312
  Public functions in libcurl:  100
  Authors:                      1538
- Contributors:                 3831
+ Contributors:                 3835
 
 This release includes the following changes:
 
@@ -41,15 +41,19 @@ This release includes the following bugfixes:
  o conncache: never discard a connection still in use [208]
  o conncache: remove bundle dest [50]
  o connectdata: use less curltime [34]
+ o cookie: accept and ignore values for 'secure' and 'httponly' [187]
  o cookie: accept slightly longer lines in cookie jars [105]
+ o cookie: cookies for a PSL domain from jar just limits tailmatch [176]
  o cookie: ignore individual cookie errors when loading [6]
  o cpool: do not use admin handle for conn lookup [299]
  o cshutdown: make it smaller [60]
+ o cshutdown: use ptrarray instead of llist [156]
  o curl-openssl.m4: sync LibreSSL detection method with rest of forks [218]
  o curl_addrinfo: drop redundant parentheses [41]
  o curl_easy_send/recv: check pointer arg [175]
  o curl_fopen: restore the uid and gid checks [70]
  o curl_formadd.md: mention the strlen() for names as well [29]
+ o curl_multi_perform: doc update [148]
  o curl_setup.h: drop compatibility raw C flag `ENABLE_IPV6` [260]
  o CURLINFO_EFFECTIVE_URL.md: mention a short lifetime [116]
  o CURLOPT*ISSUERCERT*: not verified cryptographically [28]
@@ -62,6 +66,7 @@ This release includes the following bugfixes:
  o cw-pause: fix O(N^2) list traversal in cw_pause_flush [137]
  o DEPENDENCIES.md: fix release date for valgrind 3.0.0 to 2005-08-03
  o DEPRECATE.md: reflect SMB removal [252]
+ o DEPRECATE: Common Name support in TLS certificates for OpenSSL [172]
  o digest: check peer equality for staleness [24]
  o digest: fix maximum length quoted value parsing [22]
  o digest: parse without storing 'value' in local buffer [20]
@@ -70,7 +75,9 @@ This release includes the following bugfixes:
  o dnscache: check hostname on lookup [209]
  o docs: add the missing .html to the url-encode book link [3]
  o docs: document and align the blocking situations [163]
+ o docs: SSL session import/file updates [199]
  o doh: reject undersized HTTPS RDATA [11]
+ o dynhds: check size overflows [198]
  o dynhds: grow header array geometrically [73]
  o easy: duplicating a zero byte memory area needs no malloc [91]
  o easy: make ca_cache_timeout standalone [51]
@@ -153,6 +160,7 @@ This release includes the following bugfixes:
  o netrc: empty quoted values now produce a valid empty string [62]
  o netrc: survive comment-only .netrc file [93]
  o ngtcp2: shrink max sendbuf [13]
+ o ngtcp2: use stream in userdata [185]
  o openldap: hand it a dup'd socket, not curl's own
  o openssl/gtls: reject CRLfile with native CA store, matching rustls [27]
  o openssl: fix OpenSSL v4.1 no-deprecated build [190]
@@ -171,7 +179,9 @@ This release includes the following bugfixes:
  o perf-tests: output two-digital decimals always [96]
  o pingpong: add a max loop counter for Curl_pp_readresp [113]
  o pytest: check server status without ssl verify [154]
+ o pytest: set `PerSourcePenalties no` when sshd supports it [169]
  o pytest: silence pytest warnings [261]
+ o retry.md: clarify that the server can override retry delay time [184]
  o rtsp: accept a Content-Length body on methods that expected none [115]
  o rtsp: do not send a learned session id to another origin [10]
  o runtests: add extra room for mininum number of tests in sliced jobs [201]
@@ -181,6 +191,7 @@ This release includes the following bugfixes:
  o schannel: clear borrowed sslContext on close [15]
  o schannel: fix `-Wextra-semi-stmt` with clang and extra debug enabled [267]
  o schannel: fix compiler warning `-Wstrict-aliasing` in ALPN code [243]
+ o schannel: handle empty tokens during renegotiation [183]
  o sectrust: add guards for rest of Apple OS flavors [250]
  o socketpair: fix accept loop [210]
  o socketpair: use `pipe2()` on Apple OSes (requires SDK 27) [262]
@@ -201,10 +212,12 @@ This release includes the following bugfixes:
  o test2072: enable on Cygwin/MSYS2 [256]
  o test: restore the old test 1609 as 3271 [162]
  o tests/http: use @classmethod when appropriate [231]
+ o tests: clean up Python test code [130]
  o tests: fix typos in a comment [247]
  o tests: require valgrind 3+ (2007-08-03) [282]
  o tftp: verify direction in a few places [101]
  o tool: (re)set SSL verification in --libcurl output [1]
+ o tool: add Unicode and long-filename support to `--create-dir` (Windows) [141]
  o tool: buffer headers before remote filename selection [98]
  o tool_doswin: recognize superscript numbers as reserved [117]
  o tool_easysrc: reset the handle between --next operations [90]
@@ -212,9 +225,11 @@ This release includes the following bugfixes:
  o tool_help: guard category[2] access when category is bare "-" [59]
  o tool_ipfs: keep the path percent-encoded when rewriting to the gateway [138]
  o tool_operate: clear the retry flag when the output file fails [122]
+ o tool_util: add Unicode support to `tool_execpath()` [142]
  o u8_strset, u32_ptrset: fix boundaries handling [131]
  o uint-bset: skip unused slots when counting
  o uint-table: add remove-max precaution [165]
+ o url: check syntax before applying default-protocol [147]
  o url: match connections without force reuse and candidates [95]
  o url: ntlm/negotiate, prohibit connection reuse on follows [18]
  o urlapi: make curl_url_dup() copy the guessed_scheme flag [166]
@@ -246,6 +261,7 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
+ o Common Name support in TLS certificates for OpenSSL
  o HTTP/2 Server Push
  o local crypto implementations
  o NTLM
@@ -261,16 +277,18 @@ advice from friends like these:
   Christian Ullrich, Claude, Dan Fandrich, Daniel Lang, Daniel McCarney,
   Daniel S. Roche, Daniel Stenberg, David Benjamin, dependabot[bot],
   Fengxiaoxx on github, Fernando Gallardo, Filippo Tedeschi, Florent Castelli,
-  Fredrik Blau, Huang Yiheng, Ilias Aberkane, Jorge Rocamora, Joshua Rogers,
-  JuanCarlosgg on github, KayanoLiam on github, ldm0, Luna Tong, Marcel Raad,
-  Martin Dukek, Max Dymond, Mihai-Gabriel Marin, minnnjuuu, Mohammed K. Fathy,
-  Muhamad Arga Reksapati, OSS-Fuzz, Paolo Ganci, Patrick Monnerat, rawsun007,
-  Ray Satiro, renovate[bot], Rhino, Richard Payne, Ron Kuper, Roshan Ramani,
-  Rudolf Polzer, Samuel Henrique, Sebastian Raase, Skye Soss, Stanislav Fort,
-  Stefan Eissing, Stephen Psaradellis, szedenik-adam on github,
-  Thanniru Sai Teja, Tip ten Brink, Tyler Yankee, Un1q32, Viktor Szakats,
+  Fredrik Blau, GPT-6.1 Sol, Huang Yiheng, Ilias Aberkane,
+  jared-m-cohen-civ on github, Johannes Schindelin, Jorge Rocamora,
+  Joshua Rogers, JuanCarlosgg on github, KayanoLiam on github, ldm0, Luna Tong,
+  Marcel Raad, Martin Dukek, Max Dymond, Mihai-Gabriel Marin, minnnjuuu,
+  Mohammed K. Fathy, Muhamad Arga Reksapati, OSS-Fuzz, Paolo Ganci,
+  Patrick Monnerat, rawsun007, Ray Satiro, Rémi NICOLE, renovate[bot], Rhino,
+  Richard Payne, Ron Kuper, Roshan Ramani, Rudolf Polzer, Samuel Henrique,
+  Sebastian Raase, Skye Soss, Stanislav Fort, Stefan Eissing,
+  Stephen Psaradellis, szedenik-adam on github, Thanniru Sai Teja,
+  Tip ten Brink, Tyler Yankee, Un1q32, Viktor Szakats, Wonyoung Jung,
   xhon-pelushi, Yechan Bae, yuwk
-  (67 contributors)
+  (72 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -403,6 +421,7 @@ References to bug reports and discussions on issues:
  [127] = https://curl.se/bug/?i=22997
  [128] = https://curl.se/bug/?i=22996
  [129] = https://curl.se/bug/?i=22993
+ [130] = https://curl.se/bug/?i=23290
  [131] = https://curl.se/bug/?i=22991
  [132] = https://curl.se/bug/?i=22950
  [133] = https://curl.se/bug/?i=23086
@@ -412,10 +431,14 @@ References to bug reports and discussions on issues:
  [138] = https://curl.se/bug/?i=22944
  [139] = https://curl.se/bug/?i=23060
  [140] = https://curl.se/bug/?i=23083
+ [141] = https://curl.se/bug/?i=23289
+ [142] = https://curl.se/bug/?i=23287
  [143] = https://curl.se/bug/?i=23080
  [144] = https://curl.se/bug/?i=23078
  [145] = https://curl.se/bug/?i=23068
  [146] = https://curl.se/bug/?i=23069
+ [147] = https://curl.se/bug/?i=23273
+ [148] = https://curl.se/bug/?i=23283
  [149] = https://curl.se/bug/?i=23061
  [150] = https://curl.se/bug/?i=23071
  [151] = https://curl.se/bug/?i=23067
@@ -423,6 +446,7 @@ References to bug reports and discussions on issues:
  [153] = https://curl.se/bug/?i=23072
  [154] = https://curl.se/bug/?i=23064
  [155] = https://curl.se/bug/?i=23055
+ [156] = https://curl.se/bug/?i=23234
  [157] = https://curl.se/bug/?i=23058
  [158] = https://curl.se/bug/?i=23056
  [159] = https://curl.se/bug/?i=23054
@@ -435,18 +459,27 @@ References to bug reports and discussions on issues:
  [166] = https://curl.se/bug/?i=23043
  [167] = https://curl.se/bug/?i=23045
  [168] = https://curl.se/bug/?i=23245
+ [169] = https://curl.se/bug/?i=23259
  [171] = https://curl.se/bug/?i=23014
+ [172] = https://curl.se/bug/?i=23280
  [173] = https://curl.se/bug/?i=23037
  [174] = https://curl.se/bug/?i=23038
  [175] = https://curl.se/bug/?i=23035
+ [176] = https://curl.se/bug/?i=23261
  [178] = https://curl.se/bug/?i=23030
  [179] = https://curl.se/bug/?i=23028
  [180] = https://curl.se/bug/?i=23027
  [181] = https://curl.se/bug/?i=23026
+ [183] = https://github.com/git-for-windows/git/issues/6457
+ [184] = https://curl.se/bug/?i=23249
+ [185] = https://curl.se/bug/?i=23267
+ [187] = https://curl.se/bug/?i=23265
  [189] = https://curl.se/bug/?i=23216
  [190] = https://curl.se/bug/?i=23215
  [191] = https://curl.se/bug/?i=23183
  [192] = https://curl.se/bug/?i=23050
+ [198] = https://curl.se/bug/?i=23210
+ [199] = https://curl.se/bug/?i=23220
  [201] = https://curl.se/bug/?i=23211
  [203] = https://curl.se/bug/?i=23208
  [205] = https://curl.se/bug/?i=23181
