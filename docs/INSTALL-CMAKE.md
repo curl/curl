@@ -217,7 +217,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_LINT`:                              Run lint checks while building. Default: `OFF`
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
 - `CURL_PATCHSTAMP`:                        Set security patch string for `curl -V`/`curl --version` output.
-- `CURL_STATIC_CRT`:                        Build curl with static CRT with MSVC (`/MT`) (requires UCRT and static curl). Default: `OFF`
+- `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires UCRT, static libcurl or no curl executable). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string, e.g. `0x0a00` for Windows 10.
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
