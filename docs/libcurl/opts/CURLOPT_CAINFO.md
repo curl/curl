@@ -56,7 +56,7 @@ previous ones. Set it to NULL to disable its use again.
 The default value for this can be figured out with CURLINFO_CAINFO(3).
 
 For LDAP, this option is honored when using the OpenLDAP backend, including
-Apple's implementation. It is not supported with WinLDAP.
+Apple's fork. It is not supported with WinLDAP.
 
 # DEFAULT
 
