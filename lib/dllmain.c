@@ -36,7 +36,7 @@
 #define PREVENT_OPENSSL_MEMLEAK  /* non-fork OpenSSL */
 #endif
 
-#if defined(_MSC_VER) && defined(DEBUGBUILD)  /* FIXME: for mingw-w64 */
+#if defined(_MSC_VER) && defined(DEBUGBUILD)
 #define LIBCURL_INIT_CRTDBG
 #ifndef _DEBUG
 #define _DEBUG  /* FIXME: is this needed */
