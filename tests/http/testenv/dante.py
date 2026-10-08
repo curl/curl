@@ -139,10 +139,10 @@ class Dante:
                           ])
         try_until = datetime.now(timezone.utc) + timeout
         while datetime.now(timezone.utc) < try_until:
+            time.sleep(.1)
             r = curl.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
             if r.exit_code == 0:
                 return True
-            time.sleep(.1)
         log.error(f"Server still not responding after {timeout}")
         return False
 
