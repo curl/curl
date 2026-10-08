@@ -64,9 +64,10 @@ directions.
 
 If the given WebSocket URL (using `ws://` or `wss://`) fails to get upgraded
 via a 101 response code and instead gets another response code back from the
-HTTP server - the transfer returns `CURLE_HTTP_RETURNED_ERROR` for that
-transfer. Note then that even 2xx response codes are then considered error
-since it failed to provide a WebSocket transfer.
+HTTP server - the transfer returns `CURLE_WS_DENIED` for that transfer. Note
+then that even 2xx response codes are then considered error. However the HTTP
+transfer is completed if the response is otherwise valid. The connection may
+be kept and returned to the cache for reuse.
 
 ## Test suite
 
