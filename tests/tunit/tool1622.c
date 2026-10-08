@@ -71,7 +71,6 @@ static CURLcode test_tool1622(const char *arg)
     secs *= 2;
     secs++;
   }
-
   curl_mprintf("max5data\n");
   for(i = 0, secs = 0; i < 63; i++) {
     max5data(secs, buffer, sizeof(buffer));
