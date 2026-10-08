@@ -397,13 +397,13 @@ void tool_list_engines(void)
   /* Get the list of engines */
   curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
 
-  curl_mprintf("Build-time engines:\n");
+  puts("Build-time engines:");
   if(engines) {
     for(; engines; engines = engines->next)
       curl_mprintf("  %s\n", engines->data);
   }
   else {
-    curl_mprintf("  <none>\n");
+    puts("  <none>");
   }
 
   /* Cleanup the list of engines */
