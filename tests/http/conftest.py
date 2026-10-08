@@ -105,7 +105,7 @@ def env(pytestconfig, env_config) -> Env:
 
 
 @pytest.fixture(scope='session')
-def danted(env) -> Generator[Union[Dante, bool], None, None]:
+def danted(env, httpd) -> Generator[Union[Dante, bool], None, None]:
     if Env.has_danted():
         danted = Dante(env=env)
         assert danted.initial_start()
@@ -115,7 +115,7 @@ def danted(env) -> Generator[Union[Dante, bool], None, None]:
         yield False
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='session', autouse=True)
 def dnsd(env) -> Generator[Dnsd, None, None]:
     dnsd = Dnsd(env=env)
     assert dnsd.initial_start()
