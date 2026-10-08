@@ -287,11 +287,11 @@ int main(int argc, const char *argv[])
   if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
     s_GetLoadedModulePaths();
 #if defined(_MSC_VER) && defined(_DEBUG)
-    printf("1|%d|%d|\n", _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_REPORT_MODE), _CRT_ASSERT);
-    printf("2|%d|%d|\n", _CrtSetReportMode(_CRT_ERROR, _CRTDBG_REPORT_MODE), _CRT_ERROR);
-    printf("3|%d|%d|\n", _CrtSetReportMode(_CRT_WARN, _CRTDBG_REPORT_MODE), _CRT_WARN);
+    curl_mprintf("1|%d|%d|\n", _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_REPORT_MODE), _CRT_ASSERT);
+    curl_mprintf("2|%d|%d|\n", _CrtSetReportMode(_CRT_ERROR, _CRTDBG_REPORT_MODE), _CRT_ERROR);
+    curl_mprintf("3|%d|%d|\n", _CrtSetReportMode(_CRT_WARN, _CRTDBG_REPORT_MODE), _CRT_WARN);
 #endif
-    printf("--------\n");
+    curl_mprintf("--------\n");
     return 0;
   }
 #endif
