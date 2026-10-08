@@ -32,6 +32,7 @@
 #define _DEBUG
 #endif
 #include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
+#include <stdlib.h> /* for _set_error_mode() */
 #endif
 
 #if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
@@ -272,20 +273,27 @@ int main(int argc, const char *argv[])
   const char *env;
   size_t tmp;
 
-#ifdef _WIN32
-  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
-    s_GetLoadedModulePaths();
-    return 0;
-  }
-#endif
-
 #if defined(_MSC_VER) && defined(_DEBUG)
+  _set_error_mode(_OUT_TO_STDERR);
   _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
   _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+#endif
+
+#ifdef _WIN32
+  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
+    s_GetLoadedModulePaths();
+#if defined(_MSC_VER) && defined(_DEBUG)
+    printf("1|%d|%d|\n", _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_REPORT_MODE), _CRT_ASSERT);
+    printf("2|%d|%d|\n", _CrtSetReportMode(_CRT_ERROR, _CRTDBG_REPORT_MODE), _CRT_ERROR);
+    printf("3|%d|%d|\n", _CrtSetReportMode(_CRT_WARN, _CRTDBG_REPORT_MODE), _CRT_WARN);
+#endif
+    printf("--------\n");
+    return 0;
+  }
 #endif
 
   CURL_BINMODE(stdout);
