@@ -63,7 +63,7 @@ static CURLcode test_tool1622(const char *arg)
     { 0, NULL }
   };
 
-  curl_mprintf("timebuf\n");
+  puts("timebuf");
   for(i = 0, secs = 0; i < 63; i++) {
     timebuf(buffer, sizeof(buffer), secs);
     curl_mprintf("%20" FMT_OFF_T " - %s\n", secs, buffer);
@@ -71,7 +71,7 @@ static CURLcode test_tool1622(const char *arg)
     secs *= 2;
     secs++;
   }
-  curl_mprintf("max5data\n");
+  puts("max5data");
   for(i = 0, secs = 0; i < 63; i++) {
     max5data(secs, buffer, sizeof(buffer));
     curl_mprintf("%20" FMT_OFF_T " - %s\n", secs, buffer);
