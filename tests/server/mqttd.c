@@ -166,8 +166,9 @@ static void logprotocol(mqttdir dir,
     optr += 2;
     left -= 2;
   }
-  fprintf(output, "%s %s %zx %s\n",
-          dir == FROM_CLIENT ? "client" : "server", prefix, remlen, data);
+  fprintf(output, "%s %s %lx %s\n",
+          dir == FROM_CLIENT ? "client" : "server",
+          prefix, (unsigned long)remlen, data);
 }
 
 /* return 0 on success */
