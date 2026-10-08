@@ -55,12 +55,13 @@ previous ones. Set it to NULL to disable its use again.
 
 The default value for this can be figured out with CURLINFO_CAINFO(3).
 
-This option has no effect on LDAP connections when libcurl uses the legacy LDAP
-backend. That backend manages TLS independently of curl's TLS layer, and on
-some OpenLDAP versions the effective CA file used for certificate verification
-is governed by process-global state instead of this per-handle option. When
-libcurl is built with USE_OPENLDAP, the OpenLDAP backend routes TLS through
-curl's layer and this option is honored.
+This option has no effect on LDAP connections when libcurl uses the
+legacy LDAP backend (Apple OpenLDAP, WinLDAP). That backend manages TLS
+independently of curl's TLS layer, and on some OpenLDAP versions the
+effective CA file used for certificate verification is governed by
+process-global state instead of this per-handle option. When libcurl is
+built with OpenLDAP, the backend routes TLS through curl's layer and
+this option is honored.
 
 # DEFAULT
 
