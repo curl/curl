@@ -31,6 +31,12 @@ verbose=''
 
 # build
 
+echo '------------------'
+find /c/msys64 -name curl.exe
+echo '------------------'
+find /c/msys64 -name 'libcurl*.dll'
+echo '------------------'
+
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
 
   PRJ_CFG='Debug'
