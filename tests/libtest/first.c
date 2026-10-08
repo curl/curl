@@ -27,8 +27,7 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
-#ifdef _MSC_VER
-#define _DEBUG
+#if defined(_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
 #endif
 
@@ -225,7 +224,7 @@ int main(int argc, const char *argv[])
   const char *env;
   size_t tmp;
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && defined(_DEBUG)
   _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
   _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
