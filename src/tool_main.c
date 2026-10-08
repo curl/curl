@@ -23,8 +23,12 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef _WIN32
+#if defined(_MSC_VER) && defined(DEBUGBUILD)
+#define _DEBUG
 #include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
+#endif
+
+#ifdef _WIN32
 #include <tchar.h>
 #endif
 
@@ -157,7 +161,7 @@ int main(int argc, char *argv[])
 
   tool_init_stderr();
 
-#ifdef _WIN32
+#ifdef _MSC_VER
   _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
   _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
