@@ -361,56 +361,11 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    curl_mprintf("curlx_str_newline [PRINTF]\n");
-    for(i = 0; newl[i]; i++) {
-      const char *line = newl[i];
-      const char *orgline = line;
-      int rc = curlx_str_newline(&line);
-      /* !checksrc! disable BANNEDFUNC 1 */
-      printf("%d: (%%%02x) %d, line %d\n",
-                   i, (unsigned int)*orgline,
-                   rc, (int)(line - orgline));
-    }
-  }
-
-  {
-    static const char * const newl[] = {
-      "a",
-      "aa",
-      "A",
-      "b",
-      "\\",
-      " ",
-      "\n",
-      "\r",
-      "\r\n",
-      "\x0c",
-      "",
-      NULL
-    };
     curl_mprintf("curlx_str_newline\n");
     for(i = 0; newl[i]; i++) {
       const char *line = newl[i];
       const char *orgline = line;
       int rc = curlx_str_newline(&line);
-/* Workaround for the expression erroneously returning NUL byte */
-#if defined(_MSC_VER) && _MSC_VER == 1929 && defined(_WIN64)
-      unsigned int v1 = (unsigned int)newl[i][0];
-      unsigned int v2 = (unsigned int)*orgline;
-      if(v1 != v2) {
-        curl_mprintf("MISMATCH-A?:|%%%08x|%%%08x|\n", v1, v2);
-        /* !checksrc! disable BANNEDFUNC 1 */
-        printf("MISMATCH-B?:|%%%08x|%%%08x|\n", v1, v2);
-      }
-      if((unsigned int)(unsigned char)newl[i][0] !=
-         (unsigned int)(unsigned char)*orgline) {
-        curl_mprintf("MISMATCH-1?:|%%%08x|%%%08x|\n",
-          (unsigned int)newl[i][0], (unsigned int)*orgline);
-        /* !checksrc! disable BANNEDFUNC 1 */
-        printf("MISMATCH-2?:|%%%08x|%%%08x|\n",
-          (unsigned int)newl[i][0], (unsigned int)*orgline);
-      }
-#endif
       curl_mprintf("%d: (%%%02x) %d, line %d\n",
 /* Workaround for the expression erroneously returning NUL byte */
 #if defined(_MSC_VER) && _MSC_VER == 1929 && defined(_WIN64)
