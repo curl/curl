@@ -24,6 +24,7 @@
 #include "tool_setup.h"
 
 #ifdef _WIN32
+#include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
 #include <tchar.h>
 #endif
 
@@ -157,6 +158,13 @@ int main(int argc, char *argv[])
   tool_init_stderr();
 
 #ifdef _WIN32
+  _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+  _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+
   /* Undocumented diagnostic option to list the full paths of all loaded
      modules. This is purposely pre-init. */
   if(argc == 2 && !_tcscmp(argv[1], _TEXT("--dump-module-paths"))) {

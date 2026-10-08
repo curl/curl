@@ -27,6 +27,10 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
+#ifdef _WIN32
+#include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
+#endif
+
 #if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
 #include "tool_stderr.h"  /* for tool_init_stderr() */
 #endif
@@ -219,6 +223,15 @@ int main(int argc, const char *argv[])
   const char *entry_name;
   const char *env;
   size_t tmp;
+
+#ifdef _WIN32
+  _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+  _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+#endif
 
   CURL_BINMODE(stdout);
 
