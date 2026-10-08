@@ -116,6 +116,7 @@ find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -p
 if [ -z "${SKIP_RUN:-}" ]; then
   echo "|$PATH|"
   "${curl}" --disable --version
+  "${curl}" --dump-module-paths
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
@@ -152,6 +153,11 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
   # run unit tests
 
   if [ -z "${SKIP_RUN:-}" ]; then
+    if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
+      cp "${openssl_root}"/*.dll "_bld/tests/tunit/Debug/${PRJ_CFG}"
+      cp "${openssl_root}"/*.dll "_bld/tests/unit/Debug/${PRJ_CFG}"
+    fi
+
     export CURL_TEST_MIN=64
     export TFLAGS=''
     if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
