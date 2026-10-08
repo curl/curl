@@ -27,7 +27,10 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
-#if defined(_MSC_VER) && defined(_DEBUG)
+#if defined(_MSC_VER) && defined(DEBUGBUILD)
+#ifndef _DEBUG
+#define _DEBUG
+#endif
 #include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
 #endif
 
