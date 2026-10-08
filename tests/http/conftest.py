@@ -33,7 +33,17 @@ from testenv.env import EnvConfig
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
 
-from testenv import Env, Httpd, Nghttpx, NghttpxFwd, NghttpxQuic, NghttpxTcp, Sshd
+from testenv import (
+    Dante,
+    Dnsd,
+    Env,
+    Httpd,
+    Nghttpx,
+    NghttpxFwd,
+    NghttpxQuic,
+    NghttpxTcp,
+    Sshd,
+)
 from testenv.h2o import H2oProxy, H2oServer
 
 log = logging.getLogger(__name__)
@@ -92,6 +102,25 @@ def env(pytestconfig, env_config) -> Env:
 
     env.setup()
     return env
+
+
+@pytest.fixture(scope='session')
+def danted(env) -> Generator[Union[Dante, bool], None, None]:
+    if Env.has_danted():
+        danted = Dante(env=env)
+        assert danted.initial_start()
+        yield danted
+        danted.stop()
+    else:
+        yield False
+
+
+@pytest.fixture(scope='session')
+def dnsd(env) -> Generator[Dnsd, None, None]:
+    dnsd = Dnsd(env=env)
+    assert dnsd.initial_start()
+    yield dnsd
+    dnsd.stop()
 
 
 @pytest.fixture(scope="session")
