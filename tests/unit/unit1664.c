@@ -401,7 +401,8 @@ static CURLcode test_unit1664(const char *arg)
         curl_mprintf("MISMATCH-A?:|%%%08x|%%%08x|\n", v1, v2);
         printf("MISMATCH-B?:|%%%08x|%%%08x|\n", v1, v2);
       }
-      if((unsigned int)newl[i][0] != (unsigned int)*orgline) {
+      if((unsigned int)(unsigned char)newl[i][0] !=
+         (unsigned int)(unsigned char)*orgline) {
         curl_mprintf("MISMATCH-1?:|%%%08x|%%%08x|\n",
           (unsigned int)newl[i][0], (unsigned int)*orgline);
         printf("MISMATCH-2?:|%%%08x|%%%08x|\n",
