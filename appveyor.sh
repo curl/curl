@@ -175,6 +175,11 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
   # run unit tests
 
   if [ -z "${SKIP_RUN:-}" ]; then
+    if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
+      cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
+      cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
+    fi
+
     export CURL_TEST_MIN=64
     export TFLAGS=''
     if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
