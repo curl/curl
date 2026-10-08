@@ -351,7 +351,7 @@ void tool_version_info(void)
       }
 #endif /* !CURL_DISABLE_IPFS */
     }
-    curl_mprintf("\n");
+    puts(""); /* newline */
   }
   if(feature_names[0]) {
     const char **feat_ext;
@@ -379,7 +379,7 @@ void tool_version_info(void)
       curl_mprintf("Features:");
       for(builtin = feat_ext; *builtin; ++builtin)
         curl_mprintf(" %s", *builtin);
-      curl_mprintf("\n");
+      puts(""); /* newline */
       curlx_free((void *)feat_ext);
     }
   }
