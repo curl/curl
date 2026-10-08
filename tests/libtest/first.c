@@ -273,8 +273,10 @@ int main(int argc, const char *argv[])
   size_t tmp;
 
 #ifdef _WIN32
-  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths"))
+  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
     s_GetLoadedModulePaths();
+    return 0;
+  }
 #endif
 
 #if defined(_MSC_VER) && defined(_DEBUG)
