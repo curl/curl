@@ -1821,10 +1821,14 @@ static bool multi_handle_timeout(struct Curl_easy *data,
     timerid base_timer = Curl_is_connecting(data) ?
                          TIMER_STARTSINGLE : TIMER_STARTOP;
     timediff_t elapsed_ms = Curl_pgrs_since_ms(data, NULL, base_timer);
-    if(data->mstate == MSTATE_CONNECTING)
+    if(data->mstate == MSTATE_CONNECTING) {
       failf(data, "%s timed out after %" FMT_TIMEDIFF_T " milliseconds",
             data->conn->bits.dns_resolved ? "Connection" : "Resolving",
             elapsed_ms);
+      /* keep what we know about a partly done connect, e.g. TCP done
+       * but TLS handshake still ongoing */
+      Curl_conn_report_failed(data, FIRSTSOCKET);
+    }
     else {
       struct SingleRequest *k = &data->req;
       if(k->size != -1) {

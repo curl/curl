@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTPS
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+ftp
+</server>
+<name>
+-w IP info and connect time after failed TLS handshake
+</name>
+# The FTP server sends its plain text greeting, so the TCP connect
+# succeeds and the TLS handshake fails
+<command>
+-k https://%HOSTIP:%FTPPORT/%TESTNUMBER -w 'remote_ip == %{remote_ip}\nremote_port == %{remote_port}\nlocal ip == %{local_ip}\ntime_connect == %{time_connect}\n'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+35
+</errorcode>
+<stripfile>
+s/time_connect == (?!0\.0+$)\d+\.\d+$/time_connect == [non-zero]/
+</stripfile>
+<stdout>
+remote_ip == %HOSTIP
+remote_port == %FTPPORT
+local ip == 127.0.0.1
+time_connect == [non-zero]
+</stdout>
+</verify>
+</testcase>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTPS
+connect timeout
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+http
+</server>
+<name>
+-w IP info and connect time after TLS handshake timeout
+</name>
+# The plain HTTP server never answers the TLS ClientHello, so the TCP
+# connect succeeds and the TLS handshake times out
+<command>
+-k https://%HOSTIP:%HTTPPORT/%TESTNUMBER --connect-timeout 2 -w 'remote_ip == %{remote_ip}\nremote_port == %{remote_port}\nlocal ip == %{local_ip}\ntime_connect == %{time_connect}\n'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+28
+</errorcode>
+<stripfile>
+s/time_connect == (?!0\.0+$)\d+\.\d+$/time_connect == [non-zero]/
+</stripfile>
+<stdout>
+remote_ip == %HOSTIP
+remote_port == %HTTPPORT
+local ip == 127.0.0.1
+time_connect == [non-zero]
+</stdout>
+</verify>
+</testcase>
