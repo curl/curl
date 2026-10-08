@@ -1237,7 +1237,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   gen_cb_setopts(config, per, curl);
 
   result = proxy_setopts(config, curl);
-  if(setopt_bad(result))
+  if(setopt_bad(result) || config->synthetic_error)
     return result;
 
   result = credentials_and_headers_setopts(config, curl);
