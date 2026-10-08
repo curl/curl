@@ -2886,11 +2886,8 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
   /* unreachable */
 }
 
-/*
- * Do not make Curl_vsetopt() static: it is called from
- * projects/OS400/ccsidcurl.c.
- */
-CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
+static CURLcode setopt_dispatch(struct Curl_easy *data, CURLoption option,
+                                va_list param)
 {
   if(option < CURLOPTTYPE_OBJECTPOINT)
     return setopt_long(data, option, va_arg(param, long));
@@ -2929,6 +2926,20 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   else if(option < CURLOPTTYPE_BLOB)
     return setopt_offt(data, option, va_arg(param, curl_off_t));
   return setopt_blob(data, option, va_arg(param, struct curl_blob *));
+}
+
+/*
+ * Do not make Curl_vsetopt() static: it is called from
+ * projects/OS400/ccsidcurl.c.
+ */
+CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
+{
+  CURLcode result = setopt_dispatch(data, option, param);
+  /* An option that libcurl knows about, but which is left out of this build
+     because its feature is disabled, is "not built in" and not "unknown". */
+  if((result == CURLE_UNKNOWN_OPTION) && curl_easy_option_by_id(option))
+    result = CURLE_NOT_BUILT_IN;
+  return result;
 }
 
 /*

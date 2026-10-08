@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+curl_easy_setopt
+curl_easy_option
+libtest
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<name>
+curl_easy_setopt() does not return UNKNOWN_OPTION for a known option
+</name>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+</stdout>
+</verify>
+</testcase>
