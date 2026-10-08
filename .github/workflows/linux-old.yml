@@ -163,7 +163,7 @@ jobs:
           mkdir bld-am
           cd bld-am
           ../configure --prefix="$PWD"/../curl-install-am --enable-unity --enable-warnings --enable-werror --disable-shared \
-            --disable-dependency-tracking --enable-option-checking=fatal \
+            --enable-option-checking=fatal \
             --without-ssl --disable-ares --without-libssh2 --with-zstd --with-gssapi
 
       - name: 'AM configure log'
