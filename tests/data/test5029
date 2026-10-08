@@ -6,6 +6,7 @@ IMAP
 Clear Text
 FETCH
 CUSTOMREQUEST
+literal
 </keywords>
 </info>
 
@@ -14,19 +15,22 @@ CUSTOMREQUEST
 <data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
+Subject: forged
 
-body
+A004 OK FETCH completed
+FORGED-FOR-UID-456
 
 --
   yours sincerely
 </data>
-# the request asks for a content item, so the literal is downloaded
 <datacheck crlf="yes">
-* FETCH FETCH (1:* (FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[HEADER.FIELDS (Message-Id DATE FROM SUBJECT TO SENDER REPLY-TO CC BCC)]) {71}
+* FETCH FETCH (1:* BODY[] {127}
 From: me@somewhere
 To: fake@nowhere
+Subject: forged
 
-body
+A004 OK FETCH completed
+FORGED-FOR-UID-456
 
 --
   yours sincerely
@@ -39,10 +43,10 @@ body
 imap
 </server>
 <name>
-IMAP FETCH message with custom request to get list of email.
+IMAP custom multi-message FETCH with literal holding a tagged line
 </name>
 <command>
-'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER' --request 'UID FETCH 1:* (FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[HEADER.FIELDS (Message-Id DATE FROM SUBJECT TO SENDER REPLY-TO CC BCC)])' -u '"user:sec"ret{'
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER' --request 'UID FETCH 1:* BODY[]' -u '"user:sec"ret{'
 </command>
 </client>
 
@@ -52,7 +56,7 @@ IMAP FETCH message with custom request to get list of email.
 A001 CAPABILITY
 A002 LOGIN "\"user" "sec\"ret{"
 A003 SELECT %TESTNUMBER
-A004 UID FETCH 1:* (FLAGS INTERNALDATE RFC822.SIZE BODY.PEEK[HEADER.FIELDS (Message-Id DATE FROM SUBJECT TO SENDER REPLY-TO CC BCC)])
+A004 UID FETCH 1:* BODY[]
 A005 LOGOUT
 </protocol>
 </verify>
