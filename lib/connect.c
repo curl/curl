@@ -240,6 +240,18 @@ static void conn_report_stats(struct Curl_easy *data, int sockindex)
   }
 }
 
+void Curl_conn_report_failed(struct Curl_easy *data, int8_t sockindex)
+{
+  if(!data->conn || (sockindex != FIRSTSOCKET))
+    return;
+  /* Only filters connected at IP level have info to update. Filters
+   * still racing for a connection, like happy eyeballing, pass it on
+   * to a connected one only. */
+  (void)Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, TRUE,
+                           CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
+  conn_report_stats(data, sockindex);
+}
+
 CURLcode Curl_conn_connect(struct Curl_easy *data,
                            int8_t sockindex,
                            bool blocking,
@@ -311,7 +323,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
                   (int)result);
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "failed to connect"));
-      conn_report_stats(data, sockindex);
+      Curl_conn_report_failed(data, sockindex);
       goto out;
     }
 

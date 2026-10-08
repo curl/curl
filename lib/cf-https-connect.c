@@ -695,6 +695,7 @@ static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
   if(!cf->connected) {
     switch(event) {
     case CF_CTRL_REPORT_STATS:
+    case CF_CTRL_CONN_INFO_UPDATE:
       for(i = 0; i < ctx->baller_count; i++) {
         /* Make the first baller that connected at network level report */
         if(Curl_conn_cf_is_ip_connected(ctx->ballers[i].cf, data)) {

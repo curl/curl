@@ -89,6 +89,13 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 CURLcode Curl_conn_connect(struct Curl_easy *data, int8_t sockindex,
                            bool blocking, bool *done);
 
+/**
+ * The filter chain at `sockindex` failed to connect, e.g. the TLS handshake
+ * timed out. Let the filters that did connect, like the TCP socket, report
+ * their IP information and stats to the transfer.
+ */
+void Curl_conn_report_failed(struct Curl_easy *data, int8_t sockindex);
+
 /* Set conn to allow multiplexing. */
 void Curl_conn_set_multiplex(struct connectdata *conn);
 
