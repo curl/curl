@@ -57,10 +57,9 @@ The pinned public key is used to verify the initial origin used in a transfer.
 If the transfer is set to follow redirects to other origins, they are *not*
 checked against this key.
 
-This option has no effect on LDAP connections when libcurl uses the legacy LDAP
-backend. That backend manages TLS independently of curl's TLS layer. When
-libcurl is built with USE_OPENLDAP, the OpenLDAP backend routes TLS through
-curl's layer and this option is honored.
+For LDAP, this option only has an effect when using the OpenLDAP backend,
+which routes TLS through libcurl. It is not supported with Apple's OpenLDAP
+implementation.
 
 # DEFAULT
 

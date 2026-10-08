@@ -38,12 +38,9 @@ using the "Certificate Status Request" TLS extension (aka. OCSP stapling).
 Note that if this option is enabled but the server does not support the TLS
 extension, the verification fails.
 
-This option has no effect on LDAP connections when libcurl uses the legacy LDAP
-backend. That backend manages TLS independently of curl's TLS layer, and
-neither the OpenLDAP nor the WinLDAP native TLS APIs offer an OCSP-stapling
-verification facility, so no equivalent check occurs when this option is
-enabled for ldaps:// transfers. When libcurl is built with USE_OPENLDAP, the
-OpenLDAP backend routes TLS through curl's layer and this option is honored.
+For LDAP, this option only has an effect when using the OpenLDAP backend,
+which routes TLS through libcurl. It is not supported with Apple's OpenLDAP
+implementation.
 
 # DEFAULT
 
