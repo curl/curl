@@ -1427,13 +1427,19 @@ static void gtls_infof_cert(struct Curl_easy *data,
 #endif
 }
 
+struct gtls_cert_chain {
+  const gnutls_datum_t *certs;
+  unsigned int num_certs;
+};
+
 static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
-                                        gnutls_session_t session)
+                                        gnutls_session_t session,
+                                        struct gtls_cert_chain *chain)
 {
   gnutls_ocsp_resp_t ocsp_resp = NULL;
   gnutls_datum_t status_request;
-  gnutls_certificate_credentials_t creds = NULL;
-  gnutls_x509_trust_list_t tlist = NULL;
+  gnutls_x509_crt_t cert = NULL;
+  gnutls_x509_crt_t issuer = NULL;
   unsigned int verify_status = 0;
   gnutls_ocsp_cert_status_t status = GNUTLS_OCSP_CERT_UNKNOWN;
   gnutls_x509_crl_reason_t reason;
@@ -1467,16 +1473,56 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     goto out;
   }
 
-  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE, (void **)&creds))
-    gnutls_certificate_get_trust_list(creds, &tlist);
-  if(!tlist) {
+  /* The response is signed either by the issuer of the server certificate or
+     by a responder certificate that the issuer delegated to, which the
+     response carries itself. Neither is in the trust list, which holds root
+     CAs only, so verify against the issuer from the peer chain. */
+  if(!chain || chain->num_certs < 2) {
+    failf(data, "OCSP response verification failed: no issuer certificate");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  rc = gnutls_x509_crt_init(&issuer);
+  if(rc < 0) {
+    failf(data, "Failed to initialize issuer certificate object");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  rc = gnutls_x509_crt_import(issuer, &chain->certs[1], GNUTLS_X509_FMT_DER);
+  if(rc < 0) {
+    failf(data, "Failed to parse issuer certificate");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  rc = gnutls_ocsp_resp_verify_direct(ocsp_resp, issuer, &verify_status, 0);
+  if(rc < 0 || verify_status) {
     failf(data, "OCSP response signature verification failed");
     result = CURLE_SSL_INVALIDCERTSTATUS;
     goto out;
   }
-  rc = gnutls_ocsp_resp_verify(ocsp_resp, tlist, &verify_status, 0);
-  if(rc < 0 || verify_status) {
-    failf(data, "OCSP response signature verification failed");
+
+  /* A valid signature alone says nothing about which certificate the
+     response is about. Bind it to the certificate the server served. */
+  rc = gnutls_x509_crt_init(&cert);
+  if(rc < 0) {
+    failf(data, "Failed to initialize server certificate object");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  rc = gnutls_x509_crt_import(cert, &chain->certs[0], GNUTLS_X509_FMT_DER);
+  if(rc < 0) {
+    failf(data, "Failed to parse server certificate");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  rc = gnutls_ocsp_resp_check_crt(ocsp_resp, 0, cert);
+  if(rc < 0) {
+    failf(data, "OCSP response is not for the server certificate");
     result = CURLE_SSL_INVALIDCERTSTATUS;
     goto out;
   }
@@ -1548,15 +1594,14 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
            CURLE_SSL_INVALIDCERTSTATUS : CURLE_OK;
 
 out:
+  if(cert)
+    gnutls_x509_crt_deinit(cert);
+  if(issuer)
+    gnutls_x509_crt_deinit(issuer);
   if(ocsp_resp)
     gnutls_ocsp_resp_deinit(ocsp_resp);
   return result;
 }
-
-struct gtls_cert_chain {
-  const gnutls_datum_t *certs;
-  unsigned int num_certs;
-};
 
 #ifdef USE_APPLE_SECTRUST
 static CURLcode gtls_chain_get_der(struct Curl_cfilter *cf,
@@ -1794,7 +1839,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   }
 
   if(config->verifystatus) {
-    result = gtls_verify_ocsp_status(data, session);
+    result = gtls_verify_ocsp_status(data, session, &chain);
     if(result)
       goto out;
   }
