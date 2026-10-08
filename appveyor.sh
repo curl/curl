@@ -154,8 +154,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
 
   if [ -z "${SKIP_RUN:-}" ]; then
     if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
-      cp "${openssl_root}"/*.dll "_bld/tests/tunit/Debug/${PRJ_CFG}"
-      cp "${openssl_root}"/*.dll "_bld/tests/unit/Debug/${PRJ_CFG}"
+      cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
+      cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
     fi
 
     export CURL_TEST_MIN=64
