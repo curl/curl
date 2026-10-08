@@ -75,7 +75,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     time cmake -B "_bld${_chkprefill}" \
       -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
       -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
-      -DCURL_STATIC_CRT=ON \
+      -DCURL_STATIC_CRT=OFF \
       -DCURL_DROP_UNUSED=ON \
       -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
       -DCURL_DISABLE_HTTPSIG=OFF \
