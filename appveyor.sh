@@ -146,7 +146,7 @@ fi
 # build tests
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps --verbose
 
   if [ -z "${SKIP_RUN:-}" ]; then
     if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
