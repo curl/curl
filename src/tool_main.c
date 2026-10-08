@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 
   tool_init_stderr();
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && defined(DEBUGBUILD)
   _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
   _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
