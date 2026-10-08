@@ -24,8 +24,6 @@
 #
 import logging
 import os
-import time
-from typing import Generator
 
 import pytest
 from testenv import CurlClient, Dante, Env

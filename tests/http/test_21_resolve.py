@@ -26,7 +26,6 @@ import logging
 import os
 import re
 from datetime import timedelta
-from typing import Generator
 
 import pytest
 from testenv import CurlClient, Dnsd, Env, LocalClient
