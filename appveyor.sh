@@ -147,7 +147,7 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   echo 'Creating artifact'
   time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
   rm files.tmp
-  appveyor PushArtifact "${archive}"
+  appveyor PushArtifact "${archive}" &
 fi
 
 # build tests
