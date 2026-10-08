@@ -1503,6 +1503,12 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       if(poll_cnt == 2) {
         if(pfd[1].revents & POLLIN) { /* read from in file */
           snread = read(pfd[1].fd, buffer, sizeof(buffer));
+          if(!snread) {
+            /* stdin reached EOF, e.g. redirected from /dev/null: nothing
+               more to send, stop here instead of polling forever */
+            keepon = FALSE;
+              break;
+          }
         }
       }
       else {
@@ -1515,6 +1521,12 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
         if(snread == CURL_READFUNC_PAUSE)
           break;
+        if(!snread) {
+          /* stdin reached EOF, e.g. redirected from /dev/null:
+             nothing to send, stop here instead of polling forever */
+          keepon = FALSE;
+           break;
+        }
       }
 
       if(snread > 0) {
