@@ -108,7 +108,6 @@ find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -p
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | sort -z | xargs -0 stat -c '%10s bytes: %n' --
 
 if [ -z "${SKIP_RUN:-}" ]; then
-  echo "|$PATH|"
   "${curl}" --disable --version
   "${curl}" --dump-module-paths
 else
@@ -163,7 +162,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
     fi
     TFLAGS+=' tunittest unittest'
-    echo "|$PATH|"
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
