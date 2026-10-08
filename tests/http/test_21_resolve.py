@@ -28,7 +28,7 @@ import re
 from datetime import timedelta
 
 import pytest
-from testenv import CurlClient, Dnsd, Env, LocalClient
+from testenv import CurlClient, Env, LocalClient
 
 log = logging.getLogger(__name__)
 
