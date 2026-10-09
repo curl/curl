@@ -138,6 +138,14 @@ CURLcode Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
 void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
+    if(ctx->qlogfd != -1) {
+      curlx_close(ctx->qlogfd);
+      ctx->qlogfd = -1;
+    }
+    /* Cleanup TLS instances first as ngtcp2 objects
+     * might be registered there. */
+    Curl_vquic_tls_cleanup(&ctx->tls);
+    Curl_vquic_ctx_free(&ctx->q);
     if(ctx->h3conn) {
       nghttp3_conn_del(ctx->h3conn);
       ctx->h3conn = NULL;
@@ -152,18 +160,12 @@ void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx)
       ctx->ossl_ctx = NULL;
     }
 #endif
-    Curl_vquic_tls_cleanup(&ctx->tls);
-    Curl_vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
     curlx_dyn_free(&ctx->scratch);
     Curl_u32_ptrset_clear(&ctx->streams);
     Curl_ssl_peer_cleanup(&ctx->ssl_peer);
     curlx_safefree(ctx->tunnel_inbuf);
     ctx->tunnel_inbuf_len = 0;
-    if(ctx->qlogfd != -1) {
-      curlx_close(ctx->qlogfd);
-      ctx->qlogfd = -1;
-    }
   }
 }
 
