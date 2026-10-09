@@ -41,16 +41,15 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     *)       openssl_suffix='-Win64';;
   esac
 
-  parallel_tests=0  # old runners have bugs that break parallel tests
+  parallel_tests=1
   if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2026' ]; then
     openssl_root_win="C:/OpenSSL-v36${openssl_suffix}"
-    parallel_tests=1
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
     openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
-    parallel_tests=1
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
     openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
-    parallel_tests=1
+  else
+    parallel_tests=0  # old runners have bugs that break parallel tests
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
