@@ -3078,7 +3078,6 @@ else {
     $retry_left = $retry;
 }
 
-my $timeout_cnt = 0;
 while(1) {
     # check the abort flag
     if($globalabort) {
@@ -3245,10 +3244,6 @@ while(1) {
         logmsg "Hmmm, the tests are taking a while to finish. Here is the status:\n";
         catch_usr1();
         $endwaitcnt = 0;
-        $timeout_cnt++;
-        if($timeout_cnt > 2) {
-            $globalabort = 1;
-        }
     }
 }
 
