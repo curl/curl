@@ -111,7 +111,7 @@ find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -p
 
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
-  "${curl}" --dump-module-paths
+  "${curl}" --dump-module-paths | sort -f
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
@@ -133,7 +133,7 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
     echo "${archive}"
   } > WARNING.txt
   echo 'Finding curl module dependencies'
-  "${curl}" --dump-module-paths | grep -Fv 'C:\Windows' | tee > files.tmp
+  "${curl}" --dump-module-paths | sort -f | grep -Fv 'C:\Windows' | tee > files.tmp
   echo 'Creating artifact'
   7z a "${archive}" -y -bb1 -bsp0 -mx9 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
   rm files.tmp
@@ -153,8 +153,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
     fi
 
-    "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths
-    "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths
+    "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
+    "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
 
     export CURL_TEST_MIN=75
     export TFLAGS
