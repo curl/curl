@@ -27,7 +27,7 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
-#if defined(_MSC_VER) && defined(_DEBUG)
+#if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DBG_CRTDBG)
 #include <crtdbg.h>  /* for _CrtSetReportFile(), _CRT* macros */
 #endif
 
@@ -269,7 +269,7 @@ int main(int argc, const char *argv[])
   const char *env;
   size_t tmp;
 
-#if defined(_MSC_VER) && defined(_DEBUG)
+#if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DBG_CRTDBG)
   _set_error_mode(_OUT_TO_STDERR);  /* uses stdlib.h */
   _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
