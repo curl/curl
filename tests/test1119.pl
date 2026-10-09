@@ -66,6 +66,7 @@ my %rem;
 # included by it, which *should* be all headers
 sub scanenum {
     my ($file) = @_;
+    local $ENV{'MSYS2_ARG_CONV_EXCL'} = '*';
     open(my $h_in, "-|", "$Cpreprocessor $i$file") or die "Cannot preprocess $file";
     while(<$h_in>) {
         if(/enum\s+(\S+\s+)?{/ .. /}/) {
