@@ -69,9 +69,9 @@ HSTS and Alt-Svc information to be stored and used subsequently. Disabling
 certificate verification can make libcurl trust and use such information from
 malicious servers.
 
-For LDAP, this option is supported when using the OpenLDAP or WinLDAP
-backends. With Apple's OpenLDAP fork, the certificate chain is still verified
-when this option is disabled.
+For LDAP, this option is supported when using the OpenLDAP backend, and with
+the WinLDAP backend since 8.22.0. With Apple's OpenLDAP fork, the certificate
+chain is still verified when this option is disabled.
 
 # DEFAULT
 
