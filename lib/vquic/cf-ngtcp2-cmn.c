@@ -138,6 +138,20 @@ CURLcode Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
 void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
+    if(ctx->h3conn) {
+      nghttp3_conn_del(ctx->h3conn);
+      ctx->h3conn = NULL;
+    }
+    if(ctx->qconn) {
+      ngtcp2_conn_del(ctx->qconn);
+      ctx->qconn = NULL;
+    }
+#ifdef OPENSSL_QUIC_API2
+    if(ctx->ossl_ctx) {
+      ngtcp2_crypto_ossl_ctx_del(ctx->ossl_ctx);
+      ctx->ossl_ctx = NULL;
+    }
+#endif
     Curl_vquic_tls_cleanup(&ctx->tls);
     Curl_vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);

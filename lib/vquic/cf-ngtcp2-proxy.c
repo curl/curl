@@ -1186,6 +1186,12 @@ static void cf_h3_proxy_destroy(struct Curl_cfilter *cf,
   (void)data;
   if(ctx) {
     CURL_TRC_CF(data, cf, "cf_h3_proxy_destroy()");
+    if(ctx->ngtcp2_ctx.qconn) {
+      struct cf_call_data save;
+      CF_DATA_SAVE(save, cf, data);
+      Curl_cf_ngtcp2_cmn_conn_close(cf, data);
+      CF_DATA_RESTORE(cf, save);
+    }
     cf_h3_proxy_ctx_free(ctx);
     cf->ctx = NULL;
   }

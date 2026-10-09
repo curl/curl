@@ -966,36 +966,6 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
   return result;
 }
 
-static void cf_ngtcp2_ctx_close(struct cf_ngtcp2_ctx *ctx)
-{
-  struct cf_call_data save = ctx->call_data;
-
-  if(!ctx->initialized)
-    return;
-  if(ctx->qlogfd != -1) {
-    curlx_close(ctx->qlogfd);
-  }
-  ctx->qlogfd = -1;
-  Curl_vquic_tls_cleanup(&ctx->tls);
-  Curl_ssl_peer_cleanup(&ctx->ssl_peer);
-  Curl_vquic_ctx_free(&ctx->q);
-  if(ctx->h3conn) {
-    nghttp3_conn_del(ctx->h3conn);
-    ctx->h3conn = NULL;
-  }
-  if(ctx->qconn) {
-    ngtcp2_conn_del(ctx->qconn);
-    ctx->qconn = NULL;
-  }
-#ifdef OPENSSL_QUIC_API2
-  if(ctx->ossl_ctx) {
-    ngtcp2_crypto_ossl_ctx_del(ctx->ossl_ctx);
-    ctx->ossl_ctx = NULL;
-  }
-#endif
-  ctx->call_data = save;
-}
-
 static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
@@ -1006,7 +976,6 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
       struct cf_call_data save;
       CF_DATA_SAVE(save, cf, data);
       Curl_cf_ngtcp2_cmn_conn_close(cf, data);
-      cf_ngtcp2_ctx_close(ctx);
       CF_DATA_RESTORE(cf, save);
     }
     Curl_cf_ngtcp2_ctx_cleanup(ctx);
