@@ -156,7 +156,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths
     "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths
 
-    export CURL_TEST_MIN=64
+    export CURL_TEST_MIN=75
     export TFLAGS
     if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
       TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
