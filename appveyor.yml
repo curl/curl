@@ -36,6 +36,24 @@ environment:
   matrix:
     # CMake Visual Studio builds
 
+    # moved
+    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      CMAKE_VERSION: 3.19.8  # manually bumped
+      CMAKE_SHA256: 2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380
+      CMAKE_GENERATOR: 'Visual Studio 14 2015'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
+      TFLAGS: '-j2'
+
+    # moved
+    - job_name: 'CM VS2017, Debug, x64, Schannel, Shared, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
+      CMAKE_VERSION: 3.20.6  # manually bumped
+      CMAKE_SHA256: f240a38c964712aac474644b3ba21bdc2b4e8d5e31179f67bd2e6f45fa349419
+      CMAKE_GENERATOR: 'Visual Studio 15 2017'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
+      TFLAGS: '-j2'
+
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
@@ -101,21 +119,7 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 12 2013'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
 
-    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.19.8  # manually bumped
-      CMAKE_SHA256: 2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380
-      CMAKE_GENERATOR: 'Visual Studio 14 2015'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
-      TFLAGS: '-j2'
-
-    - job_name: 'CM VS2017, Debug, x64, Schannel, Shared, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      CMAKE_VERSION: 3.20.6  # manually bumped
-      CMAKE_SHA256: f240a38c964712aac474644b3ba21bdc2b4e8d5e31179f67bd2e6f45fa349419
-      CMAKE_GENERATOR: 'Visual Studio 15 2017'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
-      TFLAGS: '-j2'
+    # MOVED FROM
 
     - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
@@ -226,3 +230,8 @@ skip_commits:
 #    name: libcurl dll
 #  - path: '**/*.lib'
 #    name: libcurl lib
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
