@@ -120,13 +120,18 @@ static void mstate_enter_completed(struct Curl_easy *data,
 {
   /* we sometimes directly jump to COMPLETED, trigger things
    * we then missed. */
-  if(from_state < MSTATE_DID) {
+  /* multi_done() should have run and detached any connection already */
+  DEBUGASSERT(!data->conn);
+  /* A transfer that fails in the DO states, e.g. an FTP RETR of a
+   * missing file answered with 550, did send off its request and did
+   * get a response, so report the transfer times for it. Transfers
+   * that fail before the request was sent (name lookup, connect or
+   * TLS handshake failure) leave the transfer times unset. */
+  if(from_state >= MSTATE_DO && from_state < MSTATE_DID) {
     Curl_pgrsTime(data, TIMER_PRETRANSFER);
     Curl_pgrsTime(data, TIMER_POSTRANSFER);
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
   }
-  /* multi_done() should have run and detached any connection already */
-  DEBUGASSERT(!data->conn);
   Curl_pgrsCompleted(data);
   if(from_state < MSTATE_DONE)
     CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
