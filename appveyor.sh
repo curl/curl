@@ -179,6 +179,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       for acurl in \
         "${SYSTEMROOT}/System32/curl.exe" \
         "${PROGRAMFILES}/Git/mingw64/bin/curl.exe" \
+        'C:/Tools/curl/bin/curl.exe' \
         'C:/msys64/usr/bin/curl.exe' \
       ; do
         [[ "${acurl}" = *' '* ]] && acurl="$(cygpath --mixed --short-name "$acurl")"  # to avoid spaces in directory names
