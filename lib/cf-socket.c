@@ -690,18 +690,18 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 #ifdef IP_BIND_ADDRESS_NO_PORT
   int on = 1;
 #endif
+  CURLcode result = CURLE_OK;
+
 #ifndef USE_IPV6
   (void)scope;
 #endif
-  CURLcode result = CURLE_OK;
-
-  if(!conn->bind_options)
+  if(!conn->interface_opts)
     goto out;
 
   /*************************************************************
    * Select device to bind socket to
    *************************************************************/
-  result = Curl_parse_interface(conn->bind_options,
+  result = Curl_parse_interface(conn->interface_opts,
                                 &dev_in, &iface_in, &host_in);
   if(result)
     goto out;

@@ -513,7 +513,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_creds_unlink(&conn->creds);
   Curl_peer_unlink(&conn->creds_origin);
   curlx_safefree(conn->options);
-  curlx_safefree(conn->bind_options);
+  curlx_safefree(conn->interface_opts);
   Curl_ssl_conn_config_cleanup(conn);
 
   curlx_safefree(conn->destination);
@@ -615,15 +615,29 @@ static bool url_match_connect_config(struct connectdata *conn,
      m->data->set.ipver != conn->ip_version)
     return FALSE;
 
-  if((m->needle->bind_options || m->needle->localport) &&
+  /* When needle has specific local bind settings, those have to match.
+   * If it does not, any other connection might do when it comes to ports. */
+  if(m->needle->localport && (conn->localport != m->needle->localport))
+    return FALSE;
+  if(m->needle->localportrange &&
+     (conn->localportrange != m->needle->localportrange))
+    return FALSE;
+  /* For interface related bind options, we require a full match
+   * as connection might go totally different ways (VPNs, for example). */
+  if((m->needle->interface_opts != conn->interface_opts) &&
+     (!m->needle->interface_opts || !conn->interface_opts ||
+      strcmp(conn->interface_opts, m->needle->interface_opts)))
+    return FALSE;
+
+  if((m->needle->interface_opts || m->needle->localport) &&
     /* If we are bound to a specific local end (IP+port), we must not reuse a
        random other one, although if we did not ask for a particular one we
        can reuse one that was bound. */
     ((conn->localport != m->needle->localport) ||
      (conn->localportrange != m->needle->localportrange) ||
-     (m->needle->bind_options &&
-      (!conn->bind_options ||
-       strcmp(conn->bind_options, m->needle->bind_options)))))
+     (m->needle->interface_opts &&
+      (!conn->interface_opts ||
+       strcmp(conn->interface_opts, m->needle->interface_opts)))))
     return FALSE;
 
   if(!m->needle->via_peer != !conn->via_peer)
@@ -1139,9 +1153,9 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   /* Store the local bind parameters that will be used for this connection */
   if(CURL_EASY_STR(data, STRING_INTERFACE_OPT)) {
-    conn->bind_options =
+    conn->interface_opts =
       curlx_strdup(CURL_EASY_STR(data, STRING_INTERFACE_OPT));
-    if(!conn->bind_options)
+    if(!conn->interface_opts)
       goto error;
   }
 #ifndef CURL_DISABLE_BINDLOCAL
@@ -1159,7 +1173,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   return conn;
 error:
 
-  curlx_free(conn->bind_options);
+  curlx_free(conn->interface_opts);
   curlx_free(conn);
   return NULL;
 }
