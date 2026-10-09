@@ -23,6 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#undef NDEBUG
 #define CURL_NO_OLDIES
 #define CURL_DISABLE_DEPRECATION
 
