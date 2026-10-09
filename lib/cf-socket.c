@@ -685,7 +685,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
   /* how many port numbers to try to bind to, increasing one at a time */
   int portnum = data->set.localportrange;
   char *dev_in = NULL, *iface_in = NULL, *host_in = NULL;
-  const char *iface, *host;
+  const char *iface = NULL, *host = NULL;
   int sockerr;
 #ifdef IP_BIND_ADDRESS_NO_PORT
   int on = 1;
@@ -695,19 +695,18 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 #ifndef USE_IPV6
   (void)scope;
 #endif
-  if(!conn->interface_opts)
-    goto out;
-
-  /*************************************************************
-   * Select device to bind socket to
-   *************************************************************/
-  result = Curl_parse_interface(conn->interface_opts,
-                                &dev_in, &iface_in, &host_in);
-  if(result)
-    goto out;
-  /* This is how we use the values */
-  iface = iface_in ? iface_in : dev_in;
-  host = host_in ? host_in : dev_in;
+  if(conn->interface_opts) {
+    /*************************************************************
+     * Select device to bind socket to
+     *************************************************************/
+    result = Curl_parse_interface(conn->interface_opts,
+                                  &dev_in, &iface_in, &host_in);
+    if(result)
+      goto out;
+    /* This is how we use the values */
+    iface = iface_in ? iface_in : dev_in;
+    host = host_in ? host_in : dev_in;
+  }
 
   if(!iface && !host && !port)
     goto out;

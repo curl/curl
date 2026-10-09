@@ -617,10 +617,9 @@ static bool url_match_connect_config(struct connectdata *conn,
 
   /* When needle has specific local bind settings, those have to match.
    * If it does not, any other connection might do when it comes to ports. */
-  if(m->needle->localport && (conn->localport != m->needle->localport))
-    return FALSE;
-  if(m->needle->localportrange &&
-     (conn->localportrange != m->needle->localportrange))
+  if(m->needle->localport &&
+     ((conn->localport != m->needle->localport) ||
+      (conn->localportrange != m->needle->localportrange)))
     return FALSE;
   /* For interface related bind options, we require a full match
    * as connection might go totally different ways (VPNs, for example). */
