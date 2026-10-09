@@ -28,6 +28,7 @@
 
 extern const struct Curl_protocol Curl_protocol_sftp;
 extern const struct Curl_protocol Curl_protocol_scp;
+extern const struct Curl_protocol Curl_protocol_ssh;
 
 #ifdef USE_SSH
 
@@ -110,6 +111,10 @@ typedef enum {
   SSH_SCP_WAIT_EOF,
   SSH_SCP_WAIT_CLOSE,
   SSH_SCP_CHANNEL_FREE,   /* Last state in SCP-DONE */
+  SSH_SSH_TRANS_INIT,     /* First state in SSH-DO */
+  SSH_SSH_DONE,           /* First state in SSH-DONE */
+  SSH_SSH_SEND_EOF,
+  SSH_SSH_CHANNEL_FREE,   /* Last state in SSH-DONE */
   SSH_SESSION_DISCONNECT, /* First state in SCP-DISCONNECT */
   SSH_SESSION_FREE,       /* Last state in SCP/SFTP-DISCONNECT */
   SSH_QUIT,
@@ -175,6 +180,7 @@ struct ssh_conn {
   unsigned int auth_methods;
   ssh_session ssh_session;
   ssh_scp scp_session;
+  ssh_channel exec_channel;   /* raw channel used for SSH exec */
   sftp_session sftp_session;
   sftp_file sftp_file;
   sftp_dir sftp_dir;
@@ -216,6 +222,10 @@ struct ssh_conn {
   BIT(authed);                /* the connection has been authenticated fine */
   BIT(acceptfail);            /* used by the SFTP_QUOTE (continue if
                                  quote command fails) */
+  BIT(exec_eof_sent);         /* SSH exec: EOF already sent on the channel */
+  BIT(exec_write_done);       /* SSH exec: the current chunk already reached
+                                  the wire, only the trailing EOF is still
+                                  pending - do not write it again on retry */
 };
 
 #ifdef USE_LIBSSH

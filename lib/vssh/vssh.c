@@ -95,6 +95,10 @@ const char *Curl_ssh_statename(sshstate state)
     "SSH_SCP_WAIT_EOF",
     "SSH_SCP_WAIT_CLOSE",
     "SSH_SCP_CHANNEL_FREE",
+    "SSH_SSH_TRANS_INIT",
+    "SSH_SSH_DONE",
+    "SSH_SSH_SEND_EOF",
+    "SSH_SSH_CHANNEL_FREE",
     "SSH_SESSION_DISCONNECT",
     "SSH_SESSION_FREE",
     "QUIT"
@@ -285,6 +289,17 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 fail:
   curlx_dyn_free(&out);
   return CURLE_QUOTE_ERROR;
+}
+
+CURLcode Curl_ssh_getcommand(struct Curl_easy *data, const char **cmdp)
+{
+  const char *cmd = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
+  if(!cmd || !*cmd) {
+    failf(data, "SSH: no command specified, use CURLOPT_CUSTOMREQUEST");
+    return CURLE_SSH;
+  }
+  *cmdp = cmd;
+  return CURLE_OK;
 }
 
 CURLcode Curl_ssh_range(struct Curl_easy *data,
