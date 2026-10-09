@@ -111,7 +111,7 @@ find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -p
 
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
-  "${curl}" --dump-module-paths || sort
+  "${curl}" --dump-module-paths || sort -f
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
@@ -153,8 +153,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
     fi
 
-    "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths || sort
-    "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths || sort
+    "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths || sort -f
+    "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths || sort -f
 
     export CURL_TEST_MIN=64
     export TFLAGS
