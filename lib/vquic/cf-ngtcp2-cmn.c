@@ -170,7 +170,6 @@ struct Curl_easy *Curl_cf_ngtcp2_get_xfer(struct Curl_cfilter *cf,
     data = Curl_multi_get_easy(call_data->multi, stream->mid);
     if(data && (data->id == stream->xfer_id))
       return data;
-    curl_mfprintf(stderr, "H3 stream xfer is NULL\n");
     DEBUGASSERT(0);
   }
   return NULL;
