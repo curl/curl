@@ -1463,7 +1463,6 @@ sub singletest_check {
         if($res) {
             return -1;
         }
-
         $ok .= "p";
     }
     else {
@@ -1624,7 +1623,6 @@ sub singletest_check {
         if($res) {
             return -1;
         }
-
         $ok .= "P";
     }
     else {
