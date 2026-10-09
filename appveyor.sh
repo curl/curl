@@ -27,7 +27,7 @@
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 export CURL_CI=appveyor
-debug=1
+debug=0
 
 # build
 
