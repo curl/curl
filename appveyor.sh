@@ -173,7 +173,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
     fi
 
-    if [ -n "${debug}" ]; then
+    if [ -n "${verbose}" ]; then
       "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
       "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
     fi
