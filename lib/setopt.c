@@ -154,32 +154,18 @@ static CURLcode setstropt_userpwd(const char *option, char **userp,
 
 static CURLcode setstropt_interface(struct Curl_easy *data, char *option)
 {
-  char *dev = NULL;
-  char *iface = NULL;
-  char *host = NULL;
-  CURLcode result;
-
+  if(option && !option[0])
+    option = NULL;
   if(option) {
-    /* Parse the interface details if set, otherwise clear them all */
-    result = Curl_parse_interface(option, &dev, &iface, &host);
+    /* Parse for checking syntax */
+    CURLcode result = Curl_parse_interface(option, NULL, NULL, NULL);
     if(result)
       return result;
+    return CURL_EASY_STR_SET(data, STRING_INTERFACE_OPT,
+                             option, strlen(option));
   }
-
-  result = CURL_EASY_STR_SETN(data, STRING_DEVICE, dev);
-  dev = NULL;
-  if(!result) {
-    result = CURL_EASY_STR_SETN(data, STRING_INTERFACE, iface);
-    iface = NULL;
-  }
-  if(!result) {
-    result = CURL_EASY_STR_SETN(data, STRING_BINDHOST, host);
-    host = NULL;
-  }
-  curlx_free(dev);
-  curlx_free(iface);
-  curlx_free(host);
-  return result;
+  CURL_EASY_STR_CLEAR(data, STRING_INTERFACE_OPT);
+  return CURLE_OK;
 }
 
 #ifdef USE_SSL

@@ -334,7 +334,7 @@ struct connectdata {
      made and will serve the purpose of being used for comparison reasons so
      that subsequent bound-requested connections are not accidentally reusing
      wrong connections. */
-  char *localdev;
+  char *interface_opts;
   struct ConnectBits bits;    /* various state-flags for this connection */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
@@ -727,9 +727,7 @@ enum dupstring {
 #endif
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
   STRING_DEFAULT_PROTOCOL, /* Protocol to use when the URL does not specify */
-  STRING_DEVICE,          /* local network interface/address to use */
-  STRING_INTERFACE,       /* local network interface to use */
-  STRING_BINDHOST,        /* local address to use */
+  STRING_INTERFACE_OPT,   /* CURLOPT_INTERFACE config */
   STRING_ENCODING,        /* Accept-Encoding string */
 #ifndef CURL_DISABLE_FTP
   STRING_FTP_ACCOUNT,     /* ftp account data */
