@@ -367,7 +367,9 @@ static CURLcode test_unit1664(const char *arg)
       const char *orgline = line;
       int rc = curlx_str_newline(&line);
       curl_mprintf("%d: (%%%02x) %d, line %d\n",
-/* Workaround for the expression erroneously returning NUL byte */
+/* Workaround for the expression erroneously returning the byte from the next
+   address for inputs \n, \r and \r\n. Thus returning NUL, NUL, \n instead of
+   the expected \n, \r, \r. */
 #if defined(_MSC_VER) && _MSC_VER == 1929 && defined(_WIN64)
                    i, (unsigned int)newl[i][0],
 #else
