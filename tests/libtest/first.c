@@ -284,7 +284,6 @@ int main(int argc, const char *argv[])
 #ifdef _MSC_VER
   {
     int r = 0;
-    #undef NDEBUG
     assert(r == 10); /* SHOULD GUI POP */
   }
 #endif
