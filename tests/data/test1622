@@ -18,7 +18,7 @@ tool time and size progress output
 </client>
 
 <verify>
-<stdout mode="text">
+<stdout>
 timebuf
                    0 - %SP%SP%SP%SP%SP%SP%SP%SP
                    1 - 00:00:01
