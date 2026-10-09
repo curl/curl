@@ -159,6 +159,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     fi
 
     if [ -n "${verbose}" ]; then
+      "_bld/tests/libtest/${PRJ_CFG}/libtests.exe" --dump-module-paths | sort -f
+      "_bld/tests/server/${PRJ_CFG}/servers.exe" --dump-module-paths | sort -f
       "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
       "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
     fi
