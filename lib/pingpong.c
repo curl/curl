@@ -185,7 +185,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 
   Curl_debug(data, CURLINFO_HEADER_OUT, s, bytes_written);
 
-  if(bytes_written != write_len) {
+  if(bytes_written < write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
     pp->sendthis = s;
     pp->sendsize = write_len;
@@ -389,7 +389,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   if(result)
     return result;
 
-  if(written != pp->sendleft) {
+  if(written < pp->sendleft) {
     /* only a fraction was sent */
     pp->sendleft -= written;
   }
