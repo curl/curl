@@ -158,13 +158,13 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
 
     export CURL_TEST_MIN=64
     export TFLAGS
-    TFLAGS+=' -j2'
     if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
       TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
     elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
       TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
     fi
     TFLAGS+=' tunittest unittest'
+    TFLAGS=" -j0 ${TFLAGS}"
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
