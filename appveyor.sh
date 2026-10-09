@@ -166,6 +166,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     #TFLAGS+=" -ac $(cygpath --unix "\
     #  $(cygpath --mixed --short-name "${PROGRAMFILES}/Git/mingw64/bin/curl.exe")")"
     TFLAGS+=' tunittest unittest'
+    unset APPVEYOR_API_URL  # TEST TEST TEST
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
