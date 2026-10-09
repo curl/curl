@@ -173,8 +173,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     export TFLAGS
     if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
       TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
-    elif [ -x "$(cygpath 'C:/cygwin64/bin/curl.exe')" ]; then
-      TFLAGS+=" -ac $(cygpath 'C:/cygwin64/bin/curl.exe')"
+    elif [ -x /c/PROGRA~1/Git/mingw64/bin/curl.exe ]; then
+      TFLAGS+=' -ac /c/PROGRA~1/Git/mingw64/bin/curl.exe'
     elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
       # On older runners this curl has TrackMemory enabled
       TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
