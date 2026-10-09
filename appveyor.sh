@@ -29,8 +29,6 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 export CURL_CI=appveyor
 verbose=0
 
-echo "APPVEYOR_API_URL: |${APPVEYOR_API_URL}|"
-
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
