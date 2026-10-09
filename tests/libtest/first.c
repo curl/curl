@@ -279,12 +279,6 @@ int main(int argc, const char *argv[])
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
 #endif
-#ifdef _MSC_VER
-  {
-    int r = 0;
-    assert(r == 10); /* SHOULD GUI POP */
-  }
-#endif
 
 #ifdef _WIN32
   if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
