@@ -29,7 +29,6 @@
 
 #if defined(_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
-#include <stdlib.h> /* for _set_error_mode() */
 #endif
 
 #if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
@@ -271,7 +270,7 @@ int main(int argc, const char *argv[])
   size_t tmp;
 
 #if defined(_MSC_VER) && defined(_DEBUG)
-  _set_error_mode(_OUT_TO_STDERR);
+  _set_error_mode(_OUT_TO_STDERR);  /* uses stdlib.h */
   _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
   _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
