@@ -52,6 +52,8 @@ sub appveyor_create_test_result {
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\"/\\\"/g;
     $testname =~ s/\'/'"'"'/g;
+    local $ENV{CURL_MEMDEBUG};
+    delete $ENV{CURL_MEMDEBUG};
     my $appveyor_baseurl = $ENV{'APPVEYOR_API_URL'};
     my $appveyor_result = qx($curl --silent --noproxy '*' \\
     --header 'Content-Type: application/json' \\
@@ -96,6 +98,8 @@ sub appveyor_update_test_result {
         $appveyor_outcome = 'Failed';
         $appveyor_category = 'Error';
     }
+    local $ENV{CURL_MEMDEBUG};
+    delete $ENV{CURL_MEMDEBUG};
     my $appveyor_baseurl = $ENV{'APPVEYOR_API_URL'};
     my $appveyor_result = qx($curl --silent --noproxy '*' --request PUT \\
     --header 'Content-Type: application/json' \\
@@ -112,6 +116,8 @@ sub appveyor_update_test_result {
     '$appveyor_baseurl/api/tests');
     print "AppVeyor API result: $appveyor_result\n" if($appveyor_result);
     if($appveyor_category eq 'Error') {
+        local $ENV{CURL_MEMDEBUG};
+        delete $ENV{CURL_MEMDEBUG};
         $appveyor_result = qx($curl --silent --noproxy '*' \\
         --header 'Content-Type: application/json' \\
         --data '
