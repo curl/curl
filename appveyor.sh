@@ -27,7 +27,7 @@
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 export CURL_CI=appveyor
-debug=0
+verbose=0
 
 # build
 
@@ -112,7 +112,7 @@ find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -p
 
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
-  [ -n "${debug}" ] && "${curl}" --dump-module-paths | sort -f
+  [ -n "${verbose}" ] && "${curl}" --dump-module-paths | sort -f
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
@@ -154,7 +154,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
     fi
 
-    if [ -n "${debug}" ]; then
+    if [ -n "${verbose}" ]; then
       "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
       "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
     fi
