@@ -161,8 +161,8 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
 
     export CURL_TEST_MIN=75
     export TFLAGS
-    TFLAGS+=" -ac $(cygpath --unix "\
-      $(cygpath --mixed --short-name "${PROGRAMFILES}/Git/mingw64/bin/curl.exe")")"
+    #TFLAGS+=" -ac $(cygpath --unix "\
+    #  $(cygpath --mixed --short-name "${PROGRAMFILES}/Git/mingw64/bin/curl.exe")")"
     TFLAGS+=' tunittest unittest'
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
