@@ -54,6 +54,8 @@ sub azure_check_environment {
 
 sub azure_create_test_run {
     my ($curl) = @_;
+    local $ENV{CURL_MEMDEBUG};
+    delete $ENV{CURL_MEMDEBUG};
     my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
     my $azure_run = qx($curl --silent --noproxy "*" \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
@@ -77,6 +79,8 @@ sub azure_create_test_result {
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\"/\\\"/g;
     $testname =~ s/\'/'"'"'/g;
+    local $ENV{CURL_MEMDEBUG};
+    delete $ENV{CURL_MEMDEBUG};
     my $title_testnum = sprintf("%04d", $testnum);
     my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
     my $azure_result = qx($curl --silent --noproxy '*' \\
@@ -122,6 +126,8 @@ sub azure_update_test_result {
     else {
         $azure_outcome = 'Failed';
     }
+    local $ENV{CURL_MEMDEBUG};
+    delete $ENV{CURL_MEMDEBUG};
     my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
     my $azure_result = qx($curl --silent --noproxy '*' --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
@@ -146,6 +152,8 @@ sub azure_update_test_result {
 
 sub azure_update_test_run {
     my ($curl, $azure_run_id) = @_;
+    local $ENV{CURL_MEMDEBUG};
+    delete $ENV{CURL_MEMDEBUG};
     my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
     my $azure_run = qx($curl --silent --noproxy '*' --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
