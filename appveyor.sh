@@ -148,10 +148,10 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
   # run unit tests
 
   if [ -z "${SKIP_RUN:-}" ]; then
-    if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
-      cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
-      cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
-    fi
+    #if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
+    #  cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
+    #  cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
+    #fi
 
     "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
     "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
