@@ -44,12 +44,15 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     *)       openssl_suffix='-Win64';;
   esac
 
+  old_msys2=0
   if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2026' ]; then
     openssl_root_win="C:/OpenSSL-v36${openssl_suffix}"
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
     openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
     openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
+  else
+    old_msys2=1  # MSYS2 3.0.7-338.x86_64 2019-07-11
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
@@ -165,6 +168,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
     export CURL_TEST_MIN=75
     export TFLAGS="~1096 ${TFLAGS:-}"
+    [ "${old_msys2}" = '1' ] && TFLAGS+=' ~428'  # MSYS2/Cygwin 3.6.5+ is required for this test
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
