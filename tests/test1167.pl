@@ -71,6 +71,7 @@ my @syms;
 sub scanenums {
     my ($file) = @_;
     my $skipit = 0;
+    local $ENV{'MSYS2_ARG_CONV_EXCL'} = '*';
 
     open(H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file") or
         die "Cannot preprocess $file";
