@@ -27,6 +27,7 @@
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 export CURL_CI=appveyor
+debug=1
 
 # build
 
@@ -111,7 +112,7 @@ find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -p
 
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
-  "${curl}" --dump-module-paths | sort -f
+  [ -n "${debug}" ] && "${curl}" --dump-module-paths | sort -f
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
@@ -153,18 +154,27 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
     fi
 
-    "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
-    "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
+    if [ -n "${debug}" ]; then
+      "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
+      "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
+      for acurl in \
+        "${SYSTEMROOT}/System32/curl.exe" \
+        'C:/cygwin64/bin/curl.exe' \
+        'C:/msys64/usr/bin/curl.exe' \
+      ; do
+        acurl="$(cygpath "${acurl}")"
+        [ -x "${acurl}" ] && "${acurl}" --disable --version
+      done
+    fi
 
     export CURL_TEST_MIN=75
     export TFLAGS
     if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
       TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
-    #elif [ -x "$(cygpath 'C:/cygwin64/bin/curl.exe')" ]; then
-    #  TFLAGS+=" -ac $(cygpath 'C:/cygwin64/usr/bin/curl.exe')"
+    elif [ -x "$(cygpath 'C:/cygwin64/bin/curl.exe')" ]; then
+      TFLAGS+=" -ac $(cygpath 'C:/cygwin64/usr/bin/curl.exe')"
     elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
-      # BEWARE: On older runners this curl is built with TrackMemory
-      #         and interferes with runtests.
+      # On older runners this curl has TrackMemory enabled
       TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
     fi
     TFLAGS+=' tunittest unittest'
