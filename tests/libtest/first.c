@@ -28,7 +28,7 @@
 #endif
 
 #if defined(_MSC_VER) && defined(_DEBUG)
-#include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
+#include <crtdbg.h>  /* for _CrtSetReportFile(), _CRT* macros */
 #endif
 
 #if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
