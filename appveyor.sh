@@ -159,11 +159,12 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
       for acurl in \
         "${SYSTEMROOT}/System32/curl.exe" \
-        'C:/cygwin64/bin/curl.exe' \
+        "${PROGRAMFILES}/Git/mingw64/bin/curl.exe" \
         'C:/msys64/usr/bin/curl.exe' \
       ; do
-        acurl="$(cygpath "${acurl}")"
-        [ -x "${acurl}" ] && "${acurl}" --disable --version
+        acurld="$(cygpath --mixed --short-name "$acurl")"  # to avoid spaces in directory names
+        acurlu="$(cygpath --unix "${acurld}")"
+        [ -x "${acurlu}" ] && "${acurlu}" --disable --version
       done
     fi
 
