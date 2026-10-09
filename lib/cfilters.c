@@ -1038,9 +1038,16 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int8_t sockindex,
     }
   }
 #endif
-  if(data && data->conn && data->conn->send[sockindex])
-    return data->conn->send[sockindex](data, sockindex, buf, write_len, eos,
-                                       pnwritten);
+  if(data && data->conn && data->conn->send[sockindex]) {
+    CURLcode result = data->conn->send[sockindex](data, sockindex, buf,
+                                                  write_len, eos, pnwritten);
+    if(!result && (*pnwritten > write_len)) {
+      DEBUGASSERT(0);
+      *pnwritten = 0;
+      return CURLE_SEND_ERROR;
+    }
+    return result;
+  }
   *pnwritten = 0;
   return CURLE_FAILED_INIT;
 }
