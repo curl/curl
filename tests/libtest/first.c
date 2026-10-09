@@ -250,7 +250,7 @@ static void s_GetLoadedModulePaths(void)
 #else
     path = mod.szExePath;
 #endif
-    curl_mprintf("Loaded DLL: |%s|\n", path);
+    curl_mprintf("%s\n", path);
   } while(Module32Next(hnd, &mod));
 
 error:
