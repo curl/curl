@@ -162,9 +162,9 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
         "${PROGRAMFILES}/Git/mingw64/bin/curl.exe" \
         'C:/msys64/usr/bin/curl.exe' \
       ; do
-        acurld="$(cygpath --mixed --short-name "$acurl")"  # to avoid spaces in directory names
-        acurlu="$(cygpath --unix "${acurld}")"
-        [ -x "${acurlu}" ] && "${acurlu}" --disable --version
+        [[ "${acurl}" = *' '* ]] && acurl="$(cygpath --mixed --short-name "$acurl")"  # to avoid spaces in directory names
+        acurl="$(cygpath --unix "${acurl}")"
+        [ -x "${acurl}" ] && "${acurl}" --disable --version
       done
     fi
 
