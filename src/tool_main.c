@@ -158,8 +158,6 @@ int main(int argc, char *argv[])
 {
   CURLcode result = CURLE_OK;
 
-  tool_init_stderr();
-
 #if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DBG_CRTDBG)
   _set_error_mode(_OUT_TO_STDERR);  /* uses stdlib.h */
   _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
@@ -169,6 +167,8 @@ int main(int argc, char *argv[])
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
 #endif
+
+  tool_init_stderr();
 
 #ifdef _WIN32
   /* Undocumented diagnostic option to list the full paths of all loaded
