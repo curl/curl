@@ -2002,15 +2002,13 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
   struct IMAP *imap = Curl_meta_get(data, CURL_META_IMAP_EASY);
 
-  (void)premature;
-
   if(!imapc)
     return CURLE_FAILED_INIT;
   if(!imap)
     return CURLE_OK;
 
-  if(status) {
-    CURL_TRC_M(data, "IMAP done with bad status");
+  if(status || premature) {
+    CURL_TRC_M(data, "IMAP done, not finalizing transfer");
     connclose(conn); /* marked for closure */
     result = status;         /* use the already set error code */
   }
