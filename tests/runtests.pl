@@ -519,9 +519,6 @@ sub checksystemfeatures {
     my $curlvererr = "$LOGDIR/curlvererr.log";
     my $versioncmd = exerunner() . shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
 
-    runclient(exerunner() . shell_quote($CURL) . " --dump-module-paths");
-    runclient(exerunner() . shell_quote($CURL) . " --version");
-
     unlink($curlverout);
     unlink($curlvererr);
 
