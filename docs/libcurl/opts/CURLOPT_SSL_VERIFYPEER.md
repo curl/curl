@@ -70,8 +70,8 @@ certificate verification can make libcurl trust and use such information from
 malicious servers.
 
 For LDAP, this option only has an effect when using the OpenLDAP backend,
-which routes TLS through libcurl. It is not supported with Apple's OpenLDAP
-fork.
+which routes TLS through libcurl. With Apple's OpenLDAP fork, the certificate
+chain is still verified when this option is disabled.
 
 # DEFAULT
 

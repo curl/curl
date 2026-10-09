@@ -55,8 +55,9 @@ previous ones. Set it to NULL to disable its use again.
 
 The default value for this can be figured out with CURLINFO_CAINFO(3).
 
-For LDAP, this option is honored when using the OpenLDAP backend, including
-Apple's fork. It is not supported with WinLDAP.
+For LDAP, this option only has an effect when using the OpenLDAP backend,
+which routes TLS through libcurl. It is not supported by Apple's OpenLDAP
+fork.
 
 # DEFAULT
 

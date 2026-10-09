@@ -39,7 +39,7 @@ Note that if this option is enabled but the server does not support the TLS
 extension, the verification fails.
 
 For LDAP, this option only has an effect when using the OpenLDAP backend,
-which routes TLS through libcurl. It is not supported with Apple's OpenLDAP
+which routes TLS through libcurl. It is not supported by Apple's OpenLDAP
 fork.
 
 # DEFAULT
