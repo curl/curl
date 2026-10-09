@@ -41,15 +41,12 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     *)       openssl_suffix='-Win64';;
   esac
 
-  parallel_tests=1
   if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2026' ]; then
     openssl_root_win="C:/OpenSSL-v36${openssl_suffix}"
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
     openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
     openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
-  else
-    parallel_tests=0  # old runners have bugs that break parallel tests
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
@@ -171,7 +168,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       TFLAGS+=" -ac $(cygpath 'C:/msys64/usr/bin/curl.exe')"
     fi
     TFLAGS+=' tunittest unittest'
-    [ "${parallel_tests}" = '0' ] && TFLAGS=" -j0 ${TFLAGS}"
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
