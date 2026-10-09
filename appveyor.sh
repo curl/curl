@@ -29,6 +29,8 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 export CURL_CI=appveyor
 verbose=''
 
+echo "MSYS2_ARG_CONV_EXCL: |${MSYS2_ARG_CONV_EXCL}|"  # any default?
+
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
