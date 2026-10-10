@@ -2692,6 +2692,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = getstr(&config->sasl_authzid, nextarg, DENY_BLANK);
     break;
   case C_PROXY_SERVICE_NAME: /* --proxy-service-name */
+  case C_SOCKS5_GSSAPI_SERVICE: /* --socks5-gssapi-service */
     err = getstr(&config->proxy_service_name, nextarg, DENY_BLANK);
     break;
   case C_SERVICE_NAME: /* --service-name */
