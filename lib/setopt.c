@@ -1752,8 +1752,10 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
      * Set CA info SSL connection for proxy. Specify filename of the
      * CA certificate
      */
-    s->proxy_ssl.custom_cafile = TRUE;
-    return Curl_setstropt(data, STRING_SSL_CAFILE_PROXY, ptr);
+    result = Curl_setstropt(data, STRING_SSL_CAFILE_PROXY, ptr);
+    if(!result)
+      s->proxy_ssl.custom_cafile = TRUE;
+    return result;
   case CURLOPT_PROXY_CRLFILE:
     /*
      * Set CRL file info for SSL connection for proxy. Specify filename of the
@@ -1777,8 +1779,10 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
-      s->proxy_ssl.custom_capath = TRUE;
-      return Curl_setstropt(data, STRING_SSL_CAPATH_PROXY, ptr);
+      result = Curl_setstropt(data, STRING_SSL_CAPATH_PROXY, ptr);
+      if(!result)
+        s->proxy_ssl.custom_capath = TRUE;
+      return result;
     }
 #endif
     return CURLE_NOT_BUILT_IN;
@@ -1892,8 +1896,10 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     /*
      * Set CA info for SSL connection. Specify filename of the CA certificate
      */
-    data->set.ssl.custom_cafile = TRUE;
-    return Curl_setstropt(data, STRING_SSL_CAFILE, ptr);
+    result = Curl_setstropt(data, STRING_SSL_CAFILE, ptr);
+    if(!result)
+      data->set.ssl.custom_cafile = TRUE;
+    return result;
   case CURLOPT_CAPATH:
     /*
      * Set CA path info for SSL connection. Specify directory name of the CA
@@ -1901,8 +1907,10 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      */
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
-      data->set.ssl.custom_capath = TRUE;
-      return Curl_setstropt(data, STRING_SSL_CAPATH, ptr);
+      result = Curl_setstropt(data, STRING_SSL_CAPATH, ptr);
+      if(!result)
+        data->set.ssl.custom_capath = TRUE;
+      return result;
     }
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_CRLFILE:
@@ -2834,8 +2842,10 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
-      s->proxy_ssl.custom_cablob = TRUE;
-      return Curl_setblobopt(&s->blobs[BLOB_CAINFO_PROXY], blob);
+      CURLcode result = Curl_setblobopt(&s->blobs[BLOB_CAINFO_PROXY], blob);
+      if(!result)
+        s->proxy_ssl.custom_cablob = TRUE;
+      return result;
     }
 #endif
     return CURLE_NOT_BUILT_IN;
@@ -2859,8 +2869,10 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
-      s->ssl.custom_cablob = TRUE;
-      return Curl_setblobopt(&s->blobs[BLOB_CAINFO], blob);
+      CURLcode result = Curl_setblobopt(&s->blobs[BLOB_CAINFO], blob);
+      if(!result)
+        s->ssl.custom_cablob = TRUE;
+      return result;
     }
 #endif
     return CURLE_NOT_BUILT_IN;
