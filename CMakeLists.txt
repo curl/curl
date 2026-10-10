@@ -989,13 +989,30 @@ if(ZSTD_FOUND)
   endif()
 endif()
 
+# add zlib to CMAKE_REQUIRED_LIBRARIES
+function(add_libz)
+  if (ZLIB_LIBRARIES)
+    set(zlib_target ${ZLIB_LIBRARIES})
+  elseif(TARGET ZLIB::ZLIB)
+    # try_compile doesn't support aliased targets
+    # since it runs in a different scope
+    get_target_property(zlib_target ZLIB::ZLIB ALIASED_TARGET)
+    if (NOT zlib_target)
+      set(zlib_target ZLIB::ZLIB)
+    endif()
+  endif()
+
+  set(CMAKE_REQUIRED_LIBRARIES
+    ${CMAKE_REQUIRED_LIBRARIES} ${zlib_target} PARENT_SCOPE)
+endfunction()
+
 # Check function in an OpenSSL-like TLS backend.
 macro(curl_openssl_check_exists)
   cmake_push_check_state()
   if(USE_OPENSSL)
     list(APPEND CMAKE_REQUIRED_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
     if(HAVE_LIBZ)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)
+      add_libz()
     endif()
     if(WIN32)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL BCryptGenRandom()
@@ -1009,7 +1026,8 @@ macro(curl_openssl_check_exists)
     list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::wolfssl)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWOLFSSL_OPTIONS_IGNORE_SYS")
     if(HAVE_LIBZ)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)  # Public wolfSSL headers also require zlib headers
+      # Public wolfSSL headers also require zlib headers
+      add_libz()
     endif()
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL 5.5.4)
   endif()
