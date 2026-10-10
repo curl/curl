@@ -66,7 +66,8 @@ $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) --test $(TESTS_C) > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_perf_SOURCES = $(BUNDLE).c
+# Variables cannot be used in SOURCES due to automake < 1.16
+nodist_perf_SOURCES = perf.c
 LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 CLEANFILES = $(BUNDLE).c
 
