@@ -117,6 +117,12 @@ else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
 
+# build tests
+
+if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+fi
+
 # create artifact
 
 if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
@@ -141,13 +147,9 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   appveyor PushArtifact "${archive}"
 fi
 
-# build tests
+# run unit tests
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
-
-  # run unit tests
-
   if [ -z "${SKIP_RUN:-}" ]; then
     if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
       cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
