@@ -36,6 +36,9 @@ FUNVALUE=contents
 VALUE2=curl
 BLANK=
 </setenv>
+<features>
+blank-env
+</features>
 <name>
 Expand environment variables within config file
 </name>
