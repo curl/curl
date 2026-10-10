@@ -370,7 +370,7 @@ static CURLcode test_unit1664(const char *arg)
 /* Workaround for the expression erroneously returning the byte from the next
    address for inputs \n, \r and \r\n. Thus returning NUL, NUL, \n instead of
    the expected \n, \r, \r. */
-#if defined(_MSC_VER) && _MSC_VER == 1929 && defined(_WIN64)
+#ifdef VS2019_WORKAROUND
                    i, (unsigned int)newl[i][0],
 #else
                    i, (unsigned int)*orgline,
