@@ -199,6 +199,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
 const struct Curl_protocol Curl_protocol_gopher = {
   ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   gopher_do,                            /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -220,6 +221,7 @@ const struct Curl_protocol Curl_protocol_gopher = {
 #ifdef USE_SSL
 const struct Curl_protocol Curl_protocol_gophers = {
   ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   gopher_do,                            /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */

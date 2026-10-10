@@ -38,6 +38,8 @@ typedef enum {
                             file */
 } curl_ftpfile;
 
+extern struct Curl_cftype Curl_cft_ftp;
+
 #endif /* CURL_DISABLE_FTP */
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */

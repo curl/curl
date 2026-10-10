@@ -1589,7 +1589,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
     if(cf->cft == &Curl_cft_ssl) {
       bool done;
       CURL_TRC_CF(data, cf, "shutdown and remove SSL, start");
-      Curl_cshutdn_start_timer(data, sockindex, 0);
+      Curl_cshutdn_start_timer(data, sockindex);
       result = vtls_shutdown_blocking(cf, data, send_shutdown, &done);
       Curl_cshutdn_clear_timer(data, sockindex);
       if(!result && !done) /* blocking failed? */

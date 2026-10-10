@@ -1695,6 +1695,7 @@ static CURLcode pop3_setup_connection(struct Curl_easy *data,
  */
 const struct Curl_protocol Curl_protocol_pop3 = {
   pop3_setup_connection,            /* setup_connection */
+  ZERO_NULL,                        /* setup_filters */
   pop3_do,                          /* do_it */
   pop3_done,                        /* done */
   ZERO_NULL,                        /* do_more */
