@@ -5148,6 +5148,7 @@ dnl All the library dependencies put into $LIB apply to libcurl only.
 dnl
 LIBCURL_PC_LDFLAGS_PRIVATE=''
 dnl Do not quote $INITIAL_LDFLAGS
+AC_MSG_NOTICE([TRC-1: |$INITIAL_LDFLAGS|])
 set -- $INITIAL_LDFLAGS
 while test -n "$1"; do
   case "$1" in
@@ -5163,7 +5164,9 @@ while test -n "$1"; do
   esac
   shift
 done
+AC_MSG_NOTICE([TRC-2: |$LIBCURL_PC_LDFLAGS_PRIVATE|])
 LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $LDFLAGSPC"
+AC_MSG_NOTICE([TRC-3: |$LIBCURL_PC_LDFLAGS_PRIVATE|])
 LIBCURL_PC_LIBS_PRIVATE="$LIBS$PTHREAD"
 
 AC_SUBST(LIBCURL_PC_LDFLAGS_PRIVATE)
