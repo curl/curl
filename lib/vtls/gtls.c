@@ -451,7 +451,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
   bool creds_are_empty = TRUE;
   int rc;
 
-  if(!config->verifypeer) {
+  if(!config->verifypeer && !config->verifystatus) {
     infof(data, "SSL Trust: peer verification disabled");
     return CURLE_OK;
   }
@@ -1428,13 +1428,12 @@ static void gtls_infof_cert(struct Curl_easy *data,
 }
 
 static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
-                                        gnutls_session_t session)
+                                        gnutls_session_t session,
+                                        gnutls_x509_crt_t cert)
 {
   gnutls_ocsp_resp_t ocsp_resp = NULL;
   gnutls_datum_t status_request;
-  gnutls_certificate_credentials_t creds = NULL;
-  gnutls_x509_trust_list_t tlist = NULL;
-  unsigned int verify_status = 0;
+  unsigned int index;
   gnutls_ocsp_cert_status_t status = GNUTLS_OCSP_CERT_UNKNOWN;
   gnutls_x509_crl_reason_t reason;
   CURLcode result = CURLE_OK;
@@ -1453,6 +1452,13 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     goto out;
   }
 
+  /* gnutls_certificate_verify_peers2() has already verified the response. */
+  if(!gnutls_ocsp_status_request_is_checked(session, 0)) {
+    failf(data, "OCSP response verification failed");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
   rc = gnutls_ocsp_resp_init(&ocsp_resp);
   if(rc < 0) {
     failf(data, "Failed to initialize OCSP response object");
@@ -1467,22 +1473,18 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     goto out;
   }
 
-  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE, (void **)&creds))
-    gnutls_certificate_get_trust_list(creds, &tlist);
-  if(!tlist) {
-    failf(data, "OCSP response signature verification failed");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto out;
+  /* Read the status of the server certificate, which need not be first. */
+  for(index = 0;; index++) {
+    rc = gnutls_ocsp_resp_get_single(ocsp_resp, index, NULL, NULL, NULL, NULL,
+                                     &status, NULL, NULL, NULL, &reason);
+    if(rc < 0) {
+      failf(data, "No OCSP status for the server certificate");
+      result = CURLE_SSL_INVALIDCERTSTATUS;
+      goto out;
+    }
+    if(!gnutls_ocsp_resp_check_crt(ocsp_resp, index, cert))
+      break;
   }
-  rc = gnutls_ocsp_resp_verify(ocsp_resp, tlist, &verify_status, 0);
-  if(rc < 0 || verify_status) {
-    failf(data, "OCSP response signature verification failed");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto out;
-  }
-
-  (void)gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
-                                    &status, NULL, NULL, NULL, &reason);
 
   switch(status) {
   case GNUTLS_OCSP_CERT_GOOD:
@@ -1604,6 +1606,20 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
     return CURLE_SSL_CONNECT_ERROR;
   }
   *certverifyresult = verify_status;
+  /* Do not let --insecure or the native trust store bypass OCSP failures. */
+  if(config->verifystatus &&
+     (verify_status & (GNUTLS_CERT_INVALID_OCSP_STATUS |
+                       GNUTLS_CERT_REVOKED |
+                       GNUTLS_CERT_REVOCATION_DATA_SUPERSEDED |
+                       GNUTLS_CERT_REVOCATION_DATA_ISSUED_IN_FUTURE |
+                       GNUTLS_CERT_MISSING_OCSP_STATUS))) {
+    failf(data, "OCSP response verification failed");
+    return CURLE_SSL_INVALIDCERTSTATUS;
+  }
+  if(!config->verifypeer) {
+    infof(data, "  SSL certificate verification SKIPPED");
+    return CURLE_OK;
+  }
   verified = !(verify_status & GNUTLS_CERT_INVALID);
   if(verified)
     infof(data, "  SSL certificate verified by GnuTLS");
@@ -1709,7 +1725,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
     }
   }
 
-  if(config->verifypeer) {
+  if(config->verifypeer || config->verifystatus) {
     result = gtls_verify_cert(data, config, ssl_config, session,
                               cf, peer, &chain);
     if(result)
@@ -1794,7 +1810,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   }
 
   if(config->verifystatus) {
-    result = gtls_verify_ocsp_status(data, session);
+    result = gtls_verify_ocsp_status(data, session, x509_cert);
     if(result)
       goto out;
   }

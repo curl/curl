@@ -26,11 +26,20 @@ import json
 import logging
 import os
 import re
+import socket
+import subprocess
+import time
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from typing import ClassVar, Dict, List
 
 import pytest
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.x509 import ocsp
 from testenv import CurlClient, Env, LocalClient
+from testenv.certs import CertificateSpec
+from testenv.ports import alloc_port_set
 
 log = logging.getLogger(__name__)
 
@@ -625,3 +634,107 @@ class TestSSLUse:
         r = curl.http_get(url=url, alpn_proto=proto)
         # CURLE_SSL_CONNECT_ERROR or CURLE_PEER_FAILED_VERIFICATION
         assert r.exit_code in [35, 60], f'{r.dump_logs()}'
+
+    @pytest.mark.parametrize('tls_max', ['1.2', '1.3'])
+    @pytest.mark.parametrize('insecure', [False, True])
+    @pytest.mark.parametrize('intermediate', [False, True])
+    @pytest.mark.parametrize('response, expected', [
+        ('good', 0), ('missing', 91), ('expired', 91), ('revoked', 91),
+        ('unknown', 91), ('wrong-cert', 91), ('bad-signature', 91),
+        ('try-later', 91), ('multi-good', 0), ('multi-unknown', 91),
+        ('unchecked', 0),
+    ])
+    def test_17_25_stapled_ocsp(self, env: Env, tmp_path,
+                               tls_max, insecure, intermediate, response, expected):
+        if not env.curl_uses_lib('gnutls') or not env.have_openssl():
+            pytest.skip('needs GnuTLS and the openssl command')
+        if response == 'multi-good' and not env.curl_lib_version_at_least('gnutls', '3.8.13'):
+            pytest.skip('older GnuTLS only checks the first OCSP entry')
+        creds = env.get_credentials(env.domain1)
+        other = env.get_credentials(env.domain2)
+        issuer = creds.issuer
+        if intermediate:
+            issuer = env.ca.issue_cert(CertificateSpec(name='ocsp-intermediate', sub_specs=[
+                CertificateSpec(name='ocsp-leaf', domains=[env.domain1]),
+                CertificateSpec(name='ocsp-other', domains=[env.domain2]),
+            ]))
+            creds = issuer.get_first('ocsp-leaf')
+            other = issuer.get_first('ocsp-other')
+        response_file = tmp_path / 'response.der'
+        now = datetime.now(timezone.utc)
+        if response.startswith('multi-'):
+            # Put another certificate first; the served leaf may be UNKNOWN.
+            certs = [other] if response == 'multi-unknown' else [other, creds]
+            expiry = (now + timedelta(days=1)).strftime('%y%m%d%H%M%SZ')
+            index = tmp_path / 'index.txt'
+            index.write_text(''.join(
+                f'V\t{expiry}\t\t{c.certificate.serial_number:X}\tunknown\t/CN={c.name}\n'
+                for c in certs
+            ))
+            subprocess.run([
+                env.openssl, 'ocsp', '-index', str(index),
+                '-rsigner', issuer.cert_file, '-rkey', issuer.pkey_file,
+                '-CA', issuer.cert_file, '-issuer', issuer.cert_file,
+                '-cert', other.cert_file, '-cert', creds.cert_file,
+                '-ndays', '1', '-respout', str(response_file),
+            ], check=True, capture_output=True, timeout=10)
+        elif response != 'missing':
+            if response == 'try-later':
+                staple = ocsp.OCSPResponseBuilder.build_unsuccessful(
+                    ocsp.OCSPResponseStatus.TRY_LATER)
+            else:
+                status = {
+                    'revoked': ocsp.OCSPCertStatus.REVOKED,
+                    'unknown': ocsp.OCSPCertStatus.UNKNOWN,
+                }.get(response, ocsp.OCSPCertStatus.GOOD)
+                cert = other if response == 'wrong-cert' else creds
+                staple = ocsp.OCSPResponseBuilder().add_response(
+                    cert=cert.certificate, issuer=issuer.certificate,
+                    algorithm=hashes.SHA1(), cert_status=status,
+                    this_update=now - timedelta(days=2),
+                    next_update=now + timedelta(days=-1 if response == 'expired' else 1),
+                    revocation_time=now - timedelta(days=1) if response == 'revoked' else None,
+                    revocation_reason=x509.ReasonFlags.key_compromise if response == 'revoked' else None,
+                ).responder_id(
+                    ocsp.OCSPResponderEncoding.NAME, issuer.certificate
+                ).sign(issuer.private_key, hashes.SHA256())
+            der = staple.public_bytes(serialization.Encoding.DER)
+            if response == 'bad-signature':
+                signature = staple.signature
+                der = der.replace(signature, bytes([signature[0] ^ 1]) + signature[1:], 1)
+            response_file.write_bytes(der)
+
+        port = alloc_port_set({'ocsp': socket.SOCK_STREAM})['ocsp']
+        # The root is deliberately omitted from the server's certificate list.
+        args = [env.openssl, 's_server', '-accept', f'127.0.0.1:{port}',
+                '-cert', creds.cert_file, '-key', creds.pkey_file, '-www']
+        if intermediate:
+            args.extend(['-cert_chain', issuer.cert_file])
+        if response != 'missing':
+            args.extend(['-status_file', str(response_file)])
+        with (tmp_path / 'server.log').open('w+') as server_log:
+            server = subprocess.Popen(args, stdout=server_log, stderr=server_log)
+            try:
+                deadline = time.monotonic() + 5
+                while True:
+                    assert server.poll() is None, 'openssl s_server exited'
+                    try:
+                        with socket.create_connection(('127.0.0.1', port), timeout=0.1):
+                            break
+                    except OSError:
+                        assert time.monotonic() < deadline, 'openssl s_server did not start'
+                        time.sleep(0.01)
+                args = [env.curl, '--silent', '--show-error', '--noproxy', '*',
+                        '--http1.1', '--tls-max', tls_max, '--max-time', '5',
+                        '--cacert', env.ca.cert_file,
+                        '--resolve', f'{env.domain1}:{port}:127.0.0.1',
+                        f'https://{env.domain1}:{port}/']
+                if response != 'unchecked':
+                    args.append('--cert-status')
+                if insecure:
+                    args.append('--insecure')
+                result = subprocess.run(args, capture_output=True, text=True, timeout=10, check=False)
+                assert result.returncode == expected, result.stderr
+            finally:
+                server.terminate()
+                server.wait(timeout=5)
