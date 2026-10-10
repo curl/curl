@@ -1430,127 +1430,26 @@ static void gtls_infof_cert(struct Curl_easy *data,
 static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
                                         gnutls_session_t session)
 {
-  gnutls_ocsp_resp_t ocsp_resp = NULL;
   gnutls_datum_t status_request;
-  gnutls_certificate_credentials_t creds = NULL;
-  gnutls_x509_trust_list_t tlist = NULL;
-  unsigned int verify_status = 0;
-  gnutls_ocsp_cert_status_t status = GNUTLS_OCSP_CERT_UNKNOWN;
-  gnutls_x509_crl_reason_t reason;
-  CURLcode result = CURLE_OK;
   int rc;
 
+  /* We use gnutls_certificate_verify_peers2() to verify the result
+   * which - according to GnuTLS documentation - already takes
+   * an OCSP stapling extension received into account.
+   * We therefore need only to check if we indeed received
+   * a stapled OCSP response here. */
   rc = gnutls_ocsp_status_request_get(session, &status_request);
 
   if(rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE) {
     failf(data, "No OCSP response received");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto out;
+    return CURLE_SSL_INVALIDCERTSTATUS;
   }
   else if(rc < 0) {
     failf(data, "Invalid OCSP response received");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto out;
+    return CURLE_SSL_INVALIDCERTSTATUS;
   }
 
-  rc = gnutls_ocsp_resp_init(&ocsp_resp);
-  if(rc < 0) {
-    failf(data, "Failed to initialize OCSP response object");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto out;
-  }
-
-  rc = gnutls_ocsp_resp_import(ocsp_resp, &status_request);
-  if(rc < 0) {
-    failf(data, "Invalid OCSP response received");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto out;
-  }
-
-  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE, (void **)&creds))
-    gnutls_certificate_get_trust_list(creds, &tlist);
-  if(!tlist) {
-    failf(data, "OCSP response signature verification failed");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto out;
-  }
-  rc = gnutls_ocsp_resp_verify(ocsp_resp, tlist, &verify_status, 0);
-  if(rc < 0 || verify_status) {
-    failf(data, "OCSP response signature verification failed");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto out;
-  }
-
-  (void)gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
-                                    &status, NULL, NULL, NULL, &reason);
-
-  switch(status) {
-  case GNUTLS_OCSP_CERT_GOOD:
-    break;
-
-  case GNUTLS_OCSP_CERT_REVOKED: {
-    const char *crl_reason;
-
-    switch(reason) {
-    default:
-    case GNUTLS_X509_CRLREASON_UNSPECIFIED:
-      crl_reason = "unspecified reason";
-      break;
-
-    case GNUTLS_X509_CRLREASON_KEYCOMPROMISE:
-      crl_reason = "private key compromised";
-      break;
-
-    case GNUTLS_X509_CRLREASON_CACOMPROMISE:
-      crl_reason = "CA compromised";
-      break;
-
-    case GNUTLS_X509_CRLREASON_AFFILIATIONCHANGED:
-      crl_reason = "affiliation has changed";
-      break;
-
-    case GNUTLS_X509_CRLREASON_SUPERSEDED:
-      crl_reason = "certificate superseded";
-      break;
-
-    case GNUTLS_X509_CRLREASON_CESSATIONOFOPERATION:
-      crl_reason = "operation has ceased";
-      break;
-
-    case GNUTLS_X509_CRLREASON_CERTIFICATEHOLD:
-      crl_reason = "certificate is on hold";
-      break;
-
-    case GNUTLS_X509_CRLREASON_REMOVEFROMCRL:
-      crl_reason = "will be removed from delta CRL";
-      break;
-
-    case GNUTLS_X509_CRLREASON_PRIVILEGEWITHDRAWN:
-      crl_reason = "privilege withdrawn";
-      break;
-
-    case GNUTLS_X509_CRLREASON_AACOMPROMISE:
-      crl_reason = "AA compromised";
-      break;
-    }
-
-    failf(data, "Server certificate was revoked: %s", crl_reason);
-    break;
-  }
-
-  default:
-  case GNUTLS_OCSP_CERT_UNKNOWN:
-    failf(data, "Server certificate status is unknown");
-    break;
-  }
-
-  result = (status != GNUTLS_OCSP_CERT_GOOD) ?
-           CURLE_SSL_INVALIDCERTSTATUS : CURLE_OK;
-
-out:
-  if(ocsp_resp)
-    gnutls_ocsp_resp_deinit(ocsp_resp);
-  return result;
+  return CURLE_OK;
 }
 
 struct gtls_cert_chain {
