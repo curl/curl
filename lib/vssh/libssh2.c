@@ -1681,9 +1681,10 @@ static CURLcode ssh_state_auth_agent(struct Curl_easy *data,
 
   if(rc == LIBSSH2_ERROR_NONE) {
     sshc->authed = TRUE;
-    infof(data, "SSH: agent authenticated user '%s' with key '%s'",
-          Curl_creds_user(data->conn->creds),
-          sshc->sshagent_identity->comment);
+    /* key comment may embed private key path; trace-only like above */
+    CURL_TRC_SSH(data, "SSH: agent authenticated user '%s' with key '%s'",
+                 Curl_creds_user(data->conn->creds),
+                 sshc->sshagent_identity->comment);
     myssh_to(data, sshc, SSH_AUTH_DONE);
   }
   else {
@@ -3400,7 +3401,8 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   if(!sshc)
     return CURLE_FAILED_INIT;
 
-  infof(data, "SSH: user '%s'", Curl_creds_user(conn->creds));
+  /* gate username like the password below */
+  CURL_TRC_SSH(data, "SSH: user '%s'", Curl_creds_user(conn->creds));
 #ifdef CURL_LIBSSH2_DEBUG
   infof(data, "SSH: password %s", Curl_creds_passwd(conn->creds));
   sock = conn->sock[FIRSTSOCKET];
