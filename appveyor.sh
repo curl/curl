@@ -35,6 +35,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
 
   PRJ_CFG='Debug'
   [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && PRJ_CFG='Release'
+  [[ "${APPVEYOR_JOB_NAME}" = *'RelWithDebInfo'* ]] && PRJ_CFG='RelWithDebInfo'
 
   # Configure OpenSSL
   case "${CMAKE_GENERATE:-}" in
