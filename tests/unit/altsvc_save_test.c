@@ -36,7 +36,7 @@
 #include "curlx/win32-fopen.h"
 #include <stdarg.h>
 
-/* Keep the interception and all included-source statics out of units.c. */
+/* Keep interception and included-source static declarations out of units.c. */
 static struct {
   int armed;
   int active;
@@ -201,12 +201,6 @@ static int save_fclose(FILE *fp)
 #undef altsvc_free
 #undef ALTSVC_MA
 #undef ALTSVC_PERSIST
-#ifdef CURL_MEMDEBUG
-#define curlx_fclose(file) curl_dbg_fclose(file, __LINE__, __FILE__)
-#else
-#define curlx_fclose fclose
-#endif
-
 static int save_fault_case(struct Curl_easy *data, struct altsvcinfo *asi,
                            const char *filename, int fault)
 {
