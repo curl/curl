@@ -200,11 +200,11 @@ jobs:
           done
           if command -v pccritic >/dev/null 2>&1; then
             pccritic --version
-            if [ "${MATRIX_OS}" = 'freebsd' ]; then
-              pccritic --min-score 93 bld/libcurl.pc
-            else
+            #if [ "${MATRIX_OS}" = 'freebsd' ]; then
+            #  pccritic --min-score 93 bld/libcurl.pc
+            #else
               pccritic --min-score 98 bld/libcurl.pc
-            fi
+            #fi
           fi
 
       - name: 'build'
