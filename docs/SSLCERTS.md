@@ -61,15 +61,17 @@ specify your own CA cert file by setting the environment variable
 are also supported.
 
 If you are using the curl command line tool on Windows, curl searches for a CA
-cert file named `curl-ca-bundle.crt` in these directories and in this order:
+cert file named `curl-ca-bundle.crt` in the application's directory by default
+since 8.23.0, or in these directories and in this order if explicitly enabled
+at build-time (the default in 8.22.0 and earlier):
   1. application's directory
   2. current working directory
   3. Windows System directory (e.g. C:\Windows\System32)
   4. Windows Directory (e.g. C:\Windows)
   5. all directories along %PATH%
 
-curl 8.11.0 added a build-time option to disable this search behavior, and
-another option to restrict search to the application's directory.
+curl 8.11.0 added the build-time option to control the above search behavior,
+and another option to restrict search to the application's directory.
 
 curl 8.19.0 added a build-time option to enable Native CA by default on
 Windows. This build-time option by default also disables searching for
