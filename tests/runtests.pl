@@ -130,6 +130,7 @@ my $args;           # command-line arguments
 
 my $uname_release = qx(uname -r);
 my $is_wsl = $uname_release =~ /Microsoft$/;
+my $uname_release_ver = $uname_release =~ /^(\d+)\.(\d+)\.(\d+)/ ? $1 * 10000 + $2 * 100 + $3 : 0;
 
 my $http_ipv6;      # set if HTTP server has IPv6 support
 my $http_unix;      # set if HTTP server has Unix sockets support
@@ -568,6 +569,11 @@ sub checksystemfeatures {
             }
             if($curl =~ /cygwin|msys/i) {
                 $feature{"cygwin"} = 1;
+            }
+            # Set, but empty environment variables are universally supported, except
+            # a Cygwin/MSYS2 <3.6.5 (2025-09) process starting a non-Cygwin one.
+            if(($^O ne 'cygwin' && $^O ne 'msys') || $curl =~ /cygwin|msys/i || $uname_release_ver >= 30605) {
+                $feature{"blank-env"} = 1;
             }
             if($libcurl =~ /\sschannel\b/i) {
                 $feature{"Schannel"} = 1;
