@@ -386,6 +386,7 @@ static struct Curl_resolv_async *hostip_async_new(struct Curl_easy *data,
                                                   struct Curl_peer *peer,
                                                   uint8_t transport,
                                                   bool for_proxy,
+                                                  const struct curltime *pnow,
                                                   timediff_t timeout_ms)
 {
   struct Curl_resolv_async *async;
@@ -414,7 +415,7 @@ static struct Curl_resolv_async *hostip_async_new(struct Curl_easy *data,
   async->dns_queries = dns_queries;
   async->transport = transport;
   async->for_proxy = for_proxy;
-  async->start = *Curl_pgrs_now(data);
+  async->start = *pnow;
   async->timeout_ms = timeout_ms;
   async->is_ipaddr = Curl_is_ipaddr(peer->hostname);
   if(async->is_ipaddr)
@@ -520,12 +521,13 @@ const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
 CURLcode Curl_resolv_https(struct Curl_easy *data,
                            struct Curl_peer *peer,
                            bool for_proxy,
+                           const struct curltime *pnow,
                            timediff_t timeout_ms,
                            uint32_t *presolv_id,
                            struct Curl_dns_entry **pdns)
 {
   return Curl_resolv(data, peer, CURL_DNSQ_HTTPS, TRNSPRT_TCP,
-                     for_proxy, timeout_ms, presolv_id, pdns);
+                     for_proxy, pnow, timeout_ms, presolv_id, pdns);
 }
 
 const struct Curl_https_rrinfo *
@@ -562,6 +564,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
                                     bool for_proxy,
                                     timediff_t timeout_ms,
                                     bool allowDOH,
+                                    const struct curltime *pnow,
                                     uint32_t *presolv_id,
                                     struct Curl_dns_entry **pdns,
                                     bool *pnegative)
@@ -616,7 +619,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
       goto out;
     if(!async) {
       async = hostip_async_new(data, dns_queries, peer, transport,
-                               for_proxy, timeout_ms);
+                               for_proxy, pnow, timeout_ms);
       if(!async) {
         result = CURLE_OUT_OF_MEMORY;
         goto out;
@@ -639,7 +642,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
   (void)addr;
   if(!async) {
     async = hostip_async_new(data, dns_queries, peer, transport,
-                             for_proxy, timeout_ms);
+                             for_proxy, pnow, timeout_ms);
     if(!async) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -655,6 +658,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
       result = CURLE_OK;
   }
 #else
+  (void)pnow;
   result = Curl_resolv_announce_start(data, NULL);
   if(result)
     goto out;
@@ -706,6 +710,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
                               struct Curl_peer *peer,
                               uint8_t transport,
                               bool for_proxy,
+                              const struct curltime *pnow,
                               timediff_t timeout_ms,
                               bool allowDOH,
                               uint32_t *presolv_id,
@@ -745,7 +750,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
   }
 #endif
   /* Let's check our DNS cache first */
-  result = Curl_dnscache_get(data, dns_queries, peer, pdns);
+  result = Curl_dnscache_get(data, dns_queries, peer, pnow, pdns);
   if(*pdns) {
     infof(data, "Hostname %s was found in DNS cache", peer->hostname);
     result = CURLE_OK;
@@ -758,7 +763,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     /* No luck, we need to start resolving. */
     cache_dns = TRUE;
     result = hostip_resolv_start(data, dns_queries, peer, transport,
-                                 for_proxy, timeout_ms, allowDOH,
+                                 for_proxy, timeout_ms, allowDOH, pnow,
                                  presolv_id, pdns, &negative);
     CURL_TRC_DNS(data, "[%s] hostip_resolv started -> %d",
                  Curl_resolv_query_str(dns_queries), (int)result);
@@ -806,8 +811,8 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
     goto out;
 
   /* We cannot do a blocking resolve using DoH currently */
-  result = hostip_resolv(data, dns_queries, peer, transport, FALSE, 0, FALSE,
-                         &resolv_id, pdns);
+  result = hostip_resolv(data, dns_queries, peer, transport, FALSE,
+                         Curl_pgrs_now(data), 0, FALSE, &resolv_id, pdns);
   switch(result) {
   case CURLE_OK:
     DEBUGASSERT(*pdns);
@@ -845,6 +850,7 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
                                      struct Curl_peer *peer,
                                      uint8_t transport,
                                      bool for_proxy,
+                                     const struct curltime *pnow,
                                      timediff_t timeout_ms,
                                      uint32_t *presolv_id,
                                      struct Curl_dns_entry **entry)
@@ -924,7 +930,8 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long. */
   result = hostip_resolv(data, dns_queries, peer, transport,
-                         for_proxy, timeout_ms, FALSE, presolv_id, entry);
+                         for_proxy, pnow, timeout_ms, FALSE,
+                         presolv_id, entry);
 
 clean_up:
   if(!prev_alarm)
@@ -1026,6 +1033,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      uint8_t dns_queries,
                      uint8_t transport,
                      bool for_proxy,
+                     const struct curltime *pnow,
                      timediff_t timeout_ms,
                      uint32_t *presolv_id,
                      struct Curl_dns_entry **pdns)
@@ -1055,7 +1063,8 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     }
     if(timeout_ms && !Curl_doh_wanted(data)) {
       return resolv_alarm_timeout(data, dns_queries, peer, transport,
-                                  for_proxy, timeout_ms, presolv_id, pdns);
+                                  for_proxy, pnow, timeout_ms,
+                                  presolv_id, pdns);
     }
   }
 #endif /* !USE_ALARM_TIMEOUT */
@@ -1066,7 +1075,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 #endif
 
   return hostip_resolv(data, dns_queries, peer, transport,
-                       for_proxy, timeout_ms, TRUE, presolv_id, pdns);
+                       for_proxy, pnow, timeout_ms, TRUE, presolv_id, pdns);
 }
 
 #ifdef USE_CURL_ASYNC
@@ -1083,6 +1092,7 @@ struct Curl_resolv_async *Curl_async_get(struct Curl_easy *data,
 }
 
 CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
+                                 const struct curltime *pnow,
                                  struct Curl_dns_entry **pdns)
 {
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
@@ -1093,7 +1103,8 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
     return CURLE_FAILED_INIT;
 
   /* check if we have the name resolved by now (from someone else) */
-  result = Curl_dnscache_get(data, async->dns_queries, async->peer, pdns);
+  result = Curl_dnscache_get(data, async->dns_queries, async->peer, pnow,
+                             pdns);
   if(*pdns) {
     /* Tell a possibly async resolver we no longer need the results. */
     infof(data, "Hostname '%s' was found in DNS cache", async->peer->hostname);
