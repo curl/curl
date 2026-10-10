@@ -51,7 +51,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
   else
     old_msys2=1  # MSYS2 3.0.7-338.x86_64 2019-07-11
-    # CMAKE_GENERATE+=' -DCURL_STATIC_CRT=ON'  # TEST TEST TEST
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
