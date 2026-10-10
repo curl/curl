@@ -136,9 +136,9 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   echo 'Finding curl module dependencies'
   "${curl}" --dump-module-paths | sort -f | grep -Fv 'C:\Windows' | tee > files.tmp
   echo 'Creating artifact'
-  time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
+  time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt _bld
   rm files.tmp
-  appveyor PushArtifact "${archive}" &
+  appveyor PushArtifact "${archive}"
 fi
 
 # build tests
