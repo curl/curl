@@ -26,12 +26,16 @@
 # shellcheck disable=SC3040,SC2039
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
+export CURL_CI=appveyor
+verbose=0
+
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
 
   PRJ_CFG='Debug'
   [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && PRJ_CFG='Release'
+  [[ "${APPVEYOR_JOB_NAME}" = *'RelWithDebInfo'* ]] && PRJ_CFG='RelWithDebInfo'
 
   # Configure OpenSSL
   case "${CMAKE_GENERATE:-}" in
@@ -109,8 +113,15 @@ find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -p
 
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
+  [ -n "${verbose}" ] && "${curl}" --dump-module-paths | sort -f
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
+fi
+
+# build tests
+
+if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # create artifact
@@ -118,7 +129,7 @@ fi
 if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   cp /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
   echo 'Checking that https works (it should find curl-ca-bundle.crt if needed)'
-  "${curl}" -v -fsS --retry 6 --retry-all-errors -o /dev/null https://curl.se/
+  "${curl}" --disable --verbose --fail --silent --show-error --retry 6 --retry-all-errors -out-null https://curl.se/
   if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER:-}" ]; then
     archive="curl_pr${APPVEYOR_PULL_REQUEST_NUMBER}_${APPVEYOR_PULL_REQUEST_HEAD_COMMIT}.zip"
   else
@@ -130,17 +141,34 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
     echo "${archive}"
   } > WARNING.txt
   echo 'Finding curl module dependencies'
-  "${curl}" --dump-module-paths | grep -Fv 'C:\Windows' | tee > files.tmp
+  "${curl}" --dump-module-paths | sort -f | grep -Fv 'C:\Windows' | tee > files.tmp
   echo 'Creating artifact'
-  7z a "${archive}" -y -bb1 -bsp0 -mx9 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
+  time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt _bld
   rm files.tmp
   appveyor PushArtifact "${archive}"
 fi
 
-# build tests
+# run unit tests
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+  if [ -z "${SKIP_RUN:-}" ]; then
+    if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
+      cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
+      cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
+    fi
+
+    if [ -n "${verbose}" ]; then
+      "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
+      "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
+    fi
+
+    unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
+    export CURL_TEST_MIN=75
+    export TFLAGS="tunittest unittest ${TFLAGS:-}"
+    time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
+  else
+    echo "Skip running tests. Reason: ${SKIP_RUN}"
+  fi
 fi
 
 # build examples

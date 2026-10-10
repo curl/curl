@@ -29,6 +29,10 @@ mark_as_advanced(TEST_NGHTTPX)
 # Consumed variables: TEST_NGHTTPX
 configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
+if(NOT "$ENV{CURL_CI}" STREQUAL "" AND MSVC)
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_DBG_CRTDBG")
+endif()
+
 add_custom_target(tt)
 if(BUILD_CURL_EXE)
   add_dependencies(tt "curlinfo")

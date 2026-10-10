@@ -993,6 +993,7 @@ sub singletest_run {
         $valgrindcmd .= "--tool=memcheck ";  # valgrind 2.1.x+
         $valgrindcmd .= "--quiet --leak-check=yes ";
         $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
+        $valgrindcmd .= "--partial-loads-ok=no ";
         # $valgrindcmd .= "--gen-suppressions=all ";
         $valgrindcmd .= "--num-callers=16 ";
         $valgrindcmd .= "--log-file=$LOGDIR/valgrind$testnum";  # valgrind >=3
