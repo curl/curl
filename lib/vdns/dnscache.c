@@ -99,9 +99,9 @@ UNITTEST void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id)
 
 /* @unittest 3271 */
 UNITTEST bool dnsc_id_matches_entry(struct dnsc_id *id,
-                                     struct Curl_dns_entry *dns);
+                                    struct Curl_dns_entry *dns);
 UNITTEST bool dnsc_id_matches_entry(struct dnsc_id *id,
-                                     struct Curl_dns_entry *dns)
+                                    struct Curl_dns_entry *dns)
 {
   return dns &&
          /* Neither the requested nor the cached key was truncated. */

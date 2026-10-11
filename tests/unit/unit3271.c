@@ -33,6 +33,40 @@ static CURLcode t3271_setup(void)
   return result;
 }
 
+/* Check full hostname matching when the DNS cache key is truncated. */
+static CURLcode t3271_long_hostnames(void)
+{
+  char hostname[258];
+  struct dnsc_id id;
+  struct Curl_dns_entry *dns;
+  memset(hostname, 'a', sizeof(hostname) - 1);
+  hostname[sizeof(hostname) - 1] = 0;
+  dns = curlx_calloc(1, sizeof(*dns) + sizeof(hostname));
+  if(!dns)
+    return CURLE_OUT_OF_MEMORY;
+  memcpy(dns->hostname, hostname, sizeof(hostname));
+  dns->hostname[255] = 0;
+  dns->hostlen = 255;
+  dns->port = 80;
+  id.port = 80;
+  curlx_str_assign(&id.name, hostname, strlen(hostname));
+  fail_unless(!dnsc_id_matches_entry(&id, dns),
+              "long query must not match shorter cached hostname");
+  memcpy(dns->hostname, hostname, sizeof(hostname));
+  dns->hostlen = (uint16_t)strlen(hostname);
+  fail_unless(dnsc_id_matches_entry(&id, dns),
+              "identical long hostname must match");
+  hostname[0] = 'A';
+  fail_unless(dnsc_id_matches_entry(&id, dns),
+              "long hostname lookup must remain case insensitive");
+  hostname[255] = 0;
+  curlx_str_assign(&id.name, hostname, strlen(hostname));
+  fail_unless(!dnsc_id_matches_entry(&id, dns),
+              "short query must not match longer cached hostname");
+  curlx_free(dns);
+  return CURLE_OK;
+}
+
 /* CURLOPT_RESOLVE address parsing test - to test the following defect fix:
 
    1. if there is already existing host:port pair in the DNS cache and
@@ -97,35 +131,8 @@ static CURLcode test_unit3271(const char *arg)
   struct Curl_easy *easy = NULL;
   struct curl_slist *list = NULL;
 
-  {
-    char hostname[258];
-    struct dnsc_id id;
-    struct Curl_dns_entry *dns;
-    memset(hostname, 'a', sizeof(hostname) - 1);
-    hostname[sizeof(hostname) - 1] = 0;
-    dns = curlx_calloc(1, sizeof(*dns) + sizeof(hostname));
-    abort_unless(dns, "could not allocate cache entry");
-    memcpy(dns->hostname, hostname, sizeof(hostname));
-    dns->hostname[255] = 0;
-    dns->hostlen = 255;
-    dns->port = 80;
-    id.port = 80;
-    curlx_str_assign(&id.name, hostname, strlen(hostname));
-    fail_unless(!dnsc_id_matches_entry(&id, dns),
-                "long query must not match shorter cached hostname");
-    memcpy(dns->hostname, hostname, sizeof(hostname));
-    dns->hostlen = (uint16_t)strlen(hostname);
-    fail_unless(dnsc_id_matches_entry(&id, dns),
-                "identical long hostname must match");
-    hostname[0] = 'A';
-    fail_unless(dnsc_id_matches_entry(&id, dns),
-                "long hostname lookup must remain case insensitive");
-    hostname[255] = 0;
-    curlx_str_assign(&id.name, hostname, strlen(hostname));
-    fail_unless(!dnsc_id_matches_entry(&id, dns),
-                "short query must not match longer cached hostname");
-    curlx_free(dns);
-  }
+  abort_unless(t3271_long_hostnames() == CURLE_OK,
+               "could not allocate cache entry");
 
   /* important: we setup cache outside of the loop and also clean cache after
      the loop. In contrast, for example, test 1607 sets up and cleans cache on
