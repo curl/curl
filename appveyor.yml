@@ -33,24 +33,46 @@ version: 7.50.0.{build}
 environment:
   DO_NOT_TRACK: '1'
 
-  #  VS2010: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  #  VS2012: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  #  VS2013: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  #  VS2015: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  #  VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  #  VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
-  #  VS2022: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
-  #  VS2026: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.9-01d6c708.x86_64 2026-05-24 10:45 UTC x86_64 Msys, Perl: v5.42.2 (/usr/bin/perl)
+  # Jobs:
+  # VS2010: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  # VS2012: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  # VS2013: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  # VS2015: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  # VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  # VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
+  # VS2022: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
+  # VS2026: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.9-01d6c708.x86_64 2026-05-24 10:45 UTC x86_64 Msys, Perl: v5.42.2 (/usr/bin/perl)
+
+  # VS:
+  # VS2010: c:/Program Files (x86)/Microsoft Visual Studio 10.0
+  # VS2012: C:/Program Files (x86)/Microsoft Visual Studio 11.0
+  # VS2013: C:/Program Files (x86)/Microsoft Visual Studio 12.0
+  # VS2015: C:/Program Files (x86)/Microsoft Visual Studio 14.0
+  # VS2017: C:/Program Files (x86)/Microsoft Visual Studio/2017
+  # VS2019: C:/Program Files (x86)/Microsoft Visual Studio/2019
+  # VS2022: C:/Program Files/Microsoft Visual Studio/2022
+  # VS2026: C:/Program Files/Microsoft Visual Studio/18
+
+  # Runners:
+  # VS2015: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  #   VS2015
+  # VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  #   VS2017
+  # VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
+  #   VS2010
+  #   VS2012
+  #   VS2013
+  #   VS2015
+  #   VS2019
+  # VS2022: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
+  #   VS2022
+  #   VS2015
+  # VS2026: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.9-01d6c708.x86_64 2026-05-24 10:45 UTC x86_64 Msys, Perl: v5.42.2 (/usr/bin/perl)
+  #   VS2026
+  #   VS2015
 
   matrix:
     # CMake Visual Studio builds
-
-    # moved
-    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-      CMAKE_GENERATOR: 'Visual Studio 16 2019'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
-      RDP: 'true'
 
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
@@ -135,6 +157,11 @@ environment:
       CMAKE_SHA256: 2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380
       CMAKE_GENERATOR: 'Visual Studio 14 2015'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
+
+    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
+      CMAKE_GENERATOR: 'Visual Studio 16 2019'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
 
     # temp
     - job_name: 'CM VS2019, Release, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
