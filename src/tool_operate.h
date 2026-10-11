@@ -39,6 +39,7 @@ struct per_transfer {
   CURL *curl;
   /* NULL or malloced */
   char *uploadfile;
+  CURLcode retry_result;
   long retry_remaining;
   long num_retries; /* counts the performed retries */
   struct curltime start; /* start of this transfer */

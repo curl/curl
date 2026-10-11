@@ -422,6 +422,7 @@ TESTCASES = \
   test397 \
   test398 \
   test399 \
+  test3991 \
   test400 \
   test401 \
   test402 \

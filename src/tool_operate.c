@@ -388,22 +388,6 @@ static uint32_t retry_sleep(struct OperationConfig *config,
         sleeptime = UINT32_MAX;
       else
         sleeptime = (uint32_t)retry_after * 1000U; /* milliseconds */
-
-      /* if adding retry_after seconds to the process would exceed the
-         maximum time allowed for retrying, then exit the retries right
-         away */
-      if(config->retry_maxtime_ms) {
-        timediff_t ms = curlx_timediff_ms(curlx_now(), per->retrystart);
-
-        if((CURL_OFF_T_MAX - sleeptime < ms) ||
-           (ms + sleeptime > config->retry_maxtime_ms)) {
-          warnf("The Retry-After: time would "
-                "make this command line exceed the maximum allowed time "
-                "for retries.");
-          *retryp = FALSE;
-          return 0; /* no retry */
-        }
-      }
     }
   }
   if(!sleeptime && !config->retry_delay_ms) {
@@ -416,6 +400,16 @@ static uint32_t retry_sleep(struct OperationConfig *config,
   }
   if(!sleeptime)
     sleeptime = per->retry_sleep;
+
+  if(config->retry_maxtime_ms) {
+    timediff_t elapsed = curlx_timediff_ms(curlx_now(), per->retrystart);
+    if(elapsed >= config->retry_maxtime_ms ||
+       sleeptime >= config->retry_maxtime_ms - elapsed) {
+      warnf("The retry delay exceeds the remaining retry time.");
+      *retryp = FALSE;
+      return 0;
+    }
+  }
 
   warnf("Problem %s. Retrying in %u%s%.*u second%s. "
         "%ld retr%s left.",
@@ -520,7 +514,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
     sleeptime = retry_sleep(config, per, reason, retryp);
     if(!*retryp)
       /* no retry */
-      return CURLE_OK;
+      return result;
     per->retry_remaining--;
 
     /* Skip truncation of outfile if auto-resume is enabled for download and
@@ -762,8 +756,10 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   }
   else
 #endif
-    if(per->infdopen)
+    if(per->infdopen) {
       curlx_close(per->infd);
+      per->infdopen = FALSE;
+    }
 
   if(!per->skip) {
     result = post_check_result(per, result);
@@ -775,6 +771,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
        (!config->retry_maxtime_ms ||
         (curlx_timediff_ms(curlx_now(), per->retrystart) <
          config->retry_maxtime_ms))) {
+      per->retry_result = result;
       result = retrycheck(config, per, result, retryp, delay);
       if(!result && *retryp)
         return CURLE_OK; /* retry! */
@@ -1560,10 +1557,19 @@ static long all_added; /* number of easy handles currently added */
  * to add even after this call returns. sets 'addedp' to TRUE if one or more
  * transfers were added.
  */
+static bool retry_expired(struct per_transfer *per)
+{
+  return per->num_retries && per->config->retry_maxtime_ms &&
+    curlx_timediff_ms(curlx_now(), per->retrystart) >=
+    per->config->retry_maxtime_ms;
+}
+
 static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
-                                       bool *morep, bool *addedp)
+                                       bool *morep, bool *addedp,
+                                       CURLcode *transfer_result)
 {
   struct per_transfer *per;
+  struct per_transfer *next;
   CURLcode result = CURLE_OK;
   CURLMcode mcode;
   bool sleeping = FALSE;
@@ -1593,10 +1599,27 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
   }
   /* add transfers until max parallelism is achieved again */
   for(per = transfers; per && (all_added < global->parallel_max);
-      per = per->next) {
+      per = next) {
+    next = per->next;
     if(per->added || per->skip)
       /* already added or to be skipped */
       continue;
+    if(retry_expired(per)) {
+      bool retry;
+      uint32_t delay;
+      per->retry_remaining = 0;
+      per->num_retries--;
+      result = post_per_transfer(per, per->retry_result, &retry, &delay);
+      progress_finalize(per);
+      (void)del_per_transfer(per);
+      if(result) {
+        if(!*transfer_result)
+          *transfer_result = result;
+        if(is_fatal_error(result) || global->fail_early)
+          return result;
+      }
+      continue;
+    }
     if(per->startat && (time(NULL) < per->startat)) {
       /* this is still delaying */
       sleeping = TRUE;
@@ -1646,6 +1669,7 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
     per->added = TRUE;
     all_added++;
     *addedp = TRUE;
+    next = per->next;
   }
   *morep = (per || sleeping);
   return CURLE_OK;
@@ -1835,11 +1859,13 @@ static CURLcode parallel_event(struct parastate *s)
       curl_off_t nxfers;
       /* None are running, but there may be more ready to run. Try
        * to add more when possible. */
-      s->result = add_parallel_transfers(s->multi, s->share,
+      result = add_parallel_transfers(s->multi, s->share,
                                          &s->more_transfers,
-                                         &s->added_transfers);
-      if(s->result)
+                                         &s->added_transfers, &s->result);
+      if(result) {
+        s->result = result;
         break;
+      }
       if(s->more_transfers) {
         /* There are still more transfers, so not all were added. If we
          * did not add *any*, it means there is nothing to do until time
@@ -1955,7 +1981,7 @@ static CURLcode check_finished(struct parastate *s)
       /* one or more transfers completed, add more! */
       CURLcode tres = add_parallel_transfers(s->multi, s->share,
                                              &s->more_transfers,
-                                             &s->added_transfers);
+                                             &s->added_transfers, &s->result);
       if(tres)
         result = tres;
       if(s->added_transfers)
@@ -2022,7 +2048,8 @@ static CURLcode parallel_transfers(CURLSH *share)
   (void)curl_multi_notify_enable(s->multi, CURLMNOTIFY_INFO_READ);
 
   result = add_parallel_transfers(s->multi, s->share,
-                                  &s->more_transfers, &s->added_transfers);
+                                  &s->more_transfers, &s->added_transfers,
+                                  &s->result);
   if(result) {
     curl_multi_cleanup(s->multi);
     return result;
@@ -2056,11 +2083,13 @@ static CURLcode parallel_transfers(CURLSH *share)
         }
       }
       else if(s->more_transfers) {
-        s->result = add_parallel_transfers(s->multi, s->share,
+        result = add_parallel_transfers(s->multi, s->share,
                                            &s->more_transfers,
-                                           &s->added_transfers);
-        if(s->result)
+                                           &s->added_transfers, &s->result);
+        if(result) {
+          s->result = result;
           break;
+        }
       }
 
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
@@ -2111,7 +2140,12 @@ static CURLcode serial_transfers(CURLSH *share)
     struct curltime start;
 
     start = curlx_now();
-    if(!per->skip) {
+    if(retry_expired(per)) {
+      per->retry_remaining = 0;
+      per->num_retries--;
+      result = per->retry_result;
+    }
+    else if(!per->skip) {
       result = pre_transfer(per);
       if(result)
         break;
