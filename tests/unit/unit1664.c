@@ -158,27 +158,6 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char * const single[] = {
-      "a",
-      "aa",
-      "A",
-      "b",
-      "\\",
-      " ",
-      "",
-      NULL
-    };
-    curl_mprintf("curlx_str_single\n");
-    for(i = 0; single[i]; i++) {
-      const char *line = single[i];
-      const char *orgline = line;
-      int rc = curlx_str_single(&line, 'a');
-      curl_mprintf("%d: (\"%s\") %d, line %d\n",
-                   i, orgline, rc, (int)(line - orgline));
-    }
-  }
-
-  {
     static const char * const newl[] = {
       "a",
       "aa",
