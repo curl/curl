@@ -121,7 +121,7 @@ fi
 # build tests
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target units
 fi
 
 # create artifact
@@ -153,12 +153,10 @@ fi
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
   if [ -z "${SKIP_RUN:-}" ]; then
     if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
-      cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
       cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
     fi
 
     if [ -n "${verbose}" ]; then
-      "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
       "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
     fi
 
