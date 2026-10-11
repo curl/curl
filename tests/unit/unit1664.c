@@ -56,12 +56,12 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    curl_mprintf("curlx_str_singlespace\n");
+    printf("curlx_str_singlespace\n");
     for(i = 0; single[i]; i++) {
       const char *line = single[i];
       const char *orgline = line;
       int rc = curlx_str_singlespace(&line);
-      curl_mprintf("%d: (\"%s\") %d, line %d\n",
+      printf("%d: (\"%s\") %d, line %d\n",
                    i, orgline, rc, (int)(line - orgline));
     }
   }
