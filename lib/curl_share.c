@@ -37,7 +37,6 @@ static void share_destroy(struct Curl_share *share)
   if(!share)
     return;
 
-  /* The pool can still own connections after CONNECT has been unshared. */
   Curl_cpool_destroy(&share->cpool, share->admin);
 
   Curl_dnscache_destroy(&share->dnscache);
