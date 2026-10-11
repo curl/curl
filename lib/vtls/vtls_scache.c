@@ -63,8 +63,7 @@ struct Curl_ssl_scache_peer {
 
 #define GOOD_SCACHE(x) ((x) && (x)->magic == CURL_SCACHE_MAGIC)
 
-/* Length-prefix variable fields so their contents cannot create another
- * configuration field in the peer key. */
+/* Prefix the length to keep field boundaries unambiguous. */
 static CURLcode cf_ssl_peer_key_add_string(struct dynbuf *buf,
                                            const char *name,
                                            const char *value)
