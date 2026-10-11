@@ -1033,13 +1033,6 @@ static CURLcode tftp_pollset(struct Curl_easy *data,
   return Curl_pollset_add_in(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
-/**********************************************************
- *
- * tftp_receive_packet
- *
- * Called once select fires and data is ready on the socket
- *
- **********************************************************/
 /* Compare addresses without sockaddr padding. The first response may use a
  * different port, but must come from the host the request was sent to. */
 static bool tftp_peer_matches(const struct sockaddr *a,
@@ -1051,20 +1044,27 @@ static bool tftp_peer_matches(const struct sockaddr *a,
     const struct sockaddr_in *a4 = (const struct sockaddr_in *)a;
     const struct sockaddr_in *b4 = (const struct sockaddr_in *)b;
     return a4->sin_addr.s_addr == b4->sin_addr.s_addr &&
-      (!checkport || a4->sin_port == b4->sin_port);
+           (!checkport || a4->sin_port == b4->sin_port);
   }
 #ifdef USE_IPV6
   if(a->sa_family == AF_INET6) {
     const struct sockaddr_in6 *a6 = (const struct sockaddr_in6 *)a;
     const struct sockaddr_in6 *b6 = (const struct sockaddr_in6 *)b;
     return !memcmp(&a6->sin6_addr, &b6->sin6_addr, sizeof(a6->sin6_addr)) &&
-      a6->sin6_scope_id == b6->sin6_scope_id &&
-      (!checkport || a6->sin6_port == b6->sin6_port);
+           a6->sin6_scope_id == b6->sin6_scope_id &&
+           (!checkport || a6->sin6_port == b6->sin6_port);
   }
 #endif
   return FALSE;
 }
 
+/**********************************************************
+ *
+ * tftp_receive_packet
+ *
+ * Called once select fires and data is ready on the socket
+ *
+ **********************************************************/
 static CURLcode tftp_receive_packet(struct Curl_easy *data,
                                     struct tftp_conn *state, bool *ignored)
 {
