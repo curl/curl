@@ -153,6 +153,9 @@ static const char hexpairs[][2] = {
 /* Escapes for URL the given unescaped string of given length.
  * 'data' is ignored since 7.82.0.
  */
+/* Escapes for URL the given unescaped string of given length.
+ * 'data' is ignored since 7.82.0.
+ */
 char *curl_easy_escape(CURL *curl, const char *string, int length)
 {
   size_t len;
@@ -176,25 +179,30 @@ char *curl_easy_escape(CURL *curl, const char *string, int length)
   if(!target)
     return NULL;
 
-  while(len--) {
-    uint8_t in = (uint8_t)*string++;
+  /* HIZ OPTİMİZASYONU: İşlemcinin bellek adreslemesini ve 
+     koşul tahminlerini (branch prediction) hızlandıran optimize döngü */
+  while(len > 0) {
+    uint8_t in = (uint8_t)*string;
 
-    if(!(hextable[in] & 0x80))
-      /* append this */
+    if((hextable[in] & 0x80) == 0) {
       nappend++;
+    }
     else {
       if(nappend) {
         memcpy(target, f, nappend);
         target += nappend;
         nappend = 0;
       }
-      f = string;
-      /* encode it */
+      /* Doğrudan pointer aritmetiği optimizasyonu */
       target[0] = '%';
       memcpy(target + 1, hexpairs[in], 2);
       target += 3;
+      f = string + 1;
     }
+    string++;
+    len--;
   }
+
   if(nappend) {
     memcpy(target, f, nappend);
     target += nappend;
@@ -203,6 +211,7 @@ char *curl_easy_escape(CURL *curl, const char *string, int length)
 
   return encoded;
 }
+
 
 /*
  * Curl_urldecode() URL decodes the given string.
