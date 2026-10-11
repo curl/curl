@@ -23,6 +23,18 @@
  ***************************************************************************/
 #include "first.h"
 
+/* CR or LF
+   return non-zero on error */
+static int my_curlx_str_newline(const char **linep)
+{
+  DEBUGASSERT(linep && *linep);
+  if(ISNEWLINE(**linep)) {
+    (*linep)++;
+    return STRE_OK; /* yessir */
+  }
+  return STRE_NEWLINE;
+}
+
 static CURLcode test_unit1664(const char *arg)
 {
   int i;
@@ -46,7 +58,7 @@ static CURLcode test_unit1664(const char *arg)
   for(i = 0; newl[i]; i++) {
     const char *line = newl[i];
     const char *orgline = line;
-    int rc = curlx_str_newline(&line);
+    int rc = my_curlx_str_newline(&line);
     printf("%d: (%%%02x) %d, line %d\n",
 /* Workaround for the expression erroneously returning the byte from the next
    address for inputs \n, \r and \r\n. Thus returning NUL, NUL, \n instead of
