@@ -1616,6 +1616,7 @@ static struct curl_slist *cookie_list(const struct Curl_easy *data)
 {
   struct curl_slist *list = NULL;
   struct curl_slist *beg;
+  struct curl_slist **tail = &list;
   unsigned int i;
   struct Curl_llist_node *n;
 
@@ -1637,13 +1638,14 @@ static struct curl_slist *cookie_list(const struct Curl_easy *data)
         curl_slist_free_all(list);
         return NULL;
       }
-      beg = Curl_slist_append_nodup(list, line);
+      beg = Curl_slist_append_nodup(NULL, line);
       if(!beg) {
         curlx_free(line);
         curl_slist_free_all(list);
         return NULL;
       }
-      list = beg;
+      *tail = beg;
+      tail = &beg->next;
     }
   }
 
