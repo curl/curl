@@ -62,8 +62,8 @@ environment:
   #   VS2013
   #   VS2015
   # VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  #   VS2010
-  #   VS2012
+  #   VS2010 NOPE
+  #   VS2012 NOPE
   #   VS2013
   #   VS2015
   #   VS2017
@@ -83,18 +83,6 @@ environment:
   matrix:
     # CMake Visual Studio builds
 
-    - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      CMAKE_GENERATOR: 'Visual Studio 17 2022'
-      CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
-
-    - job_name: 'CM VS2026, Release, arm64, Schannel, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
-      CMAKE_VERSION: 4.2.1  # manually bumped
-      CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
-      CMAKE_GENERATOR: 'Visual Studio 18 2026'
-      CMAKE_GENERATE: '-A ARM64 -DBUILD_SHARED_LIBS=OFF'
-
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
@@ -110,10 +98,10 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
       CMAKE_GENERATE: '-A x64'
 
-    # temp
+    # temp NEW
     - job_name: 'CM VS2010, Debug, x64, Schannel, Static, Build-tests & examples'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'  # to run all tests
+      CMAKE_VERSION: 3.21.7  # manually bumped
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
@@ -133,9 +121,9 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
       CMAKE_GENERATE: '-A Win32'
 
-    # temp
+    # temp NEW
     - job_name: 'CM VS2012, Debug, x64, Schannel, Shared, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'  # to run all tests
       CMAKE_VERSION: 3.21.7  # manually bumped
       CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
@@ -143,6 +131,14 @@ environment:
 
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
+      CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
+      CMAKE_GENERATOR: 'Visual Studio 12 2013'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
+
+    # temp NEW
+    - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'  # to run all tests
       CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 12 2013'
