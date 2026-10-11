@@ -529,6 +529,15 @@ sub nostrings {
     return $str;
 }
 
+sub git_output {
+    my (@args) = @_;
+    open(my $git, '-|', 'git', '--literal-pathspecs', @args) or return '';
+    local $/;
+    my $output = <$git>;
+    close($git);
+    return defined($output) ? $output : '';
+}
+
 sub scanfile {
     my ($file) = @_;
 
@@ -1237,12 +1246,14 @@ sub scanfile {
         @copyright = sort {$$b{year} cmp $$a{year}} @copyright;
 
         # if the file is modified, assume commit year this year
-        if(qx(git status -s --end-of-options "$file") =~ /^ [MARCU]/) {
+        if(git_output('status', '-s', '--', $file) =~ /^ [MARCU]/) {
             $commityear = (localtime(time))[5] + 1900;
         }
         else {
             # min-parents=1 to ignore wrong initial commit in truncated repos
-            my $grl = qx(git rev-list --max-count=1 --min-parents=1 --timestamp --end-of-options HEAD -- "$file");
+            my $grl = git_output('rev-list', '--max-count=1', '--min-parents=1',
+                                 '--timestamp', '--end-of-options', 'HEAD',
+                                 '--', $file);
             if($grl) {
                 chomp $grl;
                 $commityear = (localtime((split(/ /, $grl))[0]))[5] + 1900;
