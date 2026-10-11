@@ -109,6 +109,7 @@ class TestEyeballs:
                         _, addr = sock.recvfrom(65536)
                         sock.sendto(b'\0', addr)
                     except socket.timeout:
+                        # Ignore socket recvfrom timeouts
                         pass
 
             t = threading.Thread(target=answer_junk)
