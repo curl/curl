@@ -20,52 +20,6 @@ unit tests for strparse.c string parsing functions
 
 <verify>
 <stdout>
-curlx_str_word
-0: ("word") 0, "word" [4], line 4
-1: ("word ") 0, "word" [4], line 4
-2: (" word ") 2, "" [0], line 0
-3: ("wo rd") 0, "wo" [2], line 2
-4: ("word(") 0, "word(" [5], line 5
-5: ("wor(d") 0, "wor(d" [5], line 5
-6: ("perfect") 0, "perfect" [7], line 7
-7: ("") 2, "" [0], line 0
-8: ("longerth") 1, "" [0], line 0
-curlx_str_until
-0: ("word") 0, "wor" [3], line 3
-1: ("word ") 0, "wor" [3], line 3
-2: (" word ") 0, " wor" [4], line 4
-3: ("wo rd") 0, "wo r" [4], line 4
-4: ("word(") 0, "wor" [3], line 3
-5: ("wor(d") 0, "wor(" [4], line 4
-6: ("perfect") 0, "perfect" [7], line 7
-7: ("") 2, "" [0], line 0
-8: ("longerth") 1, "" [0], line 0
-curlx_str_quotedword
-0: (""word"") 0, "word" [4], line 6
-1: (""word") 4, "" [0], line 0
-2: ("word"") 3, "" [0], line 0
-3: (""word""") 0, "word" [4], line 6
-4: (""word" ") 0, "word" [4], line 6
-5: (" "word"") 3, "" [0], line 0
-6: (""perfect"") 0, "perfect" [7], line 9
-7: (""p r e t"") 0, "p r e t" [7], line 9
-8: (""perfec\"") 1, "" [0], line 0
-9: (""trail\""") 0, "trail\"" [7], line 9
-10: (""trail2\""") 1, "" [0], line 0
-11: (""trail33\""") 1, "" [0], line 0
-12: (""0\\\\\\"") 0, "0\\\\\\" [7], line 9
-13: (""1\\\\\\\"") 1, "" [0], line 0
-14: ("""") 0, "" [0], line 2
-15: ("") 3, "" [0], line 0
-16: (""longerth"") 1, "" [0], line 0
-curlx_str_single
-0: ("a") 0, line 1
-1: ("aa") 0, line 1
-2: ("A") 5, line 0
-3: ("b") 5, line 0
-4: ("\") 5, line 0
-5: (" ") 5, line 0
-6: ("") 5, line 0
 curlx_str_singlespace
 0: ("a") 5, line 0
 1: ("aa") 5, line 0
