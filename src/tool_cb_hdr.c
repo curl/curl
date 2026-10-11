@@ -245,6 +245,7 @@ int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
 fail:
   curl_slist_free_all(hdrcbdata->headlist);
   hdrcbdata->headlist = NULL;
+  hdrcbdata->headlist_tail = NULL;
   return rc;
 }
 
@@ -254,20 +255,24 @@ static size_t buffer_header(struct HdrCbData *hdrcbdata,
 {
   char *clone = curlx_memdup0(str, cb);
   if(clone) {
-    struct curl_slist *old = hdrcbdata->headlist;
-    hdrcbdata->headlist = curl_slist_append(old, clone);
+    struct curl_slist *entry = curl_slist_append(NULL, clone);
     curlx_free(clone);
-    if(!hdrcbdata->headlist) {
-      curl_slist_free_all(old);
-      return CURL_WRITEFUNC_ERROR;
-    }
+    if(!entry)
+      goto fail;
+    if(hdrcbdata->headlist_tail)
+      hdrcbdata->headlist_tail->next = entry;
+    else
+      hdrcbdata->headlist = entry;
+    hdrcbdata->headlist_tail = entry;
   }
-  else {
-    curl_slist_free_all(hdrcbdata->headlist);
-    hdrcbdata->headlist = NULL;
-    return CURL_WRITEFUNC_ERROR;
-  }
+  else
+    goto fail;
   return cb;
+fail:
+  curl_slist_free_all(hdrcbdata->headlist);
+  hdrcbdata->headlist = NULL;
+  hdrcbdata->headlist_tail = NULL;
+  return CURL_WRITEFUNC_ERROR;
 }
 
 /*

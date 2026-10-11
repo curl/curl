@@ -46,6 +46,7 @@ struct HdrCbData {
   struct OutStruct *heads;
   struct OutStruct *etag_save;
   struct curl_slist *headlist;
+  struct curl_slist *headlist_tail;
   bool honor_cd_filename;
 };
 

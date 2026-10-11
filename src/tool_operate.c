@@ -809,6 +809,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     curlx_safefree(outs->filename);
   curl_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
+  per->hdrcbdata.headlist_tail = NULL;
   return result;
 }
 
