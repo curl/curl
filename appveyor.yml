@@ -89,6 +89,22 @@ environment:
       CFLAGS: '-FAcs -DVS2019_WORKAROUND'
       CREATE_ARTIFACT: 'true'
 
+    # temp
+    - job_name: 'CM VS2019, Release, x64, Schannel, Static, !verbose, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
+      CMAKE_GENERATOR: 'Visual Studio 16 2019'
+      CMAKE_GENERATE: '-A x64 -DCURL_DISABLE_VERBOSE_STRINGS=ON -D_CURL_TESTS_CONCAT=ON -DBUILD_SHARED_LIBS=OFF'
+      CFLAGS: '-FAcs'
+      CREATE_ARTIFACT: 'true'
+
+    # temp
+    - job_name: 'CM VS2019, Release, x64, Schannel, Static, !verbose, Build-tests, WORKAROUND'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
+      CMAKE_GENERATOR: 'Visual Studio 16 2019'
+      CMAKE_GENERATE: '-A x64 -DCURL_DISABLE_VERBOSE_STRINGS=ON -D_CURL_TESTS_CONCAT=ON -DBUILD_SHARED_LIBS=OFF'
+      CFLAGS: '-FAcs -DVS2019_WORKAROUND'
+      CREATE_ARTIFACT: 'true'
+
 install:
   - ps: $env:PATH = "C:/msys64/usr/bin;$env:PATH"
 
