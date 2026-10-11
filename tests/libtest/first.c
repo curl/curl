@@ -40,7 +40,7 @@ int main(int argc, const char *argv[])
   CURL_BINMODE(stdout);
 
   if(argc < 2) {
-    printf("Pass testname "
+    fprintf(stderr, "Pass testname "
             "(and URL as argument for numbered tests) please\n");
     return 1;
   }
@@ -55,17 +55,17 @@ int main(int argc, const char *argv[])
   }
 
   if(!entry_func) {
-    printf(stderr, "Test '%s' not found.\n", entry_name);
+    fprintf(stderr, "Test '%s' not found.\n", entry_name);
     return 1;
   }
 
   if(argc > 2) {
     URL = argv[2];
-    printf(stderr, "URL: %s\n", URL);
+    fprintf(stderr, "URL: %s\n", URL);
   }
 
   result = entry_func(URL);
-  printf(stderr, "Test ended with result %d\n", (int)result);
+  fprintf("Test ended with result %d\n", (int)result);
 
   /* Regular program status codes are limited to 0..127 and 126 and 127 have
    * special meanings by the shell, so limit a normal return code to 125 */
