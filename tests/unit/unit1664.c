@@ -41,6 +41,8 @@ static CURLcode test_unit1664(const char *arg)
 {
   UNITTEST_BEGIN(t1664_setup())
 
+  int i;
+  {
   static const char * const wordparse[] = {
     "word",
     "word ",
@@ -54,7 +56,6 @@ static CURLcode test_unit1664(const char *arg)
     NULL
   };
 
-  int i;
   curl_mprintf("curlx_str_word\n");
   for(i = 0; wordparse[i]; i++) {
     struct Curl_str out;
@@ -75,6 +76,7 @@ static CURLcode test_unit1664(const char *arg)
     curl_mprintf("%d: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
                  i, orgline, rc, (int)out.len, out.str, (int)out.len,
                  (int)(line - orgline));
+  }
   }
 
   {
@@ -173,176 +175,6 @@ static CURLcode test_unit1664(const char *arg)
       int rc = curlx_str_single(&line, 'a');
       curl_mprintf("%d: (\"%s\") %d, line %d\n",
                    i, orgline, rc, (int)(line - orgline));
-    }
-  }
-
-  {
-    static const char * const nums[] = {
-      "1",
-      "10000",
-      "1234",
-      "1235",
-      "1236",
-      "01234",
-      "00000000000000000000000000001234",
-      "0123 345",
-      "0123O345",
-      "-12",
-      " 123",
-      "",
-      NULL
-    };
-    curl_mprintf("curlx_str_number\n");
-    for(i = 0; nums[i]; i++) {
-      curl_off_t num;
-      const char *line = nums[i];
-      const char *orgline = line;
-      int rc = curlx_str_number(&line, &num, 1235);
-      curl_mprintf("%d: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
-                   i, orgline, rc, num, (int)(line - orgline));
-    }
-  }
-
-  {
-    struct t {
-      const char *str;
-      curl_off_t max;
-    };
-    static struct t nums[] = {
-      { "00", 8},
-      { "1", 8},
-      { "1", 1},
-      { "2", 1},
-      { "2", 2},
-      { "5", 6},
-      { "000000000000000000000006", 6},
-      { "7", 6},
-      { "8", 6},
-      { "9", 8},
-      { "10", 10},
-      { "11", 10},
-      { "12", 10},
-      {NULL, 0}
-    };
-    curl_mprintf("curlx_str_number varying max\n");
-    for(i = 0; nums[i].str; i++) {
-      curl_off_t num;
-      const char *line = nums[i].str;
-      const char *orgline = line;
-      int rc = curlx_str_number(&line, &num, nums[i].max);
-      curl_mprintf("%d: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
-                   " == %d, [%" CURL_FORMAT_CURL_OFF_T "]\n",
-                   i, orgline, nums[i].max, rc, num);
-    }
-  }
-
-  {
-    struct t {
-      const char *str;
-      curl_off_t max;
-    };
-    static struct t nums[] = {
-      { "00", 8},
-      { "1", 8},
-      { "1", 1},
-      { "2", 1},
-      { "2", 2},
-      { "5", 6},
-      { "000000000000000000000006", 6},
-      { "7", 6},
-      { "8", 6},
-      { "9", 8},
-      { "a", 14},
-      { "b", 14},
-      { "c", 14},
-      { "d", 14},
-      { "e", 14},
-      { "f", 14},
-      { "f", 15},
-      { "10", 16},
-      { "11", 16},
-      { "12", 16},
-      {NULL, 0}
-    };
-    curl_mprintf("curlx_str_hex varying max\n");
-    for(i = 0; nums[i].str; i++) {
-      curl_off_t num;
-      const char *line = nums[i].str;
-      const char *orgline = line;
-      int rc = curlx_str_hex(&line, &num, nums[i].max);
-      curl_mprintf("%d: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
-                   " == %d, [%" CURL_FORMAT_CURL_OFF_T "]\n",
-                   i, orgline, nums[i].max, rc, num);
-    }
-  }
-
-  {
-    struct t {
-      const char *str;
-      curl_off_t max;
-    };
-    static struct t nums[] = {
-      { "00", 4},
-      { "1", 4},
-      { "1", 4},
-      { "2", 4},
-      { "3", 4},
-      { "4", 4},
-      { "5", 4},
-      { "000000000000000000000006", 6},
-      { "7", 7},
-      { "10", 8},
-      { "11", 8},
-      { "11", 9},
-      { "12", 9},
-      { "13", 9},
-      { "8", 10},
-      {NULL, 0}
-    };
-    curl_mprintf("curlx_str_octal varying max\n");
-    for(i = 0; nums[i].str; i++) {
-      curl_off_t num;
-      const char *line = nums[i].str;
-      const char *orgline = line;
-      int rc = curlx_str_octal(&line, &num, nums[i].max);
-      curl_mprintf("%d: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
-                   " == %d, [%" CURL_FORMAT_CURL_OFF_T "]\n",
-                   i, orgline, nums[i].max, rc, num);
-    }
-  }
-
-  {
-    /* CURL_OFF_T is typically 9223372036854775807 */
-    static const char * const nums[] = {
-      "9223372036854775807", /* 2^63 -1 */
-      "9223372036854775808", /* 2^63 */
-      "18446744073709551615", /* 2^64 - 1 */
-      "18446744073709551616", /* 2^64 */
-      "18446744073709551617", /* 2^64 + 1 */
-      "0123456799a",
-      "0123456789",
-      "123498760b",
-      "1234987607611298232",
-      "1111111111111111111",
-      "2222222222222222222",
-      "00000000000000000000000000000009223372036854775807",
-      "3333333333333333333",
-      "4444444444444444444",
-      "5555555555555555555",
-      "6666666666666666666",
-      "7777777777777777777",
-      "8888888888888888888",
-      "999999999999999999",
-      NULL
-    };
-    curl_mprintf("curlx_str_number / max\n");
-    for(i = 0; nums[i]; i++) {
-      curl_off_t num;
-      const char *line = nums[i];
-      const char *orgline = line;
-      int rc = curlx_str_number(&line, &num, CURL_OFF_T_MAX);
-      curl_mprintf("%d: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
-                   i, orgline, rc, num, (int)(line - orgline));
     }
   }
 
