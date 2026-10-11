@@ -285,7 +285,7 @@ static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
   }
   if(ssl->signature_algorithms) {
     result = cf_ssl_peer_key_add_string(&buf, "SIGALGS",
-                                         ssl->signature_algorithms);
+                                        ssl->signature_algorithms);
     if(result)
       goto out;
   }
