@@ -29,36 +29,36 @@ static CURLcode test_unit1664(const char *arg)
 
   int i;
 
-    static const char * const newl[] = {
-      "a",
-      "aa",
-      "A",
-      "b",
-      "\\",
-      " ",
-      "\n",
-      "\r",
-      "\r\n",
-      "\x0c",
-      "",
-      NULL
-    };
-    printf("curlx_str_newline\n");
-    for(i = 0; newl[i]; i++) {
-      const char *line = newl[i];
-      const char *orgline = line;
-      int rc = curlx_str_newline(&line);
-      printf("%d: (%%%02x) %d, line %d\n",
+  static const char * const newl[] = {
+    "a",
+    "aa",
+    "A",
+    "b",
+    "\\",
+    " ",
+    "\n",
+    "\r",
+    "\r\n",
+    "\x0c",
+    "",
+    NULL
+  };
+  printf("curlx_str_newline\n");
+  for(i = 0; newl[i]; i++) {
+    const char *line = newl[i];
+    const char *orgline = line;
+    int rc = curlx_str_newline(&line);
+    printf("%d: (%%%02x) %d, line %d\n",
 /* Workaround for the expression erroneously returning the byte from the next
    address for inputs \n, \r and \r\n. Thus returning NUL, NUL, \n instead of
    the expected \n, \r, \r. */
 #ifdef VS2019_WORKAROUND
-                   i, (unsigned int)newl[i][0],
+           i, (unsigned int)newl[i][0],
 #else
-                   i, (unsigned int)*orgline,
+           i, (unsigned int)*orgline,
 #endif
-                   rc, (int)(line - orgline));
-    }
+           rc, (int)(line - orgline));
+  }
 
   UNITTEST_END_SIMPLE
 }
