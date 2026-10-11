@@ -122,6 +122,8 @@ fi
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target units
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target servers
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curlinfo
 fi
 
 # create artifact
