@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "slist_wc.h"
 
 /*
  * curl operates using a single HdrCbData struct variable, a
@@ -45,8 +46,7 @@ struct HdrCbData {
   struct OutStruct *outs;
   struct OutStruct *heads;
   struct OutStruct *etag_save;
-  struct curl_slist *headlist;
-  struct curl_slist *headlist_tail;
+  struct slist_wc *headlist;
   bool honor_cd_filename;
 };
 

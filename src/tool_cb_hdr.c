@@ -232,7 +232,8 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
 {
-  struct curl_slist *h = hdrcbdata->headlist;
+  struct curl_slist *h = hdrcbdata->headlist ?
+    hdrcbdata->headlist->first : NULL;
   int rc = 1;
   while(h) {
     /* not "handled", show it */
@@ -243,9 +244,8 @@ int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
   }
   rc = 0; /* success */
 fail:
-  curl_slist_free_all(hdrcbdata->headlist);
+  slist_wc_free_all(hdrcbdata->headlist);
   hdrcbdata->headlist = NULL;
-  hdrcbdata->headlist_tail = NULL;
   return rc;
 }
 
@@ -255,23 +255,18 @@ static size_t buffer_header(struct HdrCbData *hdrcbdata,
 {
   char *clone = curlx_memdup0(str, cb);
   if(clone) {
-    struct curl_slist *entry = curl_slist_append(NULL, clone);
+    struct slist_wc *entry = slist_wc_append(hdrcbdata->headlist, clone);
     curlx_free(clone);
     if(!entry)
       goto fail;
-    if(hdrcbdata->headlist_tail)
-      hdrcbdata->headlist_tail->next = entry;
-    else
-      hdrcbdata->headlist = entry;
-    hdrcbdata->headlist_tail = entry;
+    hdrcbdata->headlist = entry;
   }
   else
     goto fail;
   return cb;
 fail:
-  curl_slist_free_all(hdrcbdata->headlist);
+  slist_wc_free_all(hdrcbdata->headlist);
   hdrcbdata->headlist = NULL;
-  hdrcbdata->headlist_tail = NULL;
   return CURL_WRITEFUNC_ERROR;
 }
 
