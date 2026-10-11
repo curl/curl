@@ -22,19 +22,3 @@
  *
  ***************************************************************************/
 #include "first.h"
-
-#ifdef BUILDING_LIBCURL
-#include "unitprotos.h"
-#endif
-
-/* begin/end macros */
-
-#define UNITTEST_BEGIN_SIMPLE                   \
-  (void)arg;                                    \
-  {
-
-#define UNITTEST_END_SIMPLE                     \
-    goto unit_test_abort; /* avoid warning */   \
-  }                                             \
-unit_test_abort:                                \
-  return (CURLcode)unitfail;

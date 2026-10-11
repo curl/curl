@@ -21,13 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "unitcheck.h"
+#include "first.h"
 
 static CURLcode test_unit1664(const char *arg)
 {
-  UNITTEST_BEGIN_SIMPLE
-
   int i;
+
+  (void)arg;
 
   static const char * const newl[] = {
     "a",
@@ -59,5 +59,5 @@ static CURLcode test_unit1664(const char *arg)
            rc, (int)(line - orgline));
   }
 
-  UNITTEST_END_SIMPLE
+  return (CURLcode)0;
 }
