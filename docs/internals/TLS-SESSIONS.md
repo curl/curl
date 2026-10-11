@@ -45,12 +45,19 @@ string that carries hostname and port and any non-default TLS
 parameters involved in the connection.
 
 Examples:
-- `curl.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for
-   a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA
+- `curl.se:443:KEY-V2:CA-17:/etc/ssl/cert.pem:IMPL-12:GnuTLS/3.8.7:G`
+   is a peer key for a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA
    trust anchors and GnuTLS/3.8.7 as TLS backend.
-- `curl.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
-   same as the previous, except it is configured to use TLSv1.2 as
+- `curl.se:443:KEY-V2:TLSVER-6-6:CA-17:/etc/ssl/cert.pem:IMPL-12:GnuTLS/3.8.7:G`
+   is the same as the previous, except it is configured to use TLSv1.2 as
    min and max versions.
+
+The `KEY-V2` marker separates this format from legacy peer keys. Variable
+string fields use `NAME-length:value`, where the length counts bytes in the
+value, so delimiters inside a value cannot introduce another field. The `:G`
+suffix marks keys that can be used across processes; `:L` marks local keys.
+Persisted sessions exported with legacy peer keys no longer match keys in this
+format and cannot be resumed from those cache entries.
 
 Different configurations produce different keys which is what curl needs when
 handling SSL session tickets.
