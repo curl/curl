@@ -74,6 +74,12 @@ EOS
     die("Unsupported shell: $shell");
 }
 
+sub shell_quote {
+    my ($value) = @_;
+    $value =~ s/'/'\\''/g;
+    return "'$value'";
+}
+
 sub parse_main_opts {
     my ($opts_dir) = @_;
 
@@ -104,11 +110,21 @@ sub parse_main_opts {
         if($file_content =~ /^Arg:\s+(.*)\s*$/im) {$arg = $1;}
         if($file_content =~ /^Help:\s+(.*)\s*$/im) {$desc = $1;}
 
-        $arg =~ s/\:/\\\:/g if defined $arg;
-        $desc =~ s/'/'\\''/g if defined $desc;
-        $desc =~ s/\[/\\\[/g if defined $desc;
-        $desc =~ s/\]/\\\]/g if defined $desc;
-        $desc =~ s/\:/\\\:/g if defined $desc;
+        if($shell eq 'zsh') {
+            die "Invalid long option in $file\n"
+                if !defined($long) || trim($long) !~ /^--[a-zA-Z0-9][a-zA-Z0-9.-]*$/;
+            die "Invalid short option in $file\n"
+                if defined($short) && trim($short) !~ /^-[a-zA-Z0-9:#]$/;
+            # _arguments parses its own language after shell quoting.
+            for ($short, $arg, $desc) {
+                next unless defined;
+                s/\\/\\\\/g;
+                s/([:\[\]])/\\$1/g;
+            }
+        }
+        else {
+            $desc =~ s/'/'\\''/g if defined $desc;
+        }
 
         my $option = '';
 
@@ -121,13 +137,13 @@ sub parse_main_opts {
             $option .= " --description '" . strip_dash(trim($desc)) . "'"
                 if defined $desc;
         } elsif($shell eq 'zsh') {
-            $option .= '{' . trim($short) . ',' if defined $short;
-            $option .= trim($long)  if defined $long;
+            $option .= '{' . shell_quote(trim($short)) . ',' if defined $short;
+            $option .= shell_quote(trim($long)) if defined $long;
             $option .= '}' if defined $short;
-            $option .= '\'[' . trim($desc) . ']\'' if defined $desc;
+            $option .= shell_quote('[' . trim($desc) . ']') if defined $desc;
 
             if(defined $arg) {
-                $option .= ":'$arg'";
+                $option .= ':' . shell_quote($arg);
                 if($arg =~ /<file ?(name)?>|<path>/) {
                     $option .= ':_files';
                 } elsif($arg =~ /<dir>/) {
