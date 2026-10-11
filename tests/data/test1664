@@ -20,7 +20,6 @@ unit tests for strparse.c string parsing functions
 
 <verify>
 <stdout>
-curlx_str_newline
 0: (%61) 6, line 0
 1: (%61) 6, line 0
 2: (%41) 6, line 0

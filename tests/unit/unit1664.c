@@ -43,7 +43,6 @@ static CURLcode test_unit1664(const char *arg)
     "",
     NULL
   };
-  printf("curlx_str_newline\n");
   for(i = 0; newl[i]; i++) {
     const char *line = newl[i];
     const char *orgline = line;
