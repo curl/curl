@@ -57,6 +57,9 @@ the set timeout period. Since curl 8.22.0, this only happens when the
 resolver answered that the name does not exist, not on transient or local
 resolver failures.
 
+Synchronous resolver builds do not cache failed name resolves, since that
+backend does not pass along enough information to classify the failure.
+
 # DEFAULT
 
 60

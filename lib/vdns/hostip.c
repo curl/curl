@@ -662,9 +662,9 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
                                transport);
   if(!addr) {
     result = RESOLV_FAIL(for_proxy);
-    /* the synchronous resolvers do not tell a transient failure from
-       an authoritative negative answer, treat it as before */
-    *pnegative = TRUE;
+    /* Synchronous resolvers cannot distinguish authoritative negatives
+       from transient or local failures here. Do not cache an unknown
+       failure as proof that the name does not exist. */
   }
 #endif
 
