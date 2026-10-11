@@ -87,6 +87,37 @@ static CURLcode test_unit3304(const char *arg)
   curlx_safefree(key1);
   curlx_safefree(key2);
 
+  /* A delimiter in a CA path must not create a second trust field. */
+  ssl.CAfile = "/root:CApath-/certs";
+  ssl.CApath = NULL;
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
+              "peer key build failed");
+  ssl.CAfile = "/root";
+  ssl.CApath = "/certs";
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
+              "peer key build failed");
+  fail_unless(key1 && key2 && strcmp(key1, key2),
+              "CA file and path must not alias another CA file");
+  curlx_safefree(key1);
+  curlx_safefree(key2);
+  ssl.CAfile = NULL;
+  ssl.CApath = NULL;
+
+  /* Non-path fields must not inject a following field either. */
+  ssl.cipher_list = "DEFAULT:CIPHER13-TLS_AES_128_GCM_SHA256";
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
+              "peer key build failed");
+  ssl.cipher_list = "DEFAULT";
+  ssl.cipher_list13 = "TLS_AES_128_GCM_SHA256";
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
+              "peer key build failed");
+  fail_unless(key1 && key2 && strcmp(key1, key2),
+              "cipher fields must have unambiguous boundaries");
+  curlx_safefree(key1);
+  curlx_safefree(key2);
+  ssl.cipher_list = NULL;
+  ssl.cipher_list13 = NULL;
+
   /* key_passwd is NOT in the peer key: lookup uses timing-safe comparison
    * via cf_ssl_scache_match_auth(). */
   fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
