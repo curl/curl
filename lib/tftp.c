@@ -1040,8 +1040,33 @@ static CURLcode tftp_pollset(struct Curl_easy *data,
  * Called once select fires and data is ready on the socket
  *
  **********************************************************/
+/* Compare addresses without sockaddr padding. The first response may use a
+ * different port, but must come from the host the request was sent to. */
+static bool tftp_peer_matches(const struct sockaddr *a,
+                              const struct sockaddr *b, bool checkport)
+{
+  if(a->sa_family != b->sa_family)
+    return FALSE;
+  if(a->sa_family == AF_INET) {
+    const struct sockaddr_in *a4 = (const struct sockaddr_in *)a;
+    const struct sockaddr_in *b4 = (const struct sockaddr_in *)b;
+    return a4->sin_addr.s_addr == b4->sin_addr.s_addr &&
+      (!checkport || a4->sin_port == b4->sin_port);
+  }
+#ifdef USE_IPV6
+  if(a->sa_family == AF_INET6) {
+    const struct sockaddr_in6 *a6 = (const struct sockaddr_in6 *)a;
+    const struct sockaddr_in6 *b6 = (const struct sockaddr_in6 *)b;
+    return !memcmp(&a6->sin6_addr, &b6->sin6_addr, sizeof(a6->sin6_addr)) &&
+      a6->sin6_scope_id == b6->sin6_scope_id &&
+      (!checkport || a6->sin6_port == b6->sin6_port);
+  }
+#endif
+  return FALSE;
+}
+
 static CURLcode tftp_receive_packet(struct Curl_easy *data,
-                                    struct tftp_conn *state)
+                                    struct tftp_conn *state, bool *ignored)
 {
   CURLcode result = CURLE_OK;
   struct Curl_sockaddr_storage remote_addr;
@@ -1054,17 +1079,18 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
                                 0,
                                 (struct sockaddr *)&remote_addr,
                                 &fromlen);
+  *ignored = FALSE;
   if((state->rbytes >= 0) && fromlen) {
-    if(state->remote_pinned) {
-      /* pinned, verify that it comes from the same address */
-      if((state->remote_addrlen != fromlen) ||
-         memcmp(&remote_addr, &state->remote_addr, fromlen)) {
-        failf(data, "Data received from another address");
-        return CURLE_RECV_ERROR;
-      }
+    const struct Curl_sockaddr_ex *peer =
+      Curl_conn_get_remote_addr(data, FIRSTSOCKET);
+    const struct sockaddr *expected = state->remote_pinned ?
+      &state->remote_addr.buffer.sa : (peer ? &peer->curl_sa_addr : NULL);
+    if(!expected || !tftp_peer_matches(&remote_addr.buffer.sa, expected,
+                                       state->remote_pinned)) {
+      *ignored = TRUE;
+      return CURLE_OK;
     }
-    else {
-      /* pin address on first use */
+    if(!state->remote_pinned && state->rbytes >= 4) {
       state->remote_pinned = TRUE;
       state->remote_addrlen = fromlen;
       memcpy(&state->remote_addr, &remote_addr, fromlen);
@@ -1210,8 +1236,9 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
       state->event = TFTP_EVENT_ERROR;
     }
     else if(rc) {
-      result = tftp_receive_packet(data, state);
-      if(result)
+      bool ignored;
+      result = tftp_receive_packet(data, state, &ignored);
+      if(result || ignored)
         return result;
       result = tftp_state_machine(state, state->event);
       if(result)
