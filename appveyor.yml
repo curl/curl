@@ -33,13 +33,30 @@ version: 7.50.0.{build}
 environment:
   DO_NOT_TRACK: '1'
 
+  #  VS2010: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  #  VS2012: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  #  VS2013: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  #  VS2015: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  #  VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  #  VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
+  #  VS2022: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
+  #  VS2026: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.9-01d6c708.x86_64 2026-05-24 10:45 UTC x86_64 Msys, Perl: v5.42.2 (/usr/bin/perl)
+
   matrix:
     # CMake Visual Studio builds
+
+    # moved
+    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
+      CMAKE_GENERATOR: 'Visual Studio 16 2019'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+      RDP: 'true'
 
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
+      RDP: 'true'
 
     - job_name: 'CM VS2026, Release, arm64, Schannel, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
@@ -47,6 +64,7 @@ environment:
       CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
       CMAKE_GENERATE: '-A ARM64 -DBUILD_SHARED_LIBS=OFF'
+      RDP: 'true'
 
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -54,6 +72,7 @@ environment:
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
+      RDP: 'true'
 
     # temp
     - job_name: 'CM VS2010, Release, x64, Schannel, Shared, Build-tests & examples'
@@ -101,24 +120,21 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 12 2013'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
 
-    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.19.8  # manually bumped
-      CMAKE_SHA256: 2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380
-      CMAKE_GENERATOR: 'Visual Studio 14 2015'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
-
+    # moved
     - job_name: 'CM VS2017, Debug, x64, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       CMAKE_VERSION: 3.20.6  # manually bumped
       CMAKE_SHA256: f240a38c964712aac474644b3ba21bdc2b4e8d5e31179f67bd2e6f45fa349419
       CMAKE_GENERATOR: 'Visual Studio 15 2017'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
+      RDP: 'true'
 
-    - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-      CMAKE_GENERATOR: 'Visual Studio 16 2019'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      CMAKE_VERSION: 3.19.8  # manually bumped
+      CMAKE_SHA256: 2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380
+      CMAKE_GENERATOR: 'Visual Studio 14 2015'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
 
     # temp
     - job_name: 'CM VS2019, Release, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
