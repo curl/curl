@@ -27,34 +27,9 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
-#if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DBG_CRTDBG)
-#include <crtdbg.h>  /* for _CrtSetReportFile(), _CRT* macros */
-#endif
-
 #if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
 #include "tool_stderr.h"  /* for tool_init_stderr() */
 #endif
-
-int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
-                   struct timeval *tv)
-{
-  if(nfds < 0) {
-    SET_SOCKERRNO(SOCKEINVAL);
-    return -1;
-  }
-#ifdef USE_WINSOCK
-  /*
-   * Winsock select() requires that at least one of the three fd_set
-   * pointers is not NULL and points to a non-empty fdset. IOW Winsock
-   * select() can not be used to sleep without a single fd_set.
-   */
-  if(!nfds) {
-    Sleep((DWORD)curlx_tvtoms(tv));
-    return 0;
-  }
-#endif
-  return select(nfds, rd, wr, exc, tv);
-}
 
 const char *libtest_arg2 = NULL;
 const char *libtest_arg3 = NULL;
@@ -67,69 +42,6 @@ int testnum;
 struct curltime tv_test_start; /* for test timing */
 
 int unitfail; /* for unittests */
-
-int coptind;
-const char *coptarg;
-
-int cgetopt(int argc, const char * const argv[], const char *optstring)
-{
-  static int optpos = 1;
-  int coptopt;
-  const char *arg;
-
-  if(coptind == 0) {  /* Reset? */
-    coptind = !!argc;
-    optpos = 1;
-  }
-
-  arg = argv[coptind];
-  if(arg && !strcmp(arg, "--")) {
-    coptind++;
-    return -1;
-  }
-  else if(!arg || arg[0] != '-') {
-    return -1;
-  }
-  else {
-    const char *opt = strchr(optstring, arg[optpos]);
-    coptopt = (unsigned char)arg[optpos];
-    if(!opt) {
-      if(!arg[++optpos]) {
-        coptind++;
-        optpos = 1;
-      }
-      return '?';
-    }
-    else if(opt[1] == ':') {
-      if(arg[optpos + 1]) {
-        coptarg = arg + optpos + 1;
-        coptind++;
-        optpos = 1;
-        return coptopt;
-      }
-      else if(argv[coptind + 1]) {
-        coptarg = argv[coptind + 1];
-        coptind += 2;
-        optpos = 1;
-        return coptopt;
-      }
-      else {
-        if(!arg[++optpos]) {
-          coptind++;
-          optpos = 1;
-        }
-        return *optstring == ':' ? ':' : '?';
-      }
-    }
-    else {
-      if(!arg[++optpos]) {
-        coptind++;
-        optpos = 1;
-      }
-      return coptopt;
-    }
-  }
-}
 
 #ifdef CURL_MEMDEBUG
 static void memory_tracking_init(void)
@@ -166,100 +78,6 @@ char *hexdump(const unsigned char *buf, size_t len)
   return dump;
 }
 
-#ifndef CURL_DISABLE_WEBSOCKETS
-CURLcode ws_send_ping(CURL *curl, const char *send_payload)
-{
-  size_t sent;
-  CURLcode result = curl_ws_send(curl, send_payload, strlen(send_payload),
-                                 &sent, 0, CURLWS_PING);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %d, sent %zu\n",
-                (int)result, sent);
-  return result;
-}
-
-CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
-{
-  size_t rlen;
-  const struct curl_ws_frame *meta;
-  char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(result) {
-    curl_mfprintf(stderr, "ws: curl_ws_recv returned %d, received %zu\n",
-                  (int)result, rlen);
-    return result;
-  }
-
-  if(!(meta->flags & CURLWS_PONG)) {
-    curl_mfprintf(stderr, "recv_pong: wrong frame, got %zu bytes rflags %x\n",
-                  rlen, (unsigned int)meta->flags);
-    return CURLE_RECV_ERROR;
-  }
-
-  curl_mfprintf(stderr, "ws: got PONG back\n");
-  if(rlen == strlen(expected_payload) &&
-     !memcmp(expected_payload, buffer, rlen)) {
-    curl_mfprintf(stderr, "ws: got the same payload back\n");
-    return CURLE_OK;
-  }
-  curl_mfprintf(stderr, "ws: did NOT get the same payload back\n");
-  return CURLE_RECV_ERROR;
-}
-
-/* close the connection */
-void ws_close(CURL *curl)
-{
-  size_t sent;
-  CURLcode result = curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %d, sent %zu\n",
-                (int)result, sent);
-}
-#endif /* CURL_DISABLE_WEBSOCKETS */
-
-#ifdef _WIN32
-#include <tlhelp32.h>
-
-/* Print the list of all loaded modules with full paths. */
-static void s_GetLoadedModulePaths(void)
-{
-#ifndef CURL_WINDOWS_UWP
-  HANDLE hnd = INVALID_HANDLE_VALUE;
-  MODULEENTRY32 mod = { 0 };
-
-  mod.dwSize = sizeof(MODULEENTRY32);
-
-  do {
-    hnd = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
-  } while(hnd == INVALID_HANDLE_VALUE && GetLastError() == ERROR_BAD_LENGTH);
-
-  if(hnd == INVALID_HANDLE_VALUE)
-    goto error;
-
-  if(!Module32First(hnd, &mod))
-    goto error;
-
-  do {
-    char *path; /* points to stack allocated buffer */
-#ifdef UNICODE
-    /* sizeof(mod.szExePath) is the max total bytes of wchars. the max total
-       bytes of multibyte chars is not more than twice that. */
-    char buffer[sizeof(mod.szExePath) * 2];
-    if(!WideCharToMultiByte(CP_ACP, 0, mod.szExePath, -1,
-                            buffer, sizeof(buffer), NULL, NULL))
-      goto error;
-    path = buffer;
-#else
-    path = mod.szExePath;
-#endif
-    curl_mprintf("%s\n", path);
-  } while(Module32Next(hnd, &mod));
-
-error:
-  if(hnd != INVALID_HANDLE_VALUE)
-    CloseHandle(hnd);
-#endif
-}
-#endif
-
 int main(int argc, const char *argv[])
 {
   const char *URL = "";
@@ -269,19 +87,8 @@ int main(int argc, const char *argv[])
   const char *env;
   size_t tmp;
 
-#if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DBG_CRTDBG)
-  _set_error_mode(_OUT_TO_STDERR);  /* uses stdlib.h */
-  _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-  _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-  _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
-  _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
-#endif
-
 #ifdef _WIN32
   if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
-    s_GetLoadedModulePaths();
     return 0;
   }
 #endif
