@@ -28,7 +28,6 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 export CURL_CI=appveyor
 verbose=0
-export CFLAGS=-FAcs
 
 # build
 
