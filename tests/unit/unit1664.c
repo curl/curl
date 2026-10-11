@@ -23,27 +23,12 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN6_H
-#include <netinet/in6.h>
-#endif
-
-static CURLcode t1664_setup(void)
-{
-  CURLcode result = CURLE_OK;
-  global_init(CURL_GLOBAL_ALL);
-  return result;
-}
-
 static CURLcode test_unit1664(const char *arg)
 {
-  UNITTEST_BEGIN(t1664_setup())
+  UNITTEST_BEGIN_SIMPLE
 
   int i;
 
-  {
     static const char * const newl[] = {
       "a",
       "aa",
@@ -74,7 +59,6 @@ static CURLcode test_unit1664(const char *arg)
 #endif
                    rc, (int)(line - orgline));
     }
-  }
 
-  UNITTEST_END(curl_global_cleanup())
+  UNITTEST_END_SIMPLE
 }
