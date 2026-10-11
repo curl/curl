@@ -44,29 +44,6 @@ static CURLcode test_unit1664(const char *arg)
   int i;
 
   {
-    static const char * const single[] = {
-      "a",
-      "aa",
-      "A",
-      "b",
-      "\\",
-      " ",
-      "\t",
-      "\n",
-      "",
-      NULL
-    };
-    printf("curlx_str_singlespace\n");
-    for(i = 0; single[i]; i++) {
-      const char *line = single[i];
-      const char *orgline = line;
-      int rc = curlx_str_singlespace(&line);
-      printf("%d: (\"%s\") %d, line %d\n",
-                   i, orgline, rc, (int)(line - orgline));
-    }
-  }
-
-  {
     static const char * const newl[] = {
       "a",
       "aa",

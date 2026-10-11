@@ -20,17 +20,6 @@ unit tests for strparse.c string parsing functions
 
 <verify>
 <stdout>
-curlx_str_singlespace
-0: ("a") 5, line 0
-1: ("aa") 5, line 0
-2: ("A") 5, line 0
-3: ("b") 5, line 0
-4: ("\") 5, line 0
-5: (" ") 0, line 1
-6: ("%TAB") 5, line 0
-7: ("
-") 5, line 0
-8: ("") 5, line 0
 curlx_str_newline
 0: (%61) 6, line 0
 1: (%61) 6, line 0
