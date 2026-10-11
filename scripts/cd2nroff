@@ -567,6 +567,13 @@ sub single {
             $title = $f;
             $title =~ s/\.[^.]*$//;
         }
+        # Metadata supplies filename components, never an output path.
+        if($title =~ m{[\\/\x00]} || $section =~ m{[\\/\x00]} ||
+           $title eq '.' || $title eq '..' ||
+           $section eq '.' || $section eq '..') {
+            print STDERR "$f:ERROR: invalid output filename metadata\n";
+            return 2;
+        }
         my $outfile = "$dir/$title.$section";
         if(defined($extension)) {
             $outfile .= $extension;
