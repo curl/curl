@@ -60,6 +60,7 @@ use strict;
 use warnings;
 use 5.006;
 use POSIX qw(strftime);
+use File::Temp qw(tempdir);
 
 # These should be the only variables that might be needed to get edited:
 
@@ -516,12 +517,10 @@ sub checksystemfeatures {
     my @disabled;
     my $dis = "";
 
-    my $curlverout = "$LOGDIR/curlverout.log";
-    my $curlvererr = "$LOGDIR/curlvererr.log";
+    my $tmpdir = tempdir("logtmpXXXXXX", DIR => ".", CLEANUP => 1);
+    my $curlverout = "$tmpdir/curlverout.log";
+    my $curlvererr = "$tmpdir/curlvererr.log";
     my $versioncmd = exerunner() . shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
-
-    unlink($curlverout);
-    unlink($curlvererr);
 
     $versretval = runclient($versioncmd);
     $versnoexec = $!;
@@ -772,6 +771,8 @@ sub checksystemfeatures {
         displaylogcontent($curlvererr);
         die "Could not get curl's version";
     }
+    unlink($curlverout, $curlvererr);
+    rmdir($tmpdir);
 
     if(-r "../lib/curl_config.h") {
         open(my $conf, "<", "../lib/curl_config.h");
@@ -2313,6 +2314,9 @@ sub runnerready {
 #
 sub createrunners {
     my ($numrunners) = @_;
+    cleardir($LOGDIR);
+    mkdir($LOGDIR, 0777);
+    mkdir("$LOGDIR/$LOCKDIR", 0777);
     if(! $numrunners) {
         $numrunners++;
     }
@@ -2720,16 +2724,6 @@ if($gdbthis) {
         $gdb = "../libtool --mode=execute gdb";
     }
 }
-
-#######################################################################
-# clear and create logging directory:
-#
-
-# TODO: figure how to get around this. This directory is needed for checksystemfeatures()
-# Maybe create & use & delete a temporary directory in that function
-cleardir($LOGDIR);
-mkdir($LOGDIR, 0777);
-mkdir("$LOGDIR/$LOCKDIR", 0777);
 
 #######################################################################
 # initialize some variables
