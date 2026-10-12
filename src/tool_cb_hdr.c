@@ -184,25 +184,15 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
 
   /* if the filename contains a path, only use filename portion */
   q = strrchr(p, '/');
-  if(q) {
+  if(q)
     p = q + 1;
-    if(!*p) {
-      curlx_safefree(copy);
-      return NULL;
-    }
-  }
 
   /* If the filename contains a backslash, only use filename portion. The idea
      is that even systems that do not handle backslashes as path separators
      probably want the path removed for convenience. */
   q = strrchr(p, '\\');
-  if(q) {
+  if(q)
     p = q + 1;
-    if(!*p) {
-      curlx_safefree(copy);
-      return NULL;
-    }
-  }
 
   /* make sure the filename does not end in \r or \n */
   q = strchr(p, '\r');
@@ -226,6 +216,12 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
     copy = sanitized;
   }
 #endif /* _WIN32 || MSDOS */
+
+  /* an empty filename, "." or ".." is no filename */
+  if(!*copy || !strcmp(copy, ".") || !strcmp(copy, "..")) {
+    curlx_safefree(copy);
+    return NULL;
+  }
 
   return copy;
 }
