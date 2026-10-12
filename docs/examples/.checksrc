@@ -34,3 +34,5 @@ banfunc curl_mvaprintf
 banfunc curl_mvfprintf
 banfunc curl_mvprintf
 banfunc curl_mvsnprintf
+
+enable PRINTFZ
