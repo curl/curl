@@ -84,6 +84,10 @@ static CURLcode test_unit3304(const char *arg)
               "peer key build failed");
   fail_unless(key1 && key2 && !strcmp(key1, key2),
               "identical config should produce identical peer key");
+  /* Keep legacy serialized keys separate from this key format. */
+  fail_unless(key1 && !strncmp(key1, "example.com:443:KEY-V2:",
+                               sizeof("example.com:443:KEY-V2:") - 1),
+              "peer key must carry the V2 format marker after the port");
   curlx_safefree(key1);
   curlx_safefree(key2);
 
