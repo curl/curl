@@ -129,6 +129,10 @@ int main(int argc, const char *argv[])
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
                      (curl_off_t)file_info.st_size);
 
+    /* ask libcurl to use a larger size for the upload buffer */
+    curl_easy_setopt(curl, CURLOPT_UPLOAD_BUFFERSIZE,
+                     (long)400000);
+
     /* Now run off and do what you have been told! */
     result = curl_easy_perform(curl);
     /* Check for errors */
