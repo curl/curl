@@ -34,9 +34,10 @@ environment:
   DO_NOT_TRACK: '1'
 
   # Jobs:
-  # VS2010: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  # VS2012: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  # VS2013: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) -> MSYS_NT-10.0-14393
+  # VS2010: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) libtests fail
+  # VS2012: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) libtests fail
+  # VS2013: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) libtests fail
+  # VS2013: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) libtests fail
   # VS2015: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
   # VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
   # VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
@@ -59,18 +60,18 @@ environment:
   #   VS2008
   #   VS2010
   #   VS2012
-  #   VS2013
+  #   VS2013 undocumented
   #   VS2015
   # VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
   #   VS2010 BROKEN
   #   VS2012 BROKEN
-  #   VS2013
+  #   VS2013 undocumented
   #   VS2015
   #   VS2017
   # VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
   #   VS2010 BROKEN
   #   VS2012 BROKEN
-  #   VS2013
+  #   VS2013 BROKEN
   #   VS2015
   #   VS2019
   # VS2022: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
@@ -139,14 +140,6 @@ environment:
     # temp NEW -> works, but tests still broken -> breakage seems unrelated to OS version
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'  # to run all tests
-      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
-      CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
-      CMAKE_GENERATOR: 'Visual Studio 12 2013'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
-
-    # temp NEW 2
-    - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'  # to run all tests
       CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 12 2013'
