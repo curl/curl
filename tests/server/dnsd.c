@@ -1307,8 +1307,7 @@ static int doh_conn_recv(struct doh_conn *c)
   else {
     c->inblen += (size_t)n;
     c->inbuf[c->inblen] = 0;
-    logmsg("[x-%d-DOH] sread() == %lu, processing",
-           c->index, (unsigned long)n);
+    logmsg("[x-%d-DOH] sread() == %ld, processing", c->index, (long)n);
     return doh_conn_do_req(c, FALSE);
   }
 }
