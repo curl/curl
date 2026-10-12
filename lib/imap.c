@@ -103,7 +103,6 @@ typedef enum {
 struct imap_conn {
   struct pingpong pp;
   struct SASL sasl;           /* SASL-related parameters */
-  struct dynbuf dyn;          /* for the IMAP commands */
   char *mailbox;              /* The last selected mailbox */
   imapstate state;            /* Always use imap.c:state() to change state! */
   unsigned int mb_uidvalidity; /* UIDVALIDITY parsed from select response */
@@ -155,12 +154,13 @@ struct ulbits {
  */
 static CURLcode imap_sendf(struct Curl_easy *data,
                            struct imap_conn *imapc,
-                           const char *fmt, ...) CURL_PRINTF(3, 0);
+                           const char *fmt, ...) CURL_PRINTF(3, 4);
 static CURLcode imap_sendf(struct Curl_easy *data,
                            struct imap_conn *imapc,
                            const char *fmt, ...)
 {
   CURLcode result = CURLE_OK;
+  va_list ap;
 
   DEBUGASSERT(fmt);
 
@@ -169,24 +169,9 @@ static CURLcode imap_sendf(struct Curl_easy *data,
                  'A' + curlx_sltosi((long)(data->conn->connection_id % 26)),
                  ++imapc->cmdid);
 
-  /* start with a blank buffer */
-  curlx_dyn_reset(&imapc->dyn);
-
-  /* append tag + space + fmt */
-  result = curlx_dyn_addf(&imapc->dyn, "%s %s", imapc->resptag, fmt);
-  if(!result) {
-    va_list ap;
-    va_start(ap, fmt);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
-    result = Curl_pp_vsendf(data, &imapc->pp, curlx_dyn_ptr(&imapc->dyn), ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-    va_end(ap);
-  }
+  va_start(ap, fmt);
+  result = Curl_pp_vsendf(data, &imapc->pp, imapc->resptag, fmt, ap);
+  va_end(ap);
   return result;
 }
 
@@ -2250,7 +2235,6 @@ static void imap_conn_dtor(const void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   Curl_pp_disconnect(&imapc->pp);
-  curlx_dyn_free(&imapc->dyn);
   curlx_safefree(imapc->mailbox);
   curlx_free(imapc);
 }
@@ -2287,7 +2271,6 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   imapc->preftype = IMAP_TYPE_ANY;
   Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
-  curlx_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
   Curl_pp_init(pp, Curl_pgrs_now(data));
 
   if(Curl_conn_meta_set(conn, CURL_META_IMAP_CONN, imapc, imap_conn_dtor))

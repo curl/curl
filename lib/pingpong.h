@@ -118,13 +118,15 @@ CURLcode Curl_pp_sendf(struct Curl_easy *data,
  * Send the formatted string as a command to a pingpong server. Note that
  * the string should not have any CRLF appended, as this function will
  * append the necessary things itself.
+ * If `prefix` is non-NULL, prepend it with an added space before the format.
  *
  * made to never block
  */
 CURLcode Curl_pp_vsendf(struct Curl_easy *data,
                         struct pingpong *pp,
+                        const char *prefix,
                         const char *fmt,
-                        va_list args) CURL_PRINTF(3, 0);
+                        va_list args) CURL_PRINTF(4, 0);
 
 /*
  * Curl_pp_readresp()
