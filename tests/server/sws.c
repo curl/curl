@@ -327,7 +327,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
 
   req->callcount++;
 
-  logmsg("Process %zu bytes request%s", req->offset,
+  logmsg("Process %lu bytes request%s", (unsigned long)req->offset,
          req->callcount > 1 ? " [CONTINUED]" : "");
 
   /* try to figure out the request characteristics as soon as possible, but
@@ -586,9 +586,10 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       else
         req->cl = (size_t)clen - req->skip;
 
-      logmsg("Found Content-Length: %zu in the request", (size_t)clen);
+      logmsg("Found Content-Length: %lu in the request", (unsigned long)clen);
       if(req->skip)
-        logmsg("... but going to abort after %zu bytes", req->cl);
+        logmsg("... but going to abort after %lu bytes",
+               (unsigned long)req->cl);
     }
     else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
                            CURL_CSTRLEN("Transfer-Encoding: chunked"))) {
@@ -668,7 +669,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     req->ntlm = TRUE; /* NTLM found */
     logmsg("Received NTLM type-3, sending back data %ld", req->partno);
     if(req->cl) {
-      logmsg("  Expecting %zu POSTed bytes", req->cl);
+      logmsg("  Expecting %lu POSTed bytes", (unsigned long)req->cl);
     }
   }
   else if(!req->ntlm &&
@@ -931,8 +932,8 @@ retry:
       int intervals = msecs_left / MAX_SLEEP_TIME_MS;
       if(msecs_left % MAX_SLEEP_TIME_MS)
         intervals++;
-      logmsg("Pausing %d milliseconds after writing %zd bytes",
-             msecs_left, written);
+      logmsg("Pausing %d milliseconds after writing %ld bytes",
+             msecs_left, (long)written);
       while((intervals > 0) && !got_exit_signal) {
         int sleep_time = msecs_left > MAX_SLEEP_TIME_MS ?
           MAX_SLEEP_TIME_MS : msecs_left;
@@ -954,9 +955,9 @@ retry:
   }
 
   if(sendfailure) {
-    logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) "
+    logmsg("Sending response failed. Only (%lu bytes) of (%lu bytes) "
            "were sent",
-           responsesize - count, responsesize);
+           (unsigned long)(responsesize - count), (unsigned long)responsesize);
     sws_prevtestno = req->testno;
     sws_prevpartno = req->partno;
     free(ptr);
@@ -964,8 +965,8 @@ retry:
     return -1;
   }
 
-  logmsg("Response sent (%zu bytes) and written to %s",
-         responsesize, responsedump);
+  logmsg("Response sent (%lu bytes) and written to %s",
+         (unsigned long)responsesize, responsedump);
   free(ptr);
 
   if(cmdsize > 0) {
@@ -1064,7 +1065,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
                     sizeof(req->reqbuf) - 1 - req->offset);
         if(got > 0) {
           req->offset += got;
-          logmsg("Got %zd bytes from client", got);
+          logmsg("Got %ld bytes from client", (long)got);
         }
 
         if((got == -1) && SOCK_EAGAIN(SOCKERRNO)) {
@@ -1142,7 +1143,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
       return -1;
     }
 
-    logmsg("Read %zd bytes", got);
+    logmsg("Read %ld bytes", (long)got);
 
     req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
@@ -1537,12 +1538,14 @@ static void http_connect(curl_socket_t *infdp,
             /* read from client */
             rc = sread(clientfd[i], &readclient[i][tos[i]], len);
             if(rc <= 0) {
-              logmsg("[%s] got %zd, STOP READING client", data_or_ctrl(i), rc);
+              logmsg("[%s] got %ld, STOP READING client", data_or_ctrl(i),
+                     (long)rc);
               shutdown(clientfd[i], SHUT_RD);
               poll_client_rd[i] = FALSE;
             }
             else {
-              logmsg("[%s] READ %zd bytes from client", data_or_ctrl(i), rc);
+              logmsg("[%s] READ %ld bytes from client", data_or_ctrl(i),
+                     (long)rc);
               logmsg("[%s] READ \"%s\"", data_or_ctrl(i),
                      data_to_hex(&readclient[i][tos[i]], rc));
               tos[i] += rc;
@@ -1555,12 +1558,14 @@ static void http_connect(curl_socket_t *infdp,
             /* read from server */
             rc = sread(serverfd[i], &readserver[i][toc[i]], len);
             if(rc <= 0) {
-              logmsg("[%s] got %zd, STOP READING server", data_or_ctrl(i), rc);
+              logmsg("[%s] got %ld, STOP READING server", data_or_ctrl(i),
+                     (long)rc);
               shutdown(serverfd[i], SHUT_RD);
               poll_server_rd[i] = FALSE;
             }
             else {
-              logmsg("[%s] READ %zd bytes from server", data_or_ctrl(i), rc);
+              logmsg("[%s] READ %ld bytes from server", data_or_ctrl(i),
+                     (long)rc);
               logmsg("[%s] READ \"%s\"", data_or_ctrl(i),
                      data_to_hex(&readserver[i][toc[i]], rc));
               toc[i] += rc;
@@ -1572,13 +1577,15 @@ static void http_connect(curl_socket_t *infdp,
             /* write to client */
             rc = swrite(clientfd[i], readserver[i], toc[i]);
             if(rc <= 0) {
-              logmsg("[%s] got %zd, STOP WRITING client", data_or_ctrl(i), rc);
+              logmsg("[%s] got %ld, STOP WRITING client", data_or_ctrl(i),
+                     (long)rc);
               shutdown(clientfd[i], SHUT_WR);
               poll_client_wr[i] = FALSE;
               tcp_fin_wr = TRUE;
             }
             else {
-              logmsg("[%s] SENT %zd bytes to client", data_or_ctrl(i), rc);
+              logmsg("[%s] SENT %ld bytes to client", data_or_ctrl(i),
+                     (long)rc);
               logmsg("[%s] SENT \"%s\"", data_or_ctrl(i),
                      data_to_hex(readserver[i], rc));
               if(toc[i] - rc)
@@ -1592,13 +1599,15 @@ static void http_connect(curl_socket_t *infdp,
             /* write to server */
             rc = swrite(serverfd[i], readclient[i], tos[i]);
             if(rc <= 0) {
-              logmsg("[%s] got %zd, STOP WRITING server", data_or_ctrl(i), rc);
+              logmsg("[%s] got %ld, STOP WRITING server", data_or_ctrl(i),
+                     (long)rc);
               shutdown(serverfd[i], SHUT_WR);
               poll_server_wr[i] = FALSE;
               tcp_fin_wr = TRUE;
             }
             else {
-              logmsg("[%s] SENT %zd bytes to server", data_or_ctrl(i), rc);
+              logmsg("[%s] SENT %ld bytes to server", data_or_ctrl(i),
+                     (long)rc);
               logmsg("[%s] SENT \"%s\"", data_or_ctrl(i),
                      data_to_hex(readclient[i], rc));
               if(tos[i] - rc)
