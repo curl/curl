@@ -301,8 +301,9 @@ void storerequest(const char *reqbuf, size_t totalsize, const char *filename)
   else if(writeleft > 0) {
     logmsg("Error writing file %s error (%d) %s", dumpfile,
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Wrote only (%lu bytes) of (%zu bytes) request input to %s",
-           (unsigned long)(totalsize - writeleft), totalsize, dumpfile);
+    logmsg("Wrote only (%lu bytes) of (%lu bytes) request input to %s",
+           (unsigned long)(totalsize - writeleft), (unsigned long)totalsize,
+           dumpfile);
   }
 
 storerequest_cleanup:

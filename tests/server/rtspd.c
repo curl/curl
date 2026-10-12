@@ -358,8 +358,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
                     logmsg("failed resizing buffer.");
                   free(rtp_scratch);
                 }
-                logmsg("rtp_buffersize is %zu, rtp_size is %d.",
-                       req->rtp_buffersize, rtp_size);
+                logmsg("rtp_buffersize is %lu, rtp_size is %d.",
+                       (unsigned long)req->rtp_buffersize, rtp_size);
               }
             }
             else {
@@ -458,9 +458,10 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       }
       req->cl = (size_t)clen - req->skip;
 
-      logmsg("Found Content-Length: %zu in the request", (size_t)clen);
+      logmsg("Found Content-Length: %lu in the request", (unsigned long)clen);
       if(req->skip)
-        logmsg("... but going to abort after %zu bytes", req->cl);
+        logmsg("... but going to abort after %lu bytes",
+               (unsigned long)req->cl);
       break;
     }
     else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
@@ -504,7 +505,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     req->ntlm = TRUE; /* NTLM found */
     logmsg("Received NTLM type-3, sending back data %ld", req->partno);
     if(req->cl) {
-      logmsg("  Expecting %zu POSTed bytes", req->cl);
+      logmsg("  Expecting %lu POSTed bytes", (unsigned long)req->cl);
     }
   }
   else if(!req->ntlm &&
@@ -881,7 +882,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
 
   /* Send out any RTP data */
   if(req->rtp_buffer) {
-    logmsg("About to write %zu RTP bytes", req->rtp_buffersize);
+    logmsg("About to write %lu RTP bytes", (unsigned long)req->rtp_buffersize);
     count = req->rtp_buffersize;
     do {
       size_t num = count;
@@ -911,16 +912,17 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   }
 
   if(sendfailure) {
-    logmsg("Sending response failed. Only (%zu bytes) of "
-           "(%zu bytes) were sent",
-           responsesize - count, responsesize);
+    logmsg("Sending response failed. Only (%lu bytes) of "
+           "(%lu bytes) were sent",
+           (unsigned long)(responsesize - count),
+           (unsigned long)responsesize);
     free(ptr);
     free(cmd);
     return -1;
   }
 
-  logmsg("Response sent (%zu bytes) and written to %s",
-         responsesize, responsedump);
+  logmsg("Response sent (%lu bytes) and written to %s",
+         (unsigned long)responsesize, responsedump);
   free(ptr);
 
   if(cmdsize > 0) {

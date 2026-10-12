@@ -649,7 +649,7 @@ static int dnsd_make_answer(struct blob *blob, int query_id,
     return 1;
 
   if(blob_addn(blob, qbuf, qlen)) {
-    logmsg("unable to handle query of length %zu", qlen);
+    logmsg("unable to handle query of length %lu", (unsigned long)qlen);
     return 1;
   }
 
@@ -681,12 +681,12 @@ static int dnsd_make_answer(struct blob *blob, int query_id,
   case QTYPE_HTTPS:
     if(httpsrr.dlen) {
       if(add_answer(blob, httpsrr.data, httpsrr.dlen, QTYPE_HTTPS)) {
-        logmsg("[%d] error adding https %zu response bytes", query_id,
-               httpsrr.dlen);
+        logmsg("[%d] error adding https %lu response bytes", query_id,
+               (unsigned long)httpsrr.dlen);
         return 1;
       }
-      logmsg("[%d] response HTTPS (%x), %zu bytes", query_id,
-             (unsigned int)QTYPE_HTTPS, httpsrr.dlen);
+      logmsg("[%d] response HTTPS (%x), %lu bytes", query_id,
+             (unsigned int)QTYPE_HTTPS, (unsigned long)httpsrr.dlen);
     }
     else
       logmsg("[%d] response HTTPS, no record", query_id);
@@ -718,14 +718,14 @@ static CURLcode send_udp_resp(curl_socket_t sock, struct udp_resp *resp)
   } while((rc < 0) && ((sockerr = SOCKERRNO) == SOCKEINTR));
   if(rc < 0) {
     char errbuf[STRERROR_LEN];
-    logmsg("[%d-UDP] failed sending %zu bytes, error: (%d) %s",
-           resp->query_id, resp->body.dlen,
+    logmsg("[%d-UDP] failed sending %lu bytes, error: (%d) %s",
+           resp->query_id, (unsigned long)resp->body.dlen,
            sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     return CURLE_SEND_ERROR;
   }
   else if(rc != (ssize_t)resp->body.dlen) {
-    logmsg("[%d-UDP] failed sending %zu bytes, sent: %zd",
-           resp->query_id, resp->body.dlen, rc);
+    logmsg("[%d-UDP] failed sending %lu bytes, sent: %zd",
+           resp->query_id, (unsigned long)resp->body.dlen, rc);
     return CURLE_SEND_ERROR;
   }
   logmsg("[%d-UDP] sent response", resp->query_id);
@@ -804,8 +804,8 @@ static struct udp_resp *udp_resp_create(int query_id,
   /* on some platforms `curl_socklen_t` is an `int`. Casting might
    * wrap this, but then it still has to fit our record size. */
   if((size_t)addrlen > sizeof(resp->addr)) {
-    logmsg("[%d-UDP] unable to handle addrlen of %zu",
-           query_id, (size_t)addrlen);
+    logmsg("[%d-UDP] unable to handle addrlen of %lu",
+           query_id, (unsigned long)addrlen);
     goto error;
   }
   memcpy(&resp->addr, CURL_UNCONST(addr), addrlen);
@@ -1051,8 +1051,8 @@ static int doh_conn_send_err(struct doh_conn *c, int http_status)
   c->close_pending = TRUE;
   c->want_recv = FALSE;
   if(c->outblen) {
-    logmsg("[%d-%d-DOH] error sending response with %zu bytes still outgoing",
-           c->query_id, c->index, c->outblen);
+    logmsg("[%d-%d-DOH] error sending response with %lu bytes still outgoing",
+           c->query_id, c->index, (unsigned long)c->outblen);
     return 1;
   }
 
@@ -1075,7 +1075,7 @@ static int doh_conn_send_answer(struct doh_conn *c, struct blob *body,
 {
   if(c->outblen) { /* Should not happen */
     logmsg("[%d-%d-DOH] trying to send an answer with outbuf still having "
-           "%zu bytes", c->query_id, c->index, c->outblen);
+           "%lu bytes", c->query_id, c->index, (unsigned long)c->outblen);
     return 1;
   }
   memset(c->outbuf, 0, sizeof(c->outbuf));
@@ -1089,8 +1089,8 @@ static int doh_conn_send_answer(struct doh_conn *c, struct blob *body,
            http_status_descr(200), (long)body->dlen);
   c->outblen = strlen(c->outbuf);
   if((c->outblen + body->dlen) > sizeof(c->outbuf)) {
-    logmsg("[%d-%d-DOH] response size of %zu too large for outbuf",
-           c->query_id, c->index, c->outblen + body->dlen);
+    logmsg("[%d-%d-DOH] response size of %lu too large for outbuf",
+           c->query_id, c->index, (unsigned long)(c->outblen + body->dlen));
     c->outblen = 0;
     return 1;
   }
@@ -1307,7 +1307,8 @@ static int doh_conn_recv(struct doh_conn *c)
   else {
     c->inblen += (size_t)n;
     c->inbuf[c->inblen] = 0;
-    logmsg("[x-%d-DOH] sread() == %zu, processing", c->index, (size_t)n);
+    logmsg("[x-%d-DOH] sread() == %lu, processing",
+           c->index, (unsigned long)n);
     return doh_conn_do_req(c, FALSE);
   }
 }
