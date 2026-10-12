@@ -397,6 +397,17 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
     return TRUE;
   }
 
+  if(imapc->state == IMAP_FETCH_FINAL && imap_find_literal(line, len)) {
+    /* FETCH_FINAL only waits for the tagged completion of the command. A
+       literal marker here means the server sent more response data (e.g.
+       another literal of a multi-section FETCH) than the transfer consumed.
+       Fail visibly instead of silently dropping the rest. */
+    failf(data, "Multiple literals in FETCH response, "
+          "only the first can be downloaded");
+    *resp = -1;
+    return TRUE;
+  }
+
   return FALSE; /* Nothing for us */
 }
 
@@ -1273,6 +1284,16 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
             /* Keep the data after the literal body */
             pp->overflow = after_header - chunk;
             curlx_dyn_tail(&pp->recvbuf, pp->overflow);
+
+            if(imap_find_literal(curlx_dyn_ptr(&pp->recvbuf), pp->overflow)) {
+              /* The buffered remainder contains another literal, meaning
+                 this FETCH response carries more body sections than the
+                 single transfer set up above can deliver. Fail visibly
+                 instead of silently dropping the rest. */
+              failf(data, "Multiple literals in FETCH response, "
+                    "only the first can be downloaded");
+              return CURLE_WEIRD_SERVER_REPLY;
+            }
           }
           else {
             pp->overflow = 0;
