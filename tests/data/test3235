@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_SHARE
+libtest
+</keywords>
+</info>
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 0
+
+</data>
+</reply>
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+Shared connection pool survives toggles and is released on cleanup
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+<verify>
+</verify>
+</testcase>
