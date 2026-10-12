@@ -729,12 +729,6 @@ static CURLcode multi_done(struct Curl_easy *data,
   /* Make sure that transfer client writes are really done now. */
   result = Curl_1st_fatal(result, Curl_xfer_write_done(data, premature));
 
-  /* Inform connection filters that this transfer is done */
-  if(conn)
-    Curl_conn_ev_data_done(data, premature);
-
-  multi_schedule_pending(data->multi); /* connection / multiplex */
-
   if(!result)
     result = Curl_req_done(&data->req, data, premature);
 
@@ -742,12 +736,18 @@ static CURLcode multi_done(struct Curl_easy *data,
     /* Detach connection and decide what to do with it. */
     struct multi_done_ctx mdctx;
 
+    /* Inform connection filters that this transfer is done and they
+     * need to give up any references to `data`. */
+    Curl_conn_ev_data_done(data, premature);
     Curl_detach_connection(data);
     Curl_dnscache_prune(data, pnow);
 
     memset(&mdctx, 0, sizeof(mdctx));
     mdctx.premature = premature;
     Curl_cpool_return(data, conn, multi_done_locked, &mdctx, pnow);
+
+    if(data->multi)
+      multi_schedule_pending(data->multi);
   }
 
   /* flush the netrc cache */
