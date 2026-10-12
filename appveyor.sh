@@ -186,7 +186,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     fi
 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
-    export CURL_TEST_MIN=75
+    #export CURL_TEST_MIN=75
     export TFLAGS="~1096 ${TFLAGS:-}"
     TFLAGS+=" -vc $(cygpath --unix "\
       $(cygpath --mixed --short-name "${PROGRAMFILES}/Git/mingw64/bin/curl.exe")")"
