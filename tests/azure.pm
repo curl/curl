@@ -112,7 +112,7 @@ sub azure_update_test_result {
     }
     my $azure_start = strftime "%Y-%m-%dT%H:%M:%SZ", gmtime $start;
     my $azure_complete = strftime "%Y-%m-%dT%H:%M:%SZ", gmtime $stop;
-    my $azure_duration = sprintf("%.0f", ($stop-$start)*1000);
+    my $azure_duration = sprintf("%.0f", ($stop - $start) * 1000);
     my $azure_outcome;
     if($error == 2) {
         $azure_outcome = 'NotApplicable';
