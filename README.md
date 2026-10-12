@@ -22,6 +22,8 @@ libcurl is the library curl is using to do its job. It is readily available to
 be used by your software. Read [the libcurl
 man page](https://curl.se/libcurl/c/libcurl.html) to learn how.
 
+[![Live demo by Demoshell](https://build.demoshell.com/v1/embed/badge.svg)](https://build.demoshell.com/launch?snapshot=demoshell%2Ftools%3Acurl&utm_source=badge)
+
 ## Open Source
 
 curl is Open Source and is distributed under an MIT-like
