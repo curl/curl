@@ -458,7 +458,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       }
       req->cl = (size_t)clen - req->skip;
 
-      logmsg("Found Content-Length: %lu in the request", (unsigned long)clen);
+      logmsg("Found Content-Length: %" CURL_FORMAT_CURL_OFF_TU
+             " in the request", clen);
       if(req->skip)
         logmsg("... but going to abort after %lu bytes",
                (unsigned long)req->cl);

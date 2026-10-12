@@ -804,8 +804,8 @@ static struct udp_resp *udp_resp_create(int query_id,
   /* on some platforms `curl_socklen_t` is an `int`. Casting might
    * wrap this, but then it still has to fit our record size. */
   if((size_t)addrlen > sizeof(resp->addr)) {
-    logmsg("[%d-UDP] unable to handle addrlen of %lu",
-           query_id, (unsigned long)addrlen);
+    logmsg("[%d-UDP] unable to handle addrlen of %" FMT_SOCKET_T,
+           query_id, addrlen);
     goto error;
   }
   memcpy(&resp->addr, CURL_UNCONST(addr), addrlen);
