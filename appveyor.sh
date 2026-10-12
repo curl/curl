@@ -52,6 +52,11 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
+  old_msvc=0
+  if [[ "${CMAKE_GENERATOR}" =~ Visual\ Studio\ (10\ 2010|11\ 2012|12\ 2013) ]]; then
+    old_msvc=1
+  fi
+
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
     cmake_ver="$(printf '%02d%02d' \
