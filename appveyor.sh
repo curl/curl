@@ -185,11 +185,9 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
     fi
 
-    #unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
+    unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
     export CURL_TEST_MIN=75
     export TFLAGS="~1096 ${TFLAGS:-}"
-    TFLAGS+=" -ac $(cygpath --unix "\
-      $(cygpath --mixed --short-name "${PROGRAMFILES}/Git/mingw64/bin/curl.exe")")"
     [ "${old_msvc}" = '1' ] && TFLAGS="tunittest unittest 1 ${TFLAGS}"
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
