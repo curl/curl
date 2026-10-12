@@ -35,4 +35,5 @@ banfunc curl_mvfprintf
 banfunc curl_mvprintf
 banfunc curl_mvsnprintf
 
+# Required for VS2013 and earlier
 enable PRINTFZ

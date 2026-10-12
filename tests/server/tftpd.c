@@ -740,7 +740,7 @@ send_data:
 #endif
       logmsg("read");
       n = sread(peer, &ackbuf.storage[0], sizeof(ackbuf.storage));
-      logmsg("read: %zd", n);
+      logmsg("read: %ld", (long)n);
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
@@ -811,7 +811,7 @@ send_ack:
 #endif
       logmsg("read");
       n = sread(peer, rdp, PKTSIZE);
-      logmsg("read: %zd", n);
+      logmsg("read: %ld", (long)n);
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
