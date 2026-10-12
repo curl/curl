@@ -1071,10 +1071,13 @@ static int double_check(void)
   struct dbcheck c[] = {
     { "%.17Lf", /* "1.23456789012345669" */
       "1.23456789012345", "", },
+/* VS2013 and earlier CRT vsnprintf() return slightly different results */
+#if !defined(_MSC_VER) || (_MSC_VER >= 1900)
     { "%.17Le", /* "1.23456789012345669e+00" */
       "1.234567890123456", "e+00" },
     { "%.17LE", /* "1.23456789012345669E+00" */
       "1.234567890123456", "E+00" },
+#endif
     { "%.17Lg", /* "1.2345678901234567" */
       "1.234567890123456", "" },
     { "%.17LG", /* "1.2345678901234567" */
@@ -1085,21 +1088,19 @@ static int double_check(void)
     size_t len =
       curl_msnprintf(curl_out, sizeof(curl_out), c[i].fmt, val);
     if(strncmp(curl_out, c[i].prefix, strlen(c[i].prefix))) {
-      curl_mfprintf(stderr,
-                    "MISMATCH (prefix): %s curl=%s libc=%s\n",
-                    c[i].fmt, curl_out, c[i].prefix);
+      curl_mprintf("MISMATCH (prefix): %s curl=%s libc=%s\n",
+                   c[i].fmt, curl_out, c[i].prefix);
       mismatches++;
     }
     if((len < strlen(c[i].suffix) ||
         strncmp(curl_out + len - strlen(c[i].suffix),
                c[i].suffix, strlen(c[i].suffix)))) {
-      curl_mfprintf(stderr,
-                    "MISMATCH (suffix): %s curl=%s libc=%s\n",
-                    c[i].fmt, curl_out, c[i].suffix);
+      curl_mprintf("MISMATCH (suffix): %s curl=%s libc=%s\n",
+                   c[i].fmt, curl_out, c[i].suffix);
       mismatches++;
     }
   }
-  curl_mfprintf(stderr, "mismatches=%d/5\n", mismatches);
+  curl_mfprintf(stderr, "mismatches=%d/%zu\n", mismatches, CURL_ARRAYSIZE(c));
   return mismatches;
 }
 
@@ -1113,8 +1114,11 @@ static int test_float_formatting(void)
   curl_msnprintf(buf, sizeof(buf), "%f", 9.0);
   errors += string_check(buf, "9.000000");
 
+/* VS2013 and earlier CRT vsnprintf() does not support this mask */
+#if !defined(_MSC_VER) || (_MSC_VER >= 1900)
   curl_msnprintf(buf, sizeof(buf), "%F", 9.0);
   errors += string_check(buf, "9.000000");
+#endif
 
   curl_msnprintf(buf, sizeof(buf), "%.1f", 9.1);
   errors += string_check(buf, "9.1");
