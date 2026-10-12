@@ -52,11 +52,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
-  old_msvc=0
-  if [[ "${CMAKE_GENERATOR}" =~ Visual\ Studio\ (10\ 2010|11\ 2012|12\ 2013) ]]; then
-    old_msvc=1
-  fi
-
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
     cmake_ver="$(printf '%02d%02d' \
@@ -190,7 +185,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     export TFLAGS="~1096 ${TFLAGS:-}"
     TFLAGS+=" -vc $(cygpath --unix "\
       $(cygpath --mixed --short-name "${PROGRAMFILES}/Git/mingw64/bin/curl.exe")")"
-    [ "${old_msvc}" = '1' ] && TFLAGS="1 ${TFLAGS}"
     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
