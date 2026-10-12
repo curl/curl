@@ -196,7 +196,7 @@ static int connack(FILE *dump, curl_socket_t fd)
 
   rc = swrite(fd, packet, sizeof(packet));
   if(rc > 0) {
-    logmsg("WROTE %zd bytes [%s]", rc, label);
+    logmsg("WROTE %ld bytes [%s]", (long)rc, label);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, label, packet[1], dump,
                 packet, rc);
@@ -221,7 +221,7 @@ static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 
   rc = swrite(fd, packet, sizeof(packet));
   if(rc == sizeof(packet)) {
-    logmsg("WROTE %zd bytes [SUBACK]", rc);
+    logmsg("WROTE %ld bytes [SUBACK]", (long)rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "SUBACK", 3, dump, packet, rc);
     return 0;
@@ -243,7 +243,7 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 
   rc = swrite(fd, packet, sizeof(packet));
   if(rc == sizeof(packet)) {
-    logmsg("WROTE %zd bytes [PUBACK]", rc);
+    logmsg("WROTE %ld bytes [PUBACK]", (long)rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBACK", 0, dump, packet, rc);
     return 0;
@@ -274,7 +274,7 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 
   rc = swrite(fd, packet, pktlen);
   if(rc > 0) {
-    logmsg("WROTE %zd bytes [%s]", rc, label);
+    logmsg("WROTE %ld bytes [%s]", (long)rc, label);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, label, packet[1], dump, packet, rc);
   }
@@ -398,7 +398,7 @@ static int publish(FILE *dump,
 
   rc = swrite(fd, packet, sendamount);
   if(rc > 0) {
-    logmsg("WROTE %zd bytes [PUBLISH]", rc);
+    logmsg("WROTE %ld bytes [PUBLISH]", (long)rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBLISH", remaininglength, dump, packet, rc);
   }
@@ -422,10 +422,10 @@ static bool readall(curl_socket_t fd, unsigned char *buffer, size_t len)
     if(rc <= 0) {
       if(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal)
         continue;
-      logmsg("READ %zd bytes [SHORT!]", rc);
+      logmsg("READ %ld bytes [SHORT!]", (long)rc);
       return FALSE;
     }
-    logmsg("READ %zd bytes", rc);
+    logmsg("READ %ld bytes", (long)rc);
     loghex(buffer + nread, rc);
     nread += (size_t)rc;
   }
@@ -566,8 +566,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       /* check the length of the payload */
       if((ssize_t)payload_len != (rc - 12)) {
-        logmsg("Payload length mismatch, expected %zd got %zd",
-               rc - 12, (ssize_t)payload_len);
+        logmsg("Payload length mismatch, expected %ld got %ld",
+               (long)rc - 12, (long)payload_len);
         goto end;
       }
       /* check the length of the client ID */

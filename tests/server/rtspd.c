@@ -644,7 +644,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
       return 1;
     }
 
-    logmsg("Read %zd bytes", got);
+    logmsg("Read %ld bytes", (long)got);
 
     req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
@@ -869,7 +869,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       break;
     }
     else {
-      logmsg("Sent off %zd bytes", written);
+      logmsg("Sent off %ld bytes", (long)written);
     }
     /* write to file as well */
     fwrite(buffer, 1, (size_t)written, dump);

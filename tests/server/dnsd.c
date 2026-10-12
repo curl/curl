@@ -724,8 +724,8 @@ static CURLcode send_udp_resp(curl_socket_t sock, struct udp_resp *resp)
     return CURLE_SEND_ERROR;
   }
   else if(rc != (ssize_t)resp->body.dlen) {
-    logmsg("[%d-UDP] failed sending %lu bytes, sent: %zd",
-           resp->query_id, (unsigned long)resp->body.dlen, rc);
+    logmsg("[%d-UDP] failed sending %lu bytes, sent: %ld",
+           resp->query_id, (unsigned long)resp->body.dlen, (long)rc);
     return CURLE_SEND_ERROR;
   }
   logmsg("[%d-UDP] sent response", resp->query_id);
