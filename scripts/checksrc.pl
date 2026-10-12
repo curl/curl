@@ -145,6 +145,7 @@ my %banfunc = (
 
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
+    'PRINTFZ'          => '%zd or %zu printf mask detected',
     'STDERR'           => 'stderr detected',
     );
 
@@ -1018,6 +1019,12 @@ sub scanfile {
             goto again;
         }
         $l = $bl; # restore to pre-bannedfunc content
+
+        if($warnings{"PRINTFZ"} && $l =~ /".*%z[du].*"/) {
+            checkwarn("PRINTFZ",
+                      $line, length($1), $file, $ol,
+                      "use of %zd/%zu is banned (use %ld/%lu with cast instead)");
+        }
 
         if($warnings{"STDERR"}) {
             # scan for use of banned stderr. This is not a BANNEDFUNC to
