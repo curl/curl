@@ -17,3 +17,5 @@ allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
 allowfunc vsnprintf
+
+enable PRINTFZ
