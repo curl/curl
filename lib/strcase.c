@@ -104,6 +104,8 @@ void Curl_strntolower(char *dest, const char *src, size_t n)
  */
 bool Curl_safecmp(const char *a, const char *b)
 {
+  if(a == b)
+    return true;
   if(a && b)
     return !strcmp(a, b);
   return !a && !b;
