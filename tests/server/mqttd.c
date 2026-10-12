@@ -457,8 +457,9 @@ static bool fixedheader(curl_socket_t fd,
     }
   }
   *remaining_lengthp = decode_length(&buffer[1], i, remaining_length_bytesp);
-  logmsg("Remaining Length: %zu [%zu bytes]", *remaining_lengthp,
-         *remaining_length_bytesp);
+  logmsg("Remaining Length: %lu [%lu bytes]",
+         (unsigned long)*remaining_lengthp,
+         (unsigned long)*remaining_length_bytesp);
   return TRUE;
 }
 
@@ -521,7 +522,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       buff_size = remaining_length;
       newbuffer = realloc(buffer, buff_size);
       if(!newbuffer) {
-        logmsg("Failed realloc of size %zu", buff_size);
+        logmsg("Failed realloc of size %lu", (unsigned long)buff_size);
         goto end;
       }
       buffer = newbuffer;
@@ -606,8 +607,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* two bytes topic length */
       topic_len = (size_t)(buffer[2] << 8) | buffer[3];
       if(topic_len != (remaining_length - 5)) {
-        logmsg("Wrong topic length, got %zu expected %zu",
-               topic_len, remaining_length - 5);
+        logmsg("Wrong topic length, got %lu expected %lu",
+               (unsigned long)topic_len, (unsigned long)remaining_length - 5);
         goto end;
       }
       memcpy(topic, &buffer[4], topic_len);
@@ -660,7 +661,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       logprotocol(FROM_CLIENT, "PUBLISH", remaining_length, dump, buffer, rc);
 
       topiclen = (size_t)(buffer[1 + bytes] << 8) | buffer[2 + bytes];
-      logmsg("Got %zu bytes topic", topiclen);
+      logmsg("Got %lu bytes topic", (unsigned long)topiclen);
 
 #ifdef QOS
       /* Handle packetid if there is one. Send puback if QoS > 0 */
