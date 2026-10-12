@@ -152,7 +152,7 @@ while($ARGV[0]) {
 # Do the platform-specific stuff here
 $confheader = 'curl_config.h';
 $binext = '';
-$libext = '.la'; # .la since both libcurl and libcares are made with libtool
+$libext = '.la'; # .la since libcurl is made with libtool
 if($^O eq 'MSWin32' || $targetos) {
     if(!$targetos) {
         # If no target defined on Windows, let's assume vc
@@ -354,20 +354,14 @@ $str1066os = undef;
 # off that path from all possible logs and error messages etc.
 $pwd = getcwd();
 
-my $have_embedded_ares = 0;
-
 if(-d $CURLDIR) {
     if($git && -d "$CURLDIR/.git") {
         logit "$CURLDIR is verified to be a fine git source dir";
         # remove the generated sources to force them to be re-generated each
         # time we run this test
         unlink "$CURLDIR/src/tool_hugehelp.c";
-        # find out if curl source directory has an in-tree c-ares repo
-        $have_embedded_ares = 1 if(-f "$CURLDIR/ares/GIT-INFO");
     } elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
         logit "$CURLDIR is verified to be a fine daily source dir";
-        # find out if curl source directory has an in-tree c-ares extracted tarball
-        $have_embedded_ares = 1 if(-f "$CURLDIR/ares/ares_build.h");
     } else {
         mydie "$CURLDIR is not a daily source directory or checked out from git!"
     }
@@ -423,32 +417,6 @@ if($git) {
     for(@commits) {
         chomp ($_);
         logit "  $_";
-    }
-
-    if(-d "ares/.git") {
-        chdir "ares";
-
-        if($nogitpull) {
-            logit "skipping git pull (--nogitpull) in ares";
-        } else {
-            logit "run git pull in ares";
-            system("git pull 2>&1");
-            $gitstat += $?;
-            logit "failed to update from ares git ($?), continue anyway" if($?);
-
-            # Set timestamp to the UTC the git update took place.
-            $timestamp = scalar(gmtime)." UTC" if(!$gitstat);
-        }
-
-        # get the last 5 commits for show (even if no pull was made)
-        @commits = qx(git log --pretty=oneline --abbrev-commit -5);
-        logit "The most recent ares git commits:";
-        for(@commits) {
-            chomp ($_);
-            logit "  $_";
-        }
-
-        chdir $CURLDIR;
     }
 
     if($nobuildconf) {
@@ -580,73 +548,6 @@ while(<$f>) {
     print if /^ *#/;
 }
 close($f);
-
-if(($have_embedded_ares) &&
-    (grepfile("^#define USE_ARES", "lib/$confheader"))) {
-    print "\n";
-    logit "setup to build ares";
-
-    if(-f "./ares/libcares.pc") {
-        logit_spaced  "display ares/libcares.pc";
-        if(open($f, "<", "ares/libcares.pc")) {
-            while(<$f>) {
-                my $ll = $_;
-                print $ll if(($ll !~ /^ *#/) && ($ll !~ /^ *$/));
-            }
-            close($f);
-        }
-    }
-
-    if(-f "./ares/ares_build.h") {
-        logit_spaced "display ares/ares_build.h";
-        if(open($f, "<", "ares/ares_build.h")) {
-            while(<$f>) {
-                my $ll = $_;
-                print $ll if(($ll =~ /^ *# *define *CARES_/) && ($ll !~ /__CARES_BUILD_H/));
-            }
-            close($f);
-        }
-    }
-    else {
-        mydie "no ares_build.h created/found";
-    }
-
-    $confheader =~ s/curl/ares/;
-    logit_spaced "display ares/$confheader";
-    if(open($f, "<", "ares/$confheader")) {
-        while(<$f>) {
-            print if /^ *#/;
-        }
-        close($f);
-    }
-
-    print "\n";
-    logit "build ares";
-    chdir "ares";
-
-    if($targetos && !$configurebuild) {
-        logit "$make -f Makefile.$targetos";
-        open($f, "-|", "$make -f Makefile.$targetos 2>&1") or die;
-    }
-    else {
-        logit $make;
-        open($f, "-|", "$make 2>&1") or die;
-    }
-    while(<$f>) {
-        s/$pwd//g;
-        print;
-    }
-    close($f);
-
-    if(-f "libcares$libext") {
-        logit "ares is now built successfully (libcares$libext)";
-    } else {
-        mydie "ares build failed (libcares$libext)";
-    }
-
-    # cd back to the curl build dir
-    chdir "$pwd/$build";
-}
 
 my $mkcmd = "$make -i" . ($targetos && !$configurebuild ? " $targetos" : "");
 logit $mkcmd;
