@@ -59,6 +59,12 @@ static CURLcode test_unit3304(const char *arg)
   static char alt_ctype[]     = "P12";
   static char lc_ctype[]      = "pem";
   static char lc_ktype[]      = "pem";
+  static char cafile_fields[] = "/root:CApath-/certs";
+  static char cafile[]        = "/root";
+  static char capath[]        = "/certs";
+  static char cipher_fields[] = "DEFAULT:CIPHER13-TLS_AES_128_GCM_SHA256";
+  static char cipher_list[]   = "DEFAULT";
+  static char cipher_list13[] = "TLS_AES_128_GCM_SHA256";
 
   memset(&origin, 0, sizeof(origin));
   origin.hostname = base_hostname;
@@ -92,12 +98,12 @@ static CURLcode test_unit3304(const char *arg)
   curlx_safefree(key2);
 
   /* A delimiter in a CA path must not create a second trust field. */
-  ssl.CAfile = "/root:CApath-/certs";
+  ssl.CAfile = cafile_fields;
   ssl.CApath = NULL;
   fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
-  ssl.CAfile = "/root";
-  ssl.CApath = "/certs";
+  ssl.CAfile = cafile;
+  ssl.CApath = capath;
   fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && strcmp(key1, key2),
@@ -108,11 +114,11 @@ static CURLcode test_unit3304(const char *arg)
   ssl.CApath = NULL;
 
   /* Non-path fields must not inject a following field either. */
-  ssl.cipher_list = "DEFAULT:CIPHER13-TLS_AES_128_GCM_SHA256";
+  ssl.cipher_list = cipher_fields;
   fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
-  ssl.cipher_list = "DEFAULT";
-  ssl.cipher_list13 = "TLS_AES_128_GCM_SHA256";
+  ssl.cipher_list = cipher_list;
+  ssl.cipher_list13 = cipher_list13;
   fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && strcmp(key1, key2),
