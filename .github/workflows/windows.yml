@@ -75,7 +75,7 @@ jobs:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     needs: build-cache
     runs-on: windows-2022
-    timeout-minutes: 20
+    timeout-minutes: 10
     cache-mode: read
     defaults:
       run:
@@ -243,7 +243,7 @@ jobs:
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
     needs: build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
-    timeout-minutes: ${{ contains(matrix.tflags, '-t') && 25 || 20 }}
+    timeout-minutes: ${{ contains(matrix.tflags, '-t') && 14 || 10 }}
     defaults:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
