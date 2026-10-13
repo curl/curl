@@ -29,8 +29,8 @@ jobs:
     if: github.event.repository.default_branch == github.ref_name || github.event_name == 'pull_request'
     permissions:
       security-events: write # to upload the results to code-scanning dashboard.
-      # Needed to publish results and get a badge (see publish_results below).
-      id-token: write
+      id-token: write # Needed to publish results and get a badge (see publish_results below).
+
       # Uncomment the permissions below if installing in a private repository.
       # contents: read
       # actions: read
