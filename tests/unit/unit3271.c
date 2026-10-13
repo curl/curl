@@ -106,7 +106,7 @@ static CURLcode test_unit3271(const char *arg)
   long_dns = curlx_calloc(1, sizeof(*long_dns) + sizeof(hostname));
   abort_unless(long_dns, "could not allocate cache entry");
   memcpy(long_dns->hostname, hostname, sizeof(hostname));
-  long_dns->hostname[255] = 0;
+  *(long_dns->hostname + 255) = 0;
   long_dns->hostlen = 255;
   long_dns->port = 80;
   long_id.port = 80;
