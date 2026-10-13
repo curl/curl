@@ -1022,6 +1022,8 @@ sub scanfile {
         $l = $bl; # restore to pre-bannedfunc content
 
         if($warnings{"PRINTFZ"} && $l =~ /^(.*".*)%z[du].*"/) {
+            # %z format support is missing from VS2013 and earlier CRT printf,
+            # so directories where we call printf functions may ban %z.
             checkwarn("PRINTFZ",
                       $line, length($1), $file, $ol,
                       "use of %zd/%zu is banned (use %ld/%lu with cast instead)");
