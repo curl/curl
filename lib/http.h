@@ -92,6 +92,8 @@ void Curl_http_method(struct Curl_easy *data,
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
+CURLcode Curl_http_setup_filters(struct Curl_easy *data,
+                                 struct Curl_cfilter *cf);
 CURLcode Curl_http(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_done(struct Curl_easy *data,
                         CURLcode status, bool premature);
