@@ -1021,7 +1021,7 @@ sub scanfile {
         }
         $l = $bl; # restore to pre-bannedfunc content
 
-        if($warnings{"PRINTFZ"} && $l =~ /".*%z[du].*"/) {
+        if($warnings{"PRINTFZ"} && $l =~ /^(.*".*)%z[du].*"/) {
             checkwarn("PRINTFZ",
                       $line, length($1), $file, $ol,
                       "use of %zd/%zu is banned (use %ld/%lu with cast instead)");

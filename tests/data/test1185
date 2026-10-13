@@ -15,7 +15,10 @@ checksrc
 <command type="perl">
 %SRCDIR/../scripts/checksrc.pl -bmagicbad -balsobad %LOGDIR/code%TESTNUMBER.c
 </command>
-<file name="%LOGDIR/code%TESTNUMBER.c">
+<file1 name="%LOGDIR/.checksrc">
+enable PRINTFZ
+</file1>
+<file2 name="%LOGDIR/code%TESTNUMBER.c">
 /* test source code
  * Violate each rule at least once.
  **/
@@ -100,7 +103,7 @@ void startfunc(int a, int b) {
 
  /* comment does not end
 
-</file>
+</file2>
 </client>
 
 # Verify data after the test has been "shot"
@@ -186,7 +189,16 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:55:10: warning: use of magicbad is banned (BANNEDFUNC)
   int a = magicbad(buffer, alsobad(buffer), "%d", 99);
           ^
-./%LOGDIR/code1185.c:55:27: warning: use of alsobad is banned (BANNEDFUNC)
+./%LOGDIR/code1185.c:63:49: warning: use of %zd/%zu is banned (use %ld/%lu with cast instead) (PRINTFZ)[LF]
+  if(printf(buffer, "banned mask in CRT printf: |%zu|", moo)) {}[LF]
+                                                 ^[LF]
+./%LOGDIR/code1185.c:64:50: warning: use of %zd/%zu is banned (use %ld/%lu with cast instead) (PRINTFZ)[LF]
+  const char * msg = "banned mask in CRT fprintf: %zd";[LF]
+                                                  ^[LF]
+./%LOGDIR/code1185.c:64:14: warning: space after declarative asterisk (ASTERISKSPACE)[LF]
+  const char * msg = "banned mask in CRT fprintf: %zd";[LF]
+              ^[LF]
+./%LOGDIR/code1185.c:65:27: warning: use of alsobad is banned (BANNEDFUNC)
   int a = magicbad(buffer, alsobad(buffer), "%d", 99);
                            ^
 ./%LOGDIR/code1185.c:56:21: warning: missing space before colon (NOSPACEC)
