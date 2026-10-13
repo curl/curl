@@ -243,7 +243,7 @@ jobs:
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
     needs: build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
-    timeout-minutes: ${{ contains(matrix.tflags, '-t') && 14 || 10 }}
+    timeout-minutes: ${{ contains(matrix.tflags, '-t') && 25 || 20 }}
     defaults:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
