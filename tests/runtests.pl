@@ -185,6 +185,7 @@ my %runnersrunning;    # tests currently running by runner ID
 my $short;
 my $no_debuginfod;
 my $postmortem;   # display detailed info about failed tests
+my $show_success_logs = 0;  # display detailed info about passed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
 my $jobs = 0;
@@ -2034,6 +2035,9 @@ sub singletest {
                 displaylogs($rid, $testnum);
             }
         }
+        elsif($show_success_logs) {
+            displaylogs($rid, $testnum);
+        }
 
         #######################################################################
         # Load test file for this test number
@@ -2511,6 +2515,9 @@ while(@ARGV) {
             die "Failed to parse '-o $ARGV[0]'. May contain unexpected characters.\n";
         }
     }
+    elsif($ARGV[0] eq "-S") {
+        $show_success_logs = 1;
+    }
     elsif($ARGV[0] eq "-p") {
         $postmortem = 1;
     }
@@ -2608,6 +2615,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -rf      full run time statistics
   --repeat=[num] run the given tests this many times
   --retry=[num] number of attempts for the whole test run to retry failed tests
+  -S       print log file contents when a test passes
   -s       short output
   --seed=[num] set the random seed to a fixed number
   --shallow=[num] randomly makes the torture tests "thinner"
@@ -3204,6 +3212,9 @@ while(1) {
                     }
                     elsif(!$error) {
                         $ok++; # successful test counter
+                        if($show_success_logs) {
+                            displaylogs($ridready, $testnum);
+                        }
                     }
                 }
             }
