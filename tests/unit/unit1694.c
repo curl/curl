@@ -136,7 +136,7 @@ static CURLcode test_unit1694(const char *arg)
     result = Curl_range(easy); /* Exercise the code under test */
 
     /* Check the result code */
-    if(result -= tests[i].result) {
+    if(result != tests[i].result) {
       curl_mprintf("Curl_range(\"%s\") returned %d, expected %d [%zu]\n",
                    range_str, (int)result, (int)tests[i].result, i);
       fail("unexpected result code");
