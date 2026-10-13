@@ -13,7 +13,7 @@ name: 'OpenSSF Scorecard'
   schedule:
     - cron: '15 14 * * 0'
   push:
-    branches: [ 'master' ]
+    branches: ['master']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
