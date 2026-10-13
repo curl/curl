@@ -123,20 +123,6 @@ void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg)
   }
 }
 
-CURLcode Curl_http_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn)
-{
-  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
-     during this request */
-  if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
-    /* only HTTP/3, needs to work */
-    CURLcode result = Curl_conn_may_http3(data, conn);
-    if(result)
-      return result;
-  }
-  return CURLE_OK;
-}
-
 #ifndef CURL_DISABLE_PROXY
 /*
  * checkProxyHeaders() checks the linked list of custom proxy headers
@@ -5090,7 +5076,7 @@ CURLcode Curl_http_setup_filters(struct Curl_easy *data,
  * HTTP handler interface.
  */
 const struct Curl_protocol Curl_protocol_http = {
-  Curl_http_setup_conn,                 /* setup_connection */
+  ZERO_NULL,                            /* setup_connection */
   Curl_http_setup_filters,              /* setup_filters */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
