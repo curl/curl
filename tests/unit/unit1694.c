@@ -25,39 +25,37 @@
 #include "urldata.h"
 #include "curl_range.h"
 
-static CURLcode t1694_setup(struct Curl_easy **data)
+/* Only include this test if one or more of FTP, FILE are enabled. */
+#if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
+
+static CURLcode t1694_setup(struct Curl_easy **easy)
 {
-  CURL *easy;
   CURLcode result;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
   if(result)
     return result; /* init failed us */
 
-  easy = curl_easy_init();
-  if(!easy) {
+  *easy = curl_easy_init();
+  if(!*easy) {
     curl_global_cleanup();   /* roll back the half we did succeed at */
     return CURLE_OUT_OF_MEMORY;
   }
 
-  *data = (struct Curl_easy *)easy; /* grab the data */
   return CURLE_OK;
 }
 
-static void t1694_stop(struct Curl_easy *data)
+static void t1694_stop(struct Curl_easy *easy)
 {
-  curl_easy_cleanup(data);
+  curl_easy_cleanup(easy);
   curl_global_cleanup();
 }
 
 static CURLcode test_unit1694(const char *arg)
 {
-  struct Curl_easy *data;
+  struct Curl_easy *easy;
 
-  UNITTEST_BEGIN(t1694_setup(&data))
-
-  /* Only include this test if one or more of FTP, FILE are enabled. */
-#if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
+  UNITTEST_BEGIN(t1694_setup(&easy))
 
   struct testcase {
     /* Input values */
@@ -114,62 +112,69 @@ static CURLcode test_unit1694(const char *arg)
 
     /* Initialize the outputs in case any subsequent test paths
      * skip any writes to these values */
-    data->result = CURLE_UNSUPPORTED_PROTOCOL;
-    data->state.resume_from = 0;
-    data->req.maxdownload = -1;
+    easy->result = CURLE_UNSUPPORTED_PROTOCOL;
+    easy->state.resume_from = 0;
+    easy->req.maxdownload = -1;
 
     /* Set the input use_range flag according to the test case */
-    data->state.use_range = tests[i].use_range;
+    easy->state.use_range = tests[i].use_range;
 
     /* Setup the input range, including a printable version */
     if(tests[i].range) {
       range_str = tests[i].range;
-      data->state.range = curlx_strdup(tests[i].range);
-      if(!data->state.range) {
+      easy->state.range = curlx_strdup(tests[i].range);
+      if(!easy->state.range) {
         curl_mprintf("curlx_strdup failed for test case [%zu]\n", i);
         unittest_abort("out of memory");
       }
     }
     else {
       range_str = "(null)";
-      data->state.range = NULL;
+      easy->state.range = NULL;
     }
 
-    result = Curl_range(data); /* Exercise the code under test */
+    result = Curl_range(easy); /* Exercise the code under test */
 
     /* Check the result code */
-    if(result != tests[i].result) {
+    if(result -= tests[i].result) {
       curl_mprintf("Curl_range(\"%s\") returned %d, expected %d [%zu]\n",
                    range_str, (int)result, (int)tests[i].result, i);
       fail("unexpected result code");
     }
 
     /* Check the resume_from value */
-    if(data->state.resume_from != tests[i].resume_from) {
+    if(easy->state.resume_from != tests[i].resume_from) {
       curl_mprintf("Curl_range(\"%s\") set resume_from to %" FMT_OFF_T
                    ", expected %" FMT_OFF_T " [%zu]\n",
-                   range_str, data->state.resume_from,
+                   range_str, easy->state.resume_from,
                    tests[i].resume_from, i);
       fail("resume_from mismatch");
     }
 
     /* Check the maxdownload value */
-    if(data->req.maxdownload != tests[i].maxdownload) {
+    if(easy->req.maxdownload != tests[i].maxdownload) {
       curl_mprintf("Curl_range(\"%s\") set maxdownload to %" FMT_OFF_T
                    ", expected %" FMT_OFF_T " [%zu]\n",
-                   range_str, data->req.maxdownload,
+                   range_str, easy->req.maxdownload,
                    tests[i].maxdownload, i);
       fail("maxdownload mismatch");
     }
 
     /* Clean up after ourselves */
     if(tests[i].range)
-      curlx_free(data->state.range);
+      curlx_free(easy->state.range);
   }
 
-#else
-  puts("not tested");
-#endif /* !CURL_DISABLE_FTP || !CURL_DISABLE_FILE */
-
-  UNITTEST_END(t1694_stop(data))
+  UNITTEST_END(t1694_stop(easy))
 }
+
+#else
+
+static CURLcode test_unit1694(const char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  puts("not tested since FTP and FILE are disabled");
+  UNITTEST_END_SIMPLE
+}
+
+#endif /* !CURL_DISABLE_FTP || !CURL_DISABLE_FILE */
