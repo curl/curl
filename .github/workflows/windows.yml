@@ -75,7 +75,7 @@ jobs:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     needs: build-cache
     runs-on: windows-2022
-    timeout-minutes: 20
+    timeout-minutes: 10
     cache-mode: read
     defaults:
       run:
@@ -805,7 +805,7 @@ jobs:
           - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-22 clang-tidy-22', CFLAGS: '-Wunused-macros' }
     steps:
       - name: 'install prereqs'
-        timeout-minutes: 5
+        timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:
           apt: gcc-mingw-w64-x86-64-win32 ${{ matrix.install_packages }}
