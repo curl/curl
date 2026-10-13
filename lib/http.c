@@ -5056,13 +5056,11 @@ void Curl_http_resp_free(struct http_resp *resp)
 CURLcode Curl_http_setup_filters(struct Curl_easy *data,
                                  struct Curl_cfilter *cf)
 {
-  VERBOSE(const char *info_version = "HTTP/1.x");
-  const char *alpn;
+  const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf, data);
   CURLcode result;
 
-  alpn = Curl_conn_cf_get_alpn_negotiated(cf, data);
   if(alpn && !strcmp("h3", alpn)) {
-    VERBOSE(info_version = "HTTP/3 (via ALPN)");
+    CURL_TRC_CF(data, cf, "using HTTP/3 (via ALPN)");
   }
   else if(alpn && !strcmp("h2", alpn)) {
     if(Curl_conn_cf_http_version(data, cf) != 20) {
@@ -5071,7 +5069,7 @@ CURLcode Curl_http_setup_filters(struct Curl_easy *data,
       if(result)
         return result;
     }
-    VERBOSE(info_version = "HTTP/2 (via ALPN)");
+      CURL_TRC_CF(data, cf, "using HTTP/2 (via ALPN)");
   }
   else {
     /* Check if user wants to use HTTP/2 with clear TCP */
@@ -5080,10 +5078,11 @@ CURLcode Curl_http_setup_filters(struct Curl_easy *data,
       result = Curl_http2_switch_at(data, cf);
       if(result)
         return result;
-      VERBOSE(info_version = "HTTP/2 (over clean TCP)");
+        CURL_TRC_CF(data, cf, "using HTTP/2 (over clean TCP)");
     }
+    else
+      CURL_TRC_CF(data, cf, "using HTTP/1.x");
   }
-  CURL_TRC_CF(data, cf, "using %s", info_version);
   return CURLE_OK;
 }
 
