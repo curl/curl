@@ -73,7 +73,7 @@ int main(void)
 
       /* Configure the POST data */
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,
                        (long)sizeof(post_data) - 1);
 
       /* Set callback to populate trailing headers */
