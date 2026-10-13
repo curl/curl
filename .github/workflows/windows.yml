@@ -805,7 +805,7 @@ jobs:
           - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-22 clang-tidy-22', CFLAGS: '-Wunused-macros' }
     steps:
       - name: 'install prereqs'
-        timeout-minutes: 2
+        timeout-minutes: 5
         uses: $/.github/actions/pkg-install
         with:
           apt: gcc-mingw-w64-x86-64-win32 ${{ matrix.install_packages }}
