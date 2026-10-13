@@ -124,6 +124,7 @@ static CURLcode test_unit1607(const char *arg)
   struct Curl_multi *multi = NULL;
   struct Curl_easy *easy = NULL;
   struct curl_slist *list = NULL;
+  struct t1607_key key;
 
   for(i = 0; i < CURL_ARRAYSIZE(tests); ++i) {
     size_t j;
@@ -244,45 +245,42 @@ static CURLcode test_unit1607(const char *arg)
     }
   }
   /* Reset must discard pending rules while preserving cached addresses. */
-  {
-    struct t1607_key key;
-    easy = curl_easy_init();
-    multi = curl_multi_init();
-    if(!easy || !multi) {
-      unitfail++;
-      goto error;
-    }
-    curl_multi_add_handle(multi, easy);
-    list = curl_slist_append(NULL, "reset.example:80:127.0.0.1");
-    if(!list) {
-      unitfail++;
-      goto error;
-    }
-    curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
-    curl_easy_reset(easy);
-    fail_unless(Curl_loadhostpairs(easy) == CURLE_OK, "load after reset");
-    t1607_create_key(&key, "reset.example", 80, CURL_DNST_ADDR);
-    fail_unless(!Curl_hash_pick(&multi->dnscache.entries, key.data, key.len),
-                "reset must discard pending resolve rules");
-
-    curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
-    fail_unless(Curl_loadhostpairs(easy) == CURLE_OK, "load new rules");
-    fail_unless(Curl_hash_pick(&multi->dnscache.entries, key.data, key.len),
-                "new resolve rules must work after reset");
-    curl_slist_free_all(list);
-    list = curl_slist_append(NULL, "-reset.example:80");
-    if(!list) {
-      unitfail++;
-      goto error;
-    }
-    curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
-    curl_easy_reset(easy);
-    curl_slist_free_all(list);
-    list = NULL;
-    fail_unless(Curl_loadhostpairs(easy) == CURLE_OK, "load after free");
-    fail_unless(Curl_hash_pick(&multi->dnscache.entries, key.data, key.len),
-                "reset must preserve cached addresses");
+  easy = curl_easy_init();
+  multi = curl_multi_init();
+  if(!easy || !multi) {
+    unitfail++;
+    goto error;
   }
+  curl_multi_add_handle(multi, easy);
+  list = curl_slist_append(NULL, "reset.example:80:127.0.0.1");
+  if(!list) {
+    unitfail++;
+    goto error;
+  }
+  curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
+  curl_easy_reset(easy);
+  fail_unless(Curl_loadhostpairs(easy) == CURLE_OK, "load after reset");
+  t1607_create_key(&key, "reset.example", 80, CURL_DNST_ADDR);
+  fail_unless(!Curl_hash_pick(&multi->dnscache.entries, key.data, key.len),
+              "reset must discard pending resolve rules");
+
+  curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
+  fail_unless(Curl_loadhostpairs(easy) == CURLE_OK, "load new rules");
+  fail_unless(Curl_hash_pick(&multi->dnscache.entries, key.data, key.len),
+              "new resolve rules must work after reset");
+  curl_slist_free_all(list);
+  list = curl_slist_append(NULL, "-reset.example:80");
+  if(!list) {
+    unitfail++;
+    goto error;
+  }
+  curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
+  curl_easy_reset(easy);
+  curl_slist_free_all(list);
+  list = NULL;
+  fail_unless(Curl_loadhostpairs(easy) == CURLE_OK, "load after free");
+  fail_unless(Curl_hash_pick(&multi->dnscache.entries, key.data, key.len),
+              "reset must preserve cached addresses");
 error:
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
