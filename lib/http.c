@@ -5069,7 +5069,7 @@ CURLcode Curl_http_setup_filters(struct Curl_easy *data,
       if(result)
         return result;
     }
-      CURL_TRC_CF(data, cf, "using HTTP/2 (via ALPN)");
+    CURL_TRC_CF(data, cf, "using HTTP/2 (via ALPN)");
   }
   else {
     /* Check if user wants to use HTTP/2 with clear TCP */
@@ -5078,7 +5078,7 @@ CURLcode Curl_http_setup_filters(struct Curl_easy *data,
       result = Curl_http2_switch_at(data, cf);
       if(result)
         return result;
-        CURL_TRC_CF(data, cf, "using HTTP/2 (over clean TCP)");
+      CURL_TRC_CF(data, cf, "using HTTP/2 (over clean TCP)");
     }
     else
       CURL_TRC_CF(data, cf, "using HTTP/1.x");
