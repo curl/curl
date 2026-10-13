@@ -82,7 +82,7 @@ void startfunc(int a, int b) {
  if(sprintf(buffer, "%s", moo)) {}
  /* !checksrc! disable BANNEDFUNC 1 */
  if(printf(buffer, "banned mask in CRT printf: |%zu|", moo)) {}
- const char * msg = "banned mask in CRT fprintf: %zd";
+ const char *msg = "banned mask in CRT fprintf: %zd";
  *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
 
 # if defined(SINGLE_MACRO)
@@ -109,153 +109,151 @@ void startfunc(int a, int b) {
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
-./%LOGDIR/code1185.c:4:82: warning: Longer than 79 columns (LONGLINE)
+./%LOGDIR/code%TESTNUMBER.c:4:82: warning: Longer than 79 columns (LONGLINE)
  int hello; /*------------------------------------------------------------------*/
-./%LOGDIR/code1185.c:5:4: error: Contains TAB character (TABS)
+./%LOGDIR/code%TESTNUMBER.c:5:4: error: Contains TAB character (TABS)
  int%TABtab;
     ^
-./%LOGDIR/code1185.c:7:13: warning:  func with space (SPACEBEFOREPAREN)
+./%LOGDIR/code%TESTNUMBER.c:7:13: warning:  func with space (SPACEBEFOREPAREN)
  int a = func ();
              ^
-./%LOGDIR/code1185.c:8:14: warning: space after open parenthesis (SPACEAFTERPAREN)
+./%LOGDIR/code%TESTNUMBER.c:8:14: warning: space after open parenthesis (SPACEAFTERPAREN)
  int b = func( b);
               ^
-./%LOGDIR/code1185.c:9:16: warning: space before close parenthesis (SPACEBEFORECLOSE)
+./%LOGDIR/code%TESTNUMBER.c:9:16: warning: space before close parenthesis (SPACEBEFORECLOSE)
  int b = func(b );
                 ^
-./%LOGDIR/code1185.c:10:11: warning: space before comma (SPACEBEFORECOMMA)
+./%LOGDIR/code%TESTNUMBER.c:10:11: warning: space before comma (SPACEBEFORECOMMA)
  func(a, b , c);
            ^
-./%LOGDIR/code1185.c:14:9: warning: return without space before paren (RETURNNOSPACE)
+./%LOGDIR/code%TESTNUMBER.c:14:9: warning: return without space before paren (RETURNNOSPACE)
    return(2);
          ^
-./%LOGDIR/code1185.c:16:11: warning: comma without following space (COMMANOSPACE)
+./%LOGDIR/code%TESTNUMBER.c:16:11: warning: comma without following space (COMMANOSPACE)
  func(a, b,c);
            ^
-./%LOGDIR/code1185.c:18:12: warning: wrongly placed open brace (BRACEPOS)
+./%LOGDIR/code%TESTNUMBER.c:18:12: warning: wrongly placed open brace (BRACEPOS)
  if(a == 2) {
             ^
-./%LOGDIR/code1185.c:20:1: warning: else after closing brace on same line (BRACEELSE)
+./%LOGDIR/code%TESTNUMBER.c:20:1: warning: else after closing brace on same line (BRACEELSE)
  } else {
  ^
-./%LOGDIR/code1185.c:24:11: warning: missing space after close paren (PARENBRACE)
+./%LOGDIR/code%TESTNUMBER.c:24:11: warning: missing space after close paren (PARENBRACE)
  if(a == 2){%SP%SP
            ^
-./%LOGDIR/code1185.c:28:14: warning: no space before semicolon (SPACESEMICOLON)
+./%LOGDIR/code%TESTNUMBER.c:28:14: warning: no space before semicolon (SPACESEMICOLON)
  func_return() ;
               ^
-./%LOGDIR/code1185.c:30:5: warning: use of sprintf is banned (BANNEDFUNC)
+./%LOGDIR/code%TESTNUMBER.c:30:5: warning: use of sprintf is banned (BANNEDFUNC)
  a = sprintf(buffer, "%s", moo);
      ^
-./%LOGDIR/code1185.c:32:11: warning: use of non-binary fopen without FOPEN_* macro: r (FOPENMODE)
+./%LOGDIR/code%TESTNUMBER.c:32:11: warning: use of non-binary fopen without FOPEN_* macro: r (FOPENMODE)
  FILE *f = curlx_fopen("filename", "r");
            ^
-./%LOGDIR/code1185.c:34:30: warning: wrongly placed open brace (BRACEPOS)
+./%LOGDIR/code%TESTNUMBER.c:34:30: warning: wrongly placed open brace (BRACEPOS)
  void startfunc(int a, int b) {
                               ^
-./%LOGDIR/code1185.c:39:6: warning: not indented 2 steps (uses 4) (INDENTATION)
+./%LOGDIR/code%TESTNUMBER.c:39:6: warning: not indented 2 steps (uses 4) (INDENTATION)
       func(1);
       ^
-./%LOGDIR/code1185.c:42:8: warning: space after declarative asterisk (ASTERISKSPACE)
+./%LOGDIR/code%TESTNUMBER.c:42:8: warning: space after declarative asterisk (ASTERISKSPACE)
   char * name = "hello";
         ^
-./%LOGDIR/code1185.c:43:7: warning: space after declarative asterisk (ASTERISKSPACE)
+./%LOGDIR/code%TESTNUMBER.c:43:7: warning: space after declarative asterisk (ASTERISKSPACE)
   char* name = "hello";
        ^
-./%LOGDIR/code1185.c:43:6: warning: no space before asterisk (ASTERISKNOSPACE)
+./%LOGDIR/code%TESTNUMBER.c:43:6: warning: no space before asterisk (ASTERISKNOSPACE)
   char* name = "hello";
       ^
-./%LOGDIR/code1185.c:45:10: warning: no space after equals sign (EQUALSNOSPACE)
+./%LOGDIR/code%TESTNUMBER.c:45:10: warning: no space after equals sign (EQUALSNOSPACE)
   int foo=bar;
           ^
-./%LOGDIR/code1185.c:46:9: warning: no space before equals sign (NOSPACEEQUALS)
+./%LOGDIR/code%TESTNUMBER.c:46:9: warning: no space before equals sign (NOSPACEEQUALS)
   int foo= bar;
          ^
-./%LOGDIR/code1185.c:48:16: warning: no space after semicolon (SEMINOSPACE)
+./%LOGDIR/code%TESTNUMBER.c:48:16: warning: no space after semicolon (SEMINOSPACE)
   int foo = bar;foo++;
                 ^
-./%LOGDIR/code1185.c:49:10: warning: multiple spaces (MULTISPACE)
+./%LOGDIR/code%TESTNUMBER.c:49:10: warning: multiple spaces (MULTISPACE)
   for(;;)  {
           ^
-./%LOGDIR/code1185.c:50:5: warning: not indented 2 steps (uses 3) (INDENTATION)
+./%LOGDIR/code%TESTNUMBER.c:50:5: warning: not indented 2 steps (uses 3) (INDENTATION)
      moo();
      ^
-./%LOGDIR/code1185.c:52:3: warning: Suspicious close brace indentation (CLOSEBRACE)
+./%LOGDIR/code%TESTNUMBER.c:52:3: warning: Suspicious close brace indentation (CLOSEBRACE)
    moo();
    ^
-./%LOGDIR/code1185.c:54:16: warning: sizeof without parenthesis (SIZEOFNOPAREN)
+./%LOGDIR/code%TESTNUMBER.c:54:16: warning: sizeof without parenthesis (SIZEOFNOPAREN)
   int a = sizeof int;
                 ^
-./%LOGDIR/code1185.c:55:10: warning: use of magicbad is banned (BANNEDFUNC)
+./%LOGDIR/code%TESTNUMBER.c:55:10: warning: use of magicbad is banned (BANNEDFUNC)
   int a = magicbad(buffer, alsobad(buffer), "%d", 99);
           ^
-./%LOGDIR/code1185.c:63:49: warning: use of %zd/%zu is banned (use %ld/%lu with cast instead) (PRINTFZ)[LF]
-  if(printf(buffer, "banned mask in CRT printf: |%zu|", moo)) {}[LF]
-                                                 ^[LF]
-./%LOGDIR/code1185.c:64:50: warning: use of %zd/%zu is banned (use %ld/%lu with cast instead) (PRINTFZ)[LF]
-  const char * msg = "banned mask in CRT fprintf: %zd";[LF]
-                                                  ^[LF]
-./%LOGDIR/code1185.c:64:14: warning: space after declarative asterisk (ASTERISKSPACE)[LF]
-  const char * msg = "banned mask in CRT fprintf: %zd";[LF]
-              ^[LF]
-./%LOGDIR/code1185.c:65:27: warning: use of alsobad is banned (BANNEDFUNC)
+./%LOGDIR/code%TESTNUMBER.c:55:27: warning: use of alsobad is banned (BANNEDFUNC)
   int a = magicbad(buffer, alsobad(buffer), "%d", 99);
                            ^
-./%LOGDIR/code1185.c:56:21: warning: missing space before colon (NOSPACEC)
+./%LOGDIR/code%TESTNUMBER.c:56:21: warning: missing space before colon (NOSPACEC)
   int moo = hej?wrong:a>b;
                      ^
-./%LOGDIR/code1185.c:56:22: warning: missing space after colon (NOSPACEC)
+./%LOGDIR/code%TESTNUMBER.c:56:22: warning: missing space after colon (NOSPACEC)
   int moo = hej?wrong:a>b;
                       ^
-./%LOGDIR/code1185.c:56:15: warning: missing space before question mark (NOSPACEQ)
+./%LOGDIR/code%TESTNUMBER.c:56:15: warning: missing space before question mark (NOSPACEQ)
   int moo = hej?wrong:a>b;
                ^
-./%LOGDIR/code1185.c:56:16: warning: missing space after question mark (NOSPACEQ)
+./%LOGDIR/code%TESTNUMBER.c:56:16: warning: missing space after question mark (NOSPACEQ)
   int moo = hej?wrong:a>b;
                 ^
-./%LOGDIR/code1185.c:56:23: warning: missing space before less or greater than (NOSPACETHAN)
+./%LOGDIR/code%TESTNUMBER.c:56:23: warning: missing space before less or greater than (NOSPACETHAN)
   int moo = hej?wrong:a>b;
                        ^
-./%LOGDIR/code1185.c:56:23: warning: missing space after less or greater than (NOSPACETHAN)
+./%LOGDIR/code%TESTNUMBER.c:56:23: warning: missing space after less or greater than (NOSPACETHAN)
   int moo = hej?wrong:a>b;
                        ^
-./%LOGDIR/code1185.c:57:23: warning: missing space before less or greater than (NOSPACETHAN)
+./%LOGDIR/code%TESTNUMBER.c:57:23: warning: missing space before less or greater than (NOSPACETHAN)
   int moo2 = wrong2:(a)>(b);
                        ^
-./%LOGDIR/code1185.c:57:23: warning: missing space after less or greater than (NOSPACETHAN)
+./%LOGDIR/code%TESTNUMBER.c:57:23: warning: missing space after less or greater than (NOSPACETHAN)
   int moo2 = wrong2:(a)>(b);
                        ^
-./%LOGDIR/code1185.c:59:7: warning: conditional block on the same line (ONELINECONDITION)
+./%LOGDIR/code%TESTNUMBER.c:59:7: warning: conditional block on the same line (ONELINECONDITION)
   if(a) b++;
        ^
-./%LOGDIR/code1185.c:61:5: warning: use of sprintf is banned (BANNEDFUNC)
+./%LOGDIR/code%TESTNUMBER.c:61:5: warning: use of sprintf is banned (BANNEDFUNC)
   if(sprintf(buffer, "%s", moo)) {}
      ^
-./%LOGDIR/code1185.c:62:25: warning: use of alsobad is banned (BANNEDFUNC)
+./%LOGDIR/code%TESTNUMBER.c:63:49: warning: use of %zd/%zu is banned (use %ld/%lu with cast instead) (PRINTFZ)
+  if(printf(buffer, "banned mask in CRT printf: |%zu|", moo)) {}
+                                                 ^
+./%LOGDIR/code%TESTNUMBER.c:64:49: warning: use of %zd/%zu is banned (use %ld/%lu with cast instead) (PRINTFZ)
+  const char *msg = "banned mask in CRT fprintf: %zd";
+                                                 ^
+./%LOGDIR/code%TESTNUMBER.c:65:25: warning: use of alsobad is banned (BANNEDFUNC)
   *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
                          ^
-./%LOGDIR/code1185.c:64:14: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
+./%LOGDIR/code%TESTNUMBER.c:67:14: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
  # if defined(SINGLE_MACRO)
               ^
-./%LOGDIR/code1185.c:65:17: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
+./%LOGDIR/code%TESTNUMBER.c:68:17: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
   #if  ! defined(__macro_10)
                  ^
-./%LOGDIR/code1185.c:65:1: warning: space before preprocessor hash (CPPSPACE)
+./%LOGDIR/code%TESTNUMBER.c:68:1: warning: space before preprocessor hash (CPPSPACE)
   #if  ! defined(__macro_10)
  ^
-./%LOGDIR/code1185.c:71:2: warning: // comment (CPPCOMMENTS)
+./%LOGDIR/code%TESTNUMBER.c:74:2: warning: // comment (CPPCOMMENTS)
   // CPP comment ?
   ^
-./%LOGDIR/code1185.c:78:2: warning: replace curlx_free() + NULL assignment with curlx_safefree() (USESAFEFREE)
+./%LOGDIR/code%TESTNUMBER.c:81:2: warning: replace curlx_free() + NULL assignment with curlx_safefree() (USESAFEFREE)
   ptr = NULL;  /* comment more */
   ^
-./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
+./%LOGDIR/code%TESTNUMBER.c:1:1: error: Missing copyright statement (COPYRIGHT)
 %SP
  ^
-./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
+./%LOGDIR/code%TESTNUMBER.c:1:1: error: Missing closing comment (OPENCOMMENT)
 %SP
  ^
-checksrc: 3 errors and 43 warnings
+checksrc: 3 errors and 45 warnings
+checksrc: 0 errors and 1 warnings suppressed
 </stdout>
 <errorcode>
 5
