@@ -178,4 +178,3 @@ static CURLcode test_unit1694(const char *arg)
 }
 
 #endif /* !CURL_DISABLE_FTP || !CURL_DISABLE_FILE */
-
