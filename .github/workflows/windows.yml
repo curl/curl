@@ -75,7 +75,7 @@ jobs:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     needs: build-cache
     runs-on: windows-2022
-    timeout-minutes: 10
+    timeout-minutes: 20
     cache-mode: read
     defaults:
       run:
