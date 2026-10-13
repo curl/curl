@@ -59,138 +59,113 @@ static CURLcode test_unit1694(const char *arg)
   /* Only include this test if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
 
-  /* TC 1: Make sure Curl_range doesn't do anything unless the range
-   * request data is properly initialized.
-   *
-   * The use_range and range variables are ANDead together within the
-   * Curl_range function for this check, so for 3 out of 4 scenarios the
-   * initialization could be incorrect. */
+  struct testcase {
+    /* Input values */
+    bool use_range;         /* value for state.use_range */
+    const char *range;      /* value for state.range, or NULL */
+    /* Output values */
+    CURLcode result;        /* expected return from Curl_range() */
+    curl_off_t resume_from; /* expected state.resume_from after the call */
+    curl_off_t maxdownload; /* expected req.maxdownload after the call */
+  };
 
-  /* TC 1 Case 1: both items incorrect */
-  data->state.use_range = FALSE; /* range request is not enabled */
-  data->state.range = NULL; /* range string is not set */
+  static const struct testcase tests[] = {
 
-  fail_unless(Curl_range(data) == CURLE_OK,
-              "call with no range set should still succeed");
-  fail_unless(data->req.maxdownload == -1,
-              "no range set should leave maxdownload at -1");
+    /* Make sure Curl_range doesn't do anything unless the range
+     * request data is properly initialized.
+     *
+     * The use_range and range variables are ANDead together within the
+     * Curl_range function for this check, so for 3 out of 4 scenarios the
+     * initialization could be incorrect. */
 
-  /* TC 1 Case 2: use_range incorrect */
+    { FALSE, NULL,                    CURLE_OK,          0, -1 },
+    { FALSE, "0-100",                 CURLE_OK,          0, -1 },
+    { TRUE,  NULL,                    CURLE_OK,          0, -1 },
 
-  data->state.use_range = FALSE; /* range request is not enabled */
-  data->state.range = curlx_strdup("0-100"); /* range string is set */
+    /* Let's feed Curl_range some invalid ranges */
 
-  fail_unless(Curl_range(data) == CURLE_OK,
-              "call with no use range should still succeed");
-  fail_unless(data->req.maxdownload == -1,
-              "valid range set should leave maxdownload at -1");
+    /* Text instead of a numerical range */
+    { TRUE,  "NotANumber",            CURLE_RANGE_ERROR, 0, -1 },
+    /* A single stand alone "range" should fail */
+    { TRUE,  "100",                   CURLE_RANGE_ERROR, 0, -1 },
+    /* Passing in "-0" should fail */
+    { TRUE,  "-0",                    CURLE_RANGE_ERROR, 0, -1 },
+    /* Passing in a "from" greater than the "to" should fail */
+    { TRUE,  "100-50",                CURLE_RANGE_ERROR, 0, -1 },
+    /* Passing in a range that is greater than CURL_OFF_T_MAX
+     * should fail */
+    { TRUE,  "0-9223372036854775807", CURLE_RANGE_ERROR, 0, -1 },
 
-  curlx_free(data->state.range);
+    /* success paths */
 
-  /* TC 1 Case 3: range incorrect */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range = NULL; /* range string is not set */
+    /* Start at a byte, go to the end */
+    { TRUE,  "100-",                  CURLE_OK,        100, -1 },
+    /* Start at the beginning, go to a byte */
+    { TRUE,  "-100",                  CURLE_OK,       -100, 100 },
+    /* A range of bytes */
+    { TRUE,  "100-201",               CURLE_OK,        100, 102 }
+  };
 
-  fail_unless(Curl_range(data) == CURLE_OK,
-              "call with validuse range should still succeed");
-  fail_unless(data->req.maxdownload == -1,
-              "no range set should leave maxdownload at -1");
+  size_t i;
 
-  /* TC 2: Garbage instead of a valid range */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range = curlx_strdup("NotANumber"); /* range string is set */
+  for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
+    CURLcode result;
+    const char *range_str; /* printable version of the range for messages */
 
-  fail_unless(Curl_range(data) == CURLE_RANGE_ERROR,
-              "call with garbage number should fail");
-  fail_unless(data->req.maxdownload == -1,
-              "failed range should leave maxdownload at -1");
+    /* Initialize the outputs in case any subsequent test paths
+     * skip any writes to these values */
+    data->result = CURLE_UNSUPPORTED_PROTOCOL;
+    data->state.resume_from = 0;
+    data->req.maxdownload = -1;
 
-  curlx_free((char *)data->state.range);
+    /* Set the input use_range flag according to the test case */
+    data->state.use_range = tests[i].use_range;
 
-  /* TC 3: A single stand alone range number should fail */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range = curlx_strdup("100"); /* range string is set */
+    /* Setup the input range, including a printable version */
+    if(tests[i].range) {
+      range_str = tests[i].range;
+      data->state.range = curlx_strdup(tests[i].range);
+      if(!data->state.range) {
+        curl_mprintf("curlx_strdup failed for test case [%zu]\n", i);
+        unittest_abort("out of memory");
+      }
+    }
+    else {
+      range_str = "(null)";
+      data->state.range = NULL;
+    }
 
-  fail_unless(Curl_range(data) == CURLE_RANGE_ERROR,
-              "call with single stand alone number should fail");
-  fail_unless(data->req.maxdownload == -1,
-              "failed range should leave maxdownload at -1");
+    result = Curl_range(data); /* Exercise the code under test */
 
-  curlx_free((char *)data->state.range);
+    /* Check the result code */
+    if(result != tests[i].result) {
+      curl_mprintf("Curl_range(\"%s\") returned %d, expected %d [%zu]\n",
+                   range_str, (int)result, (int)tests[i].result, i);
+      fail("unexpected result code");
+    }
 
-  /* TC 4: Passing in "-0" should fail */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range = curlx_strdup("-0"); /* range string is set */
+    /* Check the resume_from value */
+    if(data->state.resume_from != tests[i].resume_from) {
+      curl_mprintf("Curl_range(\"%s\") set resume_from to %" FMT_OFF_T
+                   ", expected %" FMT_OFF_T " [%zu]\n",
+                   range_str, data->state.resume_from,
+                   tests[i].resume_from, i);
+      fail("resume_from mismatch");
+    }
 
-  fail_unless(Curl_range(data) == CURLE_RANGE_ERROR,
-              "call with -0 should fail");
-  fail_unless(data->req.maxdownload == -1,
-              "failed range should leave maxdownload at -1");
+    /* Check the maxdownload value */
+    if(data->req.maxdownload != tests[i].maxdownload) {
+      curl_mprintf("Curl_range(\"%s\") set maxdownload to %" FMT_OFF_T
+                   ", expected %" FMT_OFF_T " [%zu]\n",
+                   range_str, data->req.maxdownload,
+                   tests[i].maxdownload, i);
+      fail("maxdownload mismatch");
+    }
 
-  curlx_free((char *)data->state.range);
-
-  /* TC 5: Passing in a "from" greater than the "to" should fail */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range = curlx_strdup("100-50"); /* range string is set */
-
-  fail_unless(Curl_range(data) == CURLE_RANGE_ERROR,
-              "call with from > to should fail");
-  fail_unless(data->req.maxdownload == -1,
-              "failed range should leave maxdownload at -1");
-
-  curlx_free((char *)data->state.range);
-
-  /* TC 6: Passing in a range that is greater than CURL_OFF_T_MAX
-   * should fail */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range =
-    curlx_strdup("0-9223372036854775807"); /* range string is set */
-
-  fail_unless(Curl_range(data) == CURLE_RANGE_ERROR,
-              "call with range greater than CURL_OFF_T_MAX should fail");
-  fail_unless(data->req.maxdownload == -1,
-              "failed range should leave maxdownload at -1");
-
-  curlx_free((char *)data->state.range);
-
-  /* Finally, we're ready to test the success paths */
-
-  /* TC 7: A number and a dash */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range = curlx_strdup("100-"); /* range string is set */
-
-  fail_unless(Curl_range(data) == CURLE_OK,
-              "call with number and dash should succeed");
-  fail_unless(data->state.resume_from == 100,
-              "resume_from should be set to 100");
-
-  curlx_free((char *)data->state.range);
-
-  /* TC 8: A dash and a number */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range = curlx_strdup("-100"); /* range string is set */
-
-  fail_unless(Curl_range(data) == CURLE_OK,
-              "call with dash and number should succeed");
-  fail_unless(data->state.resume_from == -100,
-              "resume_from should be set to -100");
-  fail_unless(data->req.maxdownload == 100,
-              "maxdownload should be set to 100");
-
-  curlx_free((char *)data->state.range);
-
-  /* TC 9: A number, a dash, and a number */
-  data->state.use_range = TRUE; /* range request is enabled */
-  data->state.range = curlx_strdup("100-201"); /* range string is set */
-
-  fail_unless(Curl_range(data) == CURLE_OK,
-              "call with number and number should succeed");
-  fail_unless(data->state.resume_from == 100,
-              "resume_from should be set to 100");
-  fail_unless(data->req.maxdownload == 102,
-              "maxdownload should be set to 102");
-
-  curlx_free((char *)data->state.range);
+    /* Clean up after ourselves */
+    if(tests[i].range)
+      curlx_free(data->state.range);
+  }
 
 #else
   puts("not tested");
