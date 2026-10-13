@@ -1038,6 +1038,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
  */
 const struct Curl_protocol Curl_protocol_rtsp = {
   rtsp_setup_connection,                /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   rtsp_do,                              /* do_it */
   rtsp_done,                            /* done */
   ZERO_NULL,                            /* do_more */

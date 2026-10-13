@@ -695,6 +695,7 @@ out:
 
 const struct Curl_protocol Curl_protocol_file = {
   file_setup_connection,                /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   file_do,                              /* do_it */
   file_done,                            /* done */
   ZERO_NULL,                            /* do_more */

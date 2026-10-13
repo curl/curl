@@ -1555,6 +1555,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
  */
 const struct Curl_protocol Curl_protocol_telnet = {
   ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   telnet_do,                            /* do_it */
   telnet_done,                          /* done */
   ZERO_NULL,                            /* do_more */
