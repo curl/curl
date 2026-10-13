@@ -77,6 +77,9 @@ void startfunc(int a, int b) {
  if(a) b++;
 
  if(sprintf(buffer, "%s", moo)) {}
+ /* !checksrc! disable BANNEDFUNC 1 */
+ if(printf(buffer, "banned mask in CRT printf: |%zu|", moo)) {}
+ const char * msg = "banned mask in CRT fprintf: %zd";
  *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
 
 # if defined(SINGLE_MACRO)

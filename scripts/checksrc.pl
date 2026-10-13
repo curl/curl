@@ -473,6 +473,7 @@ sub enable_warn {
     $ignore_used{$what} = 0;
     $ignore{$what} = 0;
 }
+
 sub checksrc {
     my ($cmd, $line, $file, $l) = @_;
     if($cmd =~ / *([^ ]*) *(.*)/) {
