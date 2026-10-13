@@ -176,5 +176,7 @@ static CURLcode test_unit1694(const char *arg)
   puts("not tested since FTP and FILE are disabled");
   UNITTEST_END_SIMPLE
 }
+
 #endif /* !CURL_DISABLE_FTP || !CURL_DISABLE_FILE */
+
 
