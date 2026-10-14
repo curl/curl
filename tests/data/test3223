@@ -41,7 +41,7 @@ http
 HTTP connection not reused after partial/aborted response
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/3223-1 -w "connects=%{num_connects}/" --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -o %LOGDIR/3223-2 -w "connects=%{num_connects}/"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/%TESTNUMBER-1 -w "connects=%{num_connects}/" --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -o %LOGDIR/%TESTNUMBER-2 -w "connects=%{num_connects}/"
 </command>
 </client>
 <verify>

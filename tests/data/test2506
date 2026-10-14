@@ -36,11 +36,11 @@ proxy
 <name>
 netrc with redirect using proxy
 </name>
-<file name="%LOGDIR/netrc2506">
+<file name="%LOGDIR/netrc%TESTNUMBER">
 machine site.example login batman password robin
 </file>
 <command>
-http://%HOSTIP:%HTTPPORT http://site.example/ %LOGDIR/netrc2506
+http://%HOSTIP:%HTTPPORT http://site.example/ %LOGDIR/netrc%TESTNUMBER
 </command>
 </client>
 
@@ -52,7 +52,7 @@ Authorization: Basic %b64[batman:robin]b64%
 Accept: */*
 Proxy-Connection: Keep-Alive
 
-GET http://numbertwo.example/25060002 HTTP/1.1
+GET http://numbertwo.example/%TESTNUMBER0002 HTTP/1.1
 Host: numbertwo.example
 Accept: */*
 Proxy-Connection: Keep-Alive

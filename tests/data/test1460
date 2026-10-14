@@ -38,7 +38,7 @@ initial content
 
 # Verify data after the test has been "shot"
 <verify>
-# Warning: Failed to open the file log/name1460: File exists
+# Warning: Failed to open the file log/name%TESTNUMBER: File exists
 <errorcode>
 23
 </errorcode>

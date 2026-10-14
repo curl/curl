@@ -61,7 +61,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
  Server == test with trailing space
  Content-Type == text/html
  Content-Length == 0
- Location == /19460002
+ Location == /%TESTNUMBER0002
 - Set-Cookie == onecookie=data; (0/3)
 - Set-Cookie == secondcookie=2data; (1/3)
 - Set-Cookie == cookie3=data3; (2/3)

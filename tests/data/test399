@@ -15,7 +15,7 @@ http
 65536-byte-long hostname in URL
 </name>
 <file name="%LOGDIR/input%TESTNUM">
-url = http://%repeat[65536 x a]%/399
+url = http://%repeat[65536 x a]%/%TESTNUMBER
 </file>
 <command>
 -K %LOGDIR/input%TESTNUM
