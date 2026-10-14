@@ -35,6 +35,7 @@ permissions: {}
 cache-mode: write
 
 env:
+  CURL_CI: github
   CURL_TEST_MIN: 1900
   CURL_TEST_SSH_KEYALGO: ed25519
   DO_NOT_TRACK: '1'
