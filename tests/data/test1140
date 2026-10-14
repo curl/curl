@@ -15,7 +15,7 @@ Verify the nroff of man pages
 </name>
 
 <command type="perl">
-%SRCDIR/test1140.pl %PWD/../docs/ %PWD/../docs/libcurl/*.3 %PWD/../docs/libcurl/opts/*.3 %PWD/../docs/*.1 %PWD/../docs/cmdline-opts/*.1
+%SRCDIR/test%TESTNUMBER.pl %PWD/../docs/ %PWD/../docs/libcurl/*.3 %PWD/../docs/libcurl/opts/*.3 %PWD/../docs/*.1 %PWD/../docs/cmdline-opts/*.1
 </command>
 </client>
 

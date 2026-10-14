@@ -13,7 +13,7 @@ Verify all string options are translated by OS/400 wrapper
 </name>
 
 <command type="perl">
-%SRCDIR/test1544.pl %SRCDIR/..
+%SRCDIR/test%TESTNUMBER.pl %SRCDIR/..
 </command>
 </client>
 

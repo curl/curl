@@ -27,7 +27,7 @@ libssh2
 !badlibssh
 </features>
 <precheck>
-%PERL %SRCDIR/libtest/test3500.pl %LOGDIR/server/curl_host_key.pub %LOGDIR/known%TESTNUMBER "[%HOSTIP]:%SSHPORT"
+%PERL %SRCDIR/libtest/test%TESTNUMBER.pl %LOGDIR/server/curl_host_key.pub %LOGDIR/known%TESTNUMBER "[%HOSTIP]:%SSHPORT"
 </precheck>
 <name>
 SFTP matches requested hashed known_hosts entry

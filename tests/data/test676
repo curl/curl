@@ -57,7 +57,7 @@ http
 verify setting CURLOPT_COOKIEFILE to NULL again
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies676
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER
 </command>
 <features>
 cookies

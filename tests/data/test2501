@@ -53,7 +53,7 @@ via: 1.1 nghttpx
 
 </stdout>
 <protocol crlf="yes" nonewline="yes">
-POST https://%HOSTIP:%HTTP3PORT/2501 HTTP/1.1
+POST https://%HOSTIP:%HTTP3PORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP3PORT
 User-Agent: curl/%VERSION
 Accept: */*

@@ -14,7 +14,7 @@ Verify that symbols-in-versions and libcurl-errors.3 are in sync
 </name>
 
 <command type="perl">
-%SRCDIR/test1175.pl %SRCDIR/..
+%SRCDIR/test%TESTNUMBER.pl %SRCDIR/..
 </command>
 </client>
 

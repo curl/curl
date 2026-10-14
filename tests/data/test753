@@ -37,7 +37,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-SIZE 753
+SIZE %TESTNUMBER
 QUIT
 </protocol>
 </verify>

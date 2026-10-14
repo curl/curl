@@ -15,7 +15,7 @@ Verify that write-out.md and tool_writeout.c are in sync
 </name>
 
 <command type="perl">
-%SRCDIR/test1486.pl %SRCDIR
+%SRCDIR/test%TESTNUMBER.pl %SRCDIR
 </command>
 </client>
 

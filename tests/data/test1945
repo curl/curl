@@ -71,7 +71,7 @@ Proxy-Connection: Keep-Alive
  Set-Cookie == secondcookie=2data; (1/4)
  Set-Cookie == cookie3=data3; (2/4)
  set-cookie == lowercase=data4; (3/4)
- Location == /19450002 (0/1)
+ Location == /%TESTNUMBER0002 (0/1)
 </stdout>
 </verify>
 </testcase>

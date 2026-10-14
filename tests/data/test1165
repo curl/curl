@@ -14,7 +14,7 @@ Verify configure.ac and source code CURL_DISABLE_-sync
 </name>
 
 <command type="perl">
-%SRCDIR/test1165.pl %SRCDIR/..
+%SRCDIR/test%TESTNUMBER.pl %SRCDIR/..
 </command>
 </client>
 
