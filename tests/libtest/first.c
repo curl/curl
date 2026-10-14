@@ -225,6 +225,7 @@ int main(int argc, const char *argv[])
   {
     int r = 0;
     (void)r;
+    /* !checksrc! disable BANNEDFUNC 1 */
     assert(r == 10); /* FORCE GUI POP */
   }
 #endif
