@@ -1053,7 +1053,7 @@ typedef unsigned int curl_bit;
    replacing the interactive GUI dialog. */
 #if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DEBUG_MSVC_CRTDBG)
 #include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
-#define CURL_MSVC_INIT_CRTDBG()                                             \
+#define CURL_MSVC_CRTDBG_INIT()                                             \
   do {                                                                      \
     _set_error_mode(_OUT_TO_STDERR);  /* needs stdlib.h */                  \
     _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG); \
@@ -1064,7 +1064,7 @@ typedef unsigned int curl_bit;
     _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);                      \
   } while(0)
 #else
-#define CURL_MSVC_INIT_CRTDBG() do {} while(0)
+#define CURL_MSVC_CRTDBG_INIT() do {} while(0)
 #endif
 
 /*

@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 {
   CURLcode result = CURLE_OK;
 
-  CURL_MSVC_INIT_CRTDBG();
+  CURL_MSVC_CRTDBG_INIT();
 
   tool_init_stderr();
 
