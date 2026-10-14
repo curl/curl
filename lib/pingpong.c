@@ -416,4 +416,22 @@ bool Curl_pp_moredata(struct pingpong *pp)
   return !pp->sendleft && curlx_dyn_len(&pp->recvbuf) > pp->nfinal;
 }
 
+bool Curl_pp_pipelined(struct Curl_easy *data, struct pingpong *pp)
+{
+  curl_socket_t sock = data->conn->sock[FIRSTSOCKET];
+  int rc;
+
+  /* more data already read after the final response line */
+  if(pp->overflow)
+    return TRUE;
+  /* data buffered further down in the connection filters */
+  if(Curl_conn_data_pending(data, FIRSTSOCKET))
+    return TRUE;
+  /* data already sent by the server but not read yet */
+  if(sock == CURL_SOCKET_BAD)
+    return FALSE;
+  rc = SOCKET_READABLE(sock, 0);
+  return (rc > 0) && (rc & CURL_CSELECT_IN);
+}
+
 #endif

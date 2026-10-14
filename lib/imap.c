@@ -1108,7 +1108,7 @@ static CURLcode imap_state_starttls_resp(struct Curl_easy *data,
   (void)instate;
 
   /* Pipelining in response is forbidden. */
-  if(imapc->pp.overflow)
+  if(Curl_pp_pipelined(data, &imapc->pp))
     return CURLE_WEIRD_SERVER_REPLY;
 
   if(imapcode != IMAP_RESP_OK) {

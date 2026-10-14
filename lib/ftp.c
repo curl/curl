@@ -3206,7 +3206,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   case FTP_AUTH:
     /* we have gotten the response to a previous AUTH command */
 
-    if(pp->overflow)
+    if(Curl_pp_pipelined(data, pp))
       return CURLE_WEIRD_SERVER_REPLY; /* Forbid pipelining in response. */
 
     /* RFC2228 (page 5) says:
