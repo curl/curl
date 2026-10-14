@@ -382,7 +382,7 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     env:
       LDFLAGS: -s
