@@ -26,6 +26,8 @@
 # shellcheck disable=SC3040,SC2039
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
+export CURL_CI=appveyor
+
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
