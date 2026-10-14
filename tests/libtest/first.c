@@ -220,6 +220,14 @@ int main(int argc, const char *argv[])
   const char *env;
   size_t tmp;
 
+  CURL_MSVC_INIT_CRTDBG();
+#ifdef _MSC_VER
+  {
+    int r = 0;
+    assert(r == 10); /* FORCE GUI POP */
+  }
+#endif
+
   CURL_BINMODE(stdout);
 
   memory_tracking_init();

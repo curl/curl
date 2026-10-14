@@ -1049,6 +1049,24 @@ typedef unsigned int curl_bit;
 #define DEBUGASSERT(x) do {} while(0)
 #endif
 
+/* Macro to configure Visual Studio debug CRT to output errors to stderr,
+   replacing the interactive GUI dialog. */
+#if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DBG_CRTDBG)
+#include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
+#define CURL_MSVC_INIT_CRTDBG()                            \
+  do {                                                     \
+    _set_error_mode(_OUT_TO_STDERR);  /* needs stdlib.h */ \
+    _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);     \
+    _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);   \
+    _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);      \
+    _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);    \
+    _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);       \
+    _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);     \
+  } while(0)
+#else
+#define CURL_MSVC_INIT_CRTDBG() do {} while(0)
+#endif
+
 /*
  * Macro SOCKERRNO / SET_SOCKERRNO() returns / sets the *socket-related* errno
  * (or equivalent) on this platform to hide platform details to code using it.
