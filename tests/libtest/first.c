@@ -221,14 +221,6 @@ int main(int argc, const char *argv[])
   size_t tmp;
 
   CURL_MSVC_CRTDBG_INIT();
-#ifdef _MSC_VER
-  {
-    int r = 0;
-    (void)r;
-    /* !checksrc! disable BANNEDFUNC 1 */
-    assert(r == 10); /* FORCE GUI POP */
-  }
-#endif
 
   CURL_BINMODE(stdout);
 
