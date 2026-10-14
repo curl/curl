@@ -121,6 +121,11 @@ install:
 build_script:
   - cmd: sh -c ./appveyor.sh
 
+init:
+  - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
+on_finish:
+  - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
+
 clone_depth: 10
 
 # select branches to avoid testing feature branches twice (as branch and as pull request)
