@@ -34,10 +34,10 @@ environment:
   DO_NOT_TRACK: '1'
 
   # Jobs:
-  # VS2010: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) libtests fail
-  # VS2012: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) libtests fail
-  # VS2013: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) libtests fail
-  # VS2013: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl) libtests fail
+  # VS2010: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  # VS2012: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  # VS2013: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
+  # VS2013: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
   # VS2015: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
   # VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
   # VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
