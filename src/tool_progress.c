@@ -71,7 +71,6 @@ int xferinfo_cb(void *clientp,
                 curl_off_t ulnow)
 {
   struct per_transfer *per = clientp;
-  struct OperationConfig *config = per->config;
   per->dltotal = dltotal;
   per->dlnow = dlnow;
   per->ultotal = ultotal;
@@ -80,8 +79,8 @@ int xferinfo_cb(void *clientp,
   if(per->abort)
     return 1;
 
-  if(config->readbusy) {
-    config->readbusy = FALSE;
+  if(per->readbusy) {
+    per->readbusy = FALSE;
     curl_easy_pause(per->curl, CURLPAUSE_CONT);
   }
 

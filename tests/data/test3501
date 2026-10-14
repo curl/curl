@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+tunittest
+upload
+parallel
+</keywords>
+</info>
+<client>
+<features>
+unittest
+!win32
+</features>
+<name>
+Paused upload state is isolated between parallel transfers
+</name>
+</client>
+</testcase>

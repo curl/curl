@@ -63,11 +63,13 @@ struct per_transfer {
   curl_off_t ultotal;
   curl_off_t ulnow;
   curl_off_t uploadfilesize; /* expected total amount */
+  curl_off_t ulprev; /* previous upload progress for paused input */
   curl_off_t uploadedsofar; /* amount delivered from the callback */
   uint32_t retry_sleep_default;
   uint32_t retry_sleep;
   BIT(dltotal_added); /* if the total has been added from this */
   BIT(ultotal_added);
+  BIT(readbusy); /* set when reading input returns EAGAIN */
   BIT(infdopen); /* TRUE if infd needs closing */
   BIT(noprogress);
   BIT(was_last_header_empty);

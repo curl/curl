@@ -122,7 +122,6 @@ int tool_progress_cb(void *clientp,
 {
   struct curltime now = curlx_now();
   struct per_transfer *per = clientp;
-  struct OperationConfig *config = per->config;
   struct ProgressData *bar = &per->progressbar;
   curl_off_t total;
   curl_off_t point;
@@ -222,8 +221,8 @@ int tool_progress_cb(void *clientp,
   bar->prev = point;
   bar->prevtime = now;
 
-  if(config->readbusy) {
-    config->readbusy = FALSE;
+  if(per->readbusy) {
+    per->readbusy = FALSE;
     curl_easy_pause(per->curl, CURLPAUSE_CONT);
   }
 
