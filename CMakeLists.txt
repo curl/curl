@@ -387,6 +387,10 @@ if(WIN32)
       message(WARNING "Static CRT requires UCRT, static libcurl or no curl executable.")
     endif()
   endif()
+
+  if(MSVC AND NOT "$ENV{CURL_CI}" STREQUAL "")
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_DBG_CRTDBG")
+  endif()
 endif()
 
 # Override to force-disable or force-enable the use of CMake Configs.
