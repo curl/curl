@@ -1468,7 +1468,7 @@ static int test_dnsd(int argc, const char **argv)
   curlx_nonblock(sock_udp, TRUE);
   curlx_nonblock(sock_tcp_listen, TRUE);
 
-  while(!got_exit_signal) {
+  for(;;) {
     timediff_t timeout_ms = 0;
     fd_set readfds, writefds;
     struct timeval tv;
