@@ -32,6 +32,8 @@ int main(int argc, const char *argv[])
   int result;
   size_t tmp;
 
+  CURL_MSVC_CRTDBG_INIT();
+
   if(argc < 2) {
     fprintf(stderr, "Pass servername as first argument\n");
     return 1;

@@ -220,6 +220,8 @@ int main(int argc, const char *argv[])
   const char *env;
   size_t tmp;
 
+  CURL_MSVC_CRTDBG_INIT();
+
   CURL_BINMODE(stdout);
 
   memory_tracking_init();
