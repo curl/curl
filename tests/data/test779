@@ -66,6 +66,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 B001 CAPABILITY
+B002 LOGOUT
 </protocol>
 # curl: (67) Login denied
 <errorcode>

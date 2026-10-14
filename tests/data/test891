@@ -37,6 +37,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 CAPA
 AUTH CRAM-MD5
 %b64[user 5c8db03f04cec0f43bcb060023914190]b64%
+QUIT
 </protocol>
 # CURLE_LOGIN_DENIED
 <errorcode>

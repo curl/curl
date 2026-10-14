@@ -46,12 +46,11 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 <errorcode>
 67
 </errorcode>
-# The multi interface considers a broken "CONNECT" as a prematurely broken
-# transfer and such a connection does not get a "QUIT"
 <protocol crlf="yes">
 CAPA
 AUTH DIGEST-MD5
 *
+QUIT
 </protocol>
 </verify>
 </testcase>
