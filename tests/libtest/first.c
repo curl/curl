@@ -221,7 +221,7 @@ int main(int argc, const char *argv[])
   size_t tmp;
 
   CURL_MSVC_INIT_CRTDBG();
-#ifdef _MSC_VER
+#ifdef _WIN32
   {
     int r = 0;
     (void)r;
