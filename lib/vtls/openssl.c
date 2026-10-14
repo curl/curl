@@ -2957,8 +2957,9 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
      https://github.com/d3x0r/SACK/blob/ff15424d3c581b86d40f818532e5a400c516d39d/src/netlib/ssl_layer.c#L1410
      https://datatracker.ietf.org/doc/html/rfc5280 */
   static const char * const win_stores[] = {
-    "ROOT",   /* Trusted Root Certification Authorities */
-    "CA"      /* Intermediate Certification Authorities */
+    /* Only ROOT contains trust anchors. Importing the CA store here would
+       trust intermediates independently of their roots with PARTIAL_CHAIN. */
+    "ROOT"    /* Trusted Root Certification Authorities */
   };
   size_t i;
   CURLcode result = CURLE_OK;
@@ -3004,7 +3005,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
     if(result)
       return result;
     if(added) {
-      infof(data, "  Native: Windows System Stores ROOT+CA");
+      infof(data, "  Native: Windows System Store ROOT");
       octx->store_is_empty = FALSE;
     }
 #elif defined(USE_APPLE_SECTRUST)
