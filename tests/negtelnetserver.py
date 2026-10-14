@@ -128,6 +128,9 @@ class Negotiator:
         self.subneg = bytearray()
         # (name, value) pairs received in NEW-ENVIRON IS suboptions
         self.environ = []
+        # Set when the client agreed to NEW-ENVIRON and its IS reply has not
+        # arrived yet
+        self.environ_pending = False
 
     def recv(self, nbytes):
         """
@@ -167,20 +170,28 @@ class Negotiator:
 
         return buffer
 
-    def recv_line(self, nbytes):
+    def recv_line(self, nbytes, timeout=5):
         """
-        Read bytes like recv(), until a newline arrives or the client
+        Read bytes like recv(), until a newline arrives and any NEW-ENVIRON
+        reply the client agreed to send is complete, or until the client
         stops sending.
 
         :param nbytes: Number of bytes to read per call
+        :param timeout: Seconds to wait for more data before giving up
         :return: a buffer of bytes
         """
         buffer = bytearray()
-        while b"\n" not in buffer:
-            data = self.recv(nbytes)
-            if not data:
-                break
-            buffer.extend(data)
+        self.tcp.settimeout(timeout)
+        try:
+            while b"\n" not in buffer or self.environ_pending:
+                data = self.recv(nbytes)
+                if not data:
+                    break
+                buffer.extend(data)
+        except socket.timeout:
+            log.debug("Timed out waiting for client data")
+        finally:
+            self.tcp.settimeout(None)
         return buffer
 
     def no_neg(self, byte_int, buffer):
@@ -235,6 +246,10 @@ class Negotiator:
                         NegOptions.NAWS,
                         NegOptions.NEW_ENVIRON]:
             log.debug("Option: %s", NegOptions.from_val(byte_int))
+            if self.state == self.WILL and \
+               byte_int == NegOptions.NEW_ENVIRON:
+                # The client sends its environment when we ask for it
+                self.environ_pending = True
 
             # No further negotiation of this option needed. Reset the state.
             self.state = self.NO_NEG
@@ -272,6 +287,7 @@ class Negotiator:
         if len(subneg) < 2 or subneg[0] != NegOptions.NEW_ENVIRON or \
            subneg[1] != NegSubTokens.IS:
             return
+        self.environ_pending = False
         name = None
         value = None
         target = None
