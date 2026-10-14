@@ -224,6 +224,7 @@ int main(int argc, const char *argv[])
 #ifdef _MSC_VER
   {
     int r = 0;
+    (void)r;
     assert(r == 10); /* FORCE GUI POP */
   }
 #endif
