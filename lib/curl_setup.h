@@ -1051,7 +1051,7 @@ typedef unsigned int curl_bit;
 
 /* Macro to configure Visual Studio debug CRT to output errors to stderr,
    replacing the interactive GUI dialog. */
-#if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DEBUG_CRTDBG)
+#if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DEBUG_MSVC_CRTDBG)
 #include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
 #define CURL_MSVC_INIT_CRTDBG()                                             \
   do {                                                                      \
