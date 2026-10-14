@@ -395,15 +395,15 @@ jobs:
               options: '--without-ssl --without-libpsl --without-zstd' }
 
           - { build: 'cmake'    , platform: '21', arch: 'arm64-v8a'  , name: "!ssl !zstd",
-              options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF -Wno-deprecated' }
 
           - { build: 'cmake'    , platform: '21', arch: 'armeabi-v7a', name: "!ssl !zstd",
-              options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF -Wno-deprecated' }
 
-          - { build: 'autotools', platform: '35', arch: 'arm64-v8a'  , name: "!ssl !zstd",
+          - { build: 'autotools', platform: '37', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '--without-ssl --without-libpsl --without-zstd' }
 
-          - { build: 'cmake'    , platform: '35', arch: 'arm64-v8a'  , name: "!ssl !zstd",
+          - { build: 'cmake'    , platform: '37', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
 
       fail-fast: false
@@ -422,11 +422,14 @@ jobs:
           MATRIX_OPTIONS: '${{ matrix.options }}'
           MATRIX_PLATFORM: '${{ matrix.platform }}'
         run: |
+          if [ "${MATRIX_PLATFORM}" = '37' ]; then
+            ANDROID_NDK_HOME="${ANDROID_NDK_LATEST_HOME}"
+          fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
             cmake -B bld -G Ninja \
               -DANDROID_ABI="${MATRIX_ARCH}" \
               -DANDROID_PLATFORM="android-${MATRIX_PLATFORM}" \
-              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -Wno-deprecated \
+              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               ${MATRIX_OPTIONS}
