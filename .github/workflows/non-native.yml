@@ -400,10 +400,10 @@ jobs:
           - { build: 'cmake'    , platform: '21', arch: 'armeabi-v7a', name: "!ssl !zstd",
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
 
-          - { build: 'autotools', platform: '35', arch: 'arm64-v8a'  , name: "!ssl !zstd",
+          - { build: 'autotools', platform: '37', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '--without-ssl --without-libpsl --without-zstd' }
 
-          - { build: 'cmake'    , platform: '35', arch: 'arm64-v8a'  , name: "!ssl !zstd",
+          - { build: 'cmake'    , platform: '37', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
 
       fail-fast: false
