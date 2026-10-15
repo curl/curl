@@ -31,7 +31,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
--O with URL without path using a long trailing slash run
+-O with URL without path using many trailing slashes
 </name>
 <file name="%LOGDIR/test%TESTNUMBER.config">
 url = "http://%HOSTIP:%HTTPPORT%repeat[60000 x /]%"
