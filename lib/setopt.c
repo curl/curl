@@ -1167,8 +1167,8 @@ static CURLcode setopt_long_proto(struct Curl_easy *data, CURLoption option,
     break;
 #ifndef CURL_DISABLE_WEBSOCKETS
   case CURLOPT_WS_OPTIONS:
-    s->ws_raw_mode = (bool)(arg & CURLWS_RAW_MODE);
-    s->ws_no_auto_pong = (bool)(arg & CURLWS_NOAUTOPONG);
+    s->ws_raw_mode = !!(arg & CURLWS_RAW_MODE);
+    s->ws_no_auto_pong = !!(arg & CURLWS_NOAUTOPONG);
     break;
 #endif
   default:
