@@ -37,7 +37,8 @@ the format of your certificate.
 
 Supported formats are "PEM" and "DER", except with Schannel. OpenSSL and
 Schannel support "P12" for PKCS#12-encoded files. GnuTLS supports P12 starting
-with curl 8.11.0.
+with curl 8.11.0. OpenSSL supports "PROV" to use a store provider (added in
+8.12.0).
 
 The application does not have to keep the string around after setting this
 option.
@@ -47,7 +48,8 @@ previous ones. Set it to NULL restores back to internal default.
 
 # DEFAULT
 
-"PEM"
+"PROV" when using non-fork OpenSSL with provider support,
+"PEM" otherwise.
 
 # %PROTOCOLS%
 

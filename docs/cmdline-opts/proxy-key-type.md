@@ -17,6 +17,8 @@ Example:
 # `--proxy-key-type`
 
 Specify the private key file type your --proxy-key provided private key uses.
-DER, PEM, and ENG are supported. If not specified, PEM is assumed.
+DER, PEM, ENG, and PROV are supported. If not specified, the default depends
+on the TLS backend: PROV when using non-fork OpenSSL with provider support,
+PEM otherwise.
 
 Equivalent to --key-type but used in HTTPS proxy context.
