@@ -48,7 +48,6 @@ static CURLcode test_lib3235(const char *URL)
       result = TEST_ERR_FAILURE;
       goto test_cleanup;
     }
-    /* Unsharing an empty pool is also safe. */
     if(curl_share_setopt(share, CURLSHOPT_UNSHARE,
                          CURL_LOCK_DATA_CONNECT) != CURLSHE_OK) {
       result = TEST_ERR_FAILURE;
@@ -81,7 +80,6 @@ static CURLcode test_lib3235(const char *URL)
         result = TEST_ERR_FAILURE;
         goto test_cleanup;
       }
-      /* Options and cleanup are rejected while a handle owns a reference. */
       if(curl_share_setopt(share, CURLSHOPT_UNSHARE,
                            CURL_LOCK_DATA_CONNECT) != CURLSHE_IN_USE ||
          curl_share_setopt(share, CURLSHOPT_SHARE,
@@ -114,7 +112,6 @@ static CURLcode test_lib3235(const char *URL)
         }
       }
     }
-    /* End enabled, disabled, or re-enabled after the last transfer. */
     if(mode == 2 &&
        curl_share_setopt(share, CURLSHOPT_SHARE,
                          CURL_LOCK_DATA_CONNECT) != CURLSHE_OK) {
