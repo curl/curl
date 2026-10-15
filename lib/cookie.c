@@ -1172,7 +1172,7 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
     bool eof = FALSE;
     /* get_netscape_format() uses curl_maprintf(), which returns at most
        DYN_APRINTF - 1 bytes. cookie_output() adds a newline (CRLF on Windows),
-       and this dynbuf needs one more byte for its terminating NUL. This is a
+       and this dynbuf needs one more byte for its null-terminator. This is a
        cap, not an allocation. */
     curlx_dyn_init(&buf, DYN_APRINTF + 2);
     do {
