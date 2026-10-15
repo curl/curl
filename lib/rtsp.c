@@ -205,11 +205,11 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
      rtspreq == RTSPREQ_GET_PARAMETER) {
     curl_off_t req_clen; /* request content length */
 
+    if(data->set.crlf) {
+      failf(data, "Cannot do CRLF conversions on upload");
+      return CURLE_UPLOAD_FAILED;
+    }
     if(data->state.upload) {
-      if(data->set.crlf) {
-        failf(data, "Cannot do CRLF conversions on upload");
-        return CURLE_UPLOAD_FAILED;
-      }
       req_clen = data->state.infilesize;
       data->state.httpreq = HTTPREQ_PUT;
       result = Curl_creader_set_fread(data, req_clen);
