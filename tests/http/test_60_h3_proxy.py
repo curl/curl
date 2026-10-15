@@ -331,7 +331,7 @@ class TestH3Proxy:
         curl = CurlClient(env=env, run_env={"CURL_DEBUG": "all"})
         url = f"https://localhost:{h2o_server.port}/data.json"
         proxy_args = curl.get_proxy_args(proto="h3", tunnel=True)
-        proxy_args.extend(["--cacert", env.ca.cert_file, "--insecure"])
+        proxy_args.extend(["--cacert", env.ca.cert_file, "--insecure", '--parallel'])
 
         r = curl.http_download(
             urls=[url], alpn_proto="h3", with_stats=True, extra_args=proxy_args

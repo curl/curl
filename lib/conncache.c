@@ -221,7 +221,7 @@ static void cpool_discard_conn(struct cpool *cpool,
    * not what we want. */
   if(aborted)
     done = TRUE;
-  if(!done) {
+  if(!done && admin->multi) {
     /* Attempt to shutdown the connection right away. */
     Curl_cshutdn_try_once(admin, conn, &done);
   }
