@@ -174,7 +174,7 @@ jobs:
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'rustls valgrind 1'
-            image: ubuntu-24.04-arm
+            image: ubuntu-26.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
@@ -182,7 +182,7 @@ jobs:
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
-            image: ubuntu-24.04-arm
+            image: ubuntu-26.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
             PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
