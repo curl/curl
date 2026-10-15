@@ -24,11 +24,9 @@
 #
 import logging
 import os
-import re
 import shutil
 import socket
 import subprocess
-import time
 from typing import Dict
 
 import pytest
@@ -74,7 +72,7 @@ class OsslServer:
             '-cert', creds.cert_file,
             '-no_nonce',
             '-reqout', ocsp_req
-        ], stderr=self.cerr, stdout=self.cerr)
+        ], stderr=self.cerr, stdout=self.cerr, check=True)
         assert s.returncode == 0
         s = subprocess.run([
             self.env.CONFIG.openssl, 'ocsp',
@@ -85,7 +83,7 @@ class OsslServer:
             '-reqin', ocsp_req,
             '-respout', ocsp_file,
             '-ndays', '1'
-        ], stderr=self.cerr, stdout=self.cerr)
+        ], stderr=self.cerr, stdout=self.cerr, check=True)
         assert s.returncode == 0
 
     def startup(self):
