@@ -774,17 +774,6 @@ sub checksystemfeatures {
         die "Could not get curl's version";
     }
 
-    if(-r "../lib/curl_config.h") {
-        open(my $conf, "<", "../lib/curl_config.h");
-        while(<$conf>) {
-            if($_ =~ /^\#define HAVE_GETRLIMIT/) {
-                # set if system has getrlimit()
-                $feature{"getrlimit"} = 1;
-            }
-        }
-        close($conf);
-    }
-
     if($feature{"IPv6"}) {
         # client has IPv6 support
 
