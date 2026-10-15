@@ -27,11 +27,10 @@
 
 static CURLcode test_unit3424(const char *arg)
 {
-  UNITTEST_BEGIN_SIMPLE
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-  CURLM *multi;
-  struct Curl_easy *easy;
-  struct Curl_easy *loaded;
+  CURLM *multi = NULL;
+  struct Curl_easy *easy = NULL;
+  struct Curl_easy *loaded = NULL;
   char host[254];
   char header[MAX_COOKIE_LINE + 1];
   char path[6002];
@@ -42,14 +41,16 @@ static CURLcode test_unit3424(const char *arg)
   size_t i;
   const char *jar = "unit3424-cookies.jar";
 
+  (void)arg;
+
   abort_unless(!curl_global_init(CURL_GLOBAL_ALL), "global init");
   easy = curl_easy_init();
   loaded = curl_easy_init();
   abort_unless(easy && loaded, "easy init");
   multi = curl_multi_init();
   abort_unless(multi, "multi init");
-  curl_multi_add_handle(multi, easy);
-  curl_multi_add_handle(multi, loaded);
+  abort_unless(!curl_multi_add_handle(multi, easy), "add source handle");
+  abort_unless(!curl_multi_add_handle(multi, loaded), "add target handle");
   easy->cookies = Curl_cookie_init();
   abort_unless(easy->cookies, "cookie init");
   Curl_cookie_run(easy);
@@ -74,9 +75,11 @@ static CURLcode test_unit3424(const char *arg)
               "ordinary cookie acceptance");
   before = Curl_cookie_list(easy);
   abort_unless(before, "serialized cookie list");
-  curl_easy_setopt(easy, CURLOPT_COOKIEJAR, jar);
+  abort_unless(!curl_easy_setopt(easy, CURLOPT_COOKIEJAR, jar),
+               "set cookie jar");
   Curl_flush_cookies(easy, FALSE);
-  curl_easy_setopt(loaded, CURLOPT_COOKIEFILE, jar);
+  abort_unless(!curl_easy_setopt(loaded, CURLOPT_COOKIEFILE, jar),
+               "set cookie file");
   fail_unless(!Curl_cookie_loadfiles(loaded, 0),
               "self-generated cookie jar could not be reloaded");
   after = Curl_cookie_list(loaded);
@@ -89,15 +92,20 @@ static CURLcode test_unit3424(const char *arg)
   for(b = after, i = 0; b; b = b->next, ++i)
     ;
   fail_unless(i == 3, "cookie rows lost during round trip");
+unit_test_abort:
   curl_slist_free_all(before);
   curl_slist_free_all(after);
-  curl_multi_remove_handle(multi, easy);
-  curl_multi_remove_handle(multi, loaded);
+  if(multi && easy)
+    curl_multi_remove_handle(multi, easy);
+  if(multi && loaded)
+    curl_multi_remove_handle(multi, loaded);
   curl_multi_cleanup(multi);
   curl_easy_cleanup(easy);
   curl_easy_cleanup(loaded);
   unlink(jar);
   curl_global_cleanup();
+#else
+  (void)arg;
 #endif
-  UNITTEST_END_SIMPLE
+  return (CURLcode)unitfail;
 }
