@@ -38,6 +38,7 @@
 #include "curl_memrchr.h"
 #include "parsedate.h"
 #include "curlx/strdup.h"
+#include "curlx/dynbuf.h"
 #include "llist.h"
 #include "curlx/strparse.h"
 
@@ -1169,9 +1170,11 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
   if(fp) {
     struct dynbuf buf;
     bool eof = FALSE;
-    /* accept a little longer lines so that a full cookie fits and does not
-       abort the file read */
-    curlx_dyn_init(&buf, MAX_COOKIE_LINE + 48);
+    /* get_netscape_format() uses curl_maprintf(), which returns at most
+       DYN_APRINTF - 1 bytes. cookie_output() adds a newline (CRLF on Windows),
+       and this dynbuf needs one more byte for its null-terminator. This is a
+       cap, not an allocation. */
+    curlx_dyn_init(&buf, DYN_APRINTF + 2);
     do {
       result = Curl_get_line(&buf, fp, &eof);
       if(!result) {
