@@ -2956,30 +2956,16 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
      https://stackoverflow.com/questions/9507184/
      https://github.com/d3x0r/SACK/blob/ff15424d3c581b86d40f818532e5a400c516d39d/src/netlib/ssl_layer.c#L1410
      https://datatracker.ietf.org/doc/html/rfc5280 */
-  static const char * const win_stores[] = {
-    /* Only ROOT contains trust anchors. Importing the CA store here would
-       trust intermediates independently of their roots with PARTIAL_CHAIN. */
-    "ROOT"    /* Trusted Root Certification Authorities */
-  };
-  size_t i;
-  CURLcode result = CURLE_OK;
-
-  *padded = FALSE;
-  for(i = 0; i < CURL_ARRAYSIZE(win_stores); ++i) {
-    bool store_added = FALSE;
-    result = ossl_win_load_store(data, cf, win_stores[i], store, &store_added);
-    if(result)
-      return result;
-    if(store_added) {
-      CURL_TRC_CF(data, cf, "added trust anchors from Windows %s store",
-                  win_stores[i]);
-      *padded = TRUE;
-    }
-    else
-      infof(data, "error importing Windows %s store, continuing anyway",
-            win_stores[i]);
-  }
-  return result;
+  /* Only ROOT contains trust anchors. Importing the CA store here would
+     trust intermediates independently of their roots with PARTIAL_CHAIN. */
+  CURLcode result = ossl_win_load_store(data, cf, "ROOT", store, padded);
+  if(result)
+    return result;
+  if(*padded)
+    CURL_TRC_CF(data, cf, "added trust anchors from Windows ROOT store");
+  else
+    infof(data, "error importing Windows ROOT store, continuing anyway");
+  return CURLE_OK;
 }
 
 #endif /* USE_WIN32_CRYPTO */
