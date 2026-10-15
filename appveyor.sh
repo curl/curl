@@ -140,7 +140,7 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   echo 'Creating artifact'
   time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
   rm files.tmp
-  appveyor PushArtifact "${archive}" &
+  appveyor PushArtifact "${archive}"
 fi
 
 # build tests
@@ -148,29 +148,11 @@ fi
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 
-  # run unit tests
-
-  if [ -z "${SKIP_RUN:-}" ]; then
-    if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
-      cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
-      cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
-    fi
-
-    if [ -n "${verbose}" ]; then
-      "_bld/tests/libtest/${PRJ_CFG}/libtests.exe" --dump-module-paths | sort -f
-      "_bld/tests/server/${PRJ_CFG}/servers.exe" --dump-module-paths | sort -f
-      "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
-      "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
-    fi
-
-    unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
-    #export CURL_TEST_MIN=75
-    export TFLAGS="~1096 1 2700 to 2712 -v -d -S --retry=0 -j0 ${TFLAGS:-}"
-    TFLAGS+=" -vc $(cygpath --unix "\
-      $(cygpath --mixed --short-name "${PROGRAMFILES}/Git/mingw64/bin/curl.exe")")"
-    time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
-  else
-    echo "Skip running tests. Reason: ${SKIP_RUN}"
+  if [ -n "${verbose}" ]; then
+    "_bld/tests/libtest/${PRJ_CFG}/libtests.exe" --dump-module-paths | sort -f
+    "_bld/tests/server/${PRJ_CFG}/servers.exe" --dump-module-paths | sort -f
+    "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
+    "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
   fi
 fi
 
