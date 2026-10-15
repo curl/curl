@@ -25,7 +25,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-/* linked-list structure with last node cache */
 struct slist_wc {
   struct curl_slist *first;
   struct curl_slist *last;
