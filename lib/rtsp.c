@@ -205,10 +205,6 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
      rtspreq == RTSPREQ_GET_PARAMETER) {
     curl_off_t req_clen; /* request content length */
 
-    if(data->set.crlf) {
-      failf(data, "Cannot do CRLF conversions on upload");
-      return CURLE_UPLOAD_FAILED;
-    }
     if(data->state.upload) {
       req_clen = data->state.infilesize;
       data->state.httpreq = HTTPREQ_PUT;
@@ -236,6 +232,10 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
     }
 
     if(req_clen > 0) {
+      if(data->set.crlf) {
+        failf(data, "Cannot do CRLF conversions on upload");
+        return CURLE_UPLOAD_FAILED;
+      }
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(data, STRCONST("Content-Length"))) {
