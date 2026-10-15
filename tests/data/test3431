@@ -33,8 +33,11 @@ http
 <name>
 -O trims a long separator suffix in one pass
 </name>
+<file name="%LOGDIR/test%TESTNUMBER.config">
+url = "http://%HOSTIP:%HTTPPORT%repeat[60000 x /]%"
+</file>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT%repeat[60000 x /]% -O --output-dir %LOGDIR
+-K %LOGDIR/test%TESTNUMBER.config -O --output-dir %LOGDIR
 </command>
 </client>
 
