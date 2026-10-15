@@ -86,11 +86,9 @@ static CURLcode test_unit3310(const char *arg)
   Curl_client_cleanup(easy);
   fail_unless(t3310_closed == 1, "reader closed exactly once");
 
-  /* Unknown length also needs a CRLF conversion reader. */
   t3310_length = -1;
   result = Curl_creader_create(&reader, easy, &t3310_reader, CURL_CR_CLIENT);
   abort_unless(!result, "create replacement reader");
-  /* Fail the next allocation, which creates the CRLF conversion reader. */
   curl_dbg_memlimit(0);
   result = Curl_creader_set(easy, reader);
   fail_unless(result == CURLE_OUT_OF_MEMORY, "CRLF allocation failure");
