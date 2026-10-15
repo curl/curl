@@ -176,9 +176,7 @@ rem
     set "R03=VC12"
     set "R04=12.0"
   )
-  if "%CURL_CI%" NEQ "" (
-    set "_CURL_DEBUG_MSVC_CRTDBG=CURL_DEBUG_MSVC_CRTDBG;"
-  )
+  if "%CURL_CI%" NEQ "" set "_CURL_DEBUG_MSVC_CRTDBG=CURL_DEBUG_MSVC_CRTDBG;"
 
   echo * %CD%\%3
   for /f "usebackq delims=" %%i in (`"findstr /n ^^ %2"`) do (
