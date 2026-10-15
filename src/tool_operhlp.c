@@ -151,7 +151,6 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
           result = urlerr_cvt(uerr);
           goto out;
         }
-        /* Leave guessed schemes absent so --proto-default still applies. */
         uerr = curl_url_get(uh, CURLUPART_URL, &newurl,
                             CURLU_DEFAULT_SCHEME | CURLU_NO_GUESS_SCHEME);
         if(uerr) {
