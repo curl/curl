@@ -244,7 +244,6 @@ static CURLcode test_unit1607(const char *arg)
       continue;
     }
   }
-  /* Reset must discard pending rules while preserving cached addresses. */
   easy = curl_easy_init();
   multi = curl_multi_init();
   if(!easy || !multi) {
