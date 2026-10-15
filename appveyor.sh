@@ -96,7 +96,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   [ -n "${verbose}" ] && { echo 'configurehelp.pm'; cat _bld/tests/configurehelp.pm || true; }
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2
   [[ "${CMAKE_GENERATE:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$(pwd)/_bld/lib/${PRJ_CFG}:$PATH"
-  [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
+  [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp -p "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
 else
   (
@@ -150,9 +150,9 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
 
   if [ -z "${SKIP_RUN:-}" ]; then
     if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
-      cp "${openssl_root}"/*.dll "_bld/tests/libtest/${PRJ_CFG}"
-      cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
-      cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
+      cp -p "${openssl_root}"/*.dll "_bld/tests/libtest/${PRJ_CFG}"
+      cp -p "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
+      cp -p "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
     fi
 
     if [ -n "${verbose}" ]; then
