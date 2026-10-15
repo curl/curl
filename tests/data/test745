@@ -15,7 +15,7 @@ Verify that typecheck-gcc and curl.h are in sync
 </name>
 
 <command type="perl">
-%SRCDIR/test%TESTNUMBER.pl %SRCDIR/..
+%SRCDIR/test745.pl %SRCDIR/..
 </command>
 </client>
 

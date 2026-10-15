@@ -14,7 +14,7 @@ Verify that symbols-in-versions and headers are in sync
 </name>
 
 <command type="perl">
-%SRCDIR/test%TESTNUMBER.pl %SRCDIR/.. ../include/curl
+%SRCDIR/test1119.pl %SRCDIR/.. ../include/curl
 </command>
 </client>
 
