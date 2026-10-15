@@ -31,17 +31,20 @@ Funny-head: yesyes
 http
 </server>
 <name>
--O with URL without path using many trailing slashes
+-O with URL without path using a long trailing slash run
 </name>
+<file name="%LOGDIR/test%TESTNUMBER.config">
+url = "http://%HOSTIP:%HTTPPORT%repeat[60000 x /]%"
+</file>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT///////////////// -O --output-dir %LOGDIR
+-K %LOGDIR/test%TESTNUMBER.config -O --output-dir %LOGDIR
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-GET ///////////////// HTTP/1.1
+GET %repeat[60000 x /]% HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
