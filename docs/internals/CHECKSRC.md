@@ -146,7 +146,7 @@ Currently these are the extended warnings which can be enabled:
 - `COPYRIGHTYEAR`: the current changeset has not updated the copyright year in
   the source file
 
-- `PRINTFZ`: use of banned printf masks `%zd` or `%zu`
+- `PRINTFZ`: use of banned printf masks `%zd`, `%zu` or `%zx`
 
 - `STDERR`: use of banned variable `stderr`
 

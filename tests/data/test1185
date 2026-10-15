@@ -222,10 +222,10 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code%TESTNUMBER.c:61:5: warning: use of sprintf is banned (BANNEDFUNC)
   if(sprintf(buffer, "%s", moo)) {}
      ^
-./%LOGDIR/code%TESTNUMBER.c:63:49: warning: use of %zd/%zu is banned (use %ld/%lu with cast instead) (PRINTFZ)
+./%LOGDIR/code%TESTNUMBER.c:63:49: warning: use of %zd/%zu/%zx is banned (use %ld/%lu/%lx with cast instead) (PRINTFZ)
   if(printf(buffer, "banned mask in CRT printf: |%zu|", moo)) {}
                                                  ^
-./%LOGDIR/code%TESTNUMBER.c:64:49: warning: use of %zd/%zu is banned (use %ld/%lu with cast instead) (PRINTFZ)
+./%LOGDIR/code%TESTNUMBER.c:64:49: warning: use of %zd/%zu/%zx is banned (use %ld/%lu/%lx with cast instead) (PRINTFZ)
   const char *msg = "banned mask in CRT fprintf: %zd";
                                                  ^
 ./%LOGDIR/code%TESTNUMBER.c:65:25: warning: use of alsobad is banned (BANNEDFUNC)
