@@ -1466,7 +1466,7 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     failf(data, "OCSP response basic part is not successful");
     goto out;
   }
-  /* Find the OCSP sub-reponse for the peer certificate. */
+  /* Find the OCSP sub-response for the peer certificate. */
   for(idx = 0;; idx++) {
     rc = gnutls_ocsp_resp_check_crt(ocsp_resp, idx, cert);
     if(!rc || (rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE))
