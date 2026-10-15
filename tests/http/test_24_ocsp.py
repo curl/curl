@@ -104,7 +104,9 @@ class OsslServer:
             self._mk_ocsp_stat(ocsp_file, creds, '')
         elif self.ocsp_case == 'revoked':
             index_file = os.path.join(self.env.gen_dir, 'ocsp-index.txt')
+            # openssl wants hex numbers as complete bytes
             serial = hex(creds.serial_number)[2:].upper()
+            serial = f'0{serial}' if len(serial) % 2 else serial
             index = 'R\t301231000000Z\t240101000000Z,keyCompromise' \
                 f'\t{serial}\tunknown\t/{creds.subject.rfc4514_string()}\n'
             with open(index_file, 'wb') as fd:
@@ -112,7 +114,9 @@ class OsslServer:
             self._mk_ocsp_stat(ocsp_file, creds, index)
         elif self.ocsp_case == 'valid':
             index_file = os.path.join(self.env.gen_dir, 'ocsp-index.txt')
+            # openssl wants hex numbers as complete bytes
             serial = hex(creds.serial_number)[2:].upper()
+            serial = f'0{serial}' if len(serial) % 2 else serial
             index = 'V\t301231000000Z\t240101000000Z,valid' \
                 f'\t{serial}\tunknown\t/{creds.subject.rfc4514_string()}\n'
             with open(index_file, 'wb') as fd:
