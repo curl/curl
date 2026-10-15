@@ -155,6 +155,14 @@ int main(int argc, char *argv[])
   CURLcode result = CURLE_OK;
 
   CURL_MSVC_CRTDBG_INIT();
+#ifdef _MSC_VER
+  {
+    int r = 0;
+    (void)r;
+    /* !checksrc! disable BANNEDFUNC 1 */
+    assert(r == 10); /* FORCE GUI POP */
+  }
+#endif
 
   tool_init_stderr();
 
