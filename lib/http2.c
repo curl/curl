@@ -2211,6 +2211,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
 
   if(stream_id < 0) {
     int rv = cf_h2_check(cf, (int)stream_id);
+    (void)rv; /* for non-verbose builds, we still need the check */
     CURL_TRC_CF(data, cf, "send: nghttp2_submit_request error (%s)%d",
                 nghttp2_strerror(rv), rv);
     result = CURLE_SEND_ERROR;
