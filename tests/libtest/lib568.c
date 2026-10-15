@@ -90,6 +90,10 @@ static CURLcode test_lib568(const char *URL)
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
+  if(libtest_arg3 && !strcmp(libtest_arg3, "crlf")) {
+    easy_setopt(curl, CURLOPT_CRLF, 1L);
+  }
+
   /* Do the ANNOUNCE */
   result = curl_easy_perform(curl);
   if(result)
