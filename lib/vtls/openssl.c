@@ -2956,8 +2956,6 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
      https://stackoverflow.com/questions/9507184/
      https://github.com/d3x0r/SACK/blob/ff15424d3c581b86d40f818532e5a400c516d39d/src/netlib/ssl_layer.c#L1410
      https://datatracker.ietf.org/doc/html/rfc5280 */
-  /* Only ROOT contains trust anchors. Importing the CA store here would
-     trust intermediates independently of their roots with PARTIAL_CHAIN. */
   CURLcode result = ossl_win_load_store(data, cf, "ROOT", store, padded);
   if(result)
     return result;
