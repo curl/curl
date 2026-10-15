@@ -2270,7 +2270,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
     goto end;
   }
 
-  ch = SSL_get_peer_cert_chain(octx->ssl);
+  ch = SSL_get0_verified_chain(octx->ssl);
   if(!ch) {
     failf(data, "Could not get peer certificate chain");
     result = CURLE_SSL_INVALIDCERTSTATUS;
