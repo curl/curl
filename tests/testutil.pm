@@ -40,7 +40,7 @@ BEGIN {
         exerunner
         subtextfile
         subchars
-        subbase64
+        subfuncs
         subnewlines
         subsha256base64file
         substrippemfile
@@ -129,47 +129,48 @@ sub subchars {
     $$thing =~ s/%AMP/&/g;
 }
 
-sub subbase64 {
+sub repeatit {
+    my ($n, $d)=@_;
+    # decode %NN characters
+
+    $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+    $n =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+    return $d x $n;
+}
+
+sub hexit {
+    my ($d) = @_;
+    $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+    return $d;
+}
+
+sub b64it {
+    my ($d) = @_;
+    # encode %NN characters
+    $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+    my $enc = encode_base64($d, "");
+    # put the result into there
+    return $enc;
+}
+
+sub daysit {
+    my ($days) = @_;
+    # convert to now + given days in epoch seconds, align to a 60 second
+    # boundary. Then provide two alternatives.
+    my $now = time();
+    my $d = ($days * 24 * 3600) + $now + 30;
+    $d = int($d / 60) * 60;
+    my $d2 = $d + 60;
+    return "%alternatives[$d,$d2]";
+}
+
+sub subfuncs {
     my ($thing) = @_;
 
-    # cut out the base64 piece
-    while($$thing =~ s/%b64\[(.*?)\]b64%/%%B64%%/i) {
-        my $d = $1;
-        # encode %NN characters
-        $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
-        my $enc = encode_base64($d, "");
-        # put the result into there
-        $$thing =~ s/%%B64%%/$enc/;
-    }
-    # hex decode
-    while($$thing =~ s/%hex\[(.*?)\]hex%/%%HEX%%/i) {
-        # decode %NN characters
-        my $d = $1;
-        $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
-        $$thing =~ s/%%HEX%%/$d/;
-    }
-    # repeat
-    while($$thing =~ s/%repeat\[(\d+) x (.*?)\]%/%%REPEAT%%/i) {
-        # decode %NN characters
-        my ($d, $n) = ($2, $1);
-        $d =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
-        $n =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
-        my $all = $d x $n;
-        $$thing =~ s/%%REPEAT%%/$all/;
-    }
-
-    # days
-    while($$thing =~ s/%days\[(.*?)\]/%%DAYS%%/i) {
-        # convert to now + given days in epoch seconds, align to a 60 second
-        # boundary. Then provide two alternatives.
-        my $now = time();
-        my $d = ($1 * 24 * 3600) + $now + 30;
-        $d = int($d / 60) * 60;
-        my $d2 = $d + 60;
-        $$thing =~ s/%%DAYS%%/%alternatives[$d,$d2]/;
-    }
-
-    # include a file
+    $$thing =~ s/%b64\[(.*?)\]b64%/b64it($1)/eg;
+    $$thing =~ s/%hex\[(.*?)\]hex%/hexit($1)/eg;
+    $$thing =~ s/%repeat\[(\d+) x (.*?)\]%/repeatit($1, $2)/eg;
+    $$thing =~ s/%days\[(.*?)\]/daysit($1)/eg;
     $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1, 0)/ge;
 }
 
