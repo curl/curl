@@ -404,7 +404,7 @@ struct when {
 
 /* (1969 / 4) - (1969 / 100) + (1969 / 400) = 492 - 19 + 4 = 477 */
 #define LEAP_DAYS_BEFORE_1969 477
-#define SECONDS_PER_DAY 84600
+#define SECONDS_PER_DAY 86400
 
 /*
  * time2epoch: time stamp to seconds since epoch in GMT time zone. Similar to
