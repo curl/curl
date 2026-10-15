@@ -974,8 +974,7 @@ curl_socket_t win32_stdin_read_thread(void)
     return CURL_SOCKET_BAD;
   }
 
-  /* prevent mem leak warnings */
-  atexit(&cleanup_tdata_sync);
+  atexit(&cleanup_tdata_sync);  /* prevent mem leak warnings */
 
   DEBUGASSERT(socket_r != CURL_SOCKET_BAD);
   return socket_r;
