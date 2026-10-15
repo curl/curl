@@ -117,6 +117,9 @@ struct ossl_ctx {
   /* these ones requires specific SSL-types */
   SSL_CTX *ssl_ctx;
   SSL *ssl;
+#ifdef USE_WIN32_CRYPTO
+  STACK_OF(X509) *native_intermediates;
+#endif
   BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */

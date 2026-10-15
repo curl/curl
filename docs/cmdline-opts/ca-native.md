@@ -28,6 +28,11 @@ This option works with OpenSSL and its forks (BoringSSL, LibreSSL, etc) on
 Windows (Added in 7.71.0) and on Apple OS when libcurl is built with
 Apple SecTrust enabled. (Added in 8.17.0)
 
+On Windows, certificates in the ROOT store are used as trust anchors. The CA
+store supplies intermediate certificates for building chains when a server
+omits them; its certificates are not trusted merely because they are present
+there.
+
 This option works with wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo,
 Fedora, RHEL), macOS, Android and iOS. (Added in 8.3.0)
 

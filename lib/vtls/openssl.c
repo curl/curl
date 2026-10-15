@@ -1971,6 +1971,10 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     octx->ssl_ctx = NULL;
     octx->x509_store_setup = FALSE;
   }
+#ifdef USE_WIN32_CRYPTO
+  sk_X509_pop_free(octx->native_intermediates, X509_free);
+  octx->native_intermediates = NULL;
+#endif
   if(octx->bio_method) {
     ossl_bio_cf_method_free(octx->bio_method);
     octx->bio_method = NULL;
@@ -2794,15 +2798,61 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
 }
 
 #ifdef USE_WIN32_CRYPTO
+static int ossl_win_cert_verify(X509_STORE_CTX *ctx, void *arg)
+{
+  struct ossl_ctx *octx = arg;
+  STACK_OF(X509) *original = X509_STORE_CTX_get0_untrusted(ctx);
+  STACK_OF(X509) *combined;
+  int i, result;
+
+  if(!octx->native_intermediates ||
+     !sk_X509_num(octx->native_intermediates))
+    return X509_verify_cert(ctx);
+
+  /* Keep the server-provided chain first. The Windows CA certificates are
+     additional issuers, not trust anchors. The stack does not own its certs.
+   */
+  combined = original ? sk_X509_dup(original) : sk_X509_new_null();
+  if(!combined)
+    goto oom;
+  for(i = 0; i < sk_X509_num(octx->native_intermediates); ++i) {
+    if(!sk_X509_push(combined,
+                     sk_X509_value(octx->native_intermediates, i))) {
+      sk_X509_free(combined);
+      goto oom;
+    }
+  }
+
+#ifdef HAVE_BORINGSSL_LIKE
+  X509_STORE_CTX_set_chain(ctx, combined);
+#else
+  X509_STORE_CTX_set0_untrusted(ctx, combined);
+#endif
+  result = X509_verify_cert(ctx);
+#ifdef HAVE_BORINGSSL_LIKE
+  X509_STORE_CTX_set_chain(ctx, original);
+#else
+  X509_STORE_CTX_set0_untrusted(ctx, original);
+#endif
+  sk_X509_free(combined);
+  return result;
+
+oom:
+  X509_STORE_CTX_set_error(ctx, X509_V_ERR_OUT_OF_MEM);
+  return 0;
+}
+
 static CURLcode ossl_win_load_store(struct Curl_easy *data,
                                     struct Curl_cfilter *cf,
                                     const char *win_store,
                                     X509_STORE *store,
+                                    STACK_OF(X509) *intermediates,
                                     bool *padded)
 {
   CURLcode result = CURLE_OK;
   HCERTSTORE hStore;
 
+  DEBUGASSERT((store != NULL) != (intermediates != NULL));
   *padded = FALSE;
 
   hStore = CertOpenSystemStoreA(0, win_store);
@@ -2918,10 +2968,18 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
       if(!x509)
         continue;
 
-      /* Try to import the certificate. This may fail for legitimate reasons
-         such as duplicate certificate, which is allowed by MS but not
-         OpenSSL. */
-      if(X509_STORE_add_cert(store, x509) == 1) {
+      if(intermediates) {
+        if(!sk_X509_push(intermediates, x509)) {
+          X509_free(x509);
+          result = CURLE_OUT_OF_MEMORY;
+          break;
+        }
+        VERBOSE(++imported);
+        *padded = TRUE;
+        x509 = NULL; /* ownership transferred to intermediates */
+      }
+      /* Duplicates are allowed by Windows but not by OpenSSL. */
+      else if(X509_STORE_add_cert(store, x509) == 1) {
         VERBOSE(++imported);
 #ifdef DEBUGBUILD
         infof(data, "SSL: Imported cert");
@@ -2948,21 +3006,37 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
 
 static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
+                                          struct ossl_ctx *octx,
                                           X509_STORE *store,
                                           bool *padded)
 {
-  /* Import certificates from the Windows root certificate store if
-     requested.
+  /* Import Windows ROOT certificates as trust anchors and keep CA
+     certificates as untrusted issuers for chain building.
      https://stackoverflow.com/questions/9507184/
      https://github.com/d3x0r/SACK/blob/ff15424d3c581b86d40f818532e5a400c516d39d/src/netlib/ssl_layer.c#L1410
      https://datatracker.ietf.org/doc/html/rfc5280 */
-  CURLcode result = ossl_win_load_store(data, cf, "ROOT", store, padded);
+  bool ca_added = FALSE;
+  CURLcode result;
+
+  sk_X509_pop_free(octx->native_intermediates, X509_free);
+  octx->native_intermediates = sk_X509_new_null();
+  if(!octx->native_intermediates)
+    return CURLE_OUT_OF_MEMORY;
+
+  result = ossl_win_load_store(data, cf, "ROOT", store, NULL, padded);
   if(result)
     return result;
   if(*padded)
     CURL_TRC_CF(data, cf, "added trust anchors from Windows ROOT store");
   else
     infof(data, "error importing Windows ROOT store, continuing anyway");
+
+  result = ossl_win_load_store(data, cf, "CA", NULL,
+                               octx->native_intermediates, &ca_added);
+  if(result)
+    return result;
+  if(ca_added)
+    CURL_TRC_CF(data, cf, "loaded intermediate issuers from Windows CA store");
   return CURLE_OK;
 }
 
@@ -2985,7 +3059,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
   if(conn_config->native_ca_store) {
 #ifdef USE_WIN32_CRYPTO
     bool added = FALSE;
-    result = ossl_windows_load_anchors(cf, data, store, &added);
+    result = ossl_windows_load_anchors(cf, data, octx, store, &added);
     if(result)
       return result;
     if(added) {
@@ -3929,6 +4003,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
    * We then explicitly check the result and may try alternatives like
    * Apple's SecTrust for verification. */
   SSL_CTX_set_verify(octx->ssl_ctx, SSL_VERIFY_NONE, NULL);
+
+#ifdef USE_WIN32_CRYPTO
+  if(conn_config->native_ca_store && conn_config->verifypeer)
+    SSL_CTX_set_cert_verify_callback(octx->ssl_ctx, ossl_win_cert_verify,
+                                     octx);
+#endif
 
   /* Enable logging of secrets to the file specified in env SSLKEYLOGFILE. */
 #if !defined(HAVE_KEYLOG_UPSTREAM) && defined(HAVE_KEYLOG_CALLBACK)
