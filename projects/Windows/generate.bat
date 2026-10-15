@@ -176,7 +176,7 @@ rem
     set "R03=VC12"
     set "R04=12.0"
   )
-  if "%CURL_CI" NEQ "" (
+  if "%CURL_CI%" NEQ "" (
     set "_CURL_DEBUG_MSVC_CRTDBG=CURL_DEBUG_MSVC_CRTDBG;"
   )
 
