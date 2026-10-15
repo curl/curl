@@ -151,7 +151,8 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
           result = urlerr_cvt(uerr);
           goto out;
         }
-        uerr = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_DEFAULT_SCHEME);
+        uerr = curl_url_get(uh, CURLUPART_URL, &newurl,
+                            CURLU_DEFAULT_SCHEME | CURLU_NO_GUESS_SCHEME);
         if(uerr) {
           result = urlerr_cvt(uerr);
           goto out;
