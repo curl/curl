@@ -1169,9 +1169,10 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
   if(fp) {
     struct dynbuf buf;
     bool eof = FALSE;
-    /* accept a little longer lines so that a full cookie fits and does not
-       abort the file read */
-    curlx_dyn_init(&buf, MAX_COOKIE_LINE + 48);
+    /* A saved cookie also contains its default domain and path. Allow a
+       full URL component for each, in addition to the accepted Set-Cookie
+       header and serialization overhead. This is a cap, not an allocation. */
+    curlx_dyn_init(&buf, 2 * CURL_MAX_INPUT_LENGTH + MAX_COOKIE_LINE + 64);
     do {
       result = Curl_get_line(&buf, fp, &eof);
       if(!result) {
