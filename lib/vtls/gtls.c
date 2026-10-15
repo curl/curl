@@ -1428,28 +1428,82 @@ static void gtls_infof_cert(struct Curl_easy *data,
 }
 
 static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
-                                        gnutls_session_t session)
+                                        gnutls_session_t session,
+                                        gnutls_x509_crt_t cert)
 {
-  gnutls_datum_t status_request;
-  int rc;
+  gnutls_datum_t ocsp_raw;
+  gnutls_ocsp_resp_t ocsp_resp = NULL;
+  CURLcode result = CURLE_SSL_INVALIDCERTSTATUS;
+  int rc, idx;
+  bool ocsp_init = FALSE;
+  gnutls_ocsp_cert_status_t status = GNUTLS_OCSP_CERT_UNKNOWN;
 
-  /* We use gnutls_certificate_verify_peers2() to verify the result
-   * which - according to GnuTLS documentation - already takes
-   * an OCSP stapling extension received into account.
-   * We therefore need only to check if we indeed received
-   * a stapled OCSP response here. */
-  rc = gnutls_ocsp_status_request_get(session, &status_request);
-
+  /* Get the OCSP stapled response. We require it to be there. */
+  rc = gnutls_ocsp_status_request_get(session, &ocsp_raw);
   if(rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE) {
     failf(data, "No OCSP response received");
-    return CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
   }
   else if(rc < 0) {
     failf(data, "Invalid OCSP response received");
-    return CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+  /* Parse the OCSP response, which needs to succeed. */
+  rc = gnutls_ocsp_resp_init(&ocsp_resp);
+  if(rc < 0) {
+    failf(data, "failed to init OCSP response parsing");
+    goto out;
+  }
+  ocsp_init = TRUE;
+  rc = gnutls_ocsp_resp_import(ocsp_resp, &ocsp_raw);
+  if(rc < 0) {
+    failf(data, "failed to parse OCSP response");
+    goto out;
+  }
+  /* OCSP responses carry a basic, overall status and then individual
+   * parts for different certificates. The overall status must be good. */
+  if(gnutls_ocsp_resp_get_status(ocsp_resp) != GNUTLS_OCSP_RESP_SUCCESSFUL) {
+    failf(data, "OCSP response basic part is not successful");
+    goto out;
+  }
+  /* Find the OCSP sub-response for the peer certificate. */
+  for(idx = 0;; idx++) {
+    rc = gnutls_ocsp_resp_check_crt(ocsp_resp, idx, cert);
+    if(!rc || (rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE))
+      break;
+  }
+  if(rc < 0) {
+    failf(data, "OCSP does not carry status for peer cert");
+    goto out;
+  }
+  /* The peer certificate OCSP status is at index `idx`.
+   * Coming here means that GnuTLS has already checked that
+   * - the signature of this OCSP status has been verified
+   * - the timestamp of this OCSP status has been tested
+   * We therefore need only to inspect that actual status code. */
+  rc = gnutls_ocsp_resp_get_single(ocsp_resp, idx, NULL, NULL, NULL, NULL,
+                                   &status, NULL, NULL, NULL, NULL);
+  if(rc < 0) {
+    failf(data, "failed to parse OCSP response for peer cert");
+    goto out;
+  }
+  switch(status) {
+  case GNUTLS_OCSP_CERT_GOOD:
+    /* We only regard this as OK and fail all other status codes. */
+    result = CURLE_OK;
+    break;
+  case GNUTLS_OCSP_CERT_REVOKED:
+    failf(data, "peer certificate is revoked");
+    break;
+  default:
+    failf(data, "peer certificate OCSP status is not good: %d", (int)status);
+    break;
   }
 
-  return CURLE_OK;
+out:
+  if(ocsp_init)
+    gnutls_ocsp_resp_deinit(ocsp_resp);
+  return result;
 }
 
 struct gtls_cert_chain {
@@ -1694,7 +1748,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   }
 
   if(config->verifystatus) {
-    result = gtls_verify_ocsp_status(data, session);
+    result = gtls_verify_ocsp_status(data, session, x509_cert);
     if(result)
       goto out;
   }
