@@ -34,6 +34,13 @@ int main(int argc, const char *argv[])
 
   CURL_MSVC_CRTDBG_INIT();
 
+#ifdef _WIN32
+  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
+    CURL_DUMP_MODULE_PATHS(printf);
+    return 0;
+  }
+#endif
+
   if(argc < 2) {
     fprintf(stderr, "Pass servername as first argument\n");
     return 1;
