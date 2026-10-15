@@ -177,9 +177,6 @@ static int cb_timeout(CURLM *multi, long timeout_ms, void *userp)
   if(timeout_ms < 0)
     uv_timer_stop(&uv->timeout);
   else {
-    if(timeout_ms == 0)
-      timeout_ms = 1; /* 0 means call curl_multi_socket_action asap but NOT
-                         within the callback itself */
     uv_timer_start(&uv->timeout, on_uv_timeout, (uint64_t)timeout_ms,
                    0); /* do not repeat */
   }
