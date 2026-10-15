@@ -149,6 +149,12 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 
   if [ -z "${SKIP_RUN:-}" ]; then
+    if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
+      cp "${openssl_root}"/*.dll "_bld/tests/libtest/${PRJ_CFG}"
+      cp "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
+      cp "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
+    fi
+
     if [ -n "${verbose}" ]; then
       "_bld/tests/libtest/${PRJ_CFG}/libtests.exe" --dump-module-paths | sort -f
       "_bld/tests/server/${PRJ_CFG}/servers.exe" --dump-module-paths | sort -f
