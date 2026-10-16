@@ -2270,7 +2270,12 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
     goto end;
   }
 
+#if !defined(HAVE_BORINGSSL_LIKE) && \
+  !(defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x3060000fL)
   ch = SSL_get0_verified_chain(octx->ssl);
+#else
+  ch = SSL_get_peer_cert_chain(octx->ssl);
+#endif
   if(!ch) {
     failf(data, "Could not get peer certificate chain");
     result = CURLE_SSL_INVALIDCERTSTATUS;

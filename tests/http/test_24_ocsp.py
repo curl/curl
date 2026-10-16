@@ -161,9 +161,7 @@ class OsslServer:
 
 
 @pytest.mark.skipif(condition=not Env.have_openssl_ech(), reason="no modern openssl available")
-@pytest.mark.skipif(condition=Env.curl_uses_lib('mbedtls'), reason="no cert-status in mbedtls")
-@pytest.mark.skipif(condition=Env.curl_uses_lib('rustls'), reason="no cert-status in rustls")
-@pytest.mark.skipif(condition=Env.curl_uses_lib('schannel'), reason="no cert-status in schannel")
+@pytest.mark.skipif(condition=not Env.curl_can_cert_status(), reason="no cert-status in curl")
 class TestOCSP:
 
     @pytest.fixture(autouse=True, scope='class')
