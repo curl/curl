@@ -335,7 +335,12 @@ if(CURL_DROP_UNUSED)
     # To silence:
     #   "LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:REF' specification" (cl)
     #   "lld-link : warning : ignoring '/incremental' because REF is enabled; use '/opt:noref' to disable" (clang-cl)
-    set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:Debug,RelWithDebInfo>:-INCREMENTAL:NO>")
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:Debug,RelWithDebInfo>:-INCREMENTAL:NO>")
+    else()
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:Debug>:-INCREMENTAL:NO>")
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:RelWithDebInfo>:-INCREMENTAL:NO>")
+    endif()
     # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
     list(APPEND CURL_CFLAGS "-Gy")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
