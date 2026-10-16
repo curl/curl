@@ -69,6 +69,7 @@ struct cw_pause_ctx {
   struct cw_pause_buf *buf;
   struct cw_pause_buf *tail;
   size_t buf_total;
+  BIT(flushing); /* inside cw_pause_flush() */
 };
 
 static CURLcode cw_pause_init(struct Curl_easy *data,
@@ -99,8 +100,8 @@ static void cw_pause_close(struct Curl_easy *data, struct Curl_cwriter *writer)
   cw_pause_bufs_free(ctx);
 }
 
-static CURLcode cw_pause_flush(struct Curl_easy *data,
-                               struct Curl_cwriter *cw_pause)
+static CURLcode cw_pause_flush_do(struct Curl_easy *data,
+                                  struct Curl_cwriter *cw_pause)
 {
   struct cw_pause_ctx *ctx = (struct cw_pause_ctx *)cw_pause;
   CURLcode result = CURLE_OK;
@@ -143,6 +144,24 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
 
   if(!result)
     result = Curl_cwriter_flush(data, cw_pause->next);
+  return result;
+}
+
+static CURLcode cw_pause_flush(struct Curl_easy *data,
+                               struct Curl_cwriter *cw_pause)
+{
+  struct cw_pause_ctx *ctx = (struct cw_pause_ctx *)cw_pause;
+  CURLcode result;
+
+  /* A callback may unpause the transfer while we write, which flushes
+     again. The running flush has not consumed the chunk it writes yet,
+     so a nested call must leave the chain alone. The outer loop notices
+     the unpause. */
+  if(ctx->flushing)
+    return CURLE_OK;
+  ctx->flushing = TRUE;
+  result = cw_pause_flush_do(data, cw_pause);
+  ctx->flushing = FALSE;
   return result;
 }
 
@@ -197,14 +216,16 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
       ctx->tail = cwbuf;
       result = Curl_bufq_cwrite(&ctx->tail->b, buf, blen, &nwritten);
     }
+    /* Count queued bytes before tracing: the debug callback may unpause and
+       flush the buffer before this frame resumes. */
+    ctx->buf_total += nwritten;
     CURL_TRC_WRITE(data, "[PAUSE] buffer %zu more bytes of type %x, "
                    "total=%zu -> %d", nwritten, (unsigned int)type,
-                   ctx->buf_total + wlen, (int)result);
+                   ctx->buf_total, (int)result);
     if(result)
       return result;
     buf += nwritten;
     blen -= nwritten;
-    ctx->buf_total += nwritten;
   } while(blen);
 
   return result;
