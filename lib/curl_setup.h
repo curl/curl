@@ -986,6 +986,10 @@ typedef int bool;
  * global namespace though, so use bool_false and bool_true.
  */
 #ifndef HAVE_BOOL_T
+/* This replacement type does not preserve C99 bool's normalization semantics:
+   converting a non-zero value to C99 bool results in 1. This is significant
+   when the value is assigned to a bitfield. Make sure to normalize manually in
+   such cases. */
 typedef enum {
   bool_false = 0,
   bool_true = 1
