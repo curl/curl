@@ -1042,7 +1042,7 @@ jobs:
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags+=' -DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
-              ldflags+=' -OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
+              ldflags+=' -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
             if [ "${TFLAGS}" = 'skiprun' ]; then
@@ -1110,8 +1110,8 @@ jobs:
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_RC_FLAGS="${rcflags}" \
-              -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-              -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
+              -DCMAKE_EXE_LINKER_FLAGS="${ldflags}" \
+              -DCMAKE_SHARED_LINKER_FLAGS="${ldflags}" \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_DROP_UNUSED=ON \
               -DCURL_WERROR=ON \
