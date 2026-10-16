@@ -152,19 +152,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
          * This policy further allows trustd to consult CRLs and OCSP data
          * to determine revocation status (which it may then cache). */
         CFOptionFlags revocation_flags = kSecRevocationUseAnyAvailableMethod;
-#if 0
-        /* `revoke_best_effort` is off by default in libcurl. When we
-         * add `kSecRevocationRequirePositiveResponse` to the Apple
-         * Trust policies, it interprets this as it NEEDs a confirmation
-         * of a cert being NOT REVOKED. Which not in general available for
-         * certificates on the Internet.
-         * It seems that applications using this policy are expected to PIN
-         * their certificate public keys or verification fails.
-         * This does not seem to be what we want here. */
-        if(!conn_config->revoke_best_effort) {
+        if(conn_config->verifystatus)
           revocation_flags |= kSecRevocationRequirePositiveResponse;
-        }
-#endif
         policy = SecPolicyCreateRevocation(revocation_flags);
         if(!policy) {
           result = CURLE_OUT_OF_MEMORY;
