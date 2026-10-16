@@ -484,8 +484,8 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       flush_egress = TRUE;
     }
 
-    if(flush_egress) {
-      (void)nghttp2_session_send(ctx->h2);
+    if(flush_egress && !ctx->ngh2_kaput) {
+      cf_h2_check(cf, nghttp2_session_send(ctx->h2));
       (void)nw_out_flush(cf, data);
     }
   }
@@ -2056,7 +2056,7 @@ static CURLcode cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* Now that we transferred this to the upper layer, we report
      * the actual amount of DATA consumed to the H2 session, so
      * that it adjusts stream flow control */
-    nghttp2_session_consume(ctx->h2, stream->id, *pnread);
+    cf_h2_check(cf, nghttp2_session_consume(ctx->h2, stream->id, *pnread));
     if(stream->closed) {
       CURL_TRC_CF(data, cf, "[%d] DRAIN closed stream", stream->id);
       Curl_multi_mark_dirty(data);

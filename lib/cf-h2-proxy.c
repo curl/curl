@@ -779,8 +779,10 @@ static CURLcode proxy_h2_submit(
   }
 
   if(stream_id < 0) {
-    failf(data, "nghttp2_session_upgrade2() failed: %s(%d)",
-          nghttp2_strerror(stream_id), stream_id);
+    int rv = cf_h2_proxy_check(cf, (int)stream_id);
+    (void)rv; /* for non-verbose builds, we still need the check */
+    CURL_TRC_CF(data, cf, "send: nghttp2_submit_request error (%s)%d",
+                nghttp2_strerror(rv), rv);
     result = CURLE_SEND_ERROR;
     goto out;
   }
