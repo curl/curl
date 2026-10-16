@@ -144,7 +144,7 @@ my $SERVER_TIMEOUT_SEC = 15; # time for a server to spin up
 # Variables shared with runtests.pl
 our $SOCKSIN = "socksd-request.log"; # what curl sent to the SOCKS proxy
 our $err_unexpected; # error instead of warning on server unexpectedly alive
-our $debugprotocol;  # nonzero for verbose server logs
+our $debugprotocol;  # non-zero for verbose server logs
 our $stunnel;        # path to stunnel command
 
 #######################################################################

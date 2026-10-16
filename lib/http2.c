@@ -497,7 +497,7 @@ static int h2_client_new(struct Curl_cfilter *cf,
 }
 
 /*
- * Returns nonzero if current HTTP/2 session should be closed.
+ * Returns non-zero if current HTTP/2 session should be closed.
  */
 static int should_close_session(struct cf_h2_ctx *ctx)
 {

@@ -28,7 +28,7 @@ mqtt
 mqtt
 </server>
 <name>
-MQTT reject DISCONNECT with nonzero remaining_length
+MQTT reject DISCONNECT with non-zero remaining_length
 </name>
 <command option="binary-trace">
 mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER

@@ -141,7 +141,7 @@ overrides a space if both are used.
 
 # Field width
 
-An optional decimal digit string (with nonzero first digit) specifying a
+An optional decimal digit string (with non-zero first digit) specifying a
 minimum field width. If the converted value has fewer characters than the
 field width, it gets padded with spaces on the left (or right, if the
 left-adjustment flag has been given). Instead of a decimal digit string one

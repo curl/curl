@@ -51,7 +51,7 @@ struct mqttd_configurable {
   bool short_publish;
   bool excessive_remaining;
   bool pingresp_as_connack; /* send PINGRESP with payload instead of CONNACK */
-  bool disconnect_malformed; /* DISCONNECT with nonzero remlen */
+  bool disconnect_malformed; /* DISCONNECT with non-zero remlen */
   unsigned char error_connack;
   unsigned char remlen_connack;
 };
@@ -269,7 +269,7 @@ static int disconnect(FILE *dump, curl_socket_t fd)
     packet[1] = 0x02;
     pktlen = 4;
     label = "DISCONNECT-malformed";
-    logmsg("Sending malformed DISCONNECT with nonzero remaining_length");
+    logmsg("Sending malformed DISCONNECT with non-zero remaining_length");
   }
 
   rc = swrite(fd, packet, pktlen);
