@@ -4750,29 +4750,23 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
     unsigned char *ocsp_data = NULL;
 #endif
     long ocsp_len = 0;
-    bool ocsp_missing = FALSE;
-    if(conn_config->verifystatus && !octx->reused_session)
+    bool ocsp_required = (!octx->reused_session && conn_config->verifystatus);
+    if(!octx->reused_session)
       ocsp_len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &ocsp_data);
-
     /* SSL_get_tlsext_status_ocsp_resp() returns the length of the OCSP
        response data or -1 if there is no OCSP response data.
        AWS-LC breaks the API and returns 0 when there is no data. */
     if(ocsp_len <= 0) {
       ocsp_len = 0; /* no data available */
-      ocsp_missing = TRUE;
+      ocsp_data = NULL;
     }
+
     result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
                                     ossl_chain_get_der, &chain,
-                                    ocsp_data, ocsp_len);
+                                    ocsp_data, ocsp_len,
+                                    ocsp_required);
     OPENSSL_free(chain.last_der);
     chain.last_der = NULL;
-    if(!result && ocsp_missing && conn_config->verifystatus &&
-       !octx->reused_session) {
-      /* verified, but OCSP stapling is required and server sent none */
-      octx->sectrust_verified = TRUE;
-      failf(data, "No OCSP response received");
-      return CURLE_SSL_INVALIDCERTSTATUS;
-    }
   }
   octx->sectrust_verified = !result;
   return result;
@@ -4864,12 +4858,10 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 #ifndef OPENSSL_NO_OCSP
   if(conn_config->verifystatus &&
 #ifdef USE_APPLE_SECTRUST
-     !octx->sectrust_verified && /* already verified via sectrust, cannot
-                                  * verifystate via OpenSSL in that case as it
-                                  * does not have the trust anchors */
+    /* When SecTrust did the verify and has the capability, no need. */
+     !(octx->sectrust_verified && Curl_vtls_apple_verifies_ocsp(cf, data)) &&
 #endif
      !octx->reused_session) {
-    /* do not do this after Session ID reuse */
     result = verifystatus(cf, data, octx);
     if(result)
       goto out;
