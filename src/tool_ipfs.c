@@ -167,9 +167,14 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   /* get gateway parts */
   if(curl_url_get(gatewayurl, CURLUPART_HOST, &gwhost, CURLU_URLDECODE) ||
      curl_url_get(gatewayurl, CURLUPART_SCHEME, &gwscheme, CURLU_URLDECODE) ||
-     curl_url_get(gatewayurl, CURLUPART_PORT, &gwport,
-                  CURLU_URLDECODE | CURLU_DEFAULT_PORT) ||
      curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, 0))
+    goto clean;
+
+  /* only keep a port the gateway URL sets, so that a later scheme change
+     (like an HSTS upgrade) gets the default port of the new scheme */
+  getResult = curl_url_get(gatewayurl, CURLUPART_PORT, &gwport,
+                           CURLU_URLDECODE);
+  if(getResult && (getResult != CURLUE_NO_PORT))
     goto clean;
 
   /* Get the user path without decoding it, and build the new path below from
