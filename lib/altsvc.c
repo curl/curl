@@ -281,7 +281,9 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
   const char *src6_post = "";
   CURLcode result = curlx_gmtime(as->expires, &stamp);
   if(result)
-    return result;
+    /* fail silently for date errors so that only this entry gets
+       skipped */
+    return CURLE_OK;
 #ifdef USE_IPV6
   else {
     char ipv6_unused[16];
@@ -471,6 +473,8 @@ static void altsvc_flush(struct altsvcinfo *asi,
   }
 }
 
+#define CAP_ALTSVC_MAX_AGE (2*365*24*3600) /* two years cap */
+
 #define ALTSVC_MA      1
 #define ALTSVC_PERSIST 2
 static void altsvc_parse_params(const char **pp,
@@ -516,8 +520,11 @@ static void altsvc_parse_params(const char **pp,
         break; /* not a number, skip further parameter parsing */
       if(vp != vend)
         break; /* not entirely a number, skip further parameter parsing */
-      if(keyword == ALTSVC_MA)
+      if(keyword == ALTSVC_MA) {
+        if(num > CAP_ALTSVC_MAX_AGE)
+          num = CAP_ALTSVC_MAX_AGE;
         *pmaxage = (time_t)num;
+      }
       else if(num == 1)
         *ppersist = TRUE;
     }
