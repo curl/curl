@@ -27,6 +27,7 @@
 #include "curl_setup.h"
 
 struct Curl_easy;
+struct Curl_cfilter;
 struct connectdata;
 struct easy_pollset;
 
@@ -116,6 +117,11 @@ struct Curl_protocol {
      transfer "owns" the connection. */
   CURLcode (*setup_connection)(struct Curl_easy *data,
                                struct connectdata *conn);
+
+  /* After IP/Proxy connectivity has been established, add protocol
+   * specific filters underneath `cf`, if so desired.
+   * Called once during connection setup. */
+  CURLcode (*setup_filters)(struct Curl_easy *data, struct Curl_cfilter *cf);
 
   /* These two functions MUST be set to be protocol dependent */
   CURLcode (*do_it)(struct Curl_easy *data, bool *done);
