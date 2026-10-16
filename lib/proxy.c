@@ -115,7 +115,7 @@ UNITTEST bool cidr6_match(const char *ipv6, const char *network,
   if(curlx_inet_pton(AF_INET6, network, check) != 1)
     return FALSE;
   if((bytes == 16) && (bits == 128) && !memcmp(null6, check, 16))
-    /* ::/0 matches everyting */
+    /* ::/0 matches everything */
     return TRUE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
