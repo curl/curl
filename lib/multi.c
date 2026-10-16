@@ -120,13 +120,6 @@ static void mstate_enter_completed(struct Curl_easy *data,
 {
   /* we sometimes directly jump to COMPLETED, trigger things
    * we then missed. */
-  if(from_state < MSTATE_DID) {
-    Curl_pgrsTime(data, TIMER_PRETRANSFER);
-    Curl_pgrsTime(data, TIMER_POSTRANSFER);
-    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
-  }
-  /* multi_done() should have run and detached any connection already */
-  DEBUGASSERT(!data->conn);
   Curl_pgrsCompleted(data);
   if(from_state < MSTATE_DONE)
     CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
