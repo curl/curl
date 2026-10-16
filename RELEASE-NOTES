@@ -1,22 +1,45 @@
 curl and libcurl 8.23.1
 
- Public curl releases:         276
+ Public curl releases:         277
  Command line options:         278
  curl_easy_setopt() options:   312
  Public functions in libcurl:  100
- Authors:                      1547
- Contributors:                 3844
+ Authors:                      1548
+ Contributors:                 3850
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o altsvc: cap 'ma' values at two years maximum [17]
+ o apple sectrust: require OCSP for cert-status [10]
+ o autotools: drop adjacent duplicate `LDFLAGS` from `libcurl.pc` [14]
+ o cert-status: tests and fixes [5]
+ o cmake: drop duplicate deduplication of linker flags [13]
+ o cmake: fix preconditions for option `CURL_STATIC_CRT=ON` [15]
+ o cmake: silence MSVC linker warning in debug builds with `CURL_DROP_UNUSED=ON` [11]
+ o conncache: poll an idle connection for pending input on every reuse [27]
+ o cookie: reload complete self-generated cookie jar rows [24]
+ o curl_getdate.md: clarify that the weekday name means nothing [29]
+ o examples: simplify timeout handling in multi-uv.c [31]
+ o libssh2: make the knownhost name check also verify length [19]
+ o msvc: replace debug CRT GUI popups with stderr output [34]
+ o parsedate: minor simplifications [25]
  o pingpong: allow impa to add a prefix directly [7]
+ o proxy: fix 0.0.0.0/0 and ::/0 CIDR matching [12]
+ o rtsp: refuse doing uploads with CRLF conversions [20]
  o runtests: add `-S` option to show success logs [3]
+ o setopt: fix setting `CURLWS_NOAUTOPONG` with compilers lacking C99 bool type [16]
+ o share: connection pool shutdowns [28]
  o slist: duplicate lists in linear time [6]
+ o socketpair: fix compiler warning `-Wunreachable-code` [9]
  o test_06_eyeballs: silence Code Quality warning [2]
  o tests/server: fix crashing with VS2013 and earlier [4]
+ o testutil: better function implementation [23]
+ o tidy-up: simplify CRTDBG logic in `generate.bat` [33]
+ o tool: preserve absent schemes when appending upload filenames [22]
+ o urldata: move OpenSSL provider state to OpenSSL context struct [1]
  o VERSIONS: add the new rock-solid curl releases
  o vtls: encode session peer key fields unambiguously [8]
 
@@ -40,14 +63,39 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, dataisland, Stefan Eissing, Viktor Szakats
-  (4 contributors)
+  Bootherr on hackerone, Daniel McCarney, Daniel Stenberg, Daniel Wade,
+  pszemus, revolik on hackerone, Rhino, Samuel Henrique, Stefan Eissing,
+  Sujit Jaunjal, vansukmbg on hackerone, Vasiliy-Kkk, Viktor Szakats, Zheng Yu
+  (14 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=23436
  [2] = https://curl.se/bug/?i=23367
  [3] = https://curl.se/bug/?i=23381
  [4] = https://curl.se/bug/?i=23306
+ [5] = https://curl.se/bug/?i=23420
  [6] = https://curl.se/bug/?i=23361
  [7] = https://curl.se/bug/?i=23373
  [8] = https://curl.se/bug/?i=23357
+ [9] = https://curl.se/bug/?i=23437
+ [10] = https://curl.se/bug/?i=23430
+ [11] = https://curl.se/bug/?i=23435
+ [12] = https://curl.se/bug/?i=23434
+ [13] = https://curl.se/bug/?i=23427
+ [14] = https://curl.se/bug/?i=23348
+ [15] = https://curl.se/bug/?i=23336
+ [16] = https://curl.se/bug/?i=23306
+ [17] = https://curl.se/bug/?i=23429
+ [19] = https://curl.se/bug/?i=23423
+ [20] = https://curl.se/bug/?i=23425
+ [22] = https://curl.se/bug/?i=23402
+ [23] = https://curl.se/bug/?i=23422
+ [24] = https://curl.se/bug/?i=23407
+ [25] = https://curl.se/bug/?i=23417
+ [27] = https://hackerone.com/reports/4098761
+ [28] = https://curl.se/bug/?i=23404
+ [29] = https://curl.se/bug/?i=23413
+ [31] = https://curl.se/bug/?i=23408
+ [33] = https://curl.se/bug/?i=23410
+ [34] = https://curl.se/bug/?i=23400
