@@ -33,54 +33,6 @@ version: 7.50.0.{build}
 environment:
   DO_NOT_TRACK: '1'
 
-  # Combinations used in CI jobs:
-  # VS2010: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  # VS2012: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  # VS2013: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  # VS2013: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  # VS2015: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  # VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  # VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
-  # VS2022: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
-  # VS2026: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.9-01d6c708.x86_64 2026-05-24 10:45 UTC x86_64 Msys, Perl: v5.42.2 (/usr/bin/perl)
-
-  # Visual Studio disk locations:
-  # VS2008: c:/Program Files (x86)/Microsoft Visual Studio 9.0
-  # VS2010: c:/Program Files (x86)/Microsoft Visual Studio 10.0
-  # VS2012: C:/Program Files (x86)/Microsoft Visual Studio 11.0
-  # VS2013: C:/Program Files (x86)/Microsoft Visual Studio 12.0
-  # VS2015: C:/Program Files (x86)/Microsoft Visual Studio 14.0
-  # VS2017: C:/Program Files (x86)/Microsoft Visual Studio/2017
-  # VS2019: C:/Program Files (x86)/Microsoft Visual Studio/2019
-  # VS2022: C:/Program Files/Microsoft Visual Studio/2022
-  # VS2026: C:/Program Files/Microsoft Visual Studio/18
-
-  # Runners and Visual Studio availability
-  # VS2015: System: MSYS_NT- 6.3- 9600 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  #   VS2008 out of curl support
-  #   VS2010
-  #   VS2012
-  #   VS2013 undocumented
-  #   VS2015
-  # VS2017: System: MSYS_NT-10.0-14393 APPVYR-WIN  3.0.7-338.x86_64      2019-07-11 10:58 UTC x86_64 Msys, Perl: v5.30.0 (/usr/bin/perl)
-  #   VS2010 BROKEN
-  #   VS2012 BROKEN
-  #   VS2013 undocumented
-  #   VS2015
-  #   VS2017
-  # VS2019: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
-  #   VS2010 BROKEN
-  #   VS2012 BROKEN
-  #   VS2013 BROKEN
-  #   VS2015
-  #   VS2019
-  # VS2022: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.5-0eeda3e1.x86_64 2025-10-10 14:51 UTC x86_64 Msys, Perl: v5.40.3 (/usr/bin/perl)
-  #   VS2015
-  #   VS2022
-  # VS2026: System: MSYS_NT-10.0-17763 appveyor-vm 3.6.9-01d6c708.x86_64 2026-05-24 10:45 UTC x86_64 Msys, Perl: v5.42.2 (/usr/bin/perl)
-  #   VS2015 BROKEN: Windows SDK version 8.1 not found
-  #   VS2026
-
   matrix:
     # CMake Visual Studio builds
 
