@@ -669,6 +669,9 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
   CURLcode result = CURLE_OK;
   long postRedir = 0;
 
+  if(config->hsts)
+    MY_SETOPT_STR(curl, CURLOPT_HSTS, config->hsts);
+
   if(use_proto != proto_http && use_proto != proto_https)
     return CURLE_OK;
 
@@ -709,9 +712,6 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
 
   if(config->altsvc)
     MY_SETOPT_STR(curl, CURLOPT_ALTSVC, config->altsvc);
-
-  if(config->hsts)
-    MY_SETOPT_STR(curl, CURLOPT_HSTS, config->hsts);
 
   if(config->expect100timeout_ms > 0)
     my_setopt_long(curl, CURLOPT_EXPECT_100_TIMEOUT_MS,
