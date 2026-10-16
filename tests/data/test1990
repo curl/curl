@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+CURLINFO_EFFECTIVE_URL
+libtest
+</keywords>
+</info>
+
+# Client-side
+<client>
+<name>
+CURLINFO_EFFECTIVE_URL with no URL and an invalid URL
+</name>
+<command>
+-
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+getinfo: 0, url: ''
+perform: 3
+getinfo: 3, url: (NULL)
+</stdout>
+</verify>
+</testcase>
