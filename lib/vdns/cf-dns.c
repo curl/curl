@@ -307,8 +307,10 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
       Curl_resolv_take_result(data, ctx->resolv_id, &ctx->dns);
   }
 
-  if(ctx->resolv_result && ip_query) {
-    /* failing A|AAAA resolves is a hard failure. */
+  if(ctx->resolv_result &&
+     (ip_query || (ctx->resolv_result == CURLE_ABORTED_BY_CALLBACK))) {
+    /* a failed A|AAAA resolve, or an application-aborted HTTPS-RR
+       resolve, is a hard failure. Other HTTPS-RR errors are optional. */
     CURL_TRC_CF(data, cf, "[%s] error resolving: %d",
                 Curl_resolv_query_str(ctx->dns_queries),
                 (int)ctx->resolv_result);
