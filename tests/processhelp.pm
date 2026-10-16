@@ -223,7 +223,12 @@ sub pidkill {
                     my $result = qx(tasklist -v -fo list -fi "PID eq $pid" 2>&1);
                     $result =~ s/\r//g;
                     $result =~ s/\n/ | /g;
-                    print "Task info for $pid before taskkill: '$result'\n";
+                    print "Task info (via tasklist) for $pid before taskkill: '$result'\n";
+
+                    $result = qx(powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine");
+                    $result =~ s/\r//g;
+                    print "Task info (via Get-CimInstance) for $pid before taskkill:\n";
+                    print "$result\n";
 
                     $result = qx(powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine");
                     $result =~ s/\r//g;
