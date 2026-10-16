@@ -517,6 +517,7 @@ sub checksystemfeatures {
     my $versioncmd = exerunner() . shell_quote($CURL) . ' --disable --version 2>&1';
     my $versout = qx($versioncmd);
     my $versretval = $?;
+    print "CMD ($versretval): $versioncmd\n" if($verbose && !$torture);
     my @version = split(/\n/, $versout);
 
     my $current_time = int(time());
