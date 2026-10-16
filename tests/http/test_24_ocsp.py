@@ -160,7 +160,7 @@ class OsslServer:
             self.startup()
 
 
-@pytest.mark.skipif(condition=not Env.have_openssl_ech(), reason="no modern openssl available")
+@pytest.mark.skipif(condition=not Env.have_openssl_ech(), reason="no modern OpenSSL available")
 @pytest.mark.skipif(condition=not Env.curl_can_cert_status(), reason="no cert-status in curl")
 class TestOCSP:
 
@@ -194,7 +194,7 @@ class TestOCSP:
         if exp_ok:
             r.check_exit_code(0)
         elif ocsp_case == 'revoked':
-            # gnutls fails this with 60 as its internal checks fail early
+            # GnuTLS fails this with 60 as its internal checks fail early
             assert r.exit_code in [60, 91], f'{r}'
         else:
             r.check_exit_code(91)
