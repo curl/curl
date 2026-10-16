@@ -1042,7 +1042,7 @@ jobs:
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags+=' -DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
-              ldflags+=' -OPT:NOICF -APPCONTAINER:NO'
+              ldflags+=' -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
             if [ "${TFLAGS}" = 'skiprun' ]; then
