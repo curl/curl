@@ -511,29 +511,18 @@ sub checksystemfeatures {
     my $feat;
     my $curl;
     my $libcurl;
-    my $versretval;
-    my $versnoexec;
-    my @version = ();
     my @disabled;
     my $dis = "";
 
-    my $curlverout = "$LOGDIR/curlverout.log";
-    my $curlvererr = "$LOGDIR/curlvererr.log";
-    my $versioncmd = exerunner() . shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
-
-    unlink($curlverout);
-    unlink($curlvererr);
-
-    $versretval = runclient($versioncmd);
-    $versnoexec = $!;
+    my $versioncmd = exerunner() . shell_quote($CURL) . ' --disable --version 2>&1';
+    my $versout = qx($versioncmd);
+    my $versretval = $?;
+    print "CMD ($versretval): $versioncmd\n" if($verbose && !$torture);
+    my @version = split(/\n/, $versout);
 
     my $current_time = int(time());
     $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
     $DATE = strftime "%Y-%m-%d", gmtime($current_time);
-
-    open(my $versout, "<", $curlverout);
-    @version = <$versout>;
-    close($versout);
 
     open(my $disabledh, "-|", exerunner() . shell_quote($CURLINFO));
     while(<$disabledh>) {
@@ -758,7 +747,7 @@ sub checksystemfeatures {
         logmsg "$versioncmd \n";
         if($versretval == -1) {
             logmsg "command failed with: \n";
-            logmsg "$versnoexec \n";
+            logmsg "$versretval \n";
         }
         elsif($versretval & 127) {
             logmsg sprintf("command died with signal %d, and %s coredump.\n",
@@ -767,10 +756,8 @@ sub checksystemfeatures {
         else {
             logmsg sprintf("command exited with value %d \n", $versretval >> 8);
         }
-        logmsg "contents of $curlverout: \n";
-        displaylogcontent($curlverout);
-        logmsg "contents of $curlvererr: \n";
-        displaylogcontent($curlvererr);
+        logmsg "curl version output: \n";
+        logmsg "$versout \n";
         die "Could not get curl's version";
     }
 
