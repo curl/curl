@@ -514,7 +514,7 @@ sub checksystemfeatures {
     my @disabled;
     my $dis = "";
 
-    my $versioncmd = exerunner() . shell_quote($CURL) . ' --version 2>&1';
+    my $versioncmd = exerunner() . shell_quote($CURL) . ' --disable --version 2>&1';
     my $versout = qx($versioncmd);
     my $versretval = $?;
     my @version = split(/\n/, $versout);
