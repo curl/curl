@@ -165,6 +165,9 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
       }
     }
   }
+#else
+  /* OCSP check not available in this Apple OS version. */
+  (void)require_ocsp;
 #endif
 
   cert_array = CFArrayCreateMutable(NULL, num_certs, &kCFTypeArrayCallBacks);
@@ -303,6 +306,18 @@ out:
   if(trust)
     CFRelease(trust);
   return result;
+}
+
+bool Curl_vtls_apple_verifies_ocsp(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
+{
+  (void)cf;
+  (void)data;
+#if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
+  return TRUE;
+#else
+  return FALSE;
+#endif
 }
 
 #endif /* USE_APPLE_SECTRUST */

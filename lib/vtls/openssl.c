@@ -4858,12 +4858,10 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 #ifndef OPENSSL_NO_OCSP
   if(conn_config->verifystatus &&
 #ifdef USE_APPLE_SECTRUST
-     !octx->sectrust_verified && /* already verified via sectrust, cannot
-                                  * verifystate via OpenSSL in that case as it
-                                  * does not have the trust anchors */
+    /* When SecTrust did the verify and has the capability, no need. */
+     !(octx->sectrust_verified && Curl_vtls_apple_verifies_ocsp(cf, data)) &&
 #endif
      !octx->reused_session) {
-    /* do not do this after Session ID reuse */
     result = verifystatus(cf, data, octx);
     if(result)
       goto out;

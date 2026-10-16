@@ -50,6 +50,10 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 const unsigned char *ocsp_buf,
                                 size_t ocsp_len,
                                 bool require_ocsp);
+
+bool Curl_vtls_apple_verifies_ocsp(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data);
+
 #endif /* USE_APPLE_SECTRUST */
 
 #endif /* HEADER_CURL_VTLS_APPLE_H */
