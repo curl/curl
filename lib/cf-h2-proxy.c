@@ -1276,7 +1276,8 @@ static CURLcode cf_h2_proxy_recv(struct Curl_cfilter *cf,
   if(!result) {
     CURL_TRC_CF(data, cf, "[%d] increase window by %zu",
                 ctx->tunnel.stream_id, *pnread);
-    nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, *pnread);
+    cf_h2_proxy_check(cf,
+      nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, *pnread));
   }
 
   result = Curl_1st_fatal(result, proxy_h2_progress_egress(cf, data));

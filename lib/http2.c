@@ -478,8 +478,9 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
                   stream->id);
       stream->closed = TRUE;
       stream->reset = TRUE;
-      nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
-                                stream->id, NGHTTP2_STREAM_CLOSED);
+      cf_h2_check(cf,
+        nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
+                                  stream->id, NGHTTP2_STREAM_CLOSED));
       flush_egress = TRUE;
     }
 
@@ -1324,8 +1325,11 @@ static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
           stream_id, buffer, ngerr, nghttp2_strerror(ngerr));
 #endif /* CURLVERBOSE */
     if(stream && !ctx->ngh2_kaput) {
-      nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
-                                stream->id, NGHTTP2_STREAM_CLOSED);
+      cf_h2_check(cf,
+        nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
+                                  stream->id, NGHTTP2_STREAM_CLOSED));
+      if(ctx->ngh2_kaput)
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
       stream->error = ngerr;
       stream->closed = TRUE;
       stream->reset = TRUE;
@@ -1358,8 +1362,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
        in the pipeline. Silently ignore. */
     CURL_TRC_CF(CF_DATA_CURRENT(cf), cf, "[%d] Data for unknown", stream_id);
     /* consumed explicitly as no one will read it */
-    nghttp2_session_consume(session, stream_id, len);
-    return 0;
+    cf_h2_check(cf, nghttp2_session_consume(session, stream_id, len));
+    return ctx->ngh2_kaput ? NGHTTP2_ERR_CALLBACK_FAILURE : 0;
   }
 
   if(!stream)
@@ -1367,9 +1371,10 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
 
   h2_xfer_write_resp(cf, data_s, stream, (const char *)mem, len, FALSE);
 
-  nghttp2_session_consume(ctx->h2, stream_id, len);
+  if(!ctx->ngh2_kaput)
+    cf_h2_check(cf, nghttp2_session_consume(ctx->h2, stream_id, len));
   stream->nrcvd_data += (curl_off_t)len;
-  return 0;
+  return ctx->ngh2_kaput ? NGHTTP2_ERR_CALLBACK_FAILURE : 0;
 }
 
 static int on_stream_close(nghttp2_session *session, int32_t stream_id,
@@ -2338,7 +2343,10 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  if(stream) {
+  if(ctx->ngh2_kaput)
+    CURL_TRC_CF(data, cf, "cf_send(len=%zu) -> %d, nghttp2 kaput",
+                len, (int)result);
+  else if(stream) {
     CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) -> %d, %zu, "
                 "eos=%d, h2 windows %d-%d (stream-conn), "
                 "buffers %zu-%zu (stream-conn)",
