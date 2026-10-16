@@ -1104,7 +1104,7 @@ HEAD
     foreach my $f (sort keys %helplong) {
         my $long = $f;
         my $short = $optlong{$long};
-        my @categories = split ' ', $catlong{$long};
+        my @categories = split(' ', $catlong{$long});
         my $bitmask = ' ';
         my $opt;
 
@@ -1162,7 +1162,7 @@ FOOT
 sub listcats {
     my %allcats;
     foreach my $f (sort keys %helplong) {
-        my @categories = split ' ', $catlong{$f};
+        my @categories = split(' ', $catlong{$f});
         foreach (@categories) {
             $allcats{$_} = undef;
         }
