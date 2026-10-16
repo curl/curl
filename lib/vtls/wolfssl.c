@@ -2312,8 +2312,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wssl_get_internals,              /* get_internals */
   wssl_close,                      /* close_one */
   NULL,                            /* close_all */
-  NULL,                            /* set_engine */
-  NULL,                            /* set_engine_default */
   NULL,                            /* engines_list */
   wssl_sha256sum,                  /* sha256sum */
   wssl_recv,                       /* recv decrypted data */

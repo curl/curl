@@ -930,8 +930,13 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_ENABLE_NPN:
     break;
   case CURLOPT_SSLENGINE_DEFAULT:
-    CURL_EASY_STR_CLEAR(data, STRING_SSL_ENGINE);
-    result = Curl_ssl_set_engine_default(data);
+#ifdef USE_OPENSSL
+    if(Curl_ssl_backend() != CURLSSLBACKEND_OPENSSL)
+      return CURLE_NOT_BUILT_IN;
+    data->set.engine_default = (arg == 1);
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
@@ -1957,12 +1962,9 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     /*
      * String that holds the SSL crypto engine.
      */
-    if(ptr && ptr[0]) {
-      result = Curl_setstropt(data, STRING_SSL_ENGINE, ptr);
-      if(!result) {
-        result = Curl_ssl_set_engine(data, ptr);
-      }
-    }
+    if(Curl_ssl_backend() != CURLSSLBACKEND_OPENSSL)
+      return CURLE_NOT_BUILT_IN;
+    result = Curl_setstropt(data, STRING_SSL_ENGINE, ptr);
     break;
   case CURLOPT_ISSUERCERT:
     /*
