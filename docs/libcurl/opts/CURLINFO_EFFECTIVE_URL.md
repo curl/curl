@@ -32,6 +32,14 @@ Pass in a pointer to a char pointer and get the last used effective URL.
 In cases when you have asked libcurl to follow redirects, it may not be the
 same value you set with CURLOPT_URL(3).
 
+Any credentials (username and password) present in the URL are removed from
+the returned string.
+
+If no URL has been used yet, **urlp** points to an empty string.
+
+If the URL set with CURLOPT_URL(3) cannot be parsed as a valid URL, **urlp** is
+set to NULL and an error is returned, typically *CURLE_URL_MALFORMAT*.
+
 The **urlp** pointer is NULL or points to private memory. You **must not**
 free it. It memory gets freed automatically when you call curl_easy_cleanup(3)
 on the corresponding curl handle.
