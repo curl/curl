@@ -94,7 +94,7 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
     }
   }
   return 0;
-#endif
+#endif /* HAVE_PIPE2 */
 }
 
 #elif defined(HAVE_SOCKETPAIR)  /* !USE_EVENTFD && !HAVE_PIPE */
