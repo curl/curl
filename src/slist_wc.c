@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifndef CURL_DISABLE_LIBCURL_OPTION
-
 #include "slist_wc.h"
 
 /*
@@ -65,5 +63,3 @@ void slist_wc_free_all(struct slist_wc *list)
   curl_slist_free_all(list->first);
   curlx_free(list);
 }
-
-#endif /* CURL_DISABLE_LIBCURL_OPTION */
