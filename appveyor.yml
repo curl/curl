@@ -36,36 +36,24 @@ environment:
   matrix:
     # CMake Visual Studio builds
 
+    - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
+
+    - job_name: 'CM VS2026, Release, arm64, Schannel, Static, Build-tests'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
+      CMAKE_VERSION: 4.2.1  # manually bumped
+      CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
+      CMAKE_GENERATOR: 'Visual Studio 18 2026'
+      CMAKE_GENERATE: '-A ARM64 -DBUILD_SHARED_LIBS=OFF'
+
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
-
-    # temp
-    - job_name: 'CM VS2010, Release, x64, Schannel, Shared, Build-tests & examples'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
-      CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
-      CMAKE_GENERATOR: 'Visual Studio 10 2010'
-      CMAKE_GENERATE: '-A x64'
-
-    # temp
-    - job_name: 'CM VS2010, Debug, x64, Schannel, Static, Build-tests & examples'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
-      CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
-      CMAKE_GENERATOR: 'Visual Studio 10 2010'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
-
-    # temp
-    - job_name: 'CM VS2010, Release, x64, Schannel, Static, Build-tests & examples'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
-      CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
-      CMAKE_GENERATOR: 'Visual Studio 10 2010'
-      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF'
 
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -74,24 +62,8 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
       CMAKE_GENERATE: '-A Win32'
 
-    # temp
-    - job_name: 'CM VS2012, Debug, x64, Schannel, Shared, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.21.7  # manually bumped
-      CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
-      CMAKE_GENERATOR: 'Visual Studio 11 2012'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
-
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
-      CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
-      CMAKE_GENERATOR: 'Visual Studio 12 2013'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
-
-    # temp NEW -> works, but tests still broken -> breakage seems unrelated to OS version
-    - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-tests, Win2016'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'  # to run all tests
       CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 12 2013'
@@ -116,18 +88,6 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 16 2019'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
 
-    # temp
-    - job_name: 'CM VS2019, Release, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-      CMAKE_GENERATOR: 'Visual Studio 16 2019'
-      CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
-
-    # temp
-    - job_name: 'CM VS2019, Release, x86, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-      CMAKE_GENERATOR: 'Visual Studio 16 2019'
-      CMAKE_GENERATE: '-A Win32 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
-
     - job_name: 'CM VS2026, Debug, x64, OpenSSL 3.6 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
       CMAKE_VERSION: 4.2.1  # manually bumped (first minor version to support VS2026)
@@ -140,42 +100,6 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON'
-
-    # temp
-    - job_name: 'CM VS2022, Debug, x64, Schannel, Shared, Unicode, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      CMAKE_GENERATOR: 'Visual Studio 17 2022'
-      CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON -DENABLE_DEBUG=ON'
-
-    # temp
-    - job_name: 'CM VS2026, Debug, x64, !ssl, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
-      CMAKE_VERSION: 4.2.1
-      CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
-      CMAKE_GENERATOR: 'Visual Studio 18 2026'
-      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF -DENABLE_DEBUG=ON'
-
-    # temp
-    - job_name: 'CM VS2026, Debug, x64, !ssl, Shared, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
-      CMAKE_VERSION: 4.2.1
-      CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
-      CMAKE_GENERATOR: 'Visual Studio 18 2026'
-      CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DENABLE_DEBUG=ON'
-
-    # temp
-    - job_name: 'CM VS2026, Release, x64, !ssl, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
-      CMAKE_VERSION: 4.2.1
-      CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
-      CMAKE_GENERATOR: 'Visual Studio 18 2026'
-      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
-
-    # temp
-    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      CMAKE_GENERATOR: 'Visual Studio 17 2022'
-      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF -DENABLE_DEBUG=ON'
 
     # VisualStudioSolution builds
 
