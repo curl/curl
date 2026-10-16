@@ -67,6 +67,7 @@ static CURLcode test_unit1614(const char *arg)
     { "fe80::ab47:4396:55c9:8474", "fe80::ab47:4396:55c9:8474", 64, TRUE },
     { "fe80::ab47:4396:55c9:8474", "::", 0, TRUE },
     { "::1", "::", 0, TRUE },
+    { "::1", "::", -1, FALSE },
     { NULL, NULL, 0, FALSE } /* end marker */
   };
 #endif
