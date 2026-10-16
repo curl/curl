@@ -517,7 +517,7 @@ sub checksystemfeatures {
     my $versioncmd = exerunner() . shell_quote($CURL) . ' --version 2>&1';
     my $versout = qx($versioncmd);
     my $versretval = $?;
-    my @version = split(/\r?\n/, $versout);
+    my @version = split(/\n/, $versout);
 
     my $current_time = int(time());
     $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
