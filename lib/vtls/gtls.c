@@ -2296,8 +2296,6 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   gtls_get_internals,            /* get_internals */
   gtls_close,                    /* close_one */
   NULL,                          /* close_all */
-  NULL,                          /* set_engine */
-  NULL,                          /* set_engine_default */
   NULL,                          /* engines_list */
   gtls_sha256sum,                /* sha256sum */
   gtls_recv,                     /* recv decrypted data */

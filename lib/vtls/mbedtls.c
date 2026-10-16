@@ -1711,8 +1711,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_get_internals,            /* get_internals */
   mbedtls_close,                    /* close_one */
   NULL,                             /* close_all */
-  NULL,                             /* set_engine */
-  NULL,                             /* set_engine_default */
   NULL,                             /* engines_list */
   mbedtls_sha256sum,                /* sha256sum */
   mbed_recv,                        /* recv decrypted data */

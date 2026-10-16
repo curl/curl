@@ -256,24 +256,6 @@ CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-/* Selects an SSL crypto engine
- */
-CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine)
-{
-  if(Curl_ssl->set_engine)
-    return Curl_ssl->set_engine(data, engine);
-  return CURLE_NOT_BUILT_IN;
-}
-
-/* Selects the default SSL crypto engine
- */
-CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data)
-{
-  if(Curl_ssl->set_engine_default)
-    return Curl_ssl->set_engine_default(data);
-  return CURLE_NOT_BUILT_IN;
-}
-
 /* Return list of OpenSSL crypto engine names. */
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
 {
@@ -675,8 +657,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
   NULL,                              /* close_all */
-  NULL,                              /* set_engine */
-  NULL,                              /* set_engine_default */
   NULL,                              /* engines_list */
   NULL,                              /* sha256sum */
   multissl_recv_plain,               /* recv decrypted data */
