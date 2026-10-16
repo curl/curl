@@ -496,6 +496,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 
   DEBUGASSERT(conn);
 
+  conn->bits.in_shutdown = TRUE;
   if(conn->scheme && conn->scheme->run->disconnect &&
      !conn->bits.shutdown_handler)
     conn->scheme->run->disconnect(data, conn, TRUE);

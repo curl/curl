@@ -5113,6 +5113,7 @@ void Curl_http_resp_free(struct http_resp *resp)
  */
 const struct Curl_protocol Curl_protocol_http = {
   Curl_http_setup_conn,                 /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */

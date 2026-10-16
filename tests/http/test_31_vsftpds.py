@@ -85,7 +85,9 @@ class TestVsFTPD:
     def test_31_01_list_dir(self, env: Env, vsftpds: VsFTPD):
         curl = CurlClient(env=env)
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/'
-        r = curl.ftp_ssl_get(urls=[url], with_stats=True)
+        r = curl.ftp_ssl_get(urls=[url], with_stats=True, extra_args=[
+            '--parallel',
+        ])
         r.check_stats(count=1, http_status=226)
         with open(os.path.join(curl.run_dir, 'download_#1.data')) as fd:
             lines = fd.readlines()

@@ -40,19 +40,17 @@
 
 #define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
 
-void Curl_cshutdn_start_timer(struct Curl_easy *data, int8_t sockindex,
-                              int timeout_ms)
+void Curl_cshutdn_start_timer(struct Curl_easy *data, int8_t sockindex)
 {
   struct connectdata *conn = data->conn;
   const struct curltime *pnow = Curl_pgrs_now(data);
 
   DEBUGASSERT(conn);
+  if(sockindex == FIRSTSOCKET)
+    conn->bits.in_shutdown = TRUE;
   conn->shutdown.start_ms[sockindex] =
     curlx_ptimediff_ms(pnow, &conn->created);
-  conn->shutdown.timeout_ms = (timeout_ms > 0) ?
-    (timediff_t)timeout_ms :
-    ((data->set.shutdowntimeout > 0) ?
-     data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
+  conn->shutdown.timeout_ms = DEFAULT_SHUTDOWN_TIMEOUT_MS;
   /* Set a timer, unless we operate on the admin handle */
   if(data->mid)
     Curl_expire_set(data, EXPIRE_SHUTDOWN, conn->shutdown.timeout_ms, pnow);
@@ -148,7 +146,7 @@ CURLcode Curl_cshutdn_try_once_idx(struct Curl_easy *data,
 
   *done = FALSE;
   if(!CURL_CONN_IN_SHUTDOWN(data->conn, sockindex)) {
-    Curl_cshutdn_start_timer(data, sockindex, 0);
+    Curl_cshutdn_start_timer(data, sockindex);
   }
   else {
     timeout_ms = Curl_cshutdn_timeleft_ms(data, data->conn, sockindex);
@@ -190,9 +188,8 @@ static void cshutdn_run_once(struct Curl_easy *data,
   /* We expect to be attached when called */
   DEBUGASSERT(data->conn == conn);
 
-  if(!CURL_CONN_IN_SHUTDOWN(conn, FIRSTSOCKET)) {
-    Curl_cshutdn_start_timer(data, FIRSTSOCKET, 0);
-  }
+  if(!CURL_CONN_IN_SHUTDOWN(conn, FIRSTSOCKET))
+    Curl_cshutdn_start_timer(data, FIRSTSOCKET);
 
   cshutdn_run_conn_handler(data, conn);
 
@@ -248,6 +245,9 @@ void Curl_cshutdn_terminate(struct Curl_easy *admin,
   DEBUGASSERT(!admin->mid);
 
   Curl_attach_connection(admin, conn, FALSE);
+
+  if(!CURL_CONN_IN_SHUTDOWN(conn, FIRSTSOCKET))
+    Curl_cshutdn_start_timer(admin, FIRSTSOCKET);
 
   cshutdn_run_conn_handler(admin, conn);
   if(do_shutdown) {

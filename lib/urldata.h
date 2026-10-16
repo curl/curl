@@ -216,6 +216,7 @@ struct ConnectBits {
                             started (happy eyeballs) */
   BIT(aborted); /* connection was aborted, e.g. in unclean state */
   BIT(no_reuse); /* connection should not be reused */
+  BIT(in_shutdown); /* connection being shut down */
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
   BIT(dns_resolved); /* DNS records for connection were resolved */
@@ -958,7 +959,6 @@ struct UserDefined {
   timediff_t connecttimeout; /* ms, 0 means default timeout */
   timediff_t happy_eyeballs_timeout; /* ms, 0 is a valid value */
   timediff_t server_response_timeout; /* ms, 0 means no timeout */
-  timediff_t shutdowntimeout; /* ms, 0 means default timeout */
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */

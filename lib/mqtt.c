@@ -1027,6 +1027,7 @@ static CURLcode mqtts_connecting(struct Curl_easy *data, bool *done)
  */
 const struct Curl_protocol Curl_protocol_mqtts = {
   mqtt_setup_conn,                    /* setup_connection */
+  ZERO_NULL,                          /* setup_filters */
   mqtt_do,                            /* do_it */
   mqtt_done,                          /* done */
   ZERO_NULL,                          /* do_more */
@@ -1052,6 +1053,7 @@ const struct Curl_protocol Curl_protocol_mqtts = {
  */
 const struct Curl_protocol Curl_protocol_mqtt = {
   mqtt_setup_conn,                    /* setup_connection */
+  ZERO_NULL,                          /* setup_filters */
   mqtt_do,                            /* do_it */
   mqtt_done,                          /* done */
   ZERO_NULL,                          /* do_more */

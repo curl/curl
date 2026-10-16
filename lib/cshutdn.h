@@ -45,8 +45,7 @@ void Curl_cshutdn_terminate(struct Curl_easy *admin,
 
 /* Start the shutdown timer,
  * marks the connection sockindex as being shut down. */
-void Curl_cshutdn_start_timer(struct Curl_easy *data, int8_t sockindex,
-                              int timeout_ms);
+void Curl_cshutdn_start_timer(struct Curl_easy *data, int8_t sockindex);
 /* Clear the shutdown timer at sockindex again. */
 void Curl_cshutdn_clear_timer(struct Curl_easy *data, int8_t sockindex);
 
@@ -56,7 +55,8 @@ timediff_t Curl_cshutdn_timeleft_ms(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int8_t sockindex);
 
-#define CURL_CONN_IN_SHUTDOWN(c,i)   ((c)->shutdown.start_ms[(i)] >= 0)
+#define CURL_CONN_IN_SHUTDOWN(c,i)   ((c)->bits.in_shutdown || \
+                                      (c)->shutdown.start_ms[(i)] >= 0)
 
 /* Shutdown the connection at `sockindex` non-blocking.
  * Will start the shutdown timer if not already set.

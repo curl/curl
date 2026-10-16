@@ -600,7 +600,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
   DEBUGASSERT(ftpcodep);
 
   /* store the latest code for later retrieval, except during shutdown */
-  if(!ftpc->shutdown)
+  if(!CURL_CONN_IN_SHUTDOWN(data->conn, FIRSTSOCKET))
     data->info.httpcode = code;
 
   *ftpcodep = code;
@@ -3177,18 +3177,144 @@ static unsigned char ftp_use_ssl(struct connectdata *conn,
   return ftpc->use_ssl;
 }
 
+static CURLcode ftp_pp_easy_states(struct Curl_easy *data,
+                                   struct connectdata *conn,
+                                   struct ftp_conn *ftpc,
+                                   int ftpcode)
+{
+  struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
+  CURLcode result = CURLE_OK;
+
+  if(!ftp)
+    return CURLE_FAILED_INIT;
+  /* we have now received a full FTP server response */
+  switch(ftpc->state) {
+  case FTP_CWD:
+    if(ftpcode / 100 != 2) {
+      /* failure to CWD there */
+      if(data->set.ftp_create_missing_dirs &&
+         ftpc->cwdcount && !ftpc->count2) {
+        /* try making it */
+        ftpc->count2++; /* counter to prevent CWD-MKD loops */
+
+        /* count3 is set to allow MKD to fail once per dir. In the case when
+           CWD fails and then MKD fails (due to another session raced it to
+           create the dir) this then allows for a second try to CWD to it. */
+        ftpc->count3 = (data->set.ftp_create_missing_dirs == 2) ? 1 : 0;
+
+        result = Curl_pp_sendf(data, &ftpc->pp, "MKD %.*s",
+                               pathlen(ftpc, ftpc->cwdcount - 1),
+                               pathpiece(ftpc, ftpc->cwdcount - 1));
+        if(!result)
+          ftp_state(data, ftpc, FTP_MKD);
+      }
+      else {
+        /* return failure */
+        failf(data, "Server denied you to change to the given directory");
+        ftpc->cwdfail = TRUE; /* do not remember this path as we failed
+                                 to enter it */
+        result = CURLE_REMOTE_ACCESS_DENIED;
+      }
+    }
+    else {
+      /* success */
+      ftpc->count2 = 0;
+      if(ftpc->cwdcount >= ftpc->dirdepth)
+        result = ftp_state_mdtm(data, ftpc, ftp);
+      else {
+        ftpc->cwdcount++;
+        /* send next CWD */
+        result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
+                               pathlen(ftpc, ftpc->cwdcount - 1),
+                               pathpiece(ftpc, ftpc->cwdcount - 1));
+      }
+    }
+    break;
+
+  case FTP_QUOTE:
+  case FTP_POSTQUOTE:
+  case FTP_RETR_PREQUOTE:
+  case FTP_STOR_PREQUOTE:
+  case FTP_LIST_PREQUOTE:
+    if((ftpcode >= 400) && !ftpc->count2) {
+      /* failure response code, and not allowed to fail */
+      failf(data, "QUOT command failed with %03d", ftpcode);
+      result = CURLE_QUOTE_ERROR;
+    }
+    else
+      result = ftp_state_quote(data, ftpc, ftp, FALSE, ftpc->state);
+    break;
+
+  case FTP_MDTM:
+    result = ftp_state_mdtm_resp(data, ftpc, ftp, ftpcode);
+    break;
+
+  case FTP_TYPE:
+  case FTP_LIST_TYPE:
+  case FTP_RETR_TYPE:
+  case FTP_STOR_TYPE:
+  case FTP_RETR_LIST_TYPE:
+    result = ftp_state_type_resp(data, ftpc, ftp, ftpcode, ftpc->state);
+    break;
+
+  case FTP_SIZE:
+  case FTP_RETR_SIZE:
+  case FTP_STOR_SIZE:
+    result = ftp_state_size_resp(data, ftpc, ftp, ftpcode, ftpc->state);
+    break;
+
+  case FTP_REST:
+  case FTP_RETR_REST:
+    result = ftp_state_rest_resp(data, ftpc, ftp, ftpcode, ftpc->state);
+    break;
+
+  case FTP_PRET:
+    if(ftpcode != 200) {
+      /* there only is this one standard OK return code. */
+      failf(data, "PRET command not accepted: %03d", ftpcode);
+      return CURLE_FTP_PRET_FAILED;
+    }
+    result = ftp_state_use_pasv(data, ftpc, conn);
+    break;
+
+  case FTP_PASV:
+    result = ftp_state_pasv_resp(data, ftpc, ftpcode);
+    break;
+
+  case FTP_PORT:
+    result = ftp_state_port_resp(data, ftpc, ftp, ftpcode);
+    break;
+
+  case FTP_LIST:
+  case FTP_RETR:
+    result = ftp_state_get_resp(data, ftpc, ftp, ftpcode, ftpc->state);
+    break;
+
+  case FTP_STOR:
+    result = ftp_state_stor_resp(data, ftpc, ftpcode);
+    break;
+
+  default:
+    /* internal error */
+    ftp_state(data, ftpc, FTP_STOP);
+    break;
+  }
+
+  return result;
+}
+
 static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
                                     struct connectdata *conn)
 {
+  struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
+  struct pingpong *pp;
   CURLcode result;
   int ftpcode;
-  struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
-  struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
-  struct pingpong *pp;
   size_t nread = 0;
 
-  if(!ftpc || !ftp)
+  if(!ftpc)
     return CURLE_FAILED_INIT;
+
   pp = &ftpc->pp;
   if(pp->sendleft)
     return Curl_pp_flushsend(data, pp);
@@ -3197,7 +3323,6 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   if(result || !ftpcode)
     return result;
 
-  /* we have now received a full FTP server response */
   switch(ftpc->state) {
   case FTP_WAIT220:
     result = ftp_wait_resp(data, conn, ftpc, ftpcode);
@@ -3220,12 +3345,21 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
       /* this was BLOCKING, keep it so for now */
       bool done;
       if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-        result = Curl_ssl_cfilter_add(
-          data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
+        struct Curl_cfilter *cf_ftp =
+          Curl_conn_get_first_cf(conn, FIRSTSOCKET, &Curl_cft_ftp);
+        if(!cf_ftp) {
+          failf(data, "FTP filter not present");
+          return CURLE_FAILED_INIT;
+        }
+        result = Curl_cf_ssl_insert_after(cf_ftp, data,
+          Curl_conn_get_origin(conn, FIRSTSOCKET),
+          Curl_conn_get_destination(conn, FIRSTSOCKET));
         if(result) {
           /* we failed and bail out */
           return CURLE_USE_SSL_FAILED;
         }
+        cf_ftp->connected = FALSE;
+        VERBOSE(Curl_conn_trc_filters(data, FIRSTSOCKET, "ssl insert"));
       }
       /* BLOCKING */
       result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, &done);
@@ -3369,62 +3503,6 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
     break;
 
-  case FTP_QUOTE:
-  case FTP_POSTQUOTE:
-  case FTP_RETR_PREQUOTE:
-  case FTP_STOR_PREQUOTE:
-  case FTP_LIST_PREQUOTE:
-    if((ftpcode >= 400) && !ftpc->count2) {
-      /* failure response code, and not allowed to fail */
-      failf(data, "QUOT command failed with %03d", ftpcode);
-      result = CURLE_QUOTE_ERROR;
-    }
-    else
-      result = ftp_state_quote(data, ftpc, ftp, FALSE, ftpc->state);
-    break;
-
-  case FTP_CWD:
-    if(ftpcode / 100 != 2) {
-      /* failure to CWD there */
-      if(data->set.ftp_create_missing_dirs &&
-         ftpc->cwdcount && !ftpc->count2) {
-        /* try making it */
-        ftpc->count2++; /* counter to prevent CWD-MKD loops */
-
-        /* count3 is set to allow MKD to fail once per dir. In the case when
-           CWD fails and then MKD fails (due to another session raced it to
-           create the dir) this then allows for a second try to CWD to it. */
-        ftpc->count3 = (data->set.ftp_create_missing_dirs == 2) ? 1 : 0;
-
-        result = Curl_pp_sendf(data, &ftpc->pp, "MKD %.*s",
-                               pathlen(ftpc, ftpc->cwdcount - 1),
-                               pathpiece(ftpc, ftpc->cwdcount - 1));
-        if(!result)
-          ftp_state(data, ftpc, FTP_MKD);
-      }
-      else {
-        /* return failure */
-        failf(data, "Server denied you to change to the given directory");
-        ftpc->cwdfail = TRUE; /* do not remember this path as we failed
-                                 to enter it */
-        result = CURLE_REMOTE_ACCESS_DENIED;
-      }
-    }
-    else {
-      /* success */
-      ftpc->count2 = 0;
-      if(ftpc->cwdcount >= ftpc->dirdepth)
-        result = ftp_state_mdtm(data, ftpc, ftp);
-      else {
-        ftpc->cwdcount++;
-        /* send next CWD */
-        result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
-                               pathlen(ftpc, ftpc->cwdcount - 1),
-                               pathpiece(ftpc, ftpc->cwdcount - 1));
-      }
-    }
-    break;
-
   case FTP_MKD:
     if((ftpcode / 100 != 2) && !ftpc->count3--) {
       /* failure to MKD the directory */
@@ -3440,60 +3518,14 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     }
     break;
 
-  case FTP_MDTM:
-    result = ftp_state_mdtm_resp(data, ftpc, ftp, ftpcode);
-    break;
-
-  case FTP_TYPE:
-  case FTP_LIST_TYPE:
-  case FTP_RETR_TYPE:
-  case FTP_STOR_TYPE:
-  case FTP_RETR_LIST_TYPE:
-    result = ftp_state_type_resp(data, ftpc, ftp, ftpcode, ftpc->state);
-    break;
-
-  case FTP_SIZE:
-  case FTP_RETR_SIZE:
-  case FTP_STOR_SIZE:
-    result = ftp_state_size_resp(data, ftpc, ftp, ftpcode, ftpc->state);
-    break;
-
-  case FTP_REST:
-  case FTP_RETR_REST:
-    result = ftp_state_rest_resp(data, ftpc, ftp, ftpcode, ftpc->state);
-    break;
-
-  case FTP_PRET:
-    if(ftpcode != 200) {
-      /* there only is this one standard OK return code. */
-      failf(data, "PRET command not accepted: %03d", ftpcode);
-      return CURLE_FTP_PRET_FAILED;
-    }
-    result = ftp_state_use_pasv(data, ftpc, conn);
-    break;
-
-  case FTP_PASV:
-    result = ftp_state_pasv_resp(data, ftpc, ftpcode);
-    break;
-
-  case FTP_PORT:
-    result = ftp_state_port_resp(data, ftpc, ftp, ftpcode);
-    break;
-
-  case FTP_LIST:
-  case FTP_RETR:
-    result = ftp_state_get_resp(data, ftpc, ftp, ftpcode, ftpc->state);
-    break;
-
-  case FTP_STOR:
-    result = ftp_state_stor_resp(data, ftpc, ftpcode);
-    break;
-
   case FTP_QUIT:
-  default:
     /* internal error */
     ftp_state(data, ftpc, FTP_STOP);
     break;
+
+  default:
+    /* Go to states where `ftp` instance is required */
+    return ftp_pp_easy_states(data, conn, ftpc, ftpcode);
   }
 
   return result;
@@ -3505,23 +3537,6 @@ static CURLcode ftp_multi_statemach(struct Curl_easy *data,
 {
   struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
   return ftpc ? ftp_statemach(data, ftpc, done) : CURLE_FAILED_INIT;
-}
-
-static CURLcode ftp_block_statemach(struct Curl_easy *data,
-                                    struct ftp_conn *ftpc)
-{
-  struct pingpong *pp = &ftpc->pp;
-  CURLcode result = CURLE_OK;
-
-  while(ftpc->state != FTP_STOP) {
-    if(ftpc->shutdown)
-      CURL_TRC_FTP(data, "in shutdown, waiting for server response");
-    result = Curl_pp_statemach(data, pp, TRUE, TRUE /* disconnecting */);
-    if(result)
-      break;
-  }
-
-  return result;
 }
 
 /*
@@ -4279,71 +4294,6 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
   return result;
 }
 
-/***********************************************************************
- *
- * ftp_quit()
- *
- * This should be called before calling sclose() on an ftp control connection
- * (not data connections). We should then wait for the response from the
- * server before returning. The calling code should then try to close the
- * connection.
- *
- */
-static CURLcode ftp_quit(struct Curl_easy *data,
-                         struct ftp_conn *ftpc)
-{
-  CURLcode result = CURLE_OK;
-
-  if(ftpc->ctl_valid) {
-    CURL_TRC_FTP(data, "sending QUIT to close session");
-    result = Curl_pp_sendf(data, &ftpc->pp, "%s", "QUIT");
-    if(result) {
-      failf(data, "Failure sending QUIT command: %s",
-            curl_easy_strerror(result));
-      ftpc->ctl_valid = FALSE; /* mark control connection as bad */
-      connclose(data->conn); /* mark for closure */
-      ftp_state(data, ftpc, FTP_STOP);
-      return result;
-    }
-
-    ftp_state(data, ftpc, FTP_QUIT);
-
-    result = ftp_block_statemach(data, ftpc);
-  }
-
-  return result;
-}
-
-/***********************************************************************
- *
- * ftp_disconnect()
- *
- * Disconnect from an FTP server. Cleanup protocol-specific per-connection
- * resources. BLOCKING.
- */
-static CURLcode ftp_disconnect(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               bool dead_connection)
-{
-  struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
-
-  if(!ftpc)
-    return CURLE_FAILED_INIT;
-  /* We cannot send quit unconditionally. If this connection is stale or
-     bad in any way, sending quit and waiting around here will make the
-     disconnect wait in vain and cause more problems than we need to.
-
-     ftp_quit() will check the state of ftp->ctl_valid. If it is ok it
-     will try to send the QUIT command, otherwise it will return. */
-  ftpc->shutdown = TRUE;
-  if(dead_connection || Curl_pp_needs_flush(data, &ftpc->pp))
-    ftpc->ctl_valid = FALSE;
-
-  /* The FTP session may or may not have been allocated/setup at this point! */
-  (void)ftp_quit(data, ftpc); /* ignore errors on the QUIT */
-  return CURLE_OK;
-}
-
 /* called from multi.c while DOing */
 static CURLcode ftp_doing(struct Curl_easy *data,
                           bool *dophase_done)
@@ -4492,11 +4442,88 @@ bool Curl_ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
   }
 }
 
+static void cf_ftp_destroy(struct Curl_cfilter *cf,
+                           struct Curl_easy *data)
+{
+  (void)cf;
+  (void)data;
+}
+
+static CURLcode cf_ftp_shutdown(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                bool *done)
+{
+  struct ftp_conn *ftpc = Curl_conn_meta_get(cf->conn, CURL_META_FTP_CONN);
+  CURLcode result;
+
+  CURL_TRC_CF(data, cf, "shutdown");
+  if(ftpc && ftpc->ctl_valid && !Curl_pp_needs_flush(data, &ftpc->pp)) {
+    if(!ftpc->quit_started) {
+      ftpc->quit_started = TRUE;
+      result = Curl_pp_sendf(data, &ftpc->pp, "%s", "QUIT");
+      CURL_TRC_CF(data, cf, "shutdown, send QUIT -> %d", (int)result);
+      if(result) {
+        ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+        ftp_state(data, ftpc, FTP_STOP);
+        return result;
+      }
+      ftp_state(data, ftpc, FTP_QUIT);
+    }
+
+    if(Curl_pp_needs_flush(data, &ftpc->pp)) {
+      result = Curl_pp_flushsend(data, &ftpc->pp);
+      if(result) {
+        CURL_TRC_CF(data, cf, "flushing QUIT failed -> %d", (int)result);
+        return result;
+      }
+    }
+    return ftp_statemach(data, ftpc, done);
+  }
+  *done = TRUE;
+  return CURLE_OK;
+}
+
+struct Curl_cftype Curl_cft_ftp = {
+  "FTP",
+  0,
+  0,
+  cf_ftp_destroy,
+  Curl_cf_def_connect,
+  cf_ftp_shutdown,
+  Curl_cf_def_adjust_pollset,
+  Curl_cf_def_data_pending,
+  Curl_cf_def_send,
+  Curl_cf_def_recv,
+  Curl_cf_def_cntrl,
+  Curl_cf_def_conn_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  Curl_cf_def_query,
+};
+
+
+static CURLcode ftp_setup_filters(struct Curl_easy *data,
+                                  struct Curl_cfilter *cf_at)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+
+  (void)data;
+  if(cf_at->sockindex == FIRSTSOCKET) {
+    result = Curl_cf_create(&cf, &Curl_cft_ftp, NULL);
+    if(result)
+      goto out;
+    Curl_conn_cf_insert_after(cf_at, cf);
+  }
+out:
+  return result;
+}
+
 /*
  * FTP protocol.
  */
 const struct Curl_protocol Curl_protocol_ftp = {
   ftp_setup_connection,            /* setup_connection */
+  ftp_setup_filters,               /* setup_filters */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
   ftp_do_more,                     /* do_more */
@@ -4507,7 +4534,7 @@ const struct Curl_protocol Curl_protocol_ftp = {
   ftp_pollset,                     /* doing_pollset */
   ftp_domore_pollset,              /* domore_pollset */
   ZERO_NULL,                       /* perform_pollset */
-  ftp_disconnect,                  /* disconnect */
+  ZERO_NULL,                       /* disconnect */
   ZERO_NULL,                       /* write_resp */
   ZERO_NULL,                       /* write_resp_hd */
   ZERO_NULL,                       /* connection_is_dead */
