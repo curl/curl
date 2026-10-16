@@ -13,6 +13,20 @@ document does not describe how to install curl or libcurl using such a binary
 package. This document describes how to compile, build and install curl and
 libcurl from [source code](https://curl.se/download.html).
 
+## Verifying the source archive
+
+Before unpacking a downloaded release tarball, verify its GPG signature
+against the published key. The signature (`.asc`) is available next to
+the tarball on https://curl.se/download.html.
+
+    gpg --verify curl-X.Y.Z.tar.gz.asc curl-X.Y.Z.tar.gz
+
+The signing key fingerprint and a full verification procedure (including
+reproducible-release checks) are documented in
+[docs/VERIFY.md](https://github.com/curl/curl/blob/master/docs/VERIFY.md).
+
+This protects against tampered mirrors, MITM proxies, and compromised CDNs, but not against a compromised maintainer signing key.
+
 ## Building from source
 
 You can use autotools or CMake to build curl from source. They work equally
