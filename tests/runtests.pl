@@ -515,7 +515,6 @@ sub checksystemfeatures {
     my $dis = "";
 
     my $versioncmd = exerunner() . shell_quote($CURL) . ' --version 2>&1';
-    print "CMD: $versioncmd\n" if($verbose && !$torture);
     my $versout = qx($versioncmd);
     my $versretval = $?;
     my @version = split /\r?\n/, $versout;
@@ -756,8 +755,8 @@ sub checksystemfeatures {
         else {
             logmsg sprintf("command exited with value %d \n", $versretval >> 8);
         }
-        logmsg "contents of $versout: \n";
-        displaylogcontent($versout);
+        logmsg "curl version output: \n";
+        logmsg "$versout \n";
         die "Could not get curl's version";
     }
 
