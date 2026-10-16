@@ -23,13 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN6_H
-#include <netinet/in6.h>
-#endif
-
 #include "cf-socket.h"
 
 static CURLcode t1663_setup(void)
