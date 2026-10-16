@@ -36,38 +36,6 @@ environment:
   matrix:
     # CMake Visual Studio builds
 
-    # temp same-VS different-OS matrix
-    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-tests, VS2015 2012 MSYS 3.0.7/5.30.0'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.21.7  # manually bumped
-      CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
-      CMAKE_GENERATOR: 'Visual Studio 14 2015'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
-
-    # temp same-VS different-OS matrix
-    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-tests, VS2017 2016 MSYS 3.0.7/5.30.0'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      CMAKE_VERSION: 3.21.7  # manually bumped
-      CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
-      CMAKE_GENERATOR: 'Visual Studio 14 2015'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
-
-    # temp same-VS different-OS matrix
-    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-tests, VS2019 2019 MSYS 3.6.5/5.40.3'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-      CMAKE_VERSION: 3.21.7  # manually bumped
-      CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
-      CMAKE_GENERATOR: 'Visual Studio 14 2015'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
-
-    # temp same-VS different-OS matrix
-    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-tests, VS2022 2019 MSYS 3.6.5/5.40.3'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      CMAKE_VERSION: 3.21.7  # manually bumped
-      CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
-      CMAKE_GENERATOR: 'Visual Studio 14 2015'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
-
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
