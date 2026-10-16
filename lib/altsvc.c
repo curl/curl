@@ -516,7 +516,7 @@ static void altsvc_parse_params(const char **pp,
     if(keyword) {
       const char *vp = curlx_str(&val);
       const char *vend = vp + curlx_strlen(&val);
-      if(curlx_str_number(&vp, &num, TIME_T_MAX))
+      if(curlx_str_number(&vp, &num, CURL_OFF_T_MAX))
         break; /* not a number, skip further parameter parsing */
       if(vp != vend)
         break; /* not entirely a number, skip further parameter parsing */
