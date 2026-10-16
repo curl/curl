@@ -24,6 +24,7 @@
 #include "unitcheck.h"
 #include "urldata.h"
 #include "altsvc.h"
+#include "altsvc_save_test.h"
 
 static CURLcode test_unit1654(const char *arg)
 {
@@ -184,7 +185,10 @@ static CURLcode test_unit1654(const char *arg)
   result = Curl_altsvc_parse(curl, asi, "clear\r\n", origin, ALPN_h1);
   fail_if(result, "Curl_altsvc_parse(14) failed!");
 
-  Curl_altsvc_save(curl, asi, outname);
+  result = Curl_altsvc_save(curl, asi, outname);
+  fail_if(result, "Curl_altsvc_save() failed!");
+  fail_if(altsvc_save_test(curl, asi, arg),
+          "alt-svc save error handling failed!");
 
 fail:
   curl_easy_cleanup(curl);

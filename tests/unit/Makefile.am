@@ -65,6 +65,7 @@ $(top_builddir)/lib/unitprotos.h:
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_units_SOURCES = $(BUNDLE).c
+units_SOURCES = altsvc_save_test.c altsvc_save_test.h
 LDADD = $(top_builddir)/lib/libcurlu.la
 CLEANFILES = $(BUNDLE).c
 else
@@ -77,7 +78,8 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/$(BUNDLE).c $(TESTS_C))
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/$(BUNDLE).c $(TESTS_C) \
+	  altsvc_save_test.c altsvc_save_test.h)
 
 if NOT_CURL_CI
 all-local: checksrc
