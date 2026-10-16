@@ -1509,9 +1509,10 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
 
 #ifdef USE_APPLE_SECTRUST
   if(!verified && config->native_ca_store) {
+    /* We check OCSP separately */
     CURLcode result =
       Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
-                             gtls_chain_get_der, chain, NULL, 0);
+                             gtls_chain_get_der, chain, NULL, 0, FALSE);
     if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
       return result; /* unexpected error */
     verified = !result;

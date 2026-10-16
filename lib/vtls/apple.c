@@ -103,7 +103,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 Curl_vtls_get_cert_der *der_cb,
                                 void *cb_user_data,
                                 const unsigned char *ocsp_buf,
-                                size_t ocsp_len)
+                                size_t ocsp_len,
+                                bool require_ocsp)
 {
   struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result = CURLE_OK;
@@ -152,7 +153,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
          * This policy further allows trustd to consult CRLs and OCSP data
          * to determine revocation status (which it may then cache). */
         CFOptionFlags revocation_flags = kSecRevocationUseAnyAvailableMethod;
-        if(conn_config->verifystatus)
+        if(require_ocsp)
           revocation_flags |= kSecRevocationRequirePositiveResponse;
         policy = SecPolicyCreateRevocation(revocation_flags);
         if(!policy) {
@@ -256,8 +257,10 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
             curlx_safefree(err_desc);
         }
       }
-      infof(data, "Apple SecTrust failure %ld%s%s", code,
+      failf(data, "Apple SecTrust failure %ld%s%s", code,
             err_desc ? ": " : "", err_desc ? err_desc : "");
+      if(code == errSecIncompleteCertRevocationCheck)
+        result = CURLE_SSL_INVALIDCERTSTATUS;
     }
   }
   else
