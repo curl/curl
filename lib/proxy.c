@@ -83,6 +83,10 @@ UNITTEST bool cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
       return FALSE;
     return TRUE;
   }
+  else if(!bits && !check)
+    /* 0.0.0.0/0 matches everything */
+    return TRUE;
+
   return address == check;
 }
 
@@ -93,6 +97,7 @@ UNITTEST bool cidr6_match(const char *ipv6, const char *network,
                           unsigned int bits)
 {
 #ifdef USE_IPV6
+  static const char null6[16]= { 0 };
   unsigned int bytes;
   unsigned int rest;
   unsigned char address[16];
@@ -109,6 +114,9 @@ UNITTEST bool cidr6_match(const char *ipv6, const char *network,
     return FALSE;
   if(curlx_inet_pton(AF_INET6, network, check) != 1)
     return FALSE;
+  if((bytes == 16) && (bits == 128) && !memcmp(null6, check, 16))
+    /* ::/0 matches everyting */
+    return TRUE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
   if(rest && ((address[bytes] ^ check[bytes]) & (0xff << (8 - rest))))

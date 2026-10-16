@@ -51,6 +51,9 @@ static CURLcode test_unit1614(const char *arg)
     { "192.160.0.1", "10.0.0.1", 8, FALSE },
     { "192.160.0.1", "10.0.0.1", 32, FALSE },
     { "192.160.0.1", "10.0.0.1", 0, FALSE },
+    { "192.160.0.1", "0.0.0.0", 0, TRUE },
+    { "0.0.0.1", "0.0.0.0", 0, TRUE },
+    { "127.0.0.1", "0.0.0.0", 0, TRUE },
     { NULL, NULL, 0, FALSE } /* end marker */
   };
 #ifdef USE_IPV6
@@ -60,6 +63,8 @@ static CURLcode test_unit1614(const char *arg)
     { "::1", "0:0::1", 128, TRUE },
     { "::1", "0:0::1", 129, FALSE },
     { "fe80::ab47:4396:55c9:8474", "fe80::ab47:4396:55c9:8474", 64, TRUE },
+    { "fe80::ab47:4396:55c9:8474", "::", 0, TRUE },
+    { "::1", "::", 0, TRUE },
     { NULL, NULL, 0, FALSE } /* end marker */
   };
 #endif
