@@ -332,6 +332,10 @@ if(CURL_DROP_UNUSED)
   elseif(MSVC)  # Options below are toolchain defaults in Release configurations.
     # This option does not seem to have an effect with VS2010:
     set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
+    # To silence:
+    #   "LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:REF' specification" (cl)
+    #   "lld-link : warning : ignoring '/incremental' because REF is enabled; use '/opt:noref' to disable" (clang-cl)
+    set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:Debug,RelWithDebInfo>:-INCREMENTAL:NO>")
     # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
     list(APPEND CURL_CFLAGS "-Gy")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
