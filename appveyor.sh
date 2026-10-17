@@ -166,6 +166,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
     export TFLAGS="-a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ~1096 ${TFLAGS:-}"
+    export CURL_DIRSUFFIX="${PRJ_CFG}"
     cd _bld/tests
     time ../../tests/runtests.pl
   else
