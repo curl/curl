@@ -140,7 +140,7 @@ jobs:
         run: |
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
-          elif [ "${MATRIX_OS}" = 'freebsd' ]; then
+          elif [ "${MATRIX_OS}" = 'freebsd' ] && [ "${MATRIX_VERSION}" != '12.2' ]; then
             find /usr/local/etc/pkg/repos || true
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
