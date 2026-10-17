@@ -25,7 +25,7 @@ You can find the signing key fingerprint, and reproducible-release
 verification, documented in
 [docs/VERIFY.md](https://github.com/curl/curl/blob/master/docs/VERIFY.md).
 
-This protects against tampered mirrors/CDNs, MITM proxies, but not against
+This protects against tampered mirrors and CDNs, MITM proxies, but not against
 a compromised maintainer signing key.
 
 ## Building from source
