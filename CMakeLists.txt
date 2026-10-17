@@ -1541,6 +1541,7 @@ endif()
 # Use check_include_file_concat_curl() for headers required by subsequent
 # check_include_file_concat_curl() or check_symbol_exists() detections.
 # Order for these is significant.
+check_include_file_concat_curl("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/eventfd.h"    HAVE_SYS_EVENTFD_H)
 check_include_file("sys/filio.h"      HAVE_SYS_FILIO_H)
 check_include_file("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
@@ -1549,7 +1550,6 @@ check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
 check_include_file("sys/resource.h"   HAVE_SYS_RESOURCE_H)
 check_include_file_concat_curl("sys/select.h"     HAVE_SYS_SELECT_H)
 check_include_file("sys/sockio.h"     HAVE_SYS_SOCKIO_H)
-check_include_file_concat_curl("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file_concat_curl("sys/utime.h"      HAVE_SYS_UTIME_H)  # sys/types.h (AmigaOS)
 
