@@ -3310,7 +3310,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
 #ifdef OPENSSL_HAS_PROVIDERS
 /* CApath certificates loaded under a provider libctx can outlive that libctx
    when the store is shared with the multi handle. */
-#define USING_PROVIDER(octx) octx->p.libctx
+#define USING_PROVIDER(octx) (octx)->p.libctx
 #else
 #define USING_PROVIDER(x) 0
 #endif
