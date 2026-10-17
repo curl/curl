@@ -966,11 +966,9 @@ static CURLcode do_pubkey_field(struct Curl_easy *data, int certnum,
   /* Generate a certificate information record for the public key. */
 
   result = ASN1tostr(&out, elem);
-  if(!result) {
-    if(data->set.ssl.certinfo)
-      result = ssl_push_certinfo_dyn(data, certnum, label, &out);
-    curlx_dyn_free(&out);
-  }
+  if(!result && data->set.ssl.certinfo)
+    result = ssl_push_certinfo_dyn(data, certnum, label, &out);
+  curlx_dyn_free(&out);
   return result;
 }
 
