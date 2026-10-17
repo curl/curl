@@ -3341,6 +3341,14 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
   }
 }
 
+#ifdef OPENSSL_HAS_PROVIDERS
+/* CApath certificates loaded under a provider libctx can outlive that libctx
+   when the store is shared with the multi handle. */
+#define USING_PROVIDER(octx) octx->p.libctx
+#else
+#define USING_PROVIDER(x) 0
+#endif
+
 CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    struct ossl_ctx *octx)
@@ -3357,7 +3365,8 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     conn_config->verifypeer &&
     !conn_config->ca_info_blob &&
     !conn_config->CRLfile &&
-    !conn_config->native_ca_store;
+    !conn_config->native_ca_store &&
+    !USING_PROVIDER(octx);
 
   ERR_set_mark();
 
