@@ -203,7 +203,7 @@ else()
   set(HAVE_NETINET_IN6_H 0)
 endif()
 set(HAVE_NETINET_IN_H 1)
-set(HAVE_NETINET_IP_H 1)
+set(HAVE_NETINET_IP_H 1)  # Missing in OpenBSD 6.9
 set(HAVE_NETINET_TCP_H 1)
 set(HAVE_NETINET_UDP_H 1)
 set(HAVE_NET_IF_H 1)
@@ -235,7 +235,7 @@ if(APPLE OR
    CMAKE_SYSTEM_NAME STREQUAL "DragonFlyBSD")
   set(HAVE_SENDMMSG 0)
 else()
-  set(HAVE_SENDMMSG 1)
+  set(HAVE_SENDMMSG 1)  # Missing in OpenBSD 6.9
 endif()
 set(HAVE_SENDMSG 1)
 set(HAVE_SETLOCALE 1)
