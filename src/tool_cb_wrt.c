@@ -381,8 +381,8 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     /* we added this amount of data to the output */
     outs->bytes += bytes;
 
-  if(config->readbusy) {
-    config->readbusy = FALSE;
+  if(per->readbusy) {
+    per->readbusy = FALSE;
     curl_easy_pause(per->curl, CURLPAUSE_CONT);
   }
 

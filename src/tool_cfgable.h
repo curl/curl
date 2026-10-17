@@ -244,7 +244,6 @@ struct OperationConfig {
   BIT(crlf);
   BIT(http09_allowed);
   BIT(nobuffer);
-  BIT(readbusy);            /* set when reading input returns EAGAIN */
   BIT(globoff);
   BIT(use_httpget);
   BIT(insecure_ok);         /* set TRUE to allow insecure SSL connects */
