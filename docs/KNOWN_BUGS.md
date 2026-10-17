@@ -428,11 +428,6 @@ that says `no memory` !
 
 # TCP/IP
 
-## telnet code does not handle partial writes properly
-
-It probably does not happen too easily because of how slow and infrequent
-sends are normally performed.
-
 ## Trying local ports fails on Windows
 
 This makes `--local-port [range]` to not work since curl cannot properly

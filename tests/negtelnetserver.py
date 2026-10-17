@@ -74,9 +74,12 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             neg.send_will("NEW_ENVIRON")
             neg.send_dont("NAWS")
             neg.send_wont("NAWS")
+            # Ask the client for its environment variables
+            neg.send_sb_send("NEW_ENVIRON")
 
-            # Get the data passed through the negotiator
-            data = neg.recv(4 * 1024)
+            # Get the data passed through the negotiator, up to and
+            # including the first newline
+            data = neg.recv_line(4 * 1024)
             log.debug("Incoming data: %r", data)
 
             if VERIFIED_REQ.encode('utf-8') in data:
@@ -89,7 +92,11 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
                 response_data = response.encode('utf-8')
             else:
                 log.debug("Received normal request - echoing back")
-                response_data = data.decode('utf-8').strip().encode('utf-8')
+                response = data.decode('utf-8').strip()
+                # Append any environment variables the client sent
+                for name, value in neg.environ:
+                    response += f"\n{name}={value}"
+                response_data = response.encode('utf-8')
 
             if response_data:
                 log.debug("Sending %r", response_data)
@@ -112,10 +119,18 @@ class Negotiator:
     WONT = 3
     DO = 4
     DONT = 5
+    SUBNEG = 6
+    SUBNEG_IAC = 7
 
     def __init__(self, tcp):
         self.tcp = tcp
         self.state = self.NO_NEG
+        self.subneg = bytearray()
+        # (name, value) pairs received in NEW-ENVIRON IS suboptions
+        self.environ = []
+        # Set when the client agreed to NEW-ENVIRON and its IS reply has not
+        # arrived yet
+        self.environ_pending = False
 
     def recv(self, nbytes):
         """
@@ -142,6 +157,10 @@ class Negotiator:
                     self.start_neg(byte_int)
                 elif self.state in [self.WILL, self.WONT, self.DO, self.DONT]:
                     self.handle_option(byte_int)
+                elif self.state == self.SUBNEG:
+                    self.in_subneg(byte_int)
+                elif self.state == self.SUBNEG_IAC:
+                    self.in_subneg_iac(byte_int)
                 else:
                     # Received an unexpected byte. Stop negotiations
                     log.error("Unexpected byte %s in state %s",
@@ -149,6 +168,30 @@ class Negotiator:
                               self.state)
                     self.state = self.NO_NEG
 
+        return buffer
+
+    def recv_line(self, nbytes, timeout=5):
+        """
+        Read bytes like recv(), until a newline arrives and any NEW-ENVIRON
+        reply the client agreed to send is complete, or until the client
+        stops sending.
+
+        :param nbytes: Number of bytes to read per call
+        :param timeout: Seconds to wait for more data before giving up
+        :return: a buffer of bytes
+        """
+        buffer = bytearray()
+        self.tcp.settimeout(timeout)
+        try:
+            while b"\n" not in buffer or self.environ_pending:
+                data = self.recv(nbytes)
+                if not data:
+                    break
+                buffer.extend(data)
+        except socket.timeout:
+            log.debug("Timed out waiting for client data")
+        finally:
+            self.tcp.settimeout(None)
         return buffer
 
     def no_neg(self, byte_int, buffer):
@@ -184,6 +227,11 @@ class Negotiator:
             # Client is indicating they cannot do an option
             log.debug("Client cannot do")
             self.state = self.DONT
+        elif byte_int == NegTokens.SB:
+            # Client is sending a suboption, read until IAC SE
+            log.debug("Client suboption")
+            self.subneg = bytearray()
+            self.state = self.SUBNEG
         else:
             # Received an unexpected byte. Stop negotiations
             log.error("Unexpected byte %s in state %s",
@@ -198,6 +246,10 @@ class Negotiator:
                         NegOptions.NAWS,
                         NegOptions.NEW_ENVIRON]:
             log.debug("Option: %s", NegOptions.from_val(byte_int))
+            if self.state == self.WILL and \
+               byte_int == NegOptions.NEW_ENVIRON:
+                # The client sends its environment when we ask for it
+                self.environ_pending = True
 
             # No further negotiation of this option needed. Reset the state.
             self.state = self.NO_NEG
@@ -208,6 +260,51 @@ class Negotiator:
                       byte_int,
                       self.state)
             self.state = self.NO_NEG
+
+    def in_subneg(self, byte_int):
+        if byte_int == NegTokens.IAC:
+            self.state = self.SUBNEG_IAC
+        else:
+            self.subneg.append(byte_int)
+
+    def in_subneg_iac(self, byte_int):
+        if byte_int == NegTokens.SE:
+            log.debug("Suboption: %r", self.subneg)
+            self.handle_subneg(self.subneg)
+            self.state = self.NO_NEG
+        elif byte_int == NegTokens.IAC:
+            # escaped 0xFF inside the suboption
+            self.subneg.append(byte_int)
+            self.state = self.SUBNEG
+        else:
+            log.error("Unexpected byte %s in state %s",
+                      byte_int,
+                      self.state)
+            self.state = self.NO_NEG
+
+    def handle_subneg(self, subneg):
+        # NEW-ENVIRON IS: [VAR|USERVAR name [VALUE value]]...
+        if len(subneg) < 2 or subneg[0] != NegOptions.NEW_ENVIRON or \
+           subneg[1] != NegSubTokens.IS:
+            return
+        self.environ_pending = False
+        name = None
+        value = None
+        target = None
+        for byte_int in subneg[2:]:
+            if byte_int in (NegSubTokens.VAR, NegSubTokens.USERVAR):
+                if name is not None:
+                    self.environ.append((name.decode(), (value or b"").decode()))
+                name = bytearray()
+                value = None
+                target = name
+            elif byte_int == NegSubTokens.VALUE and name is not None:
+                value = bytearray()
+                target = value
+            elif target is not None:
+                target.append(byte_int)
+        if name is not None:
+            self.environ.append((name.decode(), (value or b"").decode()))
 
     def send_message(self, message_ints):
         self.tcp.sendall(bytearray(message_ints))
@@ -232,6 +329,11 @@ class Negotiator:
     def send_wont(self, option_str):
         log.debug("Sending WONT %s", option_str)
         self.send_iac([NegTokens.WONT, NegOptions.to_val(option_str)])
+
+    def send_sb_send(self, option_str):
+        log.debug("Sending SB %s SEND", option_str)
+        self.send_iac([NegTokens.SB, NegOptions.to_val(option_str),
+                       NegSubTokens.SEND, NegTokens.IAC, NegTokens.SE])
 
 
 class NegBase:
@@ -264,6 +366,16 @@ class NegTokens(NegBase):
     SB = 250
     # The end of sub-negotiation options.
     SE = 240
+
+
+class NegSubTokens(NegBase):
+    # Suboption commands
+    IS = 0
+    SEND = 1
+    # NEW-ENVIRON item types
+    VAR = 0
+    VALUE = 1
+    USERVAR = 3
 
 
 class NegOptions(NegBase):
