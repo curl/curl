@@ -161,4 +161,14 @@ CURLcode Curl_pp_pollset(struct Curl_easy *data,
  */
 bool Curl_pp_moredata(struct pingpong *pp);
 
+/***********************************************************************
+ *
+ * Curl_pp_pipelined()
+ *
+ * Returns whether the server has sent more data after the response that was
+ * just read: either already in the receive buffer or waiting to be read from
+ * the socket. Used to reject responses pipelined after a STARTTLS reply.
+ */
+bool Curl_pp_pipelined(struct Curl_easy *data, struct pingpong *pp);
+
 #endif /* HEADER_CURL_PINGPONG_H */
