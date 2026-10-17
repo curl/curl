@@ -120,7 +120,7 @@ jobs:
 
           - { os: 'openbsd'     , version: '6.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl'   , tflags: 'skiprun',
               install: 'cmake ninja openldap-client-- libidn2',
-              options: '-DCURL_ENABLE_SSL=OFF' }
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
 
       fail-fast: false
     steps:
