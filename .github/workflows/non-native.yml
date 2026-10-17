@@ -122,9 +122,9 @@ jobs:
               install: 'cmake ninja openldap-client-- libidn2',
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
 
-          - { os: 'openbsd'     , version: '6.8'  , build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: 'skiprun',
+          - { os: 'openbsd'     , version: '6.8'  , build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: '!ssl', tflags: 'skiprun',
               install: 'autoconf-2.69p3 automake-1.16.2 libtool openldap-client-- libidn2',
-              options: '--with-openssl --without-zlib CPPFLAGS=-DLIBRESSL_HAS_TLS1_3' }
+              options: '--without-ssl --without-zlib' }
 
       fail-fast: false
     steps:
