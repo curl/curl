@@ -422,7 +422,8 @@ necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
 visible to libcurl and curl compilation processes. To set this definition you
 have the following alternatives:
 
-- Modify `lib/config-win32.h`
+- Pass it via the `CPPFLAGS` env with autotools, or with CMake via `CFLAGS` env
+  or `-DCMAKE_C_FLAGS=-DUSE_LWIPSOCK` command-line option.
 - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
