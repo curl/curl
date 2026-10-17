@@ -112,12 +112,16 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
     const unsigned char *buf = NULL;
 
     if(Curl_bufq_peek(&first->b, &buf, &blen)) {
+      int wtype = first->type;
       wlen = (first->type & CLIENTWRITE_BODY) ?
              CURLMIN(blen, CW_PAUSE_DEC_WRITE_CHUNK) : blen;
-      result = Curl_cwriter_write(data, cw_pause->next, first->type,
+      /* EOS only goes with the very last piece, same as in cw_pause_write */
+      if((wlen < Curl_bufq_len(&first->b)) || first->next)
+        wtype &= ~CLIENTWRITE_EOS;
+      result = Curl_cwriter_write(data, cw_pause->next, wtype,
                                   (const char *)buf, wlen);
       CURL_TRC_WRITE(data, "[PAUSE] flushed %zu/%zu bytes, type=%x -> %d",
-                     wlen, ctx->buf_total, (unsigned int)first->type,
+                     wlen, ctx->buf_total, (unsigned int)wtype,
                      (int)result);
       Curl_bufq_skip(&first->b, wlen);
       DEBUGASSERT(ctx->buf_total >= wlen);
