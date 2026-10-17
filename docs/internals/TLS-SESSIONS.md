@@ -29,35 +29,32 @@ handling of session tickets. More below.
 
 ## curl's `ssl_peer_key`
 
-In order to find a ticket from a previous TLS session, curl
-needs a name for TLS sessions that uniquely identifies the peer
-it talks to.
+In order to find a ticket from a previous TLS session, curl needs a name for
+TLS sessions that uniquely identifies the peer it talks to.
 
-This name has to reflect also the various TLS parameters that can
-be configured in curl for a connection. We do not want to use
-a ticket from an different configuration. Example: when setting
-the maximum TLS version to 1.2, we do not want to reuse a ticket
-we got from a TLSv1.3 session, although we are talking to the
-same host.
+This name has to reflect also the various TLS parameters that can be
+configured in curl for a connection. We do not want to use a ticket from an
+different configuration. Example: when setting the maximum TLS version to 1.2,
+we do not want to reuse a ticket we got from a TLSv1.3 session, although we
+are talking to the same host.
 
-Internally, we call this name a `ssl_peer_key`. It is a printable
-string that carries hostname and port and any non-default TLS
-parameters involved in the connection.
+Internally, we call this name a `ssl_peer_key`. It is a printable string that
+carries hostname and port and any non-default TLS parameters involved in the
+connection.
 
 Examples:
-- `curl.se:443:KEY-V2:CA-17:/etc/ssl/cert.pem:IMPL-12:GnuTLS/3.8.7:G`
-   is a peer key for a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA
-   trust anchors and GnuTLS/3.8.7 as TLS backend.
-- `curl.se:443:KEY-V2:TLSVER-6-6:CA-17:/etc/ssl/cert.pem:IMPL-12:GnuTLS/3.8.7:G`
+- `https:curl.se:443:KEY-V3:CA-17:/etc/ssl/cert.pem:IMPL-12:GnuTLS/3.8.7:G` is
+   a peer key for a connection to `https://curl.se:443` using
+   `/etc/ssl/cert.pem` as CA trust anchors and GnuTLS/3.8.7 as TLS backend.
+- `https:curl.se:443:KEY-V3:TLSVER-6-6:CA-17:/etc/ssl/cert.pem:IMPL-12:GnuTLS/3.8.7:G`
    is the same as the previous, except it is configured to use TLSv1.2 as
    min and max versions.
 
-The `KEY-V2` marker separates this format from legacy peer keys. Variable
-string fields use `NAME-length:value`, where the length counts bytes in the
-value, so delimiters inside a value cannot introduce another field. The `:G`
-suffix marks keys that can be used across processes; `:L` marks local keys.
-Persisted sessions exported with legacy peer keys no longer match keys in this
-format and cannot be resumed from those cache entries.
+Variable string fields use `NAME-length:value`, where the length counts bytes
+in the value, so delimiters inside a value cannot introduce another field. The
+`:G` suffix marks keys that can be used across processes; `:L` marks local
+keys. Persisted sessions exported with legacy peer keys no longer match keys
+in this format and cannot be resumed from those cache entries.
 
 Different configurations produce different keys which is what curl needs when
 handling SSL session tickets.

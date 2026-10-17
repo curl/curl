@@ -246,7 +246,8 @@ static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
   *ppeer_key = NULL;
   curlx_dyn_init(&buf, 10 * 1024);
 
-  result = curlx_dyn_addf(&buf, "%s:%d:KEY-V2",
+  result = curlx_dyn_addf(&buf, "%s:%s:%d:KEY-V3",
+                          peer->origin->scheme->name,
                           peer->origin->hostname, peer->origin->port);
   if(result)
     goto out;
