@@ -317,6 +317,24 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   if(data->set.debugdata)
     ERROR_CHECK_SETOPT(CURLOPT_DEBUGDATA, data->set.debugdata);
 
+#ifdef USE_RESOLV_ARES
+  if(CURL_EASY_STR(data, STRING_DNS_SERVERS)) {
+    ERROR_CHECK_SETOPT(CURLOPT_DNS_SERVERS,
+                       CURL_EASY_STR(data, STRING_DNS_SERVERS));
+  }
+  if(CURL_EASY_STR(data, STRING_DNS_INTERFACE)) {
+    ERROR_CHECK_SETOPT(CURLOPT_DNS_INTERFACE,
+                       CURL_EASY_STR(data, STRING_DNS_INTERFACE));
+  }
+  if(CURL_EASY_STR(data, STRING_DNS_LOCAL_IP4)) {
+    ERROR_CHECK_SETOPT(CURLOPT_DNS_LOCAL_IP4,
+                       CURL_EASY_STR(data, STRING_DNS_LOCAL_IP4));
+  }
+  if(CURL_EASY_STR(data, STRING_DNS_LOCAL_IP6)) {
+    ERROR_CHECK_SETOPT(CURLOPT_DNS_LOCAL_IP6,
+                       CURL_EASY_STR(data, STRING_DNS_LOCAL_IP6));
+  }
+#endif
   if(maybe_https) {
     ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST,
                        data->set.doh_verifyhost ? 2L : 0L);
@@ -361,24 +379,6 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
                          CURL_EASY_STR(data, STRING_SSL_EC_CURVES));
     }
-#ifdef USE_RESOLV_ARES
-    if(CURL_EASY_STR(data, STRING_DNS_SERVERS)) {
-      ERROR_CHECK_SETOPT(CURLOPT_DNS_SERVERS,
-                         CURL_EASY_STR(data, STRING_DNS_SERVERS));
-    }
-    if(CURL_EASY_STR(data, STRING_DNS_INTERFACE)) {
-      ERROR_CHECK_SETOPT(CURLOPT_DNS_INTERFACE,
-                         CURL_EASY_STR(data, STRING_DNS_INTERFACE));
-    }
-    if(CURL_EASY_STR(data, STRING_DNS_LOCAL_IP4)) {
-      ERROR_CHECK_SETOPT(CURLOPT_DNS_LOCAL_IP4,
-                         CURL_EASY_STR(data, STRING_DNS_LOCAL_IP4));
-    }
-    if(CURL_EASY_STR(data, STRING_DNS_LOCAL_IP6)) {
-      ERROR_CHECK_SETOPT(CURLOPT_DNS_LOCAL_IP6,
-                         CURL_EASY_STR(data, STRING_DNS_LOCAL_IP6));
-    }
-#endif
     (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS,
                            ((long)data->set.ssl.ssl_options &
                             ~CURLSSLOPT_AUTO_CLIENT_CERT));
