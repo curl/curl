@@ -1780,6 +1780,7 @@ TESTCASES = \
   test1920 \
   test1921 \
   test1922 \
+  test1923 \
   \
   test1933 \
   test1934 \
