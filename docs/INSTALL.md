@@ -405,26 +405,6 @@ cmake . \
   -DCURL_USE_LIBPSL=OFF
 ```
 
-## Disabling Specific Protocols in Windows builds
-
-The configure utility, unfortunately, is not available for the Windows
-environment, therefore, you cannot use the various disable-protocol options of
-the configure utility on this platform.
-
-You can use specific defines to disable specific protocols and features. See
-[CURL-DISABLE](https://github.com/curl/curl/blob/master/docs/CURL-DISABLE.md)
-for the full list.
-
-If you want to set any of these defines you have the following options:
-
-- Modify `lib/config-win32.h`
-- Modify `lib/curl_setup.h`
-- Modify the "Preprocessor Definitions" in the libcurl project
-
-Note: The pre-processor settings can be found using the Visual Studio IDE
-under "Project -> Properties -> Configuration Properties -> C/C++ ->
-Preprocessor".
-
 ## Using BSD-style lwIP instead of Winsock TCP/IP stack in Windows builds
 
 In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
