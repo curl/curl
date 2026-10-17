@@ -56,8 +56,7 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
 {
 #ifdef HAVE_PIPE2
   return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;
-#else
-#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
+#elif defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
   ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
             __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000) || \
    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
@@ -94,7 +93,6 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
     }
   }
   return 0;
-#endif /* HAVE_PIPE2 */
 }
 
 #elif defined(HAVE_SOCKETPAIR)  /* !USE_EVENTFD && !HAVE_PIPE */

@@ -116,7 +116,18 @@ jobs:
 
           # Skip test 2707 'ws: Peculiar frame sizes' on suspicion of hangs
           - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
-              install: 'cmake ninja openldap-client-- libidn2' }
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '--debug-trycompile' }
+
+          # Slow
+          # { os: 'openbsd'     , version: '6.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+          #   install: 'cmake ninja openldap-client-- libidn2',
+          #   options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+
+          # Slow
+          # { os: 'openbsd'     , version: '6.8'  , build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+          #   install: 'autoconf-2.69p3 automake-1.16.2 libtool openldap-client-- libidn2',
+          #   options: '--without-ssl --without-zlib --disable-manual --disable-docs' }
 
       fail-fast: false
     steps:
@@ -131,6 +142,7 @@ jobs:
           operating_system: '${{ matrix.os }}'
           version: '${{ matrix.version }}'
           architecture: '${{ matrix.arch }}'
+          shell: "${{ matrix.shell || 'default' }}"
 
       - name: 'install prereqs'
         run: |
@@ -162,6 +174,9 @@ jobs:
             if [ "${MATRIX_VERSION}" = '7.9' ]; then
               export AUTOCONF_VERSION=2.72
               export AUTOMAKE_VERSION=1.18
+            elif [ "${MATRIX_VERSION}" = '6.8' ]; then
+              export AUTOCONF_VERSION=2.69
+              export AUTOMAKE_VERSION=1.16
             fi
           fi
           autoreconf -fi
@@ -186,7 +201,12 @@ jobs:
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+        run: |
+          cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+          find bld/CMakeFiles/CMakeScratch -name '*.c' | sort | while read -r f; do
+            echo "----------------- $f ---------------"
+            cat "$f"
+          done
 
       - name: 'curl_config.h'
         run: |
