@@ -30,9 +30,6 @@ http
 <name>
 unpause from the debug callback while replaying paused output
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
