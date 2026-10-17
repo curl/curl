@@ -165,9 +165,9 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     # run unit tests
 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
-    export CURL_TEST_MIN=75
-    export TFLAGS="-j10 ~1096 ${TFLAGS:-}"
-    time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
+    export TFLAGS="-a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ~1096 ${TFLAGS:-}"
+    cd _bld/tests
+    time ./runtests.pl
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
   fi
