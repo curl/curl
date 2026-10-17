@@ -103,10 +103,6 @@ arguments in the build.
 
 Building statically is not for the faint of heart.
 
-# Testing
-
-(The test suite does not yet work with the cmake build)
-
 # Installing
 
 Install to default location (you have to specify the build directory).
