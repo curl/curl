@@ -589,7 +589,7 @@ export NM=ppc_405-nm
 ```
 
 The `--prefix` parameter specifies where curl gets installed. If `configure`
-completes successfully, do `make` and `make install` as usual.
+completes, do `make` and `make install` as usual.
 
 In some cases, you may be able to simplify the above commands to as little as:
 
