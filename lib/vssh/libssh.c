@@ -2613,7 +2613,8 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   }
 
   if(Curl_creds_has_user(conn->creds)) {
-    infof(data, "User: %s", conn->creds->user);
+    /* username is credentials-adjacent */
+    CURL_TRC_SSH(data, "User: %s", conn->creds->user);
     rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_USER,
                          conn->creds->user);
     if(rc != SSH_OK) {
