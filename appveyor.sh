@@ -140,7 +140,7 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   echo 'Creating artifact'
   time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
   rm files.tmp
-  appveyor PushArtifact "${archive}"
+  appveyor PushArtifact "${archive}" &
 fi
 
 # build tests
@@ -161,6 +161,14 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
       "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
     fi
+
+    # run unit tests
+
+    unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
+    export TFLAGS="-a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ~1096 ${TFLAGS:-}"
+    export CURL_DIRSUFFIX="${PRJ_CFG}"
+    cd _bld/tests
+    time ../../tests/runtests.pl
   else
     echo "Skip running tests. Reason: ${SKIP_RUN}"
   fi
