@@ -22,11 +22,11 @@ the tarball on https://curl.se/download.html.
     gpg --verify curl-X.Y.Z.tar.gz.asc curl-X.Y.Z.tar.gz
 
 You can find the signing key fingerprint, and reproducible-release
-verification documented in
+verification, documented in
 [docs/VERIFY.md](https://github.com/curl/curl/blob/master/docs/VERIFY.md).
 
-This protects against tampered mirrors, MITM proxies, and compromised CDNs,
-but not against a compromised maintainer signing key.
+This protects against tampered mirrors/CDNs, MITM proxies, but not against
+a compromised maintainer signing key.
 
 ## Building from source
 
