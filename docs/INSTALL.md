@@ -415,33 +415,6 @@ cmake . \
   -DCURL_USE_LIBPSL=OFF
 ```
 
-## Using BSD-style lwIP instead of Winsock TCP/IP stack in Windows builds
-
-In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
-necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
-visible to libcurl and curl compilation processes. To set this definition you
-have the following alternatives:
-
-- Pass it via the `CPPFLAGS` environment variable with autotools, or with CMake
-  via `CFLAGS`, or the `-DCMAKE_C_FLAGS=-DUSE_LWIPSOCK` command-line option.
-- Modify the "Preprocessor Definitions" in the libcurl project
-
-Note: The pre-processor settings can be found using the Visual Studio IDE
-under "Project -> Properties -> Configuration Properties -> C/C++ ->
-Preprocessor".
-
-Once that libcurl has been built with BSD-style lwIP TCP/IP stack support, in
-order to use it with your program it is mandatory that your program includes
-lwIP header file `<lwip/opt.h>` (or another lwIP header that includes this)
-before including any libcurl header. Your program does not need the
-`USE_LWIPSOCK` preprocessor definition which is for libcurl internals only.
-
-Compilation has been verified with lwIP 1.4.0.
-
-This BSD-style lwIP TCP/IP stack support must be considered experimental given
-that it has been verified that lwIP 1.4.0 still needs some polish, and libcurl
-might yet need some additional adjustment.
-
 ## Important static libcurl usage note
 
 When building an application that uses the static libcurl library on Windows,
