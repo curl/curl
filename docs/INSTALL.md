@@ -597,7 +597,7 @@ In some cases, you may be able to simplify the above commands to as little as:
 
 # REDUCING SIZE
 
-There are a number of configure options that can be used to reduce the size of
+There are a number of configure options that you can use to reduce the size of
 libcurl for embedded applications where binary size is an important factor.
 First, be sure to set the `CFLAGS` variable when configuring with any relevant
 compiler optimization flags to reduce the size of the binary. For gcc, this
