@@ -211,6 +211,12 @@ use, you may specify these explicitly. The following options are provided:
   no other certificates configured by the application.
 - `--with-apple-sectrust`: use the system "SecTrust" service on Apple
   operating systems for verification. (Added in 8.17.0)
+- `--enable-ca-native`: use the Windows system CA store for verification.
+  (Added in 8.19.0)
+- `--disable-ca-search`: disable searching for a CA bundle in the curl tool's
+  directory and in PATH on Windows. (Added in 8.11.0)
+- `--enable-ca-search-safe`: restrict searching for a CA bundle to the curl
+  tool's directory. (Added in 8.11.0)
 
 ## MultiSSL and HTTP/3
 
