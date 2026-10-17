@@ -141,7 +141,7 @@ static const uint8_t *getASN1Element_(struct Curl_asn1Element *elem,
      if an error occurs. */
   if(!beg || !end || beg >= end || !*beg ||
      ((size_t)(end - beg) > CURL_ASN1_MAX) ||
-     lvl >= CURL_ASN1_MAX_RECURSIONS)
+     lvl++ >= CURL_ASN1_MAX_RECURSIONS)
     return NULL;
 
   /* Process header byte. */
@@ -164,19 +164,19 @@ static const uint8_t *getASN1Element_(struct Curl_asn1Element *elem,
     b &= 0x7F;
     if(!b) {
       /* Unspecified length. Since we have all the data, we can determine the
-         effective length by skipping element until an end element is found. */
+         effective length by skipping element until an EOC element is found. */
       if(!elem->constructed)
         return NULL;
       elem->beg = beg;
       while(beg < end && *beg) {
-        beg = getASN1Element_(&lelem, beg, end, lvl + 1);
+        beg = getASN1Element_(&lelem, beg, end, lvl);
         if(!beg)
           return NULL;
       }
-      if(beg >= end)
+      if(end - beg < 2 || beg[1])       /* EOC must have a zero length. */
         return NULL;
-      elem->end = beg;
-      return beg + 1;
+      elem->end = beg;                  /* Do not include EOC as content. */
+      return beg + 2;                   /* After EOC element. */
     }
     else if(b > (size_t)(end - beg))
       return NULL; /* Does not fit in source. */
