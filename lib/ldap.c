@@ -372,15 +372,18 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   infof(data, "LDAP local: trying to establish %s connection",
         ldap_ssl ? "encrypted" : "cleartext");
 
+  /* TLS needs the hostname for certificate verification; cleartext
+     connects to the address libcurl's connection layer already picked. */
 #ifdef USE_WIN32_LDAP
-  host = curlx_convert_UTF8_to_tchar(conn->origin->hostname);
+  host = curlx_convert_UTF8_to_tchar(ldap_ssl ? conn->origin->hostname :
+                                     ipquad.remote_ip);
   if(!host) {
     result = CURLE_OUT_OF_MEMORY;
 
     goto quit;
   }
 #else
-  host = conn->origin->hostname;
+  host = ldap_ssl ? conn->origin->hostname : ipquad.remote_ip;
 #endif
 
 #ifdef USE_WIN32_LDAP
