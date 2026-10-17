@@ -455,7 +455,7 @@ cmake . \
 with `configure`, on macOS:
 
 ```sh
-export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK
+export ANDROID_NDK_HOME="$HOME"/Library/Android/sdk/ndk/25.1.8937393  # Point into your NDK
 # Same tag for Apple Silicon. Other OS values here:
 #   https://developer.android.com/ndk/guides/other_build_systems#overview
 export HOST_TAG=darwin-x86_64
