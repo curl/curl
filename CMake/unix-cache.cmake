@@ -235,7 +235,7 @@ if(APPLE OR
    CMAKE_SYSTEM_NAME STREQUAL "DragonFlyBSD")
   set(HAVE_SENDMMSG 0)
 else()
-  set(HAVE_SENDMMSG 1)  # Missing in OpenBSD 6.9
+  set(HAVE_SENDMMSG 1)  # OpenBSD 7.2+
 endif()
 set(HAVE_SENDMSG 1)
 set(HAVE_SETLOCALE 1)
