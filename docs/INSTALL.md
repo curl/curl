@@ -663,9 +663,9 @@ disabling support for some features (run `./configure --help` to see them all):
 - `--without-zlib` (gzip/deflate on-the-fly decompression)
 
 Be sure also to strip debugging symbols from your binaries after compiling
-using 'strip' or an option like `-s`. If space is really tight, you may be able
-to gain a few bytes by removing some unneeded sections of the shared library
-using the -R option to objcopy (e.g. the .comment section).
+using `strip` or an option like `-s`. If space is tight, you may be able
+to gain a few bytes by removing unneeded sections of the shared library using
+the `-R` option to objcopy (e.g. the `.comment` section).
 
 Using these techniques it is possible to create a basic HTTP-only libcurl
 shared library for i386 Linux platforms that is only 137 KiB in size
