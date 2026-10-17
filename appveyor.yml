@@ -32,6 +32,7 @@ version: 7.50.0.{build}
 
 environment:
   DO_NOT_TRACK: '1'
+  CURL_TEST_MIN: 75
 
   matrix:
     # CMake Visual Studio builds
