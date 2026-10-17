@@ -497,7 +497,6 @@ LPRT
 LSB
 lseek
 Lua
-lwIP
 macdef
 macOS
 macos
