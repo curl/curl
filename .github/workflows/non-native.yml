@@ -88,9 +88,6 @@ jobs:
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
               options: '-DCURL_USE_GSSAPI=ON -DCURL_DISABLE_TYPECHECK=ON' }
 
-          - { os: 'freebsd'     , version: '12.2',  build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: '!ssl'   , tflags: 'skiprun',
-              options: '-DCURL_ENABLE_SSL=OFF', shell: 'bash' }
-
           # https://app.midnightbsd.org/
           # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
           # { os: 'midnightbsd' , version: '4.0.4', build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'gnutls !examples', tflags: 'skipall',
@@ -121,6 +118,9 @@ jobs:
           - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
               install: 'cmake ninja openldap-client-- libidn2' }
 
+          - { os: 'openbsd'     , version: '6.8'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl'   , tflags: 'skiprun',
+              options: '-DCURL_ENABLE_SSL=OFF', shell: 'bash' }
+
       fail-fast: false
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -140,7 +140,7 @@ jobs:
         run: |
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
-          elif [ "${MATRIX_OS}" = 'freebsd' ] && [ "${MATRIX_VERSION}" != '12.2' ]; then
+          elif [ "${MATRIX_OS}" = 'freebsd' ]; then
             find /usr/local/etc/pkg/repos || true
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
