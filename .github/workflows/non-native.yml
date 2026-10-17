@@ -116,7 +116,8 @@ jobs:
 
           # Skip test 2707 'ws: Peculiar frame sizes' on suspicion of hangs
           - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
-              install: 'cmake ninja openldap-client-- libidn2' }
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '--debug-trycompile' }
 
           # Slow
           # { os: 'openbsd'     , version: '6.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
@@ -200,7 +201,12 @@ jobs:
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+        run: |
+          cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+          find bld -name CheckIncludeFile.c | while read -r f; do
+            echo "----------------- $f ---------------"
+            cat "$f"
+          done
 
       - name: 'curl_config.h'
         run: |
