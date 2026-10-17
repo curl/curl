@@ -367,7 +367,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
                          CURL_EASY_STR(data, STRING_DNS_SERVERS));
     }
     if(CURL_EASY_STR(data, STRING_DNS_INTERFACE)) {
-      ERROR_CHECK_SETOPT(CURLOPT_DNS_SERVERS,
+      ERROR_CHECK_SETOPT(CURLOPT_DNS_INTERFACE,
                          CURL_EASY_STR(data, STRING_DNS_INTERFACE));
     }
     if(CURL_EASY_STR(data, STRING_DNS_LOCAL_IP4)) {
