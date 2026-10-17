@@ -46,6 +46,7 @@ static CURLcode test_unit3304(const char *arg)
   struct Curl_peer origin;
   struct ssl_peer peer;
   struct ssl_filter_config ssl;
+  struct Curl_scheme scheme;
   char *key1 = NULL;
   char *key2 = NULL;
   static char base_hostname[] = "example.com";
@@ -66,9 +67,13 @@ static CURLcode test_unit3304(const char *arg)
   static char cipher_list[]   = "DEFAULT";
   static char cipher_list13[] = "TLS_AES_128_GCM_SHA256";
 
+  memset(&scheme, 0, sizeof(scheme));
+  scheme.name = "https";
+
   memset(&origin, 0, sizeof(origin));
   origin.hostname = base_hostname;
   origin.port = 443;
+  origin.scheme = &scheme;
 
   memset(&peer, 0, sizeof(peer));
   peer.origin = &origin;
@@ -91,9 +96,9 @@ static CURLcode test_unit3304(const char *arg)
   fail_unless(key1 && key2 && !strcmp(key1, key2),
               "identical config should produce identical peer key");
   /* Keep legacy serialized keys separate from this key format. */
-  fail_unless(key1 && !strncmp(key1, "example.com:443:KEY-V2:",
-                               sizeof("example.com:443:KEY-V2:") - 1),
-              "peer key must carry the V2 format marker after the port");
+  fail_unless(key1 && !strncmp(key1, "https:example.com:443:KEY-V3:",
+                               sizeof("https:example.com:443:KEY-V3:") - 1),
+              "peer key must carry the V3 format marker after the port");
   curlx_safefree(key1);
   curlx_safefree(key2);
 
