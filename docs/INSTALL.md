@@ -174,7 +174,7 @@ information and verbose errors from `pkg-config` module detection invocations.
 
 ## Select TLS backend
 
-These options are provided to select the TLS backend to use.
+These are the options available to select the TLS backend to use.
 
 - AmiSSL: `--with-amissl`
 - GnuTLS: `--with-gnutls`.
