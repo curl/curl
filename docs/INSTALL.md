@@ -97,7 +97,7 @@ If you have write permission in that directory, you can do 'make install'
 without being root. An example of this would be to make a local install in
 your own home directory:
 
-    ./configure --prefix=$HOME
+    ./configure --prefix="$HOME"
     make
     make install
 
@@ -466,7 +466,7 @@ with CMake, where `ANDROID_NDK_HOME` points into your NDK:
 cmake . \
   -DANDROID_ABI=arm64-v8a \
   -DANDROID_PLATFORM=android-29 \
-  -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+  -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME"/build/cmake/android.toolchain.cmake \
   -DCURL_ENABLE_SSL=OFF \
   -DCURL_USE_LIBPSL=OFF
 ```
@@ -474,18 +474,18 @@ cmake . \
 with `configure`, on macOS:
 
 ```sh
-export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
+export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK
 # Same tag for Apple Silicon. Other OS values here:
 #   https://developer.android.com/ndk/guides/other_build_systems#overview
 export HOST_TAG=darwin-x86_64
-export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
-export AR=$TOOLCHAIN/bin/llvm-ar
-export AS=$TOOLCHAIN/bin/llvm-as
-export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
-export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
-export LD=$TOOLCHAIN/bin/ld
-export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
-export STRIP=$TOOLCHAIN/bin/llvm-strip
+export TOOLCHAIN="$ANDROID_NDK_HOME"/toolchains/llvm/prebuilt/$HOST_TAG
+export AR="$TOOLCHAIN"/bin/llvm-ar
+export AS="$TOOLCHAIN"/bin/llvm-as
+export CC="$TOOLCHAIN"/bin/aarch64-linux-android29-clang
+export CXX="$TOOLCHAIN"/bin/aarch64-linux-android29-clang++
+export LD="$TOOLCHAIN"/bin/ld
+export RANLIB="$TOOLCHAIN"/bin/llvm-ranlib
+export STRIP="$TOOLCHAIN"/bin/llvm-strip
 ```
 
 When building on Linux or targeting other API levels or architectures, you need
@@ -504,8 +504,8 @@ for Android using OpenSSL like this:
 ```sh
 # For AWS-LC/BoringSSL/OpenSSL. In general, you need to the SSL/TLS layer's
 # transitive dependencies if you are linking statically.
-LIBS='-lssl -lcrypto -lc++'
-./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
+export LIBS='-lssl -lcrypto -lc++'
+./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN"/sysroot/usr
 ```
 
 # IBM i
@@ -554,8 +554,8 @@ of cross-compiling for the IBM 405GP PowerPC processor using the toolchain on
 Linux.
 
 ```sh
-export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
-export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
+export PATH="$PATH":/opt/hardhat/devkit/ppc/405/bin
+export CPPFLAGS=-I/opt/hardhat/devkit/ppc/405/target/usr/include
 export AR=ppc_405-ar
 export AS=ppc_405-as
 export LD=ppc_405-ld
@@ -593,7 +593,7 @@ may be relevant in some environments: `-march=X`, `-mthumb`, `-m32`,
 
 For example, this is how to combine a few of these options:
 
-    ./configure CC=gcc CFLAGS='-Os -ffunction-sections' LDFLAGS='-Wl,--gc-sections'...
+    ./configure CC=gcc CFLAGS='-Os -ffunction-sections' LDFLAGS='-Wl,--gc-sections' ...
 
 Note that newer compilers often produce smaller code than older versions
 due to improved optimization.
