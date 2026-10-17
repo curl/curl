@@ -86,6 +86,7 @@ CAPA
 capath
 CCC
 CDN
+CDNs
 CentOS
 CFLAGS
 cflags
@@ -496,7 +497,6 @@ LPRT
 LSB
 lseek
 Lua
-lwIP
 macdef
 macOS
 macos

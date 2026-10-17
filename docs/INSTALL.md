@@ -21,16 +21,17 @@ the tarball on https://curl.se/download.html.
 
     gpg --verify curl-X.Y.Z.tar.gz.asc curl-X.Y.Z.tar.gz
 
-The signing key fingerprint and a full verification procedure (including
-reproducible-release checks) are documented in
+You can find the signing key fingerprint, and reproducible-release
+verification, documented in
 [docs/VERIFY.md](https://github.com/curl/curl/blob/master/docs/VERIFY.md).
 
-This protects against tampered mirrors, MITM proxies, and compromised CDNs, but not against a compromised maintainer signing key.
+This protects against tampered mirrors and CDNs, MITM proxies, but not against
+a compromised maintainer signing key.
 
 ## Building from source
 
-You can use autotools or CMake to build curl from source. They work equally
-well and have close to feature parity.
+You can use autotools or CMake to build curl from source. They both work well
+and have close to feature parity.
 
 autotools' advantages are wide portability and the Unix philosophy, while
 CMake typically has faster configuration and build times, and supports MSVC.
@@ -40,9 +41,9 @@ Option defaults and dependency detection details may differ.
 With both build tools, some features require Perl, and the pytest test suite
 requires Python.
 
-You can find live examples for both tools and many build cases in curl's CI
+You can find live examples for both tools and build cases in curl's CI
 scripts: `.github/workflows/*.yml`, `.circleci/*.yml` and `appveyor.*` (in the
-Git repository only). For CMake-specific instructions, see
+Git repository). For CMake-specific instructions, see
 [INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
 
 ## Building using vcpkg
@@ -96,7 +97,7 @@ If you have write permission in that directory, you can do 'make install'
 without being root. An example of this would be to make a local install in
 your own home directory:
 
-    ./configure --prefix=$HOME
+    ./configure --prefix="$HOME"
     make
     make install
 
@@ -141,8 +142,8 @@ running configure like:
     ./configure --disable-shared
 
 The configure script is primarily done to work with shared/dynamic third party
-dependencies. When linking with shared libraries, the dependency "chain" is
-handled automatically by the library loader - on all modern systems.
+dependencies. When linking with shared libraries, the library loader handles
+the dependency "chain" automatically - on all modern systems.
 
 If you instead link with a static library, you need to provide all the
 dependency libraries already at the link command line.
@@ -173,7 +174,7 @@ information and verbose errors from `pkg-config` module detection invocations.
 
 ## Select TLS backend
 
-These options are provided to select the TLS backend to use.
+These are the options available to select the TLS backend to use.
 
 - AmiSSL: `--with-amissl`
 - GnuTLS: `--with-gnutls`.
@@ -184,9 +185,10 @@ These options are provided to select the TLS backend to use.
 - wolfSSL: `--with-wolfssl`
 
 You can build curl with *multiple* TLS backends at your choice, but some TLS
-backends cannot be combined: if you build with an OpenSSL fork (or wolfSSL),
-you cannot add another OpenSSL fork (or wolfSSL) because they have
-conflicting identical symbol names.
+backends cannot coexist: if you build with OpenSSL (or fork), you cannot add
+another OpenSSL fork because they have conflicting identical symbol names.
+wolfSSL 5.7.6+, depending on its build options, can coexist with OpenSSL (and
+forks).
 
 When you build with multiple TLS backends, you can select the active one at
 runtime when curl starts up.
@@ -209,6 +211,15 @@ use, you may specify these explicitly. The following options are provided:
   no other certificates configured by the application.
 - `--with-apple-sectrust`: use the system "SecTrust" service on Apple
   operating systems for verification. (Added in 8.17.0)
+- `--enable-ca-native`: use the Windows system CA store for verification.
+  (Added in 8.19.0)
+- `--disable-ca-search`: prevent the curl tool searching for a CA bundle
+  (`curl-ca-bundle.crt`) in its own directory and in PATH on Windows.
+  To improve security by not picking up potentially outdated or crafted
+  CA roots. (Added in 8.11.0)
+- `--enable-ca-search-safe`: restrict the curl tool searching for a CA bundle
+  to its own directory. A safe option if the curl tool resides in a protected
+  directory with the CA bundle kept in the same directory. (Added in 8.11.0)
 
 ## MultiSSL and HTTP/3
 
@@ -404,52 +415,6 @@ cmake . \
   -DCURL_USE_LIBPSL=OFF
 ```
 
-## Disabling Specific Protocols in Windows builds
-
-The configure utility, unfortunately, is not available for the Windows
-environment, therefore, you cannot use the various disable-protocol options of
-the configure utility on this platform.
-
-You can use specific defines to disable specific protocols and features. See
-[CURL-DISABLE](https://github.com/curl/curl/blob/master/docs/CURL-DISABLE.md)
-for the full list.
-
-If you want to set any of these defines you have the following options:
-
-- Modify `lib/config-win32.h`
-- Modify `lib/curl_setup.h`
-- Modify the "Preprocessor Definitions" in the libcurl project
-
-Note: The pre-processor settings can be found using the Visual Studio IDE
-under "Project -> Properties -> Configuration Properties -> C/C++ ->
-Preprocessor".
-
-## Using BSD-style lwIP instead of Winsock TCP/IP stack in Windows builds
-
-In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
-necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
-visible to libcurl and curl compilation processes. To set this definition you
-have the following alternatives:
-
-- Modify `lib/config-win32.h`
-- Modify the "Preprocessor Definitions" in the libcurl project
-
-Note: The pre-processor settings can be found using the Visual Studio IDE
-under "Project -> Properties -> Configuration Properties -> C/C++ ->
-Preprocessor".
-
-Once that libcurl has been built with BSD-style lwIP TCP/IP stack support, in
-order to use it with your program it is mandatory that your program includes
-lwIP header file `<lwip/opt.h>` (or another lwIP header that includes this)
-before including any libcurl header. Your program does not need the
-`USE_LWIPSOCK` preprocessor definition which is for libcurl internals only.
-
-Compilation has been verified with lwIP 1.4.0.
-
-This BSD-style lwIP TCP/IP stack support must be considered experimental given
-that it has been verified that lwIP 1.4.0 still needs some polish, and libcurl
-might yet need some additional adjustment.
-
 ## Important static libcurl usage note
 
 When building an application that uses the static libcurl library on Windows,
@@ -459,10 +424,10 @@ for dynamic import symbols.
 ## Legacy Windows and SSL
 
 Schannel (from Windows SSPI), is the native SSL library in Windows. Schannel
-in Windows <= XP is unable to connect to servers that no longer support the
-legacy handshakes and algorithms used by those versions. If you are using curl
-in one of those earlier versions of Windows you should choose another SSL
-backend such as OpenSSL.
+in earlier Windows versions may be unable to connect to servers that no longer
+support the legacy handshakes and algorithms used by those versions. If you
+are using curl in such Windows versions you should choose another SSL backend
+such as OpenSSL.
 
 # Android
 
@@ -482,7 +447,7 @@ with CMake, where `ANDROID_NDK_HOME` points into your NDK:
 cmake . \
   -DANDROID_ABI=arm64-v8a \
   -DANDROID_PLATFORM=android-29 \
-  -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+  -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME"/build/cmake/android.toolchain.cmake \
   -DCURL_ENABLE_SSL=OFF \
   -DCURL_USE_LIBPSL=OFF
 ```
@@ -490,18 +455,18 @@ cmake . \
 with `configure`, on macOS:
 
 ```sh
-export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
+export ANDROID_NDK_HOME="$HOME"/Library/Android/sdk/ndk/25.1.8937393  # Point into your NDK
 # Same tag for Apple Silicon. Other OS values here:
 #   https://developer.android.com/ndk/guides/other_build_systems#overview
 export HOST_TAG=darwin-x86_64
-export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
-export AR=$TOOLCHAIN/bin/llvm-ar
-export AS=$TOOLCHAIN/bin/llvm-as
-export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
-export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
-export LD=$TOOLCHAIN/bin/ld
-export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
-export STRIP=$TOOLCHAIN/bin/llvm-strip
+export TOOLCHAIN="$ANDROID_NDK_HOME"/toolchains/llvm/prebuilt/$HOST_TAG
+export AR="$TOOLCHAIN"/bin/llvm-ar
+export AS="$TOOLCHAIN"/bin/llvm-as
+export CC="$TOOLCHAIN"/bin/aarch64-linux-android29-clang
+export CXX="$TOOLCHAIN"/bin/aarch64-linux-android29-clang++
+export LD="$TOOLCHAIN"/bin/ld
+export RANLIB="$TOOLCHAIN"/bin/llvm-ranlib
+export STRIP="$TOOLCHAIN"/bin/llvm-strip
 ```
 
 When building on Linux or targeting other API levels or architectures, you need
@@ -520,8 +485,8 @@ for Android using OpenSSL like this:
 ```sh
 # For AWS-LC/BoringSSL/OpenSSL. In general, you need to the SSL/TLS layer's
 # transitive dependencies if you are linking statically.
-LIBS='-lssl -lcrypto -lc++'
-./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
+export LIBS='-lssl -lcrypto -lc++'
+./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN"/sysroot/usr
 ```
 
 # IBM i
@@ -570,8 +535,8 @@ of cross-compiling for the IBM 405GP PowerPC processor using the toolchain on
 Linux.
 
 ```sh
-export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
-export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
+export PATH="$PATH":/opt/hardhat/devkit/ppc/405/bin
+export CPPFLAGS=-I/opt/hardhat/devkit/ppc/405/target/usr/include
 export AR=ppc_405-ar
 export AS=ppc_405-as
 export LD=ppc_405-ld
@@ -588,7 +553,7 @@ export NM=ppc_405-nm
 ```
 
 The `--prefix` parameter specifies where curl gets installed. If `configure`
-completes successfully, do `make` and `make install` as usual.
+completes, do `make` and `make install` as usual.
 
 In some cases, you may be able to simplify the above commands to as little as:
 
@@ -596,7 +561,7 @@ In some cases, you may be able to simplify the above commands to as little as:
 
 # REDUCING SIZE
 
-There are a number of configure options that can be used to reduce the size of
+There are a number of configure options that you can use to reduce the size of
 libcurl for embedded applications where binary size is an important factor.
 First, be sure to set the `CFLAGS` variable when configuring with any relevant
 compiler optimization flags to reduce the size of the binary. For gcc, this
@@ -609,7 +574,7 @@ may be relevant in some environments: `-march=X`, `-mthumb`, `-m32`,
 
 For example, this is how to combine a few of these options:
 
-    ./configure CC=gcc CFLAGS='-Os -ffunction-sections' LDFLAGS='-Wl,--gc-sections'...
+    ./configure CC=gcc CFLAGS='-Os -ffunction-sections' LDFLAGS='-Wl,--gc-sections' ...
 
 Note that newer compilers often produce smaller code than older versions
 due to improved optimization.
@@ -661,10 +626,13 @@ disabling support for some features (run `./configure --help` to see them all):
 - `--without-ssl` (SSL/TLS)
 - `--without-zlib` (gzip/deflate on-the-fly decompression)
 
+You can find the CMake-equivalents in
+[INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
+
 Be sure also to strip debugging symbols from your binaries after compiling
-using 'strip' or an option like `-s`. If space is really tight, you may be able
-to gain a few bytes by removing some unneeded sections of the shared library
-using the -R option to objcopy (e.g. the .comment section).
+using `strip` or an option like `-s`. If space is tight, you may be able
+to gain a few bytes by removing unneeded sections of the shared library using
+the `-R` option to objcopy (e.g. the `.comment` section).
 
 Using these techniques it is possible to create a basic HTTP-only libcurl
 shared library for i386 Linux platforms that is only 137 KiB in size
