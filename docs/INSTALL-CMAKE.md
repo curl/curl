@@ -105,7 +105,11 @@ Building statically is not for the faint of heart.
 
 # Testing
 
-(The test suite does not yet work with the cmake build)
+For example:
+
+    $ cmake --build ../curl-build --target tests
+
+You can customize it by setting the `TFLAGS` environment variable.
 
 # Installing
 
