@@ -168,6 +168,21 @@ void Curl_rlimit_init(struct Curl_rlimit *r,
   r->blocked = FALSE;
 }
 
+void Curl_rlimit_change(struct Curl_rlimit *r,
+                        int64_t rate_per_sec,
+                        int64_t burst_per_sec)
+{
+  DEBUGASSERT(rate_per_sec >= 0);
+  DEBUGASSERT(burst_per_sec >= rate_per_sec || !burst_per_sec);
+  r->rate_per_step = r->rate_per_sec = rate_per_sec;
+  r->burst_per_step = r->burst_per_sec = burst_per_sec;
+  r->step_us = CURL_US_PER_SEC;
+  r->spare_us = 0;
+  if(r->tokens > r->rate_per_step)
+    r->tokens = r->rate_per_step;
+  /* ts and blocked stay as they are, a paused transfer stays paused */
+}
+
 void Curl_rlimit_start(struct Curl_rlimit *r, const struct curltime *pts,
                        int64_t total_tokens)
 {
