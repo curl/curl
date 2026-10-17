@@ -27,6 +27,9 @@ exists in the HSTS cache, it upgrades the transfer to use HTTPS. Each HSTS
 cache entry has an individual lifetime after which the upgrade is no longer
 performed.
 
+This also applies to `ipfs://` and `ipns://` transfers when the IPFS gateway
+is an `http://` URL.
+
 Specify a "" filename (zero length) to avoid loading/saving and make curl
 handle HSTS in memory.
 
