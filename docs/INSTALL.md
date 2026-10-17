@@ -185,9 +185,8 @@ These are the options available to select the TLS backend to use.
 - wolfSSL: `--with-wolfssl`
 
 You can build curl with *multiple* TLS backends at your choice, but some TLS
-backends cannot be combined: if you build with an OpenSSL fork (or wolfSSL),
-you cannot add another OpenSSL fork (or wolfSSL) because they have
-conflicting identical symbol names.
+backends cannot coexist: if you build with OpenSSL (or fork), you cannot add
+another OpenSSL fork because they have conflicting identical symbol names.
 
 When you build with multiple TLS backends, you can select the active one at
 runtime when curl starts up.
