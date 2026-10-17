@@ -103,6 +103,14 @@ arguments in the build.
 
 Building statically is not for the faint of heart.
 
+# Testing
+
+For example:
+
+    $ cmake --build ../curl-build --target tests
+
+You can customize it by setting the `TFLAGS` environment variable.
+
 # Installing
 
 Install to default location (you have to specify the build directory).
