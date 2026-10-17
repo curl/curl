@@ -118,9 +118,9 @@ jobs:
           - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
               install: 'cmake ninja openldap-client-- libidn2' }
 
-          - { os: 'openbsd'     , version: '6.8'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl'   , tflags: 'skiprun',
+          - { os: 'openbsd'     , version: '6.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl'   , tflags: 'skiprun',
               install: 'cmake ninja openldap-client-- libidn2',
-              options: '-DCURL_ENABLE_SSL=OFF', shell: 'bash' }
+              options: '-DCURL_ENABLE_SSL=OFF' }
 
       fail-fast: false
     steps:
