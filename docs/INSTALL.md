@@ -213,10 +213,13 @@ use, you may specify these explicitly. The following options are provided:
   operating systems for verification. (Added in 8.17.0)
 - `--enable-ca-native`: use the Windows system CA store for verification.
   (Added in 8.19.0)
-- `--disable-ca-search`: disable searching for a CA bundle in the curl tool's
-  directory and in PATH on Windows. (Added in 8.11.0)
-- `--enable-ca-search-safe`: restrict searching for a CA bundle to the curl
-  tool's directory. (Added in 8.11.0)
+- `--disable-ca-search`: prevent the curl tool searching for a CA bundle
+  (`curl-ca-bundle.crt`) in its own directory and in PATH on Windows.
+  To improve security by not picking up potentially outdated or crafted
+  CA roots. (Added in 8.11.0)
+- `--enable-ca-search-safe`: restrict the curl tool searching for a CA bundle
+  to its own directory. A safe option if the curl tool resides in a protected
+  directory with the CA bundle kept in the same directory. (Added in 8.11.0)
 
 ## MultiSSL and HTTP/3
 
