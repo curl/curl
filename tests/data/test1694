@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+<name>
+Curl_range unit tests
+</name>
+</client>
+</testcase>
