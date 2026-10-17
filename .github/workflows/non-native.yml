@@ -123,7 +123,7 @@ jobs:
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
 
           - { os: 'openbsd'     , version: '6.8'  , build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: 'skiprun',
-              install: 'autoconf automake libtool openldap-client-- libidn2',
+              install: 'autoconf-2.69p3 automake-1.16.2 libtool openldap-client-- libidn2',
               options: '--with-openssl --without-zlib' }
 
       fail-fast: false
@@ -171,6 +171,9 @@ jobs:
             if [ "${MATRIX_VERSION}" = '7.9' ]; then
               export AUTOCONF_VERSION=2.72
               export AUTOMAKE_VERSION=1.18
+            elif [ "${MATRIX_VERSION}" = '6.8' ]; then
+              export AUTOCONF_VERSION=2.69
+              export AUTOMAKE_VERSION=1.16
             fi
           fi
           autoreconf -fi
