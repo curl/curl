@@ -80,6 +80,9 @@ Works with wolfSSL on Windows, Linux (Debian, Fedora, Gentoo, RHEL, Ubuntu),
 macOS, Android and iOS (added in 8.3.0); with GnuTLS (added in 8.5.0) and with
 OpenSSL and its forks (BoringSSL, LibreSSL, etc) on Windows (Added in 7.71.0).
 
+On Windows with OpenSSL, the ROOT store supplies trust anchors and the CA store
+supplies untrusted intermediate certificates for chain building.
+
 This works with Rustls on Windows, macOS, Android and iOS. On Linux it is
 equivalent to using the Mozilla CA certificate bundle. When used with Rustls
 _only_ the native CA store is consulted, not other locations set at run time or
