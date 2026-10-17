@@ -49,6 +49,7 @@
 #include "escape.h"
 #include "bufref.h"
 #include "vauth/vauth.h"
+#include "sendf.h"
 
 static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
@@ -2765,6 +2766,10 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     Curl_rlimit_init(&data->progress.ul.rlimit, offt,
                      CURLMAX(offt, (32 * 1024)),
                      Curl_pgrs_now(data));
+    /* the init cleared the block, keep a paused transfer paused */
+    if(Curl_creader_is_paused(data))
+      Curl_rlimit_block(&data->progress.ul.rlimit, TRUE,
+                        Curl_pgrs_now(data));
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
@@ -2778,6 +2783,10 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     Curl_rlimit_init(&data->progress.dl.rlimit, offt,
                      CURLMAX(offt, (32 * 1024)),
                      Curl_pgrs_now(data));
+    /* the init cleared the block, keep a paused transfer paused */
+    if(Curl_cwriter_is_paused(data))
+      Curl_rlimit_block(&data->progress.dl.rlimit, TRUE,
+                        Curl_pgrs_now(data));
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*
