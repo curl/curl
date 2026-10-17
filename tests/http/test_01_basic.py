@@ -213,7 +213,7 @@ class TestBasic:
             f'/curltest/tweak?x-hd={256 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         if proto == 'h2':
-            r.check_exit_code(56)  # CURLE_RECV_ERROR
+            assert r.exit_code in [55, 56], f'{r}'  # CURLE_SEND/RECV_ERROR
         else:
             r.check_exit_code(0)   # 1.1 can do
 
