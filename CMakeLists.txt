@@ -1541,7 +1541,6 @@ endif()
 # Use check_include_file_concat_curl() for headers required by subsequent
 # check_include_file_concat_curl() or check_symbol_exists() detections.
 # Order for these is significant.
-check_include_file_concat_curl("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/eventfd.h"    HAVE_SYS_EVENTFD_H)
 check_include_file("sys/filio.h"      HAVE_SYS_FILIO_H)
 check_include_file("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
@@ -1550,6 +1549,7 @@ check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
 check_include_file("sys/resource.h"   HAVE_SYS_RESOURCE_H)
 check_include_file_concat_curl("sys/select.h"     HAVE_SYS_SELECT_H)
 check_include_file("sys/sockio.h"     HAVE_SYS_SOCKIO_H)
+check_include_file_concat_curl("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file_concat_curl("sys/utime.h"      HAVE_SYS_UTIME_H)  # sys/types.h (AmigaOS)
 
@@ -1564,9 +1564,9 @@ check_include_file_concat_curl("net/if.h"         HAVE_NET_IF_H)  # sys/select.h
 check_include_file_concat_curl("netdb.h"          HAVE_NETDB_H)
 check_include_file_concat_curl("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file("netinet/in6.h"    HAVE_NETINET_IN6_H)
+check_include_file_concat_curl("netinet/ip.h"     HAVE_NETINET_IP_H)   # sys/types.h (e.g. OpenBSD)
 check_include_file_concat_curl("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
 check_include_file_concat_curl("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
-check_include_file("netinet/ip.h"     HAVE_NETINET_IP_H)
 check_include_file("poll.h"           HAVE_POLL_H)
 check_include_file("pwd.h"            HAVE_PWD_H)
 check_include_file("stdatomic.h"      HAVE_STDATOMIC_H)

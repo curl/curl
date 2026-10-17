@@ -203,7 +203,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
-          find bld -name CheckIncludeFile.c | while read -r f; do
+          find bld/CMakeFiles/CMakeScratch -name '*.c' | sort | while read -r f; do
             echo "----------------- $f ---------------"
             cat "$f"
           done

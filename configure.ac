@@ -4018,7 +4018,7 @@ AC_CHECK_HEADERS(
   linux/tcp.h \
   netinet/tcp.h \
   netinet/udp.h \
-  netinet/ipppppppppppppp.h \
+  netinet/ip.h \
   netdb.h \
   sys/sockio.h \
   sys/param.h \
