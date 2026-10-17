@@ -118,6 +118,34 @@ jobs:
           - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
               install: 'cmake ninja openldap-client-- libidn2' }
 
+          - { os: 'openbsd'     , version: '7.8'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+          - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+          - { os: 'openbsd'     , version: '7.6'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+          - { os: 'openbsd'     , version: '7.5'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+          - { os: 'openbsd'     , version: '7.4'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+          - { os: 'openbsd'     , version: '7.3'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+          - { os: 'openbsd'     , version: '7.2'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+          - { os: 'openbsd'     , version: '7.1'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+          - { os: 'openbsd'     , version: '7.0'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
+              install: 'cmake ninja openldap-client-- libidn2',
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
+
           - { os: 'openbsd'     , version: '6.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: '!ssl !examples', tflags: 'skipall',
               install: 'cmake ninja openldap-client-- libidn2',
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_ZLIB=OFF' }
