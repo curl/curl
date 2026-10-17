@@ -1056,6 +1056,9 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   backend->recv_renegotiating = FALSE;
   backend->renegotiate_state.started = FALSE;
   backend->encdata_is_incomplete = FALSE;
+  backend->shutdown_generated = FALSE;
+  backend->shutdown_offset = 0;
+  memset(&backend->shutdown_token, 0, sizeof(backend->shutdown_token));
 
   /* continue to second handshake step */
   connssl->connecting_state = ssl_connect_2;
@@ -2431,7 +2434,8 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
     goto out;
   }
 
-  if(backend->cred && backend->ctxt && !backend->sent_shutdown) {
+  if(backend->cred && backend->ctxt && !backend->sent_shutdown &&
+     !backend->shutdown_generated) {
     SecBufferDesc BuffDesc;
     SecBuffer Buffer;
     SECURITY_STATUS sspi_status;
@@ -2471,41 +2475,60 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       &backend->ret_flags, NULL);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
-      /* send close message which is in output buffer */
-      size_t written;
+      backend->shutdown_token = outbuf;
+      backend->shutdown_generated = TRUE;
+    }
+    else {
+      char buffer[STRERROR_LEN];
+      if(outbuf.pvBuffer)
+        Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
+      failf(data, "schannel: generating close msg failed: %s",
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
+  }
 
+  if(backend->shutdown_generated && !backend->sent_shutdown) {
+    size_t written = 0;
+    size_t remaining;
+
+    DEBUGASSERT(backend->shutdown_offset <= backend->shutdown_token.cbBuffer);
+    remaining = backend->shutdown_token.cbBuffer - backend->shutdown_offset;
+
+    if(remaining) {
       result = Curl_conn_cf_send(cf->next, data,
-                                 (const uint8_t *)outbuf.pvBuffer,
-                                 outbuf.cbBuffer,
-                                 FALSE, &written);
-      Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-      if(!result) {
-        if(written < outbuf.cbBuffer) {
-          result = CURLE_SEND_ERROR;
-          failf(data, "schannel: failed to send close msg: %s"
-                " (bytes written: %zu)", curl_easy_strerror(result), written);
-          goto out;
-        }
-        backend->sent_shutdown = TRUE;
-        *done = TRUE;
-      }
-      else if(result == CURLE_AGAIN) {
+                                 ((uint8_t *)backend->shutdown_token.pvBuffer +
+                                  backend->shutdown_offset),
+                                 remaining, FALSE, &written);
+      if(!result)
+        backend->shutdown_offset += written;
+      if(result == CURLE_AGAIN || (!result && written < remaining)) {
         connssl->io_need = CURL_SSL_IO_NEED_SEND;
         result = CURLE_OK;
         goto out;
       }
-      else {
-        if(!backend->recv_connection_closed) {
-          result = CURLE_SEND_ERROR;
-          failf(data, "schannel: error sending close msg: %d", (int)result);
-          goto out;
-        }
-        /* Looks like server already closed the connection.
-         * An error to send our close notify is not a failure. */
+    }
+    else /* no shutdown message to send? */
+      result = CURLE_OK;
+    if(result) {
+      if(backend->recv_connection_closed) {
+        /* The server already closed, so sending close_notify is optional. */
         *done = TRUE;
         result = CURLE_OK;
       }
+      else {
+        failf(data, "schannel: error sending close msg: %d", (int)result);
+        result = CURLE_SEND_ERROR;
+      }
+      goto out;
     }
+    if(backend->shutdown_token.pvBuffer)
+      Curl_pSecFn->FreeContextBuffer(backend->shutdown_token.pvBuffer);
+    memset(&backend->shutdown_token, 0, sizeof(backend->shutdown_token));
+    backend->shutdown_offset = 0;
+    backend->sent_shutdown = TRUE;
+    *done = TRUE;
   }
 
   /* If the connection seems open and we have not seen the close notify
@@ -2546,6 +2569,11 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGASSERT(data);
   DEBUGASSERT(backend);
+
+  if(backend->shutdown_token.pvBuffer)
+    Curl_pSecFn->FreeContextBuffer(backend->shutdown_token.pvBuffer);
+  memset(&backend->shutdown_token, 0, sizeof(backend->shutdown_token));
+  backend->shutdown_offset = 0;
 
   /* free SSPI Schannel API security context handle */
   if(backend->ctxt) {
@@ -2888,8 +2916,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_get_internals,            /* get_internals */
   schannel_close,                    /* close_one */
   NULL,                              /* close_all */
-  NULL,                              /* set_engine */
-  NULL,                              /* set_engine_default */
   NULL,                              /* engines_list */
   schannel_sha256sum,                /* sha256sum */
   schannel_recv,                     /* recv decrypted data */

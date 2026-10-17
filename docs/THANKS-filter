@@ -165,3 +165,6 @@ s/Val S\./Valerie Snyder/
 s/Andrew Nesbit$/Andrew Nesbitt/
 s/^https:\/\/.*//
 s/OSS-Fuzz//
+s/Claude//
+s/Copilot//
+s/dataisland/Zheng Yu/

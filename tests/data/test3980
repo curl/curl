@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+--proto-default
+</keywords>
+</info>
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 0
+
+</data>
+</reply>
+<client>
+<features>
+proxy
+</features>
+<server>
+http
+</server>
+<name>
+Schemeless upload filename keeps the selected default protocol
+</name>
+<file name="%LOGDIR/upload3980">
+hello
+</file>
+<command>
+ftp.test/%TESTNUMBER/ --proto-default http -T %LOGDIR/upload3980 -x http://%HOSTIP:%HTTPPORT/
+</command>
+</client>
+<verify>
+<protocol crlf="headers">
+PUT http://ftp.test/%TESTNUMBER/upload3980 HTTP/1.1
+Host: ftp.test
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+Content-Length: 6
+
+hello
+</protocol>
+</verify>
+</testcase>

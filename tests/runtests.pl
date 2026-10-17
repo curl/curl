@@ -60,7 +60,6 @@ use strict;
 use warnings;
 use 5.006;
 use POSIX qw(strftime);
-use File::Temp qw(tempdir);
 
 # These should be the only variables that might be needed to get edited:
 
@@ -186,6 +185,7 @@ my %runnersrunning;    # tests currently running by runner ID
 my $short;
 my $no_debuginfod;
 my $postmortem;   # display detailed info about failed tests
+my $show_success_logs = 0;  # display detailed info about passed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
 my $jobs = 0;
@@ -511,27 +511,18 @@ sub checksystemfeatures {
     my $feat;
     my $curl;
     my $libcurl;
-    my $versretval;
-    my $versnoexec;
-    my @version = ();
     my @disabled;
     my $dis = "";
 
-    my $tmpdir = tempdir("logtmpXXXXXX", DIR => ".", CLEANUP => 1);
-    my $curlverout = "$tmpdir/curlverout.log";
-    my $curlvererr = "$tmpdir/curlvererr.log";
-    my $versioncmd = exerunner() . shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
-
-    $versretval = runclient($versioncmd);
-    $versnoexec = $!;
+    my $versioncmd = exerunner() . shell_quote($CURL) . ' --disable --version 2>&1';
+    my $versout = qx($versioncmd);
+    my $versretval = $?;
+    print "CMD ($versretval): $versioncmd\n" if($verbose && !$torture);
+    my @version = split(/\n/, $versout);
 
     my $current_time = int(time());
     $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
     $DATE = strftime "%Y-%m-%d", gmtime($current_time);
-
-    open(my $versout, "<", $curlverout);
-    @version = <$versout>;
-    close($versout);
 
     open(my $disabledh, "-|", exerunner() . shell_quote($CURLINFO));
     while(<$disabledh>) {
@@ -756,7 +747,7 @@ sub checksystemfeatures {
         logmsg "$versioncmd \n";
         if($versretval == -1) {
             logmsg "command failed with: \n";
-            logmsg "$versnoexec \n";
+            logmsg "$versretval \n";
         }
         elsif($versretval & 127) {
             logmsg sprintf("command died with signal %d, and %s coredump.\n",
@@ -765,24 +756,9 @@ sub checksystemfeatures {
         else {
             logmsg sprintf("command exited with value %d \n", $versretval >> 8);
         }
-        logmsg "contents of $curlverout: \n";
-        displaylogcontent($curlverout);
-        logmsg "contents of $curlvererr: \n";
-        displaylogcontent($curlvererr);
+        logmsg "curl version output: \n";
+        logmsg "$versout \n";
         die "Could not get curl's version";
-    }
-    unlink($curlverout, $curlvererr);
-    rmdir($tmpdir);
-
-    if(-r "../lib/curl_config.h") {
-        open(my $conf, "<", "../lib/curl_config.h");
-        while(<$conf>) {
-            if($_ =~ /^\#define HAVE_GETRLIMIT/) {
-                # set if system has getrlimit()
-                $feature{"getrlimit"} = 1;
-            }
-        }
-        close($conf);
     }
 
     if($feature{"IPv6"}) {
@@ -1464,7 +1440,6 @@ sub singletest_check {
         if($res) {
             return -1;
         }
-
         $ok .= "p";
     }
     else {
@@ -1551,11 +1526,6 @@ sub singletest_check {
             # cut off the final newline from the final line of the upload data
             chomp($upload[-1]);
         }
-        for my $line (@upload) {
-            subbase64(\$line);
-            subsha256base64file(\$line);
-            substrippemfile(\$line);
-        }
 
         # verify uploaded data
         my @out = loadarray("$logdir/upload.$testnum");
@@ -1625,7 +1595,6 @@ sub singletest_check {
         if($res) {
             return -1;
         }
-
         $ok .= "P";
     }
     else {
@@ -2036,6 +2005,9 @@ sub singletest {
                 # display the server logs
                 displaylogs($rid, $testnum);
             }
+        }
+        elsif($show_success_logs) {
+            displaylogs($rid, $testnum);
         }
 
         #######################################################################
@@ -2517,6 +2489,9 @@ while(@ARGV) {
             die "Failed to parse '-o $ARGV[0]'. May contain unexpected characters.\n";
         }
     }
+    elsif($ARGV[0] eq "-S") {
+        $show_success_logs = 1;
+    }
     elsif($ARGV[0] eq "-p") {
         $postmortem = 1;
     }
@@ -2614,6 +2589,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -rf      full run time statistics
   --repeat=[num] run the given tests this many times
   --retry=[num] number of attempts for the whole test run to retry failed tests
+  -S       print log file contents when a test passes
   -s       short output
   --seed=[num] set the random seed to a fixed number
   --shallow=[num] randomly makes the torture tests "thinner"
@@ -3200,6 +3176,9 @@ while(1) {
                     }
                     elsif(!$error) {
                         $ok++; # successful test counter
+                        if($show_success_logs) {
+                            displaylogs($ridready, $testnum);
+                        }
                     }
                 }
             }

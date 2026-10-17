@@ -1740,7 +1740,9 @@ static bool multi_ischanged(struct Curl_multi *multi, bool clear)
  */
 void Curl_multi_connchanged(struct Curl_multi *multi)
 {
-  multi->recheckstate = TRUE;
+  /* May be invoked for a `data->multi` when no multi is present. */
+  if(multi)
+    multi->recheckstate = TRUE;
 }
 
 CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,

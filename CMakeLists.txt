@@ -332,6 +332,15 @@ if(CURL_DROP_UNUSED)
   elseif(MSVC)  # Options below are toolchain defaults in Release configurations.
     # This option does not seem to have an effect with VS2010:
     set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
+    # To silence:
+    #   "LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:REF' specification" (cl)
+    #   "lld-link : warning : ignoring '/incremental' because REF is enabled; use '/opt:noref' to disable" (clang-cl)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:Debug,RelWithDebInfo>:-INCREMENTAL:NO>")
+    else()
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:Debug>:-INCREMENTAL:NO>")
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:RelWithDebInfo>:-INCREMENTAL:NO>")
+    endif()
     # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
     list(APPEND CURL_CFLAGS "-Gy")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -379,14 +388,18 @@ endif()
 if(WIN32)
   option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
   if(CURL_STATIC_CRT AND MSVC)
-    if(MSVC_VERSION GREATER_EQUAL 1900 OR BUILD_STATIC_CURL OR NOT BUILD_CURL_EXE)
+    if(NOT BUILD_SHARED_LIBS)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Release>:-MT>")
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Debug>:-MTd>")
     else()
-      message(WARNING "Static CRT requires UCRT, static libcurl or no curl executable.")
+      message(WARNING "Static CRT requires static libcurl and static executable.")
     endif()
   endif()
+endif()
+
+if(MSVC AND NOT "$ENV{CURL_CI}" STREQUAL "")
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_DEBUG_MSVC_CRTDBG")
 endif()
 
 # Override to force-disable or force-enable the use of CMake Configs.
@@ -2237,8 +2250,6 @@ if(NOT CURL_DISABLE_INSTALL)
       list(APPEND _ldflags "-L${_libdir}")
     endif()
   endforeach()
-
-  list(REMOVE_DUPLICATES _ldflags)
 
   if(LIBCURL_PC_REQUIRES_PRIVATE)
     list(REMOVE_DUPLICATES LIBCURL_PC_REQUIRES_PRIVATE)

@@ -240,6 +240,12 @@ extended the test sequence.
 
 Number of attempts for the whole test run to retry failed tests.
 
+## `-S`
+
+Prints out all files in the log directory to stdout when a test case passes.
+Practical when comparing against a similar test that fails, or the same test
+failing in a different build.
+
 ## `-s`
 
 Shorter output. Speaks less than default.

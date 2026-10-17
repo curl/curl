@@ -26,12 +26,16 @@
 # shellcheck disable=SC3040,SC2039
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
+export CURL_CI=appveyor
+verbose=''
+
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
 
   PRJ_CFG='Debug'
   [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && PRJ_CFG='Release'
+  [[ "${APPVEYOR_JOB_NAME}" = *'RelWithDebInfo'* ]] && PRJ_CFG='RelWithDebInfo'
 
   # Configure OpenSSL
   case "${CMAKE_GENERATE:-}" in
@@ -40,11 +44,11 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   esac
 
   if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2026' ]; then
-    openssl_root_win="C:/OpenSSL-v36${openssl_suffix}"
+    openssl_root_win="C:/OpenSSL-v36${openssl_suffix}"  # manually bumped
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-    openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
+    openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"  # manually bumped
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
-    openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
+    openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"  # manually bumped
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
@@ -89,9 +93,10 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   echo 'libcurl.pc'; grep -v '^#' '_bld/libcurl.pc' || true
+  [ -n "${verbose}" ] && { echo 'configurehelp.pm'; cat _bld/tests/configurehelp.pm || true; }
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2
   [[ "${CMAKE_GENERATE:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$(pwd)/_bld/lib/${PRJ_CFG}:$PATH"
-  [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
+  [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp -p "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
 else
   (
@@ -109,6 +114,7 @@ find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -p
 
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
+  [ -n "${verbose}" ] && "${curl}" --dump-module-paths | sort -f
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
@@ -116,9 +122,9 @@ fi
 # create artifact
 
 if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
-  cp /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
-  echo 'Checking that https works (it should find curl-ca-bundle.crt if needed)'
-  "${curl}" -v -fsS --retry 6 --retry-all-errors -o /dev/null https://curl.se/
+  cp -p /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
+  echo 'Checking that https works'
+  "${curl}" --disable --verbose --fail --silent --show-error --retry 6 --retry-all-errors --cacert curl-ca-bundle.crt --out-null https://curl.se/
   if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER:-}" ]; then
     archive="curl_pr${APPVEYOR_PULL_REQUEST_NUMBER}_${APPVEYOR_PULL_REQUEST_HEAD_COMMIT}.zip"
   else
@@ -130,9 +136,9 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
     echo "${archive}"
   } > WARNING.txt
   echo 'Finding curl module dependencies'
-  "${curl}" --dump-module-paths | grep -Fv 'C:\Windows' | tee > files.tmp
+  "${curl}" --dump-module-paths | sort -f | grep -Fv 'C:\Windows' | tee > files.tmp
   echo 'Creating artifact'
-  7z a "${archive}" -y -bb1 -bsp0 -mx9 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
+  time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
   rm files.tmp
   appveyor PushArtifact "${archive}"
 fi
@@ -141,6 +147,23 @@ fi
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
+
+  if [ -z "${SKIP_RUN:-}" ]; then
+    if [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]]; then
+      cp -p "${openssl_root}"/*.dll "_bld/tests/libtest/${PRJ_CFG}"
+      cp -p "${openssl_root}"/*.dll "_bld/tests/tunit/${PRJ_CFG}"
+      cp -p "${openssl_root}"/*.dll "_bld/tests/unit/${PRJ_CFG}"
+    fi
+
+    if [ -n "${verbose}" ]; then
+      "_bld/tests/libtest/${PRJ_CFG}/libtests.exe" --dump-module-paths | sort -f
+      "_bld/tests/server/${PRJ_CFG}/servers.exe" --dump-module-paths | sort -f
+      "_bld/tests/tunit/${PRJ_CFG}/tunits.exe" --dump-module-paths | sort -f
+      "_bld/tests/unit/${PRJ_CFG}/units.exe" --dump-module-paths | sort -f
+    fi
+  else
+    echo "Skip running tests. Reason: ${SKIP_RUN}"
+  fi
 fi
 
 # build examples

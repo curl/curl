@@ -224,9 +224,10 @@ static const char * const disabled[] = {
   ,
 
   "win32-ca-searchpath: "
-#if !defined(_WIN32) ||                                                 \
-  (defined(CURL_WINDOWS_UWP) ||                                         \
-   defined(CURL_DISABLE_CA_SEARCH) || defined(CURL_CA_SEARCH_SAFE))
+#if !defined(_WIN32) ||               \
+  (defined(CURL_WINDOWS_UWP) ||       \
+   defined(CURL_DISABLE_CA_SEARCH) || \
+   defined(CURL_CA_SEARCH_SAFE))
   "OFF"
 #else
   "ON"
@@ -264,6 +265,13 @@ static const char * const disabled[] = {
   ,
   "cert-status: "
 #if defined(USE_GNUTLS) || (defined(USE_OPENSSL) && !defined(OPENSSL_NO_OCSP))
+  "ON"
+#else
+  "OFF"
+#endif
+  ,
+  "getrlimit: "
+#ifdef HAVE_GETRLIMIT
   "ON"
 #else
   "OFF"

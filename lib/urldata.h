@@ -556,15 +556,6 @@ struct UrlState {
   struct Curl_resolv_async *async;  /* asynchronous name resolver data */
 #endif
 
-#ifdef USE_OPENSSL
-  /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
-  void *engine;
-  /* void instead of OSSL_PROVIDER */
-  void *provider;
-  void *baseprov;
-  void *libctx;
-  char *propq; /* for a provider */
-#endif /* USE_OPENSSL */
   struct expire_timers timeouts; /* expire timeouts */
 
   /* a place to store the most recently set (S)FTP entrypath */
@@ -638,9 +629,6 @@ struct UrlState {
   uint8_t httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
 
-#ifdef USE_OPENSSL
-  BIT(provider_loaded);
-#endif /* USE_OPENSSL */
   BIT(really_alive); /* transfer is really alive in multi, passed INIT */
   BIT(this_is_a_follow); /* this is a followed Location: request */
   BIT(refused_stream); /* this was refused, try again */
@@ -840,7 +828,7 @@ struct UserDefined {
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
                                of strlen(), and then the data *may* be binary
-                               (contain zero bytes) */
+                               (contain NUL bytes) */
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
@@ -1136,6 +1124,9 @@ struct UserDefined {
   BIT(post301); /* keep POSTs as POSTs after a 301 request */
   BIT(post302); /* keep POSTs as POSTs after a 302 request */
   BIT(post303); /* keep POSTs as POSTs after a 303 request */
+#ifdef USE_OPENSSL
+  BIT(engine_default);
+#endif
 };
 
 #ifndef CURL_DISABLE_MIME

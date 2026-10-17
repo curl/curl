@@ -101,7 +101,7 @@ use testutil qw(
     exerunner
     subtextfile
     subchars
-    subbase64
+    subfuncs
     subsha256base64file
     substrippemfile
     subnewlines
@@ -371,7 +371,7 @@ sub prepro {
                 subvariables(\$s, $testnum, "%");
             }
             subchars(\$s);
-            subbase64(\$s);
+            subfuncs(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
             subnewlines(1, \$s) if($data_crlf eq "yes");

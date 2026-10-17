@@ -200,11 +200,7 @@ jobs:
           done
           if command -v pccritic >/dev/null 2>&1; then
             pccritic --version
-            if [ "${MATRIX_OS}" = 'freebsd' ]; then
-              pccritic --min-score 93 bld/libcurl.pc
-            else
-              pccritic --min-score 98 bld/libcurl.pc
-            fi
+            pccritic --min-score 98 bld/libcurl.pc
           fi
 
       - name: 'build'
@@ -382,7 +378,7 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     env:
       LDFLAGS: -s
@@ -426,7 +422,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DANDROID_ABI="${MATRIX_ARCH}" \
               -DANDROID_PLATFORM="android-${MATRIX_PLATFORM}" \
-              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -DCMAKE_WARN_DEPRECATED=OFF \
+              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -Wno-deprecated \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               ${MATRIX_OPTIONS}
