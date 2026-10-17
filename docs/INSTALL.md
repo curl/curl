@@ -634,6 +634,9 @@ disabling support for some features (run `./configure --help` to see them all):
 - `--without-ssl` (SSL/TLS)
 - `--without-zlib` (gzip/deflate on-the-fly decompression)
 
+You can find CMake-equivalents in
+[INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
+
 Be sure also to strip debugging symbols from your binaries after compiling
 using `strip` or an option like `-s`. If space is tight, you may be able
 to gain a few bytes by removing unneeded sections of the shared library using
