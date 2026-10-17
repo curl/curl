@@ -30,8 +30,8 @@ a compromised maintainer signing key.
 
 ## Building from source
 
-You can use autotools or CMake to build curl from source. They work equally
-well and have close to feature parity.
+You can use autotools or CMake to build curl from source. They both work well
+and have close to feature parity.
 
 autotools' advantages are wide portability and the Unix philosophy, while
 CMake typically has faster configuration and build times, and supports MSVC.
@@ -41,9 +41,9 @@ Option defaults and dependency detection details may differ.
 With both build tools, some features require Perl, and the pytest test suite
 requires Python.
 
-You can find live examples for both tools and many build cases in curl's CI
+You can find live examples for both tools and build cases in curl's CI
 scripts: `.github/workflows/*.yml`, `.circleci/*.yml` and `appveyor.*` (in the
-Git repository only). For CMake-specific instructions, see
+Git repository). For CMake-specific instructions, see
 [INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
 
 ## Building using vcpkg
@@ -142,8 +142,8 @@ running configure like:
     ./configure --disable-shared
 
 The configure script is primarily done to work with shared/dynamic third party
-dependencies. When linking with shared libraries, the dependency "chain" is
-handled automatically by the library loader - on all modern systems.
+dependencies. When linking with shared libraries, the library loader handles
+the dependency "chain" automatically - on all modern systems.
 
 If you instead link with a static library, you need to provide all the
 dependency libraries already at the link command line.
