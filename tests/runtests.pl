@@ -765,7 +765,7 @@ sub checksystemfeatures {
         # client has IPv6 support
 
         # check if the HTTP server has it!
-        my $cmd = server_exe('sws')." --version";
+        my $cmd = server_exe('sws') . " --logfile $dev_null --version";
         my @sws = qx($cmd);
         if($sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
@@ -773,7 +773,7 @@ sub checksystemfeatures {
         }
 
         # check if the FTP server has it!
-        $cmd = server_exe('sockfilt')." --version";
+        $cmd = server_exe('sockfilt') . " --logfile $dev_null --version";
         @sws = qx($cmd);
         if($sws[0] =~ /IPv6/) {
             # FTP server has IPv6 support!
@@ -783,7 +783,7 @@ sub checksystemfeatures {
 
     if($feature{"UnixSockets"}) {
         # client has Unix sockets support, check whether the HTTP server has it
-        my $cmd = server_exe('sws')." --version";
+        my $cmd = server_exe('sws') . " --logfile $dev_null --version";
         my @sws = qx($cmd);
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
