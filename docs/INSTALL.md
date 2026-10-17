@@ -421,6 +421,14 @@ When building an application that uses the static libcurl library on Windows,
 you must add `-DCURL_STATICLIB` to your `CFLAGS`. Otherwise the linker looks
 for dynamic import symbols.
 
+## Legacy Windows and SSL
+
+Schannel (from Windows SSPI), is the native SSL library in Windows. Schannel
+in Windows 7 and earlier is unable to connect to servers that no longer
+support the legacy handshakes and algorithms used by those versions. If you
+are using curl in one of those Windows versions you should choose another SSL
+backend such as OpenSSL.
+
 # Android
 
 When building curl for Android you can either use CMake or `configure`.
