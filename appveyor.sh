@@ -27,7 +27,7 @@
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 export CURL_CI=appveyor
-verbose=1
+verbose=''
 
 # build
 
@@ -166,16 +166,18 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     # run unit tests
 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
-    if [ -n "${MY_DEBUG:-}" ]; then
-      export TFLAGS="-j10 ~1096 ${TFLAGS:-}"
-     time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
+    TFLAGS="~1096 ${TFLAGS:-}"
+    if [ -n "${RUN_TESTS_VIA_CMAKE:-}" ]; then  # just to document the differences
+      export TFLAGS="-j10 ${TFLAGS}"
+      time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
     else
       export CURL_DIRSUFFIX="${PRJ_CFG}"
+      TFLAGS="!1119 !1167 ${TFLAGS:-}"  # skip tests that need a configured cl.exe
       (
         cd _bld/tests
-        # This command has to use the same Perl as detected by CMake in configuration step.
+        # This command must use the same Perl as detected in the CMake configuration step.
         # shellcheck disable=SC2086
-        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ~1096 ${TFLAGS:-}
+        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ${TFLAGS:-}
       )
     fi
   else
