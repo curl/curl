@@ -302,13 +302,12 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 /*
  * On each call:
- *  - Copy `plainlen` bytes into Rustls' plaintext input buffer (if > 0).
- *  - Fully drain Rustls' plaintext output buffer into the socket until
+ *  - Copy new plaintext into Rustls, or acknowledge a previous blocked send.
+ *  - Fully drain Rustls' TLS output buffer into the socket until
  *    we get either an error or EAGAIN/EWOULDBLOCK.
  *
  * it is okay to call this function with plainbuf == NULL and plainlen == 0.
- * In that case, it does not read anything into Rustls' plaintext input buffer.
- * It only drains Rustls' plaintext output buffer into the socket.
+ * In that case, only drain TLS output, without acknowledging plaintext.
  */
 static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                         const void *plainbuf, size_t plainlen,
@@ -330,22 +329,30 @@ static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   CURL_TRC_CF(data, cf, "cf_send(len=%zu)", plainlen);
 
+  /* Handshake and shutdown flushes are not retries of application data. */
+  if(!plainbuf && !plainlen) {
+    result = cr_flush_out(cf, data, rconn);
+    goto out;
+  }
+
   /* If a previous send blocked, we already added its plain bytes
-   * to rustsls and must not do that again. Flush the TLS bytes and,
+   * to Rustls and must not do that again. Flush the TLS bytes and,
    * if successful, deduct the previous plain bytes from the current
    * send. */
   if(backend->plain_out_buffered) {
+    if(blen < backend->plain_out_buffered) {
+      DEBUGASSERT(0);
+      failf(data, "rustls: send retried with less data (%zu) than the %zu "
+            "bytes already buffered", blen, backend->plain_out_buffered);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     result = cr_flush_out(cf, data, rconn);
     CURL_TRC_CF(data, cf, "cf_send: flushing %zu previously added bytes -> %d",
                 backend->plain_out_buffered, (int)result);
     if(result)
       return result;
-    if(blen > backend->plain_out_buffered) {
-      blen -= backend->plain_out_buffered;
-      buf += backend->plain_out_buffered;
-    }
-    else
-      blen = 0;
+    blen -= backend->plain_out_buffered;
+    buf += backend->plain_out_buffered;
     *pnwritten += backend->plain_out_buffered;
     backend->plain_out_buffered = 0;
   }
@@ -396,6 +403,37 @@ static uint32_t cr_verify_none(void *userdata,
   (void)params;
   return RUSTLS_RESULT_OK;
 }
+
+#ifdef UNITTESTS
+/* @unittest 2607 */
+UNITTEST CURLcode rustls_test_init(void *sslctx, size_t buffer_limit);
+UNITTEST CURLcode rustls_test_init(void *sslctx, size_t buffer_limit)
+{
+  struct ssl_connect_data *connssl = sslctx;
+  struct rustls_ssl_backend_data *backend = connssl->backend;
+  struct rustls_client_config_builder *builder;
+  rustls_result rr;
+
+  builder = rustls_client_config_builder_new();
+  if(!builder)
+    return CURLE_OUT_OF_MEMORY;
+  rr = rustls_client_config_builder_dangerous_set_certificate_verifier(
+    builder, cr_verify_none);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_client_config_builder_free(builder);
+    return map_error(rr);
+  }
+  rr = rustls_client_config_builder_build(builder, &backend->config);
+  if(rr != RUSTLS_RESULT_OK)
+    return map_error(rr);
+  rr = rustls_client_connection_new(backend->config, "localhost",
+                                    &backend->conn);
+  if(rr != RUSTLS_RESULT_OK)
+    return map_error(rr);
+  rustls_connection_set_buffer_limit(backend->conn, buffer_limit);
+  return CURLE_OK;
+}
+#endif
 
 static int read_file_into(const char *filename, struct dynbuf *out)
 {
@@ -1298,8 +1336,7 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     connssl->connecting_state = ssl_connect_2;
     wants_read = rustls_connection_wants_read(rconn);
-    wants_write = rustls_connection_wants_write(rconn) ||
-                  backend->plain_out_buffered;
+    wants_write = rustls_connection_wants_write(rconn);
     DEBUGASSERT(wants_read || wants_write);
 
     if(wants_write) {
