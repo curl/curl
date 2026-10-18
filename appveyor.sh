@@ -75,6 +75,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
     [[ "${CMAKE_GENERATE:-}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
     [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
+    [ -n "${verbose}" ] && echo "PATH: |$PATH|"
     # shellcheck disable=SC2086
     time cmake -B "_bld${_chkprefill}" \
       -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
@@ -168,6 +169,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     export CURL_DIRSUFFIX="${PRJ_CFG}"
     (
       cd _bld/tests
+      # This command has to use the same Perl as detected by CMake in configuration step.
       # shellcheck disable=SC2086
       time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ~1096 ${TFLAGS:-}
     )
