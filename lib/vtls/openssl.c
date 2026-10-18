@@ -86,8 +86,8 @@
 
 #ifdef LIBRESSL_VERSION_NUMBER
 /* As of LibreSSL 2.0.0-4.0.0: OPENSSL_VERSION_NUMBER == 0x20000000L */
-#  if LIBRESSL_VERSION_NUMBER < 0x3040000fL /* 2021-09-15 */
-#    error "LibreSSL 3.4.0 or greater required"
+#  if LIBRESSL_VERSION_NUMBER < 0x3040100fL /* 2021-10-14 */
+#    error "LibreSSL 3.4.1 or greater required"
 #  endif
 #elif !defined(HAVE_BORINGSSL_LIKE)
 #  ifndef HAVE_OPENSSL3 /* 2021-09-07 */
@@ -131,10 +131,7 @@
  * LibreSSL: supported since 3.4.1 (released 2021-10-14)
  * OpenSSL: supported since 1.1.1 (commit a53b5be6a05)
  */
-#if (!defined(LIBRESSL_VERSION_NUMBER) || \
-     (defined(LIBRESSL_VERSION_NUMBER) && \
-      LIBRESSL_VERSION_NUMBER >= 0x3040100fL)) && \
-    !defined(OPENSSL_IS_BORINGSSL)
+#ifndef OPENSSL_IS_BORINGSSL
 #  define HAVE_SSL_CTX_SET_CIPHERSUITES
 #  ifndef OPENSSL_IS_AWSLC
 #    define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
