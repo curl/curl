@@ -173,7 +173,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   /* only keep a port the gateway URL sets, so that a later scheme change
      (like an HSTS upgrade) gets the default port of the new scheme */
   getResult = curl_url_get(gatewayurl, CURLUPART_PORT, &gwport,
-                           CURLU_URLDECODE);
+                           0);
   if(getResult && (getResult != CURLUE_NO_PORT))
     goto clean;
 
