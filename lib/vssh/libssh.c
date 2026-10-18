@@ -462,6 +462,16 @@ static int myssh_in_SFTP_READDIR(struct Curl_easy *data,
   if(sshc->readdir_attrs) {
     sshc->readdir_filename = sshc->readdir_attrs->name;
     sshc->readdir_longentry = sshc->readdir_attrs->longname;
+    if(!sshc->readdir_filename) {
+      /* a server answering with a newer SFTP version than libssh parses
+         leaves the entry without a name */
+      failf(data, "SFTP readdir: entry without a name");
+      myssh_to(data, sshc, SSH_SFTP_CLOSE);
+      sshc->actualcode = CURLE_SSH;
+      return SSH_ERROR;
+    }
+    if(!sshc->readdir_longentry)
+      sshc->readdir_longentry = sshc->readdir_filename;
     sshc->readdir_len = strlen(sshc->readdir_filename);
 
     if(data->set.list_only) {
@@ -545,9 +555,16 @@ static int myssh_in_SFTP_READDIR_LINK(struct Curl_easy *data,
     sshc->readdir_filename = sshc->readdir_tmp;
   }
   else {
+    if(!sshc->readdir_link_attrs->name) {
+      failf(data, "SFTP readdir: link target without a name");
+      myssh_to(data, sshc, SSH_SFTP_CLOSE);
+      sshc->actualcode = CURLE_SSH;
+      return SSH_ERROR;
+    }
     sshc->readdir_len = strlen(sshc->readdir_link_attrs->name);
     sshc->readdir_filename = sshc->readdir_link_attrs->name;
-    sshc->readdir_longentry = sshc->readdir_link_attrs->longname;
+    sshc->readdir_longentry = sshc->readdir_link_attrs->longname ?
+      sshc->readdir_link_attrs->longname : sshc->readdir_filename;
   }
 
   curlx_safefree(sshc->readdir_linkPath);
