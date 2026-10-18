@@ -59,7 +59,7 @@ environment:
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
       TFLAGS: 'tunittest unittest'
 
-    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests, -j10 #1'
+    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests, -j10 #1 direct'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: 3.21.7  # manually bumped
       CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
@@ -67,21 +67,14 @@ environment:
       CMAKE_GENERATE: '-A Win32'
       TFLAGS: '--min=1600'
 
-    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests, -j10 #2'
+    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests, -j10 #2 cm'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: 3.21.7  # manually bumped
       CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
       CMAKE_GENERATE: '-A Win32'
       TFLAGS: '--min=1600'
-
-    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests, -j10 #3'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.21.7  # manually bumped
-      CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
-      CMAKE_GENERATOR: 'Visual Studio 11 2012'
-      CMAKE_GENERATE: '-A Win32'
-      TFLAGS: '--min=1600'
+      MY_DEBUG: 'yes'
 
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
