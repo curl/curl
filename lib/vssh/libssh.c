@@ -1820,6 +1820,9 @@ static int myssh_SSH_SCP_DOWNLOAD(struct Curl_easy *data,
 
   /* download data */
   bytecount = ssh_scp_request_get_size(sshc->scp_session);
+  if(bytecount > CURL_OFF_T_MAX)
+    /* unlikely to be a real file */
+    return CURLE_TOO_LARGE;
   data->req.maxdownload = bytecount;
   Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount);
 
