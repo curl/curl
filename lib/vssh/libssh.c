@@ -1810,7 +1810,7 @@ static void myssh_SESSION_DISCONNECT(struct Curl_easy *data,
 static int myssh_SSH_SCP_DOWNLOAD(struct Curl_easy *data,
                                   struct ssh_conn *sshc)
 {
-  size_t bytecount;
+  uint64_t bytecount;
   int rc = ssh_scp_pull_request(sshc->scp_session);
   if(rc != SSH_SCP_REQUEST_NEWFILE) {
     const char *err_msg = ssh_get_error(sshc->ssh_session);
@@ -1819,7 +1819,7 @@ static int myssh_SSH_SCP_DOWNLOAD(struct Curl_easy *data,
   }
 
   /* download data */
-  bytecount = ssh_scp_request_get_size(sshc->scp_session);
+  bytecount = ssh_scp_request_get_size64(sshc->scp_session);
   if(bytecount > CURL_OFF_T_MAX)
     /* unlikely to be a real file */
     return myssh_to_ERROR(data, sshc, CURLE_TOO_LARGE);
