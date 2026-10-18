@@ -318,7 +318,7 @@ static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
   if(avail < CURL_OFF_T_MAX) { /* limit in place */
     if(avail <= 0)
       return 0;
-    else if(avail < INT32_MAX)
+    else if(avail < H2_STREAM_WINDOW_SIZE_MAX)
       return (int32_t)avail;
   }
   return H2_STREAM_WINDOW_SIZE_MAX;

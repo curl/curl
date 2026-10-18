@@ -46,8 +46,10 @@ http/2
 <name>
 HTTP/2 GET with Upgrade:
 </name>
+# A rate limit above 1 GB/s must not grow the stream window beyond the
+# HTTP/2 maximum
 <command>
-http://%HOSTIP:%HTTP2PORT/%TESTNUMBER --http2 http://%HOSTIP:%HTTP2PORT/%TESTNUMBER0001
+http://%HOSTIP:%HTTP2PORT/%TESTNUMBER --http2 http://%HOSTIP:%HTTP2PORT/%TESTNUMBER0001 --limit-rate 1500M
 </command>
 </client>
 
