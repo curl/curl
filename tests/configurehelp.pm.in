@@ -32,14 +32,17 @@ use vars qw(
     @ISA
     @EXPORT_OK
     $Cpreprocessor
+    $Cpreprocessor_PATH
     );
 
 @ISA = qw(Exporter);
 
 @EXPORT_OK = qw(
     $Cpreprocessor
+    $Cpreprocessor_PATH
     );
 
 $Cpreprocessor = '@CURL_CPP@';
+$Cpreprocessor_PATH = '@CURL_CPP_PATH@';
 
 1;
