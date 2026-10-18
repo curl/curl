@@ -134,9 +134,11 @@ if(MSVC OR CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Cl
 else()
   set(CURL_CPP "cpp")
 endif()
+set(CURL_CPP_PATH "$ENV{PATH}")
 # Generate version script for the linker, for versioned symbols.
 # Consumed variable:
 #   CURL_CPP
+#   CURL_CPP_PATH
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/configurehelp.pm.in"
   "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" @ONLY)
