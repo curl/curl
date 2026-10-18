@@ -399,6 +399,15 @@ production.
 Unreleased code may also contain fixes to problems that were present in the
 most recent release.
 
+## Old releases
+
+Prioritize vulnerabilities reproducible on the latest release and the current
+`master` branch; older issues have likely been remediated.
+
+Low or Medium severity vulnerabilities restricted to releases older than three
+years are out of scope ("water under the bridge") and will be closed without
+action. We do not have bandwidth to also manage lost causes.
+
 # curl major incident response
 
 Vulnerability disclosure manages the full life cycle of a vulnerability
