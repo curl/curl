@@ -65,6 +65,15 @@ struct rtsp_conn {
   BIT(in_header);
 };
 
+static void rtsp_conn_reset(struct rtsp_conn *rtspc)
+{
+  curlx_dyn_reset(&rtspc->buf);
+  rtspc->rtp_channel = -1;
+  rtspc->rtp_len = 0;
+  rtspc->state = RTP_PARSE_SKIP;
+  rtspc->in_header = FALSE;
+}
+
 /* RTSP transfer data */
 struct RTSP {
   uint32_t CSeq_sent; /* CSeq of this request */
@@ -777,6 +786,13 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
       size_t rtp_len = curlx_dyn_len(&rtspc->buf);
       size_t needed;
       DEBUGASSERT(rtp_len < rtspc->rtp_len);
+      if(!in_body && data->set.rtspreq != RTSPREQ_RECEIVE &&
+         blen >= 9 && !memcmp(buf, "RTSP/1.0 ", 9)) {
+        /* A truncated RTP frame must not consume the next RTSP response. */
+        DEBUGF(infof(data, "RTSP response interrupted incomplete RTP frame"));
+        rtsp_conn_reset(rtspc);
+        break;
+      }
       needed = rtspc->rtp_len - rtp_len;
       if(needed <= blen) {
         if(curlx_dyn_addn(&rtspc->buf, buf, needed)) {

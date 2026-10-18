@@ -4,6 +4,7 @@
 # 1. giving an evil payload (with $)
 # 2. Giving evil content (SDP starting with $)
 # 3. packing rtp after headers, after content, and at the start
+# 4. an incomplete interleaved frame before the next RTSP response
 <info>
 <keywords>
 RTSP
@@ -56,6 +57,7 @@ rtp: part 2 channel 0 size 196
 rtp: part 2 channel 0 size 124
 rtp: part 2 channel 0 size 824
 rtp: part 2 channel 0 size 18 size_err -6
+rtp: part 2 channel 0 size 0 size_err 16
 rtp: part 3 channel 1 size 10
 rtp: part 3 channel 0 size 50
 rtp: part 4 channel 0 size 798
