@@ -75,7 +75,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
     [[ "${CMAKE_GENERATE:-}" = *'-A ARM64'* ]] && SKIP_RUN='ARM64 architecture'
     [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
-    [ -n "${verbose}" ] && echo "PATH: |$PATH|"
     # shellcheck disable=SC2086
     time cmake -B "_bld${_chkprefill}" \
       -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
