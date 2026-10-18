@@ -494,7 +494,7 @@ class TestH3Proxy:
             urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=xargs
         )
         r2.check_response(count=1, http_status=200)
-        reuses = [line for line in r2.trace_lines if '[SSLS] took session for proxy.http.curl.se' in line]
+        reuses = [line for line in r2.trace_lines if '[SSLS] took session for https:proxy.http.curl.se' in line]
         assert len(reuses), f'{r2.dump_logs()}'
 
     # CONNECT-UDP tunnel payload size and capsule-protocol tests.
