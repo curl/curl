@@ -50,7 +50,7 @@ static CURLcode test_lib1991(const char *URL)
   int running = 1, left;
   bool created = FALSE, completed = FALSE;
   fd_set rd;
-  struct timeval timeout = { 5, 0 };
+  struct timeval timeout;
 
   (void)URL;
   global_init(CURL_GLOBAL_ALL);
@@ -86,6 +86,8 @@ static CURLcode test_lib1991(const char *URL)
   } while(!created && running);
 
   /* Respond and close before curl checks completion of the connect. */
+  timeout.tv_sec = 5;
+  timeout.tv_usec = 0;
   FD_ZERO(&rd);
   FD_SET(listener, &rd);
   if(select((int)listener + 1, &rd, NULL, NULL, &timeout) != 1)
