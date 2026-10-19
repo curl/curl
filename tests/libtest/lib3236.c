@@ -31,11 +31,11 @@ struct t3236_status {
   CURL *curl;
   int writes;  /* write callback invocations */
   int pauses;  /* body callback pauses */
+  int paused;  /* paused by the body callback and not resumed yet */
   int nested;  /* nested pause + unpause done */
   int raw_buffered; /* at least 4096 compressed bytes waiting for replay */
   int header_paused;
   int header_unpaused;
-  int body_unpaused;
   CURLcode nested_result;
   CURLcode header_pause_result;
 };
@@ -46,10 +46,13 @@ static size_t t3236_write_cb(char *ptr, size_t size, size_t nmemb,
   struct t3236_status *st = (struct t3236_status *)userp;
   size_t len = size * nmemb;
   st->writes++;
-  /* Accept a short body delivery that may follow the final header in one
-     socket read. Pause twice only once we have a full decoder-sized write. */
-  if(st->pauses < 2 && len >= 4000) {
+  /* Pause on every full decoder-sized delivery until the nested unpause has
+     run. How much of the body arrives in the same socket read as the final
+     header varies, so the number of pauses needed before the replay holds
+     enough raw bytes varies too. */
+  if(!st->nested && len >= 4000) {
     st->pauses++;
+    st->paused = 1;
     return CURL_WRITEFUNC_PAUSE;
   }
   fwrite(ptr, size, nmemb, stdout);
@@ -78,33 +81,47 @@ static int t3236_debug_cb(CURL *curl, curl_infotype type, char *data,
   struct t3236_status *st = (struct t3236_status *)userp;
   static const char want[] = "PAUSE requested";
   static const char buffer_prefix[] = "[PAUSE] buffer ";
+  static const char total_prefix[] = "total=";
   size_t i;
   (void)curl;
   if(type != CURLINFO_TEXT)
     return 0;
 
+  /* "[PAUSE] buffer N more bytes of type T, total=M": M raw bytes are
+     queued for replay */
   for(i = 0; i + sizeof(buffer_prefix) - 1 <= size; i++) {
     if(!memcmp(&data[i], buffer_prefix, sizeof(buffer_prefix) - 1)) {
-      size_t j = i + sizeof(buffer_prefix) - 1;
-      size_t amount = 0;
-      while(j < size && data[j] >= '0' && data[j] <= '9') {
-        amount = amount * 10 + (size_t)(data[j] - '0');
-        j++;
+      size_t j;
+      for(j = i; j + sizeof(total_prefix) - 1 <= size; j++) {
+        if(!memcmp(&data[j], total_prefix, sizeof(total_prefix) - 1)) {
+          size_t queued = 0;
+          j += sizeof(total_prefix) - 1;
+          while(j < size && data[j] >= '0' && data[j] <= '9') {
+            queued = queued * 10 + (size_t)(data[j] - '0');
+            j++;
+          }
+          if(queued >= 4096)
+            st->raw_buffered = 1;
+          break;
+        }
       }
-      if(amount >= 4096)
-        st->raw_buffered = 1;
       break;
     }
   }
 
-  if(st->pauses == 2 && st->raw_buffered && !st->nested &&
-     size >= sizeof(want) - 1) {
+  /* once enough raw bytes are queued, the next pause happens from inside
+     their replay: do the nested unpause there */
+  if(st->raw_buffered && !st->nested && size >= sizeof(want) - 1) {
     for(i = 0; i + sizeof(want) - 1 <= size; i++) {
       if(!memcmp(&data[i], want, sizeof(want) - 1)) {
         st->nested = 1;
         st->nested_result = curl_easy_pause(st->curl, CURLPAUSE_RECV);
         if(!st->nested_result)
           st->nested_result = curl_easy_pause(st->curl, CURLPAUSE_CONT);
+        if(!st->nested_result) {
+          /* resumed from in here, the main loop must not do it again */
+          st->paused = 0;
+        }
         break;
       }
     }
@@ -156,8 +173,10 @@ static CURLcode test_lib3236(const char *URL)
       if(result)
         goto test_cleanup;
     }
-    if(st.pauses == 1 && !st.body_unpaused) {
-      st.body_unpaused = 1;
+    if(st.paused) {
+      /* resume after each body pause; the replay pauses again until the
+         nested unpause has run from inside it */
+      st.paused = 0;
       result = curl_easy_pause(curl, CURLPAUSE_CONT);
       if(result)
         goto test_cleanup;
@@ -173,9 +192,8 @@ static CURLcode test_lib3236(const char *URL)
       result = msg->data.result;
   } while(msg);
 
-  if(!result && (!st.header_paused || !st.raw_buffered || !st.nested ||
-                 st.pauses != 2 || st.nested_result ||
-                 st.header_pause_result)) {
+  if(!result && (!st.header_paused || !st.pauses || !st.raw_buffered ||
+                 !st.nested || st.nested_result || st.header_pause_result)) {
     curl_mfprintf(stderr, "gzip nested flush not exercised "
                   "(writes=%d pauses=%d buffered=%d nested=%d)\n",
                   st.writes, st.pauses, st.raw_buffered, st.nested);
