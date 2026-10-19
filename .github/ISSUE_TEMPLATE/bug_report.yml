@@ -14,8 +14,8 @@ body:
         Only file bugs here! Ask questions on the mailing lists https://curl.se/mail/
 
         **SECURITY RELATED?** If you don't know or believe the severity level
-          is >= HIGH, submit here: https://hackerone.com/curl if you think it
-          is LOW or MEDIUM, submit it here.
+          is >= HIGH, submit here: https://hackerone.com/curl
+          if you think it is LOW or MEDIUM, submit it here.
 
   - type: markdown
     attributes:
