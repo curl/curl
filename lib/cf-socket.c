@@ -1513,7 +1513,10 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "not connected yet on fd=%" FMT_SOCKET_T, ctx->sock);
     return CURLE_OK;
   }
-  else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
+  else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen ||
+          (rc > 0 && (rc & CURL_CSELECT_ERR))) {
+    /* A hangup can accompany a successful connect and pending response.
+     * Let SO_ERROR determine whether the connection actually failed. */
     if(verifyconnect(ctx->sock, &ctx->sockerr)) {
       /* we are connected with TCP, awesome! */
       ctx->connected_at = *Curl_pgrs_now(data);
@@ -1523,6 +1526,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "connected on fd=%" FMT_SOCKET_T, ctx->sock);
       return CURLE_OK;
     }
+    result = CURLE_COULDNT_CONNECT;
   }
   else if(rc & CURL_CSELECT_ERR) {
     CURL_TRC_CF(data, cf, "poll/select error on fd=%" FMT_SOCKET_T, ctx->sock);

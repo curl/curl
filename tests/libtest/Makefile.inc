@@ -300,6 +300,7 @@ TESTS_C = \
   lib1985.c \
   lib1989.c \
   lib1990.c \
+  lib1991.c \
   lib2023.c \
   lib2032.c \
   lib2082.c \

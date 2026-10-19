@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+libtest
+</keywords>
+</info>
+<reply>
+</reply>
+<client>
+<features>
+http
+</features>
+<name>
+TCP connect succeeds when the peer has already responded and closed
+</name>
+<command>
+http://127.0.0.1/
+</command>
+</client>
+<verify>
+<stdout>
+ok
+</stdout>
+</verify>
+</testcase>
