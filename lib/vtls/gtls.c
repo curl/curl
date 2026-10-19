@@ -1545,12 +1545,16 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
                                  gnutls_session_t session,
                                  struct Curl_cfilter *cf,
                                  struct ssl_peer *peer,
-                                 struct gtls_cert_chain *chain)
+                                 struct gtls_cert_chain *chain,
+                                 bool *pocsp_checked)
 {
   bool verified = FALSE;
   unsigned int verify_status = 0;
   long * const certverifyresult = &ssl_config->certverifyresult;
-  int rc = gnutls_certificate_verify_peers2(session, &verify_status);
+  int rc;
+
+  *pocsp_checked = FALSE;
+  rc = gnutls_certificate_verify_peers2(session, &verify_status);
   if(rc < 0) {
     failf(data, "server cert verify failed: %d", rc);
     *certverifyresult = rc;
@@ -1563,16 +1567,28 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
 
 #ifdef USE_APPLE_SECTRUST
   if(!verified && config->native_ca_store) {
-    /* We check OCSP separately */
-    CURLcode result =
-      Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
-                             gtls_chain_get_der, chain, NULL, 0, FALSE);
+    gnutls_datum_t ocsp_raw;
+    CURLcode result;
+
+    if(gnutls_ocsp_status_request_get(session, &ocsp_raw)) {
+      ocsp_raw.data = NULL;
+      ocsp_raw.size = 0;
+    }
+    if(config->verifystatus && !ocsp_raw.size) {
+      failf(data, "No OCSP response received");
+      return CURLE_SSL_INVALIDCERTSTATUS;
+    }
+    result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
+                                    gtls_chain_get_der, chain,
+                                    ocsp_raw.data, ocsp_raw.size,
+                                    config->verifystatus);
     if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
-      return result; /* unexpected error */
+      return result; /* no further failure analysis needed */
     verified = !result;
     if(verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
       *certverifyresult = 0;
+      *pocsp_checked = TRUE;
     }
   }
 #else
@@ -1582,6 +1598,7 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
 #endif
 
   if(!verified) {
+    CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
     /* verify_status is a bitmask of gnutls_certificate_status bits */
     const char *cause = "certificate error, no details available";
     if(verify_status & GNUTLS_CERT_EXPIRED)
@@ -1590,15 +1607,17 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
       cause = "certificate signer not trusted";
     else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
       cause = "certificate uses insecure algorithm";
-    else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS)
-      cause = "attached OCSP status response is invalid";
+    else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS) {
+      cause = "OCSP status response is invalid";
+      result = CURLE_SSL_INVALIDCERTSTATUS;
+    }
     failf(data, "SSL certificate verification failed: %s. (CAfile: %s "
           "CRLfile: %s)", cause,
           config->CAfile ? config->CAfile : "none",
           config->CRLfile ?
           config->CRLfile : "none");
 
-    return CURLE_PEER_FAILED_VERIFICATION;
+    return result;
   }
   return CURLE_OK;
 }
@@ -1614,6 +1633,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   struct gtls_cert_chain chain;
   gnutls_x509_crt_t x509_cert = NULL, x509_issuer = NULL;
   time_t certclock;
+  bool ocsp_checked = FALSE;
   int rc;
   CURLcode result = CURLE_OK;
   long * const certverifyresult = &ssl_config->certverifyresult;
@@ -1665,7 +1685,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 
   if(config->verifypeer) {
     result = gtls_verify_cert(data, config, ssl_config, session,
-                              cf, peer, &chain);
+                              cf, peer, &chain, &ocsp_checked);
     if(result)
       goto out;
   }
@@ -1747,7 +1767,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
       infof(data, "  SSL certificate activation date OK");
   }
 
-  if(config->verifystatus) {
+  if(config->verifystatus && !ocsp_checked) {
     result = gtls_verify_ocsp_status(data, session, x509_cert);
     if(result)
       goto out;
