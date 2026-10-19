@@ -102,6 +102,20 @@ static CURLcode test_unit3304(const char *arg)
   curlx_safefree(key1);
   curlx_safefree(key2);
 
+  /* The effective native CA-store policy is not necessarily represented in
+   * ssl_options: a build can enable it by default. It must still separate
+   * sessions authenticated with native roots from file-only sessions. */
+  ssl.native_ca_store = TRUE;
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
+              "peer key build failed");
+  ssl.native_ca_store = FALSE;
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
+              "peer key build failed");
+  fail_unless(key1 && key2 && strcmp(key1, key2),
+              "native CA-store policy must affect the peer key");
+  curlx_safefree(key1);
+  curlx_safefree(key2);
+
   /* A delimiter in a CA path must not create a second trust field. */
   ssl.CAfile = cafile_fields;
   ssl.CApath = NULL;
