@@ -55,7 +55,7 @@ The curl security team investigates the claims in the report and either
 rejects it or accepts it. See below for examples of problems that are not
 considered vulnerabilities.
 
-If the report is rejected, the team to explains why.
+If the report is rejected, the team explains why.
 
 If the report is confirmed and acknowledged, the team writes to the reporter
 to let them know it is.
