@@ -11,6 +11,8 @@ libtest
 <client>
 <features>
 http
+!cygwin
+!win32
 </features>
 <name>
 TCP connect succeeds when the peer has already responded and closed

@@ -35,6 +35,10 @@ static int t1991_created(void *userp, curl_socket_t fd, curlsocktype purpose)
   return CURL_SOCKOPT_OK;
 }
 
+/* This deliberately sends the response before reading the request. On
+   Windows, sending the request after the peer closes resets the
+   connection, so test1991 is restricted to platforms where this
+   early-close scenario is supported. */
 static CURLcode test_lib1991(const char *URL)
 {
   static const char response[] =
