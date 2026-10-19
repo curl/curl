@@ -2292,7 +2292,7 @@ sub createrunner {
     my $dir = getrunnernumlogdir($runnernum);
     cleardir($dir);
     mkdir($dir, 0777);
-    my $id = runner_init($dir, $jobs);
+    my $id = runner_init($dir, $jobs, $testtimeout);
     $runnerids{$runnernum} = $id;
     $runnernums{$id} = $runnernum;
     return $id;
@@ -3076,12 +3076,20 @@ while(1) {
         logmsg singletest_dumplogs();
         logmsg "Aborting tests\n";
         logmsg "Terminating " . scalar((keys %runnersrunning)) . " outstanding test(s)...\n";
-        # A runner may be stuck in a test, so do not wait for an IPC response.
         foreach my $rid (keys %runnersrunning) {
             my $runnernum = $runnernums{$rid};
-            runnerac_terminate($rid);
-            delete $runnerids{$runnernum} if defined $runnernum;
-            delete $runnernums{$rid};
+            if($jobs) {
+                runnerac_terminate($rid);
+                delete $runnerids{$runnernum} if defined $runnernum;
+                delete $runnernums{$rid};
+            }
+            else {
+                # The integrated runner has returned from its synchronous IPC
+                # call. Drain that response and keep it registered so final
+                # cleanup can stop its servers.
+                my ($done, undef, $logs) = runnerar($rid);
+                logmsg($logs) if defined $logs;
+            }
             delete $runnersrunning{$rid};
             delete $runnerstarted{$rid};
             delete $singletest_state{$rid};
@@ -3257,20 +3265,29 @@ while(1) {
             delete $singletest_logs{$rid};
 
             $timevrfyend{$testnum} = time();
-            citest_finishtest($testnum, 1);
+            my $error = ignoreresultcode($testnum);
+            citest_finishtest($testnum, $error);
             $total++;
             $executed++;
-            if($retry_left > 0) {
-                $retry_left--;
-                $retry_done++;
-                $total--;
-                push(@runtests, $testnum);
-                $failedre .= "$testnum ";
+            if($error == 2) {
+                # A timed-out ignored test follows the same accounting as any
+                # other ignored failure: no retry and no queue abort.
+                $failedign .= "$testnum ";
+                $ign++;
             }
             else {
-                $failed .= "$testnum ";
+                if($retry_left > 0) {
+                    $retry_left--;
+                    $retry_done++;
+                    $total--;
+                    push(@runtests, $testnum);
+                    $failedre .= "$testnum ";
+                }
+                else {
+                    $failed .= "$testnum ";
+                }
+                undef @runtests if(!$anyway);
             }
-            undef @runtests if(!$anyway);
 
             # Replace the killed worker so remaining tests can continue.
             my $newid = createrunner($runnernum);

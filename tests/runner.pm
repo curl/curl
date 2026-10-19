@@ -137,6 +137,7 @@ my $runnerw;        # pipe that runner writes to
 # per-runner variables, indexed by runner ID; these are used by controller only
 my %controllerr;    # pipe that controller reads from
 my %controllerw;    # pipe that controller writes to
+my %runnerpidfile; # native runner PID files for Windows runners
 
 # redirected stdout/stderr to these files
 sub stdoutfilename {
@@ -155,7 +156,7 @@ sub stderrfilename {
 # runnerac_* functions
 # Called by controller
 sub runner_init {
-    my ($logdir, $jobs) = @_;
+    my ($logdir, $jobs, $testtimeout) = @_;
 
     $multiprocess = !!$jobs;
 
@@ -210,6 +211,16 @@ sub runner_init {
 
             # Set this directory as ours
             $LOGDIR = $logdir;
+            my $pidfile;
+            if($^O eq 'MSWin32' && $testtimeout) {
+                $pidfile = "$logdir/runner.pid";
+                require Win32;
+                open(my $pidfh, ">", $pidfile)
+                    or die "Failure writing runner PID file";
+                print $pidfh Win32::GetCurrentProcessId(), "\n"
+                    or die "Failure writing runner PID file";
+                close($pidfh) or die "Failure closing runner PID file";
+            }
             mkdir("$LOGDIR/$PIDDIR", 0777);
             mkdir("$LOGDIR/$LOCKDIR", 0777);
 
@@ -218,6 +229,7 @@ sub runner_init {
 
             # handle IPC calls
             event_loop();
+            unlink($pidfile) if $pidfile;
 
             # Cannot rely on logmsg here in case it is buffered
             print "Runner $thisrunnerid exiting\n" if($verbose);
@@ -236,6 +248,9 @@ sub runner_init {
         close($thisrunnerr);
 
         $thisrunnerid = $child;
+        if($^O eq 'MSWin32' && $testtimeout) {
+            $runnerpidfile{$thisrunnerid} = "$logdir/runner.pid";
+        }
 
     } else {
         # Create our pid directory
@@ -1312,8 +1327,23 @@ sub runnerac_terminate {
 
     if($multiprocess) {
         if($^O eq 'MSWin32') {
-            # Native Windows needs taskkill to include descendants.
-            system("taskkill /F /T /PID $runnerid >$dev_null 2>&1");
+            # fork() returns a Perl pseudo-PID on native Windows. Use the
+            # runner's native process ID with taskkill, then wait on the Perl
+            # pseudo-PID so it can reap the child.
+            my $pidfile = $runnerpidfile{$runnerid};
+            my $native_pid;
+            if($pidfile && open(my $pidfh, "<", $pidfile)) {
+                my $line = <$pidfh>;
+                close($pidfh);
+                $native_pid = $1
+                    if defined($line) && $line =~ /^\s*(\d+)\s*$/;
+            }
+            if($native_pid) {
+                system("taskkill /F /T /PID $native_pid >$dev_null 2>&1");
+            }
+            waitpid($runnerid, 0);
+            unlink($pidfile) if $pidfile;
+            delete $runnerpidfile{$runnerid};
         }
         else {
             # The runner owns a process group, so this includes the test command
@@ -1323,8 +1353,8 @@ sub runnerac_terminate {
             Time::HiRes::sleep(0.2);
             my $killed = kill('KILL', -$runnerid);
             kill('KILL', $runnerid) unless $killed;
+            waitpid($runnerid, 0);
         }
-        waitpid($runnerid, 0);
     }
 
     close($controllerw{$runnerid}) if defined $controllerw{$runnerid};
@@ -1348,6 +1378,7 @@ sub runnerac_shutdown {
     undef $controllerw{$runnerid};
     close($controllerr{$runnerid});
     undef $controllerr{$runnerid};
+    delete $runnerpidfile{$runnerid};
     return $err;
 }
 
