@@ -1216,6 +1216,15 @@ static bool is_custom_fetch_listing_match(const char *params)
   if(curl_strnequal(params, "RFC822", 6)) {
     return FALSE;
   }
+  if(curl_strnequal(params, "ALL", 3)) {
+    return FALSE;
+  }
+  if(curl_strnequal(params, "FULL", 4)) {
+    return TRUE;
+  }
+  if(curl_strnequal(params, "FAST", 4)) {
+    return TRUE;
+  }
 
   /* query of list with various fields */
   if(*params == '(') {
