@@ -62,8 +62,8 @@ to let them know it is.
 
 ### Low/Medium severity issues are public
 
-For all reported vulnerabilities with severity LOW or MEDIUM, the reporter
-will be asked to instead submit it publicly in the [curl issue
+For all reported vulnerabilities with severity LOW or MEDIUM, the reporter is
+asked to instead submit it publicly in the [curl issue
 tracker](https://github.com/curl/curl/issues) on GitHub, or even better as a
 [pull-request](https://github.com/curl/curl/pulls). These issues are then not
 managed any further privately on HackerOne.
@@ -71,13 +71,13 @@ managed any further privately on HackerOne.
 If in doubt of the severity, starting out on HackerOne is fine.
 
 Asking the reporter to instead submit the issue on GitHub does not necessarily
-imply that we accept it as a vulnerability, but we might. It might also be
-"just a bug". It should be treated as a "let's continue the conversation over
+imply that we accept it as a vulnerability, but we might. It might also be a
+plain bug. It should be treated as a "let's continue the conversation over
 there in the public" request.
 
 If a reported issue is deemed to be severity HIGH or CRITICAL, it should
 remain on HackerOne to be handled privately until a pending releases can be
-shipped that inclueds a fix for the problem.
+shipped that includes a fix for the problem.
 
 ### Fixing
 
@@ -152,8 +152,8 @@ vary somewhat over time and a list somewhere only risks getting outdated.
 ## Disclose the report
 
 For transparency and in the spirit of complete openness, *all* vulnerability
-reports submitted to the project, valid or not, should and will be disclosed
-and made public once they have been handled.
+reports submitted to the project, valid or not, are disclosed and made public
+once they have been handled.
 
 # Severity levels
 
