@@ -41,30 +41,31 @@ struct Curl_eapi_fn_props {
   uint8_t data_is_killed; /* easy handle is killed in call */
   uint8_t recurse;        /* may be called when another call is in progress */
   uint8_t no_event_cb;    /* may not be called during a multi event callback */
+  uint8_t no_debug_cb;    /* may not be called during the debug callback */
   uint8_t no_scache_lock; /* may not be called with easy's vtls_scache
                              locked by current thread */
 };
 
 static const struct Curl_eapi_fn_props eapi_fn_props[CURL_EAPI_FN_LAST] = {
-  /* function                   kill rec !ev !scach */
-  { CURL_EAPI_FN_easy_cleanup,     1,  0,  0,  0 },
-  { CURL_EAPI_FN_easy_duphandle,   0,  1,  0,  0 },
-  { CURL_EAPI_FN_easy_getinfo,     0,  1,  0,  0 },
-  { CURL_EAPI_FN_easy_header,      0,  1,  0,  0 },
-  { CURL_EAPI_FN_easy_nextheader,  0,  1,  0,  0 },
-  { CURL_EAPI_FN_easy_pause,       0,  1,  1,  0 },
-  { CURL_EAPI_FN_easy_perform_ev,  0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_perform,     0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_recv,        0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_reset,       0,  0,  0,  0 },
-  { CURL_EAPI_FN_easy_send,        0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_setopt,      0,  1,  0,  0 },
-  { CURL_EAPI_FN_easy_ssls_export, 0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_ssls_import, 0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_upkeep,      0,  0,  0,  1 },
-  { CURL_EAPI_FN_ws_recv,          0,  1,  0,  1 },
-  { CURL_EAPI_FN_ws_send,          0,  1,  0,  1 },
-  { CURL_EAPI_FN_ws_start_frame,   0,  1,  0,  0 },
+  /* function                   kill rec !ev !dbg !scach */
+  { CURL_EAPI_FN_easy_cleanup,     1,  0,  0,  0,  0 },
+  { CURL_EAPI_FN_easy_duphandle,   0,  1,  0,  0,  0 },
+  { CURL_EAPI_FN_easy_getinfo,     0,  1,  0,  0,  0 },
+  { CURL_EAPI_FN_easy_header,      0,  1,  0,  0,  0 },
+  { CURL_EAPI_FN_easy_nextheader,  0,  1,  0,  0,  0 },
+  { CURL_EAPI_FN_easy_pause,       0,  1,  1,  1,  0 },
+  { CURL_EAPI_FN_easy_perform_ev,  0,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_perform,     0,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_recv,        0,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_reset,       0,  0,  0,  0,  0 },
+  { CURL_EAPI_FN_easy_send,        0,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_setopt,      0,  1,  0,  0,  0 },
+  { CURL_EAPI_FN_easy_ssls_export, 0,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_ssls_import, 0,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_upkeep,      0,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_ws_recv,          0,  1,  0,  1,  1 },
+  { CURL_EAPI_FN_ws_send,          0,  1,  0,  1,  1 },
+  { CURL_EAPI_FN_ws_start_frame,   0,  1,  0,  1,  0 },
 };
 
 struct Curl_mapi_fn_props {
@@ -135,9 +136,17 @@ cbapi_fn_props[CURL_CBAPI_FN_LAST - CURL_CBAPI_FN_START] = {
   { CURL_CBAPI_FN_multi_timer_cb,             1 },
 };
 
+/* The multi whose callstack records the callbacks invoked for `data`:
+ * the one it is added to or, when it is not added to any, the internal
+ * one a curl_easy_perform() leaves behind for CONNECT_ONLY use. */
+static struct Curl_multi *eapi_cb_multi(struct Curl_easy *data)
+{
+  return data->multi ? data->multi : data->multi_easy;
+}
+
 static bool eapi_in_event_cb(struct Curl_easy *data)
 {
-  struct Curl_multi *multi = data->multi;
+  struct Curl_multi *multi = eapi_cb_multi(data);
   if(multi && multi->callstack.count) {
     size_t i;
     for(i = 0; i < multi->callstack.count; ++i) {
@@ -147,6 +156,19 @@ static bool eapi_in_event_cb(struct Curl_easy *data)
            cbapi_fn_props[fn - CURL_CBAPI_FN_START].is_event_cb)
           return TRUE;
       }
+    }
+  }
+  return FALSE;
+}
+
+static bool eapi_in_debug_cb(struct Curl_easy *data)
+{
+  struct Curl_multi *multi = eapi_cb_multi(data);
+  if(multi && multi->callstack.count) {
+    size_t i;
+    for(i = 0; i < multi->callstack.count; ++i) {
+      if(multi->callstack.calls[i] == CURL_CBAPI_FN_easy_fdebug)
+        return TRUE;
     }
   }
   return FALSE;
@@ -178,9 +200,9 @@ bool Curl_api_multi_is_in_callback(struct Curl_multi *multi)
 
 bool Curl_api_is_in_callback(struct Curl_easy *data)
 {
-  if(data && data->multi) {
-    return Curl_api_multi_is_in_callback(data->multi);
-  }
+  struct Curl_multi *multi = data ? eapi_cb_multi(data) : NULL;
+  if(multi)
+    return Curl_api_multi_is_in_callback(multi);
   return FALSE;
 }
 
@@ -190,6 +212,7 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
                      CURLcode *presult)
 {
   struct Curl_easy *data = curl;
+  struct Curl_multi *multi;
   const struct Curl_eapi_fn_props *fn_props;
   CURLcode result = CURLE_OK;
 
@@ -240,13 +263,14 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
       result = CURLE_RECURSIVE_API_CALL;
       goto out;
     }
-    if(data->multi && data->multi->callstack.count) {
+    multi = eapi_cb_multi(data);
+    if(multi && multi->callstack.count) {
 #ifdef CURLVERBOSE
 
       DEBUGF(curl_mfprintf(stderr,
         "EAPI guard: calling %hu with multi call to %u ongoing\n",
         (uint16_t)fn,
-        data->multi->callstack.calls[data->multi->callstack.count - 1]));
+        multi->callstack.calls[multi->callstack.count - 1]));
 #endif
       result = CURLE_RECURSIVE_API_CALL;
       goto out;
@@ -258,6 +282,16 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
         "EAPI guard: calling %hu while event callback ongoing\n",
+        (uint16_t)fn));
+#endif
+    result = CURLE_RECURSIVE_API_CALL;
+    goto out;
+  }
+  if(fn_props->no_debug_cb && eapi_in_debug_cb(data)) {
+    /* Not allowed to be invoked while the debug callback is ongoing */
+#ifdef CURLVERBOSE
+      DEBUGF(curl_mfprintf(stderr,
+        "EAPI guard: calling %hu while debug callback ongoing\n",
         (uint16_t)fn));
 #endif
     result = CURLE_RECURSIVE_API_CALL;
@@ -421,7 +455,7 @@ void Curl_cbapi_enter(struct Curl_mapi_guard *guard,
   guard->depth = 0;
 
   if(!multi)
-    multi = data ? data->multi : NULL;
+    multi = data ? eapi_cb_multi(data) : NULL;
   /* if not multi is involved here, just leave */
   if(!multi)
     return;

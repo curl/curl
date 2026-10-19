@@ -61,6 +61,10 @@ data, including information sent as **CURLINFO_TEXT**.
 
 The *clientp* argument is the pointer set with CURLOPT_DEBUGDATA(3).
 
+This callback cannot call curl_easy_pause(3), curl_ws_recv(3),
+curl_ws_send(3) or curl_ws_start_frame(3). Those return
+**CURLE_RECURSIVE_API_CALL** when called from within it.
+
 Available **curl_infotype** values:
 
 ## CURLINFO_TEXT

@@ -65,6 +65,9 @@ wire as one or more *frames* - but since a frame can be too large to buffer in
 memory, libcurl may need to deliver partial frames to the application.
 Fragments, or chunks, of frames.
 
+This function cannot be called from within the debug callback set with
+CURLOPT_DEBUGFUNCTION(3). Such a call returns **CURLE_RECURSIVE_API_CALL**.
+
 # %PROTOCOLS%
 
 # EXAMPLE

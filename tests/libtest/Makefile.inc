@@ -246,6 +246,7 @@ TESTS_C = \
   lib1662.c \
   lib1678.c \
   lib1686.c \
+  lib1694.c \
   lib1742.c \
   lib1744.c \
   lib1745.c \
