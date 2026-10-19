@@ -17,6 +17,7 @@ dict
 </server>
 <features>
 dict
+python
 </features>
 <name>
 Basic DICT lookup
