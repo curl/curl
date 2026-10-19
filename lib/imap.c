@@ -1219,10 +1219,15 @@ static bool is_custom_fetch_listing_match(const char *params)
 
   /* query of list with various fields */
   if(*params == '(') {
-    if(curl_strnequal(params + 1, "BODY", 4)) {
+    const char *p = params + 1;
+    /* skip UID prefix */
+    if(curl_strnequal(p, "UID ", 4)) {
+      p += 4;
+    }
+    if(curl_strnequal(p, "BODY", 4)) {
       return FALSE;
     }
-    if(curl_strnequal(params + 1, "RFC822", 6)) {
+    if(curl_strnequal(p, "RFC822", 6)) {
       return FALSE;
     }
     return isList;
