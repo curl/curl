@@ -45,6 +45,9 @@ Specify a feature to run only tests requiring it, or exclude tests using
 `!feat:<feature>`, like `!feat:proxy`, to disable tests which depend on that
 feature.
 
+With special keywords `!feat:with-server` and `!fear:without-server` you can
+exclude tests using a test server or those that are not, respectively.
+
 You can also specify keywords with a leading exclamation point and the keyword
 or phrase, like "!HTTP NTLM auth" to run all tests **except** those using this
 keyword. Remember that the exclamation marks and spaces need to be quoted
