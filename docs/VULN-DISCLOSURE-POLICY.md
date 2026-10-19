@@ -28,7 +28,7 @@ The person discovering the issue, the reporter, reports the vulnerability on
 selected and trusted people.
 
 Alternatively, a reporter may submit the report [directly on
-GitHub](https://github.com/curl/curl/issue) if the severity is deemed less
+GitHub](https://github.com/curl/curl/issues) if the severity is deemed less
 than HIGH.
 
 When communicating in the curl project, please explain your issues or
@@ -42,9 +42,9 @@ The curl project cannot handle vulnerability reports sent to us over email. We
 lose track of the reports. We cannot easily disclose them. Please do not send
 us reports over email.
 
-Messages that do not relate to the reporting or managing of an undisclosed
-security vulnerability in curl or libcurl are ignored and no further action is
-required.
+Messages on HackerOne that do not relate to the reporting or managing of an
+undisclosed security vulnerability in curl or libcurl are ignored and no
+further action is required.
 
 ### Confirming it
 
