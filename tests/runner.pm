@@ -40,6 +40,7 @@ use 5.006;
 
 use File::Basename;
 use Time::HiRes;
+use POSIX ();
 
 BEGIN {
     use base qw(Exporter);
@@ -51,6 +52,7 @@ BEGIN {
         restore_test_env
         runner_init
         runnerac_shutdown
+        runnerac_terminate
         runnerac_stopservers
         runnerac_test_preprocess
         runnerac_test_run
@@ -184,6 +186,11 @@ sub runner_init {
         # Create a separate process in multiprocess mode
         my $child = fork();
         if(0 == $child) {
+            # Give this runner and its descendants a private process group.
+            # The controller can then kill a timed-out test without affecting
+            # itself.
+            eval { POSIX::setpgid(0, 0); } if($^O ne 'MSWin32');
+
             # TODO: set up better signal handlers
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
@@ -223,6 +230,8 @@ sub runner_init {
         }
 
         # Here we are the parent (controller).
+        # Set the process group here too to avoid a race with the child.
+        eval { POSIX::setpgid($child, $child); } if($^O ne 'MSWin32');
         close($thisrunnerw);
         close($thisrunnerr);
 
@@ -1296,6 +1305,36 @@ sub runner_test_run {
     return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
 }
 
+# Forcefully terminate a runner and the processes it started.
+# Called by controller when a test exceeds its deadline.
+sub runnerac_terminate {
+    my ($runnerid) = @_;
+
+    if($multiprocess) {
+        if($^O eq 'MSWin32') {
+            # Native Windows needs taskkill to include descendants.
+            system("taskkill /F /T /PID $runnerid >$dev_null 2>&1");
+        }
+        else {
+            # The runner owns a process group, so this includes the test command
+            # and any test servers it started.
+            my $sent = kill('TERM', -$runnerid);
+            kill('TERM', $runnerid) unless $sent;
+            Time::HiRes::sleep(0.2);
+            my $killed = kill('KILL', -$runnerid);
+            kill('KILL', $runnerid) unless $killed;
+        }
+        waitpid($runnerid, 0);
+    }
+
+    close($controllerw{$runnerid}) if defined $controllerw{$runnerid};
+    close($controllerr{$runnerid}) if defined $controllerr{$runnerid};
+    delete $controllerw{$runnerid};
+    delete $controllerr{$runnerid};
+    return 0;
+}
+
+###################################################################
 # Async call runner_shutdown
 # This call does NOT generate an IPC response and must be the last IPC call
 # received.
