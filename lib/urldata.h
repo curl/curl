@@ -1132,8 +1132,13 @@ struct UserDefined {
 #ifndef CURL_DISABLE_MIME
 #define IS_MIME_POST(a)                                                 \
   ((a)->set.mimepostp && ((a)->set.mimepostp->kind != MIMEKIND_NONE))
+/* The current request is a MIME post: not only configured, but also not
+   switched to GET by a followed redirect or by CURLOPT_HTTPGET */
+#define IS_MIME_POST_REQ(a)                                             \
+  (IS_MIME_POST(a) && ((a)->state.httpreq == HTTPREQ_POST_MIME))
 #else
 #define IS_MIME_POST(a) FALSE
+#define IS_MIME_POST_REQ(a) FALSE
 #endif
 
 /* callback that gets called when the transfer `data` is done and

@@ -1005,7 +1005,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_MIME
   /* Prepare the mime data if some. */
-  if(IS_MIME_POST(data)) {
+  if(IS_MIME_POST_REQ(data)) {
     curl_mimepart *postp = data->set.mimepostp;
 
     /* Use the whole structure as data. */
@@ -1739,7 +1739,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.mail_rcpt &&
-          (data->state.upload || IS_MIME_POST(data))) {
+          (data->state.upload || IS_MIME_POST_REQ(data))) {
 
     smtp_state(data, smtpc, SMTP_POSTDATA);
 
@@ -1794,7 +1794,7 @@ static CURLcode smtp_perform(struct Curl_easy *data,
   smtp->eob = 2;
 
   /* Start the first command in the DO phase */
-  if((data->state.upload || IS_MIME_POST(data)) && data->set.mail_rcpt)
+  if((data->state.upload || IS_MIME_POST_REQ(data)) && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(data, smtpc, smtp);
   else
