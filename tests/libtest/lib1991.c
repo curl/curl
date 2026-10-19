@@ -110,11 +110,13 @@ static CURLcode test_lib1991(const char *URL)
        curl_multi_perform(multi, &running))
       goto test_cleanup;
   }
-  while((msg = curl_multi_info_read(multi, &left))) {
+  msg = curl_multi_info_read(multi, &left);
+  while(msg) {
     if(msg->msg == CURLMSG_DONE) {
       result = msg->data.result;
       completed = TRUE;
     }
+    msg = curl_multi_info_read(multi, &left);
   }
 
 test_cleanup:
