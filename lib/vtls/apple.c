@@ -167,7 +167,11 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   }
 #else
   /* OCSP check not available in this Apple OS version. */
-  (void)require_ocsp;
+  if(require_ocsp) {
+    failf(data, "Apple SecTrust version does not support OCSP checks");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+  }
+
 #endif
 
   cert_array = CFArrayCreateMutable(NULL, num_certs, &kCFTypeArrayCallBacks);
