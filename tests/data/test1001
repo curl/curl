@@ -66,6 +66,7 @@ http
 crypto
 proxy
 digest
+md5
 </features>
 <name>
 HTTP Digest range upload with a modified method

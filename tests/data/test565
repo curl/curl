@@ -60,6 +60,7 @@ http
 !SSPI
 crypto
 digest
+md5
 </features>
 <tool>
 lib510

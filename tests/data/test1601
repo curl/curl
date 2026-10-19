@@ -3,7 +3,9 @@
 <info>
 <keywords>
 unittest
+HMAC
 MD5
+SHA256
 </keywords>
 </info>
 
@@ -12,7 +14,7 @@ MD5
 unittest
 </features>
 <name>
-MD5 unit tests
+MD5, SHA256 digest/HMAC unit tests
 </name>
 </client>
 </testcase>

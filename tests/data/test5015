@@ -30,6 +30,7 @@ http
 <features>
 Debug
 httpsig
+sha256
 </features>
 <name>
 httpsig: POST with HMAC-SHA256

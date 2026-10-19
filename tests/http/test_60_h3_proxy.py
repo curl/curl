@@ -477,6 +477,8 @@ class TestH3Proxy:
                         reason='curl lacks SSL session export support')
     def test_60_12_quic_session_resumption(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
+        if not env.curl_has_sha256():
+            pytest.skip(reason="curl built without SHA-256")
         curl = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/data.json"
         xargs = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True)

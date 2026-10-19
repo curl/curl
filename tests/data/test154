@@ -62,6 +62,7 @@ http
 !SSPI
 crypto
 digest
+md5
 </features>
 <name>
 HTTP PUT with --anyauth authorization (picking Digest)

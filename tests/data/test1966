@@ -74,6 +74,7 @@ http
 !SSPI
 crypto
 digest
+md5
 </features>
 <name>
 netrc with digest and redirect to other origin

@@ -26,6 +26,7 @@ http
 <features>
 Debug
 aws
+sha256
 </features>
 <name>
 aws-sigv4 for s3express does not encode the path again

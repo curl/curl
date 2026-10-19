@@ -30,17 +30,67 @@
   !defined(CURL_DISABLE_DIGEST_AUTH) ||                             \
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
-#include "curl_hmac.h"
+/* Recommended order of crypto backends:
+   1. USE_OPENSSL
+   2. USE_WOLFSSL
+   3. USE_GNUTLS
+   4. USE_MBEDTLS
+   5. USE_RUSTLS (not supported)
+   6. __APPLE__
+   7. USE_WIN32_CRYPTO
+ */
+
+#ifdef USE_OPENSSL
+#define USE_OPENSSL_SHA256
+#define CURL_HAVE_SHA256
+#endif
+
+#if !defined(CURL_HAVE_SHA256) && defined(USE_WOLFSSL)
+#include <wolfssl/options.h>
+#ifndef NO_SHA256
+#define USE_WOLFSSL_SHA256
+#define CURL_HAVE_SHA256
+#endif
+#endif
+
+#if !defined(CURL_HAVE_SHA256) && defined(USE_GNUTLS)
+#define USE_GNUTLS_SHA256
+#define CURL_HAVE_SHA256
+#endif
+
+#if !defined(CURL_HAVE_SHA256) && defined(USE_MBEDTLS)
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+#error "mbedTLS 3.2.0 or greater required"
+#endif
+#include <psa/crypto_config.h>
+#if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
+#define USE_MBEDTLS_SHA256
+#define CURL_HAVE_SHA256
+#endif
+#endif
+
+#if !defined(CURL_HAVE_SHA256) && \
+  (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+           __MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) || \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+           __IPHONE_OS_VERSION_MAX_ALLOWED >= 20000)
+#define USE_APPLE_SHA256
+#define CURL_HAVE_SHA256
+#endif
+
+#if !defined(CURL_HAVE_SHA256) && defined(USE_WIN32_CRYPTO)
+#define USE_WIN32_SHA256
+#define CURL_HAVE_SHA256
+#endif
+
+#define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 
 extern const struct HMAC_params Curl_HMAC_SHA256;
 
-#ifndef CURL_SHA256_DIGEST_LENGTH
-#define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
-#endif
-
+#include "curl_hmac.h"
 CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
                        size_t len);
-
-#endif
+#endif /* AWS, httpsig, DIGEST, or libssh2 */
 
 #endif /* HEADER_CURL_SHA256_H */
