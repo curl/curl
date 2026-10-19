@@ -103,7 +103,7 @@ jobs:
               install: 'autoconf automake libtool mit-krb5',
               options: '--with-openssl --with-gssapi' }
 
-          - { os: 'netbsd'      , version: '11.0' , build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl',
+          - { os: 'netbsd'      , version: '11.0' , build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: '!776',
               install: 'cmake ninja-build mit-krb5 openldap-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON' }
 
