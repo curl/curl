@@ -33,6 +33,7 @@ http-proxy
 http
 telnet
 proxy
+python
 </features>
 <name>
 Basic TELNET negotiation over HTTP proxy

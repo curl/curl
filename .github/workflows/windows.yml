@@ -554,6 +554,9 @@ jobs:
               PATH="/c/OpenSSH-Win64:$PATH"
             fi
           fi
+          if [[ "${MATRIX_INSTALL}" != *'python'* ]]; then
+            export CURL_TEST_NO_PYTHON=1  # we have no Python here, skip tests needing it
+          fi
           PATH="$PATH:/c/my-stunnel/bin"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
