@@ -1074,7 +1074,7 @@ sub singletest_shouldrun {
         my $f = $_;
         $f =~ s/\s//g;
 
-        $may_retry_candidate |= $f =~ /(flaky|may-retry|timing-dependent|with-server)/;
+        $may_retry_candidate |= ($f =~ /(flaky|may-retry|timing-dependent|with-server)/);
 
         if($f =~ /^([^!].*)$/) {
             if($feature{$1}) {
