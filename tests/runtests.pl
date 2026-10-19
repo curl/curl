@@ -1064,12 +1064,7 @@ sub singletest_shouldrun {
     }
     else {
         @what = getpart("client", "features");
-        if(getpart("client", "server")) {
-           push @what, "with-server";
-        }
-        else {
-           push @what, "without-server";
-        }
+        push @what, getpart("client", "server") ? "with-server" : "without-server";
     }
 
     # We require a feature to be present
