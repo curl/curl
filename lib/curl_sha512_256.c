@@ -27,78 +27,20 @@
 
 #include "curl_sha512_256.h"
 
-/* The recommended order of the TLS backends:
- * 1. USE_OPENSSL
- * 2. USE_WOLFSSL
- * 3. USE_GNUTLS
- * 4. USE_MBEDTLS (TBD)
- * 5. USE_RUSTLS (TBD)
- * 6. USE_WIN32_CRYPTO (TBD)
- * Skip the backend if it does not support the required algorithm */
-
-#ifdef USE_OPENSSL
-#  include <openssl/opensslv.h>
-#  if !defined(LIBRESSL_VERSION_NUMBER) || \
-  (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x3080000fL)
-#    include <openssl/evp.h>
-#    define USE_OPENSSL_SHA512_256          1
-#    define HAS_SHA512_256_IMPLEMENTATION   1
-#    ifdef __NetBSD__
-/* Some NetBSD versions have a bug in SHA-512/256.
- * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
- * The problematic versions:
- * - NetBSD before 9.4
- * - NetBSD 9 all development versions (9.99.x)
- * - NetBSD 10 development versions (10.99.x) before 10.99.11
- * The bug was fixed in NetBSD 9.4 release, NetBSD 10.0 release,
- * NetBSD 10.99.11 development.
- * It is safe to apply the workaround even if the bug is not present, as
- * the workaround reduces performance slightly. */
-#      if  __NetBSD_Version__ <   904000000 ||  \
-          (__NetBSD_Version__ >=  999000000 &&  \
-           __NetBSD_Version__ <  1000000000) || \
-          (__NetBSD_Version__ >= 1099000000 &&  \
-           __NetBSD_Version__ <  1099001100)
-#        define NEED_NETBSD_SHA512_256_WORKAROUND 1
-#      endif
-#    endif
-#  endif
-#endif /* USE_OPENSSL */
-
-#if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_WOLFSSL)
-#  include <wolfssl/options.h>
-#  ifndef WOLFSSL_NOSHA512_256
-#    define USE_WOLFSSL_SHA512_256          1
-#    define HAS_SHA512_256_IMPLEMENTATION   1
-#  endif
-#endif
-
-#if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
-#  include <nettle/sha2.h>
-#  include <nettle/version.h>
-#  ifdef SHA512_256_DIGEST_SIZE
-#    define USE_GNUTLS_SHA512_256           1
-#  endif
-#endif /* !HAS_SHA512_256_IMPLEMENTATION && USE_GNUTLS */
+#ifdef CURL_HAVE_SHA512_256
 
 #ifdef USE_OPENSSL_SHA512_256
 
 /* OpenSSL does not provide macros for SHA-512/256 sizes */
 
-/**
- * Size of the SHA-512/256 single processing block in bytes.
- */
+/* Size of the SHA-512/256 single processing block in bytes. */
 #define CURL_SHA512_256_BLOCK_SIZE 128
 
-/**
- * Size of the SHA-512/256 resulting digest in bytes.
- * This is the final digest size, not intermediate hash.
- */
+/* Size of the SHA-512/256 resulting digest in bytes.
+   This is the final digest size, not intermediate hash. */
 #define CURL_SHA512_256_DIGEST_SIZE CURL_SHA512_256_DIGEST_LENGTH
 
-/**
- * Context type used for SHA-512/256 calculations
- */
+/* Context type used for SHA-512/256 calculations */
 typedef EVP_MD_CTX *Curl_sha512_256_ctx;
 
 /**
@@ -159,6 +101,25 @@ static CURLcode Curl_sha512_256_update(void *context,
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
+#ifdef __NetBSD__
+/* Some NetBSD versions have a bug in SHA-512/256.
+ * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
+ * The problematic versions:
+ * - NetBSD before 9.4
+ * - NetBSD 9 all development versions (9.99.x)
+ * - NetBSD 10 development versions (10.99.x) before 10.99.11
+ * The bug was fixed in NetBSD 9.4 release, NetBSD 10.0 release,
+ * NetBSD 10.99.11 development.
+ * It is safe to apply the workaround even if the bug is not present, as
+ * the workaround reduces performance slightly. */
+#  if  __NetBSD_Version__ <   904000000 ||  \
+      (__NetBSD_Version__ >=  999000000 &&  \
+       __NetBSD_Version__ <  1000000000) || \
+      (__NetBSD_Version__ >= 1099000000 &&  \
+       __NetBSD_Version__ <  1099001100)
+#    define NEED_NETBSD_SHA512_256_WORKAROUND 1
+#  endif
+#endif
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   CURLcode result;
@@ -225,9 +186,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 #define CURL_SHA512_256_BLOCK_SIZE  SHA512_256_BLOCK_SIZE
 #define CURL_SHA512_256_DIGEST_SIZE SHA512_256_DIGEST_SIZE
 
-/**
- * Context type used for SHA-512/256 calculations
- */
+/* Context type used for SHA-512/256 calculations */
 typedef struct sha512_256_ctx Curl_sha512_256_ctx;
 
 /**
@@ -291,8 +250,6 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   return CURLE_OK;
 }
 
-#else
-#error "SHA-512/256 support required but not offered by any TLS backend"
 #endif
 
 /**
@@ -357,4 +314,5 @@ const struct HMAC_params Curl_HMAC_SHA512_256[] = {
   }
 };
 
+#endif /* CURL_HAVE_SHA512_256 */
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
