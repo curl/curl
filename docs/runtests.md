@@ -241,7 +241,8 @@ extended the test sequence.
 
 ## `--retry=[num]`
 
-Number of attempts for the whole test run to retry failed tests.
+Number of attempts for the whole test run to retry failed tests. It applies
+to tests using servers, or tagged `timing-dependent`, `flaky` or `may-retry`.
 
 ## `-S`
 
