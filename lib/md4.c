@@ -203,7 +203,7 @@ static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 }
 
 #else
-#error "MD4 support needed but not offered by any TLS backend"
+#error "MD4 support required but not offered by any TLS backend"
 #endif /* CRYPTO LIBS */
 
 CURLcode Curl_md4it(unsigned char *output,
