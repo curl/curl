@@ -1980,17 +1980,6 @@ macro(curl_add_if _label)
   endif()
 endmacro()
 
-# NTLM support requires crypto functions from various SSL libs.
-# These conditions must match those in lib/curl_setup.h.
-if(CURL_ENABLE_NTLM AND
-   ((USE_OPENSSL AND HAVE_DES_ECB_ENCRYPT) OR
-    (USE_MBEDTLS AND HAVE_MBEDTLS_DES_CRYPT_ECB) OR
-    USE_GNUTLS OR
-    USE_WIN32_CRYPTO OR
-    (USE_WOLFSSL AND HAVE_WC_DES_ECBENCRYPT)))
-  set(_use_curl_ntlm_core ON)
-endif()
-
 # Clear list and try to detect available protocols
 set(_items "")
 curl_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
