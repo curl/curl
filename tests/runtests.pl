@@ -3257,7 +3257,7 @@ while(1) {
             my $runnernum = $runnernums{$rid};
             logmsg "TIMEOUT: test $testnum exceeded $testtimeout seconds; terminating runner $runnernum\n";
             displaylogs($rid, $testnum) if($postmortem);
-            runnerac_terminate($rid);
+            my $terminate_error = runnerac_terminate($rid);
             delete $runnersrunning{$rid};
             delete $runnerstarted{$rid};
             delete $runnernums{$rid};
@@ -3289,9 +3289,17 @@ while(1) {
                 undef @runtests if(!$anyway);
             }
 
-            # Replace the killed worker so remaining tests can continue.
-            my $newid = createrunner($runnernum);
-            runnerready($newid);
+            if($terminate_error) {
+                # Do not leave an untracked runner while continuing the suite.
+                delete $runnerids{$runnernum};
+                logmsg "ERROR: could not terminate timed-out runner; aborting test run\n";
+                $globalabort = 1;
+            }
+            else {
+                # Replace the killed worker so remaining tests can continue.
+                my $newid = createrunner($runnernum);
+                runnerready($newid);
+            }
         }
     }
     $endwaitcnt += $runnerwait;

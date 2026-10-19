@@ -212,7 +212,7 @@ sub runner_init {
             # Set this directory as ours
             $LOGDIR = $logdir;
             my $pidfile;
-            if($^O eq 'MSWin32' && $testtimeout) {
+            if($^O eq 'MSWin32' && $multiprocess) {
                 $pidfile = "$logdir/runner.pid";
                 require Win32;
                 open(my $pidfh, ">", $pidfile)
@@ -248,7 +248,7 @@ sub runner_init {
         close($thisrunnerr);
 
         $thisrunnerid = $child;
-        if($^O eq 'MSWin32' && $testtimeout) {
+        if($^O eq 'MSWin32' && $multiprocess) {
             $runnerpidfile{$thisrunnerid} = "$logdir/runner.pid";
         }
 
@@ -1324,6 +1324,7 @@ sub runner_test_run {
 # Called by controller when a test exceeds its deadline.
 sub runnerac_terminate {
     my ($runnerid) = @_;
+    my $err = 0;
 
     if($multiprocess) {
         if($^O eq 'MSWin32') {
@@ -1338,10 +1339,24 @@ sub runnerac_terminate {
                 $native_pid = $1
                     if defined($line) && $line =~ /^\s*(\d+)\s*$/;
             }
-            if($native_pid) {
-                system("taskkill /F /T /PID $native_pid >$dev_null 2>&1");
+            my $kill_status = $native_pid
+                ? system("taskkill /F /T /PID $native_pid >$dev_null 2>&1")
+                : -1;
+            my $waited;
+            if($kill_status != 0) {
+                logmsg "ERROR: taskkill failed for runner $runnerid\n";
+                $waited = waitpid($runnerid, POSIX::WNOHANG());
+                if(!defined($waited) || $waited != $runnerid) {
+                    # Do not block forever unless the worker was reaped. The
+                    # caller will abort if taskkill did not stop it.
+                    logmsg "ERROR: could not reap runner $runnerid after " .
+                           "taskkill failed; not waiting for it\n";
+                    $err = 1;
+                }
             }
-            waitpid($runnerid, 0);
+            if(!$err && (!defined($waited) || $waited == 0)) {
+                waitpid($runnerid, 0);
+            }
             unlink($pidfile) if $pidfile;
             delete $runnerpidfile{$runnerid};
         }
@@ -1361,7 +1376,7 @@ sub runnerac_terminate {
     close($controllerr{$runnerid}) if defined $controllerr{$runnerid};
     delete $controllerw{$runnerid};
     delete $controllerr{$runnerid};
-    return 0;
+    return $err;
 }
 
 ###################################################################
