@@ -12,147 +12,148 @@ project.
 There is no bug bounty and the curl project never offers rewards for reported
 vulnerabilities.
 
-## Publishing Information
+## Information
 
 All known and public curl or libcurl related vulnerabilities are listed on
 [the curl website security page](https://curl.se/docs/security.html).
-
-Security vulnerabilities **should not** be entered in the project's public bug
-tracker.
 
 ## Vulnerability Handling
 
 The typical process for handling a new security vulnerability is as follows.
 
-No information should be made public about a vulnerability until it is
-formally announced at the end of this process. That means, for example, that a
-bug tracker entry must NOT be created to track the issue since that makes the
-issue public and it should not be discussed on any of the project's public
-mailing lists. Messages associated with any commits should not make any
-reference to the security nature of the commit if done prior to the public
-announcement.
+### Report
 
-- The person discovering the issue, the reporter, reports the vulnerability on
-  [HackerOne](https://hackerone.com/curl). Issues filed there reach a handful
-  of selected and trusted people.
+The person discovering the issue, the reporter, reports the vulnerability on
+[HackerOne](https://hackerone.com/curl). Issues filed there reach a handful of
+selected and trusted people.
 
-- When communicating in the curl project, please explain your issues or
-  improvements briefly and clearly in your own human voice. Do not lazily
-  paste massive, AI-generated explanations; as a contributor doing this
-  infrequently, it is your responsibility to invest a few extra minutes into
-  making your message digestible. The maintainers review submissions
-  constantly, and clear writing reduces their daily burden and friction.
+Alternatively, a reporter may submit the report [directly on
+GitHub](https://github.com/curl/curl/issues) if the severity is deemed less
+than HIGH.
 
-- The curl project cannot handle vulnerability reports sent to us over email.
-  We lose track of the reports. We cannot easily disclose them. Please do not
-  send us reports over email.
+When communicating in the curl project, please explain your issues or
+improvements briefly and clearly in your own human voice. Do not lazily paste
+massive, AI-generated explanations; it is your responsibility to invest a few
+extra minutes into making your message digestible. The maintainers review
+submissions constantly, and clear writing reduces their daily burden and
+friction.
 
-- Messages that do not relate to the reporting or managing of an undisclosed
-  security vulnerability in curl or libcurl are ignored and no further action
-  is required.
+The curl project cannot handle vulnerability reports sent to us over email. We
+lose track of the reports. We cannot easily disclose them. Please do not send
+us reports over email.
 
-- A person in the security team responds to the original report to acknowledge
-  that a human has seen the report.
+Messages on HackerOne that do not relate to the reporting or managing of an
+undisclosed security vulnerability in curl or libcurl are ignored and no
+further action is required.
 
-- The security team investigates the report and either rejects it or accepts
-  it. See below for examples of problems that are not considered
-  vulnerabilities.
+### Confirming it
 
-- If the report is rejected, the team writes to the reporter to explain why.
+Someone in the security team responds to the original report to acknowledge
+that a human has seen the report.
 
-- If the report is accepted, the team writes to the reporter to let them
-  know it is accepted and that they are working on a fix.
+The curl security team investigates the claims in the report and either
+rejects it or accepts it. See below for examples of problems that are not
+considered vulnerabilities.
 
-- The security team discusses the problem, works out a fix, considers the
-  impact of the problem and suggests a release schedule. This discussion
-  should involve the reporter as much as possible.
+If the report is rejected, the team explains why.
 
-- The release of the information should be "as soon as possible" and is most
-  often synchronized with an upcoming release that contains the fix. If the
-  reporter, or anyone else involved, thinks the next planned release is too
-  far away, then a separate earlier release should be considered.
+If the report is confirmed and acknowledged, the team writes to the reporter
+to let them know it is.
 
-- Write a security advisory draft about the problem that explains what the
-  problem is, its impact, which versions it affects, solutions or workarounds,
-  when the release is out and make sure to credit all contributors properly.
-  Figure out the CWE (Common Weakness Enumeration) number for the flaw. See
-  [SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
-  the advisory.
+### Low/Medium severity issues are public
 
-- Request a CVE Id for the issue. curl is a CNA (CVE Numbering Authority) and
-  can request its own numbers.
+For all reported vulnerabilities with severity LOW or MEDIUM, the reporter is
+asked to instead submit it publicly in the [curl issue
+tracker](https://github.com/curl/curl/issues) on GitHub, or even better as a
+[pull-request](https://github.com/curl/curl/pulls). These issues are then not
+managed any further privately on HackerOne.
 
-- Update the "security advisory" with the CVE number.
+If in doubt of the severity, starting out on HackerOne is fine.
 
-- The security team commits the fix in a private branch. The commit message
-  should ideally contain the CVE number. If the severity level of the issue is
-  set to Low or Medium, the fix is allowed to get merged into the master
-  repository via a normal PR - but without mentioning it being a security
-  vulnerability.
+Asking the reporter to instead submit the issue on GitHub does not necessarily
+imply that we accept it as a vulnerability, but we might. It might also be a
+plain bug. It should be treated as a "let's continue the conversation over
+there in the public" request.
 
-- No more than seven days before release, inform
-  [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
-  to prepare them about the upcoming public security vulnerability
-  announcement - attach the advisory draft for information with CVE and
-  current patch. 'distros' does not accept an embargo longer than 7 days and
-  they do not care for Windows-specific flaws.
+If a reported issue is deemed to be severity HIGH or CRITICAL, it should
+remain on HackerOne to be handled privately until a pending releases can be
+shipped that includes a fix for the problem.
 
-- No more than 48 hours before the release, the private branch is merged into
-  the master branch and pushed. Once pushed, the information is accessible to
-  the public and the actual release should follow suit immediately afterwards.
-  The time between the push and the release is used for final tests and
-  reviews.
+### Fixing
 
-- The project team creates a release that includes the fix.
+A vulnerability is a bug. We fix all known bugs. If the report is handled on
+GitHub, the whole world can and is encouraged to participate in the discussion
+and bugfixing. For privately reported vulnerabilities, only the reporter and
+the curl security team can participate in the discussion and fixing.
 
-- The project team announces the release and the vulnerability to the world in
-  the same manner we always announce releases. It gets sent to the
-  curl-announce, curl-library and curl-users mailing lists.
+A fix for the reported vulnerability together with extensive information about
+the problem should be released "as soon as possible" - most often synchronized
+with an upcoming release.
 
-- The security webpage on the website should get the new vulnerability
-  mentioned.
+If the reporter, or anyone else involved, thinks the next planned release is
+too far away (and the severity is HIGH or CRITICAL), an earlier release should
+be considered.
+
+If the severity level of the issue is set to LOW or MEDIUM, the fix is worked
+on and merged into the master repository via a normal pull-request.
+
+Vulnerabilities at severity HIGH or CRITICAL get fixed and worked on in a
+private branch to reduce the impact and risk for existing users. Only the
+reported and the curl security team can access this.
+
+### Documenting
+
+Write a security advisory draft about the problem that explains what the
+problem is, its impact, which versions it affects, solutions or workarounds,
+when the release is out and make sure to credit all contributors properly.
+Figure out the CWE (Common Weakness Enumeration) number for the flaw. See
+[SECURITY-ADVISORY](https://curl.se/dev/advisory.html) for help on creating
+the advisory.
+
+Request a CVE Id for the issue. curl is a CNA (CVE Numbering Authority) and
+can request its own numbers.
+
+Update the "security advisory" with the CVE number.
+
+### Release preparations
+
+No more than seven days before release, inform
+[distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
+to prepare them about the upcoming public security vulnerability
+announcement - attach the advisory draft for information with CVE and current
+patch. 'distros' does not accept an embargo longer than 7 days and they do not
+care for Windows-specific flaws.
+
+No more than 48 hours before the release, the private branch is merged into
+the master branch and pushed (if one was used). Once pushed, the information
+is accessible to the public and the actual release should follow suit
+immediately afterwards. The time between the push and the release is used for
+final tests and reviews.
+
+### Release
+
+The project team creates a release that includes the fix.
+
+The project team announces the release and the vulnerability to the world in
+the same manner we always announce releases. It gets sent to the
+curl-announce, curl-library and curl-users mailing lists.
+
+The security webpage on the website should get the new vulnerability
+mentioned.
 
 ## security (at curl dot se)
 
-This is a private mailing list for discussions on and about curl security
-issues.
+This is a private mailing list to reach the curl security team. It shall not
+be used for vulnerability reporting.
 
-Who is on this list? There are a couple of criteria you must meet, and then we
-might ask you to join the list or you can ask to join it. It really is not a
-formal process. We only require that you have a long-term presence in the curl
-project and you have shown an understanding for the project and its way of
-working. You must have been around for a good while and you should have no
-plans of vanishing in the near future.
-
-We do not make the list of participants public mostly because it tends to vary
-somewhat over time and a list somewhere only risks getting outdated.
-
-## Publishing Security Advisories
-
-1. Write up the security advisory, using markdown syntax. Use the same
-   subtitles as last time to maintain consistency.
-
-2. Name the advisory file after the allocated CVE id.
-
-3. Add a line on the top of the array in `curl-www/docs/vuln.pm`.
-
-4. Put the new advisory markdown file in the `curl-www/docs/` directory. Add it
-   to the git repository.
-
-5. Run `make` in your local web checkout and verify that things look fine.
-
-6. On security advisory release day, push the changes on the curl-www
-   repository's remote master branch.
+We do not make the list of list participants public mostly because it tends to
+vary somewhat over time and a list somewhere only risks getting outdated.
 
 ## Disclose the report
 
-Request the issue to be disclosed. If there are sensitive details present in
-the report and discussion, those should be redacted from the disclosure. The
-default policy is to disclose as much as possible as soon as the vulnerability
-has been published.
-
-*All* reports submitted to the project, valid or not, should be disclosed and
-made public.
+For transparency and in the spirit of complete openness, *all* vulnerability
+reports submitted to the project, valid or not, are disclosed and made public
+once they have been handled.
 
 # Severity levels
 
