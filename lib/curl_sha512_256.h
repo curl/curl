@@ -46,6 +46,7 @@
 #    define CURL_HAVE_SHA512_256
 #    define USE_OPENSSL_SHA512_256          1
 #    define HAS_SHA512_256_IMPLEMENTATION   1
+#  endif
 #endif
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_WOLFSSL)
@@ -73,7 +74,7 @@ extern const struct HMAC_params Curl_HMAC_SHA512_256[1];
 
 CURLcode Curl_sha512_256it(unsigned char *output, const unsigned char *input,
                            size_t input_size);
-#endif
+#endif /* CURL_HAVE_SHA512_256 */
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
 
