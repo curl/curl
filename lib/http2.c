@@ -1049,9 +1049,12 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
       if(nghttp2_is_fatal(h2rv))
         return CURLE_SEND_ERROR;
       else if(rv == CURL_PUSH_ERROROUT) {
+        /* fail the parent transfer, not the whole session */
         CURL_TRC_CF(data, cf, "[%d] fail in PUSH_PROMISE received",
                     stream_id);
-        return CURLE_RECV_ERROR;
+        if(!stream->xfer_result)
+          stream->xfer_result = CURLE_RECV_ERROR;
+        Curl_multi_mark_dirty(data);
       }
     }
     break;
