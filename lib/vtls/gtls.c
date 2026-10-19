@@ -1574,13 +1574,16 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
       ocsp_raw.data = NULL;
       ocsp_raw.size = 0;
     }
+    if(config->verifystatus && !ocsp_raw.size) {
+      failf(data, "No OCSP response received");
+      return CURLE_SSL_INVALIDCERTSTATUS;
+    }
     result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
                                     gtls_chain_get_der, chain,
                                     ocsp_raw.data, ocsp_raw.size,
                                     config->verifystatus);
-    if(result && (result != CURLE_PEER_FAILED_VERIFICATION) &&
-       (result != CURLE_SSL_INVALIDCERTSTATUS))
-      return result; /* unexpected error */
+    if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
+      return result; /* no further failure analyis needed */
     verified = !result;
     if(verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
