@@ -32,7 +32,7 @@ version: 7.50.0.{build}
 
 environment:
   DO_NOT_TRACK: '1'
-  CURL_TEST_MIN: 75
+  CURL_TEST_MIN: 200
 
   matrix:
     # CMake Visual Studio builds
@@ -41,7 +41,7 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
-      TFLAGS: 'tunittest unittest'
+      TFLAGS: '!feat:with-server'
       RUN_TESTS_VIA_CMAKE: 'yes'
 
     - job_name: 'CM VS2026, Release, arm64, Schannel, Static, Build-tests'
@@ -50,7 +50,7 @@ environment:
       CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
       CMAKE_GENERATE: '-A ARM64 -DBUILD_SHARED_LIBS=OFF'
-      TFLAGS: 'tunittest unittest'
+      TFLAGS: '!feat:with-server'
 
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -58,7 +58,7 @@ environment:
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
-      TFLAGS: 'tunittest unittest'
+      TFLAGS: '!feat:with-server'
 
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -93,7 +93,7 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       CMAKE_GENERATOR: 'Visual Studio 16 2019'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
-      TFLAGS: 'tunittest unittest'
+      TFLAGS: '!feat:with-server'
 
     - job_name: 'CM VS2026, Debug, x64, OpenSSL 3.6 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
@@ -102,13 +102,13 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
       CMAKE_GENERATE: '-A x64 -T ClangCl -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
       CREATE_ARTIFACT: 'true'
-      TFLAGS: 'tunittest unittest'
+      TFLAGS: '!feat:with-server'
 
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON'
-      TFLAGS: 'tunittest unittest'
+      TFLAGS: '!feat:with-server'
 
     # VisualStudioSolution builds
 

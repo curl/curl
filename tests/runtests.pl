@@ -806,6 +806,8 @@ sub checksystemfeatures {
     }
     close($manh);
 
+    $feature{"with-server"} = 1;  # support running tests that need server(s)
+    $feature{"without-server"} = 1;  # support running tests that need no server
     $feature{"python"} = !$ENV{'CURL_TEST_NO_PYTHON'};
     $feature{"unittest"} = 1;
     $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
@@ -1062,6 +1064,12 @@ sub singletest_shouldrun {
     }
     else {
         @what = getpart("client", "features");
+        if(getpart("client", "server")) {
+           push @what, "with-server";
+        }
+        else {
+           push @what, "without-server";
+        }
     }
 
     # We require a feature to be present
@@ -1109,7 +1117,7 @@ sub singletest_shouldrun {
         # Only evaluate keywords if the section is present.
         else {
             # Prefix features with "feat:" and add to keywords list.
-            push @info_keywords, map { "feat:" . lc($_) } getpart("client", "features");
+            push @info_keywords, map { "feat:" . lc($_) } @what;
 
             my $match;
             for my $k (@info_keywords) {
