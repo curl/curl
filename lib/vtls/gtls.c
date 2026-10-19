@@ -1583,7 +1583,7 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
                                     ocsp_raw.data, ocsp_raw.size,
                                     config->verifystatus);
     if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
-      return result; /* no further failure analyis needed */
+      return result; /* no further failure analysis needed */
     verified = !result;
     if(verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
