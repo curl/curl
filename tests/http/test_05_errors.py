@@ -27,11 +27,86 @@ import logging
 import os
 import socket
 import threading
+import time
+from datetime import datetime, timedelta, timezone
+from typing import Dict, Generator
 
 import pytest
 from testenv import CurlClient, Env
+from testenv.ports import alloc_ports_and_do
 
 log = logging.getLogger(__name__)
+
+
+def pr_process(self):
+    log.info(f"pr accepting")
+    try:
+        while self._socket and not self._done:
+            conn, _ = self._socket.accept()
+            with conn:
+                conn.sendall(HttpPureResp.RESPONSE)
+                log.info("response sent")
+    except ConnectionAbortedError:
+        return
+
+
+class HttpPureResp:
+
+    RESPONSE = (b'HTTP/1.1 200 OK\r\n'
+                b'Content-Length: 3\r\n'
+                b'Connection: close\r\n'
+                b'\r\n'
+                b'ok\n')
+
+    def __init__(self, env):
+        self.name = 'httppureresp'
+        self.env = env
+        self.run_dir = os.path.join(env.gen_dir, self.name)
+        self._thread = None
+        self._socket = None
+        self._done = False
+        self.port = 0
+
+    def start(self):
+
+        log.info("pr start")
+        def startup(ports: Dict[str, int]) -> bool:
+            self.port = ports[self.name]
+            log.info(f"pr port={self.port}")
+            self._socket = socket.create_server(('127.0.0.1', self.port))
+            log.info(f"pr socket open")
+            self._thread = threading.Thread(target=pr_process, daemon=True, args=[self])
+            self._thread.start()
+            self.env.update_ports(ports)
+            return True
+
+        port_spec = {
+            self.name: socket.SOCK_STREAM
+        }
+        assert alloc_ports_and_do(port_spec, startup,
+                                  self.env.gen_root, max_tries=3)
+        assert self._socket
+        return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
+
+    def stop(self):
+        self._done = True
+        if self._socket:
+            self._socket.close()
+            self._socket = None
+        log.info("pr stopped")
+
+    def wait_live(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self.run_dir,
+                          timeout=timeout.total_seconds())
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
+            r = curl.http_get(url=f'http://{self.env.domain1}:{self.port}/')
+            if r.exit_code == 0:
+                return True
+            time.sleep(.1)
+        log.error(f"Server still not responding after {timeout}")
+        return False
+
 
 
 @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.55'),
@@ -226,3 +301,23 @@ class TestErrors:
             '--parallel', '--retry', '5'
         ])
         r.check_stats(count=count, http_status=200, exitcode=0)
+
+    @pytest.fixture(scope='class')
+    @classmethod
+    def pr_server(cls, env: Env) -> Generator[HttpPureResp, None, None]:
+        server = HttpPureResp(env=env)
+        server.start()
+        yield server
+        server.stop()
+
+    def test_05_11_pure_resp(self, env: Env, pr_server):
+        proto = 'http/1.1'
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_SOCK_OPTWAIT'] = '1000'
+        curl = CurlClient(env=env, run_env=run_env)
+        url = f'http://{env.domain1}:{pr_server.port}/xxx'
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--connect-timeout', '5', '--max-time', '5'
+        ])
+        r.check_exit_code(0)
+        r.check_stats(count=1, http_status=200, exitcode=0)
