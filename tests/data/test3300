@@ -11,7 +11,7 @@ threads
 <client>
 <features>
 unittest
-may-retry
+may-retry-on-valgrind
 </features>
 <name>
 thrdpool unit tests

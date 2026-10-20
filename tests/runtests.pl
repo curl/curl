@@ -807,6 +807,8 @@ sub checksystemfeatures {
     }
     close($manh);
 
+    $feature{"may-retry"} = 1;
+    $feature{"may-retry-on-valgrind"} = 1;
     $feature{"with-server"} = 1;  # support running tests that need server(s)
     $feature{"without-server"} = 1;  # support running tests that need no server
     $feature{"python"} = !$ENV{'CURL_TEST_NO_PYTHON'};
@@ -1074,7 +1076,8 @@ sub singletest_shouldrun {
         my $f = $_;
         $f =~ s/\s//g;
 
-        $may_retry_candidate |= ($f =~ /(flaky|may-retry|timing-dependent|with-server)/);
+        $may_retry_candidate |= ($f =~ /^(flaky|may-retry|timing-dependent|with-server)$/);
+        $may_retry_candidate |= ($f =~ /^may-retry-on-valgrind$/) if($valgrind);
 
         if($f =~ /^([^!].*)$/) {
             if($feature{$1}) {
