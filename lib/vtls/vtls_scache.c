@@ -290,18 +290,14 @@ static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
       goto out;
   }
   if(ssl->verifypeer) {
-    if(ssl->native_ca_store) {
+    result = cf_ssl_peer_key_add_path(&buf, "CA", ssl->CAfile, &is_local);
+    if(!result)
+      result = cf_ssl_peer_key_add_path(&buf, "CApath",
+                                        ssl->CApath, &is_local);
+    if(!result && ssl->native_ca_store)
       result = curlx_dyn_add(&buf, ":NATIVE-CA");
-    }
-    else {
-      result = cf_ssl_peer_key_add_path(&buf, "CA", ssl->CAfile, &is_local);
-      if(!result)
-        result = cf_ssl_peer_key_add_path(&buf, "CApath",
-                                          ssl->CApath, &is_local);
-    }
-    if(result)
-      goto out;
-    result = cf_ssl_peer_key_add_path(&buf, "CRL", ssl->CRLfile, &is_local);
+    if(!result)
+      result = cf_ssl_peer_key_add_path(&buf, "CRL", ssl->CRLfile, &is_local);
     if(result)
       goto out;
     result = cf_ssl_peer_key_add_path(&buf, "Issuer", ssl->issuercert,
