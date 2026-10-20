@@ -29,7 +29,6 @@
 #include "urldata.h"
 #include "ngh2_shim.h"
 
-#define CURL_NGH2_CALL
 
 bool Curl_ngh2_valid(struct curl_ngh2 *ngh2)
 {
