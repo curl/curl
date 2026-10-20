@@ -60,7 +60,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.33';
+my $version = '1.34';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -171,7 +171,7 @@ sub HELP_MESSAGE() {
     print "\t-i\tprint version info about used modules\n";
     print "\t-k\tallow URLs other than HTTPS, enable HTTP fallback (insecure)\n";
     print "\t-l\tprint license info about certdata.txt\n";
-    print "\t-m\tinclude meta data in output\n";
+    print "\t-m\tinclude meta data in output (SHA-256 fingerprints are included by default)\n";
     print "\t-n\tno download of certdata.txt (to use existing)\n";
     print wrap("\t","\t\t", "-p\tlist of Mozilla trust purposes and levels for certificates to include in output. " .
           "Takes the form of a comma separated list of purposes, a colon, and a comma separated list of levels. " .
@@ -620,6 +620,9 @@ while(<TXT>) {
             }
             if($opt_m) {
                 print CRT for @precert;
+            }
+            else {
+                print CRT for grep { /^# Fingerprint .*SHA.*256/i } @precert;
             }
             if(!$opt_t) {
                 print CRT $pem;
