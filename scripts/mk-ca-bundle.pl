@@ -302,10 +302,11 @@ my $fetched;
 
 my $oldhash = oldhash($crt);
 
+my @opt_x_list;
 if($opt_x) {
     $opt_x = uc $opt_x;
     $opt_x =~ s/[\s:]//g;
-    my @opt_x_list = split(/,/, $opt_x);
+    @opt_x_list = split(/,/, $opt_x);
 }
 
 report "SHA256 of old file: $oldhash";
