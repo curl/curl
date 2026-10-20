@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/2
+</keywords>
+</info>
+
+# Server-side
+<reply>
+# SETTINGS, an unfinished HEADERS block, and nine empty CONTINUATION frames.
+# nghttp2 limits the number of CONTINUATION frames to eight by default and
+# returns NGHTTP2_ERR_TOO_MANY_CONTINUATIONS, a fatal session error.
+<data crlf="headers" nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: h2c
+
+%hex[%00%00%00%04%00%00%00%00%00%00%00%01%01%00%00%00%00%01%88%00%00%00%09%00%00%00%00%01%00%00%00%09%00%00%00%00%01%00%00%00%09%00%00%00%00%01%00%00%00%09%00%00%00%00%01%00%00%00%09%00%00%00%00%01%00%00%00%09%00%00%00%00%01%00%00%00%09%00%00%00%00%01%00%00%00%09%00%00%00%00%01%00%00%00%09%00%00%00%00%01]hex%
+</data>
+# A complete, empty HTTP/2 response for the next transfer.
+<data1 crlf="headers" nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: h2c
+
+%hex[%00%00%00%04%00%00%00%00%00%00%00%01%01%05%00%00%00%01%88]hex%
+</data1>
+<servercmd>
+upgrade
+swsclose
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<features>
+h2c
+</features>
+<server>
+http
+</server>
+<name>
+HTTP/2 fatal CONTINUATION error followed by a successful transfer
+</name>
+<command option="no-include">
+--http2 --max-time 10 -w '%{exitcode}\n' http://%HOSTIP:%HTTPPORT/%TESTNUMBER --next --http2 --max-time 10 -w '%{exitcode}\n' http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+</command>
+</client>
+
+<verify>
+# Older nghttp2 versions without a CONTINUATION limit fail on the incomplete
+# header block when the server closes the connection instead.
+<stripfile>
+s/^16$/56/
+</stripfile>
+<stdout>
+56
+0
+</stdout>
+</verify>
+</testcase>

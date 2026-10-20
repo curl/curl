@@ -256,6 +256,7 @@ LIB_CFILES =         \
   multi_ev.c         \
   multi_ntfy.c       \
   netrc.c            \
+  ngh2_shim.c        \
   openldap.c         \
   parsedate.c        \
   peer.c             \
@@ -389,6 +390,7 @@ LIB_HFILES =         \
   multi_ntfy.h       \
   multiif.h          \
   netrc.h            \
+  ngh2_shim.h        \
   parsedate.h        \
   peer.h             \
   pingpong.h         \
