@@ -14,7 +14,7 @@ Added-in: n/a
 
 libcurl-pool - connection pool and TLS session considerations
 
-# Connnection pools
+# Connection pools
 
 libcurl features a connection pool that allows it to reuse connections held
 alive since a previous transfer, instead of creating new ones. It is much
@@ -42,7 +42,7 @@ example not detected and use of CURLOPT_SSL_CTX_FUNCTION makes it impossible
 to know what magic is done out of libcurl's sight.
 
 If a TLS based connection has been accepted, used and allowed into the pool,
-and the TLS sesion into the session cache, libcurl might later reuse an
+and the TLS session into the session cache, libcurl might later reuse an
 existing connection or TLS session again if even it would not accept that
 server for a fresh new transfer because of changed CA related options in the
 handle.
@@ -53,4 +53,4 @@ your task to verify that a shared connection pool works as you need it.
 
 Do not use a shared connection pool for transfers crossing trust boundaries.
 
-Do not re-use an easy handle for different tenants.
+Do not reuse an easy handle for different tenants.
