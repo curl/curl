@@ -142,6 +142,11 @@ static CURLcode test_unit1395(const char *arg)
     { "%2ewell-known", NULL },
     { "%2Ewell-known", NULL },
     { "../.well-known", ".well-known" },
+    { "%2e", "" },
+    { "%2E", "" },
+    { "%2e/", "" },
+    { "%2e%2e", "" },
+    { "%2e%2e/", "" },
   };
 
   for(i = 0; i < CURL_ARRAYSIZE(pairs); i++) {

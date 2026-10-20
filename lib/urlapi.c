@@ -774,7 +774,7 @@ CURLUcode Curl_url_set_authority(CURLU *u, const char *authority)
 static bool is_dot(const char **str, size_t *clen)
 {
   const char *p = *str;
-  if(*p == '.') {
+  if(*clen && (*p == '.')) {
     (*str)++;
     (*clen)--;
     return TRUE;
@@ -793,11 +793,42 @@ static bool is_dot(const char **str, size_t *clen)
 /* prescan the string to see if it needs work */
 static bool needs_dedotdot(const char *p, size_t pn)
 {
+  const char *dot;
+  const char *pct;
   /* a single byte path cannot be cleaned up */
   if(pn < 2)
     return FALSE;
-  if(!memchr(p, '.', pn) && !memchr(p, '%', pn))
+  dot = memchr(p, '.', pn);
+  if(dot && ((dot == p) || (dot[-1] == '/'))) {
+    size_t rem = pn - (size_t)(dot - p) - 1;
+    const char *q = dot + 1;
+    if(!rem || ISSLASH(*q) ||
+       ((*q == '.') && ((rem == 1) || ISSLASH(q[1]))))
+      return TRUE;
+  }
+  pct = memchr(p, '%', pn);
+  if(!dot && !pct)
     return FALSE;
+  if(!pct) {
+    do {
+      pn -= (size_t)(dot - p) + 1;
+      p = dot + 1;
+      if(!pn || ISSLASH(*p))
+        return TRUE;
+      if(*p == '.') {
+        p++;
+        pn--;
+        if(!pn || ISSLASH(*p))
+          return TRUE;
+      }
+      dot = memchr(p, '.', pn);
+    } while(dot);
+    return FALSE;
+  }
+  if(dot && (dot < pct))
+    pct = dot;
+  pn -= (size_t)(pct - p);
+  p = pct;
   while(pn) {
     if(is_dot(&p, &pn)) {
       /* "./" or dot before end of string */
@@ -850,7 +881,10 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
   /* if the input buffer begins with a prefix of "../" or "./", then remove
      that prefix from the input buffer; otherwise, */
   if(is_dot(&dinput, &dlen)) {
-    if(ISSLASH(*dinput)) {
+    if(!dlen)
+      /* . [end] */
+      goto end;
+    else if(ISSLASH(*dinput)) {
       /* one dot followed by a slash */
       input = dinput + 1;
       clen = dlen - 1;
@@ -892,7 +926,7 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
            ".." is a complete path segment, then replace that prefix with "/"
            in the input buffer and remove the last segment and its preceding
            "/" (if any) from the output buffer; otherwise, */
-        else if(is_dot(&p, &blen) && (ISSLASH(*p) || !blen)) {
+        else if(is_dot(&p, &blen) && (!blen || ISSLASH(*p))) {
           /* remove the last segment from the output buffer */
           size_t len = curlx_dyn_len(&out);
           if(len) {
@@ -918,10 +952,13 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
        output buffer, including the initial "/" character (if any) and any
        subsequent characters up to, but not including, the next "/" character
        or the end of the input buffer. */
-
-    result = curlx_dyn_addn(&out, input, 1);
-    input++;
-    clen--;
+    {
+      const char *next = (clen > 1) ? memchr(input + 1, '/', clen - 1) : NULL;
+      size_t seglen = next ? (size_t)(next - input) : clen;
+      result = curlx_dyn_addn(&out, input, seglen);
+      input += seglen;
+      clen -= seglen;
+    }
   }
 end:
   if(!result) {
@@ -1195,17 +1232,6 @@ static CURLUcode handle_path(CURLU *u, const char *path,
     if(badoctets(path, pathlen, flags))
       return CURLUE_BAD_PATH;
 
-    /* paths for file:// scheme can be one byte, others need to be two */
-    if(!u->path) {
-      u->path = curlx_memdup0(path, pathlen);
-      if(!u->path)
-        return CURLUE_OUT_OF_MEMORY;
-      path = u->path;
-    }
-    else if(flags & CURLU_URLENCODE)
-      /* it might have encoded more than the path so cut it */
-      u->path[pathlen] = 0;
-
     if(!(flags & CURLU_PATH_AS_IS)) {
       /* remove ../ and ./ sequences according to RFC3986 */
       char *dedot;
@@ -1216,6 +1242,13 @@ static CURLUcode handle_path(CURLU *u, const char *path,
         curlx_free(u->path);
         u->path = dedot;
       }
+    }
+
+    /* paths for file:// scheme can be one byte, others need to be two */
+    if(!u->path) {
+      u->path = curlx_memdup0(path, pathlen);
+      if(!u->path)
+        return CURLUE_OUT_OF_MEMORY;
     }
   }
   return CURLUE_OK;
@@ -1959,24 +1992,33 @@ static CURLUcode url_encode_part(struct dynbuf *encp,
                                  bool pathmode,
                                  bool equalsencode)
 {
-  const unsigned char *i;
+  const unsigned char *i = (const unsigned char *)part;
 
-  for(i = (const unsigned char *)part; *i; i++) {
+  while(*i) {
     CURLcode result;
-    if((*i == ' ') && plusencode)
+    if((*i == ' ') && plusencode) {
       result = curlx_dyn_addn(encp, "+", 1);
+      i++;
+    }
     else if(ISUNRESERVED(*i) ||
             (pathmode && allowed_in_path(*i)) ||
             ((*i == '=') && equalsencode)) {
-      if((*i == '=') && equalsencode)
-        /* only skip the first equals sign */
-        equalsencode = FALSE;
-      result = curlx_dyn_addn(encp, i, 1);
+      const unsigned char *start = i;
+      do {
+        if((*i == '=') && equalsencode)
+          /* only skip the first equals sign */
+          equalsencode = FALSE;
+        i++;
+      } while(ISUNRESERVED(*i) ||
+              (pathmode && allowed_in_path(*i)) ||
+              ((*i == '=') && equalsencode));
+      result = curlx_dyn_addn(encp, start, (size_t)(i - start));
     }
     else {
       unsigned char out[3] = { '%' };
       Curl_hexbyte(&out[1], *i);
       result = curlx_dyn_addn(encp, out, 3);
+      i++;
     }
     if(result)
       return cc2cu(result);
@@ -1985,23 +2027,26 @@ static CURLUcode url_encode_part(struct dynbuf *encp,
 }
 
 static CURLUcode url_uppercasehex_part(struct dynbuf *encp,
-                                       const char *part)
+                                       const char *part,
+                                       size_t plen)
 {
   char *p;
-  CURLcode result = curlx_dyn_add(encp, part);
+  CURLcode result = curlx_dyn_addn(encp, part, plen);
   if(result)
     return cc2cu(result);
-  p = curlx_dyn_ptr(encp);
-  while(*p) {
-    /* make sure percent encoded are upper case */
-    if((*p == '%') && ISXDIGIT(p[1]) && ISXDIGIT(p[2]) &&
-       (ISLOWER(p[1]) || ISLOWER(p[2]))) {
-      p[1] = Curl_raw_toupper(p[1]);
-      p[2] = Curl_raw_toupper(p[2]);
-      p += 3;
+  p = memchr(curlx_dyn_ptr(encp), '%', curlx_dyn_len(encp));
+  if(p) {
+    while(*p) {
+      /* make sure percent encoded are upper case */
+      if((*p == '%') && ISXDIGIT(p[1]) && ISXDIGIT(p[2]) &&
+         (ISLOWER(p[1]) || ISLOWER(p[2]))) {
+        p[1] = Curl_raw_toupper(p[1]);
+        p[2] = Curl_raw_toupper(p[2]);
+        p += 3;
+      }
+      else
+        p++;
     }
-    else
-      p++;
   }
   return CURLUE_OK;
 }
@@ -2175,7 +2220,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     if(urlencode)
       status = url_encode_part(&enc, part, plusencode, pathmode, equalsencode);
     else
-      status = url_uppercasehex_part(&enc, part);
+      status = url_uppercasehex_part(&enc, part, nalloc);
     if(!status) {
       newp = curlx_dyn_ptr(&enc);
 
