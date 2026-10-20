@@ -71,6 +71,8 @@ specific information about each certificate that is stored in the original
 file as comments and using this option makes those comments get passed on to
 the output file. The meta data is not parsed in any way by mk-ca-bundle.
 
+(Added in 1.34) SHA-256 fingerprints are always included by default.
+
 ## -n
 
 Do not download *certdata.txt* - use the existing.
@@ -114,6 +116,11 @@ unlink (remove) *certdata.txt* after processing
 ## -v
 
 be verbose and print out processed certificate authorities
+
+## -x
+
+(Added in 1.35) Exclude list of SHA-256 fingerprints. Comma separated,
+case-insensitive, whitespace and ':' byte delimiters are ignored.
 
 # EXIT STATUS
 
