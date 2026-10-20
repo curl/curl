@@ -579,6 +579,7 @@ jobs:
           fi
 
       - name: 'disk space used'
+        continue-on-error: true
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   mingw-w64-standalone-downloads:
@@ -787,6 +788,7 @@ jobs:
           cmake --build bld --target curl-examples-build
 
       - name: 'disk space used'
+        continue-on-error: true
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   linux-cross-mingw-w64:
@@ -1238,4 +1240,5 @@ jobs:
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
 
       - name: 'disk space used'
+        continue-on-error: true
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
