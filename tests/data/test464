@@ -15,7 +15,7 @@ Debug
 asyn-rr
 </features>
 <command>
-https://localhost:%NOLISTENPORT/464
+https://localhost:%NOLISTENPORT/%TESTNUMBER
 </command>
 
 <name>

@@ -930,8 +930,13 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_ENABLE_NPN:
     break;
   case CURLOPT_SSLENGINE_DEFAULT:
-    CURL_EASY_STR_CLEAR(data, STRING_SSL_ENGINE);
-    result = Curl_ssl_set_engine_default(data);
+#ifdef USE_OPENSSL
+    if(Curl_ssl_backend() != CURLSSLBACKEND_OPENSSL)
+      return CURLE_NOT_BUILT_IN;
+    data->set.engine_default = (arg == 1);
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
@@ -1167,8 +1172,8 @@ static CURLcode setopt_long_proto(struct Curl_easy *data, CURLoption option,
     break;
 #ifndef CURL_DISABLE_WEBSOCKETS
   case CURLOPT_WS_OPTIONS:
-    s->ws_raw_mode = (bool)(arg & CURLWS_RAW_MODE);
-    s->ws_no_auto_pong = (bool)(arg & CURLWS_NOAUTOPONG);
+    s->ws_raw_mode = !!(arg & CURLWS_RAW_MODE);
+    s->ws_no_auto_pong = !!(arg & CURLWS_NOAUTOPONG);
     break;
 #endif
   default:
@@ -1957,12 +1962,9 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     /*
      * String that holds the SSL crypto engine.
      */
-    if(ptr && ptr[0]) {
-      result = Curl_setstropt(data, STRING_SSL_ENGINE, ptr);
-      if(!result) {
-        result = Curl_ssl_set_engine(data, ptr);
-      }
-    }
+    if(Curl_ssl_backend() != CURLSSLBACKEND_OPENSSL)
+      return CURLE_NOT_BUILT_IN;
+    result = Curl_setstropt(data, STRING_SSL_ENGINE, ptr);
     break;
   case CURLOPT_ISSUERCERT:
     /*
@@ -2760,9 +2762,8 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_send_speed = offt;
     /* use minimal burst rate of 32k. some protocol batch IO */
-    Curl_rlimit_init(&data->progress.ul.rlimit, offt,
-                     CURLMAX(offt, (32 * 1024)),
-                     Curl_pgrs_now(data));
+    Curl_rlimit_change(&data->progress.ul.rlimit, offt,
+                     CURLMAX(offt, (32 * 1024)));
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
@@ -2773,9 +2774,8 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_recv_speed = offt;
     /* use minimal burst rate of 32k. some protocol batch IO */
-    Curl_rlimit_init(&data->progress.dl.rlimit, offt,
-                     CURLMAX(offt, (32 * 1024)),
-                     Curl_pgrs_now(data));
+    Curl_rlimit_change(&data->progress.dl.rlimit, offt,
+                     CURLMAX(offt, (32 * 1024)));
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*

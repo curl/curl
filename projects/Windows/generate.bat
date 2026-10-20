@@ -185,6 +185,7 @@ rem
     set "var=!var:%S02%=%R02%!"
     set "var=!var:%S03%=%R03%!"
     set "var=!var:%S04%=%R04%!"
+    if "%CURL_CI%" NEQ "" set "var=!var:_DEBUG;=_DEBUG;CURL_DEBUG_MSVC_CRTDBG;!"
 
     set "var=!var:*:=!"
 

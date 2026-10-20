@@ -269,6 +269,13 @@ static const char * const disabled[] = {
 #else
   "OFF"
 #endif
+  ,
+  "getrlimit: "
+#ifdef HAVE_GETRLIMIT
+  "ON"
+#else
+  "OFF"
+#endif
 };
 
 int main(void)

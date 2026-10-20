@@ -28,7 +28,7 @@ OpenSSL
 https
 </server>
 <precheck>
-%PERL %SRCDIR/libtest/test%TESTNUMBER.pl %CURL
+%PERL %SRCDIR/libtest/test307.pl %CURL
 </precheck>
 
 <name>

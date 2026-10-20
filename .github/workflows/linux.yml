@@ -56,7 +56,7 @@ env:
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
   OPENSSL_VERSION: 4.0.3
   # renovate: datasource=github-tags depName=rustls/rustls-ffi
-  RUSTLS_VERSION: 0.15.4
+  RUSTLS_VERSION: 0.15.5
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl extractVersion=^v?(?<version>.+)-stable$
   WOLFSSL_VERSION: 5.9.4
 
@@ -119,7 +119,6 @@ jobs:
 
           - name: 'libressl Fil-C'
             install_steps: filc libressl-filc nghttp2-filc pytest
-            tflags: '!776'  # adds 1-9 minutes to the test run step, and fails consistently
             CC: /home/runner/filc/build/bin/filcc
             PKG_CONFIG_PATH: /home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
@@ -920,7 +919,6 @@ jobs:
         run: |
           if [ "${TEST_TARGET}" = 'test-ci' ] && [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
             TFLAGS+=' -j6'
-            TFLAGS+=' !776'  # skip long-running flaky test
             TFLAGS+=' !1674'  # skip long-running test
             if [[ "${MATRIX_INSTALL_PACKAGES}" = *'libgss-dev'* ]]; then
               TFLAGS+=' ~2077 ~2078'  # memory leaks from Curl_auth_decode_spnego_message() -> gss_init_sec_context()

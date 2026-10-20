@@ -46,6 +46,7 @@ static CURLcode test_unit3304(const char *arg)
   struct Curl_peer origin;
   struct ssl_peer peer;
   struct ssl_filter_config ssl;
+  struct Curl_scheme scheme;
   char *key1 = NULL;
   char *key2 = NULL;
   static char base_hostname[] = "example.com";
@@ -59,10 +60,20 @@ static CURLcode test_unit3304(const char *arg)
   static char alt_ctype[]     = "P12";
   static char lc_ctype[]      = "pem";
   static char lc_ktype[]      = "pem";
+  static char cafile_fields[] = "/root:CApath-/certs";
+  static char cafile[]        = "/root";
+  static char capath[]        = "/certs";
+  static char cipher_fields[] = "DEFAULT:CIPHER13-TLS_AES_128_GCM_SHA256";
+  static char cipher_list[]   = "DEFAULT";
+  static char cipher_list13[] = "TLS_AES_128_GCM_SHA256";
+
+  memset(&scheme, 0, sizeof(scheme));
+  scheme.name = "https";
 
   memset(&origin, 0, sizeof(origin));
   origin.hostname = base_hostname;
   origin.port = 443;
+  origin.scheme = &scheme;
 
   memset(&peer, 0, sizeof(peer));
   peer.origin = &origin;
@@ -84,8 +95,43 @@ static CURLcode test_unit3304(const char *arg)
               "peer key build failed");
   fail_unless(key1 && key2 && !strcmp(key1, key2),
               "identical config should produce identical peer key");
+  /* Keep legacy serialized keys separate from this key format. */
+  fail_unless(key1 && !strncmp(key1, "https:example.com:443:KEY-V3:",
+                               sizeof("https:example.com:443:KEY-V3:") - 1),
+              "peer key must carry the V3 format marker after the port");
   curlx_safefree(key1);
   curlx_safefree(key2);
+
+  /* A delimiter in a CA path must not create a second trust field. */
+  ssl.CAfile = cafile_fields;
+  ssl.CApath = NULL;
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
+              "peer key build failed");
+  ssl.CAfile = cafile;
+  ssl.CApath = capath;
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
+              "peer key build failed");
+  fail_unless(key1 && key2 && strcmp(key1, key2),
+              "CA file and path must not alias another CA file");
+  curlx_safefree(key1);
+  curlx_safefree(key2);
+  ssl.CAfile = NULL;
+  ssl.CApath = NULL;
+
+  /* Non-path fields must not inject a following field either. */
+  ssl.cipher_list = cipher_fields;
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
+              "peer key build failed");
+  ssl.cipher_list = cipher_list;
+  ssl.cipher_list13 = cipher_list13;
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
+              "peer key build failed");
+  fail_unless(key1 && key2 && strcmp(key1, key2),
+              "cipher fields must have unambiguous boundaries");
+  curlx_safefree(key1);
+  curlx_safefree(key2);
+  ssl.cipher_list = NULL;
+  ssl.cipher_list13 = NULL;
 
   /* key_passwd is NOT in the peer key: lookup uses timing-safe comparison
    * via cf_ssl_scache_match_auth(). */

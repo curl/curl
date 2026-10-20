@@ -1478,8 +1478,6 @@ const struct Curl_ssl Curl_ssl_rustls = {
   cr_get_internals,                /* get_internals */
   cr_close,                        /* close_one */
   NULL,                            /* close_all */
-  NULL,                            /* set_engine */
-  NULL,                            /* set_engine_default */
   NULL,                            /* engines_list */
   NULL,                            /* sha256sum */
   cr_recv,                         /* recv decrypted data */

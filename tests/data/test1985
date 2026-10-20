@@ -59,14 +59,14 @@ GET /%TESTNUMBER0001 HTTP/1.1
 Host: secondhost:%HTTPPORT
 Accept: */*
 
-GET /19850001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: secondhost:%HTTPPORT
-Authorization: Digest username="alice", realm="host-b-realm", nonce="2", uri="/19850001", response="b3186bc857ad5bb63947c39476d37290"
+Authorization: Digest username="alice", realm="host-b-realm", nonce="2", uri="/%TESTNUMBER0001", response="b3186bc857ad5bb63947c39476d37290"
 Accept: */*
 
-GET /19850001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: secondhost:%HTTPPORT
-Authorization: Digest username="alice", realm="host-b-realm", nonce="2", uri="/19850001", response="b3186bc857ad5bb63947c39476d37290"
+Authorization: Digest username="alice", realm="host-b-realm", nonce="2", uri="/%TESTNUMBER0001", response="b3186bc857ad5bb63947c39476d37290"
 Accept: */*
 
 </protocol>

@@ -32,6 +32,7 @@ version: 7.50.0.{build}
 
 environment:
   DO_NOT_TRACK: '1'
+  CURL_TEST_MIN: 200
 
   matrix:
     # CMake Visual Studio builds
@@ -40,6 +41,8 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
+      TFLAGS: '!feat:with-server'
+      RUN_TESTS_VIA_CMAKE: 'yes'
 
     - job_name: 'CM VS2026, Release, arm64, Schannel, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
@@ -54,6 +57,7 @@ environment:
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
+      TFLAGS: '!feat:with-server'
 
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -61,6 +65,7 @@ environment:
       CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
       CMAKE_GENERATE: '-A Win32'
+      TFLAGS: '--min=1600'
 
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -87,6 +92,7 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       CMAKE_GENERATOR: 'Visual Studio 16 2019'
       CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+      TFLAGS: '!feat:with-server'
 
     - job_name: 'CM VS2026, Debug, x64, OpenSSL 3.6 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
@@ -95,11 +101,13 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
       CMAKE_GENERATE: '-A x64 -T ClangCl -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
       CREATE_ARTIFACT: 'true'
+      TFLAGS: '!feat:with-server'
 
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON'
+      TFLAGS: '!feat:with-server'
 
     # VisualStudioSolution builds
 
@@ -120,6 +128,11 @@ install:
 
 build_script:
   - cmd: sh -c ./appveyor.sh
+
+init:
+  - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
+on_finish:
+  - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
 
 clone_depth: 10
 

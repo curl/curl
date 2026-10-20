@@ -44,6 +44,8 @@ env:
   OPENSSH_WINDOWS_SHA256_WIN64: 23f50f3458c4c5d0b12217c6a5ddfde0137210a30fa870e98b29827f7b43aba5
   # renovate: datasource=github-tags depName=mtrojnar/stunnel versioning=semver-coerced extractVersion=^stunnel-(?<version>.+)$
   STUNNEL_VERSION: 5.82
+  CYGWIN: 'proc_retry:1'
+  MSYS: 'proc_retry:1'
 
 jobs:
   build-cache:
@@ -105,7 +107,6 @@ jobs:
           work-vol: 'D:'
           # https://cygwin.com/mirrors.html
           # Main mirror status: https://archlinux.org/mirrors/kernel.org/
-          site: https://mirrors.kernel.org/sourceware/cygwin/
           # https://cygwin.com/packages/
           packages: >-
             ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
@@ -554,6 +555,9 @@ jobs:
             else
               PATH="/c/OpenSSH-Win64:$PATH"
             fi
+          fi
+          if [[ "${MATRIX_INSTALL}" != *'python'* ]]; then
+            export CURL_TEST_NO_PYTHON=1  # we have no Python here, skip tests needing it
           fi
           PATH="$PATH:/c/my-stunnel/bin"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -1043,7 +1047,7 @@ jobs:
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags+=' -DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
-              ldflags+=' -OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
+              ldflags+=' -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
             if [ "${TFLAGS}" = 'skiprun' ]; then
@@ -1111,8 +1115,8 @@ jobs:
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_RC_FLAGS="${rcflags}" \
-              -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-              -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
+              -DCMAKE_EXE_LINKER_FLAGS="${ldflags}" \
+              -DCMAKE_SHARED_LINKER_FLAGS="${ldflags}" \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_DROP_UNUSED=ON \
               -DCURL_WERROR=ON \

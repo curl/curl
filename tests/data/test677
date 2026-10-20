@@ -24,7 +24,7 @@ IMAP with CONNECT_ONLY, custom command then exit
 </name>
 
 <command>
-imap://%HOSTIP:%IMAPPORT/677
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER
 </command>
 
 </client>

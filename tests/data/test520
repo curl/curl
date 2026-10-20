@@ -28,7 +28,7 @@ ftp
 FTP RETR with FILETIME
 </name>
 <command>
-ftp://%HOSTIP:%FTPPORT/520
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -39,11 +39,11 @@ ftp://%HOSTIP:%FTPPORT/520
 USER anonymous
 PASS ftp@example.com
 PWD
-MDTM 520
+MDTM %TESTNUMBER
 EPSV
 TYPE I
-SIZE 520
-RETR 520
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
 QUIT
 </protocol>
 </verify>

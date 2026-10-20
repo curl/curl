@@ -63,6 +63,14 @@ struct Curl_ssl_scache_peer {
 
 #define GOOD_SCACHE(x) ((x) && (x)->magic == CURL_SCACHE_MAGIC)
 
+/* Prefix the length to keep field boundaries unambiguous. */
+static CURLcode cf_ssl_peer_key_add_string(struct dynbuf *buf,
+                                           const char *name,
+                                           const char *value)
+{
+  return curlx_dyn_addf(buf, ":%s-%zu:%s", name, strlen(value), value);
+}
+
 static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
                                          const char *name,
                                          const char *path,
@@ -75,7 +83,7 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
 #ifdef _WIN32
     char *abspath = _fullpath(NULL, path, 0);
     if(abspath) {
-      CURLcode result = curlx_dyn_addf(buf, ":%s-%s", name, abspath);
+      CURLcode result = cf_ssl_peer_key_add_string(buf, name, abspath);
       /* !checksrc! disable BANNEDFUNC 1 */
       free(abspath); /* allocated by CRT, use system free() */
       return result;
@@ -85,7 +93,7 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
     if(path[0] != '/') {
       char *abspath = realpath(path, NULL);
       if(abspath) {
-        CURLcode result = curlx_dyn_addf(buf, ":%s-%s", name, abspath);
+        CURLcode result = cf_ssl_peer_key_add_string(buf, name, abspath);
         /* !checksrc! disable BANNEDFUNC 1 */
         free(abspath); /* allocated by libc, free without memdebug */
         return result;
@@ -93,7 +101,7 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
       *is_local = TRUE;
     }
 #endif
-    return curlx_dyn_addf(buf, ":%s-%s", name, path);
+    return cf_ssl_peer_key_add_string(buf, name, path);
   }
   return CURLE_OK;
 }
@@ -145,7 +153,7 @@ static CURLcode cf_ssl_peer_key_add_mtls(struct dynbuf *buf,
   }
   if(ssl->cert_type && ssl->cert_type[0]) {
     size_t i;
-    result = curlx_dyn_add(buf, ":CT-");
+    result = curlx_dyn_addf(buf, ":CT-%zu:", strlen(ssl->cert_type));
     for(i = 0; !result && ssl->cert_type[i]; i++) {
       char c = Curl_raw_toupper(ssl->cert_type[i]);
       result = curlx_dyn_addn(buf, &c, 1);
@@ -155,7 +163,7 @@ static CURLcode cf_ssl_peer_key_add_mtls(struct dynbuf *buf,
   }
   if(ssl->key_type && ssl->key_type[0]) {
     size_t i;
-    result = curlx_dyn_add(buf, ":KT-");
+    result = curlx_dyn_addf(buf, ":KT-%zu:", strlen(ssl->key_type));
     for(i = 0; !result && ssl->key_type[i]; i++) {
       char c = Curl_raw_toupper(ssl->key_type[i]);
       result = curlx_dyn_addn(buf, &c, 1);
@@ -216,9 +224,9 @@ static CURLcode ssl_peer_key_add_vrfy(struct dynbuf *buf,
   }
   if((!ssl->verifypeer || !ssl->verifyhost) &&
      peer->peer && !Curl_peer_equal(peer->origin, peer->peer)) {
-    result = curlx_dyn_addf(buf, ":CHOST-%s:CPORT-%u",
-                            peer->peer->hostname,
-                            peer->peer->port);
+    result = cf_ssl_peer_key_add_string(buf, "CHOST", peer->peer->hostname);
+    if(!result)
+      result = curlx_dyn_addf(buf, ":CPORT-%u", peer->peer->port);
     if(result)
       return result;
   }
@@ -238,7 +246,8 @@ static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
   *ppeer_key = NULL;
   curlx_dyn_init(&buf, 10 * 1024);
 
-  result = curlx_dyn_addf(&buf, "%s:%d",
+  result = curlx_dyn_addf(&buf, "%s:%s:%d:KEY-V3",
+                          peer->origin->scheme->name,
                           peer->origin->hostname, peer->origin->port);
   if(result)
     goto out;
@@ -260,23 +269,23 @@ static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
       goto out;
   }
   if(ssl->cipher_list) {
-    result = curlx_dyn_addf(&buf, ":CIPHER-%s", ssl->cipher_list);
+    result = cf_ssl_peer_key_add_string(&buf, "CIPHER", ssl->cipher_list);
     if(result)
       goto out;
   }
   if(ssl->cipher_list13) {
-    result = curlx_dyn_addf(&buf, ":CIPHER13-%s", ssl->cipher_list13);
+    result = cf_ssl_peer_key_add_string(&buf, "CIPHER13", ssl->cipher_list13);
     if(result)
       goto out;
   }
   if(ssl->curves) {
-    result = curlx_dyn_addf(&buf, ":CURVES-%s", ssl->curves);
+    result = cf_ssl_peer_key_add_string(&buf, "CURVES", ssl->curves);
     if(result)
       goto out;
   }
   if(ssl->signature_algorithms) {
-    result = curlx_dyn_addf(&buf, ":SIGALGS-%s",
-                            ssl->signature_algorithms);
+    result = cf_ssl_peer_key_add_string(&buf, "SIGALGS",
+                                        ssl->signature_algorithms);
     if(result)
       goto out;
   }
@@ -312,7 +321,7 @@ static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
       goto out;
   }
   if(ssl->pinned_key && ssl->pinned_key[0]) {
-    result = curlx_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
+    result = cf_ssl_peer_key_add_string(&buf, "Pinned", ssl->pinned_key);
     if(result)
       goto out;
   }
@@ -325,7 +334,7 @@ static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
     result = CURLE_FAILED_INIT;
     goto out;
   }
-  result = curlx_dyn_addf(&buf, ":IMPL-%s", tls_id);
+  result = cf_ssl_peer_key_add_string(&buf, "IMPL", tls_id);
   if(result)
     goto out;
 

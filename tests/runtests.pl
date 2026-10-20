@@ -185,6 +185,7 @@ my %runnersrunning;    # tests currently running by runner ID
 my $short;
 my $no_debuginfod;
 my $postmortem;   # display detailed info about failed tests
+my $show_success_logs = 0;  # display detailed info about passed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
 my $jobs = 0;
@@ -510,29 +511,18 @@ sub checksystemfeatures {
     my $feat;
     my $curl;
     my $libcurl;
-    my $versretval;
-    my $versnoexec;
-    my @version = ();
     my @disabled;
     my $dis = "";
 
-    my $curlverout = "$LOGDIR/curlverout.log";
-    my $curlvererr = "$LOGDIR/curlvererr.log";
-    my $versioncmd = exerunner() . shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
-
-    unlink($curlverout);
-    unlink($curlvererr);
-
-    $versretval = runclient($versioncmd);
-    $versnoexec = $!;
+    my $versioncmd = exerunner() . shell_quote($CURL) . ' --disable --version 2>&1';
+    my $versout = qx($versioncmd);
+    my $versretval = $?;
+    print "CMD ($versretval): $versioncmd\n" if($verbose && !$torture);
+    my @version = split(/\n/, $versout);
 
     my $current_time = int(time());
     $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
     $DATE = strftime "%Y-%m-%d", gmtime($current_time);
-
-    open(my $versout, "<", $curlverout);
-    @version = <$versout>;
-    close($versout);
 
     open(my $disabledh, "-|", exerunner() . shell_quote($CURLINFO));
     while(<$disabledh>) {
@@ -757,7 +747,7 @@ sub checksystemfeatures {
         logmsg "$versioncmd \n";
         if($versretval == -1) {
             logmsg "command failed with: \n";
-            logmsg "$versnoexec \n";
+            logmsg "$versretval \n";
         }
         elsif($versretval & 127) {
             logmsg sprintf("command died with signal %d, and %s coredump.\n",
@@ -766,29 +756,16 @@ sub checksystemfeatures {
         else {
             logmsg sprintf("command exited with value %d \n", $versretval >> 8);
         }
-        logmsg "contents of $curlverout: \n";
-        displaylogcontent($curlverout);
-        logmsg "contents of $curlvererr: \n";
-        displaylogcontent($curlvererr);
+        logmsg "curl version output: \n";
+        logmsg "$versout \n";
         die "Could not get curl's version";
-    }
-
-    if(-r "../lib/curl_config.h") {
-        open(my $conf, "<", "../lib/curl_config.h");
-        while(<$conf>) {
-            if($_ =~ /^\#define HAVE_GETRLIMIT/) {
-                # set if system has getrlimit()
-                $feature{"getrlimit"} = 1;
-            }
-        }
-        close($conf);
     }
 
     if($feature{"IPv6"}) {
         # client has IPv6 support
 
         # check if the HTTP server has it!
-        my $cmd = server_exe('sws')." --version";
+        my $cmd = server_exe('sws') . " --logfile $dev_null --version";
         my @sws = qx($cmd);
         if($sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
@@ -796,7 +773,7 @@ sub checksystemfeatures {
         }
 
         # check if the FTP server has it!
-        $cmd = server_exe('sockfilt')." --version";
+        $cmd = server_exe('sockfilt') . " --logfile $dev_null --version";
         @sws = qx($cmd);
         if($sws[0] =~ /IPv6/) {
             # FTP server has IPv6 support!
@@ -806,7 +783,7 @@ sub checksystemfeatures {
 
     if($feature{"UnixSockets"}) {
         # client has Unix sockets support, check whether the HTTP server has it
-        my $cmd = server_exe('sws')." --version";
+        my $cmd = server_exe('sws') . " --logfile $dev_null --version";
         my @sws = qx($cmd);
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
@@ -818,7 +795,7 @@ sub checksystemfeatures {
         push @global_strip_file, $strip_cacert;
     }
 
-    open(my $manh, "-|", shell_quote($CURL) . " -M 2>&1");
+    open(my $manh, "-|", shell_quote($CURL) . " --disable --manual 2>&1");
     while(my $s = <$manh>) {
         if($s =~ /built-in manual was disabled at build-time/) {
             $feature{"manual"} = 0;
@@ -829,6 +806,9 @@ sub checksystemfeatures {
     }
     close($manh);
 
+    $feature{"with-server"} = 1;  # support running tests that need server(s)
+    $feature{"without-server"} = 1;  # support running tests that need no server
+    $feature{"python"} = !$ENV{'CURL_TEST_NO_PYTHON'};
     $feature{"unittest"} = 1;
     $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
     $feature{"nghttpx-h3"} = !!$nghttpx_h3;
@@ -1084,6 +1064,7 @@ sub singletest_shouldrun {
     }
     else {
         @what = getpart("client", "features");
+        push @what, getpart("client", "server") ? "with-server" : "without-server";
     }
 
     # We require a feature to be present
@@ -1131,7 +1112,7 @@ sub singletest_shouldrun {
         # Only evaluate keywords if the section is present.
         else {
             # Prefix features with "feat:" and add to keywords list.
-            push @info_keywords, map { "feat:" . lc($_) } getpart("client", "features");
+            push @info_keywords, map { "feat:" . lc($_) } @what;
 
             my $match;
             for my $k (@info_keywords) {
@@ -1548,11 +1529,6 @@ sub singletest_check {
         if($hash{'nonewline'}) {
             # cut off the final newline from the final line of the upload data
             chomp($upload[-1]);
-        }
-        for my $line (@upload) {
-            subbase64(\$line);
-            subsha256base64file(\$line);
-            substrippemfile(\$line);
         }
 
         # verify uploaded data
@@ -2034,6 +2010,9 @@ sub singletest {
                 displaylogs($rid, $testnum);
             }
         }
+        elsif($show_success_logs) {
+            displaylogs($rid, $testnum);
+        }
 
         #######################################################################
         # Load test file for this test number
@@ -2511,6 +2490,9 @@ while(@ARGV) {
             die "Failed to parse '-o $ARGV[0]'. May contain unexpected characters.\n";
         }
     }
+    elsif($ARGV[0] eq "-S") {
+        $show_success_logs = 1;
+    }
     elsif($ARGV[0] eq "-p") {
         $postmortem = 1;
     }
@@ -2608,6 +2590,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -rf      full run time statistics
   --repeat=[num] run the given tests this many times
   --retry=[num] number of attempts for the whole test run to retry failed tests
+  -S       print log file contents when a test passes
   -s       short output
   --seed=[num] set the random seed to a fixed number
   --shallow=[num] randomly makes the torture tests "thinner"
@@ -2671,7 +2654,7 @@ if(!$randseed) {
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year + 1900) * 100 + $mon + 1;
     print "Using curl: $CURL\n";
-    open(my $curlvh, "-|", exerunner() . shell_quote($CURL) . " --version 2>$dev_null") or
+    open(my $curlvh, "-|", exerunner() . shell_quote($CURL) . " --disable --version 2>$dev_null") or
         die "could not get curl version!";
     my @c = <$curlvh>;
     close($curlvh) or die "could not get curl version!";
@@ -3204,6 +3187,9 @@ while(1) {
                     }
                     elsif(!$error) {
                         $ok++; # successful test counter
+                        if($show_success_logs) {
+                            displaylogs($ridready, $testnum);
+                        }
                     }
                 }
             }

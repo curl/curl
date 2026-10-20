@@ -29,6 +29,7 @@
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "bufref.h"
+#include "url.h" /* Curl_uc_to_curlcode() */
 #include "curlx/strparse.h"
 
 /*
@@ -81,7 +82,8 @@ static CURLcode effective_url(struct Curl_easy *data,
                               const char **param_charp)
 {
   const char *s = Curl_bufref_ptr(&data->state.url);
-  *param_charp = s ? s : "";
+  /* never return the URL unfiltered */
+  *param_charp = s ? NULL : "";
   if(s) {
     char *url = NULL;
     /* Make a copy of the URL without credentials */
@@ -103,15 +105,17 @@ static CURLcode effective_url(struct Curl_easy *data,
     curl_url_cleanup(u);
 
     if(uc || !url)
-      return CURLE_OUT_OF_MEMORY;
+      return uc ? Curl_uc_to_curlcode(uc) : CURLE_OUT_OF_MEMORY;
     if(strcmp(url, s)) {
       /* they are different */
       curlx_free(data->info.effective_url);
       data->info.effective_url = url;
       *param_charp = url;
     }
-    else
+    else {
       curl_free(url);
+      *param_charp = s;
+    }
   }
   return CURLE_OK;
 }

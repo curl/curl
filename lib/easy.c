@@ -1006,7 +1006,6 @@ CURL *curl_easy_duphandle(CURL *curl)
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_duphandle, NULL)) {
     struct Curl_easy *data = curl;
-    const char *str;
 
     outcurl = curlx_calloc(1, sizeof(struct Curl_easy));
     if(!outcurl)
@@ -1078,16 +1077,9 @@ CURL *curl_easy_duphandle(CURL *curl)
         goto fail;
     }
 
-    /* Reinitialize an SSL engine for the new handle
-     * note: the engine name has already been copied by dupset */
-    str = CURL_EASY_STR(outcurl, STRING_SSL_ENGINE);
-    if(str) {
-      if(Curl_ssl_set_engine(outcurl, str))
-        goto fail;
-    }
-
 #ifndef CURL_DISABLE_ALTSVC
     if(data->asi) {
+      const char *str;
       outcurl->asi = Curl_altsvc_init();
       if(!outcurl->asi)
         goto fail;
@@ -1098,6 +1090,7 @@ CURL *curl_easy_duphandle(CURL *curl)
 #endif
 #ifndef CURL_DISABLE_HSTS
     if(data->hsts) {
+      const char *str;
       outcurl->hsts = Curl_hsts_init();
       if(!outcurl->hsts)
         goto fail;

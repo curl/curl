@@ -26,12 +26,12 @@ http
 <name>
 HTTP with -d @file with file containing CR, LF and NUL byte
 </name>
-<file name="%LOGDIR/input463">
+<file name="%LOGDIR/input%TESTNUMBER">
 %hex[one%0dtwo%0dthree]hex%
 %hex[four%00five]hex%
 </file>
 <command>
--d @%LOGDIR/input463 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-d @%LOGDIR/input%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

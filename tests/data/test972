@@ -44,7 +44,7 @@ CURL_DEBUG_VERSION=curl-unit-test-fake-version
 Verify JSON output
 </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -s --write-out '%{json}\n' -o %LOGDIR/out972
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -s --write-out '%{json}\n' -o %LOGDIR/out%TESTNUMBER
 </command>
 </client>
 

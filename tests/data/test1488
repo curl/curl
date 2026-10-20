@@ -15,7 +15,7 @@ symbols-in-versions and man pages agree on added-in versions
 </name>
 
 <command type="perl">
-%SRCDIR/test1488.pl %SRCDIR/.. ../include/curl %SRCDIR/../docs/VERSIONS.md
+%SRCDIR/test1488.pl %SRCDIR/.. %SRCDIR/../docs/VERSIONS.md
 </command>
 </client>
 

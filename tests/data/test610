@@ -20,7 +20,7 @@ Dummy test file for rmdir test
 sftp
 </server>
 <precheck>
-%PERL %SRCDIR/libtest/test%TESTNUMBER.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/libtest/test610.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP post-quote rmdir
@@ -36,7 +36,7 @@ Dummy test file for rmdir test
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test%TESTNUMBER.pl gone %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/test%TESTNUMBER.dir
 </postcheck>
 </verify>
 </testcase>

@@ -112,12 +112,24 @@ struct alpn_spec;
 struct ssl_peer;
 struct Curl_ssl_session;
 
+struct provider {
+  /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
+  void *engine;
+  /* void instead of OSSL_PROVIDER */
+  void *provider;
+  void *baseprov;
+  void *libctx;
+  char *propq; /* for a provider */
+  BIT(provider_loaded);
+};
+
 /* Struct to hold a curl OpenSSL instance */
 struct ossl_ctx {
   /* these ones requires specific SSL-types */
   SSL_CTX *ssl_ctx;
   SSL *ssl;
   BIO_METHOD *bio_method;
+  struct provider p;
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */
   int blocked_ssl_write_len;
@@ -203,6 +215,8 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
 /* Report properties of a successful handshake */
 void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx);
+
+void Curl_osslctx_cleanup(struct ossl_ctx *octx);
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */
