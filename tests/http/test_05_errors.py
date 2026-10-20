@@ -68,8 +68,8 @@ class HttpPureResp:
         self.port = 0
 
     def start(self):
-
         log.info("pr start")
+
         def startup(ports: Dict[str, int]) -> bool:
             self.port = ports[self.name]
             log.info(f"pr port={self.port}")
