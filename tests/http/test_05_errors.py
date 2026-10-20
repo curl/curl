@@ -39,7 +39,7 @@ log = logging.getLogger(__name__)
 
 
 def pr_process(self):
-    log.info(f"pr accepting")
+    log.info("pr accepting")
     try:
         while self._socket and not self._done:
             conn, _ = self._socket.accept()
@@ -74,7 +74,7 @@ class HttpPureResp:
             self.port = ports[self.name]
             log.info(f"pr port={self.port}")
             self._socket = socket.create_server(('127.0.0.1', self.port))
-            log.info(f"pr socket open")
+            log.info("pr socket open")
             self._thread = threading.Thread(target=pr_process, daemon=True, args=[self])
             self._thread.start()
             self.env.update_ports(ports)
@@ -106,7 +106,6 @@ class HttpPureResp:
             time.sleep(.1)
         log.error(f"Server still not responding after {timeout}")
         return False
-
 
 
 @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.55'),
