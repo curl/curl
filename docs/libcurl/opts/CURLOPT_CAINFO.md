@@ -60,7 +60,7 @@ which routes TLS through libcurl. It is not supported by Apple's OpenLDAP
 fork. WinLDAP uses the Windows CA store for root certificates.
 
 Connections that have been used may be kept in the connection pool and can be
-reused in a later transfer involving the same orgin, and for connections that
+reused in a later transfer involving the same origin, and for connections that
 gets closed, libcurl keeps cached TLS sessions that might speed up subsequent
 TLS handshakes with the same origin. Changing CA cert related options might
 make libcurl reuse a connection that that would not be verified if a new
