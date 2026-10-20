@@ -398,10 +398,12 @@ static size_t content_disposition(const char *str, const char *end,
       }
       break;
     }
-    if(!outs->stream && !tool_create_output_file(outs, per->config))
-      return CURL_WRITEFUNC_ERROR;
-    if(tool_write_headers(&per->hdrcbdata, outs->stream))
-      return CURL_WRITEFUNC_ERROR;
+    /* No usable filename in this header. Do not create the output file
+       yet: a later Content-Disposition header may still provide a name, and
+       opening the URL-derived name here would truncate an existing file
+       that -J is meant to leave alone. The file is created once the body
+       arrives (or at the end of the transfer) and any buffered headers are
+       written then. */
   } /* content-disposition handling */
 
   if(hdrcbdata->honor_cd_filename &&
