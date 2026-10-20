@@ -1714,20 +1714,32 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
   detail = wolfSSL_get_error(wssl->ssl, ret);
   CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);
 
-  /* On a successful handshake with an IP address, do an extra check
-   * on the peer certificate */
+  /* With WOLFSSL_VERIFY_NONE, the domain check configured in step1 is not
+   * performed. Keep CURLOPT_SSL_VERIFYHOST independent of
+   * CURLOPT_SSL_VERIFYPEER by checking the peer name ourselves in that case.
+   * IP addresses are checked here as wolfSSL_check_domain_name() only
+   * supports DNS names. */
   if(ret == WOLFSSL_SUCCESS &&
      conn_config->verifyhost &&
-     !connssl->peer.sni) {
-    /* we have an IP address as hostname. */
+     (!connssl->peer.sni || !conn_config->verifypeer)) {
     WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(wssl->ssl);
     if(!cert) {
       failf(data, "unable to get peer certificate");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.origin->hostname, 0);
-    CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
-                connssl->peer.origin->hostname, ret);
+    if(connssl->peer.sni) {
+      ret = wolfSSL_X509_check_host(cert, connssl->peer.sni,
+                                    strlen(connssl->peer.sni), 0, NULL);
+      CURL_TRC_CF(data, cf,
+                  "check peer certificate for host match on %s -> %d",
+                  connssl->peer.sni, ret);
+    }
+    else {
+      ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.origin->hostname, 0);
+      CURL_TRC_CF(data, cf,
+                  "check peer certificate for IP match on %s -> %d",
+                  connssl->peer.origin->hostname, ret);
+    }
     if(ret != WOLFSSL_SUCCESS)
       detail = DOMAIN_NAME_MISMATCH;
     wolfSSL_X509_free(cert);

@@ -18,7 +18,6 @@ libtest
 <features>
 SSL
 local-http
-!wolfssl
 !rustls
 </features>
 <server>
