@@ -100,7 +100,6 @@ struct cw_out_ctx {
   struct cw_out_buf *tail;
   size_t buffered_len;
   BIT(errored);
-  BIT(flushing); /* inside cw_out_flush_chain() */
 };
 
 static CURLcode cw_out_init(struct Curl_easy *data,
@@ -204,8 +203,8 @@ static CURLcode cw_out_cb_write(struct Curl_easy *data,
       return CURLE_WRITE_ERROR;
     }
     data->req.writer.paused = TRUE;
-    result = Curl_xfer_pause_recv(data, TRUE);
     CURL_TRC_WRITE(data, "[OUT] PAUSE requested by client");
+    result = Curl_xfer_pause_recv(data, TRUE);
     return result ? result : CURLE_AGAIN;
   }
   else if(nwritten == CURL_WRITEFUNC_ERROR) {
@@ -313,9 +312,9 @@ static CURLcode cw_out_buf_flush(struct cw_out_ctx *ctx,
   return result;
 }
 
-static CURLcode cw_out_flush_chain_do(struct cw_out_ctx *ctx,
-                                      struct Curl_easy *data,
-                                      bool flush_all)
+static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
+                                   struct Curl_easy *data,
+                                   bool flush_all)
 {
   CURLcode result;
 
@@ -334,9 +333,9 @@ static CURLcode cw_out_flush_chain_do(struct cw_out_ctx *ctx,
     ctx->buffered_len -= blen_before - curlx_dyn_len(&cwbuf->b);
 
     if(curlx_dyn_len(&cwbuf->b)) {
-      /* could not write it all: paused again, or a callback unpaused the
-         transfer in the meantime. The loop checks which. */
-      continue;
+      /* could not write it all, paused again? */
+      DEBUGASSERT(data->req.writer.paused);
+      return CURLE_OK;
     }
 
     ctx->buf = cwbuf->next;
@@ -345,24 +344,6 @@ static CURLcode cw_out_flush_chain_do(struct cw_out_ctx *ctx,
     cw_out_buf_free(cwbuf);
   }
   return CURLE_OK;
-}
-
-static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
-                                   struct Curl_easy *data,
-                                   bool flush_all)
-{
-  CURLcode result;
-
-  /* A callback invoked while we write (the debug callback, for example)
-     may call curl_easy_pause() to unpause, which flushes again. The running
-     flush holds a pointer to the buffer it writes, so a nested call must
-     leave the chain alone. The outer loop notices the unpause. */
-  if(ctx->flushing)
-    return CURLE_OK;
-  ctx->flushing = TRUE;
-  result = cw_out_flush_chain_do(ctx, data, flush_all);
-  ctx->flushing = FALSE;
-  return result;
 }
 
 static CURLcode cw_out_append(struct cw_out_ctx *ctx,
