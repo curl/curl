@@ -1714,22 +1714,25 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
   detail = wolfSSL_get_error(wssl->ssl, ret);
   CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);
 
-  /* On a successful handshake with an IP address, do an extra check
-   * on the peer certificate */
+  /* On a successful handshake, require a peer certificate when it is to be
+   * verified. With an anonymous cipher suite the server sends none and
+   * neither the CA nor the hostname check runs. For an IP address as
+   * hostname, also check the certificate for an IP match. */
   if(ret == WOLFSSL_SUCCESS &&
-     conn_config->verifyhost &&
-     !connssl->peer.sni) {
-    /* we have an IP address as hostname. */
+     (conn_config->verifypeer || conn_config->verifyhost)) {
     WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(wssl->ssl);
     if(!cert) {
       failf(data, "unable to get peer certificate");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.origin->hostname, 0);
-    CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
-                connssl->peer.origin->hostname, ret);
-    if(ret != WOLFSSL_SUCCESS)
-      detail = DOMAIN_NAME_MISMATCH;
+    if(conn_config->verifyhost && !connssl->peer.sni) {
+      ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.origin->hostname,
+                                      0);
+      CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
+                  connssl->peer.origin->hostname, ret);
+      if(ret != WOLFSSL_SUCCESS)
+        detail = DOMAIN_NAME_MISMATCH;
+    }
     wolfSSL_X509_free(cert);
   }
 
