@@ -170,9 +170,9 @@ typedef unsigned long sslerr_t;
 #define ossl_valsize_t numcert_t
 
 #if OPENSSL_VERSION_NUMBER >= 0x40100000L
-#define curl_ASN1_STRING_get_length ASN1_STRING_get_length
+#define ossl_ASN1_STRING_get_length ASN1_STRING_get_length
 #else
-static size_t curl_ASN1_STRING_get_length(const ASN1_STRING *str)
+static size_t ossl_ASN1_STRING_get_length(const ASN1_STRING *str)
 {
    const int length = ASN1_STRING_length(str);
    return length >= 0 ? (size_t)length : 0;
@@ -428,7 +428,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     {
       ASN1_INTEGER *num = X509_get_serialNumber(x);
       const unsigned char *numdata = ASN1_STRING_get0_data(num);
-      const size_t numlen = curl_ASN1_STRING_get_length(num);
+      const size_t numlen = ossl_ASN1_STRING_get_length(num);
       if(ASN1_STRING_type(num) == V_ASN1_NEG_INTEGER)
         BIO_puts(mem, "-");
       for(j = 0; j < numlen; j++)
@@ -503,7 +503,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
     if(!result && psig) {
       const unsigned char *psigdata = ASN1_STRING_get0_data(psig);
-      const size_t psiglen = curl_ASN1_STRING_get_length(psig);
+      const size_t psiglen = ossl_ASN1_STRING_get_length(psig);
       for(j = 0; j < psiglen; j++)
         BIO_printf(mem, "%02x:", psigdata[j]);
       result = push_certinfo(data, mem, "Signature", i);
@@ -2115,7 +2115,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       if(check->type == target) {
         /* get data and length */
         const char *altptr = (const char *)ASN1_STRING_get0_data(check->d.ia5);
-        size_t altlen = curl_ASN1_STRING_get_length(check->d.ia5);
+        size_t altlen = ossl_ASN1_STRING_get_length(check->d.ia5);
 
         switch(target) {
         case GEN_DNS: /* name/pattern comparison */
@@ -2186,7 +2186,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
          conditional in the future when OpenSSL has been fixed. */
       if(tmp) {
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
-          cnlen = curl_ASN1_STRING_get_length(tmp);
+          cnlen = ossl_ASN1_STRING_get_length(tmp);
           cn = (unsigned char *)CURL_UNCONST(ASN1_STRING_get0_data(tmp));
         }
         else { /* not a UTF8 name */
