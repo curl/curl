@@ -42,7 +42,7 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc
   AWSLC_VERSION: 5.11.0
   # renovate: datasource=github-tags depName=google/boringssl
-  BORINGSSL_VERSION: 0.20260929.0
+  BORINGSSL_VERSION: 0.20261020.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver-coerced extractVersion=^nettle_?(?<version>.+)_release_.+$
   NETTLE_VERSION: '4.0'
   # renovate: datasource=github-tags depName=gnutls/gnutls
