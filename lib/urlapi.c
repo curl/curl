@@ -849,9 +849,9 @@ static bool needs_dedotdot(const char *p, size_t pn)
 /*
  * dedotdotify()
  *
- * This function gets a null-terminated path with dot and dotdot sequences
- * passed in and strips them off according to the rules in RFC 3986 section
- * 5.2.4.
+ * This function gets a path of 'clen' bytes, not necessarily null-terminated,
+ * with dot and dotdot sequences passed in and strips them off according to
+ * the rules in RFC 3986 section 5.2.4.
  *
  * The function handles a path. It should not contain the query nor fragment.
  *
