@@ -610,7 +610,7 @@ while(<TXT>) {
         }
 
         if(!should_output_cert(%trust_purposes_by_level)) {
-            $skipnum ++;
+            $skipnum++;
             report "Skipping: $caname lacks acceptable trust level" if($opt_v);
         } else {
 
