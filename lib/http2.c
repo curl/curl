@@ -1204,6 +1204,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   struct h2_stream_ctx *stream;
   int32_t stream_id = frame->hd.stream_id;
 
+  (void)session;
   DEBUGASSERT(data);
 #ifdef CURLVERBOSE
   if(Curl_trc_cf_is_verbose(cf, data)) {
@@ -1222,10 +1223,11 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     case NGHTTP2_SETTINGS: {
       if(!(frame->hd.flags & NGHTTP2_FLAG_ACK)) {
         uint32_t max_conn = ctx->max_concurrent_streams;
-        ctx->max_concurrent_streams = nghttp2_session_get_remote_settings(
-          session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
-        ctx->enable_push = nghttp2_session_get_remote_settings(
-          session, NGHTTP2_SETTINGS_ENABLE_PUSH) != 0;
+        ctx->max_concurrent_streams =
+          Curl_ngh2_session_get_remote_settings(
+            &ctx->ngh2, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
+        ctx->enable_push = Curl_ngh2_session_get_remote_settings(
+          &ctx->ngh2, NGHTTP2_SETTINGS_ENABLE_PUSH) != 0;
         CURL_TRC_CF(data, cf, "[0] MAX_CONCURRENT_STREAMS: %u",
                     ctx->max_concurrent_streams);
         CURL_TRC_CF(data, cf, "[0] ENABLE_PUSH: %s",
@@ -1313,6 +1315,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream;
   struct Curl_easy *data_s;
+
+  (void)session;
   (void)flags;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
@@ -1326,7 +1330,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
        in the pipeline. Silently ignore. */
     CURL_TRC_CF(CF_DATA_CURRENT(cf), cf, "[%d] Data for unknown", stream_id);
     /* consumed explicitly as no one will read it */
-    nghttp2_session_consume(session, stream_id, len);
+    Curl_ngh2_session_consume(&ctx->ngh2, stream_id, len);
     return 0;
   }
 
@@ -1364,7 +1368,8 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
      * trigger DONE or DETACH events as it must. */
     CURL_TRC_CF(call_data, cf,
                 "[%d] on_stream_close, not a GOOD easy on stream", stream_id);
-    (void)nghttp2_session_set_stream_user_data(session, stream_id, NULL);
+    (void)Curl_ngh2_session_set_stream_user_data(
+      &ctx->ngh2, stream_id, NULL);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
   if(!stream) {
@@ -1394,7 +1399,8 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   Curl_multi_mark_dirty(data_s);
 
   /* remove `stream_ctx` from the nghttp2 stream */
-  rv = nghttp2_session_set_stream_user_data(session, stream_id, NULL);
+  rv = Curl_ngh2_session_set_stream_user_data(
+    &ctx->ngh2, stream_id, NULL);
   if(rv) {
     infof(data_s, "http/2: failed to clear user_data for stream %d",
           stream_id);
@@ -1433,6 +1439,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   struct Curl_easy *data;
   int32_t stream_id = frame->hd.stream_id;
   CURLcode result;
+
+  (void)session;
   (void)flags;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
@@ -1471,8 +1479,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
          * PUSH_PROMISE for which the server is not authoritative as a stream
          * error of type PROTOCOL_ERROR."
          */
-        (void)nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
-                                        stream_id, NGHTTP2_PROTOCOL_ERROR);
+        (void)Curl_ngh2_submit_rst_stream(
+          &ctx->ngh2, NGHTTP2_FLAG_NONE, stream_id, NGHTTP2_PROTOCOL_ERROR);
         rc = NGHTTP2_ERR_CALLBACK_FAILURE;
       }
       curlx_free(check);

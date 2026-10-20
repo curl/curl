@@ -53,6 +53,8 @@ void *Curl_ngh2_session_get_stream_user_data(
   struct curl_ngh2 *ngh2, int32_t stream_id);
 int Curl_ngh2_session_set_stream_user_data(
   struct curl_ngh2 *ngh2, int32_t stream_id, void *stream_user_data);
+uint32_t Curl_ngh2_session_get_remote_settings(
+  struct curl_ngh2 *ngh2, nghttp2_settings_id id);
 int32_t Curl_ngh2_session_get_stream_effective_local_window_size(
   struct curl_ngh2 *ngh2, int32_t stream_id);
 int32_t Curl_ngh2_session_get_local_window_size(

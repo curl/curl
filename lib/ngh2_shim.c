@@ -92,6 +92,14 @@ int Curl_ngh2_session_set_stream_user_data(
       ngh2->s, stream_id, stream_user_data));
 }
 
+uint32_t Curl_ngh2_session_get_remote_settings(
+  struct curl_ngh2 *ngh2, nghttp2_settings_id id)
+{
+  if(!Curl_ngh2_valid(ngh2))
+    return 0;
+  return nghttp2_session_get_remote_settings(ngh2->s, id);
+}
+
 int32_t Curl_ngh2_session_get_stream_effective_local_window_size(
   struct curl_ngh2 *ngh2, int32_t stream_id)
 {
