@@ -1093,12 +1093,12 @@ typedef unsigned int curl_bit;
       goto error;                                                      \
                                                                        \
     do {                                                               \
+      char buffer[sizeof(mod.szExePath) * 2];                          \
       char *path; /* points to stack allocated buffer */               \
       if(sizeof(*mod.szExePath) > 1) {  /* _UNICODE */                 \
         /* sizeof(mod.szExePath) is the max total bytes of   */        \
         /* wchars. the max total bytes of multibyte chars is */        \
         /* not more than twice that.                         */        \
-        char buffer[sizeof(mod.szExePath) * 2];                        \
         if(!WideCharToMultiByte(CP_ACP, 0, (WCHAR *)mod.szExePath, -1, \
                                 buffer, sizeof(buffer), NULL, NULL))   \
           goto error;                                                  \
