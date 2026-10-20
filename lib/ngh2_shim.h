@@ -36,7 +36,7 @@
  * > it using `nghttp2_session_del()`.
  *
  * This shim protects further calls into a nghttp2 session once
- * a fatal error occured.
+ * a fatal error occurred.
  */
 struct curl_ngh2 {
   nghttp2_session *s;
