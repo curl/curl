@@ -77,15 +77,12 @@ jobs:
 
           - name: 'libressl'
             install_steps: libressl
-            # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generator: Xcode
             options: --config Debug
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
-              -DOPENSSL_INCLUDE_DIR=/Users/runner/libressl/include
-              -DOPENSSL_SSL_LIBRARY=/Users/runner/libressl/lib/libssl.a
-              -DOPENSSL_CRYPTO_LIBRARY=/Users/runner/libressl/lib/libcrypto.a
+              -DOPENSSL_ROOT_DIR=/Users/runner/libressl
               -DCURL_USE_LIBPSL=OFF -DCURL_ENABLE_NTLM=ON
 
     steps:
@@ -151,6 +148,9 @@ jobs:
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
+              -DCMAKE_FIND_ROOT_PATH=/Users/runner \
+              -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+              -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
               -DUSE_APPLE_IDN=ON \
               ${MATRIX_GENERATE} ${options}
           else
