@@ -83,6 +83,7 @@
 #include "curlx/version_win32.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curlx/wait.h"
 #ifdef _WIN32
 #include <mstcpip.h> /* for TCP_INITIAL_RTO_PARAMETERS */
 #endif
@@ -1026,6 +1027,7 @@ struct cf_socket_ctx {
 #endif
   int sockerr;                       /* socket error of last failure or 0 */
 #ifdef DEBUGBUILD
+  int connect_wait_ms;               /* ms to wait after 1st connect() */
   int wblock_percent;                /* percent of writes doing EAGAIN */
   int wpartial_percent;              /* percent of bytes written in send */
   int rblock_percent;                /* percent of reads doing EAGAIN */
@@ -1076,6 +1078,12 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
       curl_off_t l;
       if(!curlx_str_number(&p, &l, CURL_OFF_T_MAX))
         ctx->recv_max = (size_t)l;
+    }
+    p = getenv("CURL_DBG_SOCK_CONNECT_WAIT_MS");
+    if(p) {
+      curl_off_t l;
+      if(!curlx_str_number(&p, &l, INT_MAX))
+        ctx->connect_wait_ms = (int)l;
     }
   }
 #endif
@@ -1490,8 +1498,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     rc = do_connect(cf, data, (bool)cf->conn->bits.tcp_fastopen);
     sockerr = SOCKERRNO;
     set_local_ip(cf, data);
-    CURL_TRC_CF(data, cf, "local address %s port %d...",
+    CURL_TRC_CF(data, cf, "local address %s port %d",
                 ctx->ip.local_ip, ctx->ip.local_port);
+#ifdef DEBUGBUILD
+    if(ctx->connect_wait_ms > 0) {
+      CURL_TRC_CF(data, cf, "debug connect wait %d ms", ctx->connect_wait_ms);
+      curlx_wait_ms(ctx->connect_wait_ms);
+    }
+#endif
     if(rc == -1) {
       ctx->sockerr = sockerr;
       result = socket_connect_result(data, ctx->ip.remote_ip, sockerr);
@@ -1513,7 +1527,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "not connected yet on fd=%" FMT_SOCKET_T, ctx->sock);
     return CURLE_OK;
   }
-  else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
+  else if(rc == CURL_CSELECT_OUT ||
+#ifdef __APPLE__
+          /* macOS reports select errors when the peer already
+           * sent us data and closed the connection normally. Do
+           * not treat that as error. See #23482 and #23445 */
+          (rc > 0 && (rc & CURL_CSELECT_ERR)) ||
+#endif
+          cf->conn->bits.tcp_fastopen) {
     if(verifyconnect(ctx->sock, &ctx->sockerr)) {
       /* we are connected with TCP, awesome! */
       ctx->connected_at = *Curl_pgrs_now(data);
@@ -1523,6 +1544,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "connected on fd=%" FMT_SOCKET_T, ctx->sock);
       return CURLE_OK;
     }
+    result = CURLE_COULDNT_CONNECT;
   }
   else if(rc & CURL_CSELECT_ERR) {
     CURL_TRC_CF(data, cf, "poll/select error on fd=%" FMT_SOCKET_T, ctx->sock);
