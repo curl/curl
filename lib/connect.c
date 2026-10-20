@@ -262,6 +262,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   struct easy_pollset ps;
   struct curl_pollfds cpfds;
   struct Curl_cfilter *cf;
+  struct curltime started;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
@@ -286,6 +287,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
   Curl_pollset_init(&ps);
   Curl_pollfds_init(&cpfds, a_few_on_stack, CF_CONN_NUM_POLLS_ON_STACK);
+  started = curlx_now();
   while(!*done) {
     if(Curl_conn_needs_flush(data, sockindex)) {
       DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
@@ -331,9 +333,24 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     else {
       /* check allowed time left */
-      const timediff_t timeout_ms = Curl_timeleft_ms(data);
+      timediff_t timeout_ms = Curl_timeleft_ms(data);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       int rc;
+
+      if(!Curl_is_connecting(data)) {
+        /* Past the connect phase, e.g. an FTP data connection handshake in
+         * DO_MORE, Curl_timeleft_ms() leaves the connect timeout out. Apply
+         * it here from when this blocking wait started, or without a total
+         * timeout a peer that never finishes the handshake blocks forever. */
+        timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
+          data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+        timediff_t ctimeleft_ms =
+          ctimeout_ms - curlx_timediff_ms(curlx_now(), started);
+        if(ctimeleft_ms <= 0)
+          ctimeleft_ms = -1;
+        if(!timeout_ms || (ctimeleft_ms < timeout_ms))
+          timeout_ms = ctimeleft_ms;
+      }
 
       if(timeout_ms < 0) {
         /* no need to continue if time already is up */
