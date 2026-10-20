@@ -64,6 +64,9 @@ Warning: while it is possible to invoke this function from a callback,
 such a call is blocking in this situation, e.g. only returns after all data
 has been sent or an error is encountered.
 
+This function cannot be called from within the debug callback set with
+CURLOPT_DEBUGFUNCTION(3). Such a call returns **CURLE_RECURSIVE_API_CALL**.
+
 # FLAGS
 
 Supports all flags documented in curl_ws_meta(3) and additionally the following

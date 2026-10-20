@@ -53,6 +53,9 @@ WebSocket frames of length 0.
 If the read function calls `curl_ws_start_frame()`, a return value of 0 is
 *not* treated as an end of file and libcurl calls the read function again.
 
+This function cannot be called from within the debug callback set with
+CURLOPT_DEBUGFUNCTION(3). Such a call returns **CURLE_RECURSIVE_API_CALL**.
+
 # FLAGS
 
 Supports all flags documented in curl_ws_meta(3).
