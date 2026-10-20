@@ -392,7 +392,7 @@ if(!$filedate) {
 # get the hash from the download file
 my $newhash = sha256($txt);
 
-if(!$opt_f && !$opt_x && $oldhash eq $newhash) {
+if(!$opt_f && $oldhash eq $newhash) {
     report "Downloaded file identical to previous run\'s source file. Exiting";
     if($opt_u && -e $txt && !unlink($txt)) {
         report "Failed to remove $txt: $!\n";
