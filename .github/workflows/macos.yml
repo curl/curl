@@ -148,6 +148,9 @@ jobs:
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
+              -DCMAKE_FIND_ROOT_PATH=/Users/runner \
+              -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+              -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
               -DUSE_APPLE_IDN=ON \
               ${MATRIX_GENERATE} ${options}
           else
