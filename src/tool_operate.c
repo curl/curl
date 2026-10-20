@@ -676,6 +676,10 @@ static CURLcode post_output_handling(struct per_transfer *per,
     curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
     if(!cond_unmet && !tool_create_output_file(outs, config))
       return CURLE_WRITE_ERROR;
+    /* write headers buffered while waiting for a -J filename */
+    if(outs->stream && per->hdrcbdata.headlist &&
+       tool_write_headers(&per->hdrcbdata, outs->stream))
+      return CURLE_WRITE_ERROR;
   }
 
   if(!outs->regular_file && outs->stream && !outs->out_null) {

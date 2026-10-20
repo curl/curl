@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-J
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Content-Disposition: inline
+Content-Disposition: attachment; filename="name%TESTNUMBER"
+Content-Length: 8
+
+PAYLOAD
+</data>
+<data2 nocheck="yes">
+HTTP/1.1 200 OK
+Content-Disposition: inline
+Content-Length: 0
+
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET -OJi, filename-less Content-Disposition first
+</name>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 http://%HOSTIP:%HTTPPORT/name%TESTNUMBER -Ji -O -O --output-dir %LOGDIR
+</command>
+<file name="%LOGDIR/name%TESTNUMBER">
+initial content
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+23
+</errorcode>
+<file name="%LOGDIR/name%TESTNUMBER">
+initial content
+</file>
+<file2 name="%LOGDIR/%TESTNUMBER0002">
+HTTP/1.1 200 OK
+Content-Disposition: inline
+Content-Length: 0
+
+</file2>
+</verify>
+</testcase>
