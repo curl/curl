@@ -169,7 +169,8 @@ typedef unsigned long sslerr_t;
 #endif
 #define ossl_valsize_t numcert_t
 
-#if OPENSSL_VERSION_NUMBER < 0x40100000L
+#if OPENSSL_VERSION_NUMBER < 0x40100000L && \
+  !(defined(OPENSSL_IS_BORINGSSL) && defined(EVP_sha3_384))
 static size_t ASN1_STRING_get_length(const ASN1_STRING *str)
 {
    const int length = ASN1_STRING_length(str);
