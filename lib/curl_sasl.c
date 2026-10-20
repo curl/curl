@@ -593,8 +593,10 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   *progress = SASL_INPROGRESS;
 
   if(sasl->state == SASL_FINAL) {
-    if(code != sasl->params->finalcode)
+    if(code != sasl->params->finalcode) {
       result = CURLE_LOGIN_DENIED;
+      conn->bits.login_rejected = TRUE;
+    }
     *progress = SASL_DONE;
     sasl_state(sasl, data, SASL_STOP);
     return result;
@@ -604,6 +606,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
      code != sasl->params->contcode) {
     *progress = SASL_DONE;
     sasl_state(sasl, data, SASL_STOP);
+    conn->bits.login_rejected = TRUE;
     return CURLE_LOGIN_DENIED;
   }
 
@@ -765,6 +768,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     else {
       *progress = SASL_DONE;
       sasl_state(sasl, data, SASL_STOP);
+      conn->bits.login_rejected = TRUE;
       return CURLE_LOGIN_DENIED;
     }
 

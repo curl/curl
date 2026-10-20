@@ -746,11 +746,14 @@ static CURLcode multi_done(struct Curl_easy *data,
 
     memset(&mdctx, 0, sizeof(mdctx));
     mdctx.premature = premature;
-    /* A login rejected by the server during the protocol connect phase
-       leaves the connection itself in a known, working state. Close it
-       without aborting so that the protocol handler gets to say goodbye
-       to the server (QUIT/LOGOUT) before the connection is shut down. */
-    if((status == CURLE_LOGIN_DENIED) &&
+    /* A login the server rejected with a final reply during the protocol
+       connect phase leaves the connection in a known, working state with
+       no authentication exchange in progress. Close it without aborting
+       so that the protocol handler gets to say goodbye to the server
+       (QUIT/LOGOUT) before the connection is shut down. Local failures
+       that return CURLE_LOGIN_DENIED do not set login_rejected and still
+       abort the connection. */
+    if((status == CURLE_LOGIN_DENIED) && conn->bits.login_rejected &&
        ((data->mstate == MSTATE_PROTOCONNECT) ||
         (data->mstate == MSTATE_PROTOCONNECTING)))
       mdctx.graceful_close = TRUE;

@@ -187,6 +187,8 @@ struct ConnectBits {
   /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
   BIT(reuse); /* if set, this is a reused connection */
+  BIT(login_rejected); /* the server ended the login with a final rejection,
+                          no authentication exchange is in progress */
   BIT(altused); /* this is an alt-svc "redirect" */
   BIT(ipv6);    /* we communicate with a site using an IPv6 address */
   BIT(do_more); /* this is set TRUE if the ->curl_do_more() function is
