@@ -549,6 +549,10 @@ CURLMcode Curl_multi_add_handle(struct Curl_multi *multi,
    * a timeout callback invocation. */
   mresult = Curl_update_timer(multi);
   if(mresult) {
+    /* undo the additions above */
+    Curl_uint32_bset_remove(&multi->process, data->mid);
+    Curl_uint32_bset_remove(&multi->dirty, data->mid);
+    --multi->xfers_alive;
     data->multi = NULL; /* not anymore */
     Curl_uint32_tbl_remove(&multi->xfers, data->mid);
     data->mid = UINT32_MAX;
