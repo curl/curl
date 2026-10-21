@@ -536,7 +536,7 @@ static CURLUcode hostname_check(char *hostname, size_t hlen)
 
 /* the input is a hostname or perhaps an IPv6 address */
 static CURLUcode hostname_check6(struct Curl_URL *u, char *hostname,
-                                size_t hlen) /* length of hostname */
+                                 size_t hlen) /* length of hostname */
 {
   DEBUGASSERT(hostname);
 
@@ -1534,9 +1534,14 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
     if(!Curl_is_ASCII_name(u->host)) {
       char *punyversion = NULL;
       uc = host_decode(part, &punyversion);
-      curlx_free(part);
       if(uc)
         return uc;
+      uc = hostname_check(punyversion, strlen(punyversion));
+      curlx_free(part);
+      if(uc) {
+        curlx_free(punyversion);
+        return uc;
+      }
       part = punyversion;
     }
   }

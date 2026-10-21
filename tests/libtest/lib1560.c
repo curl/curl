@@ -329,6 +329,11 @@ static const struct testcase get_parts_list[] = {
   { "https://www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
     "https | [11] | [12] | [13] | www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se | "
     "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK },
+  /* U+FF20 FULLWIDTH COMMERCIAL AT, decodes to '@' */
+  { "https://trusted.example\xef\xbc\xa0"
+    "evil.example/x",
+    "https | [11] | [12] | [13] | [21] | "
+    "[15] | /x | [16] | [17]", 0, CURLU_PUNYCODE, CURLUE_OK },
 #else
   { "https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
     "https | [11] | [12] | [13] | [30] | [15] | / | [16] | [17]",
