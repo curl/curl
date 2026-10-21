@@ -170,7 +170,7 @@ int Curl_ngh2_session_send(struct curl_ngh2 *ngh2)
   if(ngh2->fatal_rv)
     return ngh2->fatal_rv;
   rv = ngh2_check(ngh2, nghttp2_session_send(ngh2->s));
-  /* a callback might ecounter a fatal state without session_send()
+  /* a callback might trigger a fatal state without session_send()
    * noticing. Check again. */
   return ngh2->fatal_rv ? ngh2->fatal_rv : rv;
 }
