@@ -242,7 +242,8 @@ extended the test sequence.
 ## `--retry=[num]`
 
 Number of attempts for the whole test run to retry failed tests. It applies
-to tests using servers, or tagged `timing-dependent`, `flaky` or `may-retry`.
+to tests using servers, or tagged `timing-dependent`, `flaky`, `may-retry`,
+or `may-retry-on-valgrind` (limited to valgrind tests).
 
 ## `-S`
 
