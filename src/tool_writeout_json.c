@@ -27,8 +27,6 @@
 #include "tool_writeout_json.h"
 #include "tool_writeout.h"
 
-#define MAX_JSON_STRING 100000
-
 /* provide the given string in dynbuf as a quoted json string, but without the
    outer quotes. The buffer is not inited by this function.
 
@@ -83,14 +81,12 @@ int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
 void jsonWriteString(FILE *stream, const char *in, bool lowercase)
 {
   struct dynbuf out;
-  curlx_dyn_init(&out, MAX_JSON_STRING);
+  curlx_dyn_init(&out, MAX_DYNBUF_SIZE);
 
-  if(!jsonquoted(in, strlen(in), &out, lowercase)) {
-    fputc('\"', stream);
-    if(curlx_dyn_len(&out))
-      fputs(curlx_dyn_ptr(&out), stream);
-    fputc('\"', stream);
-  }
+  fputc('\"', stream);
+  if(!jsonquoted(in, strlen(in), &out, lowercase) && curlx_dyn_len(&out))
+    fputs(curlx_dyn_ptr(&out), stream);
+  fputc('\"', stream);
   curlx_dyn_free(&out);
 }
 
