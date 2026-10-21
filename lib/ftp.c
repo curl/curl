@@ -2326,9 +2326,10 @@ static CURLcode ftp_do_more(struct Curl_easy *data, domore *more)
       }
 
       if(result)
-        ;
-      else if((data->state.list_only || !ftpc->file) &&
-              !data->set.prequote) {
+        return result;
+
+      if((data->state.list_only || !ftpc->file) &&
+         !data->set.prequote) {
         /* The specified path ends with a slash, and therefore we think this
            is a directory that is requested, use LIST. Before that, we also
            need to set ASCII transfer mode. */

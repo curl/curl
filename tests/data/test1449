@@ -28,12 +28,14 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -r 36893488147419103232-
 
 # Verify data after the test has been "shot"
 <verify>
+<errorcode>
+33
+</errorcode>
 <protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
-QUIT
 </protocol>
 </verify>
 </testcase>
