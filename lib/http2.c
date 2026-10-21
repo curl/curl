@@ -1003,10 +1003,9 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
                   &ctx->ngh2, stream->id));
     /* If !body started on this stream, then receiving DATA is illegal. */
     if(!stream->bodystarted) {
-      rv = Curl_ngh2_submit_rst_stream(
-        &ctx->ngh2, NGHTTP2_FLAG_NONE, stream_id, NGHTTP2_PROTOCOL_ERROR);
-
-      if(nghttp2_is_fatal(rv)) {
+      if(Curl_ngh2_is_fatal(&ctx->ngh2,
+           Curl_ngh2_submit_rst_stream(&ctx->ngh2, NGHTTP2_FLAG_NONE,
+                                       stream_id, NGHTTP2_PROTOCOL_ERROR))) {
         return CURLE_RECV_ERROR;
       }
     }
@@ -1040,12 +1039,10 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
   case NGHTTP2_PUSH_PROMISE:
     rv = push_promise(cf, data, &frame->push_promise);
     if(rv) { /* deny! */
-      int h2rv;
       DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
-      h2rv = Curl_ngh2_submit_rst_stream(
-        &ctx->ngh2, NGHTTP2_FLAG_NONE, frame->push_promise.promised_stream_id,
-        NGHTTP2_CANCEL);
-      if(nghttp2_is_fatal(h2rv))
+      if(Curl_ngh2_is_fatal(&ctx->ngh2,
+           Curl_ngh2_submit_rst_stream(&ctx->ngh2, NGHTTP2_FLAG_NONE,
+             frame->push_promise.promised_stream_id, NGHTTP2_CANCEL)))
         return CURLE_SEND_ERROR;
       else if(rv == CURL_PUSH_ERROROUT) {
         /* fail the parent transfer, not the whole session */
@@ -1069,8 +1066,8 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     }
     else if(!Curl_bufq_is_empty(&stream->sendbuf)) {
       /* resume the potentially suspended stream */
-      rv = Curl_ngh2_session_resume_data(&ctx->ngh2, stream->id);
-      if(nghttp2_is_fatal(rv))
+      if(Curl_ngh2_is_fatal(&ctx->ngh2,
+           Curl_ngh2_session_resume_data(&ctx->ngh2, stream->id)))
         return CURLE_SEND_ERROR;
     }
     break;
@@ -1847,7 +1844,8 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
     rv = Curl_ngh2_session_send(&ctx->ngh2);
 
 out:
-  if(nghttp2_is_fatal(rv) || !Curl_ngh2_valid(&ctx->ngh2)) {
+  if(Curl_ngh2_is_fatal(&ctx->ngh2, rv)) {
+    rv = Curl_ngh2_fatal(&ctx->ngh2);
     CURL_TRC_CF(data, cf, "nghttp2_session_send error (%s)%d",
                 nghttp2_strerror(rv), rv);
     return CURLE_SEND_ERROR;
@@ -2028,8 +2026,14 @@ out:
     if(!CURL_REQ_WANT_SEND(data))
       Curl_multi_mark_dirty(data);
   }
-  else if(r2 && !result)
+  else if(r2 && (result == CURLE_AGAIN)) {
+    /* Do not replace a previous error result NOR a successful result
+     * with an egress error. Example: the server might close the
+     * connection after sending the complete response with EOS
+     * and everything. Further sending may fail, but that MUST
+     * not change that we had a successful response. */
     result = r2;
+  }
 
   CURL_TRC_CF(data, cf, "[%d] cf_recv(len=%zu) -> %d, %zu, "
               "window=%d/%d, connection %d/%d",
@@ -2083,8 +2087,8 @@ static CURLcode cf_h2_body_send(struct Curl_cfilter *cf,
 
   if(eos || !Curl_bufq_is_empty(&stream->sendbuf)) {
     /* resume the potentially suspended stream */
-    int rv = Curl_ngh2_session_resume_data(&ctx->ngh2, stream->id);
-    if(nghttp2_is_fatal(rv))
+    if(Curl_ngh2_is_fatal(&ctx->ngh2,
+         Curl_ngh2_session_resume_data(&ctx->ngh2, stream->id)))
       return CURLE_SEND_ERROR;
   }
 
@@ -2327,8 +2331,8 @@ static CURLcode cf_h2_flush(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
   if(stream && !Curl_bufq_is_empty(&stream->sendbuf)) {
     /* resume the potentially suspended stream */
-    int rv = Curl_ngh2_session_resume_data(&ctx->ngh2, stream->id);
-    if(nghttp2_is_fatal(rv)) {
+    if(Curl_ngh2_is_fatal(&ctx->ngh2,
+         Curl_ngh2_session_resume_data(&ctx->ngh2, stream->id))) {
       result = CURLE_SEND_ERROR;
       goto out;
     }

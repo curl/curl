@@ -43,7 +43,12 @@ struct curl_ngh2 {
   int fatal_rv; /* != 0 once nghttp2 session has entered FATAL state */
 };
 
+/* True if nghttp2 session exists and is not in fatal state */
 bool Curl_ngh2_valid(struct curl_ngh2 *ngh2);
+/* True if `rv` is fatal or nghttp2 session already is in fatal state */
+bool Curl_ngh2_is_fatal(struct curl_ngh2 *ngh2, int rv);
+/* != 0 and the fatal error if nghttp2 is in fatal state */
+int Curl_ngh2_fatal(struct curl_ngh2 *ngh2);
 
 void Curl_ngh2_del(struct curl_ngh2 *ngh2);
 int Curl_ngh2_submit_settings(

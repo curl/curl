@@ -35,6 +35,22 @@ bool Curl_ngh2_valid(struct curl_ngh2 *ngh2)
   return ngh2->s && !ngh2->fatal_rv;
 }
 
+bool Curl_ngh2_is_fatal(struct curl_ngh2 *ngh2, int rv)
+{
+  if(ngh2->fatal_rv)
+    return TRUE;
+  if(nghttp2_is_fatal(rv)) {
+    ngh2->fatal_rv = rv;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+int Curl_ngh2_fatal(struct curl_ngh2 *ngh2)
+{
+  return ngh2->fatal_rv;
+}
+
 static int ngh2_check(struct curl_ngh2 *ngh2, int rv)
 {
   if(nghttp2_is_fatal(rv))

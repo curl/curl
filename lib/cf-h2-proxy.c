@@ -405,7 +405,8 @@ static CURLcode proxy_h2_progress_egress(struct Curl_cfilter *cf,
         Curl_ngh2_session_want_write(&ctx->ngh2))
     rv = Curl_ngh2_session_send(&ctx->ngh2);
 
-  if(nghttp2_is_fatal(rv) || !Curl_ngh2_valid(&ctx->ngh2)) {
+  if(Curl_ngh2_is_fatal(&ctx->ngh2, rv)) {
+    rv = Curl_ngh2_fatal(&ctx->ngh2);
     CURL_TRC_CF(data, cf, "[0] nghttp2_session_send error (%s)%d",
                 nghttp2_strerror(rv), rv);
     return CURLE_SEND_ERROR;
@@ -1261,7 +1262,6 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
-  int rv;
   CURLcode result;
 
   (void)eos;
@@ -1286,8 +1286,8 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
 
   if(!Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) {
     /* req body data is buffered, resume the potentially suspended stream */
-    rv = Curl_ngh2_session_resume_data(&ctx->ngh2, ctx->tunnel.stream_id);
-    if(nghttp2_is_fatal(rv)) {
+    if(Curl_ngh2_is_fatal(&ctx->ngh2,
+         Curl_ngh2_session_resume_data(&ctx->ngh2, ctx->tunnel.stream_id))) {
       result = CURLE_SEND_ERROR;
       goto out;
     }
@@ -1338,8 +1338,8 @@ static CURLcode cf_h2_proxy_flush(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
   if(!Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) {
     /* resume the potentially suspended tunnel */
-    int rv = Curl_ngh2_session_resume_data(&ctx->ngh2, ctx->tunnel.stream_id);
-    if(nghttp2_is_fatal(rv)) {
+    if(Curl_ngh2_is_fatal(&ctx->ngh2,
+         Curl_ngh2_session_resume_data(&ctx->ngh2, ctx->tunnel.stream_id))) {
       result = CURLE_SEND_ERROR;
       goto out;
     }
