@@ -1847,7 +1847,7 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
     rv = Curl_ngh2_session_send(&ctx->ngh2);
 
 out:
-  if(nghttp2_is_fatal(rv)) {
+  if(nghttp2_is_fatal(rv) || !Curl_ngh2_valid(&ctx->ngh2)) {
     CURL_TRC_CF(data, cf, "nghttp2_session_send error (%s)%d",
                 nghttp2_strerror(rv), rv);
     return CURLE_SEND_ERROR;
@@ -2028,9 +2028,9 @@ out:
     if(!CURL_REQ_WANT_SEND(data))
       Curl_multi_mark_dirty(data);
   }
-  else if(r2) {
+  else if(r2 && !result)
     result = r2;
-  }
+
   CURL_TRC_CF(data, cf, "[%d] cf_recv(len=%zu) -> %d, %zu, "
               "window=%d/%d, connection %d/%d",
               stream->id, len, (int)result, *pnread,

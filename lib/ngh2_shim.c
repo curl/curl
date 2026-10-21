@@ -166,9 +166,13 @@ int Curl_ngh2_submit_rst_stream(
 
 int Curl_ngh2_session_send(struct curl_ngh2 *ngh2)
 {
+  int rv;
   if(ngh2->fatal_rv)
     return ngh2->fatal_rv;
-  return ngh2_check(ngh2, nghttp2_session_send(ngh2->s));
+  rv = ngh2_check(ngh2, nghttp2_session_send(ngh2->s));
+  /* a callback might ecounter a fatal state without session_send()
+   * noticing. Check again. */
+  return ngh2->fatal_rv ? ngh2->fatal_rv : rv;
 }
 
 int Curl_ngh2_session_client_new3(
@@ -201,10 +205,14 @@ int Curl_ngh2_session_want_write(struct curl_ngh2 *ngh2)
 ssize_t Curl_ngh2_session_mem_recv(
   struct curl_ngh2 *ngh2, const uint8_t *in, size_t inlen)
 {
+  ssize_t rv;
   if(ngh2->fatal_rv)
     return ngh2->fatal_rv;
-  return ngh2_checks(ngh2,
-    nghttp2_session_mem_recv(ngh2->s, in, inlen));
+  rv = ngh2_checks(ngh2, nghttp2_session_mem_recv(ngh2->s, in, inlen));
+  /* the session might encounter a fatal state in a callback,
+   * but session_mem_rec() might not notice and return a non-error.
+   * Check again. */
+  return ngh2->fatal_rv ? ngh2->fatal_rv : rv;
 }
 
 int Curl_ngh2_session_check_request_allowed(struct curl_ngh2 *ngh2)

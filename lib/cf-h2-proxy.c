@@ -405,7 +405,7 @@ static CURLcode proxy_h2_progress_egress(struct Curl_cfilter *cf,
         Curl_ngh2_session_want_write(&ctx->ngh2))
     rv = Curl_ngh2_session_send(&ctx->ngh2);
 
-  if(nghttp2_is_fatal(rv)) {
+  if(nghttp2_is_fatal(rv) || !Curl_ngh2_valid(&ctx->ngh2)) {
     CURL_TRC_CF(data, cf, "[0] nghttp2_session_send error (%s)%d",
                 nghttp2_strerror(rv), rv);
     return CURLE_SEND_ERROR;
