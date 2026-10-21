@@ -281,13 +281,20 @@ ParameterError parseconfig(const char *filename, int max_recursive,
         break;
       }
 
+      /* skip leading whitespace, ignore lines with nothing else (like a lone
+         CR from a CRLF line ending) */
+      while(ISSPACE(*line))
+        line++;
+      if(!*line)
+        continue;
+
       /* the option keywords starts here */
       option = line;
 
       /* the option starts with a dash? */
       dashed_option = (option[0] == '-');
 
-      while(*line && !ISBLANK(*line) && !ISSEP(*line, dashed_option))
+      while(*line && !ISSPACE(*line) && !ISSEP(*line, dashed_option))
         line++;
       /* ... and has ended here */
 
