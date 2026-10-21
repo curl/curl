@@ -36,17 +36,11 @@
  */
 void *Curl_memrchr(const void *s, int c, size_t n)
 {
-  if(n > 0) {
-    const unsigned char *p = s;
-    const unsigned char *q = s;
+  const unsigned char *p = s;
 
-    p += n - 1;
-
-    while(p >= q) {
-      if(*p == (unsigned char)c)
-        return CURL_UNCONST(p);
-      p--;
-    }
+  while(n) {
+    if(p[--n] == (unsigned char)c)
+      return CURL_UNCONST(p + n);
   }
   return NULL;
 }
