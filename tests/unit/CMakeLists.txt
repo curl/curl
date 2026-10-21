@@ -38,7 +38,8 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
     ${FIRST_C} ${FIRST_H} ${TESTS_C}
   VERBATIM)
 
-add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
+add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c"
+  altsvc_save_test.c altsvc_save_test.h)
 add_dependencies(${BUNDLE} curlu-unitprotos)
 add_dependencies(tt ${BUNDLE})
 target_link_libraries(${BUNDLE} curlu)
@@ -54,7 +55,8 @@ set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL
 
 if(NOT _CURL_TESTS_CONCAT)
   set_target_properties(${BUNDLE} PROPERTIES C_CLANG_TIDY "")
-  curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${TESTS_C})
+  curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy"
+    ${BUNDLE} ${FIRST_C} ${TESTS_C} altsvc_save_test.c)
   if(TARGET "${BUNDLE}-clang-tidy")
     add_dependencies("${BUNDLE}-clang-tidy" curlu-unitprotos)
   endif()
