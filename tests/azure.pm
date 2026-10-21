@@ -47,7 +47,7 @@ sub azure_check_environment {
        defined $ENV{'AGENT_JOBNAME'} && $ENV{'BUILD_BUILDID'} &&
        defined $ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'} &&
        defined $ENV{'SYSTEM_TEAMPROJECTID'}) {
-        return 1;
+        return 0;
     }
     return 0;
 }
