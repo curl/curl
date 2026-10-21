@@ -470,7 +470,12 @@ sub stopserver {
     my $result = 0;
     foreach my $server (@killservers) {
         my $pidfile = $serverpidfile{$server};
-        unlink($pidfile) if(-f $pidfile);
+        if($pidfile) {
+            unlink($pidfile) if(-f $pidfile);
+        }
+        else {
+            logmsg "RUN: no PID file for '$server' to clean\n";
+        }
     }
     #
     # cleanup server lock files
@@ -1019,6 +1024,12 @@ sub runhttp2server {
     my $idnum = 0;
     my $exe = "$perl " . shell_quote("$srcdir/http2-server.pl");
     my $verbose_flag = "--verbose ";
+    my $nghttpx = $ENV{'NGHTTPX'};
+
+    if(!$nghttpx) {
+        logmsg "runhttp2server: NGHTTPX env is not set\n";
+        return (2, 0, 0, 0);
+    }
 
     my $server = servername_id($proto, $ipvnum, $idnum);
 
@@ -1039,7 +1050,7 @@ sub runhttp2server {
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     my $flags = "";
-    $flags .= "--nghttpx \"$ENV{'NGHTTPX'}\" ";
+    $flags .= "--nghttpx \"$nghttpx\" ";
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--connect $HOSTIP:" . protoport("http") . " ";
@@ -1047,8 +1058,7 @@ sub runhttp2server {
 
     my $port = getfreeport($ipvnum, 0);
     my $port2 = getfreeport($ipvnum, 0);
-    my $aflags = "--port $port --port2 $port2 $flags";
-    my $cmd = "$exe $aflags";
+    my $cmd = "$exe --port \"$port\" --port2 \"$port2\" $flags";
     my ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($http2pid <= 0 || !pidexists($http2pid)) {
@@ -1080,6 +1090,12 @@ sub runhttp3server {
     my $idnum = 0;
     my $exe = "$perl " . shell_quote("$srcdir/http3-server.pl");
     my $verbose_flag = "--verbose ";
+    my $nghttpx = $ENV{'NGHTTPX'};
+
+    if(!$nghttpx) {
+        logmsg "runhttp3server: NGHTTPX env is not set\n";
+        return (2, 0, 0, 0);
+    }
 
     my $server = servername_id($proto, $ipvnum, $idnum);
 
@@ -1100,7 +1116,7 @@ sub runhttp3server {
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     my $flags = "";
-    $flags .= "--nghttpx \"$ENV{'NGHTTPX'}\" ";
+    $flags .= "--nghttpx \"$nghttpx\" ";
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--connect $HOSTIP:" . protoport("http") . " ";
@@ -1108,8 +1124,7 @@ sub runhttp3server {
     $flags .= $verbose_flag if($debugprotocol);
 
     my $port = getfreeport($ipvnum, 0);
-    my $aflags = "--port $port $flags";
-    my $cmd = "$exe $aflags";
+    my $cmd = "$exe --port \"$port\" $flags";
     my ($http3pid, $pid3) = startnew($cmd, $pidfile, 15, 0);
 
     if($http3pid <= 0 || !pidexists($http3pid)) {
@@ -1192,7 +1207,7 @@ sub runhttpsserver {
     }
 
     my $port = getfreeport($ipvnum, 1);
-    my $options = "$flags --accept $port";
+    my $options = "$flags --accept \"$port\"";
     my $cmd = "$perl " . shell_quote("$srcdir/secureserver.pl") . " " . $options;
     my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
@@ -1335,7 +1350,7 @@ sub runsecureserver {
     $flags .= "--connect $clearport";
 
     my $port = getfreeport($ipvnum, 1);
-    my $options = "$flags --accept $port";
+    my $options = "$flags --accept \"$port\"";
 
     my $cmd = "$perl " . shell_quote("$srcdir/secureserver.pl") . " " . $options;
     my ($protospid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -1641,7 +1656,7 @@ sub runsshserver {
 
     push @tports, $port;
 
-    my $options = "$flags --sshport $port";
+    my $options = "$flags --sshport \"$port\"";
 
     my $cmd = "$perl " . shell_quote("$srcdir/sshserver.pl") . " " . $options;
     my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
@@ -1893,8 +1908,7 @@ sub rundictserver {
     $flags .= "--host $HOSTIP";
 
     my $port = getfreeport($ipvnum, 1);
-    my $aflags = "--port $port $flags";
-    my $cmd = "$srcdir/dictserver.py $aflags";
+    my $cmd = "$srcdir/dictserver.py --port \"$port\" $flags";
     my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($dictpid <= 0 || !pidexists($dictpid)) {
@@ -1953,8 +1967,7 @@ sub runnegtelnetserver {
     $flags .= "--srcdir \"$srcdir\"";
 
     my $port = getfreeport($ipvnum, 1);
-    my $aflags = "--port $port $flags";
-    my $cmd = "$srcdir/negtelnetserver.py $aflags";
+    my $cmd = "$srcdir/negtelnetserver.py --port \"$port\" $flags";
     my ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ntelpid <= 0 || !pidexists($ntelpid)) {
