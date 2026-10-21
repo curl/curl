@@ -62,11 +62,6 @@ deems the server response to be too large truncating it to 40 characters"
 
 https://curl.se/bug/view.cgi?id=1366
 
-## No disconnect command
-
-The disconnect commands (`LOGOUT` and `QUIT`) may not be sent by IMAP, POP3
-and SMTP if a failure occurs during the authentication phase of a connection.
-
 ## `AUTH PLAIN` for SMTP is not working on all servers
 
 Specifying `--login-options AUTH=PLAIN` on the command line does not seem to
