@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+FTP
+FTPS
+EPSV
+RETR
+timeout
+STALLDATA
+timing-dependent
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+DELAY RETR 1
+STALLDATA
+REPLY "PBSZ 0" 200 OK
+REPLY "PROT P" 200 OK
+</servercmd>
+<data nocheck="yes">
+data
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+ftps
+</server>
+<killserver>
+ftps
+</killserver>
+<name>
+FTPS data connection connect timeout includes the 150 wait
+</name>
+<command>
+--insecure --connect-timeout 2 --max-time 5 --write-out '%{time_total} %{time_appconnect}' ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 28 is CURLE_OPERATION_TIMEDOUT
+<errorcode>
+28
+</errorcode>
+<protocol crlf="yes">
+USER anonymous
+PASS ftp@example.com
+PBSZ 0
+PROT P
+PWD
+EPSV
+TYPE I
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
+</protocol>
+# The 150 wait and the stalled handshake must both count. The postcheck
+# subtracts time_appconnect, so the control connection setup does not count.
+# The fix ends the wait at the 2 second connect timeout; a total-timeout
+# exit, or a timer started after the 150 response, takes 3 seconds or more
+# and fails.
+<postcheck>
+%PERL %SRCDIR/test1792.pl %LOGDIR/stdout%TESTNUMBER
+</postcheck>
+</verify>
+</testcase>

@@ -156,6 +156,7 @@ my $nodataconn;    # set if FTP srvr does not establish or accepts data channel
 my $nodataconn425; # set if FTP srvr does not establish data ch and replies 425
 my $nodataconn421; # set if FTP srvr does not establish data ch and replies 421
 my $nodataconn150; # set if FTP srvr does not establish data ch and replies 150
+my $stalldata;     # set if the data connection should accept and stay silent
 my $storeresp;
 my $postfetch;
 my @capabilities;  # set if server supports capability commands
@@ -2358,6 +2359,12 @@ sub RETR_ftp {
 
             sendcontrol "150 Binary data connection for $testno ($testpart) $sz.\r\n";
 
+            if($stalldata) {
+                # Keep the data socket open without answering the TLS
+                # handshake so the client has to time out on its own.
+                return 0;
+            }
+
             for(@data) {
                 my $send = $_;
                 senddata $send;
@@ -2818,6 +2825,7 @@ sub customize {
     $nodataconn425 = 0; # default is to not send 425 without data channel
     $nodataconn421 = 0; # default is to not send 421 without data channel
     $nodataconn150 = 0; # default is to not send 150 without data channel
+    $stalldata = 0;     # default is to send response data
     $storeresp = "";    # send as ultimate STOR response
     $postfetch = "";    # send as header after a FETCH response
     @capabilities = (); # default is to not support capability commands
@@ -2870,6 +2878,10 @@ sub customize {
             $ctrldelay = 0;
             $datadelay = 0.005;
             logmsg "FTPD: send response data with 5ms delay per byte\n";
+        }
+        elsif($_ =~ /STALLDATA/) {
+            $stalldata = 1;
+            logmsg "FTPD: accept the data connection and send nothing\n";
         }
         elsif($_ =~ /SLOWDOWN/) {
             $ctrldelay = 0.005;
