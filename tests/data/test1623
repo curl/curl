@@ -12,7 +12,7 @@ tool-sizeparser
 unittest
 </features>
 <name>
-the size parser for --limit-rate
+the size parser for --limit-rate and the seconds parser for timeouts
 </name>
 </client>
 
