@@ -27,8 +27,6 @@
 #include "tool_writeout_json.h"
 #include "tool_writeout.h"
 
-#define MAX_JSON_STRING 100000
-
 /* The longest escape sequence is \u00XX. */
 #define JSON_ESC_MAX 6
 
@@ -103,16 +101,17 @@ int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
 
 void jsonWriteString(FILE *stream, const char *in, bool lowercase)
 {
-  struct dynbuf out;
-  curlx_dyn_init(&out, MAX_JSON_STRING);
+  const unsigned char *i = (const unsigned char *)in;
 
-  if(!jsonquoted(in, strlen(in), &out, lowercase)) {
-    fputc('\"', stream);
-    if(curlx_dyn_len(&out))
-      fputs(curlx_dyn_ptr(&out), stream);
-    fputc('\"', stream);
+  /* escape straight to the stream: there is no buffer that could grow too
+     large or fail to allocate and cost the caller the value */
+  fputc('\"', stream);
+  for(; *i; i++) {
+    char esc[JSON_ESC_MAX];
+    size_t elen = jsonescape(*i, lowercase, esc);
+    fwrite(esc, 1, elen, stream);
   }
-  curlx_dyn_free(&out);
+  fputc('\"', stream);
 }
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],

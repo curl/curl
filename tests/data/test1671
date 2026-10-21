@@ -22,6 +22,8 @@ Set-Cookie: firstcookie=want1; path=/
 Funny-head: yesyes
 Set-Cookie: 2cookie=want2; path=/
 Content-Type: text/html
+X-Large: small
+X-Large: %repeat[60000 x "]%
 Set-Cookie: cookie3=want3; path=/
 Content-Length: 6
 Connection: close
@@ -64,6 +66,7 @@ Accept: */*
 "set-cookie":["firstcookie=want1; path=/","2cookie=want2; path=/","cookie3=want3; path=/"],
 "funny-head":["yesyes"],
 "content-type":["text/html"],
+"x-large":["small","%repeat[60000 x \"]%"],
 "content-length":["6"],
 "connection":["close"]
 }
