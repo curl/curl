@@ -29,6 +29,58 @@
 
 #define MAX_JSON_STRING 100000
 
+/* The longest escape sequence is \u00XX. */
+#define JSON_ESC_MAX 6
+
+/* Write the json form of the input byte to buf, which must have room for
+   JSON_ESC_MAX bytes. Return the number of bytes written. */
+static size_t jsonescape(unsigned char c, bool lowercase, char *buf)
+{
+  static const char hex[] = "0123456789abcdef";
+  const char *esc = NULL;
+
+  switch(c) {
+  case '\\':
+    esc = "\\\\";
+    break;
+  case '\"':
+    esc = "\\\"";
+    break;
+  case '\b':
+    esc = "\\b";
+    break;
+  case '\f':
+    esc = "\\f";
+    break;
+  case '\n':
+    esc = "\\n";
+    break;
+  case '\r':
+    esc = "\\r";
+    break;
+  case '\t':
+    esc = "\\t";
+    break;
+  default:
+    break;
+  }
+  if(esc) {
+    memcpy(buf, esc, 2);
+    return 2;
+  }
+  if(c < 32) {
+    memcpy(buf, "\\u00", 4);
+    buf[4] = hex[c >> 4];
+    buf[5] = hex[c & 0xf];
+    return JSON_ESC_MAX;
+  }
+  if(lowercase && (c >= 'A' && c <= 'Z'))
+    /* do not use tolower() since that is locale specific */
+    c |= ('a' - 'A');
+  buf[0] = (char)c;
+  return 1;
+}
+
 /* provide the given string in dynbuf as a quoted json string, but without the
    outer quotes. The buffer is not inited by this function.
 
@@ -40,40 +92,9 @@ int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
   CURLcode result = CURLE_OK;
 
   for(; (i < in_end) && !result; i++) {
-    switch(*i) {
-    case '\\':
-      result = curlx_dyn_addn(out, "\\\\", 2);
-      break;
-    case '\"':
-      result = curlx_dyn_addn(out, "\\\"", 2);
-      break;
-    case '\b':
-      result = curlx_dyn_addn(out, "\\b", 2);
-      break;
-    case '\f':
-      result = curlx_dyn_addn(out, "\\f", 2);
-      break;
-    case '\n':
-      result = curlx_dyn_addn(out, "\\n", 2);
-      break;
-    case '\r':
-      result = curlx_dyn_addn(out, "\\r", 2);
-      break;
-    case '\t':
-      result = curlx_dyn_addn(out, "\\t", 2);
-      break;
-    default:
-      if(*i < 32)
-        result = curlx_dyn_addf(out, "\\u%04x", *i);
-      else {
-        char o = (char)*i;
-        if(lowercase && (o >= 'A' && o <= 'Z'))
-          /* do not use tolower() since that is locale specific */
-          o |= ('a' - 'A');
-        result = curlx_dyn_addn(out, &o, 1);
-      }
-      break;
-    }
+    char esc[JSON_ESC_MAX];
+    size_t elen = jsonescape(*i, lowercase, esc);
+    result = curlx_dyn_addn(out, esc, elen);
   }
   if(result)
     return (int)result;
