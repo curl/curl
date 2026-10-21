@@ -469,7 +469,12 @@ sub stopserver {
     my $result = 0;
     foreach my $server (@killservers) {
         my $pidfile = $serverpidfile{$server};
-        unlink($pidfile) if(-f $pidfile);
+        if($pidfile) {
+            unlink($pidfile) if(-f $pidfile);
+        }
+        else {
+            logmsg "RUN: no PID file for '$server' to clean\n";
+        }
     }
     #
     # cleanup server lock files
