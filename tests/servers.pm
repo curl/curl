@@ -1018,6 +1018,11 @@ sub runhttp2server {
     my $idnum = 0;
     my $exe = "$perl " . shell_quote("$srcdir/http2-server.pl");
     my $verbose_flag = "--verbose ";
+    my $nghttpx = $ENV{'NGHTTPX'};
+
+    if(!$nghttpx) {
+        return (2, 0, 0, 0);
+    }
 
     my $server = servername_id($proto, $ipvnum, $idnum);
 
@@ -1038,7 +1043,7 @@ sub runhttp2server {
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     my $flags = "";
-    $flags .= "--nghttpx \"$ENV{'NGHTTPX'}\" ";
+    $flags .= "--nghttpx \"$nghttpx\" ";
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--connect $HOSTIP:" . protoport("http") . " ";
@@ -1078,6 +1083,11 @@ sub runhttp3server {
     my $idnum = 0;
     my $exe = "$perl " . shell_quote("$srcdir/http3-server.pl");
     my $verbose_flag = "--verbose ";
+    my $nghttpx = $ENV{'NGHTTPX'};
+
+    if(!$nghttpx) {
+        return (2, 0, 0, 0);
+    }
 
     my $server = servername_id($proto, $ipvnum, $idnum);
 
@@ -1098,7 +1108,7 @@ sub runhttp3server {
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     my $flags = "";
-    $flags .= "--nghttpx \"$ENV{'NGHTTPX'}\" ";
+    $flags .= "--nghttpx \"$nghttpx\" ";
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--connect $HOSTIP:" . protoport("http") . " ";
