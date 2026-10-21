@@ -304,6 +304,7 @@ error:
  */
 const struct Curl_protocol Curl_protocol_dict = {
   ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   dict_do,                              /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */

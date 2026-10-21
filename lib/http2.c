@@ -2873,9 +2873,9 @@ out:
   return result;
 }
 
-bool Curl_http2_may_switch(struct Curl_easy *data)
+bool Curl_http2_may_switch_at(struct Curl_easy *data, struct Curl_cfilter *cf)
 {
-  if(Curl_conn_http_version(data, data->conn) < 20 &&
+  if(Curl_conn_cf_http_version(data, cf) < 20 &&
      (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
      data->state.http_neg.h2_prior_knowledge) {
 #ifndef CURL_DISABLE_PROXY
@@ -2889,43 +2889,10 @@ bool Curl_http2_may_switch(struct Curl_easy *data)
   return FALSE;
 }
 
-CURLcode Curl_http2_switch(struct Curl_easy *data)
+CURLcode Curl_http2_switch_at(struct Curl_easy *data, struct Curl_cfilter *cf)
 {
-  struct Curl_cfilter *cf;
-  CURLcode result;
-
-  DEBUGASSERT(Curl_conn_http_version(data, data->conn) < 20);
-
-  result = http2_cfilter_add(&cf, data, data->conn, FIRSTSOCKET, FALSE);
-  if(result)
-    return result;
-  CURL_TRC_CF(data, cf, "switching connection to HTTP/2");
-
-  if(cf->next) {
-    bool done;
-    return Curl_conn_cf_connect(cf, data, &done);
-  }
-  return CURLE_OK;
-}
-
-CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct Curl_cfilter *cf_h2;
-  CURLcode result;
-
-  DEBUGASSERT(Curl_conn_http_version(data, data->conn) < 20);
-
-  result = http2_cfilter_insert_after(cf, data, FALSE);
-  if(result)
-    return result;
-
-  cf_h2 = cf->next;
-
-  if(cf_h2->next) {
-    bool done;
-    return Curl_conn_cf_connect(cf_h2, data, &done);
-  }
-  return CURLE_OK;
+  DEBUGASSERT(Curl_conn_cf_http_version(data, cf) < 20);
+  return http2_cfilter_insert_after(cf, data, FALSE);
 }
 
 CURLcode Curl_http2_upgrade(struct Curl_easy *data,

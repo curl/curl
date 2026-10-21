@@ -123,20 +123,6 @@ void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg)
   }
 }
 
-CURLcode Curl_http_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn)
-{
-  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
-     during this request */
-  if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
-    /* only HTTP/3, needs to work */
-    CURLcode result = Curl_conn_may_http3(data, conn);
-    if(result)
-      return result;
-  }
-  return CURLE_OK;
-}
-
 #ifndef CURL_DISABLE_PROXY
 /*
  * checkProxyHeaders() checks the linked list of custom proxy headers
@@ -2784,55 +2770,6 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static CURLcode http_check_new_conn(struct Curl_easy *data)
-{
-  struct connectdata *conn = data->conn;
-  const char *info_version = NULL;
-  const char *alpn;
-  CURLcode result;
-
-  alpn = Curl_conn_get_alpn_negotiated(data, conn);
-  if(alpn && !strcmp("h3", alpn)) {
-#ifndef CURL_DISABLE_PROXY
-    if(!conn->bits.origin_is_proxy)
-#endif
-      DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
-    info_version = "HTTP/3";
-  }
-  else if(alpn && !strcmp("h2", alpn)) {
-#ifndef CURL_DISABLE_PROXY
-    if((Curl_conn_http_version(data, conn) != 20) &&
-       conn->bits.origin_is_proxy) {
-      result = Curl_http2_switch(data);
-      if(result)
-        return result;
-    }
-    else
-#endif
-    DEBUGASSERT(Curl_conn_http_version(data, conn) == 20);
-    info_version = "HTTP/2";
-  }
-  else {
-    /* Check if user wants to use HTTP/2 with clear TCP */
-    if(Curl_http2_may_switch(data)) {
-      DEBUGF(infof(data, "HTTP/2 over clean TCP"));
-      result = Curl_http2_switch(data);
-      if(result)
-        return result;
-      info_version = "HTTP/2";
-      /* There is no ALPN here, but the connection is now definitely h2 */
-      conn->httpversion_seen = 20;
-      Curl_conn_set_multiplex(conn);
-    }
-    else
-      info_version = "HTTP/1.x";
-  }
-
-  if(info_version)
-    infof(data, "using %s", info_version);
-  return CURLE_OK;
-}
-
 static CURLcode http_add_connection_hd(struct Curl_easy *data,
                                        struct dynbuf *req)
 {
@@ -3098,12 +3035,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      previous transfer */
   curlx_dyn_reset(&data->state.headerb);
   data->state.maybe_folded = FALSE;
-
-  if(!data->conn->bits.reuse) {
-    result = http_check_new_conn(data);
-    if(result)
-      goto out;
-  }
 
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse
@@ -5108,11 +5039,59 @@ void Curl_http_resp_free(struct http_resp *resp)
   }
 }
 
+CURLcode Curl_http_setup_conn(struct Curl_easy *data,
+                              struct connectdata *conn)
+{
+  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
+     during this request */
+  if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
+    /* only HTTP/3, needs to work */
+    CURLcode result = Curl_conn_may_http3(data, conn);
+    if(result)
+      return result;
+  }
+  return CURLE_OK;
+}
+
+CURLcode Curl_http_setup_filters(struct Curl_easy *data,
+                                 struct Curl_cfilter *cf)
+{
+  const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf, data);
+  CURLcode result;
+
+  if(alpn && !strcmp("h3", alpn)) {
+    CURL_TRC_CF(data, cf, "using HTTP/3 (via ALPN)");
+  }
+  else if(alpn && !strcmp("h2", alpn)) {
+    if(Curl_conn_cf_http_version(data, cf) != 20) {
+      CURL_TRC_CF(data, cf, "adding HTTP/2 filter");
+      result = Curl_http2_switch_at(data, cf);
+      if(result)
+        return result;
+    }
+    CURL_TRC_CF(data, cf, "using HTTP/2 (via ALPN)");
+  }
+  else {
+    /* Check if user wants to use HTTP/2 with clear TCP */
+    if(Curl_http2_may_switch_at(data, cf)) {
+      CURL_TRC_CF(data, cf, "adding HTTP/2 filter");
+      result = Curl_http2_switch_at(data, cf);
+      if(result)
+        return result;
+      CURL_TRC_CF(data, cf, "using HTTP/2 (over clean TCP)");
+    }
+    else
+      CURL_TRC_CF(data, cf, "using HTTP/1.x");
+  }
+  return CURLE_OK;
+}
+
 /*
  * HTTP handler interface.
  */
 const struct Curl_protocol Curl_protocol_http = {
   Curl_http_setup_conn,                 /* setup_connection */
+  Curl_http_setup_filters,              /* setup_filters */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */

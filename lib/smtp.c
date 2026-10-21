@@ -1994,6 +1994,7 @@ out:
  */
 const struct Curl_protocol Curl_protocol_smtp = {
   smtp_setup_connection,            /* setup_connection */
+  ZERO_NULL,                        /* setup_filters */
   smtp_do,                          /* do_it */
   smtp_done,                        /* done */
   ZERO_NULL,                        /* do_more */

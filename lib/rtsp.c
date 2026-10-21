@@ -109,6 +109,17 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
   struct rtsp_conn *rtspc;
   struct RTSP *rtsp;
 
+  if(!(data->state.http_neg.wanted & CURL_HTTP_V1x) ||
+     !(data->state.http_neg.allowed & CURL_HTTP_V1x)) {
+    failf(data, "RTSP is only supported over HTTP/1.x");
+    return CURLE_FAILED_INIT;
+  }
+  /* zap any other http version */
+  data->state.http_neg.accept_09 = FALSE;
+  data->state.http_neg.only_10 = FALSE;
+  data->state.http_neg.wanted = CURL_HTTP_V1x;
+  data->state.http_neg.allowed = CURL_HTTP_V1x;
+
   rtspc = curlx_calloc(1, sizeof(*rtspc));
   if(!rtspc)
     return CURLE_OUT_OF_MEMORY;
@@ -1042,6 +1053,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
  */
 const struct Curl_protocol Curl_protocol_rtsp = {
   rtsp_setup_connection,                /* setup_connection */
+  Curl_http_setup_filters,              /* setup_filters */
   rtsp_do,                              /* do_it */
   rtsp_done,                            /* done */
   ZERO_NULL,                            /* do_more */
