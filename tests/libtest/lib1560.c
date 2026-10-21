@@ -1748,16 +1748,16 @@ static const struct idncase set_idn_url[] = {
     NULL, CURLUE_BAD_HOSTNAME },
   /* Black question mark ornament (looks like a question mark)*/
   { "https://bad\xE2\x9D\x93" "host.example/",
-    "https://xn--badhost-458d.example/", 0 },
+    "https://xn--badhost-458d.example/", CURLUE_OK },
   /* Division Slash (looks like a slash) */
   { "https://bad\xE2\x88\x95" "host.example/",
-    "https://xn--badhost-ef0d.example/", 0 },
+    "https://xn--badhost-ef0d.example/", CURLUE_OK },
   /* Fullwidth Solidus (looks like a slash) */
   { "https://bad\xef\xbc\x8f" "host.example/",
     NULL, CURLUE_BAD_HOSTNAME},
   /* Fullwidth Stop (looks like a period) */
   { "https://bad\xef\xbc\x8e" "host.example/",
-    "https://bad.host.example/", 0},
+    "https://bad.host.example/", CURLUE_OK},
 };
 
 static int set_idn(void)
