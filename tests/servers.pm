@@ -1046,7 +1046,7 @@ sub runhttp2server {
 
     my $port = getfreeport($ipvnum, 0);
     my $port2 = getfreeport($ipvnum, 0);
-    my $cmd = "$exe --port $port --port2 $port2 $flags";
+    my $cmd = "$exe --port \"$port\" --port2 \"$port2\" $flags";
     my ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($http2pid <= 0 || !pidexists($http2pid)) {
@@ -1106,7 +1106,7 @@ sub runhttp3server {
     $flags .= $verbose_flag if($debugprotocol);
 
     my $port = getfreeport($ipvnum, 0);
-    my $cmd = "$exe --port $port $flags";
+    my $cmd = "$exe --port \"$port\" $flags";
     my ($http3pid, $pid3) = startnew($cmd, $pidfile, 15, 0);
 
     if($http3pid <= 0 || !pidexists($http3pid)) {
@@ -1189,7 +1189,7 @@ sub runhttpsserver {
     }
 
     my $port = getfreeport($ipvnum, 1);
-    my $options = "$flags --accept $port";
+    my $options = "$flags --accept \"$port\"";
     my $cmd = "$perl " . shell_quote("$srcdir/secureserver.pl") . " " . $options;
     my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
@@ -1332,7 +1332,7 @@ sub runsecureserver {
     $flags .= "--connect $clearport";
 
     my $port = getfreeport($ipvnum, 1);
-    my $options = "$flags --accept $port";
+    my $options = "$flags --accept \"$port\"";
 
     my $cmd = "$perl " . shell_quote("$srcdir/secureserver.pl") . " " . $options;
     my ($protospid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -1638,7 +1638,7 @@ sub runsshserver {
 
     push @tports, $port;
 
-    my $options = "$flags --sshport $port";
+    my $options = "$flags --sshport \"$port\"";
 
     my $cmd = "$perl " . shell_quote("$srcdir/sshserver.pl") . " " . $options;
     my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
@@ -1890,7 +1890,7 @@ sub rundictserver {
     $flags .= "--host $HOSTIP";
 
     my $port = getfreeport($ipvnum, 1);
-    my $cmd = "$srcdir/dictserver.py --port $port $flags";
+    my $cmd = "$srcdir/dictserver.py --port \"$port\" $flags";
     my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($dictpid <= 0 || !pidexists($dictpid)) {
@@ -1949,7 +1949,7 @@ sub runnegtelnetserver {
     $flags .= "--srcdir \"$srcdir\"";
 
     my $port = getfreeport($ipvnum, 1);
-    my $cmd = "$srcdir/negtelnetserver.py --port $port $flags";
+    my $cmd = "$srcdir/negtelnetserver.py --port \"$port\" $flags";
     my ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ntelpid <= 0 || !pidexists($ntelpid)) {
