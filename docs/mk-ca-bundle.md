@@ -42,9 +42,8 @@ backup an existing version of *output*
 ## -d [name]
 
 specify which Mozilla tree to pull *certdata.txt* from (or a custom URL).
-Valid names are: **aurora**, **beta**, **central**, **Mozilla**, **nss**,
-**release** (default). They are shortcuts for which source tree to get the
-certificate data from.
+Valid names are: **autoland**, **beta**, **nss**, and **release** (default).
+They are shortcuts for which source tree to get the certificate data from.
 
 ## -f
 
