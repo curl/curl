@@ -1937,12 +1937,13 @@ out:
 static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
+  (void)conn;
   /* WebSocket is 1.1 only (for now) */
   data->state.http_neg.accept_09 = FALSE;
   data->state.http_neg.only_10 = FALSE;
   data->state.http_neg.wanted = CURL_HTTP_V1x;
   data->state.http_neg.allowed = CURL_HTTP_V1x;
-  return Curl_http_setup_conn(data, conn);
+  return CURLE_OK;
 }
 
 const struct curl_ws_frame *curl_ws_meta(CURL *curl)
@@ -2011,6 +2012,7 @@ out:
 
 const struct Curl_protocol Curl_protocol_ws = {
   ws_setup_conn,                        /* setup_connection */
+  Curl_http_setup_filters,              /* setup_filters */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
