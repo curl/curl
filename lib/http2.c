@@ -1845,7 +1845,7 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
 
 out:
   if(Curl_ngh2_is_fatal(&ctx->ngh2, rv)) {
-    rv = Curl_ngh2_fatal(&ctx->ngh2);
+    VERBOSE(rv = Curl_ngh2_fatal(&ctx->ngh2));
     CURL_TRC_CF(data, cf, "nghttp2_session_send error (%s)%d",
                 nghttp2_strerror(rv), rv);
     return CURLE_SEND_ERROR;
