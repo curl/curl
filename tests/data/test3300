@@ -4,6 +4,7 @@
 <keywords>
 unittest
 threads
+may-retry-on-valgrind
 </keywords>
 </info>
 
@@ -11,7 +12,6 @@ threads
 <client>
 <features>
 unittest
-may-retry-on-valgrind
 </features>
 <name>
 thrdpool unit tests

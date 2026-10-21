@@ -807,10 +807,6 @@ sub checksystemfeatures {
     }
     close($manh);
 
-    $feature{"may-retry"} = 1;
-    $feature{"may-retry-on-valgrind"} = 1;
-    $feature{"with-server"} = 1;  # support running tests that need server(s)
-    $feature{"without-server"} = 1;  # support running tests that need no server
     $feature{"python"} = !$ENV{'CURL_TEST_NO_PYTHON'};
     $feature{"unittest"} = 1;
     $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
@@ -1068,16 +1064,12 @@ sub singletest_shouldrun {
     }
     else {
         @what = getpart("client", "features");
-        push @what, getpart("client", "server") ? "with-server" : "without-server";
     }
 
     # We require a feature to be present
     for(@what) {
         my $f = $_;
         $f =~ s/\s//g;
-
-        $may_retry_candidate |= ($f =~ /^(flaky|may-retry|timing-dependent|with-server)$/);
-        $may_retry_candidate |= ($f =~ /^may-retry-on-valgrind$/) if($valgrind);
 
         if($f =~ /^([^!].*)$/) {
             if($feature{$1}) {
@@ -1112,6 +1104,7 @@ sub singletest_shouldrun {
     my @info_keywords;
     if(!$why) {
         @info_keywords = getpart("info", "keywords");
+        push @info_keywords, getpart("client", "server") ? "with-server" : "without-server";
 
         if(!$info_keywords[0]) {
             $why = "missing the <keywords> section!";
@@ -1124,6 +1117,10 @@ sub singletest_shouldrun {
             my $match;
             for my $k (@info_keywords) {
                 chomp $k;
+
+                $may_retry_candidate |= ($k =~ /^(flaky|may-retry|timing-dependent|with-server)$/);
+                $may_retry_candidate |= ($k =~ /^may-retry-on-valgrind$/) if($valgrind);
+
                 if($disabled_keywords{lc($k)}) {
                     if($k =~ /^feat:/) {
                         $why = "disabled by feature";
