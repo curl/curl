@@ -94,7 +94,7 @@ my $srvrname;       # server name for presentation purposes
 my $cwd_testno;     # test case numbers extracted from CWD command
 my $testno = 0;     # test case number (read from server.cmd)
 my $path   = '.';
-my $logdir = $path .'/log';
+my $logdir = $path . '/log';
 my $piddir;
 
 #**********************************************************************
@@ -574,11 +574,11 @@ sub protocolsetup {
             'PBSZ' => '500 PBSZ not implemented',
             'PROT' => '500 PROT not implemented',
             'welcome' => join("",
-            '220-        _   _ ____  _'."\r\n",
-            '220-    ___| | | |  _ \| |'."\r\n",
-            '220-   / __| | | | |_) | |'."\r\n",
-            '220-  | (__| |_| |  _ {| |___'."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n")
+            '220-        _   _ ____  _' . "\r\n",
+            '220-    ___| | | |  _ \| |' . "\r\n",
+            '220-   / __| | | | |_) | |' . "\r\n",
+            '220-  | (__| |_| |  _ {| |___' . "\r\n",
+            '220    \___|\___/|_| \_\_____|' . "\r\n")
         );
     }
     elsif($proto eq 'pop3') {
@@ -600,12 +600,12 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '        _   _ ____  _'."\r\n",
-            '    ___| | | |  _ \| |'."\r\n",
-            '   / __| | | | |_) | |'."\r\n",
-            '  | (__| |_| |  _ {| |___'."\r\n",
-            '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK curl POP3 server ready to serve '."\r\n")
+            '        _   _ ____  _' . "\r\n",
+            '    ___| | | |  _ \| |' . "\r\n",
+            '   / __| | | | |_) | |' . "\r\n",
+            '  | (__| |_| |  _ {| |___' . "\r\n",
+            '   \___|\___/|_| \_\_____|' . "\r\n",
+            '+OK curl POP3 server ready to serve ' . "\r\n")
         );
     }
     elsif($proto eq 'imap') {
@@ -635,12 +635,12 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '        _   _ ____  _'."\r\n",
-            '    ___| | | |  _ \| |'."\r\n",
-            '   / __| | | | |_) | |'."\r\n",
-            '  | (__| |_| |  _ {| |___'."\r\n",
-            '   \___|\___/|_| \_\_____|'."\r\n",
-            '* OK curl IMAP server ready to serve'."\r\n")
+            '        _   _ ____  _' . "\r\n",
+            '    ___| | | |  _ \| |' . "\r\n",
+            '   / __| | | | |_) | |' . "\r\n",
+            '  | (__| |_| |  _ {| |___' . "\r\n",
+            '   \___|\___/|_| \_\_____|' . "\r\n",
+            '* OK curl IMAP server ready to serve' . "\r\n")
         );
     }
     elsif($proto eq 'smtp') {
@@ -659,11 +659,11 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '220-        _   _ ____  _'."\r\n",
-            '220-    ___| | | |  _ \| |'."\r\n",
-            '220-   / __| | | | |_) | |'."\r\n",
-            '220-  | (__| |_| |  _ {| |___'."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n")
+            '220-        _   _ ____  _' . "\r\n",
+            '220-    ___| | | |  _ \| |' . "\r\n",
+            '220-   / __| | | | |_) | |' . "\r\n",
+            '220-  | (__| |_| |  _ {| |___' . "\r\n",
+            '220    \___|\___/|_| \_\_____|' . "\r\n")
         );
     }
 }
@@ -726,26 +726,26 @@ sub close_dataconn {
             logmsg "Server disconnected $datasockf_mode DATA connection\n";
         }
         else {
-            logmsg "Server finds $datasockf_mode DATA connection already ".
+            logmsg "Server finds $datasockf_mode DATA connection already " .
                    "disconnected\n";
         }
     }
     else {
-        logmsg "Server knows $datasockf_mode DATA connection is already ".
+        logmsg "Server knows $datasockf_mode DATA connection is already " .
                "disconnected\n";
     }
 
     if($datapid > 0) {
-        logmsg "DATA sockfilt for $datasockf_mode data channel quits ".
+        logmsg "DATA sockfilt for $datasockf_mode data channel quits " .
                "(pid $datapid)\n";
         print DWRITE "QUIT\n";
         pidwait($datapid, 0);
         unlink($datasockf_pidfile) if(-f $datasockf_pidfile);
-        logmsg "DATA sockfilt for $datasockf_mode data channel quit ".
+        logmsg "DATA sockfilt for $datasockf_mode data channel quit " .
                "(pid $datapid)\n";
     }
     else {
-        logmsg "DATA sockfilt for $datasockf_mode data channel already ".
+        logmsg "DATA sockfilt for $datasockf_mode data channel already " .
                "dead\n";
     }
 
@@ -2559,11 +2559,11 @@ sub PASV_ftp {
 
     if($nodataconn) {
         my $str = nodataconn_str();
-        logmsg "DATA sockfilt for passive data channel ($str) bound on port ".
+        logmsg "DATA sockfilt for passive data channel ($str) bound on port " .
                "$pasvport\n";
     }
     else {
-        logmsg "DATA sockfilt for passive data channel listens on port ".
+        logmsg "DATA sockfilt for passive data channel listens on port " .
                "$pasvport\n";
     }
 
@@ -2582,7 +2582,7 @@ sub PASV_ftp {
         sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\r\n", $pasvport);
     }
 
-    logmsg "Client has been notified that upcoming DATA connection ".
+    logmsg "Client has been notified that upcoming DATA connection " .
            "is awaited on port $pasvport\n";
 
     if($nodataconn) {
@@ -2616,7 +2616,7 @@ sub PASV_ftp {
     };
     if($@) {
         # timed out
-        logmsg "$srvrname server timed out awaiting data connection ".
+        logmsg "$srvrname server timed out awaiting data connection " .
             "on port $pasvport\n";
         logmsg "accept failed or connection not even attempted\n";
         logmsg "DATA sockfilt killed now\n";
@@ -2626,7 +2626,7 @@ sub PASV_ftp {
         return;
     }
     else {
-        logmsg "====> Client established passive DATA connection ".
+        logmsg "====> Client established passive DATA connection " .
                "on port $pasvport\n";
     }
 
@@ -2655,7 +2655,7 @@ sub PORT_ftp {
 
     if($cmd eq "PORT") {
         if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
-            logmsg "DATA sockfilt for active data channel not started ".
+            logmsg "DATA sockfilt for active data channel not started " .
                    "(bad PORT-line: $arg)\n";
             sendcontrol "500 silly you, go away\r\n";
             return;
@@ -2666,7 +2666,7 @@ sub PORT_ftp {
     # EPRT |2|::1|49706|
     elsif($cmd eq "EPRT") {
         if($arg !~ /(\d+)\|([^\|]+)\|(\d+)/) {
-            logmsg "DATA sockfilt for active data channel not started ".
+            logmsg "DATA sockfilt for active data channel not started " .
                    "(bad EPRT-line: $arg)\n";
             sendcontrol "500 silly you, go away\r\n";
             return;
@@ -2676,14 +2676,14 @@ sub PORT_ftp {
         $addr = $2;
     }
     else {
-        logmsg "DATA sockfilt for active data channel not started ".
+        logmsg "DATA sockfilt for active data channel not started " .
                "(invalid command: $cmd)\n";
         sendcontrol "500 we don't like $cmd now\r\n";
         return;
     }
 
     if(!$port || $port > 65535) {
-        logmsg "DATA sockfilt for active data channel not started ".
+        logmsg "DATA sockfilt for active data channel not started " .
                "(illegal PORT number: $port)\n";
         return;
     }
@@ -3119,7 +3119,7 @@ if($portfile && !$port) {
 logmsg sprintf("%s server listens on port IPv${ipvnum}/${port}\n", uc($proto));
 
 open(my $pid, ">", $pidfile);
-print $pid $$."\n";
+print $pid $$ . "\n";
 close($pid);
 
 logmsg("logged pid $$ in $pidfile\n");

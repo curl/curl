@@ -46,7 +46,8 @@ if($shell eq 'fish') {
     print q(complete -c curl -n 'string match -qr "^@" -- (commandline -ct)' -k -xa "(printf '%s\n' -- @(__fish_complete_suffix --complete=(commandline -ct | string replace -r '^@' '') ''))");
     print "\n\n";
     print qq{$_ \n} foreach (@opts);
-} elsif($shell eq 'zsh') {
+}
+elsif($shell eq 'zsh') {
     my $opts_str;
 
     $opts_str .= qq{  $_ \\\n} foreach (@opts);
@@ -70,7 +71,8 @@ return rc
 EOS
 
     print $tmpl;
-} else {
+}
+else {
     die("Unsupported shell: $shell");
 }
 
@@ -120,7 +122,8 @@ sub parse_main_opts {
                 if defined $long;
             $option .= " --description '" . strip_dash(trim($desc)) . "'"
                 if defined $desc;
-        } elsif($shell eq 'zsh') {
+        }
+        elsif($shell eq 'zsh') {
             $option .= '{' . trim($short) . ',' if defined $short;
             $option .= trim($long)  if defined $long;
             $option .= '}' if defined $short;
@@ -130,13 +133,17 @@ sub parse_main_opts {
                 $option .= ":'$arg'";
                 if($arg =~ /<file ?(name)?>|<path>/) {
                     $option .= ':_files';
-                } elsif($arg =~ /<dir>/) {
+                }
+                elsif($arg =~ /<dir>/) {
                     $option .= ":'_path_files -/'";
-                } elsif($arg =~ /<url>/i) {
+                }
+                elsif($arg =~ /<url>/i) {
                     $option .= ':_urls';
-                } elsif($long =~ /ftp/ && $arg =~ /<method>/) {
+                }
+                elsif($long =~ /ftp/ && $arg =~ /<method>/) {
                     $option .= ":'(multicwd nocwd singlecwd)'";
-                } elsif($arg =~ /<method>/) {
+                }
+                elsif($arg =~ /<method>/) {
                     $option .= ":'(DELETE GET HEAD POST PUT)'";
                 }
             }

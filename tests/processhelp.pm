@@ -58,7 +58,8 @@ BEGIN {
             # https://metacpan.org/pod/Win32::Process::List
             require Win32::Process::List;
         };
-    } else {
+    }
+    else {
       $has_win32_process = 0;
     }
 }
@@ -105,7 +106,8 @@ sub winpid_to_pid {
         my $pid = Cygwin::winpid_to_pid($vpid - 4194304);
         if($pid) {
             return $pid;
-        } else {
+        }
+        else {
             return $vpid
         }
     }
@@ -132,7 +134,8 @@ sub pidexists {
                     if(exists $processes{$pid}) {
                         return -$pid;
                     }
-                } else {
+                }
+                else {
                     my $filter = "PID eq $pid";
                     # https://ss64.com/nt/tasklist.html
                     my $result = qx(tasklist -fi \"$filter\" 2>$dev_null);
@@ -167,7 +170,8 @@ sub pid_term_or_kill {
             if($^O ne 'MSWin32') {
                 if($has_win32_process) {
                     Win32::Process::KillProcess($pid, 0);
-                } else {
+                }
+                else {
                     my $pwsh;
                     # https://ss64.com/nt/tasklist.html
                     my $result = qx(tasklist -v -fo list -fi "PID eq $pid" 2>&1);

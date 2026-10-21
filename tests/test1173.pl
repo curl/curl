@@ -147,7 +147,7 @@ sub scanmanpage {
     if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
         # This is a man page for libcurl. It requires an example unless it is
         # considered deprecated.
-        $reqex = 1 unless defined $deprecated{'CURL'.$2};
+        $reqex = 1 unless defined $deprecated{'CURL' . $2};
         if($1 eq "CURL") {
             $optpage = 1;
         }

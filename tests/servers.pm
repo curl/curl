@@ -480,7 +480,7 @@ sub stopserver {
         my @lockfiles = (
             "$LOGDIR/$LOCKDIR/$server.lock",
             "$LOGDIR/$LOCKDIR/$server-IPv$ipvnum.lock",
-            "$LOGDIR/$LOCKDIR/sws-".uc($server)."-IPv$ipvnum.lock"
+            "$LOGDIR/$LOCKDIR/sws-" . uc($server) . "-IPv$ipvnum.lock"
             );
         foreach my $lockfile (@lockfiles) {
             if(-f $lockfile) {
@@ -514,12 +514,12 @@ sub verifyhttp {
     my $port = ($ipvnum eq "unix") ? 80 : $port_or_path;
     my $infix = ($do_http3) ? "_h3" : "";
 
-    my $verifyout = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .$infix .'_verify.out';
+    my $verifyout = "$LOGDIR/" .
+        servername_canon($proto, $ipvnum, $idnum) . $infix . '_verify.out';
     unlink($verifyout) if(-f $verifyout);
 
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .$infix .'_verify.log';
+    my $verifylog = "$LOGDIR/" .
+        servername_canon($proto, $ipvnum, $idnum) . $infix . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     if($proto eq "gopher") {
@@ -573,7 +573,7 @@ sub verifyhttp {
 
     my $pid = 0;
     if($data && ($data =~ /WE ROOLZ: (\d+)/)) {
-        $pid = 0+$1;
+        $pid = 0 + $1;
     }
     elsif($res == 6) {
         # curl: (6) Could not resolve hostname '::1'
@@ -599,8 +599,8 @@ sub verifyftp {
     my $time = time();
     my $extra = "";
 
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+    my $verifylog = "$LOGDIR/" .
+        servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     if($proto eq "ftps") {
@@ -633,7 +633,7 @@ sub verifyftp {
     foreach my $line (@data) {
         if($line =~ /WE ROOLZ: (\d+)/) {
             # this is our test server with a known pid!
-            $pid = 0+$1;
+            $pid = 0 + $1;
             last;
         }
     }
@@ -664,12 +664,12 @@ sub verifyrtsp {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
 
-    my $verifyout = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
+    my $verifyout = "$LOGDIR/" .
+        servername_canon($proto, $ipvnum, $idnum) . '_verify.out';
     unlink($verifyout) if(-f $verifyout);
 
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+    my $verifylog = "$LOGDIR/" .
+        servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     my $flags = "--max-time $server_response_maxtime ";
@@ -716,7 +716,7 @@ sub verifyrtsp {
 
     my $pid = 0;
     if($data && ($data =~ /RTSP_SERVER WE ROOLZ: (\d+)/)) {
-        $pid = 0+$1;
+        $pid = 0 + $1;
     }
     elsif($res == 6) {
         # curl: (6) Could not resolve hostname '::1'
@@ -809,8 +809,8 @@ sub verifytelnet {
     my $time = time();
     my $extra = "";
 
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+    my $verifylog = "$LOGDIR/" .
+        servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     my $flags = "--max-time $server_response_maxtime ";
@@ -838,7 +838,7 @@ sub verifytelnet {
     foreach my $line (@data) {
         if($line =~ /WE ROOLZ: (\d+)/) {
             # this is our test server with a known pid!
-            $pid = 0+$1;
+            $pid = 0 + $1;
             last;
         }
     }
@@ -973,7 +973,8 @@ sub runhttpserver {
     $flags .= "--id $idnum " if($idnum > 1);
     if($ipvnum eq "unix") {
         $flags .= "--unix-socket '$port_or_path' ";
-    } else {
+    }
+    else {
         $flags .= "--ipv$ipvnum --port 0 ";
     }
     $flags .= "--srcdir \"$srcdir\"";
@@ -1061,12 +1062,12 @@ sub runhttp2server {
     $doesntrun{$pidfile} = 0;
 
     if($verb) {
-        logmsg "RUN: $srvrname server PID $http2pid ".
-            "http-port $port https-port $port2 ".
+        logmsg "RUN: $srvrname server PID $http2pid " .
+            "http-port $port https-port $port2 " .
             "backend $HOSTIP:" . protoport("http") . "\n";
     }
 
-    return (0+!$http2pid, $http2pid, $pid2, $port, $port2);
+    return (0 + !$http2pid, $http2pid, $pid2, $port, $port2);
 }
 
 #######################################################################
@@ -1125,7 +1126,7 @@ sub runhttp3server {
         logmsg "RUN: $srvrname server PID $http3pid port $port\n";
     }
 
-    return (0+!$http3pid, $http3pid, $pid3, $port);
+    return (0 + !$http3pid, $http3pid, $pid3, $port);
 }
 
 #######################################################################
@@ -1213,7 +1214,7 @@ sub runhttpsserver {
 
     $runcert{$server} = $certfile;
 
-    return (0+!$httpspid, $httpspid, $pid2, $port);
+    return (0 + !$httpspid, $httpspid, $pid2, $port);
 }
 
 #######################################################################
@@ -1356,7 +1357,7 @@ sub runsecureserver {
         logmsg "RUN: $srvrname server is PID $protospid port $port\n";
     }
 
-    return (0+!$protospid, $protospid, $pid2, $port);
+    return (0 + !$protospid, $protospid, $pid2, $port);
 }
 
 #######################################################################
@@ -1740,12 +1741,12 @@ sub runmqttserver {
 
     unlink($portfile); # need to see a new one
     # start our MQTT server - on a random port!
-    my $cmd = server_exe('mqttd').
-        " --port 0".
-        " --pidfile $pidfile".
-        " --portfile $portfile".
-        " --config $LOGDIR/$SERVERCMD".
-        " --logfile $logfile".
+    my $cmd = server_exe('mqttd') .
+        " --port 0" .
+        " --pidfile $pidfile" .
+        " --portfile $portfile" .
+        " --config $LOGDIR/$SERVERCMD" .
+        " --logfile $logfile" .
         " --logdir $LOGDIR";
     my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
 
@@ -1805,22 +1806,23 @@ sub runsocksserver {
     # start our socks server, get commands from the FTP cmd file
     my $cmd = "";
     if($is_unix) {
-        $cmd = server_exe('socksd').
-            " --pidfile $pidfile".
-            " --reqfile $LOGDIR/$SOCKSIN".
-            " --logfile $logfile".
-            " --unix-socket $SOCKSUNIXPATH".
-            " --backend $HOSTIP".
+        $cmd = server_exe('socksd') .
+            " --pidfile $pidfile" .
+            " --reqfile $LOGDIR/$SOCKSIN" .
+            " --logfile $logfile" .
+            " --unix-socket $SOCKSUNIXPATH" .
+            " --backend $HOSTIP" .
             " --config $LOGDIR/$SERVERCMD";
         $portfile = "none";
-    } else {
-        $cmd = server_exe('socksd').
-            " --port 0".
-            " --pidfile $pidfile".
-            " --portfile $portfile".
-            " --reqfile $LOGDIR/$SOCKSIN".
-            " --logfile $logfile".
-            " --backend $HOSTIP".
+    }
+    else {
+        $cmd = server_exe('socksd') .
+            " --port 0" .
+            " --pidfile $pidfile" .
+            " --portfile $portfile" .
+            " --reqfile $LOGDIR/$SOCKSIN" .
+            " --logfile $logfile" .
+            " --backend $HOSTIP" .
             " --config $LOGDIR/$SERVERCMD";
     }
     my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
@@ -1909,7 +1911,7 @@ sub rundictserver {
         logmsg "RUN: $srvrname server PID $dictpid port $port\n";
     }
 
-    return (0+!$dictpid, $dictpid, $pid2, $port);
+    return (0 + !$dictpid, $dictpid, $pid2, $port);
 }
 
 #######################################################################
@@ -1969,7 +1971,7 @@ sub runnegtelnetserver {
         logmsg "RUN: $srvrname server PID $ntelpid port $port\n";
     }
 
-    return (0+!$ntelpid, $ntelpid, $pid2, $port);
+    return (0 + !$ntelpid, $ntelpid, $pid2, $port);
 }
 
 #######################################################################
@@ -2131,13 +2133,13 @@ sub startservers {
             if($run{$what} &&
                !responsive_pingpong_server($what, "", $verbose)) {
                 if(stopserver($what)) {
-                    return ("failed stopping unresponsive ".uc($what)." server", 3);
+                    return ("failed stopping unresponsive " . uc($what) . " server", 3);
                 }
             }
             if(!$run{$what}) {
                 ($serr, $pid, $pid2) = runpingpongserver($what, "", $verbose);
                 if($pid <= 0) {
-                    return ("failed starting ". uc($what) ." server", $serr);
+                    return ("failed starting " . uc($what) . " server", $serr);
                 }
                 logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2) if($verbose);
                 $run{$what} = "$pid $pid2";

@@ -827,7 +827,7 @@ sub checksystemfeatures {
     # 'socks' was once here but is now removed
 
     if($torture && !$feature{"TrackMemory"}) {
-        die "cannot run torture tests since curl was built without ".
+        die "cannot run torture tests since curl was built without " .
             "TrackMemory feature (--enable-debug)";
     }
 
@@ -1221,7 +1221,7 @@ sub singletest_count {
     else {
         if(exists $allnames{$testname} &&
            ($allnames{$testname} != $testnum)) {
-            logmsg sprintf("ERROR: test %d has duplicate test name: \"%s\". ".
+            logmsg sprintf("ERROR: test %d has duplicate test name: \"%s\". " .
                            "The same as test %d\n", $testnum,
                            $testname, $allnames{$testname});
             exit 1;
@@ -1440,8 +1440,8 @@ sub singletest_check {
         }
 
         if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
-            logmsg "\n $testnum: protocol FAILED!\n".
-                " There was no content at all in the file $logdir/$SERVERIN.\n".
+            logmsg "\n $testnum: protocol FAILED!\n" .
+                " There was no content at all in the file $logdir/$SERVERIN.\n" .
                 " Server glitch? Total curl failure? Returned: $cmdres\n";
             # timestamp test result verification end
             $timevrfyend{$testnum} = Time::HiRes::time();
@@ -1462,9 +1462,9 @@ sub singletest_check {
     my @reply;
     if(partexists("reply", "datacheck")) {
         for my $partsuffix (('', '1', '2', '3', '4')) {
-            my @replycheckpart = getpart("reply", "datacheck".$partsuffix);
+            my @replycheckpart = getpart("reply", "datacheck" . $partsuffix);
             if(@replycheckpart) {
-                my %replycheckpartattr = getpartattr("reply", "datacheck".$partsuffix);
+                my %replycheckpartattr = getpartattr("reply", "datacheck" . $partsuffix);
                 # get the mode attribute
                 my $filemode = $replycheckpartattr{'mode'};
                 if($filemode && ($filemode eq "text")) {
@@ -1615,18 +1615,19 @@ sub singletest_check {
 
     my $outputok;
     for my $partsuffix (('', '1', '2', '3', '4')) {
-        my @outfile = getpart("verify", "file".$partsuffix);
-        if(@outfile || partexists("verify", "file".$partsuffix) ) {
+        my @outfile = getpart("verify", "file" . $partsuffix);
+        if(@outfile || partexists("verify", "file" . $partsuffix) ) {
             # we are supposed to verify a dynamically generated file!
-            my %hash = getpartattr("verify", "file".$partsuffix);
+            my %hash = getpartattr("verify", "file" . $partsuffix);
 
             my $filename = $hash{'name'};
             if(!$filename) {
-                logmsg " $testnum: IGNORED: section verify=>file$partsuffix ".
+                logmsg " $testnum: IGNORED: section verify=>file$partsuffix " .
                        "has no name attribute\n";
                 if(runnerac_stopservers($runnerid)) {
                     logmsg "ERROR: runner $runnerid seems to have died\n";
-                } else {
+                }
+                else {
 
                     # TODO: this is a blocking call that stalls the controller,
                     if($verbose) {
@@ -1637,7 +1638,8 @@ sub singletest_check {
                     my ($rid, $unexpected, $logs) = runnerar($runnerid);
                     if(!$rid) {
                         logmsg "ERROR: runner $runnerid seems to have died\n";
-                    } else {
+                    }
+                    else {
                         logmsg $logs;
                     }
                 }
@@ -1648,7 +1650,7 @@ sub singletest_check {
             my @generated = loadarray($filename);
 
             # what parts to cut off from the file
-            my @stripfilepar = getpart("verify", "stripfile".$partsuffix);
+            my @stripfilepar = getpart("verify", "stripfile" . $partsuffix);
 
             my $filemode = $hash{'mode'};
             if($filemode && ($filemode eq "text")) {
@@ -1975,8 +1977,8 @@ sub singletest {
         # Recursively call the state machine again because there is no
         # event expected that would otherwise trigger a new call.
         return singletest(@_);
-
-    } elsif($singletest_state{$runnerid} == ST_INITED) {
+    }
+    elsif($singletest_state{$runnerid} == ST_INITED) {
         ###################################################################
         # Restore environment variables that were modified in a previous run.
         # Test definition may instruct to (un)set environment vars.
@@ -2001,8 +2003,8 @@ sub singletest {
             return (-1, 0);
         }
         $singletest_state{$runnerid} = ST_PREPROCESS;
-
-    } elsif($singletest_state{$runnerid} == ST_PREPROCESS) {
+    }
+    elsif($singletest_state{$runnerid} == ST_PREPROCESS) {
         my ($rid, $why, $error, $logs, $testtimings) = runnerar($runnerid);
         if(!$rid) {
             logmsg "ERROR: runner $runnerid seems to have died\n";
@@ -2050,8 +2052,8 @@ sub singletest {
             return (-1, 0);
         }
         $singletest_state{$runnerid} = ST_RUN;
-
-    } elsif($singletest_state{$runnerid} == ST_RUN) {
+    }
+    elsif($singletest_state{$runnerid} == ST_RUN) {
         my ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar($runnerid);
         if(!$rid) {
             logmsg "ERROR: runner $runnerid seems to have died\n";
@@ -2195,21 +2197,21 @@ sub runtimestats {
         @timetest = sort { $b <=> $a } @timetest;
     }
 
-    logmsg "Spent ". sprintf("%08.3f ", $timesrvrtot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timesrvrtot) .
            "seconds starting and verifying test harness servers.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timepreptot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timepreptot) .
            "seconds reading definitions and doing test preparations.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timetooltot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timetooltot) .
            "seconds actually running test tools.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timelocktot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timelocktot) .
            "seconds awaiting server logs lock removal.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timevrfytot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timevrfytot) .
            "seconds verifying test results.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timetesttot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timetesttot) .
            "seconds doing all of the above.\n";
 
     $counter = 25;
-    logmsg "\nTest server starting and verification time per test ".
+    logmsg "\nTest server starting and verification time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2219,7 +2221,7 @@ sub runtimestats {
     }
 
     $counter = 10;
-    logmsg "\nTest definition reading and preparation time per test ".
+    logmsg "\nTest definition reading and preparation time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2229,7 +2231,7 @@ sub runtimestats {
     }
 
     $counter = 25;
-    logmsg "\nTest tool execution time per test ".
+    logmsg "\nTest tool execution time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2239,7 +2241,7 @@ sub runtimestats {
     }
 
     $counter = 15;
-    logmsg "\nTest server logs lock removal time per test ".
+    logmsg "\nTest server logs lock removal time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2249,7 +2251,7 @@ sub runtimestats {
     }
 
     $counter = 10;
-    logmsg "\nTest results verification time per test ".
+    logmsg "\nTest results verification time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2259,7 +2261,7 @@ sub runtimestats {
     }
 
     $counter = 50;
-    logmsg "\nTotal time per test ".
+    logmsg "\nTotal time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2494,7 +2496,8 @@ while(@ARGV) {
         if($ARGV[0] =~ /^(\w+)=([\w.:\/\[\]-]+)$/) {
             my ($variable, $value) = ($1, $2);
             eval "\$$variable='$value'" or die "Failed to set \$$variable to $value: $@";
-        } else {
+        }
+        else {
             die "Failed to parse '-o $ARGV[0]'. May contain unexpected characters.\n";
         }
     }
@@ -2685,8 +2688,8 @@ if($valgrind) {
     if(($code>>8) != 1) {
         #logmsg "Valgrind failure, disable it\n";
         undef $valgrind;
-    } else {
-
+    }
+    else {
         open(my $curlh, "<", $CURL);
         my $l = <$curlh>;
         if($l =~ /^\#\!/) {
@@ -2921,7 +2924,8 @@ sub displaylogcontent {
                 $line =~ s/\s*\!$//;
                 if($truncate) {
                     push @tail, " $line\n";
-                } else {
+                }
+                else {
                     logmsg " $line\n";
                 }
                 $linecount++;
@@ -3105,7 +3109,8 @@ while(1) {
         if($again) {
             # this runner is busy running a test
             $runnersrunning{$runnerid} = $testnum;
-        } else {
+        }
+        else {
             runnerready($runnerid);
             if($error >= 0) {
                 # We make this simplifying assumption to avoid having to handle
@@ -3149,7 +3154,8 @@ while(1) {
                 if($again) {
                     # this runner is busy running a test
                     $runnersrunning{$ridready} = $testnum;
-                } else {
+                }
+                else {
                     # Test is complete
                     $runner_wait_cnt = 0;
                     runnerready($ridready);
@@ -3276,8 +3282,8 @@ my $all = $total + $numskipped;
 runtimestats($lasttest);
 
 if($all) {
-    logmsg "TESTDONE: $all tests were considered during ".
-        sprintf("%.0f", $sofar) ." seconds.\n";
+    logmsg "TESTDONE: $all tests were considered during " .
+        sprintf("%.0f", $sofar) . " seconds.\n";
 }
 
 if(%skipped && !$short) {
@@ -3308,7 +3314,7 @@ if(%skipped && !$short) {
             }
         }
         if($c > $max) {
-            $log_line .= " and ".($c-$max)." more";
+            $log_line .= " and " . ($c - $max) . " more";
         }
         $log_line .= ")\n";
         $restraints{$log_line} = $skip_count;

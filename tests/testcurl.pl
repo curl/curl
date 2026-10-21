@@ -320,7 +320,7 @@ my $str1066os = 'o' x 1066;
 
 # Set timestamp to the UTC this script is running. Its value might
 # be changed later in the script to the value present in curlver.h
-$timestamp = scalar(gmtime)." UTC";
+$timestamp = scalar(gmtime) . " UTC";
 
 logit "STARTING HERE"; # first line logged, for scripts to trigger on
 logit 'TRANSFER CONTROL ==== 1120 CHAR LINE' . $str1066os . 'LINE_END';
@@ -360,9 +360,11 @@ if(-d $CURLDIR) {
         # remove the generated sources to force them to be re-generated each
         # time we run this test
         unlink "$CURLDIR/src/tool_hugehelp.c";
-    } elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
+    }
+    elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
         logit "$CURLDIR is verified to be a fine daily source dir";
-    } else {
+    }
+    else {
         mydie "$CURLDIR is not a daily source directory or checked out from git!"
     }
 }
@@ -386,7 +388,8 @@ mkdir $build, 0777;
 
 if(-d $build) {
     logit "build directory $build was created fine";
-} else {
+}
+else {
     mydie "failed to create directory $build";
 }
 
@@ -401,14 +404,15 @@ if($git) {
     # update quietly to the latest git
     if($nogitpull) {
         logit "skipping git pull (--nogitpull)";
-    } else {
+    }
+    else {
         logit "run git pull in curl";
         system("git pull 2>&1");
         $gitstat += $?;
         logit "failed to update from curl git ($?), continue anyway" if($?);
 
         # Set timestamp to the UTC the git update took place.
-        $timestamp = scalar(gmtime)." UTC" if(!$gitstat);
+        $timestamp = scalar(gmtime) . " UTC" if(!$gitstat);
     }
 
     # get the last 5 commits for show (even if no pull was made)
@@ -444,8 +448,8 @@ if($git) {
     else {
         logit "autoreconf -fi was successful (dummy message)";
     }
-
-} else {
+}
+else {
     # Show snapshot git commit when available
     if(open(my $f, '<', "docs/tarball-commit.txt")) {
         my $commit = <$f>;
@@ -465,7 +469,7 @@ if((-f "include/curl/curlver.h") &&
             my $stampstring = $1;
             if($stampstring !~ /DEV/) {
                $stampstring =~ s/\s+UTC//;
-                $timestamp = $stampstring." UTC";
+                $timestamp = $stampstring . " UTC";
             }
             last;
         }
@@ -479,10 +483,12 @@ logit "timestamp = $timestamp";
 if($configurebuild) {
     if(-f "configure") {
         logit "configure created (at least it exists)";
-    } else {
+    }
+    else {
         mydie "no configure created/found";
     }
-} else {
+}
+else {
    logit "configure created (dummy message)"; # dummy message to feign success
 }
 
@@ -519,10 +525,12 @@ if($configurebuild) {
 
     if(-f "lib/Makefile") {
         logit "configure seems to have finished fine";
-    } else {
+    }
+    else {
         mydie "configure did not work";
     }
-} else {
+}
+else {
     logit "copying files to build directory ...";
     if($^O eq 'MSWin32') {
         system('xcopy', ('/s', '/q', $CURLDIR, '.'));
@@ -574,7 +582,7 @@ else {
 
 if(!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
     logit "display curl${binext} --version output";
-    my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
+    my $cmd = ($extvercmd ne '' ? $extvercmd . ' ' : '') . "./src/curl${binext} --version|";
     open($f, "<", $cmd);
     while(<$f>) {
         # strip CR from output on non-Windows platforms (WINE on Linux)
@@ -622,13 +630,15 @@ if($configurebuild && !$crosscompile) {
 
     if(grepfile("^TEST", $buildlog)) {
         logit "tests were run";
-    } else {
+    }
+    else {
         mydie "test suite failure";
     }
 
     if(grepfile("^TESTFAIL:", $buildlog)) {
         logit "the tests were not successful";
-    } else {
+    }
+    else {
         logit "the tests were successful!";
     }
 }
@@ -677,6 +687,6 @@ if(($mktarball ne '') && (-x $mktarball)) {
     system($mktarball);
 }
 
-logit "enddate = ".scalar(gmtime)." UTC";  # When the run ends
+logit "enddate = " . scalar(gmtime) . " UTC";  # When the run ends
 # mydie to cleanup
 mydie "ending nicely";

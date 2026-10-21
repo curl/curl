@@ -112,7 +112,7 @@ use memanalyzer;
 #######################################################################
 # Global variables set elsewhere but used only by this package
 # These may only be set *before* runner_init is called
-our $DBGCURL = $CURL; #"../src/.libs/curl";  # alternative for debugging
+our $DBGCURL = $CURL; # "../src/.libs/curl";  # alternative for debugging
 our $gdb = checktestcmd("gdb");
 our $gdbthis = 0;  # run test case with debugger (gdb or lldb)
 our $gdbxwin;      # use windowed gdb when using gdb
@@ -227,8 +227,8 @@ sub runner_init {
         close($thisrunnerr);
 
         $thisrunnerid = $child;
-
-    } else {
+    }
+    else {
         # Create our pid directory
         mkdir("$LOGDIR/$PIDDIR", 0777);
 
@@ -620,7 +620,8 @@ sub singletest_startservers {
             if($err == 1) {
                 # Error indicates an actual problem starting the server
                 $error = -2;
-            } else {
+            }
+            else {
                 $error = -1;
             }
         }
@@ -754,8 +755,8 @@ sub singletest_prepare {
 
     # create (possibly-empty) files before starting the test
     for my $partsuffix (('', '1', '2', '3', '4')) {
-        my @inputfile = getpart("client", "file".$partsuffix);
-        my %fileattr = getpartattr("client", "file".$partsuffix);
+        my @inputfile = getpart("client", "file" . $partsuffix);
+        my %fileattr = getpartattr("client", "file" . $partsuffix);
         my $filename = $fileattr{'name'};
         if(@inputfile || $filename) {
             if(!$filename) {
@@ -788,7 +789,8 @@ sub singletest_prepare {
                 }
                 print $outfile join('', @inputfile);
                 close($outfile);
-            } else {
+            }
+            else {
                 logmsg "ERROR: cannot write $filename\n";
             }
         }
@@ -1003,7 +1005,7 @@ sub singletest_run {
     if($cmdhash{'option'} && ($cmdhash{'option'} =~ /no-stdout/)) {
         $redirstdout = "";
     }
-    $CMDLINE .= "$cmdargs $redirstdout".
+    $CMDLINE .= "$cmdargs $redirstdout" .
         " 2> " . stderrfilename($LOGDIR, $testnum);
 
     if($verbose) {
@@ -1502,7 +1504,8 @@ sub ipcrecv {
     }
     elsif($funcname eq "runner_test_run") {
         @res = runner_test_run(@$argsarrayref);
-    } else {
+    }
+    else {
         die "Unknown IPC function $funcname\n";
     }
     # print "ipcrecv results\n";

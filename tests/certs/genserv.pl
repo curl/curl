@@ -32,8 +32,8 @@ use IPC::Open3;
 use Symbol 'gensym';
 
 sub opensslfail {
-    die "Missing or unsupported 'openssl' tool. openssl 1.0.2+ required. ".
-        "Without it, this script cannot generate the necessary certificates ".
+    die "Missing or unsupported 'openssl' tool. openssl 1.0.2+ required. " .
+        "Without it, this script cannot generate the necessary certificates " .
         "the curl test suite needs for all its TLS related tests.";
 }
 
@@ -64,8 +64,9 @@ my $CAPREFIX = shift @ARGV;
 if(!$CAPREFIX) {
     print "Usage: genserv.pl <caprefix> [<prefix> ...]\n";
     exit 1;
-} elsif(! -f "$CAPREFIX-ca.cacert" ||
-        ! -f "$CAPREFIX-ca.key") {
+}
+elsif(! -f "$CAPREFIX-ca.cacert" ||
+      ! -f "$CAPREFIX-ca.key") {
 
     if($OPENSSL eq basename($OPENSSL)) {  # has no directory component
         # find openssl in PATH
