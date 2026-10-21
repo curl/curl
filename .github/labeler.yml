@@ -511,6 +511,7 @@ TLS:
               docs/libcurl/opts/CURLOPT_SSL*,\
               docs/libcurl/opts/CURLOPT_TLS*,\
               docs/libcurl/opts/CURLOPT_USE_SSL*,\
+              docs/mk-ca-bundle.md,\
               lib/vtls/**,\
               m4/curl-gnutls.m4,\
               m4/curl-mbedtls.m4,\
@@ -518,6 +519,7 @@ TLS:
               m4/curl-rustls.m4,\
               m4/curl-schannel.m4,\
               m4/curl-wolfssl.m4,\
+              scripts/mk-ca-bundle.pl,\
               src/tool_ssls.*\
               }"
 
