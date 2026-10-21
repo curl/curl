@@ -49,28 +49,24 @@ my $dev_null = File::Spec->devnull();
 # Process command line options
 #
 while(@ARGV) {
-    print STDERR "\nhttp3-server.pl ARG: '$ARGV[0]'\n";
     if($ARGV[0] eq '--verbose') {
         $verbose = 1;
     }
     elsif($ARGV[0] eq '--pidfile') {
         if($ARGV[1]) {
             $pidfile = $ARGV[1];
-    print STDERR "\nhttp3-server.pl ARG-2: '$ARGV[1]'\n";
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--nghttpx') {
         if($ARGV[1]) {
             $nghttpx = $ARGV[1];
-    print STDERR "\nhttp3-server.pl ARG-3: '$ARGV[1]'\n";
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--port') {
         if($ARGV[1]) {
             $listenport = $ARGV[1];
-    print STDERR "\nhttp3-server.pl ARG-4: '$ARGV[1]'\n";
             shift @ARGV;
         }
     }
@@ -78,35 +74,30 @@ while(@ARGV) {
         if($ARGV[1]) {
             $connect = $ARGV[1];
             $connect =~ s/:/,/;
-    print STDERR "\nhttp3-server.pl ARG-5: '$ARGV[1]'\n";
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--cert') {
         if($ARGV[1]) {
             $cert = $ARGV[1];
-    print STDERR "\nhttp3-server.pl ARG-6: '$ARGV[1]'\n";
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logfile') {
         if($ARGV[1]) {
             $logfile = $ARGV[1];
-    print STDERR "\nhttp3-server.pl ARG-7: '$ARGV[1]'\n";
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
         if($ARGV[1]) {
             $logdir = $ARGV[1];
-    print STDERR "\nhttp3-server.pl ARG-8: '$ARGV[1]'\n";
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--conf') {
         if($ARGV[1]) {
             $conf = $ARGV[1];
-    print STDERR "\nhttp3-server.pl ARG-9: '$ARGV[1]'\n";
             shift @ARGV;
         }
     }
