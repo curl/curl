@@ -328,7 +328,7 @@ sub serverfortest {
 sub startnew {
     my ($cmd, $pidfile, $timeout, $fakepidfile) = @_;
 
-    logmsg "startnew: $cmd\n" if($verbose);
+    logmsg "startnew: $cmd\n";
 
     my $child = fork();
 
@@ -357,7 +357,7 @@ sub startnew {
         if(open(my $out, ">", $pidfile)) {
             print $out $child . "\n";
             close($out) or die "Failure writing pidfile";
-            logmsg "startnew: $pidfile faked with pid=$child\n" if($verbose);
+            logmsg "startnew: $pidfile faked with pid=$child\n";
         }
         else {
             logmsg "startnew: failed to write fake $pidfile with pid=$child\n";
@@ -365,7 +365,7 @@ sub startnew {
         # could/should do a while connect fails sleep a bit and loop
         Time::HiRes::sleep($timeout);
         if(checkdied($child)) {
-            logmsg "startnew: child process has failed to start\n" if($verbose);
+            logmsg "startnew: child process has failed to start\n";
             return (-1, -1);
         }
     }
@@ -381,8 +381,7 @@ sub startnew {
             last;
         }
         if(checkdied($child)) {
-            logmsg "startnew: child process has died, server might start up\n"
-                if($verbose);
+            logmsg "startnew: child process has died, server might start up\n";
             # We cannot abort waiting for the server with a
             # return (-1, -1);
             # because the server might have forked and could still start
