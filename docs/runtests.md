@@ -45,7 +45,7 @@ Specify a feature to run only tests requiring it, or exclude tests using
 `!feat:<feature>`, like `!feat:proxy`, to disable tests which depend on that
 feature.
 
-With special keywords `!feat:with-server` and `!feat:without-server` you can
+With special keywords `!with-server` and `!without-server` you can
 exclude tests using a test server or those that are not, respectively.
 
 You can also specify keywords with a leading exclamation point and the keyword
@@ -241,8 +241,8 @@ extended the test sequence.
 
 ## `--retry=[num]`
 
-Number of attempts for the whole test run to retry failed tests. It
-applies to tests using servers, or features `timing-dependent`, `flaky`,
+Number of attempts for the whole test run to retry failed tests. It applies to
+tests using servers, or with keywords `timing-dependent`, `flaky`,
 `may-retry`, or `may-retry-on-valgrind` (limited to valgrind tests).
 
 ## `-S`
