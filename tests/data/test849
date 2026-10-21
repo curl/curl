@@ -37,11 +37,12 @@ IMAP plain auth with alt authorization identity (Not authorized)
 <errorcode>
 67
 </errorcode>
+# The multi interface considers a broken "CONNECT" as a prematurely broken
+# transfer and such a connection does not get a "LOGOUT"
 <protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
 %b64[ursel%00kurt%00xipj3plmq]b64%
-A003 LOGOUT
 </protocol>
 </verify>
 </testcase>

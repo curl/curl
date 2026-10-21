@@ -992,7 +992,6 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
       else {
         failf(data, "Authentication cancelled");
         result = CURLE_LOGIN_DENIED;
-        data->conn->bits.login_rejected = TRUE;
       }
       break;
     default:
@@ -1013,7 +1012,6 @@ static CURLcode pop3_state_apop_resp(struct Curl_easy *data, int pop3code,
   if(pop3code != '+') {
     failf(data, "Authentication failed: %d", pop3code);
     result = CURLE_LOGIN_DENIED;
-    data->conn->bits.login_rejected = TRUE;
   }
   else
     /* End of connect phase */
@@ -1038,7 +1036,6 @@ static CURLcode pop3_state_user_resp(struct Curl_easy *data, int pop3code,
   if(pop3code != '+') {
     failf(data, "Access denied. %c", pop3code);
     result = CURLE_LOGIN_DENIED;
-    data->conn->bits.login_rejected = TRUE;
   }
   else
     /* Send the PASS command */
@@ -1060,7 +1057,6 @@ static CURLcode pop3_state_pass_resp(struct Curl_easy *data, int pop3code,
   if(pop3code != '+') {
     failf(data, "Access denied. %c", pop3code);
     result = CURLE_LOGIN_DENIED;
-    data->conn->bits.login_rejected = TRUE;
   }
   else
     /* End of connect phase */

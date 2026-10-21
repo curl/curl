@@ -1134,7 +1134,6 @@ static CURLcode imap_state_auth_resp(struct Curl_easy *data,
       else {
         failf(data, "Authentication cancelled");
         result = CURLE_LOGIN_DENIED;
-        data->conn->bits.login_rejected = TRUE;
       }
       break;
     default:
@@ -1156,7 +1155,6 @@ static CURLcode imap_state_login_resp(struct Curl_easy *data,
   if(imapcode != IMAP_RESP_OK) {
     failf(data, "Access denied. %c", imapcode);
     result = CURLE_LOGIN_DENIED;
-    data->conn->bits.login_rejected = TRUE;
   }
   else
     /* End of connect phase */

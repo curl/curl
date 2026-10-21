@@ -39,11 +39,12 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u kurt:xipj3plmq --sasl-authzid ursel
 <errorcode>
 67
 </errorcode>
+# The multi interface considers a broken "CONNECT" as a prematurely broken
+# transfer and such a connection does not get a "QUIT"
 <protocol crlf="yes">
 CAPA
 AUTH PLAIN
 %b64[ursel%00kurt%00xipj3plmq]b64%
-QUIT
 </protocol>
 </verify>
 </testcase>

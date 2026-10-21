@@ -589,7 +589,6 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *curl)
 
 struct multi_done_ctx {
   BIT(premature);
-  BIT(graceful_close); /* close without aborting despite premature */
 };
 
 static bool multi_conn_should_close(struct connectdata *conn,
@@ -657,8 +656,7 @@ static cpool_do_result multi_done_locked(struct Curl_easy *data,
                data->set.reuse_forbid, conn->bits.close, mdctx->premature,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn);
-    return (mdctx->premature && !mdctx->graceful_close) ?
-      CPOOL_DO_TERMINATE : CPOOL_DO_CLOSE;
+    return mdctx->premature ? CPOOL_DO_TERMINATE : CPOOL_DO_CLOSE;
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
     CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s:%u was shutdown"
@@ -746,17 +744,6 @@ static CURLcode multi_done(struct Curl_easy *data,
 
     memset(&mdctx, 0, sizeof(mdctx));
     mdctx.premature = premature;
-    /* A login the server rejected with a final reply during the protocol
-       connect phase leaves the connection in a known, working state with
-       no authentication exchange in progress. Close it without aborting
-       so that the protocol handler gets to say goodbye to the server
-       (QUIT/LOGOUT) before the connection is shut down. Local failures
-       that return CURLE_LOGIN_DENIED do not set login_rejected and still
-       abort the connection. */
-    if((status == CURLE_LOGIN_DENIED) && conn->bits.login_rejected &&
-       ((data->mstate == MSTATE_PROTOCONNECT) ||
-        (data->mstate == MSTATE_PROTOCONNECTING)))
-      mdctx.graceful_close = TRUE;
     Curl_cpool_return(data, conn, multi_done_locked, &mdctx, pnow);
 
     if(data->multi)

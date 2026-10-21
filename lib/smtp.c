@@ -1331,7 +1331,6 @@ static CURLcode smtp_state_auth_resp(struct Curl_easy *data,
     case SASL_IDLE:            /* No mechanism left after cancellation */
       failf(data, "Authentication cancelled");
       result = CURLE_LOGIN_DENIED;
-      data->conn->bits.login_rejected = TRUE;
       break;
     default:
       break;
