@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SMTP
+EXPN
+CUSTOMREQUEST
+</keywords>
+</info>
+<reply>
+</reply>
+<client>
+<server>
+smtp
+</server>
+<name>
+SMTP custom command rejects recipient with LF
+</name>
+<file1 name="%LOGDIR/test%TESTNUMBER.config">
+mail-rcpt = "Friends\n"
+</file1>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X EXPN -K %LOGDIR/test%TESTNUMBER.config --max-time 5
+</command>
+</client>
+<verify>
+<errorcode>
+43
+</errorcode>
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+</testcase>
