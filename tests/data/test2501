@@ -27,6 +27,7 @@ Funny-head: yesyes
 Debug
 http
 http/3
+nghttpx-h3
 </features>
 <server>
 http/3
