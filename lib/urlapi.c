@@ -1534,10 +1534,10 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
     if(!Curl_is_ASCII_name(u->host)) {
       char *punyversion = NULL;
       uc = host_decode(part, &punyversion);
+      curlx_free(part);
       if(uc)
         return uc;
       uc = hostname_check(punyversion, strlen(punyversion));
-      curlx_free(part);
       if(uc) {
         curlx_free(punyversion);
         return uc;
