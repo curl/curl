@@ -1643,8 +1643,12 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
     else if(flags & CURLU_PUNYCODE) {
       if(!Curl_is_ASCII_name(u->host)) {
         CURLUcode ret = host_decode(u->host, &allochost);
-        if(ret)
+        if(!ret)
+          ret = hostname_check(allochost, strlen(allochost));
+        if(ret) {
+          curlx_safefree(allochost);
           return ret;
+        }
       }
     }
     else if(flags & CURLU_PUNY2IDN) {
