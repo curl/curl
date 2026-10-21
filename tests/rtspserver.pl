@@ -53,31 +53,31 @@ my $logdir = $path . '/log';
 
 while(@ARGV) {
     if($ARGV[0] eq '--pidfile') {
-        if($ARGV[1]) {
+        if(defined $ARGV[1]) {
             $pidfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--portfile') {
-        if($ARGV[1]) {
+        if(defined $ARGV[1]) {
             $portfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logfile') {
-        if($ARGV[1]) {
+        if(defined $ARGV[1]) {
             $logfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
-        if($ARGV[1]) {
+        if(defined $ARGV[1]) {
             $logdir = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--srcdir') {
-        if($ARGV[1]) {
+        if(defined $ARGV[1]) {
             $srcdir = $ARGV[1];
             shift @ARGV;
         }
@@ -89,14 +89,18 @@ while(@ARGV) {
         $ipvnum = 6;
     }
     elsif($ARGV[0] eq '--port') {
-        if($ARGV[1] =~ /^(\d+)$/) {
-            $port = $1;
+        if(defined $ARGV[1]) {
+            if($ARGV[1] =~ /^(\d+)$/) {
+                $port = $1;
+            }
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--id') {
-        if($ARGV[1] =~ /^(\d+)$/) {
-            $idnum = $1 if($1 > 0);
+        if(defined $ARGV[1]) {
+            if($ARGV[1] =~ /^(\d+)$/) {
+                $idnum = $1 if($1 > 0);
+            }
             shift @ARGV;
         }
     }
