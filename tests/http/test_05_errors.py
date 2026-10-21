@@ -312,7 +312,7 @@ class TestErrors:
     def test_05_11_pure_resp(self, env: Env, pr_server):
         proto = 'http/1.1'
         run_env = os.environ.copy()
-        run_env['CURL_DBG_SOCK_OPTWAIT'] = '1000'
+        run_env['CURL_DBG_SOCK_CONNECT_WAIT_MS'] = '1000'
         curl = CurlClient(env=env, run_env=run_env)
         url = f'http://{env.domain1}:{pr_server.port}/xxx'
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[

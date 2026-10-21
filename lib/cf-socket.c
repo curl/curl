@@ -1027,7 +1027,7 @@ struct cf_socket_ctx {
 #endif
   int sockerr;                       /* socket error of last failure or 0 */
 #ifdef DEBUGBUILD
-  int sockopt_wait_ms;               /* ms to wait after socket open */
+  int connect_wait_ms;               /* ms to wait after 1st connect() */
   int wblock_percent;                /* percent of writes doing EAGAIN */
   int wpartial_percent;              /* percent of bytes written in send */
   int rblock_percent;                /* percent of reads doing EAGAIN */
@@ -1079,11 +1079,11 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
       if(!curlx_str_number(&p, &l, CURL_OFF_T_MAX))
         ctx->recv_max = (size_t)l;
     }
-    p = getenv("CURL_DBG_SOCK_OPTWAIT");
+    p = getenv("CURL_DBG_SOCK_CONNECT_WAIT_MS");
     if(p) {
       curl_off_t l;
       if(!curlx_str_number(&p, &l, INT_MAX))
-        ctx->sockopt_wait_ms = (int)l;
+        ctx->connect_wait_ms = (int)l;
     }
   }
 #endif
@@ -1489,12 +1489,6 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     if(result)
       goto out;
 
-#ifdef DEBUGBUILD
-    if(ctx->sockopt_wait_ms > 0) {
-      CURL_TRC_CF(data, cf, "debug sockopt wait %d ms", ctx->sockopt_wait_ms);
-      curlx_wait_ms(ctx->sockopt_wait_ms);
-    }
-#endif
     if(cf->connected) {
       *done = TRUE;
       return CURLE_OK;
@@ -1504,8 +1498,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     rc = do_connect(cf, data, (bool)cf->conn->bits.tcp_fastopen);
     sockerr = SOCKERRNO;
     set_local_ip(cf, data);
-    CURL_TRC_CF(data, cf, "local address %s port %d...",
+    CURL_TRC_CF(data, cf, "local address %s port %d",
                 ctx->ip.local_ip, ctx->ip.local_port);
+#ifdef DEBUGBUILD
+    if(ctx->connect_wait_ms > 0) {
+      CURL_TRC_CF(data, cf, "debug connect wait %d ms", ctx->connect_wait_ms);
+      curlx_wait_ms(ctx->connect_wait_ms);
+    }
+#endif
     if(rc == -1) {
       ctx->sockerr = sockerr;
       result = socket_connect_result(data, ctx->ip.remote_ip, sockerr);

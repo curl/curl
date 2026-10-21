@@ -53,10 +53,9 @@ sockets. This is applied to every send.
 Example: **CURL_DBG_SOCK_WPARTIAL=80** means a send with 1000 bytes would
 only send 800.
 
-## `CURL_DBG_SOCK_OPTWAIT`
+## `CURL_DBG_SOCK_CONNECT_WAIT_MS`
 
-Wait this many milliseconds after opening and configuring a connection
-socket.
+Wait this many milliseconds after first `connect()` on a socket.
 
 ## `CURL_DBG_QUIC_WBLOCK`
 
