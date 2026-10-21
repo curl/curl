@@ -290,6 +290,10 @@ struct connectdata {
   timediff_t lastused_ms; /* when returned to the connection pool as idle */
   timediff_t lastchecked_ms; /* when last checked alive status */
   timediff_t lastupkeep_ms; /* when last done conn_upkeep */
+  struct {
+    struct curltime at[2]; /* first Curl_conn_connect() for each socket */
+    bool set[2];
+  } connect_started;
 
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
