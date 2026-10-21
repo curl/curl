@@ -1047,8 +1047,7 @@ sub runhttp2server {
 
     my $port = getfreeport($ipvnum, 0);
     my $port2 = getfreeport($ipvnum, 0);
-    my $aflags = "--port $port --port2 $port2 $flags";
-    my $cmd = "$exe $aflags";
+    my $cmd = "$exe --port $port --port2 $port2 $flags";
     my ($http2pid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($http2pid <= 0 || !pidexists($http2pid)) {
@@ -1108,8 +1107,7 @@ sub runhttp3server {
     $flags .= $verbose_flag if($debugprotocol);
 
     my $port = getfreeport($ipvnum, 0);
-    my $aflags = "--port $port $flags";
-    my $cmd = "$exe $aflags";
+    my $cmd = "$exe --port $port $flags";
     my ($http3pid, $pid3) = startnew($cmd, $pidfile, 15, 0);
 
     if($http3pid <= 0 || !pidexists($http3pid)) {
@@ -1893,8 +1891,7 @@ sub rundictserver {
     $flags .= "--host $HOSTIP";
 
     my $port = getfreeport($ipvnum, 1);
-    my $aflags = "--port $port $flags";
-    my $cmd = "$srcdir/dictserver.py $aflags";
+    my $cmd = "$srcdir/dictserver.py --port $port $flags";
     my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($dictpid <= 0 || !pidexists($dictpid)) {
@@ -1953,8 +1950,7 @@ sub runnegtelnetserver {
     $flags .= "--srcdir \"$srcdir\"";
 
     my $port = getfreeport($ipvnum, 1);
-    my $aflags = "--port $port $flags";
-    my $cmd = "$srcdir/negtelnetserver.py $aflags";
+    my $cmd = "$srcdir/negtelnetserver.py --port $port $flags";
     my ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ntelpid <= 0 || !pidexists($ntelpid)) {
