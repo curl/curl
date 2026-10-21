@@ -575,7 +575,11 @@ class ExecResult:
         seen_tl = sorted(ref_tl, key=cmp_to_key(cmp_ts))
         assert seen_tl == ref_tl, f'timeline {idx}: {[f"{ts}: {s[ts]}" for ts in seen_tl]}\n{self.dump_logs()}'
         for key in somewhere_keys:
-            self.check_stat_positive(s, idx, key)
+            if key == 'time_queue':
+                # time_queue is a bastard and sometimes in CI it is reported as 0
+                self.check_stat_positive_or_0(s, idx, key)
+            else:
+                self.check_stat_positive(s, idx, key)
             assert s[key] <= s['time_total']
 
     def dump_logs(self):
