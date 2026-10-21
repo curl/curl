@@ -136,17 +136,17 @@ while(@ARGV) {
         $debugprotocol = 1;
     }
     elsif($ARGV[0] eq '--user') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $username = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--id') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             if($ARGV[1] =~ /^(\d+)$/) {
                 $idnum = $1 if($1 > 0);
+                shift @ARGV;
             }
-            shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--ipv4') {
@@ -158,40 +158,41 @@ while(@ARGV) {
         $listenaddr = '::1' if($listenaddr eq '127.0.0.1');
     }
     elsif($ARGV[0] eq '--addr') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             my $tmpstr = $ARGV[1];
             if($tmpstr =~ /^(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)$/) {
                 $listenaddr = "$1.$2.$3.$4" if($ipvnum == 4);
+                shift @ARGV;
             }
             elsif($ipvnum == 6) {
                 $listenaddr = $tmpstr;
                 $listenaddr =~ s/^\[(.*)\]$/$1/;
+                shift @ARGV;
             }
-            shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--pidfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $pidfile = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logdir = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--sshport') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             if($ARGV[1] =~ /^(\d+)$/) {
                 $port = $1;
+                shift @ARGV;
             }
-            shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--keyalgo') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $keyalgo = $ARGV[1];
             shift @ARGV;
         }

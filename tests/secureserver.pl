@@ -101,51 +101,51 @@ while(@ARGV) {
         $verbose = 1;
     }
     elsif($ARGV[0] eq '--proto') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $proto = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--accept') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             if($ARGV[1] =~ /^(\d+)$/) {
                 $accept_port = $1;
+                shift @ARGV;
             }
-            shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--connect') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             if($ARGV[1] =~ /^(\d+)$/) {
                 $target_port = $1;
+                shift @ARGV;
             }
-            shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--stunnel') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $stunnel = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--srcdir') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $srcdir = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--certfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $stuncert = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--id') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             if($ARGV[1] =~ /^(\d+)$/) {
                 $idnum = $1 if($1 > 0);
+                shift @ARGV;
             }
-            shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--ipv4') {
@@ -155,19 +155,19 @@ while(@ARGV) {
         $ipvnum = 6;
     }
     elsif($ARGV[0] eq '--pidfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $pidfile = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logfile = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logdir = "$path/" . $ARGV[1];
             shift @ARGV;
         }

@@ -53,50 +53,50 @@ while(@ARGV) {
         $verbose = 1;
     }
     elsif($ARGV[0] eq '--pidfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $pidfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--nghttpx') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $nghttpx = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--port') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $listenport = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--connect') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $connect = $ARGV[1];
             $connect =~ s/:/,/;
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--cert') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $cert = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logdir = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--conf') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $conf = $ARGV[1];
             shift @ARGV;
         }

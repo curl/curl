@@ -61,37 +61,37 @@ my $piddir;
 
 while(@ARGV) {
     if($ARGV[0] eq '--pidfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $pidfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--portfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $portfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--config') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $cmdfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logdir = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--srcdir') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $srcdir = $ARGV[1];
             shift @ARGV;
         }
@@ -104,7 +104,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq '--unix-socket') {
         $ipvnum = 'unix';
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $unix_socket = $ARGV[1];
             shift @ARGV;
         }
@@ -119,22 +119,20 @@ while(@ARGV) {
         }
     }
     elsif($ARGV[0] eq '--connect') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $connect = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--keepalive') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $keepalive_secs = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--id') {
-        if(defined $ARGV[1]) {
-            if($ARGV[1] =~ /^(\d+)$/) {
-                $idnum = $1 if($1 > 0);
-            }
+        if($ARGV[1] =~ /^(\d+)$/) {
+            $idnum = $1 if($1 > 0);
             shift @ARGV;
         }
     }

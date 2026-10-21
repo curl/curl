@@ -2985,50 +2985,46 @@ while(@ARGV) {
         $verbose = 1;
     }
     elsif($ARGV[0] eq '--srcdir') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $srcdir = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--id') {
-        if(defined $ARGV[1]) {
-            if($ARGV[1] && ($ARGV[1] =~ /^(\d+)$/)) {
-                $idnum = $1 if($1 > 0);
-            }
+        if($ARGV[1] && ($ARGV[1] =~ /^(\d+)$/)) {
+            $idnum = $1 if($1 > 0);
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--proto') {
-        if(defined $ARGV[1]) {
-            if($ARGV[1] =~ /^(ftp|imap|pop3|smtp)$/) {
-                $proto = $1;
-            }
-            else {
-                die "unsupported protocol $ARGV[1]";
-            }
+        if($ARGV[1] && ($ARGV[1] =~ /^(ftp|imap|pop3|smtp)$/)) {
+            $proto = $1;
             shift @ARGV;
+        }
+        else {
+            die "unsupported protocol $ARGV[1]";
         }
     }
     elsif($ARGV[0] eq '--pidfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $pidfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--portfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $portfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logfile') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logfile = $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             $logdir = $ARGV[1];
             shift @ARGV;
         }
@@ -3042,15 +3038,13 @@ while(@ARGV) {
         $listenaddr = '::1' if($listenaddr eq '127.0.0.1');
     }
     elsif($ARGV[0] eq '--port') {
-        if(defined $ARGV[1]) {
-            if($ARGV[1] =~ /^(\d+)$/) {
-                $port = $1;
-            }
+        if($ARGV[1] =~ /^(\d+)$/) {
+            $port = $1;
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--addr') {
-        if(defined $ARGV[1]) {
+        if($ARGV[1]) {
             my $tmpstr = $ARGV[1];
             if($tmpstr =~ /^(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)\.(\d\d?\d?)$/) {
                 $listenaddr = "$1.$2.$3.$4" if($ipvnum == 4);
