@@ -1437,6 +1437,7 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
   int rc, idx;
   bool ocsp_init = FALSE;
   gnutls_ocsp_cert_status_t status = GNUTLS_OCSP_CERT_UNKNOWN;
+  time_t this_update = 0;
 
   /* Get the OCSP stapled response. We require it to be there. */
   rc = gnutls_ocsp_status_request_get(session, &ocsp_raw);
@@ -1482,9 +1483,16 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
    * - the timestamp of this OCSP status has been tested
    * We therefore need only to inspect that actual status code. */
   rc = gnutls_ocsp_resp_get_single(ocsp_resp, idx, NULL, NULL, NULL, NULL,
-                                   &status, NULL, NULL, NULL, NULL);
+                                   &status, &this_update, NULL, NULL, NULL);
   if(rc < 0) {
     failf(data, "failed to parse OCSP response for peer cert");
+    goto out;
+  }
+  /* GnuTLS rejects an expired response but not one that claims a thisUpdate
+   * in the future, so bound that side here with the same clock skew the
+   * OpenSSL backend allows */
+  if(this_update > (time(NULL) + 300)) {
+    failf(data, "OCSP response is not yet valid");
     goto out;
   }
   switch(status) {
