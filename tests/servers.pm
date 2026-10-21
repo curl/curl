@@ -573,7 +573,7 @@ sub verifyhttp {
 
     my $pid = 0;
     if($data && ($data =~ /WE ROOLZ: (\d+)/)) {
-        $pid = 0+$1;
+        $pid = 0 + $1;
     }
     elsif($res == 6) {
         # curl: (6) Could not resolve hostname '::1'
@@ -633,7 +633,7 @@ sub verifyftp {
     foreach my $line (@data) {
         if($line =~ /WE ROOLZ: (\d+)/) {
             # this is our test server with a known pid!
-            $pid = 0+$1;
+            $pid = 0 + $1;
             last;
         }
     }
@@ -716,7 +716,7 @@ sub verifyrtsp {
 
     my $pid = 0;
     if($data && ($data =~ /RTSP_SERVER WE ROOLZ: (\d+)/)) {
-        $pid = 0+$1;
+        $pid = 0 + $1;
     }
     elsif($res == 6) {
         # curl: (6) Could not resolve hostname '::1'
@@ -838,7 +838,7 @@ sub verifytelnet {
     foreach my $line (@data) {
         if($line =~ /WE ROOLZ: (\d+)/) {
             # this is our test server with a known pid!
-            $pid = 0+$1;
+            $pid = 0 + $1;
             last;
         }
     }
@@ -1066,7 +1066,7 @@ sub runhttp2server {
             "backend $HOSTIP:" . protoport("http") . "\n";
     }
 
-    return (0+!$http2pid, $http2pid, $pid2, $port, $port2);
+    return (0 + !$http2pid, $http2pid, $pid2, $port, $port2);
 }
 
 #######################################################################
@@ -1125,7 +1125,7 @@ sub runhttp3server {
         logmsg "RUN: $srvrname server PID $http3pid port $port\n";
     }
 
-    return (0+!$http3pid, $http3pid, $pid3, $port);
+    return (0 + !$http3pid, $http3pid, $pid3, $port);
 }
 
 #######################################################################
@@ -1213,7 +1213,7 @@ sub runhttpsserver {
 
     $runcert{$server} = $certfile;
 
-    return (0+!$httpspid, $httpspid, $pid2, $port);
+    return (0 + !$httpspid, $httpspid, $pid2, $port);
 }
 
 #######################################################################
@@ -1356,7 +1356,7 @@ sub runsecureserver {
         logmsg "RUN: $srvrname server is PID $protospid port $port\n";
     }
 
-    return (0+!$protospid, $protospid, $pid2, $port);
+    return (0 + !$protospid, $protospid, $pid2, $port);
 }
 
 #######################################################################
@@ -1909,7 +1909,7 @@ sub rundictserver {
         logmsg "RUN: $srvrname server PID $dictpid port $port\n";
     }
 
-    return (0+!$dictpid, $dictpid, $pid2, $port);
+    return (0 + !$dictpid, $dictpid, $pid2, $port);
 }
 
 #######################################################################
@@ -1969,7 +1969,7 @@ sub runnegtelnetserver {
         logmsg "RUN: $srvrname server PID $ntelpid port $port\n";
     }
 
-    return (0+!$ntelpid, $ntelpid, $pid2, $port);
+    return (0 + !$ntelpid, $ntelpid, $pid2, $port);
 }
 
 #######################################################################
