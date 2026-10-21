@@ -29,6 +29,39 @@
 
 #define MAX_JSON_STRING 100000
 
+/* return the length of the valid UTF-8 sequence that starts at 'i', or 0 */
+static size_t utf8len(const unsigned char *i, const unsigned char *end)
+{
+  unsigned char lo = 0x80, hi = 0xbf; /* allowed range of the second byte */
+  size_t n, k;
+
+  if(*i >= 0xc2 && *i <= 0xdf)
+    n = 2;
+  else if(*i >= 0xe0 && *i <= 0xef) {
+    n = 3;
+    if(*i == 0xe0)
+      lo = 0xa0; /* no overlong forms */
+    else if(*i == 0xed)
+      hi = 0x9f; /* no surrogates */
+  }
+  else if(*i >= 0xf0 && *i <= 0xf4) {
+    n = 4;
+    if(*i == 0xf0)
+      lo = 0x90; /* no overlong forms */
+    else if(*i == 0xf4)
+      hi = 0x8f; /* nothing above U+10FFFF */
+  }
+  else
+    return 0;
+
+  if((size_t)(end - i) < n || i[1] < lo || i[1] > hi)
+    return 0;
+  for(k = 2; k < n; k++)
+    if((i[k] & 0xc0) != 0x80)
+      return 0;
+  return n;
+}
+
 /* provide the given string in dynbuf as a quoted json string, but without the
    outer quotes. The buffer is not inited by this function.
 
@@ -65,6 +98,16 @@ int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
     default:
       if(*i < 32)
         result = curlx_dyn_addf(out, "\\u%04x", *i);
+      else if(*i >= 0x80) {
+        size_t n = utf8len(i, in_end);
+        if(n) {
+          result = curlx_dyn_addn(out, i, n);
+          i += n - 1;
+        }
+        else
+          /* not UTF-8, escape the byte as if it was ISO-8859-1 */
+          result = curlx_dyn_addf(out, "\\u%04x", *i);
+      }
       else {
         char o = (char)*i;
         if(lowercase && (o >= 'A' && o <= 'Z'))
