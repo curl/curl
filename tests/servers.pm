@@ -1021,6 +1021,7 @@ sub runhttp2server {
     my $nghttpx = $ENV{'NGHTTPX'};
 
     if(!$nghttpx) {
+        logmsg "runhttp2server: NGHTTPX env is not set\n";
         return (2, 0, 0, 0);
     }
 
@@ -1086,6 +1087,7 @@ sub runhttp3server {
     my $nghttpx = $ENV{'NGHTTPX'};
 
     if(!$nghttpx) {
+        logmsg "runhttp3server: NGHTTPX env is not set\n";
         return (2, 0, 0, 0);
     }
 
