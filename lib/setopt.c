@@ -42,6 +42,7 @@
 #include "vtls/vtls.h"
 #include "curl_trc.h"
 #include "setopt.h"
+#include "easyoptions.h"
 #include "altsvc.h"
 #include "hsts.h"
 #include "tftp.h"
@@ -2876,11 +2877,8 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
   /* unreachable */
 }
 
-/*
- * Do not make Curl_vsetopt() static: it is called from
- * projects/OS400/ccsidcurl.c.
- */
-CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
+static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
+                        va_list param)
 {
   if(option < CURLOPTTYPE_OBJECTPOINT)
     return setopt_long(data, option, va_arg(param, long));
@@ -2919,6 +2917,31 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   else if(option < CURLOPTTYPE_BLOB)
     return setopt_offt(data, option, va_arg(param, curl_off_t));
   return setopt_blob(data, option, va_arg(param, struct curl_blob *));
+}
+
+/* Return TRUE if the option is one that libcurl knows about, even when
+   support for it was disabled at build time. */
+static bool known_option(CURLoption option)
+{
+  const struct curl_easyoption *o;
+  for(o = &Curl_easyopts[0]; o->name; o++) {
+    if(o->id == option)
+      return TRUE;
+  }
+  return FALSE;
+}
+
+/*
+ * Do not make Curl_vsetopt() static: it is called from
+ * projects/OS400/ccsidcurl.c.
+ */
+CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
+{
+  CURLcode result = vsetopt(data, option, param);
+  /* an option that exists but was left out from this build */
+  if((result == CURLE_UNKNOWN_OPTION) && known_option(option))
+    result = CURLE_NOT_BUILT_IN;
+  return result;
 }
 
 /*

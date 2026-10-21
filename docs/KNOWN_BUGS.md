@@ -381,15 +381,6 @@ See [curl issue 14481](https://github.com/curl/curl/issues/14481)
 
 Test 165 disabled when built with WinIDN.
 
-## setting a disabled option should return `CURLE_NOT_BUILT_IN`
-
-When curl has been built with specific features or protocols disabled, setting
-such options with `curl_easy_setopt()` should rather return
-`CURLE_NOT_BUILT_IN` instead of `CURLE_UNKNOWN_OPTION` to signal the
-difference to the application
-
-See [curl issue 15472](https://github.com/curl/curl/issues/15472)
-
 # LDAP
 
 ## OpenLDAP hangs after returning results
