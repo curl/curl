@@ -23,10 +23,17 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "tool_getparam.h"
+#include "tool_paramhlp.h"
 
 struct check1623 {
   const char *input;
   curl_off_t amount;
+  ParameterError err;
+};
+
+struct secs1623 {
+  const char *input;
+  long ms;
   ParameterError err;
 };
 
@@ -97,6 +104,21 @@ static CURLcode test_tool1623(const char *arg)
     { "2,2k", 0, PARAM_BAD_USE },
     { NULL, 0, PARAM_OK } /* end of list */
   };
+  static const struct secs1623 secs[] = {
+    { "0", 0, PARAM_OK },
+    { "1", 1000, PARAM_OK },
+    { "10", 10000, PARAM_OK },
+    { "1.5", 1500, PARAM_OK },
+    { "0.25", 250, PARAM_OK },
+    { "0.001", 1, PARAM_OK },
+    { "2m", 0, PARAM_BAD_NUMERIC },
+    { "1.5abc", 0, PARAM_BAD_NUMERIC },
+    { "1.", 0, PARAM_BAD_NUMERIC },
+    { "1 ", 0, PARAM_BAD_NUMERIC },
+    { "-4", 0, PARAM_BAD_NUMERIC },
+    { "", 0, PARAM_BAD_NUMERIC },
+    { NULL, 0, PARAM_OK } /* end of list */
+  };
 
   for(i = 0; check[i].input; i++) {
     bool ok = FALSE;
@@ -119,6 +141,21 @@ static CURLcode test_tool1623(const char *arg)
     }
     if(!ok)
       unitfail++;
+  }
+
+  for(i = 0; secs[i].input; i++) {
+    long ms = 0;
+    ParameterError err = secs2ms(&ms, secs[i].input);
+    if(err != secs[i].err) {
+      curl_mprintf("secs2ms('%s') unexpectedly returned %d\n",
+                   secs[i].input, (int)err);
+      unitfail++;
+    }
+    else if(!err && (ms != secs[i].ms)) {
+      curl_mprintf("secs2ms('%s') unexpectedly gave %ld\n",
+                   secs[i].input, ms);
+      unitfail++;
+    }
   }
 
   UNITTEST_END_SIMPLE
