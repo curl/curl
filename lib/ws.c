@@ -999,15 +999,7 @@ static CURLcode ws_enc_write_head(struct Curl_easy *data,
 }
 
 /*
- * Mask 'len' bytes of 'buf' with the 4-byte 'mask', starting at mask
- * offset '*pxori', and append them to 'out'. The data is masked in
- * chunks, eight bytes at a time, and each chunk is written to 'out' in
- * a single call. '*pnwritten' is set to the number of bytes 'out'
- * accepted and '*pxori' advances by the same amount.
- *
- * Returns CURLE_AGAIN only when 'out' accepted nothing. Any other bufq
- * error is returned as-is, with '*pnwritten' left at 0 even if earlier
- * chunks were already added.
+ * Mask and append payload to the bufq in chunks.
  *
  * @unittest 2607
  */
