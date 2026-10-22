@@ -165,8 +165,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     # run unit tests
 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
-    export CYGWIN=proc_retry:1
-    export MSYS=proc_retry:1
     if [ -n "${RUN_TESTS_VIA_CMAKE:-}" ]; then  # just to document the differences
       export TFLAGS="-j10 ${TFLAGS:-}"
       time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
