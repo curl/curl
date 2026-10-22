@@ -7,7 +7,6 @@ Alt-Svc
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 alt-svc
@@ -44,7 +42,6 @@ h1 %HOSTIP %HTTPPORT h1 example.com 80 "20290222 22:19:028" 0 0
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

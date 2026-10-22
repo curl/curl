@@ -8,11 +8,9 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 verbose-strings
@@ -23,7 +21,6 @@ libcurl strerror API call tests
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 e0: No error

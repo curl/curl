@@ -26,7 +26,6 @@ Content-Length: 0
 </connect>
 </reply>
 
-# Client-side
 <client>
 <features>
 ftp
@@ -43,7 +42,6 @@ http://hello/wanted/page -p -x %HOSTIP:%HTTPPORT --header "User-Agent: myapp/1.0
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 <protocol crlf="headers">

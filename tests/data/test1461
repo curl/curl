@@ -6,11 +6,9 @@
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 manual
@@ -23,7 +21,6 @@ curl important --help
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

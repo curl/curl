@@ -8,11 +8,9 @@ RETR
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3
@@ -25,7 +23,6 @@ pop3://user%0dFRIGGING_cmd:secret@%HOSTIP:%POP3PORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # malformed URL
 <errorcode>

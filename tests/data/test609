@@ -7,14 +7,12 @@ post-quote
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 Test file for mkdir test
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -30,7 +28,6 @@ Test file for mkdir test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 21

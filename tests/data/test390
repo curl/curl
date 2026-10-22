@@ -9,7 +9,6 @@ parallel
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -25,7 +24,6 @@ Content-Type: text/html
 
 </reply>
 
-# Client-side
 <client>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 %repeat[1000 x hellofile!]%

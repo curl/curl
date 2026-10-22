@@ -8,7 +8,6 @@ libcurl.def
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Verify libcurl.def against CURL_EXTERN declarations

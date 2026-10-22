@@ -9,11 +9,9 @@ UIDVALIDITY
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -26,7 +24,6 @@ IMAP SELECT UIDVALIDITY Failure
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # CURLE_REMOTE_FILE_NOT_FOUND - UIDVALIDITY mismatch
 <errorcode>

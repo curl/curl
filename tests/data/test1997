@@ -7,7 +7,6 @@ Alt-Svc
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ Alt-Svc: h1="nowhere.foo:80"; ma=9223372036854775807
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Debug
@@ -43,7 +41,6 @@ http://%HOSTIP:%HTTPPORT/ --alt-svc "%LOGDIR/altsvc-%TESTNUMBER"
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET / HTTP/1.1

@@ -6,7 +6,6 @@ SFTP
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -19,7 +18,6 @@ SFTP retrieval of nonexistent file
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 78

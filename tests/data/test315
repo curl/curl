@@ -7,7 +7,6 @@ HTTP GET
 compressed
 </keywords>
 </info>
-# Server-side
 <reply>
 # this brotli chunk has three bytes removed from the beginning and is cut off
 <data crlf="headers">
@@ -36,7 +35,6 @@ Content-Length: 1056
 
 </reply>
 
-# Client-side
 <client>
 <features>
 brotli
@@ -52,7 +50,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/

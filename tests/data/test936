@@ -11,7 +11,6 @@ RFC4954
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH NTLM PLAIN
@@ -23,7 +22,6 @@ REPLY %b64[%00user%00secret]b64% 235 Authenticated
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -44,7 +42,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

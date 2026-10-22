@@ -8,11 +8,9 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -38,7 +36,6 @@ works?
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <upload>
 </upload>

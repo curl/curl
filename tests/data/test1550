@@ -7,11 +7,9 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 # tool is what to use instead of 'curl'
 

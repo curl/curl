@@ -6,7 +6,6 @@ runtests.pl
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Verify that runtests.pl accepts an exclude file with the -E option

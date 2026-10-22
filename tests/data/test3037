@@ -11,7 +11,6 @@ Early Hints
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 103 Early Hints
@@ -25,7 +24,6 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http

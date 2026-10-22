@@ -8,7 +8,6 @@ chunked Transfer-Encoding
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 302 OK
@@ -57,7 +56,6 @@ this data is slightly larger than the first piece
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -74,7 +72,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/ip%TESTNUMBER">
 CL -1

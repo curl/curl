@@ -14,7 +14,6 @@ chunked Transfer-Encoding
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.0 401 Authorization Required swsclose
@@ -29,7 +28,6 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -51,7 +49,6 @@ which is impossible in HTTP/1.0
 </stdin>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 25

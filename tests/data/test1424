@@ -8,7 +8,6 @@ If-Modified-Since
 -z
 </keywords>
 </info>
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -37,7 +36,6 @@ Funny-head: yesyes
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -53,7 +51,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "dec 12 11:00:00 1999 GMT" -o %LOGDIR/ou
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

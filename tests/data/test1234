@@ -6,11 +6,9 @@ globbing
 {} list
 </keywords>
 </info>
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <name>
 abusing {}-globbing
@@ -20,7 +18,6 @@ abusing {}-globbing
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 3 == CURLE_URL_MALFORMAT
 <errorcode>

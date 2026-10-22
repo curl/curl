@@ -13,7 +13,6 @@ data for %TESTNUMBER
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 tftp

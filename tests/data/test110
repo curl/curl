@@ -8,7 +8,6 @@ RETR
 Resume
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 expected to be a file without the first part
@@ -22,7 +21,6 @@ REPLY EPSV 500 no such command
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -35,7 +33,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -C 20
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

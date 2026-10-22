@@ -8,7 +8,6 @@ HTTP Digest auth
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 100 Continue
@@ -52,7 +51,6 @@ ok
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -71,7 +69,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/ip%TESTNUMBER">
 Progress: start UL 0/0

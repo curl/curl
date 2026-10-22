@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <connect crlf="headers">
 HTTP/1.1 200 OK
@@ -18,7 +17,6 @@ We-are: good
 </connect>
 
 </reply>
-# Client-side
 <client>
 <server>
 http

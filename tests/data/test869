@@ -11,7 +11,6 @@ RFC5034
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH DIGEST-MD5
@@ -30,7 +29,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3
@@ -52,7 +50,6 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 CAPA

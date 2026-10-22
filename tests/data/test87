@@ -8,7 +8,6 @@ globbing
 [] range
 </keywords>
 </info>
-# Server-side
 <reply>
 <data1 crlf="headers">
 HTTP/1.1 200 OK
@@ -26,7 +25,6 @@ two is nice too
 </data2>
 
 </reply>
-# Client-side
 <client>
 <server>
 http
@@ -42,7 +40,6 @@ urlglob with out of range -o #[num] usage
 </command>
 </client>
 
-# Verify data after the test has been "shot". Note that the command line
 # writes both responses into the same filename so only the second survives
 <verify>
 <file name="%LOGDIR/dumpit%TESTNUMBER-#2.dump" crlf="headers">

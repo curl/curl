@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -23,7 +22,6 @@ hello
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -38,7 +36,6 @@ http://failthis/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

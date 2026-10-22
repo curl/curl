@@ -5,7 +5,6 @@
 --dump-header
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -23,7 +22,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER --dump-header %PWD/%LOGDIR/tmp/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /this/is/the/%TESTNUMBER HTTP/1.1

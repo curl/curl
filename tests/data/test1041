@@ -9,7 +9,6 @@ Resume
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
@@ -23,7 +22,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -48,7 +46,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C - --no-pro
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 43

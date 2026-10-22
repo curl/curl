@@ -13,7 +13,6 @@ SOCKS5
 CURLOPT_CONNECT_TO
 </keywords>
 </info>
-# Server-side
 <reply>
 <connect>
 HTTP/1.1 200 Connection established
@@ -33,7 +32,6 @@ silly content
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -55,7 +53,6 @@ ftp://ftp.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

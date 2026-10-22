@@ -7,11 +7,9 @@ MULTIPART
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -38,7 +36,6 @@ It contains at least an 8-bit byte value.
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

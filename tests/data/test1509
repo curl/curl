@@ -11,7 +11,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 connection-monitor
@@ -45,7 +44,6 @@ header length should be..: 245
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -70,7 +68,6 @@ moo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1

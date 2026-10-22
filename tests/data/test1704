@@ -8,7 +8,6 @@ HTTP/2
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/2 101 OK
@@ -23,7 +22,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 h2c
@@ -39,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^X-Forwarded-Proto:.*

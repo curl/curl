@@ -7,11 +7,9 @@ SFTP put
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -28,7 +26,6 @@ for ssh upload test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 78

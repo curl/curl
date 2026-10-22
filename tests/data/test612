@@ -7,14 +7,12 @@ post-quote
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 Dummy test file for remove test
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -30,7 +28,6 @@ Dummy test file for remove test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <postcheck>
 %PERL %SRCDIR/test610.pl gone %PWD/%LOGDIR/upload.%TESTNUMBER

@@ -7,7 +7,6 @@ HTTP GET
 DELAY
 </keywords>
 </info>
-# Server-side
 <reply>
 # the first response is exactly 60 bytes so that with writedelay the server
 # sends it in three 20 byte writes and the unsolicited second response only
@@ -35,7 +34,6 @@ writedelay: 150
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -53,7 +51,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 --
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1

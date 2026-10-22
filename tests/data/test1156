@@ -11,7 +11,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -48,7 +47,6 @@ body
 </data3>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -61,7 +59,6 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 0

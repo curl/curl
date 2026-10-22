@@ -9,7 +9,6 @@ followlocation
 NTLM
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <!-- no <data> in this test since we have NTLM from the start
@@ -87,7 +86,6 @@ Finally, this is the real page!
 
 </reply>
 
-# Client-side
 <client>
 <features>
 NTLM
@@ -105,7 +103,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -L
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

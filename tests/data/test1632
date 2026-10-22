@@ -8,7 +8,6 @@ flaky
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # This is the HTTPS proxy response
@@ -44,7 +43,6 @@ mother knew what became of me.
 
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -62,7 +60,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 # The second and third CONNECTs are made to the dynamic port number the FTP

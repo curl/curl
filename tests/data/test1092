@@ -9,7 +9,6 @@ HTTP proxy
 type=
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.0 200 OK
@@ -22,7 +21,6 @@ contents
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ FTP with type=i over HTTP proxy
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER;type=i HTTP/1.1

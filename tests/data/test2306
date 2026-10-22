@@ -34,7 +34,6 @@ Date: Wed, 10 May 2023 14:58:08 GMT
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -49,7 +48,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

@@ -9,14 +9,12 @@ asterisk
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 Dummy test file for rename test
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -35,7 +33,6 @@ Dummy test file for rename test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <postcheck>
 %PERL %SRCDIR/test610.pl rmdir %PWD/%LOGDIR/test%TESTNUMBER.new

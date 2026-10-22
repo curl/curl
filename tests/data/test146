@@ -8,14 +8,12 @@ persistent connection
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 this is file contents
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -28,7 +26,6 @@ ftp://%HOSTIP:%FTPPORT/first/dir/here/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNU
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Strip all valid kinds of PORT and EPRT that curl can send
 <strip>

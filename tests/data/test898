@@ -10,7 +10,6 @@ cookies
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 301 redirect
@@ -54,7 +53,6 @@ hey
 
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -70,7 +68,6 @@ HTTP with custom auth and cookies redirected to HTTP on a diff port
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://firsthost.com/ HTTP/1.1

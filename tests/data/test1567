@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 302 OK
@@ -31,7 +30,6 @@ redirected
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http

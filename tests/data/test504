@@ -11,11 +11,9 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 http
@@ -31,7 +29,6 @@ http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 # TEST_ERR_SUCCESS is errorcode 41
 <verify>
 <errorcode>

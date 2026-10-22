@@ -21,7 +21,6 @@ proxy-trailer: 12345
 </connect>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -42,7 +41,6 @@ http://%HOSTIP:%HTTPPORT/ --proxy %HOSTIP:%PROXYPORT --proxytunnel -sS -D %LOGDI
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 7

@@ -9,7 +9,6 @@ DELAY
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 writedelay: 2000
@@ -20,7 +19,6 @@ writedelay: 2000
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 tftp

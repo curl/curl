@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -63,7 +62,6 @@ run 1: foobar and so on fun!
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -76,7 +74,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

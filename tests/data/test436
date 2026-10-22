@@ -6,7 +6,6 @@
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -17,7 +16,6 @@ Content-Type: text/1
 </data>
 </reply>
 
-# Client-side
 <client>
 <file1 name="%LOGDIR/.config/curlrc">
 --next
@@ -40,7 +38,6 @@ Find .curlrc in .config/curlrc via CURL_HOME
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

@@ -7,7 +7,6 @@ FTP
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 moo
@@ -21,7 +20,6 @@ moo
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -39,7 +37,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER activeftp
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^(EPRT \|1\|)(\S*)/$1/

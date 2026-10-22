@@ -6,11 +6,9 @@ memory callbacks
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 http
@@ -22,7 +20,6 @@ initialization with memory callbacks and actual usage
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 Callbacks were invoked!

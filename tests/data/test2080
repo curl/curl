@@ -8,11 +8,9 @@ config
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <name>
 config file with overly long option
@@ -25,7 +23,6 @@ config file with overly long option
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # the used option in the config file is too long
 <errorcode>

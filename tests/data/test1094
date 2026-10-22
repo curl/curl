@@ -8,7 +8,6 @@ mode=
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 a chunk of
@@ -24,7 +23,6 @@ returned
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 tftp

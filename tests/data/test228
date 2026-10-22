@@ -6,7 +6,6 @@ FTP
 ACCT
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 data
@@ -22,7 +21,6 @@ REPLY ACCT 230 thank you
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -35,7 +33,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-account "one count"
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

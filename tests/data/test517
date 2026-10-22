@@ -6,11 +6,9 @@ getdate
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 # tool is what to use instead of 'curl'
 
@@ -19,7 +17,6 @@ curl_getdate() testing
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 </stdout>

@@ -7,7 +7,6 @@ HTTP NTLM auth
 NTLM
 </keywords>
 </info>
-# Server-side
 <reply>
 
 # This is supposed to be returned when the server gets a first
@@ -33,7 +32,6 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4Ab
 
 </reply>
 
-# Client-side
 <client>
 <features>
 NTLM
@@ -51,7 +49,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser%repeat[1100 x A]%:testpass --nt
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

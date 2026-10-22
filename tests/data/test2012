@@ -7,7 +7,6 @@ HTTP PUT
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -33,7 +32,6 @@ again
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -60,7 +58,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1

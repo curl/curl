@@ -8,7 +8,6 @@ documentation
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 src/tool_listhelp.c is in sync with docs/cmdline-opts

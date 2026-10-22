@@ -10,7 +10,6 @@ HTTP replaced headers
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1>
 HTTP/1.1 200 OK
@@ -32,7 +31,6 @@ nomnom
 </data2>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL

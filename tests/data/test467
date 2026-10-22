@@ -6,7 +6,6 @@ cmdline
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 non-existing short option letter (after one that exists)

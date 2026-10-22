@@ -9,7 +9,6 @@ noproxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -22,7 +21,6 @@ boo
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -39,7 +37,6 @@ http://user:secret@%HOSTIP:%HTTPPORT/ulion/%TESTNUMBER --socks5 non-existing-hos
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /ulion/%TESTNUMBER HTTP/1.1

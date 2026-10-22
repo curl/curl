@@ -11,7 +11,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -42,7 +41,6 @@ Denied access. Leave
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -70,7 +68,6 @@ http://test.remote.example.com/path/%TESTNUMBER https://another.example.com:%HTT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1

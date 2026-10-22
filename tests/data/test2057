@@ -8,7 +8,6 @@ HTTP Negotiate auth (stub ntlm)
 SPNEGO NTLM disallowed
 </keywords>
 </info>
-# Server-side
 <reply>
 <data nocheck="yes" crlf="headers">
 HTTP/1.1 200 OK swsclose
@@ -18,7 +17,6 @@ This IS the real page!
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -38,7 +36,6 @@ CURL_STUB_GSS_CREDS="NTLM_Alice"
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

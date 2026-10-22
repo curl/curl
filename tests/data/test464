@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 Debug
@@ -23,7 +22,6 @@ resolver start callback vetoes the HTTPS RR query before it is sent
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

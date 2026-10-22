@@ -6,7 +6,6 @@ HTTP
 HTTP GET
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.0 200 Mooo swsclose
@@ -17,7 +16,6 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -30,7 +28,6 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -o - -o -
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1

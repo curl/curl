@@ -6,11 +6,9 @@ missing URL
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 http
@@ -22,7 +20,6 @@ simple libcurl attempt operation without URL set
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 3

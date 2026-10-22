@@ -7,11 +7,9 @@ Range
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 file
@@ -28,7 +26,6 @@ X- range on a file:// URL to stdout
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 890

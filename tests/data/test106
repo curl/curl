@@ -9,7 +9,6 @@ RETR
 type=
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 data
@@ -21,7 +20,6 @@ works
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -34,7 +32,6 @@ FTP GET with type=A style ASCII URL using %20 codes
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

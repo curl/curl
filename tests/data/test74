@@ -8,7 +8,6 @@ globbing
 {} list
 </keywords>
 </info>
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -33,7 +32,6 @@ crap data
 </data1>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -46,7 +44,6 @@ HTTP, urlglob {}-retrieval and -o #[num] usage
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

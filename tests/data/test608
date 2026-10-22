@@ -7,14 +7,12 @@ post-quote
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 Test file for rename test
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -32,7 +30,6 @@ Test file for rename test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/file%TESTNUMBER.txt">
 Test file for rename test

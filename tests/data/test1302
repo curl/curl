@@ -7,7 +7,6 @@ base64
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

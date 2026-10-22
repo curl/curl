@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 RTSP/1.0 401 Unauthorized please swsbounce
@@ -64,7 +63,6 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 DESCRIBE rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0

@@ -8,7 +8,6 @@ HTTP Basic auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
@@ -20,7 +19,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -36,7 +34,6 @@ HTTPS GET with user and password
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

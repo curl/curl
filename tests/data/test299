@@ -9,7 +9,6 @@ HTTP proxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
@@ -21,7 +20,6 @@ blablabla
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -38,7 +36,6 @@ FTP over HTTP proxy with user:pass not in url
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET ftp://michal:aybabtu@host.com/we/want/%TESTNUMBER HTTP/1.1

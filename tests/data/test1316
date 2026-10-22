@@ -10,7 +10,6 @@ HTTP CONNECT
 HTTP proxy
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <connect crlf="headers">
@@ -34,7 +33,6 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 </data>
 </reply>
 
-# Client-side
 <client>
 
 # please send the real CONNECT connect off to the FTP server's port
@@ -56,7 +54,6 @@ ftp://ftp.%TESTNUMBER:%FTPPORT/ -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

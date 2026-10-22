@@ -9,7 +9,6 @@ documentation
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Verify that all libcurl options have man pages

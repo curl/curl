@@ -11,7 +11,6 @@ NTLM
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <data crlf="headers">
@@ -81,7 +80,6 @@ Contents of that second request. Differn.
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -99,7 +97,6 @@ http://%HOSTIP:%HTTPPORT/path/mine http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER0010
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 <protocol crlf="headers">

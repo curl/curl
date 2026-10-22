@@ -7,11 +7,9 @@ MULTIPART
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -56,7 +54,6 @@ X-fileheader2: This is #a
 </file2>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/------------------------------/

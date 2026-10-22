@@ -8,7 +8,6 @@ cookies
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 <data crlf="headers">
@@ -21,7 +20,6 @@ Set-Cookie: fine=yesyes; domain=CURL.CO.UK; path=/
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ cookies
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://curl.co.UK/ HTTP/1.1

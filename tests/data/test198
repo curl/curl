@@ -7,7 +7,6 @@ HTTP GET
 retry
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 503 OK swsbounce
@@ -36,7 +35,6 @@ ok
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -49,7 +47,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 1000
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

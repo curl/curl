@@ -8,13 +8,11 @@ SOCKS5
 connect to non-listen
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -30,7 +28,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 7

@@ -8,7 +8,6 @@ RETR
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 silly data
@@ -16,7 +15,6 @@ over FTP
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -33,7 +31,6 @@ FTP a type=A URL and CURLOPT_PORT set
 
 </client>
 
-# Verify data after the test has been "shot"
 # There is no MTDM in the protocol here since this code does not ask for the
 # time/date of the file
 <verify>

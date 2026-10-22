@@ -11,7 +11,6 @@ followlocation
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK swsbounce
@@ -32,7 +31,6 @@ OK
 </data1>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -54,7 +52,6 @@ http://%hex[%c3%a5%c3%a4%c3%b6]hex%.se/%TESTNUMBER -x %HOSTIP:%HTTPPORT -w "%{nu
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://xn--4cab6c.se/%TESTNUMBER HTTP/1.1

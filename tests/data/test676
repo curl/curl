@@ -11,7 +11,6 @@ curl_easy_reset
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -43,7 +42,6 @@ Content-Type: text/html
 
 </reply>
 
-# Client-side
 <client>
 <file name="%LOGDIR/cookies%TESTNUMBER">
 %HOSTIP	TRUE	/we/want/	FALSE	22118138987	proven	yes
@@ -64,7 +62,6 @@ cookies
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1

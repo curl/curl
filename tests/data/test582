@@ -8,13 +8,11 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -31,7 +29,6 @@ Moooooooooooo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/file%TESTNUMBER.txt">
 Moooooooooooo

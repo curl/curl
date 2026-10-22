@@ -12,7 +12,6 @@ SOCKS5
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <connect>
 HTTP/1.1 200 Connection established
@@ -40,7 +39,6 @@ OK
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -59,7 +57,6 @@ http://www.example.com.%TESTNUMBER:%HTTPPORT/%TESTNUMBER --connect-to ::www.exam
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="yes">
 CONNECT connect.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1

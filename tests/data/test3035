@@ -10,7 +10,6 @@ retry
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # the first chunk
@@ -63,7 +62,6 @@ lmnopqrstuvwxyz
 </data4>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -76,7 +74,6 @@ HTTP retry failed download with keep data and auto-resume
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

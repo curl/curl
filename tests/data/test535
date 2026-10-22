@@ -36,7 +36,6 @@ fine content
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -54,7 +53,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

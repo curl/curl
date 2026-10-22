@@ -7,13 +7,11 @@ HTTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -26,7 +24,6 @@ http
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Protocol "h1234" not supported or disabled in libcurl
 <errorcode>

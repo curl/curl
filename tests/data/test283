@@ -7,7 +7,6 @@ TFTP RRQ
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 tftp

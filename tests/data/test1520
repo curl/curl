@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -34,7 +33,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

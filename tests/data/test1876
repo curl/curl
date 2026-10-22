@@ -6,7 +6,6 @@ netrc
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 301 redir
@@ -25,7 +24,6 @@ Content-Type: text/html
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -44,7 +42,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --netrc-optional --netrc-file %LOGDIR/netrc
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

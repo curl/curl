@@ -7,7 +7,6 @@ HTTP proxy
 http_proxy
 </keywords>
 </info>
-# Server-side
 <reply>
 <connect>
 HTTP/1.1 407 Denied
@@ -25,7 +24,6 @@ boo
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -47,7 +45,6 @@ https_proxy=https://%HOSTIP:%HTTPSPORT/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://somewhere.example/ HTTP/1.1

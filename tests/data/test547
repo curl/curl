@@ -11,7 +11,6 @@ NTLM
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <data crlf="headers">
@@ -68,7 +67,6 @@ Contents of that page you requested, sir.
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -88,7 +86,6 @@ http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT testuse
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 POST http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1

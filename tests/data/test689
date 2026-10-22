@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 RTSP/1.0 786%repeat[10 x  ]%

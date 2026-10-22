@@ -9,7 +9,6 @@ HTTP POST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 I am cool swsclose
@@ -19,7 +18,6 @@ Content-Length: 0
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -41,7 +39,6 @@ content to _?!#$'|%LT%GT
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER?my+name+is+moo%5B%5D%AMPyes=s+i+r%AMPv_alue=content+to+_%3F%21%23%24%27%7C%3C%3E%0A%AMPcontent+to+_%3F%21%23%24%27%7C%3C%3E%0A%AMP%3D%3D HTTP/1.1
