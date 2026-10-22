@@ -25,7 +25,6 @@ sent
 </file>
 </client>
 
-# Verify pseudo protocol after the test has been "shot"
 <verify>
 <upload>
 a chunk of

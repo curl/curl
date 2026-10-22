@@ -29,7 +29,6 @@ tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --local-port 44444-45444
 </command>
 </client>
 
-# Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>
 ^timeout = [5-6]$

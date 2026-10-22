@@ -28,7 +28,6 @@ tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --tftp-no-options
 </command>
 </client>
 
-# Verify pseudo protocol after the test has been "shot"
 <verify>
 <protocol>
 opcode = 1
