@@ -65,7 +65,6 @@
 #include "progress.h"
 #include "curlx/strdup.h"
 #include "curlx/strcopy.h"
-#include "vtls/x509asn1.h"
 #ifdef USE_ECH
 #include "curlx/base64.h"
 #endif
@@ -1550,6 +1549,7 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
                                  struct wssl_ctx *wssl)
 {
   WOLFSSL_X509 *x509 = NULL;
+  unsigned char *pubkey = NULL;
   CURLcode result = CURLE_OK;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
@@ -1563,10 +1563,7 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
 
   if(pinnedpubkey) {
 #ifdef KEEP_PEER_CERT
-    const uint8_t *x509_der;
-    int x509_der_len;
-    struct Curl_X509certificate x509_parsed;
-    struct Curl_asn1Element *pubkey;
+    int pubkey_len = 0;
 
     result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
@@ -1576,25 +1573,26 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
       goto end;
     }
 
-    x509_der = wolfSSL_X509_get_der(x509, &x509_der_len);
-    if(!x509_der) {
-      failf(data, "SSL: failed retrieving ASN.1 server certificate");
+    /* Get the SubjectPublicKeyInfo from wolfSSL's own parse of the
+       certificate, so the pinned key is the one the handshake used. */
+    if(wolfSSL_X509_get_pubkey_buffer(x509, NULL, &pubkey_len) !=
+       WOLFSSL_SUCCESS || pubkey_len <= 0) {
+      failf(data, "SSL: failed retrieving public key from server certificate");
       goto end;
     }
-
-    memset(&x509_parsed, 0, sizeof(x509_parsed));
-    if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
+    pubkey = curlx_malloc((size_t)pubkey_len);
+    if(!pubkey) {
+      result = CURLE_OUT_OF_MEMORY;
       goto end;
-
-    pubkey = &x509_parsed.subjectPublicKeyInfo;
-    if(!pubkey->header || pubkey->end <= pubkey->header) {
+    }
+    if(wolfSSL_X509_get_pubkey_buffer(x509, pubkey, &pubkey_len) !=
+       WOLFSSL_SUCCESS) {
       failf(data, "SSL: failed retrieving public key from server certificate");
       goto end;
     }
 
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey,
-                                  (const unsigned char *)pubkey->header,
-                                  (size_t)(pubkey->end - pubkey->header));
+    result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
+                                  (size_t)pubkey_len);
     if(result)
       failf(data, "SSL: public key does not match pinned public key");
 #else
@@ -1603,6 +1601,7 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
 #endif
   }
 end:
+  curlx_free(pubkey);
   wolfSSL_FreeX509(x509);
   return result;
 }
