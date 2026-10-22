@@ -3269,8 +3269,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     mresult = multi_perform(multi, running_handles);
 
     if(mresult != CURLM_BAD_HANDLE) {
-      /* Reassess event status of all active transfers */
-      mresult = Curl_multi_ev_assess_xfer_bset(multi, &multi->process);
+      /* Reassess event status of all active transfers, but keep any error
+         from multi_perform() */
+      CURLMcode mresult2 =
+        Curl_multi_ev_assess_xfer_bset(multi, &multi->process);
+      if(!mresult)
+        mresult = mresult2;
     }
     goto out;
   }
