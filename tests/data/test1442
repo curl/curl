@@ -22,7 +22,6 @@ file://localhost/%FILE_PWD/%LOGDIR/non-existent-file.txt --write-out='\'
 </command>
 </client>
 
-# Verify data
 <verify>
 <errorcode>
 37

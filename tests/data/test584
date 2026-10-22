@@ -41,7 +41,6 @@ Mime
 <server>
 http
 </server>
-# tool to invoke
 <tool>
 lib589
 </tool>

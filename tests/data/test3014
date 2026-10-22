@@ -32,7 +32,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{num_headers}'
 </command>
 </client>
 
-# Verify data
 <verify>
 <stdout nonewline="yes">
 HTTP/1.1 200 OK

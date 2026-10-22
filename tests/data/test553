@@ -25,7 +25,6 @@ hello
 <server>
 http
 </server>
-# tool to use
 <features>
 </features>
 <name>

@@ -50,7 +50,6 @@ This IS the real page!
 </datacheck>
 </reply>
 
-# Client-Side
 <client>
 # require https because the code sets that as an acceptable redirect proto
 <features>

@@ -84,7 +84,6 @@ Contents of that second request. Differn.
 <server>
 http
 </server>
-# tool to use
 <features>
 NTLM
 !SSPI

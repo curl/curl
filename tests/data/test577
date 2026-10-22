@@ -20,7 +20,6 @@ Curl-Private: swsclose
 </datacheck>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

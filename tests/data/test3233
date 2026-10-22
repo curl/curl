@@ -28,7 +28,6 @@ Curl-private: swsclose
 </data2>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

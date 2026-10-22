@@ -52,7 +52,6 @@ CSeq: 6
 </data6>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

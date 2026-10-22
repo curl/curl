@@ -49,7 +49,6 @@ u=http://www.curl.example.com/fakesdp.ps
 </datacheck>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

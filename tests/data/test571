@@ -72,7 +72,6 @@ rtp: part 4 channel 0 size 63
 </servercmd>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

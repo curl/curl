@@ -13,7 +13,6 @@ libtest
 
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

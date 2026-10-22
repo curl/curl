@@ -59,7 +59,6 @@ Informational: Empty Options Response
 </data5>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

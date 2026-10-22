@@ -44,7 +44,6 @@ Informational: Empty Options Response
 </data4>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

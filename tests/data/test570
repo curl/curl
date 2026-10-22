@@ -36,7 +36,6 @@ CSeq: 1000
 
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

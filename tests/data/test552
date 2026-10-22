@@ -49,7 +49,6 @@ Contents of that page you requested, sir.
 <server>
 http
 </server>
-# tool to use
 <features>
 !SSPI
 crypto
