@@ -253,6 +253,7 @@ print "- Tests that set lib* in <tool> have 'libtest' as <keyword>\n";
 for my $t (@a) {
     my @k = tool($t);
     for my $w (@k) {
+        next if(!$w);
         if($w =~ /lib%TESTNUMBER/) {
             print "test $t invokes default tool\n";
             $error++;
@@ -284,6 +285,7 @@ print "- Tests that set tool* in <tool> have 'tunittest' as <keyword>\n";
 for my $t (@a) {
     my @k = tool($t);
     for my $w (@k) {
+        next if(!$w);
         if($w =~ /tool%TESTNUMBER/) {
             print "test $t invokes default tool\n";
             $error++;
@@ -315,6 +317,7 @@ print "- Tests that set unit* in <tool> have 'unittest' as <keyword>\n";
 for my $t (@a) {
     my @k = tool($t);
     for my $w (@k) {
+        next if(!$w);
         if($w =~ /unit%TESTNUMBER/) {
             print "test $t invokes default tool\n";
             $error++;
