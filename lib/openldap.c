@@ -1364,6 +1364,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
  */
 const struct Curl_protocol Curl_protocol_ldap = {
   oldap_setup_connection,               /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   oldap_do,                             /* do_it */
   oldap_done,                           /* done */
   ZERO_NULL,                            /* do_more */

@@ -3140,6 +3140,7 @@ void Curl_ssh_version(char *buffer, size_t buflen)
  */
 const struct Curl_protocol Curl_protocol_scp = {
   myssh_setup_connection,               /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   myssh_do_it,                          /* do_it */
   scp_done,                             /* done */
   ZERO_NULL,                            /* do_more */
@@ -3163,6 +3164,7 @@ const struct Curl_protocol Curl_protocol_scp = {
  */
 const struct Curl_protocol Curl_protocol_sftp = {
   myssh_setup_connection,               /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   myssh_do_it,                          /* do_it */
   sftp_done,                            /* done */
   ZERO_NULL,                            /* do_more */

@@ -38,6 +38,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
+#include "ftp.h"
 #include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
@@ -601,6 +602,9 @@ static struct trc_cft_def trc_cfts[] = {
 #endif
 #ifndef CURL_DISABLE_HTTP
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
+#endif
+#ifndef CURL_DISABLE_FTP
+  { &Curl_cft_ftp,            TRC_CT_PROTOCOL },
 #endif
 };
 

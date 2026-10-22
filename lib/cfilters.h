@@ -242,10 +242,6 @@ struct Curl_cfilter {
   BIT(shutdown);                 /* != 0 iff this filter has shut down */
 };
 
-/* Default implementations for the type functions, implementing nop. */
-void Curl_cf_def_destroy_this(struct Curl_cfilter *cf,
-                              struct Curl_easy *data);
-
 /* Default implementations for the type functions, implementing pass-through
  * the filter chain. */
 CURLcode Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
@@ -393,6 +389,12 @@ bool Curl_conn_is_ssl(struct connectdata *conn, int8_t sockindex);
 /* Determine if the connection has one or more proxy filters.
  * e.g. is tunneling. */
 bool Curl_conn_is_tunneling(struct connectdata *conn, int8_t sockindex);
+
+/* Get first filter instance at connection in filter chain at
+ * sockindex of filter type `cft` or NULL. */
+struct Curl_cfilter *Curl_conn_get_first_cf(struct connectdata *conn,
+                                            int8_t sockindex,
+                                            struct Curl_cftype *cft);
 
 /*
  * Fill `info` with information about the TLS instance securing the connection
