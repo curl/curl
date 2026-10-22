@@ -198,20 +198,38 @@ sub checkunit {
 
 sub checkxml {
     my ($num) = @_;
-    my $bad = 1;
+    my $bad = 0;
     if(open(my $fh, "<", "./data/test$num")) {
+        my $has_xml = 0;
+        my %tag_count;
+        my $tags = 'testcase|' .
+            'info|client|reply|verify|' .
+            'command|data|datacheck|disable|errorcode|features|keywords|killserver|limits|mdtm|name|notexists|postcheck|precheck|' .
+            'protocol|proxy|server|servercmd|setenv|size|socks|stderr|stdin|stdout|strip|stripfile|strippart|tool|upload|valgrind';
         while(<$fh>) {
+            chomp;
+            ++$tag_count{$_} if /^<($tags)>$/;
             if(/^<\?xml/) {
-                $bad = 0;
-                last;
+                $has_xml = 1;
             }
-            print "data/test$num lacks <xml> tag\n";
-            last;
         }
         close($fh);
+
+        if(!$has_xml) {
+            print "data/test$num lacks <xml> tag\n";
+            $bad = 1;
+        }
+
+        for my $stat (sort { $tag_count{$a} <=> $tag_count{$b} || $a cmp $b } keys %tag_count) {
+            if($tag_count{$stat} > 1) {
+                printf "data/test$num has multiple $stat sections\n";
+                $bad = 1;
+            }
+        }
     }
     else {
         print STDERR "cannot open test$num\n";
+        $bad = 1;
     }
     return $bad;
 }
