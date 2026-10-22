@@ -34,6 +34,10 @@ my @executable = (
     '^scripts/',
 );
 
+my @is_executable = (
+    '\.pl$',
+);
+
 my @tabs = (
     '^m4/zz40-xc-ovr\.m4$',
     'Makefile\.(am|example)$',
@@ -126,6 +130,13 @@ while(my $filename = <$git_ls_files>) {
         my $mode = (stat($filename))[2];
         if($mode & 0111) {
             push @err, sprintf('file has executable bit(s) set: %o', $mode);
+        }
+    }
+
+    if(fn_match($filename, @is_executable)) {
+        my $mode = (stat($filename))[2];
+        if(($mode & 0111) != 0111) {
+            push @err, sprintf('executable file missing executable bits: %o', $mode);
         }
     }
 
