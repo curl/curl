@@ -28,7 +28,6 @@ These data are not actually sent to the client
 
 <client>
 <features>
-proxy
 IPv6
 </features>
 <server>
@@ -40,6 +39,9 @@ HTTP-IPv6 GET with PROXY protocol with spoofed client IP
 <command>
 -g "http://%HOST6IP:%HTTP6PORT/%TESTNUMBER" --haproxy-clientip "2001:db8::"
 </command>
+<features>
+proxy
+</features>
 </client>
 
 <verify>
