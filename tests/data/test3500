@@ -19,7 +19,6 @@ sftp
 <features>
 sftp
 libssh2
-!badlibssh
 </features>
 <precheck>
 %PERL %SRCDIR/test3500.pl %LOGDIR/server/curl_host_key.pub %LOGDIR/known%TESTNUMBER "[%HOSTIP]:%SSHPORT"
