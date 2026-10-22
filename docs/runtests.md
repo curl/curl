@@ -182,6 +182,12 @@ Lists all test case names.
 
 Set timeout for curl commands in tests.
 
+## `--test-timeout=[seconds]`
+
+Set a deadline for each test when using parallel mode (`-j`). If a runner does not finish a test before the deadline, `runtests.pl` terminates the runner and its child processes,
+marks the test as failed, and continues with a replacement runner. The
+default is 600 seconds. Set this to 0 to disable the deadline.
+
 ## `--min=[count]`
 
 Set the minimum number of tests to run. This overrides the `CURL_TEST_MIN`

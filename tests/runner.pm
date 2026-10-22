@@ -40,6 +40,7 @@ use 5.006;
 
 use File::Basename;
 use Time::HiRes;
+use POSIX ();
 
 BEGIN {
     use base qw(Exporter);
@@ -51,6 +52,7 @@ BEGIN {
         restore_test_env
         runner_init
         runnerac_shutdown
+        runnerac_terminate
         runnerac_stopservers
         runnerac_test_preprocess
         runnerac_test_run
@@ -135,6 +137,7 @@ my $runnerw;        # pipe that runner writes to
 # per-runner variables, indexed by runner ID; these are used by controller only
 my %controllerr;    # pipe that controller reads from
 my %controllerw;    # pipe that controller writes to
+my %runnerpidfile; # native runner PID files for Windows runners
 
 # redirected stdout/stderr to these files
 sub stdoutfilename {
@@ -153,7 +156,7 @@ sub stderrfilename {
 # runnerac_* functions
 # Called by controller
 sub runner_init {
-    my ($logdir, $jobs) = @_;
+    my ($logdir, $jobs, $testtimeout) = @_;
 
     $multiprocess = !!$jobs;
 
@@ -184,6 +187,11 @@ sub runner_init {
         # Create a separate process in multiprocess mode
         my $child = fork();
         if(0 == $child) {
+            # Give this runner and its descendants a private process group.
+            # The controller can then kill a timed-out test without affecting
+            # itself.
+            eval { POSIX::setpgid(0, 0); } if($^O ne 'MSWin32');
+
             # TODO: set up better signal handlers
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
@@ -203,6 +211,16 @@ sub runner_init {
 
             # Set this directory as ours
             $LOGDIR = $logdir;
+            my $pidfile;
+            if($^O eq 'MSWin32' && $multiprocess) {
+                $pidfile = "$logdir/runner.pid";
+                require Win32;
+                open(my $pidfh, ">", $pidfile)
+                    or die "Failure writing runner PID file";
+                print $pidfh Win32::GetCurrentProcessId(), "\n"
+                    or die "Failure writing runner PID file";
+                close($pidfh) or die "Failure closing runner PID file";
+            }
             mkdir("$LOGDIR/$PIDDIR", 0777);
             mkdir("$LOGDIR/$LOCKDIR", 0777);
 
@@ -211,6 +229,7 @@ sub runner_init {
 
             # handle IPC calls
             event_loop();
+            unlink($pidfile) if $pidfile;
 
             # Cannot rely on logmsg here in case it is buffered
             print "Runner $thisrunnerid exiting\n" if($verbose);
@@ -223,10 +242,15 @@ sub runner_init {
         }
 
         # Here we are the parent (controller).
+        # Set the process group here too to avoid a race with the child.
+        eval { POSIX::setpgid($child, $child); } if($^O ne 'MSWin32');
         close($thisrunnerw);
         close($thisrunnerr);
 
         $thisrunnerid = $child;
+        if($^O eq 'MSWin32' && $multiprocess) {
+            $runnerpidfile{$thisrunnerid} = "$logdir/runner.pid";
+        }
 
     } else {
         # Create our pid directory
@@ -1296,6 +1320,66 @@ sub runner_test_run {
     return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
 }
 
+# Forcefully terminate a runner and the processes it started.
+# Called by controller when a test exceeds its deadline.
+sub runnerac_terminate {
+    my ($runnerid) = @_;
+    my $err = 0;
+
+    if($multiprocess) {
+        if($^O eq 'MSWin32') {
+            # fork() returns a Perl pseudo-PID on native Windows. Use the
+            # runner's native process ID with taskkill, then wait on the Perl
+            # pseudo-PID so it can reap the child.
+            my $pidfile = $runnerpidfile{$runnerid};
+            my $native_pid;
+            if($pidfile && open(my $pidfh, "<", $pidfile)) {
+                my $line = <$pidfh>;
+                close($pidfh);
+                $native_pid = $1
+                    if defined($line) && $line =~ /^\s*(\d+)\s*$/;
+            }
+            my $kill_status = $native_pid
+                ? system("taskkill /F /T /PID $native_pid >$dev_null 2>&1")
+                : -1;
+            my $waited;
+            if($kill_status != 0) {
+                logmsg "ERROR: taskkill failed for runner $runnerid\n";
+                $waited = waitpid($runnerid, POSIX::WNOHANG());
+                if(!defined($waited) || $waited != $runnerid) {
+                    # Do not block forever unless the worker was reaped. The
+                    # caller will abort if taskkill did not stop it.
+                    logmsg "ERROR: could not reap runner $runnerid after " .
+                           "taskkill failed; not waiting for it\n";
+                    $err = 1;
+                }
+            }
+            if(!$err && (!defined($waited) || $waited == 0)) {
+                waitpid($runnerid, 0);
+            }
+            unlink($pidfile) if $pidfile;
+            delete $runnerpidfile{$runnerid};
+        }
+        else {
+            # The runner owns a process group, so this includes the test command
+            # and any test servers it started.
+            my $sent = kill('TERM', -$runnerid);
+            kill('TERM', $runnerid) unless $sent;
+            Time::HiRes::sleep(0.2);
+            my $killed = kill('KILL', -$runnerid);
+            kill('KILL', $runnerid) unless $killed;
+            waitpid($runnerid, 0);
+        }
+    }
+
+    close($controllerw{$runnerid}) if defined $controllerw{$runnerid};
+    close($controllerr{$runnerid}) if defined $controllerr{$runnerid};
+    delete $controllerw{$runnerid};
+    delete $controllerr{$runnerid};
+    return $err;
+}
+
+###################################################################
 # Async call runner_shutdown
 # This call does NOT generate an IPC response and must be the last IPC call
 # received.
@@ -1309,6 +1393,7 @@ sub runnerac_shutdown {
     undef $controllerw{$runnerid};
     close($controllerr{$runnerid});
     undef $controllerr{$runnerid};
+    delete $runnerpidfile{$runnerid};
     return $err;
 }
 

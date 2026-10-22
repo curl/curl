@@ -179,6 +179,7 @@ my %runnernums;        # runner numbers by IDs (inverted %runnerids)
 my @runnersidle;       # runner IDs idle and ready to execute a test
 my %countforrunner;    # test count by runner ID
 my %runnersrunning;    # tests currently running by runner ID
+my %runnerstarted;     # start time for each running test
 
 #######################################################################
 # variables that command line options may set
@@ -190,6 +191,7 @@ my $show_success_logs = 0;  # display detailed info about passed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
 my $jobs = 0;
+my $testtimeout = 600; # seconds a test may run before its runner is restarted
 
 # Azure Pipelines specific variables
 my $AZURE_RUN_ID = 0;
@@ -2296,6 +2298,17 @@ sub runnerready {
 #######################################################################
 # Create test runners
 #
+sub createrunner {
+    my ($runnernum) = @_;
+    my $dir = getrunnernumlogdir($runnernum);
+    cleardir($dir);
+    mkdir($dir, 0777);
+    my $id = runner_init($dir, $jobs, $testtimeout);
+    $runnerids{$runnernum} = $id;
+    $runnernums{$id} = $runnernum;
+    return $id;
+}
+
 sub createrunners {
     my ($numrunners) = @_;
     if(! $numrunners) {
@@ -2303,13 +2316,7 @@ sub createrunners {
     }
     # create $numrunners runners with minimum 1
     for my $runnernum (1..$numrunners) {
-        my $dir = getrunnernumlogdir($runnernum);
-        cleardir($dir);
-        mkdir($dir, 0777);
-        my $id = runner_init($dir, $jobs);
-        $runnerids{$runnernum} = $id;
-        $runnernums{$id} = $runnernum;
-        runnerready($id);
+        runnerready(createrunner($runnernum));
     }
 }
 
@@ -2428,6 +2435,9 @@ while(@ARGV) {
         # automake-style output
         $short = 1;
         $automakestyle = 1;
+    }
+    elsif($ARGV[0] =~ /^--test-timeout=(\d+)$/) {
+        $testtimeout = $1;
     }
     elsif($ARGV[0] =~ /-m=(\d+)/) {
         my ($num) = ($1);
@@ -2587,6 +2597,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
   -m=[seconds] set timeout for curl commands in tests
+  --test-timeout=[seconds] restart timed out runners (default 600; requires -j)
   --min=[count] minimum number of tests to run.
   -n       no valgrind
   --no-debuginfod disable the valgrind debuginfod functionality
@@ -3075,13 +3086,25 @@ while(1) {
     if($globalabort) {
         logmsg singletest_dumplogs();
         logmsg "Aborting tests\n";
-        logmsg "Waiting for " . scalar((keys %runnersrunning)) . " outstanding test(s) to finish...\n";
-        # Wait for the last requests to complete and throw them away so
-        # that IPC calls & responses stay in sync
-        # TODO: send a signal to the runners to interrupt a long test
+        logmsg "Terminating " . scalar((keys %runnersrunning)) . " outstanding test(s)...\n";
         foreach my $rid (keys %runnersrunning) {
-            runnerar($rid);
+            my $runnernum = $runnernums{$rid};
+            if($jobs) {
+                runnerac_terminate($rid);
+                delete $runnerids{$runnernum} if defined $runnernum;
+                delete $runnernums{$rid};
+            }
+            else {
+                # The integrated runner has returned from its synchronous IPC
+                # call. Drain that response and keep it registered so final
+                # cleanup can stop its servers.
+                my ($done, undef, $logs) = runnerar($rid);
+                logmsg($logs) if defined $logs;
+            }
             delete $runnersrunning{$rid};
+            delete $runnerstarted{$rid};
+            delete $singletest_state{$rid};
+            delete $singletest_logs{$rid};
             logmsg ".";
             $| = 1;
         }
@@ -3105,6 +3128,7 @@ while(1) {
         if($again) {
             # this runner is busy running a test
             $runnersrunning{$runnerid} = $testnum;
+            $runnerstarted{$runnerid} = time();
         } else {
             runnerready($runnerid);
             if($error >= 0) {
@@ -3149,8 +3173,10 @@ while(1) {
                 if($again) {
                     # this runner is busy running a test
                     $runnersrunning{$ridready} = $testnum;
+                    $runnerstarted{$ridready} = time() unless exists $runnerstarted{$ridready};
                 } else {
                     # Test is complete
+                    delete $runnerstarted{$ridready};
                     $runner_wait_cnt = 0;
                     runnerready($ridready);
 
@@ -3226,7 +3252,66 @@ while(1) {
     if($riderror) {
         logmsg "ERROR: runner $riderror is dead! aborting test run\n";
         delete $runnersrunning{$riderror} if(defined $runnersrunning{$riderror});
+        delete $runnerstarted{$riderror};
         $globalabort = 1;
+    }
+
+    # A slow runner must not hold the entire test run forever. Check each
+    # runner independently; activity from another runner must not reset its
+    # deadline.
+    if($jobs && $testtimeout) {
+        for my $rid (keys %runnersrunning) {
+            next unless defined $runnerstarted{$rid};
+            next if time() - $runnerstarted{$rid} < $testtimeout;
+
+            my $testnum = $runnersrunning{$rid};
+            my $runnernum = $runnernums{$rid};
+            logmsg "TIMEOUT: test $testnum exceeded $testtimeout seconds; terminating runner $runnernum\n";
+            displaylogs($rid, $testnum) if($postmortem);
+            my $terminate_error = runnerac_terminate($rid);
+            delete $runnersrunning{$rid};
+            delete $runnerstarted{$rid};
+            delete $runnernums{$rid};
+            delete $singletest_state{$rid};
+            delete $singletest_logs{$rid};
+
+            $timevrfyend{$testnum} = time();
+            my $error = ignoreresultcode($testnum);
+            citest_finishtest($testnum, $error);
+            $total++;
+            $executed++;
+            if($error == 2) {
+                # A timed-out ignored test follows the same accounting as any
+                # other ignored failure: no retry and no queue abort.
+                $failedign .= "$testnum ";
+                $ign++;
+            }
+            else {
+                if($retry_left > 0) {
+                    $retry_left--;
+                    $retry_done++;
+                    $total--;
+                    push(@runtests, $testnum);
+                    $failedre .= "$testnum ";
+                }
+                else {
+                    $failed .= "$testnum ";
+                }
+                undef @runtests if(!$anyway);
+            }
+
+            if($terminate_error) {
+                # Do not leave an untracked runner while continuing the suite.
+                delete $runnerids{$runnernum};
+                logmsg "ERROR: could not terminate timed-out runner; aborting test run\n";
+                $globalabort = 1;
+            }
+            else {
+                # Replace the killed worker so remaining tests can continue.
+                my $newid = createrunner($runnernum);
+                runnerready($newid);
+            }
+        }
     }
     $endwaitcnt += $runnerwait;
     if($endwaitcnt >= 10) {
