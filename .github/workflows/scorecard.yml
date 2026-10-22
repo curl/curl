@@ -20,8 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
-# Key not supported by ossf/scorecard-action as of v2.5.0
-# cache-mode: none
+cache-mode: none
 
 jobs:
   analysis:
