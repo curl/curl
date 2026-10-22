@@ -1018,11 +1018,9 @@ UNITTEST CURLcode ws_enc_mask_write(const uint8_t *mask, unsigned int *pxori,
     uint8_t tmp[1024];
     uint8_t mask8[8];
     uint64_t m;
-    size_t n = len - done;
+    size_t n = CURLMIN(len - done, sizeof(tmp));
     size_t nwritten;
 
-    if(n > sizeof(tmp))
-      n = sizeof(tmp);
     for(i = 0; i < 8; i++)
       mask8[i] = mask[(*pxori + i) & 3];
     memcpy(&m, mask8, 8);
