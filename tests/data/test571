@@ -103,8 +103,8 @@ rtp: part 4 channel 0 size 127
 rtp: part 4 channel 1 size 24 size_err 11
 rtp: part 4 channel 0 size 37
 rtp: part 4 channel 0 size 63
-rtp: part 5 channel 0 size 0 size_err 10
-rtp: part 7 channel 0 size 0 size_err 10
+rtp: part 5 channel 0 size 0 size_err 10 coalesce
+rtp: part 7 channel 0 size 0 size_err 10 coalesce
 </servercmd>
 </reply>
 
