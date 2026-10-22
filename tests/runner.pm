@@ -429,7 +429,7 @@ sub waitlockunlock {
         if(($lockretry < 0) &&
            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
             logmsg "Warning: server logs lock timeout ",
-                   "($serverlogslocktimeout seconds) expired (locks: ".
+                   "($serverlogslocktimeout seconds) expired (locks: " .
                    join(", ", @locks) . ")\n";
         }
     }
@@ -1005,7 +1005,7 @@ sub singletest_run {
     if($cmdhash{'option'} && ($cmdhash{'option'} =~ /no-stdout/)) {
         $redirstdout = "";
     }
-    $CMDLINE .= "$cmdargs $redirstdout".
+    $CMDLINE .= "$cmdargs $redirstdout" .
         " 2> " . stderrfilename($LOGDIR, $testnum);
 
     if($verbose) {

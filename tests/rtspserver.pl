@@ -123,9 +123,9 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$flags .= "--pidfile \"$pidfile\" ".
-    "--portfile \"$portfile\" ".
-    "--logfile \"$logfile\" ".
+$flags .= "--pidfile \"$pidfile\" " .
+    "--portfile \"$portfile\" " .
+    "--logfile \"$logfile\" " .
     "--logdir \"$logdir\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 

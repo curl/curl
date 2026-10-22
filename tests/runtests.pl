@@ -827,7 +827,7 @@ sub checksystemfeatures {
     # 'socks' was once here but is now removed
 
     if($torture && !$feature{"TrackMemory"}) {
-        die "cannot run torture tests since curl was built without ".
+        die "cannot run torture tests since curl was built without " .
             "TrackMemory feature (--enable-debug)";
     }
 
@@ -1221,7 +1221,7 @@ sub singletest_count {
     else {
         if(exists $allnames{$testname} &&
            ($allnames{$testname} != $testnum)) {
-            logmsg sprintf("ERROR: test %d has duplicate test name: \"%s\". ".
+            logmsg sprintf("ERROR: test %d has duplicate test name: \"%s\". " .
                            "The same as test %d\n", $testnum,
                            $testname, $allnames{$testname});
             exit 1;
@@ -1440,8 +1440,8 @@ sub singletest_check {
         }
 
         if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
-            logmsg "\n $testnum: protocol FAILED!\n".
-                " There was no content at all in the file $logdir/$SERVERIN.\n".
+            logmsg "\n $testnum: protocol FAILED!\n" .
+                " There was no content at all in the file $logdir/$SERVERIN.\n" .
                 " Server glitch? Total curl failure? Returned: $cmdres\n";
             # timestamp test result verification end
             $timevrfyend{$testnum} = Time::HiRes::time();
@@ -1622,7 +1622,7 @@ sub singletest_check {
 
             my $filename = $hash{'name'};
             if(!$filename) {
-                logmsg " $testnum: IGNORED: section verify=>file$partsuffix ".
+                logmsg " $testnum: IGNORED: section verify=>file$partsuffix " .
                        "has no name attribute\n";
                 if(runnerac_stopservers($runnerid)) {
                     logmsg "ERROR: runner $runnerid seems to have died\n";
@@ -2211,7 +2211,7 @@ sub runtimestats {
            "seconds doing all of the above.\n";
 
     $counter = 25;
-    logmsg "\nTest server starting and verification time per test ".
+    logmsg "\nTest server starting and verification time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2221,7 +2221,7 @@ sub runtimestats {
     }
 
     $counter = 10;
-    logmsg "\nTest definition reading and preparation time per test ".
+    logmsg "\nTest definition reading and preparation time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2231,7 +2231,7 @@ sub runtimestats {
     }
 
     $counter = 25;
-    logmsg "\nTest tool execution time per test ".
+    logmsg "\nTest tool execution time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2241,7 +2241,7 @@ sub runtimestats {
     }
 
     $counter = 15;
-    logmsg "\nTest server logs lock removal time per test ".
+    logmsg "\nTest server logs lock removal time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2251,7 +2251,7 @@ sub runtimestats {
     }
 
     $counter = 10;
-    logmsg "\nTest results verification time per test ".
+    logmsg "\nTest results verification time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -2261,7 +2261,7 @@ sub runtimestats {
     }
 
     $counter = 50;
-    logmsg "\nTotal time per test ".
+    logmsg "\nTotal time per test " .
         sprintf("(%s)...\n\n", (not $fullstats) ? "top $counter" : "full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
@@ -3282,7 +3282,7 @@ my $all = $total + $numskipped;
 runtimestats($lasttest);
 
 if($all) {
-    logmsg "TESTDONE: $all tests were considered during ".
+    logmsg "TESTDONE: $all tests were considered during " .
         sprintf("%.0f", $sofar) . " seconds.\n";
 }
 

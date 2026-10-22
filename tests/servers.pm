@@ -514,11 +514,11 @@ sub verifyhttp {
     my $port = ($ipvnum eq "unix") ? 80 : $port_or_path;
     my $infix = ($do_http3) ? "_h3" : "";
 
-    my $verifyout = "$LOGDIR/".
+    my $verifyout = "$LOGDIR/" .
         servername_canon($proto, $ipvnum, $idnum) . $infix . '_verify.out';
     unlink($verifyout) if(-f $verifyout);
 
-    my $verifylog = "$LOGDIR/".
+    my $verifylog = "$LOGDIR/" .
         servername_canon($proto, $ipvnum, $idnum) . $infix . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
@@ -599,7 +599,7 @@ sub verifyftp {
     my $time = time();
     my $extra = "";
 
-    my $verifylog = "$LOGDIR/".
+    my $verifylog = "$LOGDIR/" .
         servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
@@ -664,11 +664,11 @@ sub verifyrtsp {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
 
-    my $verifyout = "$LOGDIR/".
+    my $verifyout = "$LOGDIR/" .
         servername_canon($proto, $ipvnum, $idnum) . '_verify.out';
     unlink($verifyout) if(-f $verifyout);
 
-    my $verifylog = "$LOGDIR/".
+    my $verifylog = "$LOGDIR/" .
         servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
@@ -809,7 +809,7 @@ sub verifytelnet {
     my $time = time();
     my $extra = "";
 
-    my $verifylog = "$LOGDIR/".
+    my $verifylog = "$LOGDIR/" .
         servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
@@ -821,7 +821,7 @@ sub verifytelnet {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port\"";
 
-    my $cmd = "echo 'verifiedserver' | ".
+    my $cmd = "echo 'verifiedserver' | " .
         exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
@@ -1062,8 +1062,8 @@ sub runhttp2server {
     $doesntrun{$pidfile} = 0;
 
     if($verb) {
-        logmsg "RUN: $srvrname server PID $http2pid ".
-            "http-port $port https-port $port2 ".
+        logmsg "RUN: $srvrname server PID $http2pid " .
+            "http-port $port https-port $port2 " .
             "backend $HOSTIP:" . protoport("http") . "\n";
     }
 
@@ -1742,11 +1742,11 @@ sub runmqttserver {
     unlink($portfile); # need to see a new one
     # start our MQTT server - on a random port!
     my $cmd = server_exe('mqttd').
-        " --port 0".
-        " --pidfile $pidfile".
-        " --portfile $portfile".
-        " --config $LOGDIR/$SERVERCMD".
-        " --logfile $logfile".
+        " --port 0" .
+        " --pidfile $pidfile" .
+        " --portfile $portfile" .
+        " --config $LOGDIR/$SERVERCMD" .
+        " --logfile $logfile" .
         " --logdir $LOGDIR";
     my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
 
@@ -1807,22 +1807,22 @@ sub runsocksserver {
     my $cmd = "";
     if($is_unix) {
         $cmd = server_exe('socksd').
-            " --pidfile $pidfile".
-            " --reqfile $LOGDIR/$SOCKSIN".
-            " --logfile $logfile".
-            " --unix-socket $SOCKSUNIXPATH".
-            " --backend $HOSTIP".
+            " --pidfile $pidfile" .
+            " --reqfile $LOGDIR/$SOCKSIN" .
+            " --logfile $logfile" .
+            " --unix-socket $SOCKSUNIXPATH" .
+            " --backend $HOSTIP" .
             " --config $LOGDIR/$SERVERCMD";
         $portfile = "none";
     }
     else {
         $cmd = server_exe('socksd').
-            " --port 0".
-            " --pidfile $pidfile".
-            " --portfile $portfile".
-            " --reqfile $LOGDIR/$SOCKSIN".
-            " --logfile $logfile".
-            " --backend $HOSTIP".
+            " --port 0" .
+            " --pidfile $pidfile" .
+            " --portfile $portfile" .
+            " --reqfile $LOGDIR/$SOCKSIN" .
+            " --logfile $logfile" .
+            " --backend $HOSTIP" .
             " --config $LOGDIR/$SERVERCMD";
     }
     my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
