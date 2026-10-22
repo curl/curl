@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+TELNET
+libtest
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+telnet
+</features>
+<tool>
+lib513
+</tool>
+<name>
+TELNET with read callback that returns CURL_READFUNC_ABORT
+</name>
+<command>
+telnet://%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 42 - aborted by callback
+<errorcode>
+42
+</errorcode>
+</verify>
+</testcase>
