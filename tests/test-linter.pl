@@ -222,7 +222,7 @@ sub checkxml {
 
         for my $stat (sort { $tag_count{$a} <=> $tag_count{$b} || $a cmp $b } keys %tag_count) {
             if($tag_count{$stat} > 1) {
-                printf "data/test$num has multiple $stat sections\n";
+                print "data/test$num has multiple $stat sections\n";
                 $bad = 1;
             }
         }
