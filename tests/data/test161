@@ -17,7 +17,6 @@ PASV
 </size>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -30,7 +29,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # This does not send QUIT because of known bug:
 # "7.8 Premature transfer end but healthy control channel"

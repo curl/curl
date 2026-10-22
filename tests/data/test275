@@ -12,7 +12,6 @@ proxytunnel
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <connect crlf="headers">
 HTTP/1.1 200 OK
@@ -43,7 +42,6 @@ contents
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -60,7 +58,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT remotesite.com.%TESTNUMBER:%HTTPPORT HTTP/1.1

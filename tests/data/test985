@@ -7,7 +7,6 @@ STARTTLS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY CAPA -ERR Not implemented
@@ -23,7 +22,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -39,7 +37,6 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --ssl-reqd
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 64 is CURLE_USE_SSL_FAILED
 <errorcode>

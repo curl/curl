@@ -6,7 +6,6 @@ FILE
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 foo
@@ -17,12 +16,10 @@ moo
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 file
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 simple multi file:// get
@@ -39,7 +36,6 @@ moo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

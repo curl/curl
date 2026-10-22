@@ -8,7 +8,6 @@ AUTH OAUTHBEARER
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -26,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

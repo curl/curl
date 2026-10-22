@@ -179,6 +179,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
                               struct connectdata *conn, int8_t sockindex)
 {
+  conn->connect_start_ms = -1;
   conn->shutdown.start_ms[sockindex] = -1;
   Curl_conn_cf_discard_chain(&conn->cfilter[sockindex], data);
 }
@@ -699,7 +700,7 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
                                   struct easy_pollset *ps)
 {
   CURLcode result = CURLE_OK;
-  bool want_io = !!ps->n;
+  const bool want_io = !!ps->n;
   int8_t i;
 
   DEBUGASSERT(data);
@@ -719,8 +720,8 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
    * of its own. */
   for(i = 0; (i < (int)CURL_ARRAYSIZE(conn->cfilter)) && !result; ++i) {
     if(conn->cfilter[i] &&
-       (want_io || !Curl_conn_is_connected(conn, i) ||
-        Curl_cshutdn_has_started(conn, i)))
+       (want_io || !conn->cfilter[i]->connected ||
+        CURL_CONN_IN_SHUTDOWN(conn, i)))
       result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
   }
   return result;
@@ -1038,9 +1039,16 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int8_t sockindex,
     }
   }
 #endif
-  if(data && data->conn && data->conn->send[sockindex])
-    return data->conn->send[sockindex](data, sockindex, buf, write_len, eos,
-                                       pnwritten);
+  if(data && data->conn && data->conn->send[sockindex]) {
+    CURLcode result = data->conn->send[sockindex](data, sockindex, buf,
+                                                  write_len, eos, pnwritten);
+    if(!result && (*pnwritten > write_len)) {
+      DEBUGASSERT(0);
+      *pnwritten = 0;
+      return CURLE_SEND_ERROR;
+    }
+    return result;
+  }
   *pnwritten = 0;
   return CURLE_FAILED_INIT;
 }

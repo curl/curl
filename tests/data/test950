@@ -8,14 +8,12 @@ VRFY
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 250 %LTrecipient@example.com%GT
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -30,7 +28,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient --request "vrfy"
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

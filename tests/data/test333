@@ -6,11 +6,9 @@ cmdline
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <name>
 Try a non-boolean command line option with --no-
@@ -20,7 +18,6 @@ Try a non-boolean command line option with --no-
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # detected the bad --no- prefix
 <errorcode>

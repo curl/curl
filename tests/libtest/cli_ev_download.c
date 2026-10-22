@@ -166,6 +166,8 @@ static void usage_ev_download(const char *msg)
     "  event-based downloads with connection reuse forbidden\n"
     "  -n number      of transfers to do serially (default: 5)\n"
     "  -C certfile    for CA verification\n"
+    "  -t ms          server response timeout (default: libcurl default)\n"
+    "  -m ms          test time limit per transfer (default: 30000)\n"
   );
 }
 
@@ -176,6 +178,8 @@ static CURLcode test_cli_ev_download(const char *URL)
   char *cafile = NULL;
   const char *url;
   size_t transfer_count = 5;
+  long response_timeout_ms = 0;
+  long test_timeout_ms = 30000;
   size_t i;
   int watched = 0;
   struct curltime started;
@@ -186,7 +190,7 @@ static CURLcode test_cli_ev_download(const char *URL)
   memset(&ctx, 0, sizeof(ctx));
   ctx.timer_ms = -1;
 
-  while((ch = cgetopt(test_argc, test_argv, "hn:C:")) != -1) {
+  while((ch = cgetopt(test_argc, test_argv, "hn:C:t:m:")) != -1) {
     switch(ch) {
     case 'h':
       usage_ev_download(NULL);
@@ -203,6 +207,21 @@ static CURLcode test_cli_ev_download(const char *URL)
       curlx_free(cafile);
       cafile = curlx_strdup(coptarg);
       break;
+    case 't':
+    case 'm': {
+      const char *opt = coptarg;
+      curl_off_t num;
+      if(curlx_str_number(&opt, &num, LONG_MAX)) {
+        usage_ev_download("invalid timeout");
+        result = (CURLcode)1;
+        goto optcleanup;
+      }
+      if(ch == 't')
+        response_timeout_ms = (long)num;
+      else
+        test_timeout_ms = (long)num;
+      break;
+    }
     default:
       usage_ev_download("invalid option");
       result = (CURLcode)1;
@@ -252,6 +271,9 @@ static CURLcode test_cli_ev_download(const char *URL)
     curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, ev_dl_discard_cb);
     curl_easy_setopt(easy, CURLOPT_FORBID_REUSE, 1L);
     curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+    if(response_timeout_ms)
+      curl_easy_setopt(easy, CURLOPT_SERVER_RESPONSE_TIMEOUT_MS,
+                       response_timeout_ms);
     if(cafile)
       curl_easy_setopt(easy, CURLOPT_CAINFO, cafile);
 
@@ -276,9 +298,11 @@ static CURLcode test_cli_ev_download(const char *URL)
         curl_mfprintf(stderr, "[t-%zu] FINISHED with result %d\n",
                       i, (int)result);
       }
-      else if(curlx_timediff_ms(curlx_now(), started) > (timediff_t)30000) {
+      else if(curlx_timediff_ms(curlx_now(), started) > test_timeout_ms) {
         curl_mfprintf(stderr, "[t-%zu] transfer timed out\n", i);
         result = (CURLcode)1;
+        curl_multi_remove_handle(multi, easy);
+        curl_easy_cleanup(easy);
         goto cleanup;
       }
     }

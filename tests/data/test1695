@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+TELNET
+libtest
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+telnet
+</features>
+<tool>
+lib513
+</tool>
+<name>
+TELNET with read callback that returns CURL_READFUNC_ABORT
+</name>
+<command>
+telnet://%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+<verify>
+# 42 - aborted by callback
+<errorcode>
+42
+</errorcode>
+</verify>
+</testcase>

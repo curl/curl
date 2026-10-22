@@ -43,6 +43,10 @@ struct ssl_filter_config {
   char *key;             /* private key filename */
   char *key_type;        /* format for private key (default: PEM) */
   char *key_passwd;      /* plain text private key password */
+#ifdef USE_ECH
+  char *ech_config;      /* TLS ECH configuration, base64 string */
+  char *ech_public;      /* TLS ECH public DNS (SNI in outer ClientHello) */
+#endif
   struct curl_blob *cert_blob;
   struct curl_blob *ca_info_blob;
   struct curl_blob *issuercert_blob;
@@ -51,6 +55,9 @@ struct ssl_filter_config {
   uint32_t version_max; /* max supported version the client wants to use */
   uint8_t ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */
   uint8_t version;    /* what version the client wants to use */
+#ifdef USE_ECH
+  uint8_t ech;           /* TLS ECH CURLECH_((DIS|EN)ABLE|GREASE) */
+#endif
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */
@@ -72,6 +79,9 @@ struct ssl_easy_config {
   uint32_t version_max; /* max supported version the client wants to use */
   uint8_t version;    /* what version the client wants to use */
   uint8_t ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */
+#ifdef USE_ECH
+  uint8_t ech;           /* TLS ECH CURLECH_((DIS|EN)ABLE|GREASE) */
+#endif
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */

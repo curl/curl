@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+Schannel
+TLS
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+Schannel
+</features>
+<name>
+Schannel shutdown retries retain unsent TLS records
+</name>
+</client>
+</testcase>

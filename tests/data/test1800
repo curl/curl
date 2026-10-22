@@ -7,7 +7,6 @@ HTTP/2
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 Ignored!
@@ -22,7 +21,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 h2c

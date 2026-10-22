@@ -7,24 +7,20 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 TrackMemory
 IPv6
 </features>
-# tool is what to use instead of 'curl'
 
 <name>
 libtest memory tracking operational
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/memdump">
 MEM easy.c: malloc()

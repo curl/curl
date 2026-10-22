@@ -87,12 +87,6 @@ static void multi_xfer_tbl_dump(struct Curl_multi *multi);
 /* Get the # of transfers current in process/pending. */
 static uint32_t multi_xfers_running(struct Curl_multi *multi);
 
-static const struct curltime *multi_now(struct Curl_multi *multi)
-{
-  curlx_pnow(&multi->now);
-  return &multi->now;
-}
-
 /* function pointer called once when entering a state */
 typedef void (*mstate_enter_func)(struct Curl_easy *data,
                                   CURLMstate from_state);
@@ -131,6 +125,8 @@ static void mstate_enter_completed(struct Curl_easy *data,
     Curl_pgrsTime(data, TIMER_POSTRANSFER);
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
   }
+  /* multi_done() should have run and detached any connection already */
+  DEBUGASSERT(!data->conn);
   Curl_pgrsCompleted(data);
   if(from_state < MSTATE_DONE)
     CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
@@ -230,6 +226,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t dnssize,   /* dns hash */
                                      size_t sesssize)  /* TLS session cache */
 {
+  struct curltime created;
   struct Curl_multi *multi = curlx_calloc(1, sizeof(struct Curl_multi));
 
   if(!multi)
@@ -250,8 +247,8 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   multi->admin->state.internal = TRUE;
 
   /* Now we can use curlx_* things safely */
-  curlx_pnow(&multi->now);
-  Curl_timeouts_init(&multi->timeouts, &multi->now);
+  curlx_pnow(&created);
+  Curl_timeouts_init(&multi->timeouts, &created);
   multi_timeouts_init(multi->admin);
 
   Curl_dnscache_init(&multi->dnscache, dnssize);
@@ -552,6 +549,10 @@ CURLMcode Curl_multi_add_handle(struct Curl_multi *multi,
    * a timeout callback invocation. */
   mresult = Curl_update_timer(multi);
   if(mresult) {
+    /* undo the additions above */
+    Curl_uint32_bset_remove(&multi->process, data->mid);
+    Curl_uint32_bset_remove(&multi->dirty, data->mid);
+    --multi->xfers_alive;
     data->multi = NULL; /* not anymore */
     Curl_uint32_tbl_remove(&multi->xfers, data->mid);
     data->mid = UINT32_MAX;
@@ -732,12 +733,6 @@ static CURLcode multi_done(struct Curl_easy *data,
   /* Make sure that transfer client writes are really done now. */
   result = Curl_1st_fatal(result, Curl_xfer_write_done(data, premature));
 
-  /* Inform connection filters that this transfer is done */
-  if(conn)
-    Curl_conn_ev_data_done(data, premature);
-
-  multi_schedule_pending(data->multi); /* connection / multiplex */
-
   if(!result)
     result = Curl_req_done(&data->req, data, premature);
 
@@ -745,12 +740,18 @@ static CURLcode multi_done(struct Curl_easy *data,
     /* Detach connection and decide what to do with it. */
     struct multi_done_ctx mdctx;
 
+    /* Inform connection filters that this transfer is done and they
+     * need to give up any references to `data`. */
+    Curl_conn_ev_data_done(data, premature);
     Curl_detach_connection(data);
     Curl_dnscache_prune(data, pnow);
 
     memset(&mdctx, 0, sizeof(mdctx));
     mdctx.premature = premature;
     Curl_cpool_return(data, conn, multi_done_locked, &mdctx, pnow);
+
+    if(data->multi)
+      multi_schedule_pending(data->multi);
   }
 
   /* flush the netrc cache */
@@ -1743,7 +1744,9 @@ static bool multi_ischanged(struct Curl_multi *multi, bool clear)
  */
 void Curl_multi_connchanged(struct Curl_multi *multi)
 {
-  multi->recheckstate = TRUE;
+  /* May be invoked for a `data->multi` when no multi is present. */
+  if(multi)
+    multi->recheckstate = TRUE;
 }
 
 CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
@@ -1824,10 +1827,14 @@ static bool multi_handle_timeout(struct Curl_easy *data,
     timerid base_timer = Curl_is_connecting(data) ?
                          TIMER_STARTSINGLE : TIMER_STARTOP;
     timediff_t elapsed_ms = Curl_pgrs_since_ms(data, NULL, base_timer);
-    if(data->mstate == MSTATE_CONNECTING)
+    if(data->mstate == MSTATE_CONNECTING) {
       failf(data, "%s timed out after %" FMT_TIMEDIFF_T " milliseconds",
             data->conn->bits.dns_resolved ? "Connection" : "Resolving",
             elapsed_ms);
+      /* keep what we know about a partly done connect, e.g. TCP done
+       * but TLS handshake still ongoing */
+      Curl_conn_report_failed(data, FIRSTSOCKET);
+    }
     else {
       struct SingleRequest *k = &data->req;
       if(k->size != -1) {
@@ -2405,9 +2412,9 @@ static CURLcode is_finished(struct Curl_multi *multi,
            connection */
         streamclose(data->conn);
 
-        /* if not yet in DONE state, go there, otherwise COMPLETED */
-        multistate(data, (data->mstate < MSTATE_DONE) ?
-                   MSTATE_DONE : MSTATE_COMPLETED);
+        /* if not yet in DONE state, go there. */
+        if(data->mstate < MSTATE_DONE)
+          multistate(data, MSTATE_DONE);
         return result;
       }
     }
@@ -2896,10 +2903,11 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
                                int *running_handles)
 {
   CURLMcode returncode = CURLM_OK;
-  struct curltime start = *multi_now(multi);
+  struct curltime start;
   uint32_t mid;
   struct Curl_sigpipe_ctx sigpipe_ctx;
 
+  curlx_pnow(&start);
   sigpipe_init(&sigpipe_ctx);
 
   if(Curl_uint32_bset_first(&multi->process, &mid)) {
@@ -2948,7 +2956,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
     if(data->mstate == MSTATE_PENDING) {
       bool stream_unused;
       CURLcode result_unused;
-      if(multi_handle_timeout(data, multi_now(multi),
+      if(multi_handle_timeout(data, Curl_pgrs_now(data),
                               &stream_unused, &result_unused)) {
         infof(data, "PENDING handle timeout");
         move_pending_to_connect(multi, data);
@@ -3250,6 +3258,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 {
   CURLMcode mresult = CURLM_OK;
   struct Curl_sigpipe_ctx pipe_ctx;
+  struct curltime now;
   uint32_t run_xfers;
 
   (void)ev_bitmask;
@@ -3260,8 +3269,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     mresult = multi_perform(multi, running_handles);
 
     if(mresult != CURLM_BAD_HANDLE) {
-      /* Reassess event status of all active transfers */
-      mresult = Curl_multi_ev_assess_xfer_bset(multi, &multi->process);
+      /* Reassess event status of all active transfers, but keep any error
+         from multi_perform() */
+      CURLMcode mresult2 =
+        Curl_multi_ev_assess_xfer_bset(multi, &multi->process);
+      if(!mresult)
+        mresult = mresult2;
     }
     goto out;
   }
@@ -3287,7 +3300,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       goto out;
   }
 
-  multi_mark_expired_as_dirty(multi, multi_now(multi));
+  curlx_pnow(&now);
+  multi_mark_expired_as_dirty(multi, &now);
   mresult = multi_run_dirty(multi, &pipe_ctx, &run_xfers);
   if(mresult)
     goto out;
@@ -3298,7 +3312,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
      * to set a 0 timeout and call us again, we run them here.
      * Do that only once or it might be unfair to transfers on other
      * sockets. */
-    multi_mark_expired_as_dirty(multi, &multi->now);
+    curlx_pnow(&now);
+    multi_mark_expired_as_dirty(multi, &now);
     mresult = multi_run_dirty(multi, &pipe_ctx, &run_xfers);
   }
 
@@ -3526,17 +3541,20 @@ static void multi_timeout(struct Curl_multi *multi,
   }
 
   if(multi_has_dirties(multi)) {
-    if(pexire_offset_us)
-      *pexire_offset_us = Curl_timeouts_offset_us(&multi->timeouts,
-                                                  multi_now(multi));
+    if(pexire_offset_us) {
+      struct curltime now;
+      curlx_pnow(&now);
+      *pexire_offset_us = Curl_timeouts_offset_us(&multi->timeouts, &now);
+    }
     *timeout_ms = 0;
     return;
   }
   else {
-    const struct curltime *pnow = multi_now(multi);
+    struct curltime now;
     uint32_t mid;
 
-    *timeout_ms = Curl_timeouts_next_ms(&multi->timeouts, pnow,
+    curlx_pnow(&now);
+    *timeout_ms = Curl_timeouts_next_ms(&multi->timeouts, &now,
                                         pexire_offset_us, &mid);
 #ifdef CURLVERBOSE
     if(mid != UINT32_MAX) {

@@ -22,37 +22,24 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Usage: test3990.pl host-public-key known-hosts-file first-name target-name
+# Writes a plain known_hosts file: an entry for first-name with a key of
+# another type, then the real host key for target-name.
 use strict;
 use warnings;
-
-# Perform simple file and directory manipulation in a portable way
-if($#ARGV <= 0) {
-    print "Usage: $0 mkdir|rmdir|rm|move|gone path1 [path2] [more commands...]\n";
-    exit 1;
-}
-
-use File::Copy;
-while(@ARGV) {
-    my $cmd = shift @ARGV;
-    my $arg = shift @ARGV;
-    if($cmd eq "mkdir") {
-        mkdir $arg or die "$!";
-    }
-    elsif($cmd eq "rmdir") {
-        rmdir $arg or die "$!";
-    }
-    elsif($cmd eq "rm") {
-        unlink $arg or die "$!";
-    }
-    elsif($cmd eq "move") {
-        my $arg2 = shift @ARGV;
-        move($arg, $arg2) or die "$!";
-    }
-    elsif($cmd eq "gone") {
-        ! -e $arg or die "Path $arg exists";
-    } else {
-        print "Unsupported command $cmd\n";
-        exit 1;
-    }
-}
-exit 0;
+my ($hostkey_file, $out, $first, $target) = @ARGV;
+open(my $fh, "<", $hostkey_file) or die "$!";
+my ($algo, $data) = split(/\s+/, <$fh>);
+close($fh);
+my $rsa = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCgSyqrUP2xhqLqkyopVapoKeu" .
+    "cYIpZXeUqj+Q9WLWyXka5re62Y3R/lxZUXtkJjlpdD2LNMFenNlDQvPaXH5Utllt+c3zw" .
+    "OkOLy7RXX5S37SfQFm/0fPkZqoZfMDB6XDcwA4cakjCRn4oZyKs8dWAxoNaTtYcnKKMJ6" .
+    "rmc8PttykJw9fwiKAjPyYf21/BMvWIzu9req+TrDA/Jcd2UAug94CikJIXuwKmSYleAOo" .
+    "4eJWx8GyujgEgZn05eq+K1LSg9RqRVIxOdqjoE5K3abBfs0rmUuLdMFh7nHseTFXYbKzp" .
+    "z46V7iZMfFuoyURrzVsqGUm+/m7dxBM98In12kOm3";
+my $ed = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqmXRY8k+W9GtpWxYru6ELAXYHd" .
+    "Xqjf33ziITGTiJUN";
+my $other = ($algo eq "ssh-ed25519") ? $rsa : $ed;
+open(my $kh, ">", $out) or die "$!";
+print $kh "$first $other\n$target $algo $data\n";
+close($kh);

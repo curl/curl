@@ -68,7 +68,8 @@ dates. The tool was called `httpget` before 2.0, `urlget` before 4.0 then
 `curl` since 4.0. `libcurl` and `curl` are always released in sync, using the
 same version numbers.
 
-- 8.23.0: pending
+- 8.24.0: pending
+- 8.23.0: October 14, 2026
 - 8.22.0: September 2, 2026
 - 8.21.0: June 24 2026
 - 8.20.0: April 29 2026
@@ -354,8 +355,11 @@ customers only. They are made as releases branches off previous standard curl
 releases, and use version numbers that were never used by the freely available
 version.
 
-- Rock-solid curl 8.18.1: February 25, 2026
+- Rock-solid curl 8.14.3: October 14, 2026
+- Rock-solid curl 8.16.2: October 14, 2026
+- Rock-solid curl 8.20.2: October 14, 2026
 - Rock-solid curl 8.18.2: September 2, 2026
 - Rock-solid curl 8.14.2: September 7, 2026
 - Rock-solid curl 8.16.1: September 7, 2026
 - Rock-solid curl 8.20.1: September 7, 2026
+- Rock-solid curl 8.18.1: February 25, 2026

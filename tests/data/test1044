@@ -9,7 +9,6 @@ Largefile
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
@@ -21,7 +20,6 @@ Largefile
 </mdtm>
 </reply>
 
-# Client-side
 <client>
 <features>
 Largefile
@@ -37,7 +35,6 @@ ftp://%HOSTIP:%FTPPORT/blalbla/%TESTNUMBER -I
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

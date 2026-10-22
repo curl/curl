@@ -7,7 +7,6 @@ Curl_pgrsTime
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

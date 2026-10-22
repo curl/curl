@@ -903,15 +903,9 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-  result = Curl_cf_ngtcp2_h3_stream_setup(cf, data);
+  result = Curl_cf_ngtcp2_h3_stream_setup(cf, data, &stream);
   if(result)
     goto out;
-  stream = H3_STREAM_CTX(ctx, data);
-  DEBUGASSERT(stream);
-  if(!stream) {
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
 
   nheader = Curl_dynhds_count(&h2_headers);
   nva = curlx_malloc(sizeof(nghttp3_nv) * nheader);
@@ -955,7 +949,7 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
   preader = &reader;
 
   rc = nghttp3_conn_submit_request(ctx->h3conn, stream->id,
-                                   nva, nheader, preader, data);
+                                   nva, nheader, preader, stream);
 
   if(rc) {
     switch(rc) {
@@ -1192,6 +1186,12 @@ static void cf_h3_proxy_destroy(struct Curl_cfilter *cf,
   (void)data;
   if(ctx) {
     CURL_TRC_CF(data, cf, "cf_h3_proxy_destroy()");
+    if(ctx->ngtcp2_ctx.qconn) {
+      struct cf_call_data save;
+      CF_DATA_SAVE(save, cf, data);
+      Curl_cf_ngtcp2_cmn_conn_close(cf, data);
+      CF_DATA_RESTORE(cf, save);
+    }
     cf_h3_proxy_ctx_free(ctx);
     cf->ctx = NULL;
   }

@@ -283,7 +283,6 @@ struct connectdata {
    * the connection is cleaned up (see Curl_hash_add2()).*/
   struct Curl_hash meta_hash;
 
-  struct Curl_llist_node cshutdn_node; /* cshutdn list */
   char *destination; /* hostname+port, used in conncache */
 
   struct curltime created; /* creation time */
@@ -291,6 +290,7 @@ struct connectdata {
   timediff_t lastused_ms; /* when returned to the connection pool as idle */
   timediff_t lastchecked_ms; /* when last checked alive status */
   timediff_t lastupkeep_ms; /* when last done conn_upkeep */
+  timediff_t connect_start_ms; /* when ongoing connect attempt started */
 
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
@@ -335,7 +335,7 @@ struct connectdata {
      made and will serve the purpose of being used for comparison reasons so
      that subsequent bound-requested connections are not accidentally reusing
      wrong connections. */
-  char *localdev;
+  char *interface_opts;
   struct ConnectBits bits;    /* various state-flags for this connection */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
@@ -504,6 +504,7 @@ typedef enum {
   EXPIRE_FTP_ACCEPT,
   EXPIRE_ALPN_EYEBALLS,
   EXPIRE_SHUTDOWN,
+  EXPIRE_SERVER_RESPONSE,
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
@@ -556,15 +557,6 @@ struct UrlState {
   struct Curl_resolv_async *async;  /* asynchronous name resolver data */
 #endif
 
-#ifdef USE_OPENSSL
-  /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
-  void *engine;
-  /* void instead of OSSL_PROVIDER */
-  void *provider;
-  void *baseprov;
-  void *libctx;
-  char *propq; /* for a provider */
-#endif /* USE_OPENSSL */
   struct expire_timers timeouts; /* expire timeouts */
 
   /* a place to store the most recently set (S)FTP entrypath */
@@ -638,9 +630,6 @@ struct UrlState {
   uint8_t httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
 
-#ifdef USE_OPENSSL
-  BIT(provider_loaded);
-#endif /* USE_OPENSSL */
   BIT(really_alive); /* transfer is really alive in multi, passed INIT */
   BIT(this_is_a_follow); /* this is a followed Location: request */
   BIT(refused_stream); /* this was refused, try again */
@@ -727,9 +716,7 @@ enum dupstring {
 #endif
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
   STRING_DEFAULT_PROTOCOL, /* Protocol to use when the URL does not specify */
-  STRING_DEVICE,          /* local network interface/address to use */
-  STRING_INTERFACE,       /* local network interface to use */
-  STRING_BINDHOST,        /* local address to use */
+  STRING_INTERFACE_OPT,   /* CURLOPT_INTERFACE config */
   STRING_ENCODING,        /* Accept-Encoding string */
 #ifndef CURL_DISABLE_FTP
   STRING_FTP_ACCOUNT,     /* ftp account data */
@@ -842,7 +829,7 @@ struct UserDefined {
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
                                of strlen(), and then the data *may* be binary
-                               (contain zero bytes) */
+                               (contain NUL bytes) */
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
@@ -1003,9 +990,6 @@ struct UserDefined {
 #ifndef CURL_DISABLE_RTSP
   uint8_t rtspreq; /* RTSP request type */
 #endif
-#ifdef USE_ECH
-  uint8_t tls_ech;      /* TLS ECH configuration */
-#endif
 #ifndef CURL_DISABLE_NETRC
   uint8_t use_netrc;        /* enum CURL_NETRC_OPTION values */
 #endif
@@ -1141,6 +1125,9 @@ struct UserDefined {
   BIT(post301); /* keep POSTs as POSTs after a 301 request */
   BIT(post302); /* keep POSTs as POSTs after a 302 request */
   BIT(post303); /* keep POSTs as POSTs after a 303 request */
+#ifdef USE_OPENSSL
+  BIT(engine_default);
+#endif
 };
 
 #ifndef CURL_DISABLE_MIME

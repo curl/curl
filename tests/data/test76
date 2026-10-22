@@ -8,7 +8,6 @@ HTTP NTLM auth
 NTLM
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
@@ -66,7 +65,6 @@ Finally, this is the real page!
 
 </reply>
 
-# Client-side
 <client>
 <features>
 NTLM
@@ -84,7 +82,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

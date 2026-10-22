@@ -154,17 +154,16 @@ int main(int argc, char *argv[])
 {
   CURLcode result = CURLE_OK;
 
+  CURL_MSVC_CRTDBG_INIT();
+
   tool_init_stderr();
 
 #ifdef _WIN32
   /* Undocumented diagnostic option to list the full paths of all loaded
      modules. This is purposely pre-init. */
   if(argc == 2 && !_tcscmp(argv[1], _TEXT("--dump-module-paths"))) {
-    struct curl_slist *item, *head = GetLoadedModulePaths();
-    for(item = head; item; item = item->next)
-      curl_mprintf("%s\n", item->data);
-    curl_slist_free_all(head);
-    return head ? 0 : 1;
+    CURL_DUMP_MODULE_PATHS(curl_mprintf);
+    return 0;
   }
 
   /* win32_init must be called before other init routines. */

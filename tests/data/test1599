@@ -9,14 +9,12 @@ libtest
 </info>
 
 # Test based on GitHub issue 17659
-# Server-side
 <reply>
 <data>
 -foo-
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -32,7 +30,6 @@ default   passwor?dlogin anonymou\ ' password login anonymous       passwor?d.'m
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

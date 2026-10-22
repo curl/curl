@@ -24,6 +24,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "ptrarray.h"
+
 struct connectdata;
 struct Curl_easy;
 struct curl_pollfds;
@@ -54,8 +56,7 @@ timediff_t Curl_cshutdn_timeleft_ms(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int8_t sockindex);
 
-/* TRUE iff shutdown at sockindex has been started */
-bool Curl_cshutdn_has_started(struct connectdata *conn, int8_t sockindex);
+#define CURL_CONN_IN_SHUTDOWN(c,i)   ((c)->shutdown.start_ms[(i)] >= 0)
 
 /* Shutdown the connection at `sockindex` non-blocking.
  * Will start the shutdown timer if not already set.
@@ -75,7 +76,7 @@ void Curl_cshutdn_try_once(struct Curl_easy *admin,
  * the connections to be shut down. It registers timers and
  * sockets to monitor via the multi handle. */
 struct cshutdn {
-  struct Curl_llist list;    /* connections being shut down */
+  struct ptrarray conns;    /* connections being shut down */
 };
 
 /* Init as part of the given multi handle. */

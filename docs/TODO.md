@@ -170,9 +170,15 @@ Make sure we do not ever loop because of non-blocking sockets returning
 - TELNET transfers
 - GSSAPI authentication for FTP transfers
 - The "DONE" operation (post transfer protocol-specific actions) for the
-protocols SFTP, SMTP, FTP. Fixing `multi_done()` for this is a worthy task.
+protocols SFTP, SCP, SMTP, IMAP, FTP. Fixing `multi_done()` for this is a
+worthy task.
+- The protocol disconnect handlers for FTP, IMAP, POP3, SMTP, SCP and SFTP,
+when a connection is closed instead of kept for reuse.
 - `curl_multi_remove_handle()` for any of the above.
 - Calling `curl_ws_send()` from a callback
+
+Several of these are also documented in the BLOCKING section
+of [`libcurl-multi`](https://curl.se/libcurl/c/libcurl-multi.html).
 
 ## Better support for same name resolves
 

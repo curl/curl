@@ -16,7 +16,6 @@ Content-Length: 6
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -32,7 +31,6 @@ machine example.com login bob password sekret
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

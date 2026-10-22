@@ -7,7 +7,6 @@ RETR
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 fooo
@@ -15,7 +14,6 @@ mooo
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -28,7 +26,6 @@ ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o %LOGDIR/download%TESTNUMBER -D %L
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

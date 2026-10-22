@@ -14,7 +14,6 @@ curl_url_set() different schemes
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout mode="text">
 bad! REJECTED

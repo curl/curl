@@ -1428,127 +1428,80 @@ static void gtls_infof_cert(struct Curl_easy *data,
 }
 
 static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
-                                        gnutls_session_t session)
+                                        gnutls_session_t session,
+                                        gnutls_x509_crt_t cert)
 {
+  gnutls_datum_t ocsp_raw;
   gnutls_ocsp_resp_t ocsp_resp = NULL;
-  gnutls_datum_t status_request;
-  gnutls_certificate_credentials_t creds = NULL;
-  gnutls_x509_trust_list_t tlist = NULL;
-  unsigned int verify_status = 0;
+  CURLcode result = CURLE_SSL_INVALIDCERTSTATUS;
+  int rc, idx;
+  bool ocsp_init = FALSE;
   gnutls_ocsp_cert_status_t status = GNUTLS_OCSP_CERT_UNKNOWN;
-  gnutls_x509_crl_reason_t reason;
-  CURLcode result = CURLE_OK;
-  int rc;
 
-  rc = gnutls_ocsp_status_request_get(session, &status_request);
-
+  /* Get the OCSP stapled response. We require it to be there. */
+  rc = gnutls_ocsp_status_request_get(session, &ocsp_raw);
   if(rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE) {
     failf(data, "No OCSP response received");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
     goto out;
   }
   else if(rc < 0) {
     failf(data, "Invalid OCSP response received");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
     goto out;
   }
-
+  /* Parse the OCSP response, which needs to succeed. */
   rc = gnutls_ocsp_resp_init(&ocsp_resp);
   if(rc < 0) {
-    failf(data, "Failed to initialize OCSP response object");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    failf(data, "failed to init OCSP response parsing");
     goto out;
   }
-
-  rc = gnutls_ocsp_resp_import(ocsp_resp, &status_request);
+  ocsp_init = TRUE;
+  rc = gnutls_ocsp_resp_import(ocsp_resp, &ocsp_raw);
   if(rc < 0) {
-    failf(data, "Invalid OCSP response received");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+    failf(data, "failed to parse OCSP response");
     goto out;
   }
-
-  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE, (void **)&creds))
-    gnutls_certificate_get_trust_list(creds, &tlist);
-  if(!tlist) {
-    failf(data, "OCSP response signature verification failed");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+  /* OCSP responses carry a basic, overall status and then individual
+   * parts for different certificates. The overall status must be good. */
+  if(gnutls_ocsp_resp_get_status(ocsp_resp) != GNUTLS_OCSP_RESP_SUCCESSFUL) {
+    failf(data, "OCSP response basic part is not successful");
     goto out;
   }
-  rc = gnutls_ocsp_resp_verify(ocsp_resp, tlist, &verify_status, 0);
-  if(rc < 0 || verify_status) {
-    failf(data, "OCSP response signature verification failed");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
+  /* Find the OCSP sub-response for the peer certificate. */
+  for(idx = 0;; idx++) {
+    rc = gnutls_ocsp_resp_check_crt(ocsp_resp, idx, cert);
+    if(!rc || (rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE))
+      break;
+  }
+  if(rc < 0) {
+    failf(data, "OCSP does not carry status for peer cert");
     goto out;
   }
-
-  (void)gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
-                                    &status, NULL, NULL, NULL, &reason);
-
+  /* The peer certificate OCSP status is at index `idx`.
+   * Coming here means that GnuTLS has already checked that
+   * - the signature of this OCSP status has been verified
+   * - the timestamp of this OCSP status has been tested
+   * We therefore need only to inspect that actual status code. */
+  rc = gnutls_ocsp_resp_get_single(ocsp_resp, idx, NULL, NULL, NULL, NULL,
+                                   &status, NULL, NULL, NULL, NULL);
+  if(rc < 0) {
+    failf(data, "failed to parse OCSP response for peer cert");
+    goto out;
+  }
   switch(status) {
   case GNUTLS_OCSP_CERT_GOOD:
+    /* We only regard this as OK and fail all other status codes. */
+    result = CURLE_OK;
     break;
-
-  case GNUTLS_OCSP_CERT_REVOKED: {
-    const char *crl_reason;
-
-    switch(reason) {
-    default:
-    case GNUTLS_X509_CRLREASON_UNSPECIFIED:
-      crl_reason = "unspecified reason";
-      break;
-
-    case GNUTLS_X509_CRLREASON_KEYCOMPROMISE:
-      crl_reason = "private key compromised";
-      break;
-
-    case GNUTLS_X509_CRLREASON_CACOMPROMISE:
-      crl_reason = "CA compromised";
-      break;
-
-    case GNUTLS_X509_CRLREASON_AFFILIATIONCHANGED:
-      crl_reason = "affiliation has changed";
-      break;
-
-    case GNUTLS_X509_CRLREASON_SUPERSEDED:
-      crl_reason = "certificate superseded";
-      break;
-
-    case GNUTLS_X509_CRLREASON_CESSATIONOFOPERATION:
-      crl_reason = "operation has ceased";
-      break;
-
-    case GNUTLS_X509_CRLREASON_CERTIFICATEHOLD:
-      crl_reason = "certificate is on hold";
-      break;
-
-    case GNUTLS_X509_CRLREASON_REMOVEFROMCRL:
-      crl_reason = "will be removed from delta CRL";
-      break;
-
-    case GNUTLS_X509_CRLREASON_PRIVILEGEWITHDRAWN:
-      crl_reason = "privilege withdrawn";
-      break;
-
-    case GNUTLS_X509_CRLREASON_AACOMPROMISE:
-      crl_reason = "AA compromised";
-      break;
-    }
-
-    failf(data, "Server certificate was revoked: %s", crl_reason);
+  case GNUTLS_OCSP_CERT_REVOKED:
+    failf(data, "peer certificate is revoked");
     break;
-  }
-
   default:
-  case GNUTLS_OCSP_CERT_UNKNOWN:
-    failf(data, "Server certificate status is unknown");
+    failf(data, "peer certificate OCSP status is not good: %d", (int)status);
     break;
   }
-
-  result = (status != GNUTLS_OCSP_CERT_GOOD) ?
-           CURLE_SSL_INVALIDCERTSTATUS : CURLE_OK;
 
 out:
-  if(ocsp_resp)
+  if(ocsp_init)
     gnutls_ocsp_resp_deinit(ocsp_resp);
   return result;
 }
@@ -1592,12 +1545,16 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
                                  gnutls_session_t session,
                                  struct Curl_cfilter *cf,
                                  struct ssl_peer *peer,
-                                 struct gtls_cert_chain *chain)
+                                 struct gtls_cert_chain *chain,
+                                 bool *pocsp_checked)
 {
   bool verified = FALSE;
   unsigned int verify_status = 0;
   long * const certverifyresult = &ssl_config->certverifyresult;
-  int rc = gnutls_certificate_verify_peers2(session, &verify_status);
+  int rc;
+
+  *pocsp_checked = FALSE;
+  rc = gnutls_certificate_verify_peers2(session, &verify_status);
   if(rc < 0) {
     failf(data, "server cert verify failed: %d", rc);
     *certverifyresult = rc;
@@ -1610,15 +1567,28 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
 
 #ifdef USE_APPLE_SECTRUST
   if(!verified && config->native_ca_store) {
-    CURLcode result =
-      Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
-                             gtls_chain_get_der, chain, NULL, 0);
+    gnutls_datum_t ocsp_raw;
+    CURLcode result;
+
+    if(gnutls_ocsp_status_request_get(session, &ocsp_raw)) {
+      ocsp_raw.data = NULL;
+      ocsp_raw.size = 0;
+    }
+    if(config->verifystatus && !ocsp_raw.size) {
+      failf(data, "No OCSP response received");
+      return CURLE_SSL_INVALIDCERTSTATUS;
+    }
+    result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
+                                    gtls_chain_get_der, chain,
+                                    ocsp_raw.data, ocsp_raw.size,
+                                    config->verifystatus);
     if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
-      return result; /* unexpected error */
+      return result; /* no further failure analysis needed */
     verified = !result;
     if(verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
       *certverifyresult = 0;
+      *pocsp_checked = TRUE;
     }
   }
 #else
@@ -1628,6 +1598,7 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
 #endif
 
   if(!verified) {
+    CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
     /* verify_status is a bitmask of gnutls_certificate_status bits */
     const char *cause = "certificate error, no details available";
     if(verify_status & GNUTLS_CERT_EXPIRED)
@@ -1636,15 +1607,17 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
       cause = "certificate signer not trusted";
     else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
       cause = "certificate uses insecure algorithm";
-    else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS)
-      cause = "attached OCSP status response is invalid";
+    else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS) {
+      cause = "OCSP status response is invalid";
+      result = CURLE_SSL_INVALIDCERTSTATUS;
+    }
     failf(data, "SSL certificate verification failed: %s. (CAfile: %s "
           "CRLfile: %s)", cause,
           config->CAfile ? config->CAfile : "none",
           config->CRLfile ?
           config->CRLfile : "none");
 
-    return CURLE_PEER_FAILED_VERIFICATION;
+    return result;
   }
   return CURLE_OK;
 }
@@ -1660,6 +1633,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   struct gtls_cert_chain chain;
   gnutls_x509_crt_t x509_cert = NULL, x509_issuer = NULL;
   time_t certclock;
+  bool ocsp_checked = FALSE;
   int rc;
   CURLcode result = CURLE_OK;
   long * const certverifyresult = &ssl_config->certverifyresult;
@@ -1711,7 +1685,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 
   if(config->verifypeer) {
     result = gtls_verify_cert(data, config, ssl_config, session,
-                              cf, peer, &chain);
+                              cf, peer, &chain, &ocsp_checked);
     if(result)
       goto out;
   }
@@ -1793,8 +1767,8 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
       infof(data, "  SSL certificate activation date OK");
   }
 
-  if(config->verifystatus) {
-    result = gtls_verify_ocsp_status(data, session);
+  if(config->verifystatus && !ocsp_checked) {
+    result = gtls_verify_ocsp_status(data, session, x509_cert);
     if(result)
       goto out;
   }
@@ -2095,8 +2069,13 @@ static CURLcode gtls_send(struct Curl_cfilter *cf,
     nwritten = gnutls_record_send(backend->gtls.session, buf, remain);
 
     if(nwritten >= 0) {
+      if((size_t)nwritten > remain) {
+        DEBUGASSERT(0);
+        failf(data, "gnutls_record_send(len=%zu) returned %zd",
+              remain, nwritten);
+        return CURLE_SEND_ERROR;
+      }
       *pnwritten += (size_t)nwritten;
-      DEBUGASSERT((size_t)nwritten <= remain);
       buf = (char *)CURL_UNCONST(buf) + (size_t)nwritten;
       remain -= (size_t)nwritten;
     }
@@ -2337,8 +2316,6 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   gtls_get_internals,            /* get_internals */
   gtls_close,                    /* close_one */
   NULL,                          /* close_all */
-  NULL,                          /* set_engine */
-  NULL,                          /* set_engine_default */
   NULL,                          /* engines_list */
   gtls_sha256sum,                /* sha256sum */
   gtls_recv,                     /* recv decrypted data */

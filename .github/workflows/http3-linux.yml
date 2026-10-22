@@ -39,32 +39,31 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 2000
   DO_NOT_TRACK: '1'
-  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 5.8.0
-  # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260929.0
-  # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver-coerced extractVersion=^nettle_?(?<version>.+)_release_.+$ registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=awslabs/aws-lc
+  AWSLC_VERSION: 5.11.0
+  # renovate: datasource=github-tags depName=google/boringssl
+  BORINGSSL_VERSION: 0.20261020.0
+  # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver-coerced extractVersion=^nettle_?(?<version>.+)_release_.+$
   NETTLE_VERSION: '4.0'
-  # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=gnutls/gnutls
   GNUTLS_VERSION: 3.8.13
-  # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-  LIBRESSL_VERSION: 4.3.2
-  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=libressl/portable
+  LIBRESSL_VERSION: 4.3.3
+  # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
   OPENSSL_VERSION: 4.0.3
-  # manually bumped
-  OPENSSL_PREV_VERSION: 3.6.5
-  OPENSSL_PREV_SHA256: a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98
-  # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>3\.5\..+)$
+  OPENSSL_PREV_VERSION: 3.5.9
+  # renovate: datasource=github-tags depName=cloudflare/quiche
   QUICHE_VERSION: 0.30.0
-  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssl extractVersion=^v?(?<version>.+)-stable$
   WOLFSSL_VERSION: 5.9.4
-  # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=ngtcp2/nghttp3
   NGHTTP3_VERSION: 1.18.0
-  # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=ngtcp2/ngtcp2
   NGTCP2_VERSION: 1.25.0
-  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=nghttp2/nghttp2
   NGHTTP2_VERSION: 1.70.0
-  # no tagged releases
+  # manually bumped (repo not offering tagged releases)
   H2O_VERSION: 11b0cfa2771e3ccad4a852e72473e4e278ab1de7 # 2026-05-28
   H2O_SHA256: 5ae1bd7b09970d7d49c41fa68193e24da04c2a7ac5581fbe2affc79200b0721f
 
@@ -123,18 +122,18 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-http3-no-deprecated
+        id: cache2-openssl-http3-no-deprecated
         env:
-          cache-name: cache1-openssl-http3-no-deprecated
+          cache-name: cache2-openssl-http3-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
 
       - name: 'cache openssl-prev'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-prev-http3
+        id: cache2-openssl-prev-http3
         env:
-          cache-name: cache1-openssl-prev-http3
+          cache-name: cache2-openssl-prev-http3
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
@@ -211,8 +210,8 @@ jobs:
               !steps.cache1-nettle.outputs.cache-hit ||
               !steps.cache1-gnutls.outputs.cache-hit ||
               !steps.cache1-libressl.outputs.cache-hit ||
-              !steps.cache1-openssl-http3-no-deprecated.outputs.cache-hit ||
-              !steps.cache1-openssl-prev-http3.outputs.cache-hit ||
+              !steps.cache2-openssl-http3-no-deprecated.outputs.cache-hit ||
+              !steps.cache2-openssl-prev-http3.outputs.cache-hit ||
               !steps.cache1-wolfssl.outputs.cache-hit ||
               !steps.cache1-nghttp3.outputs.cache-hit ||
               !steps.cache1-ngtcp2-boringssl.outputs.cache-hit ||
@@ -303,24 +302,26 @@ jobs:
           cmake --install .
 
       - name: 'build openssl'
-        if: ${{ !steps.cache1-openssl-http3-no-deprecated.outputs.cache-hit }}
+        if: ${{ !steps.cache2-openssl-http3-no-deprecated.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
+          # Prefer clang to avoid test 2500-2503 failing valgrind with gcc-15/16 arm64 non-debug OpenSSL 3/4 builds
+          CC=clang ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
 
       - name: 'build openssl-prev'
-        if: ${{ !steps.cache1-openssl-prev-http3.outputs.cache-hit }}
+        if: ${{ !steps.cache2-openssl-prev-http3.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
-          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${OPENSSL_PREV_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
-          ./config --prefix=/home/runner/pkg/openssl-prev --libdir=lib no-makedepend no-apps no-docs no-tests
+          # Prefer clang to avoid test 2500-2503 failing valgrind with gcc-15/16 arm64 non-debug OpenSSL 3/4 builds
+          CC=clang ./config --prefix=/home/runner/pkg/openssl-prev --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
@@ -524,6 +525,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'openssl-prev'
+            image: ubuntu-26.04-arm
             install_steps: skipall
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/openssl-prev/lib
             PKG_CONFIG_PATH: "\
@@ -534,6 +536,7 @@ jobs:
               --with-openssl=/home/runner/pkg/openssl-prev --with-ngtcp2=/home/runner/pkg/ngtcp2-openssl-prev --enable-ssls-export
 
           - name: 'openssl-prev'
+            image: ubuntu-26.04-arm
             tflags: '--min=2000'
             PKG_CONFIG_PATH: "\
               /home/runner/pkg/openssl-prev/lib/pkgconfig:\
@@ -653,9 +656,9 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-http3-no-deprecated
+        id: cache2-openssl-http3-no-deprecated
         env:
-          cache-name: cache1-openssl-http3-no-deprecated
+          cache-name: cache2-openssl-http3-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
@@ -664,9 +667,9 @@ jobs:
       - name: 'cache openssl-prev'
         if: ${{ contains(matrix.build.name, 'openssl-prev') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache1-openssl-prev-http3
+        id: cache2-openssl-prev-http3
         env:
-          cache-name: cache1-openssl-prev-http3
+          cache-name: cache2-openssl-prev-http3
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
@@ -762,6 +765,9 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
           cd quiche
+          if [ "$(uname -m)" = 'aarch64' ]; then
+            export CARGO_PROFILE_RELEASE_OPT_LEVEL=0  # to avoid test 2500-2503 failing valgrind with arm64 non-debug quiche 0.30.0 builds
+          fi
           cargo build --package quiche --release --features ffi,pkg-config-meta,qlog -vv
           ln -s libquiche.so target/release/libquiche.so.0
           cd ..
@@ -844,8 +850,8 @@ jobs:
 
       - name: 'curl -V'
         run: |
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -c '%10s bytes: %n' --
           bld/src/curl --disable -V
 
       - name: 'build tests'

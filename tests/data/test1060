@@ -11,7 +11,6 @@ HTTP proxy Digest auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -63,7 +62,6 @@ daniel
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -82,7 +80,6 @@ http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy http://
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 CONNECT test.remote.haxx.se.%TESTNUMBER:8990 HTTP/1.1

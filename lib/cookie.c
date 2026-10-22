@@ -38,6 +38,7 @@
 #include "curl_memrchr.h"
 #include "parsedate.h"
 #include "curlx/strdup.h"
+#include "curlx/dynbuf.h"
 #include "llist.h"
 #include "curlx/strparse.h"
 
@@ -448,29 +449,6 @@ static bool parse_first_pair(struct Curl_easy *data, struct Cookie *co,
   return TRUE;
 }
 
-static bool parse_flag(struct Curl_easy *data, struct Cookie *co,
-                       const struct CookieInfo *ci,
-                       struct Curl_str *name, bool secure)
-{
-  /*
-   * secure cookies are only allowed to be set when the connection is
-   * using a secure protocol, or when the cookie is being set by
-   * reading from file
-   */
-  if(curlx_str_casecompare(name, "secure")) {
-    if(secure || !ci->running)
-      co->secure = TRUE;
-    else {
-      infof(data, "skipped cookie because not 'secure'");
-      return FALSE;
-    }
-  }
-  else if(curlx_str_casecompare(name, "httponly"))
-    co->httponly = TRUE;
-
-  return TRUE;
-}
-
 static bool parse_domain(struct Curl_easy *data, struct Cookie *co,
                          struct Curl_str *cookie_domain,
                          struct Curl_str *val,
@@ -587,7 +565,6 @@ static void parse_expires(struct Cookie *co, struct Curl_str *val,
 static CURLcode
 parse_cookie_header(struct Curl_easy *data,
                     struct Cookie *co,
-                    const struct CookieInfo *ci,
                     bool *okay, /* if the cookie was fine */
                     const char *ptr, /* the header */
                     const char *domain, /* default domain */
@@ -611,7 +588,8 @@ parse_cookie_header(struct Curl_easy *data,
     struct Curl_str name;
 
     /* we have a <name>=<value> pair or a stand-alone word here */
-    if(!curlx_str_cspn(&ptr, &name, ";\r\n=")) {
+    int rc = curlx_str_cspn(&ptr, &name, ";\r\n=");
+    if(!rc || (rc == STRE_SHORT)) {
       struct Curl_str val;
       bool sep = FALSE;
       curlx_str_trimblanks(&name);
@@ -638,20 +616,32 @@ parse_cookie_header(struct Curl_easy *data,
         if(!parse_first_pair(data, co, cookie, &name, &val, sep))
           return CURLE_OK;
       }
-      else if(!sep) {
-        if(!parse_flag(data, co, ci, &name, secure_origin))
+
+      /* whether there's separator or not */
+      else if(curlx_str_casecompare(&name, "secure")) {
+        if(secure_origin)
+          co->secure = TRUE;
+        else {
+          infof(data, "skipped cookie because not 'secure'");
           return CURLE_OK;
+        }
       }
-      else if(curlx_str_casecompare(&name, "path"))
-        cookie[COOKIE_PATH] = val;
-      else if(curlx_str_casecompare(&name, "domain") && curlx_strlen(&val)) {
-        if(!parse_domain(data, co, &cookie[COOKIE_DOMAIN], &val, &domain))
-          return CURLE_OK;
+      else if(curlx_str_casecompare(&name, "httponly"))
+        co->httponly = TRUE;
+      else if(sep) {
+        /* only if a separating equals sign is present */
+        if(curlx_str_casecompare(&name, "path"))
+          cookie[COOKIE_PATH] = val;
+        else if(curlx_str_casecompare(&name, "domain")) {
+          if(curlx_strlen(&val) &&
+             !parse_domain(data, co, &cookie[COOKIE_DOMAIN], &val, &domain))
+            return CURLE_OK;
+        }
+        else if(curlx_str_casecompare(&name, "max-age") && curlx_strlen(&val))
+          parse_maxage(co, &val, &now);
+        else if(curlx_str_casecompare(&name, "expires") && curlx_strlen(&val))
+          parse_expires(co, &val, &now);
       }
-      else if(curlx_str_casecompare(&name, "max-age") && curlx_strlen(&val))
-        parse_maxage(co, &val, &now);
-      else if(curlx_str_casecompare(&name, "expires") && curlx_strlen(&val))
-        parse_expires(co, &val, &now);
     }
   } while(!curlx_str_single(&ptr, ';'));
 
@@ -847,12 +837,11 @@ static bool is_public_suffix(struct Curl_easy *data,
             co->tailmatch = FALSE;
         }
         else {
-          /* libpsl says localhost is a PSL, we think not */
-          acceptable =
-            curl_strequal(lcookie, "localhost") ||
-            /* note that this PSL function returns the opposite value than
-               psl_is_cookie_domain_acceptable() does */
-            !psl_is_public_suffix(psl, lcookie);
+          bool suffix = psl_is_public_suffix(psl, lcookie);
+          acceptable = TRUE;
+          if(suffix)
+            /* switch off tailmatching when set for a PSL domain */
+            co->tailmatch = FALSE;
         }
         Curl_psl_release(data);
       }
@@ -1018,7 +1007,7 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   memset(co, 0, sizeof(comem));
 
   if(flags & COOKIE_HTTPHEADER)
-    result = parse_cookie_header(data, co, ci, &okay,
+    result = parse_cookie_header(data, co, &okay,
                                  lineptr, domain, path, flags & COOKIE_SECURE);
   else
     result = parse_netscape(co, ci, &okay, lineptr, flags & COOKIE_SECURE);
@@ -1181,9 +1170,11 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
   if(fp) {
     struct dynbuf buf;
     bool eof = FALSE;
-    /* accept a little longer lines so that a full cookie fits and does not
-       abort the file read */
-    curlx_dyn_init(&buf, MAX_COOKIE_LINE + 48);
+    /* get_netscape_format() uses curl_maprintf(), which returns at most
+       DYN_APRINTF - 1 bytes. cookie_output() adds a newline (CRLF on Windows),
+       and this dynbuf needs one more byte for its null-terminator. This is a
+       cap, not an allocation. */
+    curlx_dyn_init(&buf, DYN_APRINTF + 2);
     do {
       result = Curl_get_line(&buf, fp, &eof);
       if(!result) {
@@ -1628,6 +1619,7 @@ static struct curl_slist *cookie_list(const struct Curl_easy *data)
 {
   struct curl_slist *list = NULL;
   struct curl_slist *beg;
+  struct curl_slist **tail = &list;
   unsigned int i;
   struct Curl_llist_node *n;
 
@@ -1649,13 +1641,14 @@ static struct curl_slist *cookie_list(const struct Curl_easy *data)
         curl_slist_free_all(list);
         return NULL;
       }
-      beg = Curl_slist_append_nodup(list, line);
+      beg = Curl_slist_append_nodup(NULL, line);
       if(!beg) {
         curlx_free(line);
         curl_slist_free_all(list);
         return NULL;
       }
-      list = beg;
+      *tail = beg;
+      tail = &beg->next;
     }
   }
 

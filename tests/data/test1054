@@ -8,7 +8,6 @@ followlocation
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 301 OK swsclose
@@ -38,7 +37,6 @@ body
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -54,7 +52,6 @@ http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d @%LOGDIR/test%TESTNUMBER.txt --p
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /blah/%TESTNUMBER HTTP/1.1

@@ -37,7 +37,7 @@ use Getopt::Std;
 use MIME::Base64;
 use strict;
 use warnings;
-use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
+use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w $opt_x);
 use List::Util;
 use Text::Wrap;
 use Time::Local;
@@ -52,6 +52,7 @@ eval "require LWP::UserAgent";
 my %urls = (
     'autoland' => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt',
     'beta'     => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/beta/security/nss/lib/ckfw/builtins/certdata.txt',
+    'nss'      => 'https://raw.githubusercontent.com/mozilla/nss/refs/heads/master/lib/ckfw/builtins/certdata.txt',
     'release'  => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/release/security/nss/lib/ckfw/builtins/certdata.txt',
 );
 
@@ -60,7 +61,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.33';
+my $version = '1.35';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -110,7 +111,7 @@ my @valid_signature_algorithms = (
 
 $0 =~ s@.*(/|\\)@@;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
-getopts('bd:fhiklmnp:qs:tuvw:');
+getopts('bd:fhiklmnp:qs:tuvw:x:');
 
 if(!defined($opt_d)) {
     # to make plain "-d" use not cause warnings, and actually still work
@@ -156,7 +157,8 @@ sub warning_message() {
         print "  6. Use of this script makes a security engineer grind his teeth and\n";
         print "     swear at you.  ;)\n";
         exit;
-    } else { # Short Form Warning
+    }
+    else { # Short Form Warning
         print "Warning: Use of this script may pose some risk, -d risk for more details.\n";
     }
 }
@@ -171,7 +173,7 @@ sub HELP_MESSAGE() {
     print "\t-i\tprint version info about used modules\n";
     print "\t-k\tallow URLs other than HTTPS, enable HTTP fallback (insecure)\n";
     print "\t-l\tprint license info about certdata.txt\n";
-    print "\t-m\tinclude meta data in output\n";
+    print "\t-m\tinclude meta data in output (SHA-256 fingerprints are included by default)\n";
     print "\t-n\tno download of certdata.txt (to use existing)\n";
     print wrap("\t","\t\t", "-p\tlist of Mozilla trust purposes and levels for certificates to include in output. " .
           "Takes the form of a comma separated list of purposes, a colon, and a comma separated list of levels. " .
@@ -188,6 +190,7 @@ sub HELP_MESSAGE() {
     print "\t-u\tunlink (remove) certdata.txt after processing\n";
     print "\t-v\tbe verbose and print out processed CAs\n";
     print "\t-w <l>\twrap base64 output lines after <l> chars (default: ${opt_w})\n";
+    print "\t-x\texclude list of SHA-256 fingerprints. Comma separated, case-insensitive, whitespace and ':' byte delimiters are ignored.\n";
     exit;
 }
 
@@ -245,7 +248,8 @@ sub sha256 {
         binmode(FILE);
         $result = $MOD_SHA->new(256)->addfile(*FILE)->hexdigest;
         close(FILE);
-    } else {
+    }
+    else {
         # Use OpenSSL command if Perl Digest::SHA modules not available
         open(my $fh, '-|', $openssl, 'dgst', '-r', '-sha256', $_[0]) or die "Failed running openssl on '$_[0]': $!";
         $result = <$fh>;  # read first line
@@ -300,6 +304,13 @@ my $resp;
 my $fetched;
 
 my $oldhash = oldhash($crt);
+
+my @opt_x_list;
+if($opt_x) {
+    $opt_x = uc $opt_x;
+    $opt_x =~ s/[\s:]//g;
+    @opt_x_list = split(/,/, $opt_x);
+}
 
 report "SHA256 of old file: $oldhash";
 
@@ -402,7 +413,8 @@ my $currentdate = scalar gmtime($filedate);
 my $format = $opt_t ? "plain text and " : "";
 if($stdout) {
     open(CRT, '> -') or die "Could not open STDOUT: $!\n";
-} else {
+}
+else {
     open(CRT, ">", "$crt.~") or die "Could not open $crt.~: $!\n";
 }
 print CRT <<EOT;
@@ -577,9 +589,11 @@ while(<TXT>) {
             if(/^CKA_TRUST_([A-Z_]+)\s+CK_TRUST\s+CKT_NSS_([A-Z_]+)\s*$/) {
                 if(!is_in_list($1, @valid_mozilla_trust_purposes)) {
                     report "Warning: Unrecognized trust purpose for cert: $caname. Trust purpose: $1. Trust Level: $2";
-                } elsif(!is_in_list($2, @valid_mozilla_trust_levels)) {
+                }
+                elsif(!is_in_list($2, @valid_mozilla_trust_levels)) {
                     report "Warning: Unrecognized trust level for cert: $caname. Trust purpose: $1. Trust Level: $2";
-                } else {
+                }
+                else {
                     push @{$trust_purposes_by_level{$2}}, $1;
                 }
             }
@@ -601,9 +615,23 @@ while(<TXT>) {
         }
 
         if(!should_output_cert(%trust_purposes_by_level)) {
-            $skipnum ++;
+            $skipnum++;
             report "Skipping: $caname lacks acceptable trust level" if($opt_v);
-        } else {
+        }
+        else {
+            # Skip if explicitly excluded
+            if($opt_x) {
+                my ($fingerprint_sha256) = grep { /^# Fingerprint .*SHA.*256/i } @precert;
+                $fingerprint_sha256 =~ s/://g;
+                $fingerprint_sha256 = uc $fingerprint_sha256;
+                ($fingerprint_sha256) = $fingerprint_sha256 =~ /([A-F0-9]{64})/;
+                if(grep { $_ eq $fingerprint_sha256 } @opt_x_list) {
+                    report "Skipping: '$main_block_name' fingerprint explicitly excluded: $fingerprint_sha256";
+                    $skipnum++;
+                    next;
+                }
+            }
+
             my $encoded = MIME::Base64::encode_base64($cka_value, '');
             $encoded =~ s/(.{1,${opt_w}})/$1\n/g;
             my $pem = "-----BEGIN CERTIFICATE-----\n"
@@ -621,9 +649,13 @@ while(<TXT>) {
             if($opt_m) {
                 print CRT for @precert;
             }
+            else {
+                print CRT for grep { /^# Fingerprint .*SHA.*256/i } @precert;
+            }
             if(!$opt_t) {
                 print CRT $pem;
-            } else {
+            }
+            else {
                 my $pipe = "";
                 foreach my $hash (@included_signature_algorithms) {
                     $pipe = "|$openssl x509 -" . $hash . " -fingerprint -noout -inform PEM";
@@ -665,7 +697,8 @@ unless($stdout) {
             $bk++;
         }
         rename $crt, "$crt.~${bk}~" or die "Failed to create backup $crt.~$bk}~: $!\n";
-    } elsif(-e $crt) {
+    }
+    elsif(-e $crt) {
         unlink($crt) or die "Failed to remove $crt: $!\n";
     }
     rename "$crt.~", $crt or die "Failed to rename $crt.~ to $crt: $!\n";

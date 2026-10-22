@@ -6,7 +6,6 @@ HTTP
 HTTP GET
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -19,7 +18,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -36,7 +34,6 @@ MSYS2_ARG_CONV_EXCL=http://
 </setenv>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /{}\/%TESTNUMBER HTTP/1.1

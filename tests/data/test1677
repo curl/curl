@@ -16,7 +16,6 @@ Content-Length
 # The writedelay simulates the timing issue where chunks arrive in
 # separate packets.
 
-# Server-side
 <reply>
 <servercmd>
 writedelay: 500
@@ -39,7 +38,6 @@ random data in first chunk
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -52,7 +50,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -d "testdata"
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol nonewline="yes" crlf="headers">
 POST /%TESTNUMBER HTTP/1.1

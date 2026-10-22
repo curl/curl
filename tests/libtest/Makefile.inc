@@ -299,9 +299,11 @@ TESTS_C = \
   lib1978.c \
   lib1985.c \
   lib1989.c \
+  lib1990.c \
   lib2023.c \
   lib2032.c \
   lib2082.c \
+  lib2095.c \
   lib2118.c \
   lib2270.c \
   lib2301.c \
@@ -342,6 +344,7 @@ TESTS_C = \
   lib3208.c \
   lib3231.c \
   lib3233.c \
+  lib3234.c \
   lib3595.c \
   lib3596.c \
   lib5000.c \

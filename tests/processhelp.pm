@@ -58,7 +58,8 @@ BEGIN {
             # https://metacpan.org/pod/Win32::Process::List
             require Win32::Process::List;
         };
-    } else {
+    }
+    else {
       $has_win32_process = 0;
     }
 }
@@ -105,7 +106,8 @@ sub winpid_to_pid {
         my $pid = Cygwin::winpid_to_pid($vpid - 4194304);
         if($pid) {
             return $pid;
-        } else {
+        }
+        else {
             return $vpid
         }
     }
@@ -132,7 +134,8 @@ sub pidexists {
                     if(exists $processes{$pid}) {
                         return -$pid;
                     }
-                } else {
+                }
+                else {
                     my $filter = "PID eq $pid";
                     # https://ss64.com/nt/tasklist.html
                     my $result = qx(tasklist -fi \"$filter\" 2>$dev_null);
@@ -154,10 +157,10 @@ sub pidexists {
 }
 
 #######################################################################
-# pidterm asks the process with a given pid to terminate gracefully.
+# terminate or kill a process, pass "TERM" or "KILL" for $method.
 #
-sub pidterm {
-    my $pid = $_[0];
+sub pid_term_or_kill {
+    my ($pid, $method) = @_;
 
     if($pid > 0) {
         # request the process to quit
@@ -167,14 +170,27 @@ sub pidterm {
             if($^O ne 'MSWin32') {
                 if($has_win32_process) {
                     Win32::Process::KillProcess($pid, 0);
-                } else {
+                }
+                else {
+                    my $pwsh;
                     # https://ss64.com/nt/tasklist.html
                     my $result = qx(tasklist -v -fo list -fi "PID eq $pid" 2>&1);
                     $result =~ s/\r//g;
                     $result =~ s/\n/ | /g;
-                    print "Task info for $pid before taskkill: '$result'\n";
+                    print "Task info (via tasklist) for $pid before taskkill: '$result'\n";
 
-                    $result = qx(powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine");
+                    $pwsh = "Get-CimInstance -ClassName Win32_Process -Filter 'ProcessId=$pid' | " .
+                            "Select ProcessId, ParentProcessId, Name, CommandLine | " .
+                            "Out-String -Width 2048";
+                    $result = qx(powershell -Command "$pwsh");
+                    $result =~ s/\r//g;
+                    print "Task info (via Get-CimInstance) for $pid before taskkill:\n";
+                    print "$result\n";
+
+                    $pwsh = "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | " .
+                            "Select ProcessId, ParentProcessId, Name, CommandLine | " .
+                            "Out-String -Width 2048";
+                    $result = qx(powershell -Command "$pwsh");
                     $result =~ s/\r//g;
                     print "Task child processes for $pid before taskkill:\n";
                     print "$result\n";
@@ -200,8 +216,16 @@ sub pidterm {
         }
 
         # signal the process to terminate
-        kill("TERM", $pid);
+        kill($method, $pid);
     }
+}
+
+#######################################################################
+# pidterm asks the process with a given pid to terminate gracefully.
+#
+sub pidterm {
+    my $pid = $_[0];
+    pid_term_or_kill($pid, "TERM");
 }
 
 #######################################################################
@@ -209,50 +233,7 @@ sub pidterm {
 #
 sub pidkill {
     my $pid = $_[0];
-
-    if($pid > 0) {
-        # request the process to quit
-        $pid = winpid_to_pid($pid);
-        if($pid > 4194304 && os_is_win()) {
-            $pid -= 4194304;
-            if($^O ne 'MSWin32') {
-                if($has_win32_process) {
-                    Win32::Process::KillProcess($pid, 0);
-                } else {
-                    # https://ss64.com/nt/tasklist.html
-                    my $result = qx(tasklist -v -fo list -fi "PID eq $pid" 2>&1);
-                    $result =~ s/\r//g;
-                    $result =~ s/\n/ | /g;
-                    print "Task info for $pid before taskkill: '$result'\n";
-
-                    $result = qx(powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine");
-                    $result =~ s/\r//g;
-                    print "Task child processes for $pid before taskkill:\n";
-                    print "$result\n";
-
-                    if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
-                        # https://ss64.com/nt/taskkill.html
-                        my $cmd;
-                        if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
-                            $cmd = "taskkill -f    -pid $pid >$dev_null 2>&1";
-                        }
-                        else {
-                            $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
-                        }
-                        print "Executing: '$cmd'\n";
-                        system($cmd);
-                    }
-                    else {
-                        print "taskkill disabled via CURL_TEST_NO_TASKKILL.\n";
-                    }
-                }
-                return;
-            }
-        }
-
-        # signal the process to terminate
-        kill("KILL", $pid);
-    }
+    pid_term_or_kill($pid, "KILL");
 }
 
 #######################################################################

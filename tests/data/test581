@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 all good!
@@ -24,7 +23,6 @@ Content-Type: changed/my/mind
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -32,7 +30,6 @@ http
 <features>
 http
 </features>
-# tool is what to use instead of 'curl'
 <tool>
 lib507
 </tool>
@@ -45,7 +42,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

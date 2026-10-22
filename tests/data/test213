@@ -11,7 +11,6 @@ NTLM
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -72,7 +71,6 @@ daniel
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -91,7 +89,6 @@ http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER0002 --prox
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.0

@@ -9,7 +9,6 @@ httpsrr
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # This is the DoH response for foo.example.com A 127.0.0.1. It will be sent
@@ -39,7 +38,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -64,7 +62,6 @@ https://foo.example.com:%HTTPSPORT/%TESTNUMBER --insecure --ech true --connect-t
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 # To make the test ignore the order of the two outgoing DoH requests, strip

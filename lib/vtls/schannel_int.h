@@ -31,7 +31,7 @@
 #include "vtls/vtls.h"
 #include "curl_sha256.h"
 
-#if defined(_MSC_VER) && (_MSC_VER < 1700)
+#if defined(_MSC_VER) && (_MSC_VER <= 1700)
 /* Workaround for warning:
    'type cast' : conversion from 'int' to 'LPCSTR' of greater size */
 #undef CERT_STORE_PROV_MEMORY
@@ -118,6 +118,8 @@ struct schannel_ssl_backend_data {
   struct sbuffer decdata;
   struct Curl_schannel_cred *cred;
   struct Curl_schannel_ctxt *ctxt;
+  SecBuffer shutdown_token;
+  size_t shutdown_offset;
   SecPkgContext_StreamSizes stream_sizes;
   unsigned long req_flags, ret_flags;
   CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
@@ -132,6 +134,7 @@ struct schannel_ssl_backend_data {
   BIT(use_alpn); /* true if ALPN is used for this connection */
   BIT(use_manual_cred_validation); /* true if manual cred validation is used */
   BIT(sent_shutdown);
+  BIT(shutdown_generated);
   /* encdata_is_incomplete: if encdata contains only a partial record that
      cannot be decrypted without another recv() (that is, status is
      SEC_E_INCOMPLETE_MESSAGE) then set this true. after recv() adds more

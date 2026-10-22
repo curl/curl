@@ -141,8 +141,7 @@ that Visual Studio uses.
 ## Legacy Windows and SSL
 
 Some of the project configurations use Schannel (Windows SSPI), the native SSL
-library that comes with the Windows OS. Schannel in Windows 8 and earlier is
-not able to connect to servers that no longer support the legacy handshakes
-and algorithms used by those versions. If you are using curl in one of those
-earlier versions of Windows you should choose another SSL backend like
-OpenSSL.
+library in Windows. Schannel in earlier Windows versions may be unable to
+connect to servers that no longer support the legacy handshakes and algorithms
+used by those versions. If you are using curl in such Windows versions you
+should choose another SSL backend such as OpenSSL.

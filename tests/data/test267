@@ -8,7 +8,6 @@ HTTP NTLM auth
 NTLM
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <!-- no <data> in this test since we have NTLM from the start
@@ -54,7 +53,6 @@ Finally, this is the real page!
 
 </reply>
 
-# Client-side
 <client>
 <features>
 NTLM
@@ -72,7 +70,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -d "data" -H "H
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

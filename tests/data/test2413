@@ -7,7 +7,6 @@ Curl_peer
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

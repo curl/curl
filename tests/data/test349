@@ -7,7 +7,6 @@ HTTP GET
 --fail-with-body
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.0 404 BAD BOY swsclose
@@ -17,7 +16,6 @@ This silly page does not reaaaaaly exist so you should not get it.
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -30,7 +28,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail-with-body
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

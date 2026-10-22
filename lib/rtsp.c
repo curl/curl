@@ -232,6 +232,10 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
     }
 
     if(req_clen > 0) {
+      if(data->set.crlf) {
+        failf(data, "Cannot do CRLF conversions on upload");
+        return CURLE_UPLOAD_FAILED;
+      }
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(data, STRCONST("Content-Length"))) {

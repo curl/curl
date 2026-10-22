@@ -103,7 +103,6 @@ typedef enum {
 struct imap_conn {
   struct pingpong pp;
   struct SASL sasl;           /* SASL-related parameters */
-  struct dynbuf dyn;          /* for the IMAP commands */
   char *mailbox;              /* The last selected mailbox */
   imapstate state;            /* Always use imap.c:state() to change state! */
   unsigned int mb_uidvalidity; /* UIDVALIDITY parsed from select response */
@@ -155,12 +154,13 @@ struct ulbits {
  */
 static CURLcode imap_sendf(struct Curl_easy *data,
                            struct imap_conn *imapc,
-                           const char *fmt, ...) CURL_PRINTF(3, 0);
+                           const char *fmt, ...) CURL_PRINTF(3, 4);
 static CURLcode imap_sendf(struct Curl_easy *data,
                            struct imap_conn *imapc,
                            const char *fmt, ...)
 {
   CURLcode result = CURLE_OK;
+  va_list ap;
 
   DEBUGASSERT(fmt);
 
@@ -169,24 +169,9 @@ static CURLcode imap_sendf(struct Curl_easy *data,
                  'A' + curlx_sltosi((long)(data->conn->connection_id % 26)),
                  ++imapc->cmdid);
 
-  /* start with a blank buffer */
-  curlx_dyn_reset(&imapc->dyn);
-
-  /* append tag + space + fmt */
-  result = curlx_dyn_addf(&imapc->dyn, "%s %s", imapc->resptag, fmt);
-  if(!result) {
-    va_list ap;
-    va_start(ap, fmt);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
-    result = Curl_pp_vsendf(data, &imapc->pp, curlx_dyn_ptr(&imapc->dyn), ap);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-    va_end(ap);
-  }
+  va_start(ap, fmt);
+  result = Curl_pp_vsendf(data, &imapc->pp, imapc->resptag, fmt, ap);
+  va_end(ap);
   return result;
 }
 
@@ -409,6 +394,17 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
       break;
     }
 
+    return TRUE;
+  }
+
+  if(imapc->state == IMAP_FETCH_FINAL && imap_find_literal(line, len)) {
+    /* FETCH_FINAL only waits for the tagged completion of the command. A
+       literal marker here means the server sent more response data (e.g.
+       another literal of a multi-section FETCH) than the transfer consumed.
+       Fail visibly instead of silently dropping the rest. */
+    failf(data, "Multiple literals in FETCH response, "
+          "only the first can be downloaded");
+    *resp = -1;
     return TRUE;
   }
 
@@ -1288,6 +1284,16 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
             /* Keep the data after the literal body */
             pp->overflow = after_header - chunk;
             curlx_dyn_tail(&pp->recvbuf, pp->overflow);
+
+            if(imap_find_literal(curlx_dyn_ptr(&pp->recvbuf), pp->overflow)) {
+              /* The buffered remainder contains another literal, meaning
+                 this FETCH response carries more body sections than the
+                 single transfer set up above can deliver. Fail visibly
+                 instead of silently dropping the rest. */
+              failf(data, "Multiple literals in FETCH response, "
+                    "only the first can be downloaded");
+              return CURLE_WEIRD_SERVER_REPLY;
+            }
           }
           else {
             pp->overflow = 0;
@@ -2002,15 +2008,13 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
   struct IMAP *imap = Curl_meta_get(data, CURL_META_IMAP_EASY);
 
-  (void)premature;
-
   if(!imapc)
     return CURLE_FAILED_INIT;
   if(!imap)
     return CURLE_OK;
 
-  if(status) {
-    CURL_TRC_M(data, "IMAP done with bad status");
+  if(status || premature) {
+    CURL_TRC_M(data, "IMAP done, not finalizing transfer");
     connclose(conn); /* marked for closure */
     result = status;         /* use the already set error code */
   }
@@ -2252,7 +2256,6 @@ static void imap_conn_dtor(const void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   Curl_pp_disconnect(&imapc->pp);
-  curlx_dyn_free(&imapc->dyn);
   curlx_safefree(imapc->mailbox);
   curlx_free(imapc);
 }
@@ -2289,7 +2292,6 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   imapc->preftype = IMAP_TYPE_ANY;
   Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
-  curlx_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
   Curl_pp_init(pp, Curl_pgrs_now(data));
 
   if(Curl_conn_meta_set(conn, CURL_META_IMAP_CONN, imapc, imap_conn_dtor))

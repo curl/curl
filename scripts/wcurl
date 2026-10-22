@@ -29,7 +29,7 @@
 # Stop on errors, usage of unset variables and disable glob expansion.
 set -euf
 
-VERSION="2026.08.30"
+VERSION="2026.10.12"
 
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME
@@ -74,7 +74,9 @@ Options:
   -h, --help: Print this usage message.
 
   <CURL_OPTIONS>: Any option supported by curl can be set here. This is not used by wcurl; it is
-                 instead forwarded to the curl invocation.
+                 instead forwarded to the curl invocation. The value is split on whitespace and
+                 quotes are not interpreted; use '--config <FILE>' for arguments containing
+                 whitespace. Never build it from untrusted input.
 
   <URL>: URL to be downloaded. Anything that is not a parameter is considered
          an URL. Whitespace is percent-encoded and the URL is passed to curl, which
@@ -202,13 +204,17 @@ percent_decode()
 # Print the percent-decoded filename portion of the given URL.
 get_url_filename()
 {
-    # Remove protocol and query string if present.
+    # Remove protocol, query string and URL fragments if present.
     hostname_and_path="$(printf %s "${1}" | sed -e 's,^[^/]*//,,' -e 's,[?#].*$,,')"
     # If what remains contains a slash, there is a path; return it percent-decoded.
     case "${hostname_and_path}" in
         # sed to remove everything preceding the last '/', e.g.: "example/something" becomes "something"
         # sed to also replace '\' with the percent_encoded %5C and ':' with %3A
-        */*) percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,' -e 's,\\,%5C,g' -e 's,:,%3A,g')" ;;
+        */*)
+            filename="$(percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,' -e 's,\\,%5C,g' -e 's,:,%3A,g')")"
+            [ "${filename}" = "-" ] && filename=""
+            printf %s "${filename}"
+            ;;
     esac
     # No slash means there was only a hostname and no path; return empty string.
 }

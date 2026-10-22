@@ -7,7 +7,6 @@ INDEX
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 iMenu results		error.host	1
@@ -16,7 +15,6 @@ iMenu results		error.host	1
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 gopher
@@ -29,7 +27,6 @@ gopher://%HOSTIP:%GOPHERPORT/1/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 /%TESTNUMBER

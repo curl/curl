@@ -8,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.0 200 OK
@@ -20,7 +19,6 @@ foo
 </data>
 </reply>
 
-# Client-side
 <client>
 <name>
 HTTP GET without clobber and --output-dir
@@ -39,7 +37,6 @@ to stay the same
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/exist%TESTNUMBER">
 to stay the same

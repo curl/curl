@@ -7,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 304 Not Modified
@@ -18,7 +17,6 @@ ETag: "21025-dc7-39462498"
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http

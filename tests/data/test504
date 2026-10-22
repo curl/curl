@@ -11,17 +11,14 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 http
 proxy
 </features>
-# tool is what to use instead of 'curl'
 
 <name>
 simple multi through local proxy without listener
@@ -31,7 +28,6 @@ http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 # TEST_ERR_SUCCESS is errorcode 41
 <verify>
 <errorcode>

@@ -513,7 +513,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_creds_unlink(&conn->creds);
   Curl_peer_unlink(&conn->creds_origin);
   curlx_safefree(conn->options);
-  curlx_safefree(conn->localdev);
+  curlx_safefree(conn->interface_opts);
   Curl_ssl_conn_config_cleanup(conn);
 
   curlx_safefree(conn->destination);
@@ -615,21 +615,28 @@ static bool url_match_connect_config(struct connectdata *conn,
      m->data->set.ipver != conn->ip_version)
     return FALSE;
 
-  if((m->needle->localdev || m->needle->localport) &&
+  /* When needle has specific local bind settings, those have to match.
+   * If it does not, any other connection might do when it comes to ports. */
+  if(m->needle->localport &&
+     ((conn->localport != m->needle->localport) ||
+      (conn->localportrange != m->needle->localportrange)))
+    return FALSE;
+  /* For interface related bind options, we require a full match
+   * as connection might go totally different ways (VPNs, for example). */
+  if((m->needle->interface_opts != conn->interface_opts) &&
+     (!m->needle->interface_opts || !conn->interface_opts ||
+      strcmp(conn->interface_opts, m->needle->interface_opts)))
+    return FALSE;
+
+  if((m->needle->interface_opts || m->needle->localport) &&
     /* If we are bound to a specific local end (IP+port), we must not reuse a
        random other one, although if we did not ask for a particular one we
-       can reuse one that was bound.
-
-       This comparison is a bit rough and too strict. Since the input
-       parameters can be specified in numerous ways and still end up the same
-       it would take a lot of processing to make it really accurate. Instead,
-       this matching will assume that reuses of bound connections will most
-       likely also reuse the exact same binding parameters and missing out a
-       few edge cases should not hurt anyone much. */
+       can reuse one that was bound. */
     ((conn->localport != m->needle->localport) ||
      (conn->localportrange != m->needle->localportrange) ||
-     (m->needle->localdev &&
-      (!conn->localdev || strcmp(conn->localdev, m->needle->localdev)))))
+     (m->needle->interface_opts &&
+      (!conn->interface_opts ||
+       strcmp(conn->interface_opts, m->needle->interface_opts)))))
     return FALSE;
 
   if(!m->needle->via_peer != !conn->via_peer)
@@ -1132,6 +1139,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connection_id = -1;    /* no ID */
   conn->cpid = UINT32_MAX;  /* not in connection pool yet */
   conn->attached_xfers = 0;
+  conn->connect_start_ms = -1;
   conn->shutdown.start_ms[FIRSTSOCKET] =
     conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
 
@@ -1144,9 +1152,10 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Store the local bind parameters that will be used for this connection */
-  if(CURL_EASY_STR(data, STRING_DEVICE)) {
-    conn->localdev = curlx_strdup(CURL_EASY_STR(data, STRING_DEVICE));
-    if(!conn->localdev)
+  if(CURL_EASY_STR(data, STRING_INTERFACE_OPT)) {
+    conn->interface_opts =
+      curlx_strdup(CURL_EASY_STR(data, STRING_INTERFACE_OPT));
+    if(!conn->interface_opts)
       goto error;
   }
 #ifndef CURL_DISABLE_BINDLOCAL
@@ -1164,7 +1173,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   return conn;
 error:
 
-  curlx_free(conn->localdev);
+  curlx_free(conn->interface_opts);
   curlx_free(conn);
   return NULL;
 }
@@ -2061,7 +2070,7 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   CURLU *uh;
-  CURLUcode uc;
+  CURLUcode uc = CURLUE_OK;
   bool use_set_uh = (data->set.uh && !data->state.this_is_a_follow);
   uint16_t port_override = data->state.allow_port ? data->set.use_port : 0;
   uint32_t scope_id = 0;
@@ -2086,41 +2095,78 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
     goto out;
   }
 
-  /* Calculate the *real* URL this transfer uses, applying defaults
-   * where information is missing. */
-  if(CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL) &&
-     !Curl_is_absolute_url(Curl_bufref_ptr(&data->state.url), NULL, 0, TRUE)) {
-    char *url = curl_maprintf("%s://%s",
-                              CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL),
-                              Curl_bufref_ptr(&data->state.url));
-    if(!url) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
-    Curl_bufref_set(&data->state.url, url, 0, curl_free);
-  }
-
   if(!use_set_uh) {
-    char *newurl;
-    uc = curl_url_set(uh, CURLUPART_URL, Curl_bufref_ptr(&data->state.url),
-                      (unsigned int)(CURLU_GUESS_SCHEME |
-                       CURLU_NON_SUPPORT_SCHEME |
-                       (data->set.disallow_username_in_url ?
-                        CURLU_DISALLOW_USER : 0) |
-                       (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)));
-    if(uc) {
-      failf(data, "URL rejected: %s", curl_url_strerror(uc));
-      result = Curl_uc_to_curlcode(uc);
-      goto out;
+    bool prepend_sheme = FALSE;
+    /* special-case when 'file' is default as a normal path is not a valid URL
+       without the 'file' scheme present */
+    if(curl_strequal("file", CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL)) &&
+       !Curl_is_absolute_url(Curl_bufref_ptr(&data->state.url), NULL, 0, TRUE))
+      prepend_sheme = TRUE;
+    else {
+      uc = curl_url_set(uh, CURLUPART_URL, Curl_bufref_ptr(&data->state.url),
+                        (unsigned int)
+                        CURLU_GUESS_SCHEME |
+                        CURLU_NON_SUPPORT_SCHEME |
+                        (data->set.disallow_username_in_url ?
+                         CURLU_DISALLOW_USER : 0) |
+                        (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
+      if(uc) {
+        failf(data, "URL rejected: %s", curl_url_strerror(uc));
+        result = Curl_uc_to_curlcode(uc);
+        goto out;
+      }
+
+      if(CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL)) {
+        /* check if we there was a scheme provided */
+        char *scheme;
+        uc = curl_url_get(uh, CURLUPART_SCHEME, &scheme,
+                          CURLU_NO_GUESS_SCHEME);
+        if(uc == CURLUE_NO_SCHEME)
+          prepend_sheme = TRUE;
+        curl_free(scheme);
+        if(uc && uc != CURLUE_NO_SCHEME) {
+          result = Curl_uc_to_curlcode(uc);
+          goto out;
+        }
+      }
     }
 
-    /* after it was parsed, get the generated normalized version */
-    uc = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_GET_EMPTY);
-    if(uc) {
-      result = Curl_uc_to_curlcode(uc);
-      goto out;
+    if(prepend_sheme) {
+      char *url = curl_maprintf("%s://%s",
+                                CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL),
+                                Curl_bufref_ptr(&data->state.url));
+      if(!url) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
+      uc = curl_url_set(uh, CURLUPART_URL, url,
+                        (unsigned int)
+                        CURLU_GUESS_SCHEME |
+                        CURLU_NON_SUPPORT_SCHEME |
+                        (data->set.disallow_username_in_url ?
+                         CURLU_DISALLOW_USER : 0) |
+                        (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
+      curl_free(url);
+      if(uc) {
+        failf(data, "URL rejected: %s", curl_url_strerror(uc));
+        result = Curl_uc_to_curlcode(uc);
+        goto out;
+      }
     }
-    Curl_bufref_set(&data->state.url, newurl, 0, curl_free);
+    {
+      char *newurl;
+      /* after it was parsed, and possibly given a new scheme, get the
+         normalized version */
+      uc = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_GET_EMPTY);
+      if(uc) {
+        result = Curl_uc_to_curlcode(uc);
+        goto out;
+      }
+      if(prepend_sheme)
+        infof(data, "Applied default protocol '%s'",
+              CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL));
+      Curl_bufref_set(&data->state.url, newurl, 0, curl_free);
+    }
   }
 
 #ifdef USE_IPV6

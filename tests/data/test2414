@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 wakeup
@@ -22,7 +21,6 @@ wakeup, perform and poll needs to exit
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

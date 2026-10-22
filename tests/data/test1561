@@ -11,7 +11,6 @@ HTTP replaced headers
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1>
 HTTP/1.1 200 OK
@@ -57,7 +56,6 @@ nomnom
 </data2>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -100,7 +98,7 @@ www.example.com	FALSE	/	TRUE	0	__Host-SID	12346
 .example.com	TRUE	/	TRUE	0	supersupersuper	secret
 .example.com	TRUE	/	TRUE	0	__SecURE-SID	12346
 .example.com	TRUE	/%TESTNUMBER/login	TRUE	0	supersuper	secret
-.example.com	TRUE	/1561	TRUE	0	super	secret
+.example.com	TRUE	/%TESTNUMBER	TRUE	0	super	secret
 </file>
 
 </verify>

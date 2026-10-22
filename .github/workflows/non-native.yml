@@ -145,6 +145,7 @@ jobs:
               sudo mport upgrade | grep -v -E '(Downloading.+%|^/usr/local)'
             fi
             sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} | grep -v -E '(Downloading.+%|^/usr/local)' || true
+            command -v pkg-config >/dev/null 2>&1
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
@@ -212,8 +213,8 @@ jobs:
 
       - name: 'curl -V'
         run: |
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -f '%10z bytes: %N' --
           bld/src/curl --disable --version
 
       - name: 'curl install'
@@ -262,9 +263,10 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
-      AMISSL_VERSION: '5.27'
+      # renovate: datasource=github-releases depName=jens-maus/amissl versioning=semver-coerced
+      AMISSL_VERSION: 5.27
       AMISSL_SHA256: 5003bef8c5930354d16b0ce7196d71b2811891c42fad38a9238c5ce4098ad42a
-      TOOLCHAIN_VERSION: 6.5.0
+      TOOLCHAIN_VERSION: 6.5.0  # manually bumped
       TOOLCHAIN_SHA256: 381e227c9ef552f073771d6f851cfdf873b574f3cf5db7c1c0107ea5d7146edc
     strategy:
       matrix:
@@ -353,8 +355,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . -type f \( -name curl -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          find . -type f \( -name curl -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
@@ -376,7 +378,7 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     env:
       LDFLAGS: -s
@@ -420,7 +422,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DANDROID_ABI="${MATRIX_ARCH}" \
               -DANDROID_PLATFORM="android-${MATRIX_PLATFORM}" \
-              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -DCMAKE_WARN_DEPRECATED=OFF \
+              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -Wno-deprecated \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               ${MATRIX_OPTIONS}
@@ -465,8 +467,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         run: |
@@ -493,7 +495,7 @@ jobs:
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
-      # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced registryUrl=https://github.com
+      # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced
       TOOLCHAIN_VERSION: '3.4'
       TOOLCHAIN_SHA256: 8464f17017d6ab1b2bb2df4ed82357b5bf692e6e2b7fee37e315638f3d505f00
     strategy:
@@ -585,8 +587,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time

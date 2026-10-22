@@ -6,7 +6,6 @@ globbing
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 more cmdline options than URLs and --next
@@ -16,7 +15,6 @@ more cmdline options than URLs and --next
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # curl: (1) Protocol "qttp" not supported
 <errorcode>

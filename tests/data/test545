@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK swsclose
@@ -20,12 +19,10 @@ OK
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib544
 </tool>
@@ -38,7 +35,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

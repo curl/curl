@@ -9,7 +9,6 @@ CURLOPT_URL
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -19,7 +18,6 @@ hello
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -32,7 +30,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER?q=foobar#fragment
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER?q=foobar HTTP/1.1

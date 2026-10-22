@@ -8,7 +8,6 @@ HTTP NTLM auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 # the first request has NTLM type-1 included, and then the 1001 is returned
 <data1001 crlf="headers">
@@ -45,7 +44,6 @@ content for you
 
 </reply>
 
-# Client-side
 <client>
 <features>
 NTLM
@@ -63,7 +61,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --ntlm -d "junkelijunk"
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

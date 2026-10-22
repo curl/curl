@@ -189,7 +189,7 @@ sub checkurl {
 
     $url =~ s/\+/%2B/g;
     my @content;
-    if(open(my $fh, '-|', 'curl', '-ILfsm10', '--retry', '2', '--retry-delay', '5',
+    if(open(my $fh, '-|', 'curl', '-ILfsm10', '--retry', '2', '--retry-delay', '5', '--retry-max-time', '60',
                           '-A', 'Mozilla/curl.se link-probe', $url)) {
         @content = <$fh>;
         close $fh;

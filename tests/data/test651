@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -22,7 +21,6 @@ hello
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 form-api
@@ -30,7 +28,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 curl_formadd with huge COPYCONTENTS
@@ -46,7 +43,6 @@ This is data from a file.
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/------------------------------/

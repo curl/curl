@@ -6,7 +6,6 @@ HTTP
 HTTP FORMPOST
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
@@ -19,7 +18,6 @@ blablabla
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -35,7 +33,6 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -F name=daniel -H "Content-Type: text/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/--------------------------/

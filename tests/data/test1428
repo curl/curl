@@ -9,7 +9,6 @@ HTTP Basic auth
 proxytunnel
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -39,7 +38,6 @@ contents
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -49,14 +47,13 @@ http-proxy
 HTTP over proxy-tunnel with --proxy-header and --header
 </name>
 <command>
-http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --user 'iam:my:;self' --header "header-type: server" --proxy-header "header-type: proxy"
+http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --user 'iam:my:;self' --header "header-type: server" --proxy-header "header-type: proxy" --proxy-header " : ignored"
 </command>
 <features>
 proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1

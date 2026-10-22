@@ -74,6 +74,13 @@ void Curl_rlimit_init(struct Curl_rlimit *r,
 /* Start ratelimiting with the given timestamp. Resets available tokens.
  * `total_tokens` is either -1 or the number of total tokens expected
  * to be consumed. */
+/* Change the rates of a limiter that may be in use. Keeps the blocked
+ * state and the time already accounted for, caps the tokens at the new
+ * rate. */
+void Curl_rlimit_change(struct Curl_rlimit *r,
+                        int64_t rate_per_sec,
+                        int64_t burst_per_sec);
+
 void Curl_rlimit_start(struct Curl_rlimit *r, const struct curltime *pts,
                        int64_t total_tokens);
 

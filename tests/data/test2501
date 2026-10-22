@@ -9,7 +9,6 @@ HTTPS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 201 OK
@@ -21,12 +20,12 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Debug
 http
 http/3
+nghttpx-h3
 </features>
 <server>
 http/3
@@ -42,7 +41,6 @@ HTTP/3 POST
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">
 HTTP/3 201%SP
@@ -53,7 +51,7 @@ via: 1.1 nghttpx
 
 </stdout>
 <protocol crlf="yes" nonewline="yes">
-POST https://%HOSTIP:%HTTP3PORT/2501 HTTP/1.1
+POST https://%HOSTIP:%HTTP3PORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP3PORT
 User-Agent: curl/%VERSION
 Accept: */*

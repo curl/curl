@@ -6,13 +6,11 @@ FILE
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 file
@@ -28,7 +26,6 @@ contents in a single file
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 contents in a single file

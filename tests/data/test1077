@@ -10,7 +10,6 @@ HTTP proxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.0 200 OK
@@ -36,7 +35,6 @@ contents
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -53,7 +51,6 @@ FTP over HTTP proxy with downgrade to HTTP 1.0
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER HTTP/1.1

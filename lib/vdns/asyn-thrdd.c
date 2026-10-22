@@ -513,7 +513,7 @@ void Curl_async_thrdd_multi_destroy(struct Curl_multi *multi, bool join)
   if(multi->resolv_thrdq) {
 #ifdef CURLVERBOSE
     CURL_TRC_DNS(multi->admin, "destroy thread queue+pool, join=%d", join);
-    Curl_thrdq_trace(multi->resolv_thrdq, multi->admin);
+    CURL_THRDQ_TRACE(multi->resolv_thrdq, multi->admin);
 #endif
     Curl_thrdq_destroy(multi->resolv_thrdq, join);
     multi->resolv_thrdq = NULL;
@@ -596,7 +596,7 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
     }
     async_thrdd_item_free(item);
   }
-  VERBOSE(Curl_thrdq_trace(multi->resolv_thrdq, multi->admin));
+  CURL_THRDQ_TRACE(multi->resolv_thrdq, multi->admin);
 }
 
 CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
@@ -683,9 +683,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
       goto out;
   }
 
-#ifdef CURLVERBOSE
-  Curl_thrdq_trace(data->multi->resolv_thrdq, data);
-#endif
+  CURL_THRDQ_TRACE(data->multi->resolv_thrdq, data);
 
 out:
   if(!async->queries_ongoing)
@@ -928,9 +926,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     *pdns = dns;
     dns = NULL;
   }
-#ifdef CURLVERBOSE
-  Curl_thrdq_trace(data->multi->resolv_thrdq, data);
-#endif
+  CURL_THRDQ_TRACE(data->multi->resolv_thrdq, data);
 
 out:
   Curl_dns_entry_unlink(data, &dns);

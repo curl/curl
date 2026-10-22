@@ -7,7 +7,6 @@ CURLOPT_FOLLOWLOCATION
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 303 OK
@@ -54,7 +53,6 @@ Content-Type: text/html
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -74,7 +72,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 CURL /%TESTNUMBER HTTP/1.1

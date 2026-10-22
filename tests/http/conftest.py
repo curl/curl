@@ -1,4 +1,4 @@
-# ***************************************************************************
+#***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -33,7 +33,17 @@ from testenv.env import EnvConfig
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
 
-from testenv import Env, Httpd, Nghttpx, NghttpxFwd, NghttpxQuic, Sshd
+from testenv import (
+    Dante,
+    Dnsd,
+    Env,
+    Httpd,
+    Nghttpx,
+    NghttpxFwd,
+    NghttpxQuic,
+    NghttpxTcp,
+    Sshd,
+)
 from testenv.h2o import H2oProxy, H2oServer
 
 log = logging.getLogger(__name__)
@@ -57,6 +67,8 @@ def pytest_report_header(config):
         report.extend([f"  h2o: {env.h2o_version()}"])
     if env.has_caddy():
         report.extend([f"  Caddy: {env.caddy_version()}"])
+    if env.has_sshd():
+        report.extend([f"  sshd: {env.sshd_version()}"])
     if env.has_vsftpd():
         report.extend([f"  VsFTPD: {env.vsftpd_version()}"])
     buildinfo_fn = os.path.join(env.build_dir, "buildinfo.txt")
@@ -92,6 +104,25 @@ def env(pytestconfig, env_config) -> Env:
     return env
 
 
+@pytest.fixture(scope='session')
+def danted(env, httpd) -> Generator[Union[Dante, bool], None, None]:
+    if Env.has_danted():
+        danted = Dante(env=env)
+        assert danted.initial_start()
+        yield danted
+        danted.stop()
+    else:
+        yield False
+
+
+@pytest.fixture(scope='session', autouse=True)
+def dnsd(env) -> Generator[Dnsd, None, None]:
+    dnsd = Dnsd(env=env)
+    assert dnsd.initial_start()
+    yield dnsd
+    dnsd.stop()
+
+
 @pytest.fixture(scope="session")
 def httpd(env) -> Generator[Httpd, None, None]:
     httpd = Httpd(env=env)
@@ -107,6 +138,18 @@ def httpd(env) -> Generator[Httpd, None, None]:
 def nghttpx(env, httpd) -> Generator[Union[Nghttpx, bool], None, None]:
     nghttpx = NghttpxQuic(env=env)
     if nghttpx.exists() and nghttpx.supports_h3() and env.have_h3_curl():
+        nghttpx.clear_logs()
+        assert nghttpx.initial_start()
+        yield nghttpx
+        nghttpx.stop()
+    else:
+        yield False
+
+
+@pytest.fixture(scope="session")
+def nghttpx_tcp(env, httpd) -> Generator[Union[Nghttpx, bool], None, None]:
+    nghttpx = NghttpxTcp(env=env)
+    if nghttpx.exists():
         nghttpx.clear_logs()
         assert nghttpx.initial_start()
         yield nghttpx

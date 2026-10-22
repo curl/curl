@@ -10,7 +10,6 @@ NTLM
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -47,7 +46,6 @@ Contents of that page you requested, sir.
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -66,7 +64,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-us
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1

@@ -7,11 +7,9 @@ TrackMemory
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 unittest
@@ -22,7 +20,6 @@ unit tests memory tracking operational
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/memdump">
 MEM unit%TESTNUMBER.c: malloc()

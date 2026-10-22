@@ -19,25 +19,39 @@ Content-Type: text/html
 
 12345
 </data>
+<data2 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Disposition: attachment; filename=""
+Content-Type: text/html
+
+54321
+</data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
 <name>
-HTTP GET with -J without Content-Disposition
+HTTP GET with -J without Content-Disposition or with empty filename
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER?junk -J -O --output-dir %LOGDIR
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER?junk http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 -J -O -O --output-dir %LOGDIR
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER?junk HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
@@ -46,6 +60,9 @@ Accept: */*
 <file name="%LOGDIR/%TESTNUMBER">
 12345
 </file>
+<file2 name="%LOGDIR/%TESTNUMBER0002">
+54321
+</file2>
 
 </verify>
 </testcase>

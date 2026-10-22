@@ -7,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -25,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -45,7 +43,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out='Time: %time{%d/%b/%Y %H:%M:%S.
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

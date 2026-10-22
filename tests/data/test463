@@ -7,7 +7,6 @@ HTTP POST
 -d
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -18,7 +17,6 @@ ok!
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -26,16 +24,15 @@ http
 <name>
 HTTP with -d @file with file containing CR, LF and NUL byte
 </name>
-<file name="%LOGDIR/input463">
+<file name="%LOGDIR/input%TESTNUMBER">
 %hex[one%0dtwo%0dthree]hex%
 %hex[four%00five]hex%
 </file>
 <command>
--d @%LOGDIR/input463 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-d @%LOGDIR/input%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

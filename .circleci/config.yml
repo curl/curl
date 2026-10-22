@@ -23,6 +23,7 @@
 ###########################################################################
 
 # View these jobs in the browser: https://app.circleci.com/pipelines/github/curl/curl
+# Images: https://circleci.com/developer/images?imageType=machine
 
 # Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/reference/configuration-reference/
 version: 2.1
@@ -111,7 +112,7 @@ commands:
 executors:
   ubuntu:
     machine:
-      image: ubuntu-2204:2026.05.1
+      image: ubuntu-2204:2026.05.1  # manually bumped
 
 jobs:
   basic:
@@ -154,7 +155,7 @@ jobs:
 
   arm:
     machine:
-      image: ubuntu-2204:2026.05.1
+      image: ubuntu-2204:2026.05.1  # manually bumped
     resource_class: arm.medium
     steps:
       - checkout
@@ -165,7 +166,7 @@ jobs:
 
   arm-cares:
     machine:
-      image: ubuntu-2204:2026.05.1
+      image: ubuntu-2204:2026.05.1  # manually bumped
     resource_class: arm.medium
     steps:
       - checkout

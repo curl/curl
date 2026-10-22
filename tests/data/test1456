@@ -9,7 +9,6 @@ haproxy
 IPv6
 </keywords>
 </info>
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -27,7 +26,6 @@ These data are not actually sent to the client
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 IPv6
@@ -46,7 +44,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Strip off the (random) local port number. This test used to use a fixed
 # local port number that frequently causes the test to fail

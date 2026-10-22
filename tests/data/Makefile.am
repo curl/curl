@@ -796,7 +796,6 @@ TESTCASES = \
   test773 \
   test774 \
   test775 \
-  test776 \
   test777 \
   test778 \
   test779 \
@@ -1715,8 +1714,10 @@ TESTCASES = \
   test1692 \
   test1693 \
   test1694 \
+  test1695 \
   \
   test1700 \
+  test1701 \
   test1702 \
   test1703 \
   test1704 \
@@ -1732,6 +1733,7 @@ TESTCASES = \
   test1714 \
   test1715 \
   test1716 \
+  test1717 \
   test1720 \
   test1721 \
   test1722 \
@@ -1746,6 +1748,7 @@ TESTCASES = \
   test1745 \
   test1790 \
   test1791 \
+  test1792 \
   test1800 \
   test1801 \
   test1802 \
@@ -1826,6 +1829,8 @@ TESTCASES = \
   test1984 \
   test1985 \
   test1989 \
+  test1990 \
+  test1997 \
   test2000 \
   test2001 \
   test2002 \
@@ -1915,6 +1920,7 @@ TESTCASES = \
   test2092 \
   test2093 \
   test2094 \
+  test2095 \
   test2100 \
   test2101 \
   test2102 \
@@ -1967,6 +1973,7 @@ TESTCASES = \
   test2310 \
   test2311 \
   test2318 \
+  test2330 \
   test2349 \
   test2380 \
   test2397 \
@@ -1998,7 +2005,7 @@ TESTCASES = \
   test2504 \
   test2505 \
   test2506 \
-  \
+  test2582 \
   test2600 \
   test2601 \
   test2602 \
@@ -2006,7 +2013,7 @@ TESTCASES = \
   test2604 \
   test2605 \
   test2606 \
-  \
+  test2622 \
   test2700 \
   test2701 \
   test2702 \
@@ -2120,6 +2127,7 @@ TESTCASES = \
   test3231 \
   test3232 \
   test3233 \
+  test3234 \
   test3271 \
   test3300 \
   test3301 \
@@ -2135,12 +2143,19 @@ TESTCASES = \
   test3555 \
   test3595 \
   test3596 \
+  test3611 \
+  test3980 \
+  test3990 \
+  test3991 \
   test4000 \
   test4001 \
+  test4039 \
+  test4040 \
   test4644 \
   test4656 \
   test4657 \
   test4781 \
+  test4782 \
   test5000 \
   test5001 \
   test5002 \
@@ -2169,7 +2184,9 @@ TESTCASES = \
   test5025 \
   test5026 \
   test5027 \
-  test5028
+  test5028 \
+  test5029 \
+  test5030
 
 EXTRA_DIST = \
   $(TESTCASES) \

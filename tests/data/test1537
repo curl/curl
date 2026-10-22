@@ -7,11 +7,9 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 
 <name>
@@ -19,7 +17,6 @@ libcurl URL escape/unescape tests
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 %2F%3A%3B%3C%3D%3E%3F%91%A2%B3%C4%D5%E6%F7

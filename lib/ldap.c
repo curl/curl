@@ -419,10 +419,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       ldap_set_option(server, LDAP_OPT_SERVER_CERTIFICATE,
                       (void *)(uintptr_t)bypass_cert_verify);
     }
-#else /* !USE_WIN32_LDAP */
+#elif defined(LDAP_OPT_X_TLS) /* !USE_WIN32_LDAP */
     int ldap_option;
     const char *ldap_ca = conn->ssl_config.CAfile;
-#ifdef LDAP_OPT_X_TLS
     if(conn->ssl_config.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
       if(conn->ssl_config.cert_type &&
@@ -464,17 +463,14 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-#else /* !LDAP_OPT_X_TLS */
-    (void)ldap_option;
-    (void)ldap_ca;
+#else /* !USE_WIN32_LDAP && !LDAP_OPT_X_TLS */
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
     failf(data, "LDAP local: SSL/TLS not supported with this version "
           "of the OpenLDAP toolkit");
     result = CURLE_SSL_CERTPROBLEM;
     goto quit;
-#endif /* LDAP_OPT_X_TLS */
-#endif /* USE_WIN32_LDAP */
+#endif
 #endif /* HAVE_LDAP_SSL */
   }
   else if(data->set.use_ssl > CURLUSESSL_TRY) {

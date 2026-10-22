@@ -45,6 +45,9 @@ Specify a feature to run only tests requiring it, or exclude tests using
 `!feat:<feature>`, like `!feat:proxy`, to disable tests which depend on that
 feature.
 
+With special keywords `!with-server` and `!without-server` you can
+exclude tests using a test server or those that are not, respectively.
+
 You can also specify keywords with a leading exclamation point and the keyword
 or phrase, like "!HTTP NTLM auth" to run all tests **except** those using this
 keyword. Remember that the exclamation marks and spaces need to be quoted
@@ -238,7 +241,15 @@ extended the test sequence.
 
 ## `--retry=[num]`
 
-Number of attempts for the whole test run to retry failed tests.
+Number of attempts for the whole test run to retry failed tests. It applies to
+tests using servers, or with keywords `timing-dependent`, `flaky`,
+`may-retry`, or `may-retry-on-valgrind` (limited to valgrind tests).
+
+## `-S`
+
+Prints out all files in the log directory to stdout when a test case passes.
+Practical when comparing against a similar test that fails, or the same test
+failing in a different build.
 
 ## `-s`
 

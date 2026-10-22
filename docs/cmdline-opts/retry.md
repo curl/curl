@@ -31,4 +31,6 @@ algorithm. See also --retry-max-time to limit the total time allowed for
 retries.
 
 curl complies with the Retry-After: response header if one was present to know
-when to issue the next retry (added in 7.66.0).
+when to issue the next retry (added in 7.66.0). That means the server can
+override the retry delay. To handle server retry delays that may be longer
+than expected, you can use --retry-max-time to limit the total retry time.

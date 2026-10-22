@@ -36,8 +36,8 @@ from .client import LocalClient
 from .dante import Dante
 from .dnsd import Dnsd
 from .env import Env
-from .h2o import H2oServer, H2oProxy
+from .h2o import H2oProxy, H2oServer
 from .httpd import Httpd
-from .nghttpx import Nghttpx, NghttpxFwd, NghttpxQuic
+from .nghttpx import Nghttpx, NghttpxFwd, NghttpxQuic, NghttpxTcp
 from .sshd import Sshd
 from .vsftpd import VsFTPD

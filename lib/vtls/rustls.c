@@ -528,7 +528,8 @@ static void cr_keylog_log_cb(struct rustls_str label,
 }
 
 static CURLcode
-init_config_builder(struct Curl_easy *data,
+init_config_builder(struct Curl_cfilter *cf,
+                    struct Curl_easy *data,
                     const struct ssl_filter_config *conn_config,
                     struct rustls_client_config_builder **config_builder)
 {
@@ -583,11 +584,13 @@ init_config_builder(struct Curl_easy *data,
   }
 
 #ifdef USE_ECH
-  if(CURLECH_ENABLED(data)) {
+  if(Curl_ssl_ech_enabled(cf)) {
     tls_versions[0] = RUSTLS_TLS_VERSION_TLSV1_3;
     tls_versions_len = 1;
     infof(data, "rustls: ECH enabled, forcing TLSv1.3");
   }
+#else
+  (void)cf;
 #endif /* USE_ECH */
 
   cipher_suites = curlx_malloc(sizeof(*cipher_suites) * cipher_suites_len);
@@ -852,29 +855,60 @@ init_config_builder_client_auth(struct Curl_easy *data,
   rustls_result rr;
   const struct rustls_certified_key *certified_key = NULL;
   CURLcode result = CURLE_OK;
+  const bool have_cert = conn_config->clientcert || conn_config->cert_blob;
+  const bool have_key = conn_config->key || conn_config->key_blob;
 
-  if(conn_config->clientcert && !conn_config->key) {
-    failf(data, "rustls: must provide key with certificate '%s'",
-          conn_config->clientcert);
+  if(have_cert && !have_key) {
+    failf(data, "rustls: must provide key with certificate");
     return CURLE_SSL_CERTPROBLEM;
   }
-  else if(!conn_config->clientcert && conn_config->key) {
-    failf(data, "rustls: must provide certificate with key '%s'",
-          conn_config->key);
+  else if(!have_cert && have_key) {
+    failf(data, "rustls: must provide certificate with key");
+    return CURLE_SSL_CERTPROBLEM;
+  }
+
+  if(conn_config->cert_type && !curl_strequal(conn_config->cert_type, "PEM")) {
+    failf(data, "rustls: unsupported certificate type '%s', only 'PEM' is "
+          "supported", conn_config->cert_type);
+    return CURLE_SSL_CERTPROBLEM;
+  }
+  if(conn_config->key_type && !curl_strequal(conn_config->key_type, "PEM")) {
+    failf(data, "rustls: unsupported key type '%s', only 'PEM' is supported",
+          conn_config->key_type);
     return CURLE_SSL_CERTPROBLEM;
   }
 
   curlx_dyn_init(&cert_contents, DYN_CERTFILE_SIZE);
   curlx_dyn_init(&key_contents, DYN_KEYFILE_SIZE);
 
-  if(!read_file_into(conn_config->clientcert, &cert_contents)) {
+  if(conn_config->cert_blob) {
+    result = curlx_dyn_addn(&cert_contents,
+                            conn_config->cert_blob->data,
+                            conn_config->cert_blob->len);
+    if(result) {
+      failf(data, "rustls: failed to copy client certificate blob (%s)",
+            result == CURLE_TOO_LARGE ? "too large" : "out of memory");
+      goto cleanup;
+    }
+  }
+  else if(!read_file_into(conn_config->clientcert, &cert_contents)) {
     failf(data, "rustls: failed to read client certificate file: '%s'",
           conn_config->clientcert);
     result = CURLE_SSL_CERTPROBLEM;
     goto cleanup;
   }
 
-  if(!read_file_into(conn_config->key, &key_contents)) {
+  if(conn_config->key_blob) {
+    result = curlx_dyn_addn(&key_contents,
+                            conn_config->key_blob->data,
+                            conn_config->key_blob->len);
+    if(result) {
+      failf(data, "rustls: failed to copy key blob (%s)",
+            result == CURLE_TOO_LARGE ? "too large" : "out of memory");
+      goto cleanup;
+    }
+  }
+  else if(!read_file_into(conn_config->key, &key_contents)) {
     failf(data, "rustls: failed to read key file: '%s'",
           conn_config->key);
     result = CURLE_SSL_CERTPROBLEM;
@@ -920,21 +954,12 @@ cleanup:
 
 #ifdef USE_ECH
 
-static bool cr_ech_need_httpsrr(struct Curl_easy *data)
-{
-  if(!CURLECH_ENABLED(data))
-    return FALSE;
-  if((data->set.tls_ech == CURLECH_GREASE) ||
-     CURL_EASY_STR(data, STRING_ECH_CONFIG))
-    return FALSE;
-  return TRUE;
-}
-
 static CURLcode
 init_config_builder_ech(struct Curl_easy *data,
                         struct Curl_cfilter *cf,
                         struct rustls_client_config_builder *builder)
 {
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   const rustls_hpke *hpke = rustls_supported_hpke();
   unsigned char *ech_config = NULL;
   size_t ech_config_len = 0;
@@ -950,13 +975,13 @@ init_config_builder_ech(struct Curl_easy *data,
     goto cleanup;
   }
 
-  if(CURL_EASY_STR(data, STRING_ECH_PUBLIC)) {
+  if(conn_config->ech_public) {
     failf(data, "rustls: ECH outername not supported");
     result = CURLE_SSL_CONNECT_ERROR;
     goto cleanup;
   }
 
-  if(data->set.tls_ech == CURLECH_GREASE) {
+  if(conn_config->ech == CURLECH_GREASE) {
     rr = rustls_client_config_builder_enable_ech_grease(builder, hpke);
     if(rr != RUSTLS_RESULT_OK) {
       rustls_failf(data, rr, "rustls: failed to configure ECH GREASE");
@@ -966,10 +991,10 @@ init_config_builder_ech(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  if(data->set.tls_ech && CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
-    const char *b64 = CURL_EASY_STR(data, STRING_ECH_CONFIG);
+  if(conn_config->ech && conn_config->ech_config) {
+    const char *b64 = conn_config->ech_config;
     size_t decode_result;
-    if(!b64) {
+    if(!b64[0]) {
       infof(data, "rustls: ECHConfig from command line empty");
       result = CURLE_SSL_CONNECT_ERROR;
       goto cleanup;
@@ -1008,7 +1033,7 @@ init_config_builder_ech(struct Curl_easy *data,
   }
 cleanup:
   /* if we base64 decoded, we can free now */
-  if(data->set.tls_ech && CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
+  if(conn_config->ech && conn_config->ech_config) {
     curlx_free(ech_config);
   }
   if(dns) {
@@ -1038,7 +1063,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  result = init_config_builder(data, conn_config, &config_builder);
+  result = init_config_builder(cf, data, conn_config, &config_builder);
   if(result != CURLE_OK) {
     return result;
   }
@@ -1076,7 +1101,8 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     }
   }
 
-  if(conn_config->clientcert || conn_config->key) {
+  if(conn_config->clientcert || conn_config->cert_blob ||
+     conn_config->key || conn_config->key_blob) {
     result = init_config_builder_client_auth(data,
                                              conn_config,
                                              config_builder);
@@ -1087,9 +1113,9 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
   }
 
 #ifdef USE_ECH
-  if(CURLECH_ENABLED(data)) {
+  if(Curl_ssl_ech_enabled(cf)) {
     result = init_config_builder_ech(data, cf, config_builder);
-    if((result != CURLE_OK) && (data->set.tls_ech == CURLECH_HARD)) {
+    if((result != CURLE_OK) && (conn_config->ech == CURLECH_HARD)) {
       rustls_client_config_builder_free(config_builder);
       return result;
     }
@@ -1163,7 +1189,7 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 #ifdef USE_ECH
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
-    if(cr_ech_need_httpsrr(data) &&
+    if(Curl_ssl_need_httpsrr(cf) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex,
                                      connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
@@ -1452,8 +1478,6 @@ const struct Curl_ssl Curl_ssl_rustls = {
   cr_get_internals,                /* get_internals */
   cr_close,                        /* close_one */
   NULL,                            /* close_all */
-  NULL,                            /* set_engine */
-  NULL,                            /* set_engine_default */
   NULL,                            /* engines_list */
   NULL,                            /* sha256sum */
   cr_recv,                         /* recv decrypted data */

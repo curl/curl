@@ -10,7 +10,6 @@ UnixSockets
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -28,7 +27,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 # --socks5h cannot accept Windows absolute paths
 <features>
@@ -48,7 +46,6 @@ http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://localhost%SOC
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

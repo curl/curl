@@ -348,9 +348,11 @@ void Curl_pollfds_cleanup(struct curl_pollfds *cpfds)
 {
   DEBUGASSERT(cpfds);
   if(cpfds->allocated_pfds) {
-    curlx_free(cpfds->pfds);
+    curlx_safefree(cpfds->pfds);
+    cpfds->count = 0;
+    cpfds->allocated_pfds = FALSE;
   }
-  memset(cpfds, 0, sizeof(*cpfds));
+  cpfds->n = 0;
 }
 
 static CURLcode cpfds_increase(struct curl_pollfds *cpfds, unsigned int inc)
@@ -476,15 +478,10 @@ unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
 
 void Curl_pollset_reset(struct easy_pollset *ps)
 {
-  unsigned int i;
-  ps->n = 0;
 #ifdef DEBUGBUILD
   DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
 #endif
-  DEBUGASSERT(ps->count);
-  for(i = 0; i < ps->count; i++)
-    ps->sockets[i] = CURL_SOCKET_BAD;
-  memset(ps->actions, 0, ps->count * sizeof(ps->actions[0]));
+  ps->n = 0;
 }
 
 void Curl_pollset_init(struct easy_pollset *ps)

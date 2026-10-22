@@ -8,11 +8,9 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 http
@@ -25,7 +23,6 @@ http
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 2 failed init, the --proto argument is not accepted
 <errorcode>

@@ -7,11 +7,9 @@ IDN
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -38,7 +36,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@%hex[%c3%a5%c3%a4%c3%
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

@@ -197,7 +197,7 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
                                bool is_connect);
 
 /* Decode HTTP status code string. */
-CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
+CURLcode Curl_http_decode_status(int32_t *pstatus, const char *s, size_t len);
 
 /**
  * All about a core HTTP request, excluding body and trailers

@@ -6,7 +6,6 @@ IMAP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY welcome * PREAUTH ready to serve already!
@@ -23,7 +22,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -36,7 +34,6 @@ IMAP PREAUTH response
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

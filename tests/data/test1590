@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 From: me@somewhere
@@ -26,7 +25,6 @@ body
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -37,7 +35,6 @@ imap
 <name>
 IMAP cleanup before a connection was created
 </name>
-# tool is what to use instead of 'curl'
 <tool>
 lib1553
 </tool>
@@ -48,7 +45,6 @@ imap://localhost:%IMAPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

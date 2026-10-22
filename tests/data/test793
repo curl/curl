@@ -6,14 +6,12 @@ netrc
 FTP
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 content
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp

@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -44,7 +43,6 @@ Hello World
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -60,7 +58,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 # TEST_ERR_SUCCESS is errorcode 41
 <verify>
 <errorcode>

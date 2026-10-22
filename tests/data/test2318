@@ -24,7 +24,6 @@ Content-Type: text/html
 </data2>
 </reply>
 
-# Client-side
 <client>
 <features>
 PSL
@@ -41,7 +40,6 @@ Get cookies from PSL domain then use *.domain
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

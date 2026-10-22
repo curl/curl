@@ -26,6 +26,10 @@
  * </DESC>
  */
 
+/* This example uses the legacy and discouraged method. Use
+   CURLOPT_CAINFO_BLOB instead, which is TLS backend agnostic. See the
+   cainfo-blob.c example */
+
 /* Requires: USE_OPENSSL */
 
 #include <openssl/ssl.h>

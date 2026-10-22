@@ -434,8 +434,8 @@ sub memanalyze {
             "Wcsdups: $wcsdups\n",
             "Frees: $frees\n",
             "Sockets: $sockets\n",
-            "Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n",
-            "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sockets)."\n",
+            "Allocations: " . ($mallocs + $callocs + $reallocs + $strdups + $wcsdups) . "\n",
+            "Operations: " . ($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sockets) . "\n",
             "Maximum allocated: $maxmem\n",
             "Total allocated: $memsum\n";
     }

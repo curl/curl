@@ -9,7 +9,6 @@ DELAY
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 416 Requested Range Not Satisfiable
@@ -37,7 +36,6 @@ writedelay: 100
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -50,7 +48,6 @@ HTTP with invalid range then another URL
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">
 HTTP/1.1 416 Requested Range Not Satisfiable

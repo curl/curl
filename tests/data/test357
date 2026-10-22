@@ -7,7 +7,6 @@ HTTP PUT
 Expect: 100-continue
 </keywords>
 </info>
-# Server-side
 <reply>
 # 417 means the server did not like the Expect header
 <data>
@@ -43,7 +42,6 @@ no-expect
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -63,7 +61,6 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt --ex
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 PUT /we/want/%TESTNUMBER HTTP/1.1

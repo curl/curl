@@ -8,7 +8,6 @@ aws-sigv4
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

@@ -9,7 +9,6 @@ HTTPS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 201 OK
@@ -21,7 +20,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Debug
@@ -42,7 +40,6 @@ HTTP/2 POST over HTTPS
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">
 HTTP/2 201%SP

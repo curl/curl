@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 401 OK
@@ -29,7 +28,6 @@ WWW-Authenticate: Digest realm="host-b-realm", nonce="2"
 </data1>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -48,7 +46,6 @@ http://firsthost:%HTTPPORT/%TESTNUMBER http://secondhost:%HTTPPORT/%TESTNUMBER00
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
@@ -59,14 +56,14 @@ GET /%TESTNUMBER0001 HTTP/1.1
 Host: secondhost:%HTTPPORT
 Accept: */*
 
-GET /19850001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: secondhost:%HTTPPORT
-Authorization: Digest username="alice", realm="host-b-realm", nonce="2", uri="/19850001", response="b3186bc857ad5bb63947c39476d37290"
+Authorization: Digest username="alice", realm="host-b-realm", nonce="2", uri="/%TESTNUMBER0001", response="b3186bc857ad5bb63947c39476d37290"
 Accept: */*
 
-GET /19850001 HTTP/1.1
+GET /%TESTNUMBER0001 HTTP/1.1
 Host: secondhost:%HTTPPORT
-Authorization: Digest username="alice", realm="host-b-realm", nonce="2", uri="/19850001", response="b3186bc857ad5bb63947c39476d37290"
+Authorization: Digest username="alice", realm="host-b-realm", nonce="2", uri="/%TESTNUMBER0001", response="b3186bc857ad5bb63947c39476d37290"
 Accept: */*
 
 </protocol>

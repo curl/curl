@@ -8,7 +8,6 @@ Resume
 Largefile
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 404 Nah
@@ -30,7 +29,6 @@ Funny-head: yesyes
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <features>
 Largefile
@@ -46,7 +44,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 33 is CURLE_RANGE_ERROR
 <errorcode>

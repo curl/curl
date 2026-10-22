@@ -7,7 +7,6 @@ HTTP GET
 If-Modified-Since
 </keywords>
 </info>
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -31,7 +30,6 @@ Content-Type: text/html
 </data1>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -44,7 +42,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -z
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

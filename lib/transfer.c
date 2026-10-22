@@ -154,7 +154,7 @@ static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
   if(!data || !data->conn)
     return FALSE;
-  return Curl_cshutdn_has_started(data->conn, data->conn->recv_idx);
+  return CURL_CONN_IN_SHUTDOWN(data->conn, data->conn->recv_idx);
 }
 
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
@@ -590,6 +590,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   }
 
   data->req.headerbytecount = 0;
+  /* a previous transfer on this handle may have ended with a rewind request
+   * still pending (a follow or auth retry that failed). This is a new
+   * transfer, so drop those readers now instead of letting a later upload
+   * read from them. */
+  data->req.rewind_read = FALSE;
+  Curl_client_reset(data);
   Curl_headers_cleanup(data);
   return result;
 }

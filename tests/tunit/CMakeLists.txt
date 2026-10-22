@@ -45,7 +45,7 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h", curlx
   "${PROJECT_SOURCE_DIR}/src"            # for tool headers
-  "${PROJECT_SOURCE_DIR}/tests/libtest"  # for "first.h", "unitcheck.h"
+  "${PROJECT_SOURCE_DIR}/tests/libtest"  # for "first.c", "first.h", "unitcheck.h"
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
 target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS})

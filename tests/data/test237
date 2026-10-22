@@ -6,14 +6,12 @@ FTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY PASV 227 Entering Passive Mode (1216,256,2,127,127,127)
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -26,7 +24,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --disable-epsv
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 # The bogus address used here is chosen specifically so that when processed on
 # certain hosts with buggy resolver code, the resulting address (192.0.2.127)
 # is from an address block that is guaranteed never to be assigned (RFC3330).

@@ -8,7 +8,6 @@ docs
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Verify that write-out.md and tool_writeout.c are in sync

@@ -6,13 +6,11 @@ DNS cache
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <dns>
 </dns>
 </reply>
 
-# Client-side
 <client>
 <server>
 dns
@@ -31,7 +29,6 @@ http://examplehost.invalid/%TESTNUMBER http://examplehost.invalid/%TESTNUMBER ht
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # curl: (6) Could not resolve host: examplehost.invalid
 <errorcode>

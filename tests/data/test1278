@@ -6,7 +6,6 @@
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -24,7 +23,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -37,7 +35,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter -o %LOGDIR/out%TESTNUMB
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
 yes

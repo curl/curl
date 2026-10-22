@@ -10,7 +10,6 @@ HTTP proxy NTLM auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 We are fine and cool
@@ -39,7 +38,6 @@ This is all fine and dandy
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 https
@@ -58,7 +56,6 @@ http://test.a.galaxy.far.far.away.%TESTNUMBER:%HTTPPORT/%TESTNUMBER --proxy http
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 CONNECT test.a.galaxy.far.far.away.%TESTNUMBER:%HTTPPORT HTTP/1.1

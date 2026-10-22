@@ -23,7 +23,6 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 telnet
@@ -33,6 +32,7 @@ http-proxy
 http
 telnet
 proxy
+python
 </features>
 <name>
 Basic TELNET negotiation over HTTP proxy
@@ -45,7 +45,6 @@ telnet://%HOSTIP:%TELNETPORT --upload-file - -p -x http://%HOSTIP:%PROXYPORT/%TE
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout nonewline="yes">
 test%TESTNUMBER

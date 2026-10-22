@@ -8,7 +8,6 @@ HTTP POST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 --libcurl
@@ -40,7 +38,6 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /we/want/%TESTNUMBER HTTP/1.1

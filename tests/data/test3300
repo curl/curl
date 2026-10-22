@@ -4,10 +4,10 @@
 <keywords>
 unittest
 threads
+may-retry-on-valgrind
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

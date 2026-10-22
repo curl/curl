@@ -6,7 +6,6 @@ cmdline
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Pass in negative number to --max-time
@@ -16,7 +15,6 @@ http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --max-time -4
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 2

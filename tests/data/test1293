@@ -8,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -26,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -42,7 +40,6 @@ http://0 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F=
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/------------------------------/

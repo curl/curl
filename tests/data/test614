@@ -8,7 +8,6 @@ directory
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <datacheck>
 d?????????    N U         U               N ???  N NN:NN asubdir
@@ -18,13 +17,12 @@ d?????????    N U         U               N ???  N NN:NN asubdir
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
 </server>
 <precheck>
-%PERL %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP pre-quote chmod
@@ -34,10 +32,9 @@ SFTP pre-quote chmod
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
+%PERL %SRCDIR/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
 </postcheck>
 </verify>
 </testcase>

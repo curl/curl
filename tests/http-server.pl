@@ -56,7 +56,7 @@ my $gopher = 0;
 
 my $flags  = "";
 my $path   = '.';
-my $logdir = $path .'/log';
+my $logdir = $path . '/log';
 my $piddir;
 
 while(@ARGV) {
@@ -168,24 +168,25 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$flags .= "--pidfile \"$pidfile\" ".
-    "--cmdfile \"$cmdfile\" ".
-    "--logfile \"$logfile\" ".
-    "--logdir \"$logdir\" ".
+$flags .= "--pidfile \"$pidfile\" " .
+    "--cmdfile \"$cmdfile\" " .
+    "--logfile \"$logfile\" " .
+    "--logdir \"$logdir\" " .
     "--portfile \"$portfile\" ";
 $flags .= "--gopher " if($gopher);
 $flags .= "--connect $connect " if($connect);
 $flags .= "--keepalive $keepalive_secs " if($keepalive_secs);
 if($ipvnum eq 'unix') {
     $flags .= "--unix-socket '$unix_socket' ";
-} else {
+}
+else {
     $flags .= "--ipv$ipvnum --port $port ";
 }
 $flags .= "--srcdir \"$srcdir\"";
 
 if($verbose) {
-    print STDERR "RUN: ".server_exe('sws')." $flags\n";
+    print STDERR "RUN: " . server_exe('sws') . " $flags\n";
 }
 
 $| = 1;
-exec("exec ".server_exe('sws')." $flags");
+exec("exec " . server_exe('sws') . " $flags");

@@ -9,7 +9,6 @@ huge request header
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <data crlf="headers">
@@ -22,12 +21,10 @@ hello
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool to use
 <features>
 </features>
 <name>
@@ -38,7 +35,6 @@ http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers" nonewline="yes">
 POST /path/%TESTNUMBER HTTP/1.1

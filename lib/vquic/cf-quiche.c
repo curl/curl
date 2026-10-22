@@ -176,7 +176,7 @@ struct h3_stream_ctx {
   uint64_t id;             /* HTTP/3 protocol stream identifier */
   struct h1_req_parser h1; /* h1 request parsing */
   uint64_t error3;         /* HTTP/3 stream error code */
-  int status_code;         /* HTTP status code */
+  int32_t status_code;     /* HTTP status code */
   CURLcode xfer_result;    /* result from cf_quiche_write_(hd/body) */
   BIT(opened);             /* TRUE after stream has been opened */
   BIT(closed);             /* TRUE on stream close */
@@ -1399,7 +1399,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  if(Curl_ossl_need_httpsrr(data) &&
+  if(Curl_ssl_need_httpsrr(cf) &&
      !Curl_conn_dns_resolved_https(data, cf->sockindex, ctx->ssl_peer.peer)) {
     CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
     return CURLE_OK;
@@ -1682,7 +1682,8 @@ out:
 
 CURLcode Curl_cf_quiche_insert_after(struct Curl_cfilter *cf_at,
                                      struct Curl_peer *origin,
-                                     struct Curl_peer *peer)
+                                     struct Curl_peer *peer,
+                                     struct Curl_cfilter **pcf)
 {
   struct cf_quiche_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1706,7 +1707,7 @@ out:
     if(ctx)
       cf_quiche_ctx_free(ctx);
   }
-
+  *pcf = cf;
   return result;
 }
 

@@ -65,8 +65,8 @@ jobs:
       LDFLAGS: ''
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_OPTIONS: ${{ matrix.build.options }}
-      # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-      LIBRESSL_VERSION: 4.3.1
+      # renovate: datasource=github-tags depName=libressl/portable
+      LIBRESSL_VERSION: 4.3.3
     strategy:
       fail-fast: false
       matrix:
@@ -77,15 +77,12 @@ jobs:
 
           - name: 'libressl'
             install_steps: libressl
-            # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generator: Xcode
             options: --config Debug
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
-              -DOPENSSL_INCLUDE_DIR=/Users/runner/libressl/include
-              -DOPENSSL_SSL_LIBRARY=/Users/runner/libressl/lib/libssl.a
-              -DOPENSSL_CRYPTO_LIBRARY=/Users/runner/libressl/lib/libcrypto.a
+              -DOPENSSL_ROOT_DIR=/Users/runner/libressl
               -DCURL_USE_LIBPSL=OFF -DCURL_ENABLE_NTLM=ON
 
     steps:
@@ -120,8 +117,8 @@ jobs:
       - name: 'build libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') && !steps.cache-libressl.outputs.cache-hit }}
         run: |
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/Users/runner/libressl \
@@ -151,6 +148,9 @@ jobs:
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
+              -DCMAKE_FIND_ROOT_PATH=/Users/runner \
+              -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+              -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
               -DUSE_APPLE_IDN=ON \
               ${MATRIX_GENERATE} ${options}
           else
@@ -191,8 +191,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -f '%10z bytes: %N' --
 
       - name: 'build tests'
         if: ${{ matrix.build.generate }}  # skip for autotools to save time
@@ -522,8 +522,8 @@ jobs:
 
       - name: 'curl -V'
         run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -f '%10z bytes: %N' --
           bld/src/curl --disable --version
 
       - name: 'curl install'
@@ -773,6 +773,6 @@ jobs:
 
       - name: 'curl -V'
         run: |
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -f '%10z bytes: %N' --
           bld/src/curl --disable --version

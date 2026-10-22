@@ -8,7 +8,6 @@ HTTP NTLM auth
 connection reuse
 </keywords>
 </info>
-# Server-side
 <reply>
 <servercmd>
 connection-monitor
@@ -75,7 +74,6 @@ moo
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -93,7 +91,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOST
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

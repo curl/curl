@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
   curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(curl, CURLOPT_URL, "http://moo/");
   curl_easy_setopt(curl, CURLOPT_PROXY, "http://%HOSTIP:%HTTPPORT");
+  curl_easy_setopt(curl, CURLOPT_PROXY_SERVICE_NAME, "sockd");
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(curl, CURLOPT_SSLVERSION, (long)(CURL_SSLVERSION_TLSv1_2 | CURL_SSLVERSION_MAX_TLSv1_3));

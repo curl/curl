@@ -55,6 +55,10 @@ previous ones. Set it to NULL to disable its use again.
 
 The default value for this can be figured out with CURLINFO_CAINFO(3).
 
+For LDAP, this option only has an effect when using the OpenLDAP backend,
+which routes TLS through libcurl. It is not supported by Apple's OpenLDAP
+fork. WinLDAP uses the Windows CA store for root certificates.
+
 # DEFAULT
 
 Built-in system specific. When curl is built with Schannel, this option is not

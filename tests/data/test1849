@@ -8,7 +8,6 @@ HTTP proxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -39,7 +38,6 @@ daniel
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -57,7 +55,6 @@ https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://user1:pwd1@%HOSTI
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT example.com:%HTTPSPORT HTTP/1.1

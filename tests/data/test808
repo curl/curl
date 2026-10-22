@@ -9,7 +9,6 @@ CUSTOMREQUEST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 * 17 EXISTS
@@ -22,7 +21,6 @@ CUSTOMREQUEST
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -35,7 +33,6 @@ imap://%HOSTIP:%IMAPPORT -u user:secret -X 'EXAMINE %TESTNUMBER'
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

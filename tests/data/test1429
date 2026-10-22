@@ -25,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +38,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{response_code}'
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers" nonewline="yes">
 HTTP/1.1 999 OK

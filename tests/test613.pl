@@ -132,14 +132,16 @@ elsif($ARGV[0] eq "postprocess") {
                 # Erase all directory metadata except for the name, as it is not
                 # consistent for across all test systems and file systems
                 push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
-            } elsif($1 eq "-") {
+            }
+            elsif($1 eq "-") {
                 # Ignore group and other permissions, because these may vary on
                 # some systems (e.g. on Windows)
                 # Erase user and group names, as they are not consistent across
                 # all test systems
                 my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1, $2, $5, $6, $7, $8);
                 push @canondir, $line;
-            } else {
+            }
+            else {
                 # Unexpected format; pass it through and let the test fail
                 push @canondir, $_;
             }

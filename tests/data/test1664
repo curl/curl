@@ -7,7 +7,6 @@ strparse
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest
@@ -77,14 +76,6 @@ curlx_str_singlespace
 7: ("
 ") 5, line 0
 8: ("") 5, line 0
-curlx_str_single
-0: ("a") 0, line 1
-1: ("aa") 0, line 1
-2: ("A") 5, line 0
-3: ("b") 5, line 0
-4: ("\") 5, line 0
-5: (" ") 5, line 0
-6: ("") 5, line 0
 curlx_str_number
 0: ("1") 0, [1] line 1
 1: ("10000") 7, [0] line 0

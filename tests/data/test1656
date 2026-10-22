@@ -7,7 +7,6 @@ GTime2str
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

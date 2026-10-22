@@ -49,13 +49,19 @@ struct dynbuf;
 #define SSLSUPP_ISSUERCERT_BLOB (1 << 14) /* CURLOPT_ISSUERCERT_BLOB */
 
 #ifdef USE_ECH
-/* CURLECH_ values for the tls_ech option */
+/* CURLECH_ values for the ech option */
 #define CURLECH_DISABLE    0
 #define CURLECH_GREASE     1
 #define CURLECH_ENABLE     2
 #define CURLECH_HARD       3
 
-#define CURLECH_ENABLED(data) ((data)->set.tls_ech)
+/* TRUE if ECH is enabled (and supported) */
+bool Curl_ssl_ech_enabled(struct Curl_cfilter *cf);
+/* TRUE if SSL ECH configuration requires DNS HTTPS-RR record */
+bool Curl_ssl_need_httpsrr(struct Curl_cfilter *cf);
+#else
+#define Curl_ssl_ech_enabled(c)      FALSE
+#define Curl_ssl_need_httpsrr(c)     FALSE
 #endif /* USE_ECH */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "

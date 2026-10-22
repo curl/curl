@@ -6,11 +6,9 @@
 FILE
 </keywords>
 </info>
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 file
@@ -24,7 +22,6 @@ file://localhost/%FILE_PWD/%LOGDIR/non-existent-file.txt --write-out '%{'
 </command>
 </client>
 
-# Verify data
 <verify>
 <errorcode>
 37

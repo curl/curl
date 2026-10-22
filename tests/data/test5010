@@ -9,7 +9,6 @@ error
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ Content-Length: 0
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -37,7 +35,6 @@ httpsig: error - non-existent key file
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 26

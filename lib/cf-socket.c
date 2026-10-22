@@ -83,6 +83,7 @@
 #include "curlx/version_win32.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curlx/wait.h"
 #ifdef _WIN32
 #include <mstcpip.h> /* for TCP_INITIAL_RTO_PARAMETERS */
 #endif
@@ -585,11 +586,13 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
  * len    [in]     - length of the input string.
  * dev    [in/out] - address where a pointer to newly allocated memory
  *                   holding the interface-or-host will be stored upon
- *                   completion.
+ *                   completion or NULL if the caller is not interested.
  * iface  [in/out] - address where a pointer to newly allocated memory
- *                   holding the interface will be stored upon completion.
+ *                   holding the interface will be stored upon completion
+ *                   or NULL if the caller is not interested.
  * host   [in/out] - address where a pointer to newly allocated memory
- *                   holding the host will be stored upon completion.
+ *                   holding the host will be stored upon completion
+ *                   or NULL if the caller is not interested.
  *
  * Returns CURLE_OK on success.
  */
@@ -601,27 +604,36 @@ CURLcode Curl_parse_interface(const char *input,
   static const char if_host_prefix[] = "ifhost!";
   size_t len;
 
-  DEBUGASSERT(dev);
-  DEBUGASSERT(iface);
-  DEBUGASSERT(host);
-
   len = strlen(input);
   if(len > 512)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(dev)
+    *dev = NULL;
+  if(iface)
+    *iface = NULL;
+  if(host)
+    *host = NULL;
 
   if(!strncmp(if_prefix, input, strlen(if_prefix))) {
     input += strlen(if_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *iface = curlx_memdup0(input, len - strlen(if_prefix));
-    return *iface ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    if(iface) {
+      *iface = curlx_memdup0(input, len - strlen(if_prefix));
+      return *iface ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    }
+    return CURLE_OK;
   }
   else if(!strncmp(host_prefix, input, strlen(host_prefix))) {
     input += strlen(host_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *host = curlx_memdup0(input, len - strlen(host_prefix));
-    return *host ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    if(host) {
+      *host = curlx_memdup0(input, len - strlen(host_prefix));
+      return *host ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+    }
+    return CURLE_OK;
   }
   else if(!strncmp(if_host_prefix, input, strlen(if_host_prefix))) {
     const char *host_part;
@@ -630,22 +642,30 @@ CURLcode Curl_parse_interface(const char *input,
     host_part = memchr(input, '!', len);
     if(!host_part || !*(host_part + 1))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    *iface = curlx_memdup0(input, host_part - input);
-    if(!*iface)
-      return CURLE_OUT_OF_MEMORY;
+    if(iface) {
+      *iface = curlx_memdup0(input, host_part - input);
+      if(!*iface)
+        return CURLE_OUT_OF_MEMORY;
+    }
     ++host_part;
-    *host = curlx_memdup0(host_part, len - (host_part - input));
-    if(!*host) {
-      curlx_safefree(*iface);
-      return CURLE_OUT_OF_MEMORY;
+    if(host) {
+      *host = curlx_memdup0(host_part, len - (host_part - input));
+      if(!*host) {
+        if(iface)
+          curlx_safefree(*iface);
+        return CURLE_OUT_OF_MEMORY;
+      }
     }
     return CURLE_OK;
   }
 
   if(!*input)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  *dev = curlx_memdup0(input, len);
-  return *dev ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+  if(dev) {
+    *dev = curlx_memdup0(input, len);
+    return *dev ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
 }
 
 #ifndef CURL_DISABLE_BINDLOCAL
@@ -660,34 +680,42 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 #ifdef USE_IPV6
   struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)&sa;
 #endif
-
   struct Curl_dns_entry *h = NULL;
   unsigned short port = data->set.localport; /* use this port number, 0 for
                                                 "random" */
   /* how many port numbers to try to bind to, increasing one at a time */
   int portnum = data->set.localportrange;
-  const char *dev = CURL_EASY_STR(data, STRING_DEVICE);
-  const char *iface_input = CURL_EASY_STR(data, STRING_INTERFACE);
-  const char *host_input = CURL_EASY_STR(data, STRING_BINDHOST);
-  const char *iface = iface_input ? iface_input : dev;
-  const char *host = host_input ? host_input : dev;
+  char *dev_in = NULL, *iface_in = NULL, *host_in = NULL;
+  const char *iface = NULL, *host = NULL;
   int sockerr;
 #ifdef IP_BIND_ADDRESS_NO_PORT
   int on = 1;
 #endif
+  CURLcode result = CURLE_OK;
+
 #ifndef USE_IPV6
   (void)scope;
 #endif
+  if(conn->interface_opts) {
+    /*************************************************************
+     * Select device to bind socket to
+     *************************************************************/
+    result = Curl_parse_interface(conn->interface_opts,
+                                  &dev_in, &iface_in, &host_in);
+    if(result)
+      goto out;
+    /* This is how we use the values */
+    iface = iface_in ? iface_in : dev_in;
+    host = host_in ? host_in : dev_in;
+  }
 
-  /*************************************************************
-   * Select device to bind socket to
-   *************************************************************/
   if(!iface && !host && !port)
-    /* no local kind of binding was requested */
-    return CURLE_OK;
-  else if(iface && (strlen(iface) >= 255))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
 
+  if(iface && (strlen(iface) >= 255)) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
+  }
   memset(&sa, 0, sizeof(struct Curl_sockaddr_storage));
 
   if(iface || host) {
@@ -714,12 +742,13 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
         * succeeds it means the parameter was a valid interface and not an IP
         * address. Return immediately.
         */
-       !host_input) {
+       !host_in) {
       infof(data, "socket successfully bound to interface '%s'", iface);
-      return CURLE_OK;
+      result = CURLE_OK;
+      goto out;
     }
 #endif
-    if(!host_input) {
+    if(!host_in) {
       /* Discover IP from input device, then bind to it */
       if2ip_result = Curl_if2ip(af,
 #ifdef USE_IPV6
@@ -729,18 +758,20 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     }
     switch(if2ip_result) {
     case IF2IP_NOT_FOUND:
-      if(iface_input && !host_input) {
+      if(iface_in && !host_in) {
         /* Do not fall back to treating it as a hostname */
         char buffer[STRERROR_LEN];
         data->state.os_errno = sockerr = SOCKERRNO;
         failf(data, "Could not bind to interface '%s' with errno %d: %s",
               iface, sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
-        return CURLE_INTERFACE_FAILED;
+        result = CURLE_INTERFACE_FAILED;
+        goto out;
       }
       break;
     case IF2IP_AF_NOT_SUPPORTED:
       /* Signal the caller to try another address family if available */
-      return CURLE_UNSUPPORTED_PROTOCOL;
+      result = CURLE_UNSUPPORTED_PROTOCOL;
+      goto out;
     case IF2IP_FOUND:
       /*
        * We now have the numerical IP address in the 'myhost' buffer
@@ -751,7 +782,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       done = 1;
       break;
     }
-    if(!iface_input || host_input) {
+    if(!iface_in || host_in) {
       /*
        * This was not an interface, resolve the name as a hostname
        * or IP number
@@ -778,7 +809,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
         if(af != h_af) {
           /* bad IP version combo, signal the caller to try another address
              family if available */
-          return CURLE_UNSUPPORTED_PROTOCOL;
+          result = CURLE_UNSUPPORTED_PROTOCOL;
+          goto out;
         }
         done = 1;
       }
@@ -811,8 +843,10 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
                if present, known to be numeric */
             curl_off_t scope_id;
             if(curlx_str_number((const char **)CURL_UNCONST(&scope_ptr),
-                                &scope_id, UINT_MAX))
-              return CURLE_UNSUPPORTED_PROTOCOL;
+                                &scope_id, UINT_MAX)) {
+              result = CURLE_UNSUPPORTED_PROTOCOL;
+              goto out;
+            }
             si6->sin6_scope_id = (unsigned int)scope_id;
           }
 #endif
@@ -839,7 +873,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       data->state.os_errno = sockerr = SOCKERRNO;
       failf(data, "Could not bind to '%s' with errno %d: %s", host,
             sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
-      return CURLE_INTERFACE_FAILED;
+      result = CURLE_INTERFACE_FAILED;
+      goto out;
     }
   }
   else {
@@ -866,7 +901,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       /* we succeeded to bind */
       infof(data, "Local port: %hu", port);
       conn->bits.bound = TRUE;
-      return CURLE_OK;
+      result = CURLE_OK;
+      goto out;
     }
 
     if(--portnum > 0) {
@@ -892,7 +928,13 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
           sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
   }
 
-  return CURLE_INTERFACE_FAILED;
+  result = CURLE_INTERFACE_FAILED;
+
+out:
+  curlx_free(dev_in);
+  curlx_free(iface_in);
+  curlx_free(host_in);
+  return result;
 }
 #endif
 
@@ -985,6 +1027,7 @@ struct cf_socket_ctx {
 #endif
   int sockerr;                       /* socket error of last failure or 0 */
 #ifdef DEBUGBUILD
+  int connect_wait_ms;               /* ms to wait after 1st connect() */
   int wblock_percent;                /* percent of writes doing EAGAIN */
   int wpartial_percent;              /* percent of bytes written in send */
   int rblock_percent;                /* percent of reads doing EAGAIN */
@@ -1035,6 +1078,12 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
       curl_off_t l;
       if(!curlx_str_number(&p, &l, CURL_OFF_T_MAX))
         ctx->recv_max = (size_t)l;
+    }
+    p = getenv("CURL_DBG_SOCK_CONNECT_WAIT_MS");
+    if(p) {
+      curl_off_t l;
+      if(!curlx_str_number(&p, &l, INT_MAX))
+        ctx->connect_wait_ms = (int)l;
     }
   }
 #endif
@@ -1449,8 +1498,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     rc = do_connect(cf, data, (bool)cf->conn->bits.tcp_fastopen);
     sockerr = SOCKERRNO;
     set_local_ip(cf, data);
-    CURL_TRC_CF(data, cf, "local address %s port %d...",
+    CURL_TRC_CF(data, cf, "local address %s port %d",
                 ctx->ip.local_ip, ctx->ip.local_port);
+#ifdef DEBUGBUILD
+    if(ctx->connect_wait_ms > 0) {
+      CURL_TRC_CF(data, cf, "debug connect wait %d ms", ctx->connect_wait_ms);
+      curlx_wait_ms(ctx->connect_wait_ms);
+    }
+#endif
     if(rc == -1) {
       ctx->sockerr = sockerr;
       result = socket_connect_result(data, ctx->ip.remote_ip, sockerr);
@@ -1472,7 +1527,14 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "not connected yet on fd=%" FMT_SOCKET_T, ctx->sock);
     return CURLE_OK;
   }
-  else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
+  else if(rc == CURL_CSELECT_OUT ||
+#ifdef __APPLE__
+          /* macOS reports select errors when the peer already
+           * sent us data and closed the connection normally. Do
+           * not treat that as error. See #23482 and #23445 */
+          (rc > 0 && (rc & CURL_CSELECT_ERR)) ||
+#endif
+          cf->conn->bits.tcp_fastopen) {
     if(verifyconnect(ctx->sock, &ctx->sockerr)) {
       /* we are connected with TCP, awesome! */
       ctx->connected_at = *Curl_pgrs_now(data);
@@ -1482,6 +1544,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "connected on fd=%" FMT_SOCKET_T, ctx->sock);
       return CURLE_OK;
     }
+    result = CURLE_COULDNT_CONNECT;
   }
   else if(rc & CURL_CSELECT_ERR) {
     CURL_TRC_CF(data, cf, "poll/select error on fd=%" FMT_SOCKET_T, ctx->sock);

@@ -184,25 +184,15 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
 
   /* if the filename contains a path, only use filename portion */
   q = strrchr(p, '/');
-  if(q) {
+  if(q)
     p = q + 1;
-    if(!*p) {
-      curlx_safefree(copy);
-      return NULL;
-    }
-  }
 
   /* If the filename contains a backslash, only use filename portion. The idea
      is that even systems that do not handle backslashes as path separators
      probably want the path removed for convenience. */
   q = strrchr(p, '\\');
-  if(q) {
+  if(q)
     p = q + 1;
-    if(!*p) {
-      curlx_safefree(copy);
-      return NULL;
-    }
-  }
 
   /* make sure the filename does not end in \r or \n */
   q = strchr(p, '\r');
@@ -227,12 +217,19 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   }
 #endif /* _WIN32 || MSDOS */
 
+  /* an empty filename, "." or ".." is no filename */
+  if(!*copy || !strcmp(copy, ".") || !strcmp(copy, "..")) {
+    curlx_safefree(copy);
+    return NULL;
+  }
+
   return copy;
 }
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
 {
-  struct curl_slist *h = hdrcbdata->headlist;
+  struct curl_slist *h = hdrcbdata->headlist ?
+    hdrcbdata->headlist->first : NULL;
   int rc = 1;
   while(h) {
     /* not "handled", show it */
@@ -243,7 +240,7 @@ int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
   }
   rc = 0; /* success */
 fail:
-  curl_slist_free_all(hdrcbdata->headlist);
+  slist_wc_free_all(hdrcbdata->headlist);
   hdrcbdata->headlist = NULL;
   return rc;
 }
@@ -254,20 +251,19 @@ static size_t buffer_header(struct HdrCbData *hdrcbdata,
 {
   char *clone = curlx_memdup0(str, cb);
   if(clone) {
-    struct curl_slist *old = hdrcbdata->headlist;
-    hdrcbdata->headlist = curl_slist_append(old, clone);
+    struct slist_wc *entry = slist_wc_append(hdrcbdata->headlist, clone);
     curlx_free(clone);
-    if(!hdrcbdata->headlist) {
-      curl_slist_free_all(old);
-      return CURL_WRITEFUNC_ERROR;
-    }
+    if(!entry)
+      goto fail;
+    hdrcbdata->headlist = entry;
   }
-  else {
-    curl_slist_free_all(hdrcbdata->headlist);
-    hdrcbdata->headlist = NULL;
-    return CURL_WRITEFUNC_ERROR;
-  }
+  else
+    goto fail;
   return cb;
+fail:
+  slist_wc_free_all(hdrcbdata->headlist);
+  hdrcbdata->headlist = NULL;
+  return CURL_WRITEFUNC_ERROR;
 }
 
 /*

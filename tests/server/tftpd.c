@@ -196,7 +196,7 @@ static tftphdr_storage_t ackbuf;
 static curl_socket_t peer = CURL_SOCKET_BAD;
 
 static unsigned int timeout;
-static unsigned int maxtimeout = 5 * TIMEOUT;
+static unsigned int maxtimeout = TIMEOUT * 5;
 
 static int tftpd_wrotepidfile = 0;
 static int tftpd_wroteportfile = 0;
@@ -740,7 +740,7 @@ send_data:
 #endif
       logmsg("read");
       n = sread(peer, &ackbuf.storage[0], sizeof(ackbuf.storage));
-      logmsg("read: %zd", n);
+      logmsg("read: %ld", (long)n);
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
@@ -811,7 +811,7 @@ send_ack:
 #endif
       logmsg("read");
       n = sread(peer, rdp, PKTSIZE);
-      logmsg("read: %zd", n);
+      logmsg("read: %ld", (long)n);
 #ifdef HAVE_ALARM
       alarm(0);
 #endif
@@ -984,7 +984,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   recvtimeout = sizeof(recvtimeoutbak);
   getsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
              (char *)&recvtimeoutbak, (int *)&recvtimeout);
-  recvtimeout = TIMEOUT*1000;
+  recvtimeout = TIMEOUT * 1000;
   setsockopt(peer, SOL_SOCKET, SO_RCVTIMEO,
              (const char *)&recvtimeout, sizeof(recvtimeout));
 #endif
@@ -1175,7 +1175,7 @@ static int test_tftpd(int argc, const char **argv)
       }
     }
 
-    maxtimeout = 5 * TIMEOUT;
+    maxtimeout = TIMEOUT * 5;
 
     tp = &trsbuf.hdr;
     tp->th_opcode = ntohs(tp->th_opcode);

@@ -11,7 +11,6 @@ NTLM
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <data crlf="headers">
@@ -81,12 +80,10 @@ Contents of that second request. Differn.
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool to use
 <features>
 NTLM
 !SSPI
@@ -99,7 +96,6 @@ http://%HOSTIP:%HTTPPORT/path/mine http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER0010
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 <protocol crlf="headers">
@@ -117,7 +113,7 @@ Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAgACAHAAAAALAAsAcgAAAAAAAAAAAAAAhoIBAAQt1KW5CgG4YdWWcfXyfXBz1ZMCzYp37xYjBiAizmw58O6eQS7yR66eqYGWeSwl9W1lV09SS1NUQVRJT04=
 Accept: */*
 
-GET /path/6940010 HTTP/1.1
+GET /path/%TESTNUMBER0010 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 

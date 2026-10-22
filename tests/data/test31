@@ -9,7 +9,6 @@ cookiejar
 --resolve
 </keywords>
 </info>
-# Server-side
 
 <reply>
 <data>
@@ -39,7 +38,7 @@ Set-Cookie: secure=very1  ; secure; domain=test31.curl; path=/secure9/; %CR
 Set-Cookie: httpo1=value1  ; domain=test31.curl; path=/p1/; httponly%CR
 Set-Cookie: httpo2=value2  ; domain=test31.curl; path=/p2/; httponly%CR
 Set-Cookie: httpo3=value3  ; httponly; domain=test31.curl; path=/p3/;%CR
-Set-Cookie: httpo4=value4  ; httponly; domain=test31.curl; path=/p4/; %CR
+Set-Cookie: httpo4=value4  ; httponly =rubbish; domain=test31.curl; path=/p4/; %CR
 Set-Cookie: httponly=myvalue1  ; domain=test31.curl; path=/p4/; httponly%CR
 Set-Cookie: httpandsec=myvalue2  ; domain=test31.curl; path=/p4/; httponly; secure%CR
 Set-Cookie: httpandsec2=myvalue3; domain=test31.curl; path=/p4/; httponly; secure%CR
@@ -77,7 +76,6 @@ boo
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -100,7 +98,6 @@ local-http
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1

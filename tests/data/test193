@@ -9,7 +9,6 @@ followlocation
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK swsbounce swsclose
@@ -31,7 +30,6 @@ monster
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -44,7 +42,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n" -L
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

@@ -9,7 +9,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 301 Redirect
@@ -40,7 +39,6 @@ Funny-head: yesyes
 
 </reply>
 
-# Client-side
 <client>
 <features>
 headers-api
@@ -56,7 +54,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -L -w '%header{this:all:-{\}-}\n' -o %LOGDI
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout mode="text">
 one-{}-two-{}-three-{}-four

@@ -59,6 +59,7 @@ class Nghttpx:
         self._cred_name = self._def_cred_name = cred_name
         self._loaded_cred_name = ''
         self._version = NghttpxUtil.version(self._cmd)
+        self._uses_ech = False
 
     def supports_h3(self):
         return NghttpxUtil.version_with_h3(self._version)
@@ -82,6 +83,10 @@ class Nghttpx:
     @property
     def port_is_quic(self):
         return self._port_is_quic
+
+    @property
+    def uses_ech(self):
+        return self._uses_ech
 
     def exists(self):
         return self._cmd and os.path.exists(self._cmd)
@@ -221,6 +226,10 @@ class NghttpxQuic(Nghttpx):
                          domain=env.domain1, cred_name=env.domain1)
         self._https_port = 0
 
+    @property
+    def https_port(self):
+        return self._https_port
+
     def initial_start(self):
         super().initial_start()
 
@@ -269,6 +278,74 @@ class NghttpxQuic(Nghttpx):
             '--frontend-http3-max-connection-window-size=100M',
             # f'--frontend-quic-debug-log',
         ])
+        if self.env.have_nghttpx_ech():
+            ech_conf = self.env.get_echconfig_file(self._cred_name)
+            if ech_conf:
+                args.extend([
+                    '--ech-config-file', ech_conf
+                ])
+                self._uses_ech = True
+        self._error_fd = open(self._stderr, 'a')  # noqa: SIM115
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
+        if self._process.returncode is not None:
+            return False
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
+
+
+class NghttpxTcp(Nghttpx):
+
+    PORT_SPECS: ClassVar[Dict[str, int]] = {
+        'nghttpx_tcp': socket.SOCK_STREAM,
+    }
+
+    def __init__(self, env: Env):
+        super().__init__(env=env, name='nghttpx-tcp',
+                         domain=env.domain1, cred_name=env.domain1)
+
+    def initial_start(self):
+        super().initial_start()
+
+        def startup(ports: Dict[str, int]) -> bool:
+            self._port = ports['nghttpx_tcp']
+            if self.start():
+                self.env.update_ports(ports)
+                return True
+            self.stop()
+            self._port = 0
+            return False
+
+        return alloc_ports_and_do(NghttpxTcp.PORT_SPECS, startup,
+                                  self.env.gen_root, max_tries=3)
+
+    def start(self, wait_live=True):
+        self._mkpath(self._tmp_dir)
+        if self._process:
+            self.stop()
+        creds = self.env.get_credentials(self._cred_name)
+        assert creds  # convince pytype this is not None
+        self._loaded_cred_name = self._cred_name
+        args = [self._cmd, f'--frontend=*,{self._port};tls']
+        args.extend([
+            f'--backend=127.0.0.1,{self.env.http_port}',
+            '--log-level=ERROR',
+            f'--pid-file={self._pid_file}',
+            f'--errorlog-file={self._error_log}',
+            f'--conf={self._conf_file}',
+            f'--cacert={self.env.ca.cert_file}',
+            creds.pkey_file,
+            creds.cert_file,
+            '--frontend-http3-window-size=1M',
+            '--frontend-http3-max-window-size=10M',
+            '--frontend-http3-connection-window-size=10M',
+            '--frontend-http3-max-connection-window-size=100M',
+        ])
+        if self.env.have_nghttpx_ech():
+            ech_conf = self.env.get_echconfig_file(self._cred_name)
+            if ech_conf:
+                args.extend([
+                    '--ech-config-file', ech_conf
+                ])
+                self._uses_ech = True
         self._error_fd = open(self._stderr, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:

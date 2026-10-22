@@ -256,6 +256,7 @@ LIB_CFILES =         \
   multi_ev.c         \
   multi_ntfy.c       \
   netrc.c            \
+  ngh2_shim.c        \
   openldap.c         \
   parsedate.c        \
   peer.c             \
@@ -265,6 +266,7 @@ LIB_CFILES =         \
   protocol.c         \
   proxy.c            \
   psl.c              \
+  ptrarray.c         \
   rand.c             \
   ratelimit.c        \
   request.c          \
@@ -388,6 +390,7 @@ LIB_HFILES =         \
   multi_ntfy.h       \
   multiif.h          \
   netrc.h            \
+  ngh2_shim.h        \
   parsedate.h        \
   peer.h             \
   pingpong.h         \
@@ -396,6 +399,7 @@ LIB_HFILES =         \
   protocol.h         \
   proxy.h            \
   psl.h              \
+  ptrarray.h         \
   rand.h             \
   ratelimit.h        \
   request.h          \

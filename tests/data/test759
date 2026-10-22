@@ -6,7 +6,6 @@ globbing
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 glob '{,'
@@ -16,7 +15,6 @@ glob '{,'
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # curl: (3) unmatched brace in position 1:
 <errorcode>

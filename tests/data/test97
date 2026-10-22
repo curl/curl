@@ -7,7 +7,6 @@ HTTP POST
 HTTP replaced headers
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.0 200 OK
@@ -19,7 +18,6 @@ blaha
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -32,7 +30,6 @@ HTTP POST with custom content-type
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

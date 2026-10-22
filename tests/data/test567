@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 RTSP/1.0 200 OK
@@ -20,7 +19,6 @@ Curl-Private: swsclose
 </data>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

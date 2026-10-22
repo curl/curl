@@ -6,11 +6,9 @@ curl-config
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <name>
 Compare curl --version with curl-config --version
@@ -20,10 +18,9 @@ Compare curl --version with curl-config --version
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER version
+%PERL %SRCDIR/test1022.pl ../curl-config %LOGDIR/stdout%TESTNUMBER version
 </postcheck>
 <errorcode>
 0

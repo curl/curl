@@ -174,11 +174,12 @@ char *getpass_r(const char *prompt, /* prompt to display */
   disabled = ttyecho(FALSE, fd); /* disable terminal echo */
 
   fputs(prompt, tool_stderr);
-  nread = read(fd, buffer, buflen);
-  if(nread > 0)
-    buffer[--nread] = '\0'; /* null-terminate where enter is stored */
-  else
-    buffer[0] = '\0'; /* got nothing */
+  nread = read(fd, buffer, buflen - 1);
+  if(nread < 0)
+    nread = 0; /* got nothing */
+  else if(nread && (buffer[nread - 1] == '\n'))
+    nread--; /* remove the newline from pressing enter */
+  buffer[nread] = '\0';
 
   if(disabled) {
     /* if echo actually was disabled, add a newline */

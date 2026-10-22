@@ -8,9 +8,7 @@ globbing
 {} list
 </keywords>
 </info>
-# Server-side
 
-# Client-side
 <client>
 <name>
 duplicate named glob
@@ -20,7 +18,6 @@ duplicate named glob
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
 curl: (3) Duplicate glob name in position 40:

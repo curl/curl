@@ -137,6 +137,40 @@ class TestSftp:
         r.check_exit_code(0)
         self.check_downloads(curl, doc_file, count)
 
+    def test_51_13_dl_reuse(self, env: Env, sshd: Sshd):
+        count = 3
+        curl = CurlClient(env=env)
+        doc_file = os.path.join(sshd.home_dir, 'data-10k')
+        url = f'sftp://{env.domain1}:{sshd.port}/{doc_file}?[0-{count-1}]'
+        r = curl.ssh_download(urls=[url], extra_args=[
+            '--knownhosts', sshd.known_hosts,
+            '--pubkey', sshd.user1_pubkey_file,
+            '--key', sshd.user1_privkey_file,
+            '--user', f'{os.environ["USER"]}:',
+        ])
+        r.check_exit_code(0)
+        assert len(r.stats) == count, r.dump_logs()
+        assert r.total_connects == 1, r.dump_logs()
+
+    def test_51_14_dl_no_reuse(self, env: Env, sshd: Sshd):
+        if not env.curl_is_debug():
+            pytest.skip('only works for curl debug builds')
+        count = 3
+        run_env = os.environ.copy()
+        run_env['CURL_FORBID_REUSE'] = '1'
+        curl = CurlClient(env=env, run_env=run_env)
+        doc_file = os.path.join(sshd.home_dir, 'data-10k')
+        url = f'sftp://{env.domain1}:{sshd.port}/{doc_file}?[0-{count-1}]'
+        r = curl.ssh_download(urls=[url], extra_args=[
+            '--knownhosts', sshd.known_hosts,
+            '--pubkey', sshd.user1_pubkey_file,
+            '--key', sshd.user1_privkey_file,
+            '--user', f'{os.environ["USER"]}:',
+        ])
+        r.check_exit_code(0)
+        assert len(r.stats) == count, r.dump_logs()
+        assert r.total_connects == count, r.dump_logs()
+
     def test_51_20_ul_single(self, env: Env, sshd: Sshd):
         srcfile = os.path.join(env.gen_dir, 'data-10k')
         destfile = os.path.join(sshd.home_dir, 'upload_20.data')

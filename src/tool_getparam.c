@@ -713,6 +713,12 @@ static ParameterError data_urlencode(const char *nextarg,
       return PARAM_NO_MEM;
     size = 0;
   }
+  else if(size > INT_MAX) {
+    /* curl_easy_escape() takes an int length */
+    errorf("too much data to URL encode");
+    curlx_free(postdata);
+    return PARAM_BAD_USE;
+  }
   else {
     char *enc = curl_easy_escape(NULL, postdata, (int)size);
     curlx_safefree(postdata); /* no matter if it worked or not */
@@ -2692,6 +2698,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = getstr(&config->sasl_authzid, nextarg, DENY_BLANK);
     break;
   case C_PROXY_SERVICE_NAME: /* --proxy-service-name */
+  case C_SOCKS5_GSSAPI_SERVICE: /* --socks5-gssapi-service */
     err = getstr(&config->proxy_service_name, nextarg, DENY_BLANK);
     break;
   case C_SERVICE_NAME: /* --service-name */

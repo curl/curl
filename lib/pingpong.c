@@ -80,8 +80,11 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     if(timeout_ms < interval_ms)
       interval_ms = timeout_ms;
   }
-  else
+  else {
     interval_ms = 0; /* immediate */
+    /* Wake the multi socket API even when the server sends no response. */
+    Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
+  }
 
   if(Curl_conn_data_pending(data, FIRSTSOCKET))
     rc = 1;
@@ -129,25 +132,16 @@ void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow)
   pp->initialized = TRUE;
 }
 
-/***********************************************************************
- *
- * Curl_pp_vsendf()
- *
- * Send the formatted string as a command to a pingpong server. Note that
- * the string should not have any CRLF appended, as this function will
- * append the necessary things itself.
- *
- * made to never block
- */
 CURLcode Curl_pp_vsendf(struct Curl_easy *data,
                         struct pingpong *pp,
+                        const char *prefix,
                         const char *fmt,
                         va_list args)
 {
   size_t bytes_written = 0;
   size_t write_len;
   char *s;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
 
   DEBUGASSERT(pp->sendleft == 0);
@@ -159,7 +153,13 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
     return CURLE_SEND_ERROR;
 
   curlx_dyn_reset(&pp->sendbuf);
-  result = curlx_dyn_vaddf(&pp->sendbuf, fmt, args);
+  if(prefix) {
+    result = curlx_dyn_add(&pp->sendbuf, prefix);
+    if(!result)
+      result = curlx_dyn_addn(&pp->sendbuf, " ", 1);
+  }
+  if(!result)
+    result = curlx_dyn_vaddf(&pp->sendbuf, fmt, args);
   if(result)
     return result;
 
@@ -182,7 +182,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 
   Curl_debug(data, CURLINFO_HEADER_OUT, s, bytes_written);
 
-  if(bytes_written != write_len) {
+  if(bytes_written < write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
     pp->sendthis = s;
     pp->sendsize = write_len;
@@ -197,16 +197,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/***********************************************************************
- *
- * Curl_pp_sendf()
- *
- * Send the formatted string as a command to a pingpong server. Note that
- * the string should not have any CRLF appended, as this function will
- * append the necessary things itself.
- *
- * made to never block
- */
 CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
                        const char *fmt, ...)
 {
@@ -214,7 +204,7 @@ CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
   va_list ap;
   va_start(ap, fmt);
 
-  result = Curl_pp_vsendf(data, pp, fmt, ap);
+  result = Curl_pp_vsendf(data, pp, NULL, fmt, ap);
 
   va_end(ap);
 
@@ -386,7 +376,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   if(result)
     return result;
 
-  if(written != pp->sendleft) {
+  if(written < pp->sendleft) {
     /* only a fraction was sent */
     pp->sendleft -= written;
   }

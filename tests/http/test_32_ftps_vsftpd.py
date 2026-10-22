@@ -275,7 +275,7 @@ class TestFtpsVsFTPD:
         assert os.path.exists(dstfile)
         with open(dstfile) as fd:
             destdata = fd.readlines()
-        expdata = [indata] if len(indata) else []
+        expdata = [indata] if indata else []
         assert expdata == destdata, f'expected: {expdata}, got: {destdata}'
 
     def test_32_11_download_non_existing(self, env: Env, vsftpds: VsFTPD):

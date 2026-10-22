@@ -39,11 +39,12 @@ env:
   CURL_TEST_MIN: 1900
   CURL_TEST_SSH_KEYALGO: ed25519
   DO_NOT_TRACK: '1'
-  OPENSSH_WINDOWS_VERSION: 10.0.0.0p2-Preview
-  OPENSSH_WINDOWS_SHA256_ARM64: 698c6aec31c1dd0fb996206e8741f4531a97355686b5431ef347d531b07fcd42
-  OPENSSH_WINDOWS_SHA256_WIN64: 23f50f3458c4c5d0b12217c6a5ddfde0137210a30fa870e98b29827f7b43aba5
-  STUNNEL_VERSION: '5.82'
-  STUNNEL_SHA256: 722c1ad626919af2b0034666b4d19cc4795e925c32f60e8f3c59af4fb3ad2dfc
+  # https://github.com/PowerShell/Win32-OpenSSH/tags
+  OPENSSH_WINDOWS_VERSION: 10.4.0.0p1-Preview  # manually bumped
+  OPENSSH_WINDOWS_SHA256_ARM64: d2b1928225479fec9e0c938f527fdb5ed676446cca1bbcc5af84aca1f272842e
+  OPENSSH_WINDOWS_SHA256_WIN64: b67ff8becd203502190ec42ac7787c24c2cd3325ed7700485fe7a1c83d2a7957
+  # renovate: datasource=github-tags depName=mtrojnar/stunnel versioning=semver-coerced extractVersion=^stunnel-(?<version>.+)$
+  STUNNEL_VERSION: 5.82
 
 jobs:
   build-cache:
@@ -69,7 +70,7 @@ jobs:
           cd /c && mkdir my-stunnel && cd my-stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             "https://www.stunnel.org/archive/5.x/stunnel-${STUNNEL_VERSION}-win64-installer.exe" --output pkg.bin
-          sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${STUNNEL_SHA256}" && 7z x -y pkg.bin >/dev/null && rm -f pkg.bin && ls -l && bin/tstunnel -version
+          sha256sum pkg.bin && 7z x -y pkg.bin >/dev/null && rm -f pkg.bin && ls -l && bin/tstunnel -version
 
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
@@ -105,7 +106,6 @@ jobs:
           work-vol: 'D:'
           # https://cygwin.com/mirrors.html
           # Main mirror status: https://archlinux.org/mirrors/kernel.org/
-          site: https://mirrors.kernel.org/sourceware/cygwin/
           # https://cygwin.com/packages/
           packages: >-
             ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
@@ -183,8 +183,8 @@ jobs:
         timeout-minutes: 1
         run: |
           PATH=/usr/bin
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | sort -z | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | sort -z | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
@@ -218,9 +218,6 @@ jobs:
         run: |
           PATH=/usr/bin:/cygdrive/c/my-stunnel/bin
           TFLAGS="-j8 ${TFLAGS}"
-          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
-            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
-          fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
             cmake --build bld --verbose --target test-ci
@@ -466,8 +463,8 @@ jobs:
             # avoid libtool's curl.exe wrapper for shared builds
             mv bld/src/.libs/curl.exe bld/src/curl.exe || true
           fi
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | sort -z | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | sort -z | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
@@ -538,7 +535,7 @@ jobs:
             if [[ "${MATRIX_INSTALL}" = *'libssh2-wincng'* ]]; then
               TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
               unset CURL_TEST_SSH_KEYALGO  # libssh2 built with WinCNG does not support ssh-ed25519 hostkeys
-              export CURL_TEST_SSH_ENABLE_KEX=diffie-hellman-group-exchange-sha256
+              export CURL_TEST_SSH_ENABLE_KEX=diffie-hellman-group16-sha512
             fi
             if [[ "${MATRIX_CONFIG} " = *'-DCURL_USE_LIBSSH=ON'* && \
                   "${MATRIX_ENV}" = *'x86_64'* ]]; then
@@ -558,8 +555,8 @@ jobs:
               PATH="/c/OpenSSH-Win64:$PATH"
             fi
           fi
-          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
-            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
+          if [[ "${MATRIX_INSTALL}" != *'python'* ]]; then
+            export CURL_TEST_NO_PYTHON=1  # we have no Python here, skip tests needing it
           fi
           PATH="$PATH:/c/my-stunnel/bin"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -581,6 +578,7 @@ jobs:
           fi
 
       - name: 'disk space used'
+        continue-on-error: true
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   mingw-w64-standalone-downloads:
@@ -603,9 +601,9 @@ jobs:
             sys: 'mingw64'
             dir: 'w64devkit'
             env: 'x86_64'
-            ver: '16.1.0'
-            url: 'https://github.com/skeeto/w64devkit/releases/download/v2.8.0/w64devkit-x64-2.8.0.7z.exe'
-            SHA256: 6252bf34fe2231a55ac7f03d482b36d2c7c58697990551bba508102cfb3f342e
+            ver: '16.2.0'
+            url: 'https://github.com/skeeto/w64devkit/releases/download/v2.10.1/w64devkit-x64-2.10.1.7z.exe'  # manually bumped
+            SHA256: add1edf984ce4d473cfeb7c52e0ab38db73a855bba6c7f564d5e16648eb2896a
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBSSH=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
             install: perl mingw-w64-x86_64-libssh
             type: 'Debug'
@@ -614,7 +612,7 @@ jobs:
             dir: 'mingw64'
             env: 'x86_64'
             ver: '9.5.0'
-            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
+            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'  # manually bumped
             SHA256: 41637132ea7dc36a7f86a1961eaa334c380b5a3423d36aecb481cabcd006e3fe
             config: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
             type: 'Release'
@@ -624,7 +622,7 @@ jobs:
             dir: 'mingw64'
             env: 'x86_64'
             ver: '7.3.0'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
+            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'  # manually bumped
             SHA256: 9dc08c9c2bdd5d8173f87791bed644f6e290624f739de474f117b590dfd8a721
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             install: mingw-w64-x86_64-mbedtls
@@ -635,7 +633,7 @@ jobs:
             dir: 'mingw32'
             env: 'i686'
             ver: '6.4.0'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
+            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'  # manually bumped
             SHA256: 12d2c62ad4527ec8a52275ea8485678dcbe20bec4716a3c7ba274f225d696085
             config: '-DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_SCHANNEL=ON -DENABLE_ARES=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             install: perl mingw-w64-i686-c-ares mingw-w64-i686-gnutls mingw-w64-i686-libssh2 mingw-w64-i686-openssl
@@ -646,7 +644,7 @@ jobs:
             dir: 'mingw64'
             env: 'x86_64'
             ver: '4.8.1'
-            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'
+            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'  # manually bumped (lowest supported mingw-w64 version)
             SHA256: 1353d997e85bb4494ebbebb432d824848d66b32c6045900da9a38a767b3c4ab4
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             type: 'Debug'
@@ -747,8 +745,8 @@ jobs:
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | sort -z | xargs -0 file --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | sort -z | xargs -0 stat -c '%10s bytes: %n' --
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -778,9 +776,6 @@ jobs:
           TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           TFLAGS+=' ~3000 ~3001 ~3023 ~3024'  # 'HTTPS localhost, last subject alt name matches, CN does not match' HTTPS, HTTP GET, PEM certificate (returning 56)
-          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
-            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
-          fi
           PATH="$PWD/bld/lib:$PATH:/c/my-stunnel/bin"
           cmake --build bld --target test-ci
 
@@ -792,6 +787,7 @@ jobs:
           cmake --build bld --target curl-examples-build
 
       - name: 'disk space used'
+        continue-on-error: true
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   linux-cross-mingw-w64:
@@ -884,8 +880,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 file --
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | sort -z | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -print0 | grep -z curl | sort -z | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools and clang-tidy
@@ -1052,7 +1048,7 @@ jobs:
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags+=' -DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
-              ldflags+=' -OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
+              ldflags+=' -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
             if [ "${TFLAGS}" = 'skiprun' ]; then
@@ -1120,8 +1116,8 @@ jobs:
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_RC_FLAGS="${rcflags}" \
-              -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-              -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
+              -DCMAKE_EXE_LINKER_FLAGS="${ldflags}" \
+              -DCMAKE_SHARED_LINKER_FLAGS="${ldflags}" \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_DROP_UNUSED=ON \
               -DCURL_WERROR=ON \
@@ -1157,8 +1153,8 @@ jobs:
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 file --
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | sort -z | xargs -0 file --
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | sort -z | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib/${MATRIX_TYPE}:$(cygpath --unix "${VCPKG_INSTALLATION_ROOT}")/installed/${MATRIX_ARCH}-${MATRIX_PLAT}/${MATRIX_TYPE}/bin:$PATH"
             "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
@@ -1216,7 +1212,7 @@ jobs:
                 "${MATRIX_INSTALL_VCPKG}" = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
             unset CURL_TEST_SSH_KEYALGO  # libssh2 built with WinCNG does not support ssh-ed25519 hostkeys
-            export CURL_TEST_SSH_ENABLE_KEX=diffie-hellman-group-exchange-sha256
+            export CURL_TEST_SSH_ENABLE_KEX=diffie-hellman-group16-sha512
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
@@ -1243,4 +1239,5 @@ jobs:
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
 
       - name: 'disk space used'
+        continue-on-error: true
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld

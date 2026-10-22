@@ -256,24 +256,6 @@ CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-/* Selects an SSL crypto engine
- */
-CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine)
-{
-  if(Curl_ssl->set_engine)
-    return Curl_ssl->set_engine(data, engine);
-  return CURLE_NOT_BUILT_IN;
-}
-
-/* Selects the default SSL crypto engine
- */
-CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data)
-{
-  if(Curl_ssl->set_engine_default)
-    return Curl_ssl->set_engine_default(data);
-  return CURLE_NOT_BUILT_IN;
-}
-
 /* Return list of OpenSSL crypto engine names. */
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
 {
@@ -675,8 +657,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
   NULL,                              /* close_all */
-  NULL,                              /* set_engine */
-  NULL,                              /* set_engine_default */
   NULL,                              /* engines_list */
   NULL,                              /* sha256sum */
   multissl_recv_plain,               /* recv decrypted data */
@@ -1429,10 +1409,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
 #if defined(USE_HTTPSRR) && defined(USE_ECH)
     /* When using ECH, kick off the HTTPS-RR resolve */
     if((origin->scheme->family == CURLPROTO_HTTP) &&
-       CURLECH_ENABLED(data) &&
-       Curl_ssl_supports(data, SSLSUPP_ECH) &&
-       (data->set.tls_ech != CURLECH_GREASE) &&
-       !CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
+       Curl_ssl_need_httpsrr(cf)) {
       result = Curl_conn_dns_add_https_resolve(data, cf->conn, cf->sockindex,
                                                origin);
     }
@@ -1502,6 +1479,30 @@ bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
   (void)data;
   return (Curl_ssl->supports & ssl_option);
 }
+
+#ifdef USE_ECH
+bool Curl_ssl_ech_enabled(struct Curl_cfilter *cf)
+{
+  if(Curl_ssl->supports & SSLSUPP_ECH) {
+    struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+    return !!conn_config->ech;
+  }
+  return FALSE;
+}
+
+bool Curl_ssl_need_httpsrr(struct Curl_cfilter *cf)
+{
+  if(Curl_ssl->supports & SSLSUPP_ECH) {
+    struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+    if(!conn_config->ech)
+      return FALSE;
+    if((conn_config->ech == CURLECH_GREASE) || conn_config->ech_config)
+      return FALSE;
+    return TRUE;
+  }
+  return FALSE;
+}
+#endif
 
 static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,

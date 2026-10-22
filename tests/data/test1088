@@ -12,7 +12,6 @@ followlocation
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1000 crlf="headers" nocheck="yes">
 HTTP/1.1 401 Authorization Required
@@ -69,7 +68,6 @@ contents
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -85,7 +83,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://first.host.it.is/we/want/that/page/%TESTNUMBER1000 HTTP/1.1

@@ -10,7 +10,6 @@ NTLM
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH NTLM
@@ -29,7 +28,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -47,7 +45,6 @@ IMAP NTLM authentication with initial response
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

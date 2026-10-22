@@ -7,7 +7,6 @@ xattr
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 301 OK
@@ -40,7 +39,6 @@ Funny-head: yesyes
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -61,7 +59,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --xattr -L -o %LOGDIR/out%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

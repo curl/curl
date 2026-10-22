@@ -24,8 +24,6 @@
 #
 import logging
 import os
-import time
-from typing import Generator
 
 import pytest
 from testenv import CurlClient, Dante, Env
@@ -35,15 +33,6 @@ log = logging.getLogger(__name__)
 
 @pytest.mark.skipif(condition=not Env.has_danted(), reason="missing danted")
 class TestSocks:
-
-    @pytest.fixture(scope='class')
-    @classmethod
-    def danted(cls, env: Env) -> Generator[Dante, None, None]:
-        danted = Dante(env=env)
-        assert danted.initial_start()
-        time.sleep(1)
-        yield danted
-        danted.stop()
 
     @pytest.fixture(autouse=True, scope='class')
     @classmethod

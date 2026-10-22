@@ -9,7 +9,6 @@ SASL CANCELLATION
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH NTLM
@@ -20,7 +19,6 @@ REPLY * A002 NO AUTH exchange cancelled by client
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -38,7 +36,6 @@ IMAP NTLM graceful cancellation
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 67 - CURLE_LOGIN_DENIED
 <errorcode>

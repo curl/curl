@@ -8,7 +8,6 @@ Resume
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 100 Continue swsclose
@@ -17,7 +16,6 @@ Silly-header: yeeeees
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -33,7 +31,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F name=daniel -C 0
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^Content-Type: multipart/form-data.*

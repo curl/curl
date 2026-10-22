@@ -69,7 +69,7 @@ By default, **wcurl** does:
 ## * Percent-decode the resulting filename;
 
 ## * Use 'index.html' as the default filename
-    if there is none in the URL.
+    if there is none in the URL, or if it is '-'.
 
 # OPTIONS
 
@@ -106,6 +106,19 @@ Print help message.
 
 Any option supported by curl can be set here. This is not used by **wcurl**; it
 is instead forwarded to the curl invocation.
+
+The value is split on whitespace (spaces, tabs and newlines) and each resulting
+word is passed to curl as a separate argument. Quotes and backslashes are not
+interpreted, so an argument containing whitespace cannot be passed this way. For
+example, **--curl-options='-H "Cookie: a=1; b=2"'** passes the four arguments
+`-H`, `"Cookie:`, `a=1;` and `b=2"` to curl, which treats the extra words as
+URLs to download.
+
+To pass arguments that contain whitespace, write them to a curl config file and
+pass it with **--curl-options="--config \<FILE\>"**, or use curl directly.
+
+Everything in \<CURL_OPTIONS\> becomes part of the curl command line, so never
+build it from untrusted input.
 
 # URL
 
