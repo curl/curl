@@ -198,20 +198,39 @@ sub checkunit {
 
 sub checkxml {
     my ($num) = @_;
-    my $bad = 1;
+    my $bad = 0;
     if(open(my $fh, "<", "./data/test$num")) {
+        my $has_xml = 0;
+        my %tag_count;
         while(<$fh>) {
+            chomp;
+            ++$tag_count{$1} if /^<([a-z0-9]+)( .+)?>$/;
             if(/^<\?xml/) {
-                $bad = 0;
-                last;
+                $has_xml = 1;
             }
-            print "data/test$num lacks <xml> tag\n";
-            last;
+            if(/^(# Server-side|# Client-side|# Verify data after the test has been \"shot\"|# tool is what to use instead of 'curl')/) {
+                print "data/test$num has superfluous comment: '$_'\n";
+                $bad = 1;
+            }
         }
         close($fh);
+
+        if(!$has_xml) {
+            print "data/test$num lacks <xml> tag\n";
+            $bad = 1;
+        }
+
+        for my $stat (sort { $tag_count{$a} <=> $tag_count{$b} || $a cmp $b } keys %tag_count) {
+            my $max = ($stat =~ /^(dns|file[0-9]*|postcheck)/) ? 2 : 1;
+            if($tag_count{$stat} > $max) {
+                print "data/test$num has too many '<$stat>' tags ($tag_count{$stat} vs. $max maximum)\n";
+                $bad = 1;
+            }
+        }
     }
     else {
         print STDERR "cannot open test$num\n";
+        $bad = 1;
     }
     return $bad;
 }
