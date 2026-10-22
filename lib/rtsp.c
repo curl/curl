@@ -172,6 +172,11 @@ static CURLcode rtsp_done(struct Curl_easy *data,
 
   result = Curl_http_done(data, status, premature);
 
+  /* Do not reuse a connection if an interleaved RTP frame is incomplete.
+   * The next transfer's RTSP response could otherwise be parsed as RTP. */
+  if(rtspc->state != RTP_PARSE_SKIP)
+    connclose(data->conn);
+
   if(!status && !result) {
     /* Check the sequence numbers */
     uint32_t CSeq_sent = rtsp->CSeq_sent;
