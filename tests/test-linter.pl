@@ -217,9 +217,10 @@ sub checkxml {
 }
 
 my $error;
-my @l = libtests();
+my @l;
 
 print "- Tests with source code in libtests/ have 'libtest' as <keyword>\n";
+@l = libtests();
 for my $t (@l) {
     my $lt = 0;
     my @k = keywords($t);
@@ -235,7 +236,7 @@ for my $t (@l) {
 }
 
 print "- Tests with source code in tunit/ have 'tunittest' as <keyword>\n";
-my @l = tunittests();
+@l = tunittests();
 for my $t (@l) {
     my $lt = 0;
     my @k = keywords($t);
@@ -254,7 +255,7 @@ for my $t (@l) {
 }
 
 print "- Tests with source code in unit/ have 'unittest' as <keyword>\n";
-my @l = unittests();
+@l = unittests();
 for my $t (@l) {
     my $lt = 0;
     my @k = keywords($t);
@@ -370,7 +371,7 @@ for my $t (@a) {
 }
 
 print "- Unit tests actually use private symbols\n";
-my @l = unittests();
+@l = unittests();
 my %protos = unitprotos();
 for my $t (@l) {
     $error += checkunit($t, \%protos);
