@@ -35,7 +35,7 @@ if($ARGV[0]) {
 # return all known test cases
 sub alltests {
     my @a;
-    open(M, "<./data/Makefile.am") ||
+    open(M, "<", "./data/Makefile.am") ||
         print STDERR "can't open data/Makefile.am\n";
     while(<M>) {
         if(/^  test(\d+)/) {
@@ -48,7 +48,7 @@ sub alltests {
 
 sub libtests {
     my @a;
-    open(M, "<./libtest/Makefile.inc") ||
+    open(M, "<", "./libtest/Makefile.inc") ||
         print STDERR "can't open Makefile.inc\n";
     while(<M>) {
         if(/^ *lib(\d+)\.c/) {
@@ -61,7 +61,7 @@ sub libtests {
 
 sub tunittests {
     my @a;
-    open(M, "<./tunit/Makefile.inc") ||
+    open(M, "<", "./tunit/Makefile.inc") ||
         print STDERR "can't open Makefile.inc\n";
     while(<M>) {
         if(/^ *tool(\d+)\.c/) {
@@ -74,7 +74,7 @@ sub tunittests {
 
 sub unittests {
     my @a;
-    open(M, "<./unit/Makefile.inc") ||
+    open(M, "<", "./unit/Makefile.inc") ||
         print STDERR "can't open Makefile.inc\n";
     while(<M>) {
         if(/^ *unit(\d+)\.c/) {
@@ -88,7 +88,7 @@ sub unittests {
 # provided a test number, return the keywords it uses
 sub keywords {
     my ($num) = @_;
-    open(my $fh, "<./data/test$num") ||
+    open(my $fh, "<", "./data/test$num") ||
         print STDERR "can't open test$num\n";
     local $/;
     my $c = <$fh>;
@@ -104,7 +104,7 @@ sub keywords {
 # provided a test number, return the <tool> it uses
 sub tool {
     my ($num) = @_;
-    open(my $fh, "<./data/test$num") ||
+    open(my $fh, "<", "./data/test$num") ||
         print STDERR "can't open test$num\n";
     local $/;
     my $c = <$fh>;
@@ -121,7 +121,7 @@ sub tool {
 sub unitprotos {
     my ($num) = @_;
     my %protos;
-    open(my $fh, "<$root/lib/unitprotos.h") ||
+    open(my $fh, "<", "$root/lib/unitprotos.h") ||
         print STDERR "can't open unitprotos.h\n";
     while(<$fh>) {
         if(/^UNITTEST .*[* ]([a-z0-9_]+)\(/i) {
@@ -135,7 +135,7 @@ sub unitprotos {
 # check if this unit test actually uses any internal symbols
 sub checkunit {
     my ($num, $protref) = @_;
-    open(my $fh, "<./unit/unit$num.c") ||
+    open(my $fh, "<", "./unit/unit$num.c") ||
         print STDERR "can't open unit$num.c\n";
     my $private = 0;
     while(<$fh>) {
@@ -171,7 +171,7 @@ sub checkunit {
 
 sub checkxml {
     my ($num) = @_;
-    open(my $fh, "<./data/test$num") ||
+    open(my $fh, "<", "./data/test$num") ||
         print STDERR "can't open test$num\n";
     my $bad = 1;
     while(<$fh>) {
