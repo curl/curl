@@ -34,7 +34,8 @@
       "commitMessagePrefix": "GHA: ",
       "labels": [
         "CI"
-      ]
+      ],
+      "minimumReleaseAge": "3 days"
     },
     {
       "matchDepNames": [
