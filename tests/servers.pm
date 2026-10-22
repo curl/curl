@@ -1741,7 +1741,7 @@ sub runmqttserver {
 
     unlink($portfile); # need to see a new one
     # start our MQTT server - on a random port!
-    my $cmd = server_exe('mqttd').
+    my $cmd = server_exe('mqttd') .
         " --port 0" .
         " --pidfile $pidfile" .
         " --portfile $portfile" .
@@ -1806,7 +1806,7 @@ sub runsocksserver {
     # start our socks server, get commands from the FTP cmd file
     my $cmd = "";
     if($is_unix) {
-        $cmd = server_exe('socksd').
+        $cmd = server_exe('socksd') .
             " --pidfile $pidfile" .
             " --reqfile $LOGDIR/$SOCKSIN" .
             " --logfile $logfile" .
@@ -1816,7 +1816,7 @@ sub runsocksserver {
         $portfile = "none";
     }
     else {
-        $cmd = server_exe('socksd').
+        $cmd = server_exe('socksd') .
             " --port 0" .
             " --pidfile $pidfile" .
             " --portfile $portfile" .
