@@ -285,6 +285,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
         if(cmdsize) {
           logmsg("Found a reply-servercmd section!");
           do {
+            int rtp_fields;
+            char rtp_option[16] = "";
             rtp_size_err = 0;
             if(!strncmp(CMD_AUTH_REQUIRED, ptr,
                         CURL_CSTRLEN(CMD_AUTH_REQUIRED))) {
@@ -312,16 +314,18 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
               logmsg("instructed to skip this number of bytes %d", num);
               req->skip = num;
             }
-            else if(3 <= sscanf(ptr,
-                                "rtp: part %d channel %d size %d size_err %d",
+            else if(3 <= (rtp_fields = sscanf(
+                                ptr,
+                                "rtp: part %d channel %d size %d size_err %d %15s",
                                 &rtp_partno, &rtp_channel, &rtp_size,
-                                &rtp_size_err)) {
+                                &rtp_size_err, rtp_option))) {
 
               if(rtp_partno == req->partno) {
                 int i = 0;
                 logmsg("RTP: part %d channel %d size %d size_err %d",
                        rtp_partno, rtp_channel, rtp_size, rtp_size_err);
-                if(strstr(ptr, " coalesce"))
+                if((rtp_fields == 5) &&
+                   !strcmp(rtp_option, "coalesce"))
                   req->rtp_coalesce = TRUE;
 
                 /* Make our scratch buffer enough to fit all the
