@@ -326,6 +326,11 @@ static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
     if(result)
       goto out;
   }
+  if(ssl->auto_client_cert) {
+    result = curlx_dyn_add(&buf, ":AUTOC");
+    if(result)
+      goto out;
+  }
 
   result = cf_ssl_peer_key_add_mtls(&buf, ssl, &is_local);
   if(result)
