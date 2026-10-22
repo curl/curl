@@ -203,7 +203,7 @@ $cafile = abs_path("$path/certs/test-ca.cacert");
 $certfile = $stuncert ? "certs/$stuncert" : "certs/test-localhost.pem";
 $certfile = abs_path($certfile);
 
-my $ssltext = uc($proto) ." SSL/TLS:";
+my $ssltext = uc($proto) . " SSL/TLS:";
 
 my $host_ip = ($ipvnum == 6) ? '::1' : '127.0.0.1';
 
@@ -268,7 +268,7 @@ if($stunnel_version < 400) {
     $cmd .= ($socketopt) ? "$socketopt " : "";
     $cmd .= ">$logfile 2>&1";
     if($verbose) {
-        print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
+        print uc($proto) . " server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
         print "pem cert file: $certfile\n";
         print "pid file: $pidfile\n";
@@ -334,7 +334,7 @@ if($stunnel_version >= 400) {
         exit 1;
     }
     if($verbose) {
-        print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
+        print uc($proto) . " server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
         print "stunnel config at $conffile:\n";
         open(my $writtenconf, '<', $conffile) or die "$ssltext could not open the config file after writing\n";

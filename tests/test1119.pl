@@ -185,13 +185,13 @@ for my $e (sort @syms) {
     }
     if($doc{$e}) {
         if($verbose) {
-            print $e."\n";
+            print $e . "\n";
         }
         $doc{$e} = "used";
         next;
     }
     else {
-        print $e."\n";
+        print $e . "\n";
         $misses++;
     }
 }

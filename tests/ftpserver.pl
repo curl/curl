@@ -574,11 +574,11 @@ sub protocolsetup {
             'PBSZ' => '500 PBSZ not implemented',
             'PROT' => '500 PROT not implemented',
             'welcome' => join("",
-            '220-        _   _ ____  _'."\r\n",
-            '220-    ___| | | |  _ \| |'."\r\n",
-            '220-   / __| | | | |_) | |'."\r\n",
-            '220-  | (__| |_| |  _ {| |___'."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n")
+            '220-        _   _ ____  _' . "\r\n",
+            '220-    ___| | | |  _ \| |' . "\r\n",
+            '220-   / __| | | | |_) | |' . "\r\n",
+            '220-  | (__| |_| |  _ {| |___' . "\r\n",
+            '220    \___|\___/|_| \_\_____|' . "\r\n")
         );
     }
     elsif($proto eq 'pop3') {
@@ -600,12 +600,12 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '        _   _ ____  _'."\r\n",
-            '    ___| | | |  _ \| |'."\r\n",
-            '   / __| | | | |_) | |'."\r\n",
-            '  | (__| |_| |  _ {| |___'."\r\n",
-            '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK curl POP3 server ready to serve '."\r\n")
+            '        _   _ ____  _' . "\r\n",
+            '    ___| | | |  _ \| |' . "\r\n",
+            '   / __| | | | |_) | |' . "\r\n",
+            '  | (__| |_| |  _ {| |___' . "\r\n",
+            '   \___|\___/|_| \_\_____|' . "\r\n",
+            '+OK curl POP3 server ready to serve ' . "\r\n")
         );
     }
     elsif($proto eq 'imap') {
@@ -635,12 +635,12 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '        _   _ ____  _'."\r\n",
-            '    ___| | | |  _ \| |'."\r\n",
-            '   / __| | | | |_) | |'."\r\n",
-            '  | (__| |_| |  _ {| |___'."\r\n",
-            '   \___|\___/|_| \_\_____|'."\r\n",
-            '* OK curl IMAP server ready to serve'."\r\n")
+            '        _   _ ____  _' . "\r\n",
+            '    ___| | | |  _ \| |' . "\r\n",
+            '   / __| | | | |_) | |' . "\r\n",
+            '  | (__| |_| |  _ {| |___' . "\r\n",
+            '   \___|\___/|_| \_\_____|' . "\r\n",
+            '* OK curl IMAP server ready to serve' . "\r\n")
         );
     }
     elsif($proto eq 'smtp') {
@@ -659,11 +659,11 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '220-        _   _ ____  _'."\r\n",
-            '220-    ___| | | |  _ \| |'."\r\n",
-            '220-   / __| | | | |_) | |'."\r\n",
-            '220-  | (__| |_| |  _ {| |___'."\r\n",
-            '220    \___|\___/|_| \_\_____|'."\r\n")
+            '220-        _   _ ____  _' . "\r\n",
+            '220-    ___| | | |  _ \| |' . "\r\n",
+            '220-   / __| | | | |_) | |' . "\r\n",
+            '220-  | (__| |_| |  _ {| |___' . "\r\n",
+            '220    \___|\___/|_| \_\_____|' . "\r\n")
         );
     }
 }
@@ -3119,7 +3119,7 @@ if($portfile && !$port) {
 logmsg sprintf("%s server listens on port IPv${ipvnum}/${port}\n", uc($proto));
 
 open(my $pid, ">", $pidfile);
-print $pid $$."\n";
+print $pid $$ . "\n";
 close($pid);
 
 logmsg("logged pid $$ in $pidfile\n");

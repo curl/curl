@@ -3283,7 +3283,7 @@ runtimestats($lasttest);
 
 if($all) {
     logmsg "TESTDONE: $all tests were considered during ".
-        sprintf("%.0f", $sofar) ." seconds.\n";
+        sprintf("%.0f", $sofar) . " seconds.\n";
 }
 
 if(%skipped && !$short) {

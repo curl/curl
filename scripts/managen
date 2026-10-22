@@ -528,7 +528,7 @@ sub render {
         $blankline = 0;
         push @desc, $d if($manpage);
         my $qstr = $quote ? "q" : "";
-        push @desc, "[".(1 + $level)."$qstr]$d" if(!$manpage);
+        push @desc, "[" . (1 + $level) ." $qstr]$d" if(!$manpage);
         $header = 0;
     }
     if($finalblank) {
@@ -927,7 +927,7 @@ sub single {
                     # a long example, shorten it
                     my $p = substr($e, 0, $maxwidth);
                     $p = maybespace($p);
-                    push @ex, "[0q] curl ".$p."\\";
+                    push @ex, "[0q] curl " . $p . "\\";
                     $e = substr($e, length($p));
                     do {
                         my $r = substr($e, 0, $maxwidth);

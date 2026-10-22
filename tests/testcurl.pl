@@ -320,7 +320,7 @@ my $str1066os = 'o' x 1066;
 
 # Set timestamp to the UTC this script is running. Its value might
 # be changed later in the script to the value present in curlver.h
-$timestamp = scalar(gmtime)." UTC";
+$timestamp = scalar(gmtime) . " UTC";
 
 logit "STARTING HERE"; # first line logged, for scripts to trigger on
 logit 'TRANSFER CONTROL ==== 1120 CHAR LINE' . $str1066os . 'LINE_END';
@@ -412,7 +412,7 @@ if($git) {
         logit "failed to update from curl git ($?), continue anyway" if($?);
 
         # Set timestamp to the UTC the git update took place.
-        $timestamp = scalar(gmtime)." UTC" if(!$gitstat);
+        $timestamp = scalar(gmtime) . " UTC" if(!$gitstat);
     }
 
     # get the last 5 commits for show (even if no pull was made)
@@ -469,7 +469,7 @@ if((-f "include/curl/curlver.h") &&
             my $stampstring = $1;
             if($stampstring !~ /DEV/) {
                $stampstring =~ s/\s+UTC//;
-                $timestamp = $stampstring." UTC";
+                $timestamp = $stampstring . " UTC";
             }
             last;
         }
