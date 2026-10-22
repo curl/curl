@@ -480,7 +480,7 @@ sub stopserver {
         my @lockfiles = (
             "$LOGDIR/$LOCKDIR/$server.lock",
             "$LOGDIR/$LOCKDIR/$server-IPv$ipvnum.lock",
-            "$LOGDIR/$LOCKDIR/sws-".uc($server)."-IPv$ipvnum.lock"
+            "$LOGDIR/$LOCKDIR/sws-" . uc($server) . "-IPv$ipvnum.lock"
             );
         foreach my $lockfile (@lockfiles) {
             if(-f $lockfile) {
@@ -2131,13 +2131,13 @@ sub startservers {
             if($run{$what} &&
                !responsive_pingpong_server($what, "", $verbose)) {
                 if(stopserver($what)) {
-                    return ("failed stopping unresponsive ".uc($what)." server", 3);
+                    return ("failed stopping unresponsive " . uc($what) . " server", 3);
                 }
             }
             if(!$run{$what}) {
                 ($serr, $pid, $pid2) = runpingpongserver($what, "", $verbose);
                 if($pid <= 0) {
-                    return ("failed starting ". uc($what) ." server", $serr);
+                    return ("failed starting " . uc($what) . " server", $serr);
                 }
                 logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2) if($verbose);
                 $run{$what} = "$pid $pid2";
