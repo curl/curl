@@ -897,7 +897,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     else {
       logmsg("Sent off %ld bytes", (long)written);
     }
-    /* Write only the RTSP response, not any coalesced RTP bytes, to the dump. */
+    /* Dump only the RTSP response, not coalesced RTP bytes. */
     if(response_written < responsesize) {
       size_t dump_size = (size_t)written;
       if(dump_size > responsesize - response_written)
