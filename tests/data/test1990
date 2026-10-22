@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 CURLINFO_EFFECTIVE_URL with no URL and an invalid URL
@@ -17,7 +16,6 @@ CURLINFO_EFFECTIVE_URL with no URL and an invalid URL
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 getinfo: 0, url: ''

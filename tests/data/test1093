@@ -8,7 +8,6 @@ mode=
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 a chunk of
@@ -18,7 +17,6 @@ returned
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 tftp
@@ -31,7 +29,6 @@ TFTP retrieve with mode=octet
 </command>
 </client>
 
-# Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>
 ^timeout = [5-6]$

@@ -8,7 +8,6 @@ DELAY
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
@@ -30,7 +29,6 @@ wait 1
 </postcmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -43,7 +41,6 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TES
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">
 HTTP/1.1 200 OK swsclose

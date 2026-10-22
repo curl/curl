@@ -8,16 +8,13 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 FTP upload and upload same file again without rewind
@@ -38,7 +35,6 @@ works?
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <upload>
 </upload>

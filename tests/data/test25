@@ -8,7 +8,6 @@ followlocation
 --max-redirs
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message
@@ -59,7 +58,6 @@ Connection: close
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -72,7 +70,6 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L --max-redirs 5
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1

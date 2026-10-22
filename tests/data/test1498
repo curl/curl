@@ -9,7 +9,6 @@ chunked Transfer-Encoding
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.0 200 OK swsclose
@@ -21,7 +20,6 @@ blablabla
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -37,7 +35,6 @@ http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T .
 </stdin>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol>
 PUT /bzz/%TESTNUMBER HTTP/1.1%CR

@@ -6,7 +6,6 @@ source analysis
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Verify curl prefix of public symbols in header files

@@ -6,7 +6,6 @@ etags
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -16,7 +15,6 @@ Content-Length: 0
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -33,7 +31,6 @@ initial content
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

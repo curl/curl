@@ -8,7 +8,6 @@ HTTP proxy
 followlocation
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 302 OK
@@ -40,7 +39,6 @@ body
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -56,7 +54,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://example.com/please/gimme/%TESTNUMBER HTTP/1.1

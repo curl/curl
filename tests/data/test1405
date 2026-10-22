@@ -9,7 +9,6 @@ pre-quote
 --libcurl
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 data
@@ -25,7 +24,6 @@ REPLY FAIL 500 this might not be a failure!
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <features>
 --libcurl
@@ -44,7 +42,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FA
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

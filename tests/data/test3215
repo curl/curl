@@ -6,7 +6,6 @@ SMTP DSN
 </keywords>
 </info>
 
-# Server-side
 <reply>
 # Special Replies, so the server does not have to understand DSN
 <servercmd>
@@ -15,7 +14,6 @@ REPLY RCPT 250 Ok
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -34,7 +32,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt "%LTrecipient@example.com%GT NO
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

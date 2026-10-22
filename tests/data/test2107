@@ -9,7 +9,6 @@ proxytunnel
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -23,7 +22,6 @@ X-Evil: he%hex[%00]hex%llo%CR
 </connect>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -40,7 +38,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -p -x http://%HOSTIP:%PROXYPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 8

@@ -6,7 +6,6 @@ HTTPS
 HTTPS PUT
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
@@ -17,7 +16,6 @@ blablabla
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -36,7 +34,6 @@ HTTPS PUT of small file
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 PUT /we/want/%TESTNUMBER HTTP/1.1

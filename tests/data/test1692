@@ -6,7 +6,6 @@ IPNS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ Hello curl from IPFS
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 ipfs
@@ -36,7 +34,6 @@ IPNS path with encoded slashes and dotdot stays under the gateway
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /private/gateway/ipns/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u/%2F..%2F..%2F..%2F..%2F..%2Fadmin/config HTTP/1.1

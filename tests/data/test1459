@@ -7,7 +7,6 @@ known_hosts
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -28,7 +27,6 @@ R93Ey5VtBeBblYTRlFXBWJgKFcTKBRJ/O4qBZwbUgt10AHj31i6h8NehfT19tR8wG/YCmj3KtYLHmwdz
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # badlibssh configurations return the wrong thing: 67 CURLE_LOGIN_DENIED,
 # instead of 60 CURLE_PEER_FAILED_VERIFICATION.

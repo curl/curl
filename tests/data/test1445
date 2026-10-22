@@ -10,7 +10,6 @@ FILE
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 file
@@ -26,7 +25,6 @@ file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt --remote-tim
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <postcheck>
 %PERL %SRCDIR/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %LOGDIR/curl%TESTNUMBER.out 946728000

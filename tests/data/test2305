@@ -7,7 +7,6 @@ HTTP GET
 compressed
 </keywords>
 </info>
-# Server-side
 <reply>
 <data nocheck="yes" crlf="headers">
 HTTP/1.1 200 OK
@@ -22,7 +21,6 @@ Content-Length: 54
 
 </reply>
 
-# Client-side
 <client>
 <features>
 libz
@@ -38,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed --silent --show-error
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/

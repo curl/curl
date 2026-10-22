@@ -6,7 +6,6 @@ cmdline
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Pass in string to -C
@@ -16,7 +15,6 @@ http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER -C wrong
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 2

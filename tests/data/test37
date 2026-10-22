@@ -6,13 +6,11 @@ HTTP
 HTTP GET
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -25,7 +23,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 52

@@ -7,7 +7,6 @@ curl_get_line
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

@@ -26,7 +26,6 @@ Content-Type: text/html
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +38,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -L -O --output-dir %LOGDIR
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

@@ -8,7 +8,6 @@ aws-sigv4
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -19,7 +18,6 @@ Content-Length: 0
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -38,7 +36,6 @@ HTTP AWS_SIGV4 canonical request header sorting test
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^Content-Length:.*

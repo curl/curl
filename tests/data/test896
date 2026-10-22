@@ -9,11 +9,9 @@ FETCH
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -26,7 +24,6 @@ IMAP with --login-options 'AUTH=dummy' (failing)
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 3 == CURLE_URL_MALFORMAT
 <errorcode>

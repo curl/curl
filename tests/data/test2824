@@ -11,7 +11,6 @@ chunked Transfer-Encoding
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 connection-monitor
@@ -48,7 +47,6 @@ Content-Length: 0
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -67,7 +65,6 @@ http://test.remote.example.com.%TESTNUMBER:1024/path/%TESTNUMBER0003 --proxy htt
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 CONNECT test.remote.example.com.%TESTNUMBER:1024 HTTP/1.1

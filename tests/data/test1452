@@ -7,13 +7,11 @@ UPLOAD
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 telnet
@@ -33,7 +31,6 @@ telnet://%HOSTIP:%TELNETPORT --upload-file -
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout nonewline="yes">
 test%TESTNUMBER

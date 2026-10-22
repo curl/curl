@@ -8,7 +8,6 @@ documentation
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Verify feature names and CURL_VERSION_* in lib and docs in sync

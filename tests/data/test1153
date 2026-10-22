@@ -7,7 +7,6 @@ PASV
 LIST
 </keywords>
 </info>
-# Server-side
 <reply>
 <servercmd>
 REPLY PWD 257 "/""hello"""
@@ -28,7 +27,6 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -41,7 +39,6 @@ ftp://%HOSTIP:%FTPPORT/test-%TESTNUMBER/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

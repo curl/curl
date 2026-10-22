@@ -6,7 +6,6 @@ globbing
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 too many {} globs
@@ -16,7 +15,6 @@ http://testingthis/%repeat[201 x {a}b]%
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 3

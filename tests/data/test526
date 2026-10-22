@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 file contents should appear once for each file
@@ -23,7 +22,6 @@ file contents should appear once for each file
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -36,7 +34,6 @@ ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

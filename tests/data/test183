@@ -9,7 +9,6 @@ persistent connection
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ moo
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -36,7 +34,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://deathstar.another.galaxy/%TESTNUMBER HTTP/1.1

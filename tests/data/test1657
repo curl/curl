@@ -7,7 +7,6 @@ getASN1Element
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

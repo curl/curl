@@ -12,7 +12,6 @@ RFC7628
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH OAUTHBEARER
@@ -30,7 +29,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3
@@ -43,7 +41,6 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 CAPA

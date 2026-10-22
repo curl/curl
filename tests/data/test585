@@ -11,7 +11,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 302 eat this!
@@ -35,7 +34,6 @@ Connection: close%CR
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -43,7 +41,6 @@ http
 <features>
 http
 </features>
-# tool is what to use instead of 'curl'
 <tool>
 lib500
 </tool>
@@ -56,7 +53,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

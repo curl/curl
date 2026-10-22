@@ -8,7 +8,6 @@ chunked Transfer-Encoding
 DELAY
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 funky chunky!%CR
@@ -45,7 +44,6 @@ writedelay: 10
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -58,7 +56,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

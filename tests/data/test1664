@@ -7,7 +7,6 @@ strparse
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

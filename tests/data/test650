@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 301 OK
@@ -33,7 +32,6 @@ Content-Type: text/html
 </data2>
 </reply>
 
-# Client-side
 <client>
 <features>
 form-api
@@ -41,7 +39,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 HTTP formpost using form API - with redirect and re-POST
@@ -57,7 +54,6 @@ This is data from a file.
 </file>
 </client>
 
-# Verify data bbter the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/------------------------------/

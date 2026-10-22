@@ -8,7 +8,6 @@ CURLOPT_PORT
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 line 1
@@ -26,7 +25,6 @@ last line
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -42,7 +40,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

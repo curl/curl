@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 301 OK
@@ -34,7 +33,6 @@ Funny-head: nono
 </data2>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -51,7 +49,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 # This does not verify the protocol because the sending of data might be

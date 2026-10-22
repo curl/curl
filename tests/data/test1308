@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 http

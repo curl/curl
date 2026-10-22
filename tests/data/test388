@@ -8,7 +8,6 @@ HTTP Digest auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 # First reply back and ask for Digest auth
 <data1 crlf="headers">
@@ -68,7 +67,6 @@ This IS the second real page!
 </data1003>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -86,7 +84,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u testuser:testpass --digest http://%H
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^Authorization.*cnonce

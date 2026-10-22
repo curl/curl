@@ -8,7 +8,6 @@ manpages
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 symbols-in-versions and man pages agree on added-in versions

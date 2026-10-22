@@ -8,7 +8,6 @@ SOCKS5
 connect to non-listen
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 </data>
@@ -18,7 +17,6 @@ response 1
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 socks5
@@ -35,7 +33,6 @@ Attempt connect to non-listening HTTP server via SOCKS5 proxy
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 97

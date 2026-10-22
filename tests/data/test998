@@ -7,7 +7,6 @@ HTTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 301 redirect
@@ -49,7 +48,6 @@ Funny-head: yesyes
 
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -65,7 +63,6 @@ HTTP with auth in URL redirected to another host
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://somewhere.example/%TESTNUMBER HTTP/1.1

@@ -7,7 +7,6 @@ CURLOPT_RESOLVE
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

@@ -10,7 +10,6 @@ RFC2449
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 CAPA UIDL USER
@@ -24,7 +23,6 @@ CAPA UIDL USER
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3
@@ -37,7 +35,6 @@ pop3://%HOSTIP:%POP3PORT -u user:secret -X UIDL
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 CAPA

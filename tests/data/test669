@@ -8,7 +8,6 @@ HTTP MIME POST
 HTTP FORMPOST
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
@@ -20,7 +19,6 @@ blablabla
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -36,7 +34,6 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -H 'Content-type: multipart/form-da
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/------------------------------/

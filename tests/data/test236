@@ -6,7 +6,6 @@ FTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY SIZE 550 access to this file is very much denied
@@ -16,7 +15,6 @@ REPLY SIZE 500 command not understood
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -32,7 +30,6 @@ Test data
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 <protocol crlf="yes">

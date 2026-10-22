@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 funky chunky!%CR
@@ -31,7 +30,6 @@ Server: sent-as-trailer%CR
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 http
@@ -53,7 +51,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
  Date == Thu, 09 Nov 2010 14:49:00 GMT

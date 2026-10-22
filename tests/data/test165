@@ -9,7 +9,6 @@ IDN
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -42,7 +40,6 @@ http://www.%hex[%c3%a5%c3%a4%c3%b6]hex%.se/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://www.xn--4cab6c.se/page/%TESTNUMBER HTTP/1.1

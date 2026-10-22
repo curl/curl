@@ -9,7 +9,6 @@ NTLM
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <!-- First request has NTLM auth, wrong password -->
@@ -233,7 +232,6 @@ Finally, this is the real page!
 
 </reply>
 
-# Client-side
 <client>
 <features>
 NTLM
@@ -255,7 +253,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER ntlm ntlm
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER0100 HTTP/1.1

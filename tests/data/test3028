@@ -6,7 +6,6 @@ HTTP
 HTTP CONNECT
 </keywords>
 </info>
-# Server-side
 <reply>
 <connect>
 HTTP/1.1 200 Mighty fine indeed
@@ -27,7 +26,6 @@ haha
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -44,7 +42,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %PROXYPORT/proxy-line/

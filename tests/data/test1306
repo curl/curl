@@ -8,7 +8,6 @@ hash
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

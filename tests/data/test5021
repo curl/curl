@@ -8,7 +8,6 @@ RFC9421
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -22,7 +21,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ httpsig: default algorithm (ed25519) when --httpsig-algo omitted
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/Signature: sig1=:.*:/Signature: sig1=:STRIPPED:/

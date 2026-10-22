@@ -7,11 +7,9 @@ cmdline
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <name>
 use --next with missing URL before it
@@ -21,7 +19,6 @@ use --next with missing URL before it
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
 curl: missing URL before --next

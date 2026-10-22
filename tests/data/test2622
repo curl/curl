@@ -9,12 +9,10 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

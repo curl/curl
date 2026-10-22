@@ -6,7 +6,6 @@ checksrc
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 checksrc
@@ -106,7 +105,6 @@ void startfunc(int a, int b) {
 </file2>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 ./%LOGDIR/code%TESTNUMBER.c:4:82: warning: Longer than 79 columns (LONGLINE)

@@ -10,7 +10,6 @@ CUSTOMREQUEST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1 crlf="yes">
 * 123 FETCH (FLAGS (\Seen \Deleted))
@@ -20,7 +19,6 @@ CUSTOMREQUEST
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -33,7 +31,6 @@ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X 'STORE 123 +Flags \Deleted' -u user:secr
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

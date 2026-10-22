@@ -7,7 +7,6 @@ HTTP POST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK swsclose
@@ -20,7 +19,6 @@ blablabla
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -37,7 +35,6 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=daniel;type=moo/foo-.4" -F
 # We create this file before the command is invoked!
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^(Content-Type: multipart/form-data;|------------).*

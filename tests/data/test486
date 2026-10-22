@@ -6,7 +6,6 @@ netrc
 HTTP
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 301 Follow this you fool
@@ -59,7 +58,6 @@ target
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http

@@ -8,14 +8,12 @@ netrc
 macdef
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 blipp
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -42,7 +40,6 @@ machine %HOSTIP login user1 password passwd1
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER user1

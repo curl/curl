@@ -8,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK swsclose
@@ -18,7 +17,6 @@ Content-Type: text/html; charset=ISO-8859-4%repeat[3 x  ]%
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -31,7 +29,6 @@ HTTP content-type with spaces in
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout mode="text">
 text/html; charset=ISO-8859-4

@@ -7,7 +7,6 @@ HTTP GET
 retry
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 503 BAD
@@ -20,7 +19,6 @@ server not available
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -33,7 +31,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 2 --retry-max-time 10
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

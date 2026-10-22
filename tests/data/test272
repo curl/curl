@@ -7,14 +7,12 @@ PASV
 RETR
 </keywords>
 </info>
-# Server-side
 <reply>
 <mdtm>
 213 20040101121212
 </mdtm>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -28,7 +26,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -z "2004 jan 1 12:12:12 UTC"
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

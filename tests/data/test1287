@@ -9,7 +9,6 @@ proxytunnel
 verbose logs
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -47,7 +46,6 @@ contents
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -65,7 +63,6 @@ verbose-strings
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1

@@ -9,7 +9,6 @@ FILE
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 file
@@ -33,7 +32,6 @@ moo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # CURLE_URL_MALFORMAT is error code 3
 <errorcode>

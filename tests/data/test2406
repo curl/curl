@@ -9,7 +9,6 @@ HTTPS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 404 nope
@@ -23,7 +22,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Debug
@@ -44,7 +42,6 @@ HTTP/2 over HTTPS with -f
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">
 HTTP/2 404%SP
