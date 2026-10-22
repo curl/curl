@@ -56,7 +56,7 @@ my $gopher = 0;
 
 my $flags  = "";
 my $path   = '.';
-my $logdir = $path .'/log';
+my $logdir = $path . '/log';
 my $piddir;
 
 while(@ARGV) {

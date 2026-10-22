@@ -98,7 +98,7 @@ my $idnum = 1;                # default ssh daemon instance number
 my $proto = 'ssh';            # protocol the ssh daemon speaks
 my $keyalgo = 'rsa';          # key algorithm
 my $path = getcwd();          # current working directory
-my $logdir = $path .'/log';   # directory for log files
+my $logdir = $path . '/log';  # directory for log files
 my $piddir;                   # directory for server config files
 my $username = $ENV{USER};    # default user
 my $pidfile;                  # ssh daemon pid file

@@ -79,7 +79,7 @@ my $mtls = 0;         # Whether to verify client certificates
 #
 my $path   = getcwd();
 my $srcdir = $path;
-my $logdir = $path .'/log';
+my $logdir = $path . '/log';
 my $piddir;
 
 #***************************************************************************

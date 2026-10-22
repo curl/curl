@@ -94,7 +94,7 @@ my $srvrname;       # server name for presentation purposes
 my $cwd_testno;     # test case numbers extracted from CWD command
 my $testno = 0;     # test case number (read from server.cmd)
 my $path   = '.';
-my $logdir = $path .'/log';
+my $logdir = $path . '/log';
 my $piddir;
 
 #**********************************************************************

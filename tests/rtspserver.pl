@@ -49,7 +49,7 @@ my $srcdir;
 
 my $flags  = "";
 my $path   = '.';
-my $logdir = $path .'/log';
+my $logdir = $path . '/log';
 
 while(@ARGV) {
     if($ARGV[0] eq '--pidfile') {

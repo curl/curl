@@ -582,7 +582,7 @@ else {
 
 if(!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
     logit "display curl${binext} --version output";
-    my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '') . "./src/curl${binext} --version|";
+    my $cmd = ($extvercmd ne '' ? $extvercmd . ' ' : '') . "./src/curl${binext} --version|";
     open($f, "<", $cmd);
     while(<$f>) {
         # strip CR from output on non-Windows platforms (WINE on Linux)

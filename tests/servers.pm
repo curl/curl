@@ -515,11 +515,11 @@ sub verifyhttp {
     my $infix = ($do_http3) ? "_h3" : "";
 
     my $verifyout = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .$infix .'_verify.out';
+        servername_canon($proto, $ipvnum, $idnum) . $infix . '_verify.out';
     unlink($verifyout) if(-f $verifyout);
 
     my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .$infix .'_verify.log';
+        servername_canon($proto, $ipvnum, $idnum) . $infix . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     if($proto eq "gopher") {
@@ -600,7 +600,7 @@ sub verifyftp {
     my $extra = "";
 
     my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+        servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     if($proto eq "ftps") {
@@ -665,11 +665,11 @@ sub verifyrtsp {
     my $server = servername_id($proto, $ipvnum, $idnum);
 
     my $verifyout = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
+        servername_canon($proto, $ipvnum, $idnum) . '_verify.out';
     unlink($verifyout) if(-f $verifyout);
 
     my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+        servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     my $flags = "--max-time $server_response_maxtime ";
@@ -810,7 +810,7 @@ sub verifytelnet {
     my $extra = "";
 
     my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+        servername_canon($proto, $ipvnum, $idnum) . '_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     my $flags = "--max-time $server_response_maxtime ";
