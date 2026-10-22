@@ -208,8 +208,13 @@ static CURLcode test_lib571(const char *URL)
 
   packets_before = rtp_packet_count;
   result = curl_easy_perform(curl);
-  if(result)
+  if(result != CURLE_OPERATION_TIMEDOUT) {
+    curl_mfprintf(stderr,
+                  "Expected timeout with incomplete RTP frame, got %s\n",
+                  curl_easy_strerror(result));
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
+  }
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
