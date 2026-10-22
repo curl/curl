@@ -32,8 +32,6 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-#define T2607_POOL 8192
-
 static unsigned int t2607_rand(unsigned int *seed)
 {
   *seed = *seed * 1103515245U + 12345U;
@@ -44,14 +42,14 @@ static CURLcode test_unit2607(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  static uint8_t pool[T2607_POOL];
+  static uint8_t pool[8192];
   static uint8_t piece[3000];
   static uint8_t drained[2048];
   unsigned int seed = 2607;
   unsigned int round;
   size_t i;
 
-  for(i = 0; i < T2607_POOL; i++)
+  for(i = 0; i < sizeof(pool); i++)
     pool[i] = (uint8_t)t2607_rand(&seed);
 
   for(round = 0; round < 300; round++) {
@@ -78,7 +76,7 @@ static CURLcode test_unit2607(const char *arg)
       CURLcode result;
 
       for(i = 0; i < len; i++)
-        piece[i] = pool[(sent + i) % T2607_POOL];
+        piece[i] = pool[(sent + i) % sizeof(pool)];
       result = ws_enc_mask_write(mask, &xori, piece, len, &q, &nwritten);
       if(full && len) {
         fail_unless(result == CURLE_AGAIN, "full bufq must return AGAIN");
@@ -98,7 +96,7 @@ static CURLcode test_unit2607(const char *arg)
       fail_unless(!result || result == CURLE_AGAIN, "read failed");
       for(i = 0; i < nread; i++) {
         size_t k = checked + i;
-        uint8_t want = pool[k % T2607_POOL] ^ mask[(xori0 + k) & 3];
+        uint8_t want = pool[k % sizeof(pool)] ^ mask[(xori0 + k) & 3];
         if(drained[i] != want) {
           /* report the first difference only */
           fail_unless(drained[i] == want,
