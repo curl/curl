@@ -39,9 +39,10 @@ env:
   CURL_TEST_MIN: 1900
   CURL_TEST_SSH_KEYALGO: ed25519
   DO_NOT_TRACK: '1'
-  OPENSSH_WINDOWS_VERSION: 10.0.0.0p2-Preview  # manually bumped
-  OPENSSH_WINDOWS_SHA256_ARM64: 698c6aec31c1dd0fb996206e8741f4531a97355686b5431ef347d531b07fcd42
-  OPENSSH_WINDOWS_SHA256_WIN64: 23f50f3458c4c5d0b12217c6a5ddfde0137210a30fa870e98b29827f7b43aba5
+  # https://github.com/PowerShell/Win32-OpenSSH/tags
+  OPENSSH_WINDOWS_VERSION: 10.4.0.0p1-Preview  # manually bumped
+  OPENSSH_WINDOWS_SHA256_ARM64: d2b1928225479fec9e0c938f527fdb5ed676446cca1bbcc5af84aca1f272842e
+  OPENSSH_WINDOWS_SHA256_WIN64: b67ff8becd203502190ec42ac7787c24c2cd3325ed7700485fe7a1c83d2a7957
   # renovate: datasource=github-tags depName=mtrojnar/stunnel versioning=semver-coerced extractVersion=^stunnel-(?<version>.+)$
   STUNNEL_VERSION: 5.82
   CYGWIN: 'proc_retry:1'
