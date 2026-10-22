@@ -112,7 +112,7 @@ use memanalyzer;
 #######################################################################
 # Global variables set elsewhere but used only by this package
 # These may only be set *before* runner_init is called
-our $DBGCURL = $CURL; #"../src/.libs/curl";  # alternative for debugging
+our $DBGCURL = $CURL; # "../src/.libs/curl";  # alternative for debugging
 our $gdb = checktestcmd("gdb");
 our $gdbthis = 0;  # run test case with debugger (gdb or lldb)
 our $gdbxwin;      # use windowed gdb when using gdb
@@ -755,8 +755,8 @@ sub singletest_prepare {
 
     # create (possibly-empty) files before starting the test
     for my $partsuffix (('', '1', '2', '3', '4')) {
-        my @inputfile = getpart("client", "file".$partsuffix);
-        my %fileattr = getpartattr("client", "file".$partsuffix);
+        my @inputfile = getpart("client", "file" . $partsuffix);
+        my %fileattr = getpartattr("client", "file" . $partsuffix);
         my $filename = $fileattr{'name'};
         if(@inputfile || $filename) {
             if(!$filename) {

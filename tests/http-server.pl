@@ -185,8 +185,8 @@ else {
 $flags .= "--srcdir \"$srcdir\"";
 
 if($verbose) {
-    print STDERR "RUN: ".server_exe('sws')." $flags\n";
+    print STDERR "RUN: " . server_exe('sws') . " $flags\n";
 }
 
 $| = 1;
-exec("exec ".server_exe('sws')." $flags");
+exec("exec " . server_exe('sws') . " $flags");

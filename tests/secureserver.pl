@@ -156,19 +156,19 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq '--pidfile') {
         if($ARGV[1]) {
-            $pidfile = "$path/". $ARGV[1];
+            $pidfile = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logfile') {
         if($ARGV[1]) {
-            $logfile = "$path/". $ARGV[1];
+            $logfile = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
         if($ARGV[1]) {
-            $logdir = "$path/". $ARGV[1];
+            $logdir = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }

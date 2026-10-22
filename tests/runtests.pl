@@ -1462,9 +1462,9 @@ sub singletest_check {
     my @reply;
     if(partexists("reply", "datacheck")) {
         for my $partsuffix (('', '1', '2', '3', '4')) {
-            my @replycheckpart = getpart("reply", "datacheck".$partsuffix);
+            my @replycheckpart = getpart("reply", "datacheck" . $partsuffix);
             if(@replycheckpart) {
-                my %replycheckpartattr = getpartattr("reply", "datacheck".$partsuffix);
+                my %replycheckpartattr = getpartattr("reply", "datacheck" . $partsuffix);
                 # get the mode attribute
                 my $filemode = $replycheckpartattr{'mode'};
                 if($filemode && ($filemode eq "text")) {
@@ -1615,10 +1615,10 @@ sub singletest_check {
 
     my $outputok;
     for my $partsuffix (('', '1', '2', '3', '4')) {
-        my @outfile = getpart("verify", "file".$partsuffix);
-        if(@outfile || partexists("verify", "file".$partsuffix) ) {
+        my @outfile = getpart("verify", "file" . $partsuffix);
+        if(@outfile || partexists("verify", "file" . $partsuffix) ) {
             # we are supposed to verify a dynamically generated file!
-            my %hash = getpartattr("verify", "file".$partsuffix);
+            my %hash = getpartattr("verify", "file" . $partsuffix);
 
             my $filename = $hash{'name'};
             if(!$filename) {
@@ -1650,7 +1650,7 @@ sub singletest_check {
             my @generated = loadarray($filename);
 
             # what parts to cut off from the file
-            my @stripfilepar = getpart("verify", "stripfile".$partsuffix);
+            my @stripfilepar = getpart("verify", "stripfile" . $partsuffix);
 
             my $filemode = $hash{'mode'};
             if($filemode && ($filemode eq "text")) {
@@ -2197,17 +2197,17 @@ sub runtimestats {
         @timetest = sort { $b <=> $a } @timetest;
     }
 
-    logmsg "Spent ". sprintf("%08.3f ", $timesrvrtot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timesrvrtot) .
            "seconds starting and verifying test harness servers.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timepreptot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timepreptot) .
            "seconds reading definitions and doing test preparations.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timetooltot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timetooltot) .
            "seconds actually running test tools.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timelocktot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timelocktot) .
            "seconds awaiting server logs lock removal.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timevrfytot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timevrfytot) .
            "seconds verifying test results.\n";
-    logmsg "Spent ". sprintf("%08.3f ", $timetesttot) .
+    logmsg "Spent " . sprintf("%08.3f ", $timetesttot) .
            "seconds doing all of the above.\n";
 
     $counter = 25;
@@ -3314,7 +3314,7 @@ if(%skipped && !$short) {
             }
         }
         if($c > $max) {
-            $log_line .= " and ".($c-$max)." more";
+            $log_line .= " and " . ($c - $max) . " more";
         }
         $log_line .= ")\n";
         $restraints{$log_line} = $skip_count;
