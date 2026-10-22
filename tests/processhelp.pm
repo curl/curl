@@ -179,16 +179,16 @@ sub pid_term_or_kill {
                     $result =~ s/\n/ | /g;
                     print "Task info (via tasklist) for $pid before taskkill: '$result'\n";
 
-                    $pwsh = "Get-CimInstance -ClassName Win32_Process -Filter 'ProcessId=$pid' | ".
-                            "Select ProcessId, ParentProcessId, Name, CommandLine | ".
+                    $pwsh = "Get-CimInstance -ClassName Win32_Process -Filter 'ProcessId=$pid' | " .
+                            "Select ProcessId, ParentProcessId, Name, CommandLine | " .
                             "Out-String -Width 2048";
                     $result = qx(powershell -Command "$pwsh");
                     $result =~ s/\r//g;
                     print "Task info (via Get-CimInstance) for $pid before taskkill:\n";
                     print "$result\n";
 
-                    $pwsh = "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | ".
-                            "Select ProcessId, ParentProcessId, Name, CommandLine | ".
+                    $pwsh = "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | " .
+                            "Select ProcessId, ParentProcessId, Name, CommandLine | " .
                             "Out-String -Width 2048";
                     $result = qx(powershell -Command "$pwsh");
                     $result =~ s/\r//g;

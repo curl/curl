@@ -75,8 +75,8 @@ sub getoptions {
 
 # this adds a fake randomly generated command line option
 sub addarg {
-    my $nice = "abcdefhijklmnopqrstuvwqxyz".
-        "ABCDEFHIJKLMNOPQRSTUVWQXYZ".
+    my $nice = "abcdefhijklmnopqrstuvwqxyz" .
+        "ABCDEFHIJKLMNOPQRSTUVWQXYZ" .
         "0123456789-";
     my $len = getnum(20) + 2;
     my $o;
@@ -87,9 +87,9 @@ sub addarg {
 }
 
 sub randarg {
-    my $nice = "abcdefhijklmnopqrstuvwqxyz".
-        "ABCDEFHIJKLMNOPQRSTUVWQXYZ".
-        "0123456789".
+    my $nice = "abcdefhijklmnopqrstuvwqxyz" .
+        "ABCDEFHIJKLMNOPQRSTUVWQXYZ" .
+        "0123456789" .
         ",-?#$%!@ ";
     my $len = getnum(20);
     my $o = '';
@@ -242,10 +242,10 @@ print "Recorded exit codes:\n";
 for my $rc (keys %allrc) {
     printf " %2d: %d times\n", $rc, $allrc{$rc};
 }
-printf "Number or command lines tested:\n".
+printf "Number or command lines tested:\n" .
     " $totalcmds (%.1f/second)\n", $totalcmds/$seconds;
-printf "Number or command line options tested:\n".
+printf "Number or command line options tested:\n" .
     " $totalargs (average %.1f per command line)\n",
     $totalargs/$totalcmds;
-printf "Number or different options tested:\n".
+printf "Number or different options tested:\n" .
     " %u out of %u\n", scalar(keys %uniq), $nopts;

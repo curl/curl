@@ -110,14 +110,14 @@ while(@ARGV) {
 my $certfile = abs_path("certs/$cert.pem");
 my $keyfile = abs_path("certs/$cert.key");
 
-my $cmdline = "$nghttpx --backend=$connect ".
-    "--backend-keep-alive-timeout=500ms ".
-    "--frontend=\"*,$listenport;no-tls\" ".
-    "--frontend=\"*,$listenport2\" ".
-    "--log-level=INFO ".
-    "--pid-file=$pidfile ".
-    "--conf=$conf ".
-    "--errorlog-file=$logfile ".
+my $cmdline = "$nghttpx --backend=$connect " .
+    "--backend-keep-alive-timeout=500ms " .
+    "--frontend=\"*,$listenport;no-tls\" " .
+    "--frontend=\"*,$listenport2\" " .
+    "--log-level=INFO " .
+    "--pid-file=$pidfile " .
+    "--conf=$conf " .
+    "--errorlog-file=$logfile " .
     "$keyfile $certfile";
 print "RUN: $cmdline\n" if($verbose);
 exec("exec $cmdline 2>$dev_null");

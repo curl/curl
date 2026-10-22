@@ -168,10 +168,10 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$flags .= "--pidfile \"$pidfile\" ".
-    "--cmdfile \"$cmdfile\" ".
-    "--logfile \"$logfile\" ".
-    "--logdir \"$logdir\" ".
+$flags .= "--pidfile \"$pidfile\" " .
+    "--cmdfile \"$cmdfile\" " .
+    "--logfile \"$logfile\" " .
+    "--logdir \"$logdir\" " .
     "--portfile \"$portfile\" ";
 $flags .= "--gopher " if($gopher);
 $flags .= "--connect $connect " if($connect);

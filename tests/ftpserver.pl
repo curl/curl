@@ -249,12 +249,12 @@ sub eXsysread {
     $$scalar = "";
 
     if((not defined $nbytes) || ($nbytes < 1)) {
-        logmsg "Error: eXsysread() failure: ".
+        logmsg "Error: eXsysread() failure: " .
                "length argument must be positive\n";
         return 0;
     }
     if((not defined $timeout) || ($timeout < 0)) {
-        logmsg "Error: eXsysread() failure: ".
+        logmsg "Error: eXsysread() failure: " .
                "timeout argument must be zero or positive\n";
         return 0;
     }
@@ -332,7 +332,7 @@ sub read_mainsockf {
     }
     if(eXsysread($FH, $scalar, $nbytes, $timeout) != $nbytes) {
         my ($fcaller, $lcaller) = (caller)[1, 2];
-        logmsg "Error: read_mainsockf() failure at $fcaller ".
+        logmsg "Error: read_mainsockf() failure at $fcaller " .
                "line $lcaller. Due to eXsysread() failure\n";
         return 0;
     }
@@ -356,7 +356,7 @@ sub read_datasockf {
     }
     if(eXsysread($FH, $scalar, $nbytes, $timeout) != $nbytes) {
         my ($fcaller, $lcaller) = (caller)[1, 2];
-        logmsg "Error: read_datasockf() failure at $fcaller ".
+        logmsg "Error: read_datasockf() failure at $fcaller " .
                "line $lcaller. Due to eXsysread() failure\n";
         return 0;
     }
@@ -377,7 +377,7 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1, 2];
         logmsg "Failed to read input\n";
         logmsg "Error: $srvrname server, sysread error: $!\n";
-        logmsg "Exited from sysread_or_die() at $fcaller ".
+        logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. $srvrname server, sysread error: $!\n";
         killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
@@ -392,7 +392,7 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1, 2];
         logmsg "Failed to read input\n";
         logmsg "Error: $srvrname server, read zero\n";
-        logmsg "Exited from sysread_or_die() at $fcaller ".
+        logmsg "Exited from sysread_or_die() at $fcaller " .
                "line $lcaller. $srvrname server, read zero\n";
         killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
@@ -726,26 +726,26 @@ sub close_dataconn {
             logmsg "Server disconnected $datasockf_mode DATA connection\n";
         }
         else {
-            logmsg "Server finds $datasockf_mode DATA connection already ".
+            logmsg "Server finds $datasockf_mode DATA connection already " .
                    "disconnected\n";
         }
     }
     else {
-        logmsg "Server knows $datasockf_mode DATA connection is already ".
+        logmsg "Server knows $datasockf_mode DATA connection is already " .
                "disconnected\n";
     }
 
     if($datapid > 0) {
-        logmsg "DATA sockfilt for $datasockf_mode data channel quits ".
+        logmsg "DATA sockfilt for $datasockf_mode data channel quits " .
                "(pid $datapid)\n";
         print DWRITE "QUIT\n";
         pidwait($datapid, 0);
         unlink($datasockf_pidfile) if(-f $datasockf_pidfile);
-        logmsg "DATA sockfilt for $datasockf_mode data channel quit ".
+        logmsg "DATA sockfilt for $datasockf_mode data channel quit " .
                "(pid $datapid)\n";
     }
     else {
-        logmsg "DATA sockfilt for $datasockf_mode data channel already ".
+        logmsg "DATA sockfilt for $datasockf_mode data channel already " .
                "dead\n";
     }
 
@@ -2559,11 +2559,11 @@ sub PASV_ftp {
 
     if($nodataconn) {
         my $str = nodataconn_str();
-        logmsg "DATA sockfilt for passive data channel ($str) bound on port ".
+        logmsg "DATA sockfilt for passive data channel ($str) bound on port " .
                "$pasvport\n";
     }
     else {
-        logmsg "DATA sockfilt for passive data channel listens on port ".
+        logmsg "DATA sockfilt for passive data channel listens on port " .
                "$pasvport\n";
     }
 
@@ -2582,7 +2582,7 @@ sub PASV_ftp {
         sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\r\n", $pasvport);
     }
 
-    logmsg "Client has been notified that upcoming DATA connection ".
+    logmsg "Client has been notified that upcoming DATA connection " .
            "is awaited on port $pasvport\n";
 
     if($nodataconn) {
@@ -2616,7 +2616,7 @@ sub PASV_ftp {
     };
     if($@) {
         # timed out
-        logmsg "$srvrname server timed out awaiting data connection ".
+        logmsg "$srvrname server timed out awaiting data connection " .
             "on port $pasvport\n";
         logmsg "accept failed or connection not even attempted\n";
         logmsg "DATA sockfilt killed now\n";
@@ -2626,7 +2626,7 @@ sub PASV_ftp {
         return;
     }
     else {
-        logmsg "====> Client established passive DATA connection ".
+        logmsg "====> Client established passive DATA connection " .
                "on port $pasvport\n";
     }
 
@@ -2655,7 +2655,7 @@ sub PORT_ftp {
 
     if($cmd eq "PORT") {
         if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
-            logmsg "DATA sockfilt for active data channel not started ".
+            logmsg "DATA sockfilt for active data channel not started " .
                    "(bad PORT-line: $arg)\n";
             sendcontrol "500 silly you, go away\r\n";
             return;
@@ -2666,7 +2666,7 @@ sub PORT_ftp {
     # EPRT |2|::1|49706|
     elsif($cmd eq "EPRT") {
         if($arg !~ /(\d+)\|([^\|]+)\|(\d+)/) {
-            logmsg "DATA sockfilt for active data channel not started ".
+            logmsg "DATA sockfilt for active data channel not started " .
                    "(bad EPRT-line: $arg)\n";
             sendcontrol "500 silly you, go away\r\n";
             return;
@@ -2676,14 +2676,14 @@ sub PORT_ftp {
         $addr = $2;
     }
     else {
-        logmsg "DATA sockfilt for active data channel not started ".
+        logmsg "DATA sockfilt for active data channel not started " .
                "(invalid command: $cmd)\n";
         sendcontrol "500 we don't like $cmd now\r\n";
         return;
     }
 
     if(!$port || $port > 65535) {
-        logmsg "DATA sockfilt for active data channel not started ".
+        logmsg "DATA sockfilt for active data channel not started " .
                "(illegal PORT number: $port)\n";
         return;
     }
