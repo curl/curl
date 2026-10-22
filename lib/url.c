@@ -1139,6 +1139,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connection_id = -1;    /* no ID */
   conn->cpid = UINT32_MAX;  /* not in connection pool yet */
   conn->attached_xfers = 0;
+  conn->connect_start_ms = -1;
   conn->shutdown.start_ms[FIRSTSOCKET] =
     conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
 

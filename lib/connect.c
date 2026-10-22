@@ -57,16 +57,17 @@ enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
 
 #endif
 
-/*
- * Milliseconds left of the connect timeout after `used_ms` have been spent.
- * One home for the default timeout and the zero-to-expired sentinel.
- */
+/* Milliseconds left of the connect timeout. */
 static timediff_t connect_left_ms(struct Curl_easy *data,
-                                  timediff_t used_ms)
+                                  const struct curltime *pnow)
 {
   timediff_t timeout_ms = (data->set.connecttimeout > 0) ?
     data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
-  timediff_t left_ms = timeout_ms - used_ms;
+  timediff_t elapsed_ms =
+    curlx_ptimediff_ms(pnow, &data->conn->created) -
+    data->conn->connect_start_ms;
+  timediff_t left_ms = timeout_ms - elapsed_ms;
+  DEBUGASSERT(data->conn->connect_start_ms >= 0);
   return left_ms ? left_ms : -1; /* 0 is "no limit", fake 1 ms expiry */
 }
 
@@ -89,8 +90,17 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
   if(data->conn && CURL_CONN_IN_SHUTDOWN(data->conn, FIRSTSOCKET))
     return Curl_cshutdn_timeleft_ms(data, data->conn, FIRSTSOCKET);
   else if(Curl_is_connecting(data)) {
-    ctimeleft_ms = connect_left_ms(data,
-      Curl_pgrs_since_ms(data, pnow, TIMER_STARTSINGLE));
+    /* transfer has not reached DO phase yet */
+    timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
+      data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+    ctimeleft_ms = ctimeout_ms -
+      Curl_pgrs_since_ms(data, pnow, TIMER_STARTSINGLE);
+    if(!ctimeleft_ms)
+      ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
+  }
+  else if(data->conn && data->conn->connect_start_ms >= 0) {
+    /* ongoing connect of filters, pbly FTP second socket */
+    ctimeleft_ms = connect_left_ms(data, pnow);
   }
   else if(!data->set.timeout || data->set.connect_only) {
     return 0; /* no timeout in place or checked, return "no limit" */
@@ -293,9 +303,9 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   if(*done)
     return CURLE_OK;
 
-  if(!data->conn->connect_started.set[sockindex]) {
-    data->conn->connect_started.at[sockindex] = *Curl_pgrs_now(data);
-    data->conn->connect_started.set[sockindex] = TRUE;
+  if(data->conn->connect_start_ms < 0) {
+    data->conn->connect_start_ms =
+      curlx_ptimediff_ms(Curl_pgrs_now(data), &data->conn->created);
   }
 
   Curl_pollset_init(&ps);
@@ -331,6 +341,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
       Curl_conn_remove_setup_filters(data, sockindex);
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "reduced to"));
+      data->conn->connect_start_ms = -1;
       goto out;
     }
     else if(result) {
@@ -349,19 +360,6 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       timediff_t timeout_ms = Curl_timeleft_now_ms(data, pnow);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       int rc;
-
-      if(!Curl_is_connecting(data)) {
-        /* Past MSTATE_DO, e.g. an FTP data connection handshake in DO_MORE,
-         * timeleft_now_ms() leaves the connect timeout out. Bound the wait
-         * by this socket's whole connect phase, or a peer that never
-         * finishes the handshake blocks forever. */
-        const struct curltime *started =
-          &data->conn->connect_started.at[sockindex];
-        timediff_t ctimeleft_ms = connect_left_ms(data,
-          curlx_ptimediff_ms(pnow, started));
-        if(!timeout_ms || (ctimeleft_ms < timeout_ms))
-          timeout_ms = ctimeleft_ms;
-      }
 
       if(timeout_ms < 0) {
         /* no need to continue if time already is up */

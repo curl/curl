@@ -587,6 +587,7 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
 
   DEBUGASSERT(conn->cpid == UINT32_MAX);
   conn->created = *pnow;
+  conn->connect_start_ms = -1;
   conn->shutdown.start_ms[FIRSTSOCKET] =
     conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
 
