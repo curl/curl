@@ -21,7 +21,7 @@ runs:
       if: ${{ inputs.apt }}
       shell: bash
       env:
-        CURL_GHA_UBUNTU_MIRROR: ${{ vars.CURL_GHA_UBUNTU_MIRROR }}
+        CURL_GHA_UBUNTU_MIRROR: 'ubuntu'  # 'azure', 'ubuntu', or empty to leave at default
         PACKAGES: ${{ inputs.apt }}
       run: |
         sudo rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf || true
