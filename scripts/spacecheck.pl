@@ -136,7 +136,7 @@ while(my $filename = <$git_ls_files>) {
     if(fn_match($filename, @is_executable)) {
         my $mode = (stat($filename))[2];
         if(($mode & 0111) != 0111) {
-            push @err, sprintf('file misses executable bits: %o', $mode);
+            push @err, sprintf('executable missing executable bits: %o', $mode);
         }
     }
 
