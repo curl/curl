@@ -22,7 +22,7 @@ Dummy test file for rename test
 sftp
 </server>
 <precheck>
-%PERL %SRCDIR/libtest/test610.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/test610.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP post-quote rename error with accept-fail
@@ -38,7 +38,7 @@ Dummy test file for rename test
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test610.pl rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/test610.pl rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </postcheck>
 </verify>
 </testcase>

@@ -24,8 +24,13 @@
 
 # scripts used in test cases
 TESTSCRIPTS = \
+  test307.pl  \
+  test610.pl  \
+  test613.pl  \
   test745.pl  \
   test971.pl  \
+  test1013.pl \
+  test1022.pl \
   test1119.pl \
   test1135.pl \
   test1139.pl \
@@ -44,6 +49,7 @@ TESTSCRIPTS = \
   test1544.pl \
   test1707.pl \
   test1792.pl \
+  test3500.pl \
   test3990.pl
 
 EXTRA_DIST =         \
