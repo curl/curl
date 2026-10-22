@@ -33,7 +33,7 @@ Dummy test file for remove test
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/upload.%TESTNUMBER
+%PERL %SRCDIR/test610.pl gone %PWD/%LOGDIR/upload.%TESTNUMBER
 </postcheck>
 </verify>
 </testcase>

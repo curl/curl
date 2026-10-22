@@ -24,7 +24,7 @@ d?????????    N U         U               N ???  N NN:NN asubdir
 sftp
 </server>
 <precheck>
-%PERL %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP pre-quote chmod
@@ -37,7 +37,7 @@ SFTP pre-quote chmod
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
+%PERL %SRCDIR/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
 </postcheck>
 </verify>
 </testcase>
