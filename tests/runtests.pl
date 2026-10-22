@@ -1118,7 +1118,7 @@ sub singletest_shouldrun {
             for my $k (@info_keywords) {
                 chomp $k;
 
-                $may_retry_candidate |= ($k =~ /^(flaky|may-retry|timing-dependent|with-server)$/);
+                $may_retry_candidate |= ($k =~ /^(flaky|may-retry|threads|timing-dependent|with-server)$/);
                 $may_retry_candidate |= ($k =~ /^may-retry-on-valgrind$/) if($valgrind);
 
                 if($disabled_keywords{lc($k)}) {
