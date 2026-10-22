@@ -34,6 +34,7 @@ silly content
 
 <client>
 <features>
+http
 proxy
 </features>
 <server>
@@ -41,10 +42,6 @@ ftp
 http-proxy
 socks5
 </server>
-<features>
-http
-proxy
-</features>
 <name>
 FTP fetch with --preproxy, --proxy and --connect-to
 </name>

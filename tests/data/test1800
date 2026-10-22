@@ -24,13 +24,11 @@ Content-Type: text/html
 <client>
 <features>
 h2c
+http/2
 </features>
 <server>
 http
 </server>
-<features>
-http/2
-</features>
 <name>
 HTTP/2 upgrade refused
 </name>

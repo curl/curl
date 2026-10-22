@@ -43,8 +43,5 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<data>
-[insert full protocol verifiction dump here]
-</data>
 </verify>
 </testcase>
