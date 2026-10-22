@@ -22,7 +22,6 @@ Content-Length: 0
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <name>
 CURLINFO_FILETIME init and reset
 </name>

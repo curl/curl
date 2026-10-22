@@ -12,7 +12,6 @@ libtest
 </reply>
 
 <client>
-# tool is what to use instead of 'curl'
 
 <name>
 multi - add many easy handles

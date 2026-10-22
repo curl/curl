@@ -23,7 +23,6 @@ OK
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 HTTP POST text data using CURLOPT_COPYPOSTFIELDS

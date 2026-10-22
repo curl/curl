@@ -16,7 +16,6 @@ libtest
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 Avoid redundant CWDs

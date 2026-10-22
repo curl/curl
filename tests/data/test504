@@ -19,7 +19,6 @@ libtest
 http
 proxy
 </features>
-# tool is what to use instead of 'curl'
 
 <name>
 simple multi through local proxy without listener

@@ -25,7 +25,6 @@ Connection: close
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 Extract Location: with broken URL

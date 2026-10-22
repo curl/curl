@@ -22,7 +22,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib554
 </tool>

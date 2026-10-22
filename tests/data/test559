@@ -29,7 +29,6 @@ Silly-header: %repeat[511 x Z]%
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 use tiny CURLOPT_BUFFERSIZE

@@ -40,7 +40,6 @@ fine content
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib533
 </tool>

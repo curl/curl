@@ -18,7 +18,6 @@ REPLY SIZE 550 bluah you f00l!
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 FTP with FILETIME and NOBODY but missing file

@@ -10,7 +10,6 @@ libtest
 </reply>
 
 <client>
-# tool is what to use instead of 'curl'
 
 <name>
 curl_getdate() testing

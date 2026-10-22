@@ -11,7 +11,6 @@ libtest
 </reply>
 
 <client>
-# tool is what to use instead of 'curl'
 
 <name>
 verify setting pipelining blocklisting options

@@ -20,7 +20,6 @@ moo
 <server>
 file
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 simple multi file:// get

@@ -37,7 +37,6 @@ Mime
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 Request pause from mime read callback: multi

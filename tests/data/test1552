@@ -32,7 +32,6 @@ imap
 <name>
 IMAP multi transfer error without curl_multi_remove_handle
 </name>
-# tool is what to use instead of 'curl'
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>

@@ -29,7 +29,6 @@ http
 <features>
 http
 </features>
-# tool is what to use instead of 'curl'
 
 <name>
 curl_multi_wait

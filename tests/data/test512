@@ -23,7 +23,6 @@ hello
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 simple curl_easy_duplicate() test

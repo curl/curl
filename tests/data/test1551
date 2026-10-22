@@ -33,7 +33,6 @@ redirected
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 re-run redirected transfer without setting URL again

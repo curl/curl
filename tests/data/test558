@@ -15,7 +15,6 @@ libtest
 TrackMemory
 IPv6
 </features>
-# tool is what to use instead of 'curl'
 
 <name>
 libtest memory tracking operational

@@ -45,7 +45,6 @@ content2
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 GET same URL twice with different users

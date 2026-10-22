@@ -27,7 +27,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 make an HTTPPOST set to NULL

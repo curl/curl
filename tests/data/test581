@@ -30,7 +30,6 @@ http
 <features>
 http
 </features>
-# tool is what to use instead of 'curl'
 <tool>
 lib507
 </tool>

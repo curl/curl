@@ -17,7 +17,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 use curl_formadd() data twice with unreadable file

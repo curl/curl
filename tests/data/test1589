@@ -56,7 +56,6 @@ Nice proxy auth sir!
 http
 http-proxy
 </server>
-# tool is what to use instead of 'curl'
 <features>
 !SSPI
 crypto

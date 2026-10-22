@@ -39,7 +39,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 HTTP formpost using form API - with redirect and re-POST

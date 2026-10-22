@@ -15,7 +15,6 @@ libtest
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 FTP upload and upload same file again without rewind

@@ -27,7 +27,6 @@ Mime
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 make an HTTP MIME POST set to NULL

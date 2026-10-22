@@ -37,7 +37,6 @@ Mime
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 HTTP chunked mimepost using single-byte read callback with encoder

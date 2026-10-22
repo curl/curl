@@ -49,7 +49,6 @@ Content-Type: text/html
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 verify setting CURLOPT_COOKIEFILE to NULL again

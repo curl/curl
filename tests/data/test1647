@@ -47,7 +47,6 @@ http
 https-proxy
 https
 </server>
-# tool is what to use instead of 'curl'
 <features>
 !SSPI
 crypto

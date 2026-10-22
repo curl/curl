@@ -44,7 +44,6 @@ Mime
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 HTTP duplicate easy handle with mime data

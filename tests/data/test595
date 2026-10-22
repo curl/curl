@@ -24,7 +24,6 @@ moo
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib500
 </tool>

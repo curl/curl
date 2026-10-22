@@ -26,7 +26,6 @@ hello
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 resolver start callback

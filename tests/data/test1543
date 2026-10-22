@@ -34,7 +34,6 @@ Connection: close
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib1518
 </tool>

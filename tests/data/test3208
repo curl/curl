@@ -28,7 +28,6 @@ Funny-head: yesyes
 <server>
 https
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 easy_perform, multi_perform, easy_perform the same handle

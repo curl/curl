@@ -61,7 +61,6 @@ http
 crypto
 digest
 </features>
-# tool is what to use instead of 'curl'
 <tool>
 lib510
 </tool>

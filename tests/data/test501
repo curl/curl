@@ -13,7 +13,6 @@ libtest
 <features>
 http
 </features>
-# tool is what to use instead of 'curl'
 
 <name>
 simple libcurl attempt operation without URL set

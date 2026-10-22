@@ -22,7 +22,6 @@ OK
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 make a POSTFIELDS set to NULL with POSTFIELDSIZE set to zero

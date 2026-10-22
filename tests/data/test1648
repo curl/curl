@@ -27,7 +27,6 @@ And you should ignore this data.
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <features>
 proxy
 </features>

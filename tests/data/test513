@@ -15,7 +15,6 @@ libtest
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 send HTTP POST using read callback that returns CURL_READFUNC_ABORT

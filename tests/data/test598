@@ -46,7 +46,6 @@ Content-Type: text/html
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 curl_easy_reset with referer and other strings set

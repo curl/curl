@@ -37,7 +37,6 @@ Mime
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib670
 </tool>

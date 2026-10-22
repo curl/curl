@@ -44,7 +44,6 @@ Mime
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 Reuse of handle after altering mime data

@@ -24,7 +24,6 @@ hello
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 send HTTP POST using read callback

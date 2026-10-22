@@ -28,7 +28,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 curl_formadd with huge COPYCONTENTS

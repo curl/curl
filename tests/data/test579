@@ -59,7 +59,6 @@ http
 crypto
 digest
 </features>
-# tool is what to use instead of 'curl'
 
 <name>
 small chunked HTTP POSTs with digest auth and progress callback

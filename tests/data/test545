@@ -23,7 +23,6 @@ OK
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib544
 </tool>

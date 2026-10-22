@@ -35,7 +35,6 @@ imap
 <name>
 IMAP cleanup with non-existing hostname
 </name>
-# tool is what to use instead of 'curl'
 
 # this MUST use a hostname that does not resolve
 <command>

@@ -21,7 +21,6 @@ Content-Length: 0
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <name>
 Test CURLINFO_RESPONSE_CODE CURLINFO_PROTOCOL
 </name>

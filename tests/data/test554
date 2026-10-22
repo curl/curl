@@ -44,7 +44,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 HTTP multi-part formpost using read callback for the file part
