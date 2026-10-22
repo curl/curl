@@ -528,7 +528,7 @@ sub render {
         $blankline = 0;
         push @desc, $d if($manpage);
         my $qstr = $quote ? "q" : "";
-        push @desc, "[" . (1 + $level) ." $qstr]$d" if(!$manpage);
+        push @desc, "[" . (1 + $level) . "$qstr]$d" if(!$manpage);
         $header = 0;
     }
     if($finalblank) {
