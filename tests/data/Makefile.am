@@ -2012,6 +2012,7 @@ TESTCASES = \
   test2604 \
   test2605 \
   test2606 \
+  test2607 \
   test2622 \
   test2700 \
   test2701 \

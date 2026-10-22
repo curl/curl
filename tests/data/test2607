@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+WebSocket
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+ws
+</features>
+<name>
+WebSocket payload masking into a hard-limited bufq
+</name>
+</client>
+</testcase>
