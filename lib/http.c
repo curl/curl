@@ -5039,6 +5039,20 @@ void Curl_http_resp_free(struct http_resp *resp)
   }
 }
 
+CURLcode Curl_http_setup_conn(struct Curl_easy *data,
+                              struct connectdata *conn)
+{
+  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
+     during this request */
+  if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
+    /* only HTTP/3, needs to work */
+    CURLcode result = Curl_conn_may_http3(data, conn);
+    if(result)
+      return result;
+  }
+  return CURLE_OK;
+}
+
 CURLcode Curl_http_setup_filters(struct Curl_easy *data,
                                  struct Curl_cfilter *cf)
 {
@@ -5076,7 +5090,7 @@ CURLcode Curl_http_setup_filters(struct Curl_easy *data,
  * HTTP handler interface.
  */
 const struct Curl_protocol Curl_protocol_http = {
-  ZERO_NULL,                            /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http_setup_filters,              /* setup_filters */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */

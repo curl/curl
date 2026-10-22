@@ -1943,7 +1943,7 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
   data->state.http_neg.only_10 = FALSE;
   data->state.http_neg.wanted = CURL_HTTP_V1x;
   data->state.http_neg.allowed = CURL_HTTP_V1x;
-  return CURLE_OK;
+  return Curl_http_setup_conn(data, conn);
 }
 
 const struct curl_ws_frame *curl_ws_meta(CURL *curl)
