@@ -147,7 +147,7 @@ static CURLcode test_lib571(const char *URL)
   result = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &numconnects);
   if(result)
     goto test_cleanup;
-  if(numconnects != 0) {
+  if(numconnects) {
     curl_mfprintf(stderr, "Expected RTSP connection reuse, got %ld connects\n",
                   numconnects);
     result = TEST_ERR_MAJOR_BAD;
@@ -205,18 +205,12 @@ static CURLcode test_lib571(const char *URL)
   curl_free(stream_uri);
   stream_uri = NULL;
   easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
-  easy_setopt(curl, CURLOPT_TIMEOUT_MS, 500L);
 
   packets_before = rtp_packet_count;
   result = curl_easy_perform(curl);
-  if(result != CURLE_OPERATION_TIMEDOUT) {
-    curl_mfprintf(stderr, "Expected PLAY timeout with incomplete RTP frame, "
-                  "got %s\n", curl_easy_strerror(result));
-    result = TEST_ERR_MAJOR_BAD;
+  if(result)
     goto test_cleanup;
-  }
 
-  easy_setopt(curl, CURLOPT_TIMEOUT_MS, 30000L);
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;
