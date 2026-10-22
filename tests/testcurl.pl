@@ -448,7 +448,6 @@ if($git) {
     else {
         logit "autoreconf -fi was successful (dummy message)";
     }
-
 }
 else {
     # Show snapshot git commit when available

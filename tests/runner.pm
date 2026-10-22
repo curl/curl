@@ -227,7 +227,6 @@ sub runner_init {
         close($thisrunnerr);
 
         $thisrunnerid = $child;
-
     }
     else {
         # Create our pid directory

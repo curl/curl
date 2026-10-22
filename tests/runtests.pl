@@ -1977,7 +1977,6 @@ sub singletest {
         # Recursively call the state machine again because there is no
         # event expected that would otherwise trigger a new call.
         return singletest(@_);
-
     }
     elsif($singletest_state{$runnerid} == ST_INITED) {
         ###################################################################
@@ -2004,7 +2003,6 @@ sub singletest {
             return (-1, 0);
         }
         $singletest_state{$runnerid} = ST_PREPROCESS;
-
     }
     elsif($singletest_state{$runnerid} == ST_PREPROCESS) {
         my ($rid, $why, $error, $logs, $testtimings) = runnerar($runnerid);
@@ -2054,7 +2052,6 @@ sub singletest {
             return (-1, 0);
         }
         $singletest_state{$runnerid} = ST_RUN;
-
     }
     elsif($singletest_state{$runnerid} == ST_RUN) {
         my ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar($runnerid);
