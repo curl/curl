@@ -6,7 +6,6 @@ HTTP
 HTTP PUT
 </keywords>
 </info>
-
 <reply>
 <data>
 HTTP/1.0 200 OK swsclose
