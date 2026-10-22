@@ -2678,7 +2678,7 @@ sub PORT_ftp {
     else {
         logmsg "DATA sockfilt for active data channel not started " .
                "(invalid command: $cmd)\n";
-        sendcontrol "500 we don't like $cmd now\r\n";
+        sendcontrol "500 we do not like $cmd now\r\n";
         return;
     }
 
