@@ -228,7 +228,8 @@ sub runner_init {
 
         $thisrunnerid = $child;
 
-    } else {
+    }
+    else {
         # Create our pid directory
         mkdir("$LOGDIR/$PIDDIR", 0777);
 
@@ -620,7 +621,8 @@ sub singletest_startservers {
             if($err == 1) {
                 # Error indicates an actual problem starting the server
                 $error = -2;
-            } else {
+            }
+            else {
                 $error = -1;
             }
         }
@@ -788,7 +790,8 @@ sub singletest_prepare {
                 }
                 print $outfile join('', @inputfile);
                 close($outfile);
-            } else {
+            }
+            else {
                 logmsg "ERROR: cannot write $filename\n";
             }
         }
@@ -1502,7 +1505,8 @@ sub ipcrecv {
     }
     elsif($funcname eq "runner_test_run") {
         @res = runner_test_run(@$argsarrayref);
-    } else {
+    }
+    else {
         die "Unknown IPC function $funcname\n";
     }
     # print "ipcrecv results\n";

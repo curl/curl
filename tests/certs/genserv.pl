@@ -64,8 +64,9 @@ my $CAPREFIX = shift @ARGV;
 if(!$CAPREFIX) {
     print "Usage: genserv.pl <caprefix> [<prefix> ...]\n";
     exit 1;
-} elsif(! -f "$CAPREFIX-ca.cacert" ||
-        ! -f "$CAPREFIX-ca.key") {
+}
+elsif(! -f "$CAPREFIX-ca.cacert" ||
+      ! -f "$CAPREFIX-ca.key") {
 
     if($OPENSSL eq basename($OPENSSL)) {  # has no directory component
         # find openssl in PATH

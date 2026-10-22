@@ -598,7 +598,8 @@ if($sshdid =~ /OpenSSH-Windows/) {
         $username_lc = "$userdomain_lc\\$username_lc";
         push @cfgarr, "AllowUsers " . ($username_lc =~ s/ /\?/gr);  # replace space with '?'
     }
-} else {
+}
+else {
     push @cfgarr, "AllowUsers $username";
 }
 

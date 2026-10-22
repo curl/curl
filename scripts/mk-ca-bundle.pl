@@ -157,7 +157,8 @@ sub warning_message() {
         print "  6. Use of this script makes a security engineer grind his teeth and\n";
         print "     swear at you.  ;)\n";
         exit;
-    } else { # Short Form Warning
+    }
+    else { # Short Form Warning
         print "Warning: Use of this script may pose some risk, -d risk for more details.\n";
     }
 }
@@ -247,7 +248,8 @@ sub sha256 {
         binmode(FILE);
         $result = $MOD_SHA->new(256)->addfile(*FILE)->hexdigest;
         close(FILE);
-    } else {
+    }
+    else {
         # Use OpenSSL command if Perl Digest::SHA modules not available
         open(my $fh, '-|', $openssl, 'dgst', '-r', '-sha256', $_[0]) or die "Failed running openssl on '$_[0]': $!";
         $result = <$fh>;  # read first line
@@ -411,7 +413,8 @@ my $currentdate = scalar gmtime($filedate);
 my $format = $opt_t ? "plain text and " : "";
 if($stdout) {
     open(CRT, '> -') or die "Could not open STDOUT: $!\n";
-} else {
+}
+else {
     open(CRT, ">", "$crt.~") or die "Could not open $crt.~: $!\n";
 }
 print CRT <<EOT;
@@ -586,9 +589,11 @@ while(<TXT>) {
             if(/^CKA_TRUST_([A-Z_]+)\s+CK_TRUST\s+CKT_NSS_([A-Z_]+)\s*$/) {
                 if(!is_in_list($1, @valid_mozilla_trust_purposes)) {
                     report "Warning: Unrecognized trust purpose for cert: $caname. Trust purpose: $1. Trust Level: $2";
-                } elsif(!is_in_list($2, @valid_mozilla_trust_levels)) {
+                }
+                elsif(!is_in_list($2, @valid_mozilla_trust_levels)) {
                     report "Warning: Unrecognized trust level for cert: $caname. Trust purpose: $1. Trust Level: $2";
-                } else {
+                }
+                else {
                     push @{$trust_purposes_by_level{$2}}, $1;
                 }
             }
@@ -612,8 +617,8 @@ while(<TXT>) {
         if(!should_output_cert(%trust_purposes_by_level)) {
             $skipnum++;
             report "Skipping: $caname lacks acceptable trust level" if($opt_v);
-        } else {
-
+        }
+        else {
             # Skip if explicitly excluded
             if($opt_x) {
                 my ($fingerprint_sha256) = grep { /^# Fingerprint .*SHA.*256/i } @precert;
@@ -649,7 +654,8 @@ while(<TXT>) {
             }
             if(!$opt_t) {
                 print CRT $pem;
-            } else {
+            }
+            else {
                 my $pipe = "";
                 foreach my $hash (@included_signature_algorithms) {
                     $pipe = "|$openssl x509 -" . $hash . " -fingerprint -noout -inform PEM";
@@ -691,7 +697,8 @@ unless($stdout) {
             $bk++;
         }
         rename $crt, "$crt.~${bk}~" or die "Failed to create backup $crt.~$bk}~: $!\n";
-    } elsif(-e $crt) {
+    }
+    elsif(-e $crt) {
         unlink($crt) or die "Failed to remove $crt: $!\n";
     }
     rename "$crt.~", $crt or die "Failed to rename $crt.~ to $crt: $!\n";

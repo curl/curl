@@ -50,7 +50,8 @@ while(@ARGV) {
     }
     elsif($cmd eq "gone") {
         ! -e $arg or die "Path $arg exists";
-    } else {
+    }
+    else {
         print "Unsupported command $cmd\n";
         exit 1;
     }

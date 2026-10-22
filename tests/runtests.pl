@@ -1626,7 +1626,8 @@ sub singletest_check {
                        "has no name attribute\n";
                 if(runnerac_stopservers($runnerid)) {
                     logmsg "ERROR: runner $runnerid seems to have died\n";
-                } else {
+                }
+                else {
 
                     # TODO: this is a blocking call that stalls the controller,
                     if($verbose) {
@@ -1637,7 +1638,8 @@ sub singletest_check {
                     my ($rid, $unexpected, $logs) = runnerar($runnerid);
                     if(!$rid) {
                         logmsg "ERROR: runner $runnerid seems to have died\n";
-                    } else {
+                    }
+                    else {
                         logmsg $logs;
                     }
                 }
@@ -1976,7 +1978,8 @@ sub singletest {
         # event expected that would otherwise trigger a new call.
         return singletest(@_);
 
-    } elsif($singletest_state{$runnerid} == ST_INITED) {
+    }
+    elsif($singletest_state{$runnerid} == ST_INITED) {
         ###################################################################
         # Restore environment variables that were modified in a previous run.
         # Test definition may instruct to (un)set environment vars.
@@ -2002,7 +2005,8 @@ sub singletest {
         }
         $singletest_state{$runnerid} = ST_PREPROCESS;
 
-    } elsif($singletest_state{$runnerid} == ST_PREPROCESS) {
+    }
+    elsif($singletest_state{$runnerid} == ST_PREPROCESS) {
         my ($rid, $why, $error, $logs, $testtimings) = runnerar($runnerid);
         if(!$rid) {
             logmsg "ERROR: runner $runnerid seems to have died\n";
@@ -2051,7 +2055,8 @@ sub singletest {
         }
         $singletest_state{$runnerid} = ST_RUN;
 
-    } elsif($singletest_state{$runnerid} == ST_RUN) {
+    }
+    elsif($singletest_state{$runnerid} == ST_RUN) {
         my ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar($runnerid);
         if(!$rid) {
             logmsg "ERROR: runner $runnerid seems to have died\n";
@@ -2494,7 +2499,8 @@ while(@ARGV) {
         if($ARGV[0] =~ /^(\w+)=([\w.:\/\[\]-]+)$/) {
             my ($variable, $value) = ($1, $2);
             eval "\$$variable='$value'" or die "Failed to set \$$variable to $value: $@";
-        } else {
+        }
+        else {
             die "Failed to parse '-o $ARGV[0]'. May contain unexpected characters.\n";
         }
     }
@@ -2685,8 +2691,8 @@ if($valgrind) {
     if(($code>>8) != 1) {
         #logmsg "Valgrind failure, disable it\n";
         undef $valgrind;
-    } else {
-
+    }
+    else {
         open(my $curlh, "<", $CURL);
         my $l = <$curlh>;
         if($l =~ /^\#\!/) {
@@ -2921,7 +2927,8 @@ sub displaylogcontent {
                 $line =~ s/\s*\!$//;
                 if($truncate) {
                     push @tail, " $line\n";
-                } else {
+                }
+                else {
                     logmsg " $line\n";
                 }
                 $linecount++;
@@ -3105,7 +3112,8 @@ while(1) {
         if($again) {
             # this runner is busy running a test
             $runnersrunning{$runnerid} = $testnum;
-        } else {
+        }
+        else {
             runnerready($runnerid);
             if($error >= 0) {
                 # We make this simplifying assumption to avoid having to handle
@@ -3149,7 +3157,8 @@ while(1) {
                 if($again) {
                     # this runner is busy running a test
                     $runnersrunning{$ridready} = $testnum;
-                } else {
+                }
+                else {
                     # Test is complete
                     $runner_wait_cnt = 0;
                     runnerready($ridready);

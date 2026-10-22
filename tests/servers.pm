@@ -973,7 +973,8 @@ sub runhttpserver {
     $flags .= "--id $idnum " if($idnum > 1);
     if($ipvnum eq "unix") {
         $flags .= "--unix-socket '$port_or_path' ";
-    } else {
+    }
+    else {
         $flags .= "--ipv$ipvnum --port 0 ";
     }
     $flags .= "--srcdir \"$srcdir\"";
@@ -1813,7 +1814,8 @@ sub runsocksserver {
             " --backend $HOSTIP".
             " --config $LOGDIR/$SERVERCMD";
         $portfile = "none";
-    } else {
+    }
+    else {
         $cmd = server_exe('socksd').
             " --port 0".
             " --pidfile $pidfile".

@@ -178,7 +178,8 @@ $flags .= "--connect $connect " if($connect);
 $flags .= "--keepalive $keepalive_secs " if($keepalive_secs);
 if($ipvnum eq 'unix') {
     $flags .= "--unix-socket '$unix_socket' ";
-} else {
+}
+else {
     $flags .= "--ipv$ipvnum --port $port ";
 }
 $flags .= "--srcdir \"$srcdir\"";

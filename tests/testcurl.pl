@@ -360,9 +360,11 @@ if(-d $CURLDIR) {
         # remove the generated sources to force them to be re-generated each
         # time we run this test
         unlink "$CURLDIR/src/tool_hugehelp.c";
-    } elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
+    }
+    elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
         logit "$CURLDIR is verified to be a fine daily source dir";
-    } else {
+    }
+    else {
         mydie "$CURLDIR is not a daily source directory or checked out from git!"
     }
 }
@@ -386,7 +388,8 @@ mkdir $build, 0777;
 
 if(-d $build) {
     logit "build directory $build was created fine";
-} else {
+}
+else {
     mydie "failed to create directory $build";
 }
 
@@ -401,7 +404,8 @@ if($git) {
     # update quietly to the latest git
     if($nogitpull) {
         logit "skipping git pull (--nogitpull)";
-    } else {
+    }
+    else {
         logit "run git pull in curl";
         system("git pull 2>&1");
         $gitstat += $?;
@@ -445,7 +449,8 @@ if($git) {
         logit "autoreconf -fi was successful (dummy message)";
     }
 
-} else {
+}
+else {
     # Show snapshot git commit when available
     if(open(my $f, '<', "docs/tarball-commit.txt")) {
         my $commit = <$f>;
@@ -479,10 +484,12 @@ logit "timestamp = $timestamp";
 if($configurebuild) {
     if(-f "configure") {
         logit "configure created (at least it exists)";
-    } else {
+    }
+    else {
         mydie "no configure created/found";
     }
-} else {
+}
+else {
    logit "configure created (dummy message)"; # dummy message to feign success
 }
 
@@ -519,10 +526,12 @@ if($configurebuild) {
 
     if(-f "lib/Makefile") {
         logit "configure seems to have finished fine";
-    } else {
+    }
+    else {
         mydie "configure did not work";
     }
-} else {
+}
+else {
     logit "copying files to build directory ...";
     if($^O eq 'MSWin32') {
         system('xcopy', ('/s', '/q', $CURLDIR, '.'));
@@ -622,13 +631,15 @@ if($configurebuild && !$crosscompile) {
 
     if(grepfile("^TEST", $buildlog)) {
         logit "tests were run";
-    } else {
+    }
+    else {
         mydie "test suite failure";
     }
 
     if(grepfile("^TESTFAIL:", $buildlog)) {
         logit "the tests were not successful";
-    } else {
+    }
+    else {
         logit "the tests were successful!";
     }
 }
