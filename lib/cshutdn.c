@@ -53,9 +53,6 @@ void Curl_cshutdn_start_timer(struct Curl_easy *data, int8_t sockindex,
     (timediff_t)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
      data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
-  /* Set a timer, unless we operate on the admin handle */
-  if(data->mid)
-    Curl_expire_set(data, EXPIRE_SHUTDOWN, conn->shutdown.timeout_ms, pnow);
   CURL_TRC_M(data, "shutdown start on%s connection",
              sockindex ? " secondary" : "");
 }
@@ -124,8 +121,8 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
   }
 }
 
-CURLcode Curl_cshutdn_try_once_idx(struct Curl_easy *data,
-                                   int8_t sockindex, bool *done)
+static CURLcode cshutdn_try_once_idx(struct Curl_easy *data,
+                                     int8_t sockindex, bool *done)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
@@ -180,6 +177,19 @@ CURLcode Curl_cshutdn_try_once_idx(struct Curl_easy *data,
   return result;
 }
 
+CURLcode Curl_cshutdn_try_once_idx(struct Curl_easy *data,
+                                   int8_t sockindex, bool *done)
+{
+  CURLcode result = cshutdn_try_once_idx(data, sockindex, done);
+  /* Set a timer if shutdown is ongoing */
+  if(!result && !*done) {
+    timediff_t ms = cshutdn_conn_timeleft(data, data->conn);
+    if(ms)
+      Curl_expire_set(data, EXPIRE_SHUTDOWN, ms, Curl_pgrs_now(data));
+  }
+  return result;
+}
+
 static void cshutdn_run_once(struct Curl_easy *data,
                              struct connectdata *conn,
                              bool *done)
@@ -202,14 +212,14 @@ static void cshutdn_run_once(struct Curl_easy *data,
   }
 
   if(!conn->bits.connect_only && Curl_conn_is_connected(conn, FIRSTSOCKET))
-    r1 = Curl_cshutdn_try_once_idx(data, FIRSTSOCKET, &done1);
+    r1 = cshutdn_try_once_idx(data, FIRSTSOCKET, &done1);
   else {
     r1 = CURLE_OK;
     done1 = TRUE;
   }
 
   if(!conn->bits.connect_only && Curl_conn_is_connected(conn, SECONDARYSOCKET))
-    r2 = Curl_cshutdn_try_once_idx(data, SECONDARYSOCKET, &done2);
+    r2 = cshutdn_try_once_idx(data, SECONDARYSOCKET, &done2);
   else {
     r2 = CURLE_OK;
     done2 = TRUE;
@@ -507,6 +517,7 @@ void Curl_cshutdn_add(struct cshutdn *cshutdn,
   CURL_TRC_M(admin, "[SHUTDOWN] added #%" FMT_OFF_T
              " to shutdowns, now %u conns in shutdown",
              conn->connection_id, CURL_PTRARRAY_COUNT(&cshutdn->conns));
+  Curl_multi_mark_dirty(admin);
 }
 
 void Curl_cshutdn_perform(struct cshutdn *cshutdn,
