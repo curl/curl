@@ -429,7 +429,7 @@ sub waitlockunlock {
         if(($lockretry < 0) &&
            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
             logmsg "Warning: server logs lock timeout ",
-                   "($serverlogslocktimeout seconds) expired (locks: " .
+                   "($serverlogslocktimeout seconds) expired (locks: ".
                    join(", ", @locks) . ")\n";
         }
     }

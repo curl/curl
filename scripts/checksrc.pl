@@ -1210,7 +1210,7 @@ sub scanfile {
                      /x) {
                 checkwarn("BANNEDPREPROC",
                           $line, length($1), $file, $ol,
-                          "use of $2 is banned from preprocessor lines" .
+                          "use of $2 is banned from preprocessor lines".
                           (($2 eq "WIN32") ? ", use _WIN32 instead" : ""));
             }
         }
@@ -1263,7 +1263,7 @@ sub scanfile {
            $copyright[0]{year} != $commityear) {
             checkwarn("COPYRIGHTYEAR", $copyright[0]{line}, $copyright[0]{col},
                       $file, $copyright[0]{code},
-                      "Copyright year out of date, should be $commityear, " .
+                      "Copyright year out of date, should be $commityear, ".
                       "is $copyright[0]{year}", 1);
         }
     }

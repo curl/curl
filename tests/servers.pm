@@ -821,7 +821,7 @@ sub verifytelnet {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port\"";
 
-    my $cmd = "echo 'verifiedserver' | " .
+    my $cmd = "echo 'verifiedserver' | ".
         exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:

@@ -249,12 +249,12 @@ sub eXsysread {
     $$scalar = "";
 
     if((not defined $nbytes) || ($nbytes < 1)) {
-        logmsg "Error: eXsysread() failure: " .
+        logmsg "Error: eXsysread() failure: ".
                "length argument must be positive\n";
         return 0;
     }
     if((not defined $timeout) || ($timeout < 0)) {
-        logmsg "Error: eXsysread() failure: " .
+        logmsg "Error: eXsysread() failure: ".
                "timeout argument must be zero or positive\n";
         return 0;
     }
@@ -332,7 +332,7 @@ sub read_mainsockf {
     }
     if(eXsysread($FH, $scalar, $nbytes, $timeout) != $nbytes) {
         my ($fcaller, $lcaller) = (caller)[1, 2];
-        logmsg "Error: read_mainsockf() failure at $fcaller " .
+        logmsg "Error: read_mainsockf() failure at $fcaller ".
                "line $lcaller. Due to eXsysread() failure\n";
         return 0;
     }
@@ -356,7 +356,7 @@ sub read_datasockf {
     }
     if(eXsysread($FH, $scalar, $nbytes, $timeout) != $nbytes) {
         my ($fcaller, $lcaller) = (caller)[1, 2];
-        logmsg "Error: read_datasockf() failure at $fcaller " .
+        logmsg "Error: read_datasockf() failure at $fcaller ".
                "line $lcaller. Due to eXsysread() failure\n";
         return 0;
     }
@@ -377,7 +377,7 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1, 2];
         logmsg "Failed to read input\n";
         logmsg "Error: $srvrname server, sysread error: $!\n";
-        logmsg "Exited from sysread_or_die() at $fcaller " .
+        logmsg "Exited from sysread_or_die() at $fcaller ".
                "line $lcaller. $srvrname server, sysread error: $!\n";
         killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
@@ -392,7 +392,7 @@ sub sysread_or_die {
         ($fcaller, $lcaller) = (caller)[1, 2];
         logmsg "Failed to read input\n";
         logmsg "Error: $srvrname server, read zero\n";
-        logmsg "Exited from sysread_or_die() at $fcaller " .
+        logmsg "Exited from sysread_or_die() at $fcaller ".
                "line $lcaller. $srvrname server, read zero\n";
         killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
