@@ -48,7 +48,7 @@ env:
   # renovate: datasource=github-tags depName=gnutls/gnutls
   GNUTLS_VERSION: 3.8.13
   # renovate: datasource=github-tags depName=libressl/portable
-  LIBRESSL_VERSION: 4.3.3
+  LIBRESSL_VERSION: 4.4.0
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
   OPENSSL_VERSION: 4.0.3
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>3\.5\..+)$
