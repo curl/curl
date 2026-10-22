@@ -59,7 +59,8 @@
     {
       "description": "Schedule package updates on the 10th of each month",
       "matchSourceUrls": [
-        "**/awslabs/**"
+        "**/awslabs/**",
+        "**/openldap/**"
       ],
       "groupName": "monthly updates by URL",
       "schedule": [
