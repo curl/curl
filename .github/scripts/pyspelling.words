@@ -78,6 +78,7 @@ bufq
 bufref
 bugfix
 bugfixes
+bugfixing
 buildable
 buildbot
 Caddy
@@ -156,6 +157,7 @@ curldown
 CURLE
 CURLECH
 CURLH
+CURLHTTPSIG
 curlimages
 CURLINFO
 curlrc
@@ -171,9 +173,9 @@ daniel
 datagrams
 datatracker
 dbg
-decapsulation
 Debian
 DEBUGBUILD
+decapsulation
 decrypt
 decrypted
 decrypting
@@ -371,7 +373,6 @@ HTTPS
 https
 httpsig
 HTTPSIG
-CURLHTTPSIG
 HTTPSRR
 hyper's
 IANA
@@ -431,9 +432,9 @@ KDE
 keepalive
 Keil
 kerberos
-keyid
 Keychain
 keychain
+keyid
 KiB
 kibibyte
 kickstart
