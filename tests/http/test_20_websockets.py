@@ -299,4 +299,3 @@ class TestWebsockets:
         url = f'ws://127.0.0.1:{ws_dl.port}/10mb'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True)
         r.check_exit_code(0)
-
