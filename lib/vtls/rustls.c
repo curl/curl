@@ -335,6 +335,16 @@ static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
    * if successful, deduct the previous plain bytes from the current
    * send. */
   if(backend->plain_out_buffered) {
+    /* A previous send blocked after accepting plaintext into Rustls. The
+     * caller must retry with at least the same amount of data. If the retry
+     * buffer is shorter than what we already buffered, honoring it would make
+     * us report more bytes written than were offered, underflowing the
+     * caller's remaining length and reading out of bounds. Reject it. */
+    if(plainbuf && (backend->plain_out_buffered > plainlen)) {
+      failf(data, "rustls: send retried with less data (%zu) than the %zu "
+            "bytes already buffered", plainlen, backend->plain_out_buffered);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     result = cr_flush_out(cf, data, rconn);
     CURL_TRC_CF(data, cf, "cf_send: flushing %zu previously added bytes -> %d",
                 backend->plain_out_buffered, (int)result);
