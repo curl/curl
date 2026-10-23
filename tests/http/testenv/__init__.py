@@ -41,3 +41,4 @@ from .httpd import Httpd
 from .nghttpx import Nghttpx, NghttpxFwd, NghttpxQuic, NghttpxTcp
 from .sshd import Sshd
 from .vsftpd import VsFTPD
+from .wsserver import WsServer

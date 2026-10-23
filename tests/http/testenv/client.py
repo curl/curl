@@ -26,10 +26,10 @@ import logging
 import os
 import shutil
 import subprocess
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional
 
-from . import ExecResult
+from . import ExecResult, RunProfile
 from .env import Env
 
 log = logging.getLogger(__name__)
@@ -78,7 +78,7 @@ class LocalClient:
         if not os.path.exists(path):
             os.makedirs(path)
 
-    def run(self, args):
+    def run(self, args, with_profile: bool = False):
         self._rmf(self._stdoutfile)
         self._rmf(self._stderrfile)
         start = datetime.now(timezone.utc)
@@ -86,17 +86,41 @@ class LocalClient:
         myargs = [self.path, self.name]
         myargs.extend(args)
         run_env = None
+        profile = None
         if self._run_env:
             run_env = self._run_env.copy()
             for key in ['CURL_DEBUG']:
                 if key in os.environ and key not in run_env:
                     run_env[key] = os.environ[key]
+        started_at = datetime.now(timezone.utc)
         try:
             with open(self._stdoutfile, 'w') as cout, open(self._stderrfile, 'w') as cerr:
-                p = subprocess.run(myargs, stderr=cerr, stdout=cout,
-                                   cwd=self._run_dir, shell=False,
-                                   input=None, env=run_env,
-                                   timeout=self._timeout, check=False)
+                if with_profile:
+                    end_at = started_at + timedelta(seconds=self._timeout) \
+                        if self._timeout else None
+                    p = subprocess.Popen(myargs, stderr=cerr, stdout=cout,
+                                         cwd=self._run_dir, shell=False,
+                                         env=run_env)
+                    profile = RunProfile(p.pid, started_at, self._run_dir)
+                    ptimeout = 0.0
+                    while True:
+                        try:
+                            p.wait(timeout=ptimeout)
+                            break
+                        except subprocess.TimeoutExpired as e:
+                            if end_at and datetime.now(timezone.utc) >= end_at:
+                                p.kill()
+                                raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout) from e
+                            profile.sample()
+                            ptimeout = 0.001
+                    exitcode = p.returncode
+                    profile.finish()
+                    log.info(f'done: exit={exitcode}, profile={profile}')
+                else:
+                    p = subprocess.run(myargs, stderr=cerr, stdout=cout,
+                                       cwd=self._run_dir, shell=False,
+                                       input=None, env=run_env,
+                                       timeout=self._timeout, check=False)
                 exitcode = p.returncode
         except subprocess.TimeoutExpired:
             log.warning(f'Timeout after {self._timeout}s: {args}')
@@ -107,7 +131,8 @@ class LocalClient:
             cerrput = ferr.readlines()
         return ExecResult(args=myargs, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
-                          duration=datetime.now(timezone.utc) - start)
+                          duration=datetime.now(timezone.utc) - start,
+                          profile=profile)
 
     def dump_logs(self):
         lines = []
