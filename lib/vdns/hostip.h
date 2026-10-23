@@ -101,6 +101,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      uint8_t dns_queries,
                      uint8_t transport,
                      bool for_proxy,
+                     const struct curltime *pnow,
                      timediff_t timeout_ms,
                      uint32_t *presolv_id,
                      struct Curl_dns_entry **pdns);
@@ -133,6 +134,7 @@ void Curl_resolv_shutdown_all(struct Curl_easy *data);
 void Curl_resolv_destroy_all(struct Curl_easy *data);
 
 CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
+                                 const struct curltime *pnow,
                                  struct Curl_dns_entry **pdns);
 
 void Curl_resolv_destroy(struct Curl_easy *data, uint32_t resolv_id);
@@ -165,6 +167,7 @@ const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
 CURLcode Curl_resolv_https(struct Curl_easy *data,
                            struct Curl_peer *peer,
                            bool for_proxy,
+                           const struct curltime *pnow,
                            timediff_t timeout_ms,
                            uint32_t *presolv_id,
                            struct Curl_dns_entry **pdns);
@@ -178,7 +181,7 @@ bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
 #else /* !USE_CURL_ASYNC */
 #define Curl_resolv_shutdown_all(x)      Curl_nop_stmt
 #define Curl_resolv_destroy_all(x)       Curl_nop_stmt
-#define Curl_resolv_take_result(x, y, z) CURLE_NOT_BUILT_IN
+#define Curl_resolv_take_result(x, y, z, a) CURLE_NOT_BUILT_IN
 #define Curl_resolv_elapsed_ms(x, y, z)  CURL_TIMEOUT_RESOLVE_MS
 #define Curl_resolv_has_answers(x, y, z) TRUE
 #define Curl_resolv_get_ai(x, y, z, a)   NULL

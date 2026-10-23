@@ -744,7 +744,6 @@ static CURLcode multi_done(struct Curl_easy *data,
      * need to give up any references to `data`. */
     Curl_conn_ev_data_done(data, premature);
     Curl_detach_connection(data);
-    Curl_dnscache_prune(data, pnow);
 
     memset(&mdctx, 0, sizeof(mdctx));
     mdctx.premature = premature;

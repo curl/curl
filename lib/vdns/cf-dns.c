@@ -186,7 +186,8 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
                              struct Curl_dns_entry **pdns)
 {
   struct cf_dns_ctx *ctx = cf->ctx;
-  timediff_t timeout_ms = Curl_timeleft_ms(data);
+  const struct curltime *pnow = Curl_pgrs_now(data);
+  timediff_t timeout_ms = Curl_timeleft_now_ms(data, pnow);
   CURLcode result = CURLE_OK;
 
   *pdns = NULL;
@@ -207,13 +208,13 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
 #endif
 
     result = Curl_resolv(data, ctx->peer, ctx->dns_queries, ctx->transport,
-                         (bool)ctx->for_proxy, timeout_ms,
+                         (bool)ctx->for_proxy, pnow, timeout_ms,
                          &ctx->resolv_id, pdns);
   }
 #ifdef USE_HTTPSRR
   else if(ctx->dns_queries == CURL_DNSQ_HTTPS) {
     result = Curl_resolv_https(data, ctx->peer, (bool)ctx->for_proxy,
-                               timeout_ms, &ctx->resolv_id, pdns);
+                               pnow, timeout_ms, &ctx->resolv_id, pdns);
   }
 #endif
   else {
@@ -303,8 +304,9 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   }
 
   if(!ctx->dns && !ctx->resolv_result) {
-    ctx->resolv_result =
-      Curl_resolv_take_result(data, ctx->resolv_id, &ctx->dns);
+    ctx->resolv_result = Curl_resolv_take_result(data, ctx->resolv_id,
+                                                 Curl_pgrs_now(data),
+                                                 &ctx->dns);
   }
 
   if(ctx->resolv_result && ip_query) {
