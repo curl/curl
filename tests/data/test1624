@@ -33,13 +33,25 @@ http
 URL + --url-query with --next and another URL without --url-query
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --url-query token=secret --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--url-query token=secret
+--url-query "file@%LOGDIR/empty%TESTNUMBER"
+--url-query stdin@-
+--url-query literal=
+--url-query after=2
+--next http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
+<file name="%LOGDIR/empty%TESTNUMBER" nonewline="yes">
+
+</file>
+<stdin nonewline="yes">
+
+</stdin>
 </client>
 
 <verify>
 <protocol crlf="headers">
-GET /%TESTNUMBER?token=secret HTTP/1.1
+GET /%TESTNUMBER?token=secret%AMPfile=%AMPstdin=%AMPliteral=%AMPafter=2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

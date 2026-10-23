@@ -28,12 +28,21 @@ http
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 --data-urlencode "my name is moo[]"
 --data-urlencode "y e s=s_i_r"
+--data-urlencode "file@%LOGDIR/empty%TESTNUMBER"
+--data-urlencode stdin@-
+--data-urlencode literal=
 --data-urlencode "v_alue@%LOGDIR/%TESTNUMBER.txt"
 --data-urlencode @%LOGDIR/%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/%TESTNUMBER.txt">
 content to _?!#$'|%LT%GT
 </file>
+<file1 name="%LOGDIR/empty%TESTNUMBER" nonewline="yes">
+
+</file1>
+<stdin nonewline="yes">
+
+</stdin>
 </client>
 
 <verify>
@@ -42,10 +51,10 @@ POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 119
+Content-Length: 141
 Content-Type: application/x-www-form-urlencoded
 
-my+name+is+moo%5B%5D%AMPy e s=s_i_r%AMPv_alue=content+to+_%3F%21%23%24%27%7C%3C%3E%0A%AMPcontent+to+_%3F%21%23%24%27%7C%3C%3E%0A
+my+name+is+moo%5B%5D%AMPy e s=s_i_r%AMPfile=%AMPstdin=%AMPliteral=%AMPv_alue=content+to+_%3F%21%23%24%27%7C%3C%3E%0A%AMPcontent+to+_%3F%21%23%24%27%7C%3C%3E%0A
 </protocol>
 </verify>
 </testcase>
