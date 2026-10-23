@@ -50,7 +50,9 @@ socket callback options.
 CURLOPT_RESOLVER_START_DATA(3) option.
 
 The callback must return 0 on success. Returning a non-zero value causes the
-resolve to fail.
+resolve to fail. This aborts the connection attempt even when the callback
+is invoked for the separate, optional HTTPS RR lookup rather than the
+regular A/AAAA lookup.
 
 # DEFAULT
 
