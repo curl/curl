@@ -25,8 +25,9 @@
 
 #if defined(HAVE_SOCKETPAIR) && defined(AF_UNIX)
 
-/* A response much like what a large web site sends */
-static const char resp_typical[] =
+/* A response much like what a large web site sends, in pieces since C89
+   compilers need not support string literals longer than 509 bytes */
+static const char *const resp_typical[] = {
   "HTTP/1.1 200 OK\r\n"
   "Date: Thu, 23 Oct 2026 10:00:00 GMT\r\n"
   "Content-Type: text/html; charset=utf-8\r\n"
@@ -36,7 +37,7 @@ static const char resp_typical[] =
   "ETag: W/\"9b2f6c1d0e8a4b7c3f5e2d1a0b9c8d7e\"\r\n"
   "Cache-Control: max-age=0, private, must-revalidate\r\n"
   "Strict-Transport-Security: max-age=31536000; includeSubdomains; "
-  "preload\r\n"
+  "preload\r\n",
   "X-Frame-Options: deny\r\n"
   "X-Content-Type-Options: nosniff\r\n"
   "X-XSS-Protection: 0\r\n"
@@ -44,12 +45,12 @@ static const char resp_typical[] =
   "strict-origin-when-cross-origin\r\n"
   "Content-Security-Policy: default-src 'none'; base-uri 'self'; "
   "child-src 'self' blob:; connect-src 'self' api.example.com "
-  "*.example.net wss://live.example.com; font-src assets.example.com; "
+  "*.example.net wss://live.example.com; font-src assets.example.com; ",
   "form-action 'self' example.com; frame-ancestors 'none'; img-src 'self' "
   "data: blob: assets.example.com *.examplecdn.com; manifest-src 'self'; "
   "media-src example.com; script-src assets.example.com; style-src "
   "'unsafe-inline' assets.example.com; upgrade-insecure-requests; "
-  "worker-src assets.example.com blob:\r\n"
+  "worker-src assets.example.com blob:\r\n",
   "Set-Cookie: _session=c2Vzc2lvbi12YWx1ZS1mb3ItdGVzdGluZy1vbmx5%3D"
   "--1a2b3c4d5e6f; path=/; secure; HttpOnly; SameSite=Lax\r\n"
   "Set-Cookie: _visit=GH1.1.123456789.1761210000; Path=/; "
@@ -57,7 +58,7 @@ static const char resp_typical[] =
   "SameSite=Lax\r\n"
   "Set-Cookie: logged_in=no; Path=/; Domain=example.com; "
   "Expires=Fri, 23 Oct 2027 10:00:00 GMT; HttpOnly; Secure; "
-  "SameSite=Lax\r\n"
+  "SameSite=Lax\r\n",
   "Accept-Ranges: bytes\r\n"
   "Via: 1.1 varnish\r\n"
   "Age: 0\r\n"
@@ -70,7 +71,8 @@ static const char resp_typical[] =
   "Alt-Svc: h3=\":443\"; ma=86400\r\n"
   "Server: perf\r\n"
   "\r\n"
-  "ok";
+  "ok"
+};
 
 static const char resp_small[] =
   "HTTP/1.1 200 OK\r\n"
@@ -221,8 +223,10 @@ out:
 
 static int test_respheaders(int argc, const char **argv)
 {
+  static char typical[4096];
   static char many[64 * 1024];
   curl_off_t loops = 50000;
+  size_t tlen = 0;
   size_t len;
   int rc = 0;
   int i;
@@ -233,6 +237,10 @@ static int test_respheaders(int argc, const char **argv)
     if(!curlx_str_number(&ptr, &num, CURL_OFF_T_MAX) && !*ptr)
       loops = num;
   }
+
+  for(i = 0; i < (int)CURL_ARRAYSIZE(resp_typical); i++)
+    tlen += (size_t)curl_msnprintf(&typical[tlen], sizeof(typical) - tlen,
+                                   "%s", resp_typical[i]);
 
   /* a response with lots of headers */
   len = (size_t)curl_msnprintf(many, sizeof(many),
@@ -245,7 +253,7 @@ static int test_respheaders(int argc, const char **argv)
 
   curl_global_init(CURL_GLOBAL_ALL);
   rc |= run_one("small", resp_small, sizeof(resp_small) - 1, loops);
-  rc |= run_one("typical", resp_typical, sizeof(resp_typical) - 1, loops);
+  rc |= run_one("typical", typical, tlen, loops);
   rc |= run_one("many", many, len, loops / 4);
   curl_global_cleanup();
   return rc;
