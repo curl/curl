@@ -54,6 +54,16 @@ numbers hit the cap, some numbers are not syntactically correct.
 
     ./perf numparser [loops]
 
+## `respheaders`
+
+This test runs HTTP/1.1 transfers that each receive a canned response over a
+local socket pair, with no server involved. It reuses the connection and
+times three responses: a small one, one with the 26 headers a large web site
+typically sends and one with 200 headers. It exercises the response header
+parsing and storing:
+
+    ./perf respheaders [loops]
+
 ## `simpleformat`
 
 This test repeatedly formats a commonly used simple message with
