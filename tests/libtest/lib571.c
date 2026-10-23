@@ -208,11 +208,10 @@ static CURLcode test_lib571(const char *URL)
 
   packets_before = rtp_packet_count;
   result = curl_easy_perform(curl);
-  if(result != CURLE_OPERATION_TIMEDOUT) {
+  if(result) {
     curl_mfprintf(stderr,
-                  "Expected timeout with incomplete RTP frame, got %s\n",
+                  "Expected RTSP response with incomplete RTP frame, got %s\n",
                   curl_easy_strerror(result));
-    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
@@ -245,8 +244,8 @@ static CURLcode test_lib571(const char *URL)
     goto test_cleanup;
   }
 
-  /* A TCP close mid-frame is an error. A subsequent request must use a new
-   * connection with fresh parser state. */
+  /* A TCP close mid-frame must also prevent connection reuse. The RTSP
+   * reply itself is complete, so the next transfer must use a fresh connection. */
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;
@@ -258,11 +257,8 @@ static CURLcode test_lib571(const char *URL)
   easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
 
   result = curl_easy_perform(curl);
-  if(!result) {
-    curl_mfprintf(stderr, "Expected an error after TCP close mid-frame\n");
-    result = TEST_ERR_MAJOR_BAD;
+  if(result)
     goto test_cleanup;
-  }
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
@@ -277,6 +273,12 @@ static CURLcode test_lib571(const char *URL)
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;
+  if(rtp_packet_count != packets_before) {
+    curl_mfprintf(stderr,
+                  "RTSP response after TCP close was delivered to the RTP callback\n");
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
   result = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &numconnects);
   if(result)
     goto test_cleanup;
