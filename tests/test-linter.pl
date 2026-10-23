@@ -202,13 +202,9 @@ sub checkxml {
     if(open(my $fh, "<", "./data/test$num")) {
         my $has_xml = 0;
         my %tag_count;
-        my $tags = 'testcase|' .
-            'info|client|reply|verify|' .
-            'command|data|datacheck|disable|errorcode|features|keywords|killserver|limits|mdtm|name|notexists|postcheck|precheck|' .
-            'protocol|proxy|server|servercmd|setenv|size|socks|stderr|stdin|stdout|strip|stripfile|strippart|tool|upload|valgrind';
         while(<$fh>) {
             chomp;
-            ++$tag_count{$_} if /^<($tags)>$/;
+            ++$tag_count{$1} if /^<([a-z0-9]+)( .+)?>$/;
             if(/^<\?xml/) {
                 $has_xml = 1;
             }
@@ -225,8 +221,9 @@ sub checkxml {
         }
 
         for my $stat (sort { $tag_count{$a} <=> $tag_count{$b} || $a cmp $b } keys %tag_count) {
-            if($tag_count{$stat} > 1) {
-                print "data/test$num has multiple $stat sections\n";
+            my $max = ($stat =~ /^(dns|file[0-9]*|postcheck)/) ? 2 : 1;
+            if($tag_count{$stat} > $max) {
+                print "data/test$num has too many '<$stat>' tags ($tag_count{$stat} vs. $max maximum)\n";
                 $bad = 1;
             }
         }
