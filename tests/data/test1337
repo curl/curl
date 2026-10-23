@@ -56,7 +56,7 @@ Content-Type: text/html
 Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 </file2>
-<notexists>>
+<notexists>
 %LOGDIR/name%TESTNUMBER
 </notexists>
 </verify>
