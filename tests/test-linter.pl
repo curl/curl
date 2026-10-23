@@ -212,6 +212,10 @@ sub checkxml {
             if(/^<\?xml/) {
                 $has_xml = 1;
             }
+            if(/^(# Server-side|# Client-side|# Verify data after the test has been \"shot\"|# tool is what to use instead of 'curl')/) {
+                print "data/test$num has superfluous comment: '$_'\n";
+                $bad = 1;
+            }
         }
         close($fh);
 
