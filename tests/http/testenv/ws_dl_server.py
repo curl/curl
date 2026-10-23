@@ -62,7 +62,7 @@ async def handler(websocket):
             frame = b'x' * (16 * 1024)
         nframes = max(int(dl_size / len(frame)), 1)
 
-        for index in range(nframes):
+        for _ in range(nframes):
             await websocket.send(frame)
             # print(f"sent frame {index}, len={len(frame)}", flush=True)
 
@@ -79,7 +79,7 @@ async def main():
 
     logging.basicConfig(
         format="%(asctime)s %(message)s",
-        level=logging.WARN,
+        level=logging.WARNING,
     )
 
     print(f"listening on ws://localhost:{args.port}", flush=True)
