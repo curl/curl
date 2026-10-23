@@ -37,6 +37,7 @@ CURLX_C = \
   ../../lib/curlx/base64.c \
   ../../lib/curlx/win32-fopen.c \
   ../../lib/curlx/multibyte.c \
+  ../../lib/curlx/nonblock.c \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timeval.c \
   ../../lib/curlx/warnless.c
@@ -48,6 +49,7 @@ TESTS_C = \
   dateparser.c \
   maprintf.c \
   numparser.c \
+  respheaders.c \
   simpleformat.c \
   snprintf.c \
   urldecode.c \

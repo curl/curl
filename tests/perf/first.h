@@ -33,6 +33,7 @@
 #include "curl_setup.h"
 
 #include "curlx/base64.h" /* for curlx_base64* */
+#include "curlx/nonblock.h" /* for curlx_nonblock() */
 #include "curlx/win32-fopen.h" /* for curlx_f*() */
 #include "curlx/strparse.h" /* for curlx_str_* parsing functions */
 #include "curlx/timeval.h" /* for curlx_now type and related functions */
