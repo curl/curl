@@ -41,8 +41,10 @@ from testenv import (
     ExecResult,
     H2oServer,
     Httpd,
+    LocalClient,
     NghttpxQuic,
-    RunProfile, WsServer, LocalClient,
+    RunProfile,
+    WsServer,
 )
 
 log = logging.getLogger(__name__)
@@ -522,12 +524,12 @@ class ScoreRunner:
                     'response_code': 200,
                 }])
             return r
-        else:
-            curl = self.mk_curl_client()
-            return curl.http_put(urls=[url], fdata=fpath, alpn_proto=self._alpn_proto,
-                                 with_headers=False, with_profile=True,
-                                 suppress_cl=self.suppress_cl,
-                                 extra_args=xargs)
+
+        curl = self.mk_curl_client()
+        return curl.http_put(urls=[url], fdata=fpath, alpn_proto=self._alpn_proto,
+                             with_headers=False, with_profile=True,
+                             suppress_cl=self.suppress_cl,
+                             extra_args=xargs)
 
     def ul_single(self, url: str, fsize: int, fpath: str, nsamples: int = 1):
         samples = []

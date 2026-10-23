@@ -37,6 +37,10 @@ from testenv.ports import alloc_ports_and_do
 log = logging.getLogger(__name__)
 
 
+class WsServerError(Exception):
+    pass
+
+
 class WsServer:
 
     def __init__(self, name, env):
@@ -56,7 +60,7 @@ class WsServer:
             self.cmd = os.path.join(env.project_dir,
                                     'tests/http/testenv/ws_4frames_server.py')
         else:
-            raise Exception(f'unknown WsServer name {self.name}')
+            raise WsServerError(f'unknown WsServer name {self.name}')
 
     def check_alive(self, env, port, timeout=Env.SERVER_TIMEOUT):
         curl = CurlClient(env=env)
