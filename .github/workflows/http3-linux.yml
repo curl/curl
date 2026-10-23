@@ -37,7 +37,7 @@ cache-mode: write
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 2000
+  CURL_TEST_MIN: 1820
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc
   AWSLC_VERSION: 5.11.0
@@ -478,7 +478,7 @@ jobs:
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/gnutls/lib -Wl,-rpath,/home/runner/pkg/nettle/lib -Wl,-rpath,/home/runner/pkg/ngtcp2/lib
             PKG_CONFIG_PATH: /home/runner/pkg/nettle/lib/pkgconfig:/home/runner/pkg/gnutls/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             configure: >-
-              --with-gnutls=/home/runner/pkg/gnutls --with-ngtcp2=/home/runner/pkg/ngtcp2 --with-libssh --enable-ssls-export --enable-httpsig --disable-ntlm
+              --with-gnutls=/home/runner/pkg/gnutls --with-ngtcp2=/home/runner/pkg/ngtcp2 --with-libssh --enable-ssls-export --enable-httpsig
 
           - name: 'gnutls'
             tflags: '--min=1900'
@@ -537,7 +537,7 @@ jobs:
 
           - name: 'openssl-prev'
             image: ubuntu-26.04-arm
-            tflags: '--min=2000'
+            tflags: '--min=1875'
             PKG_CONFIG_PATH: "\
               /home/runner/pkg/openssl-prev/lib/pkgconfig:\
               /home/runner/pkg/nghttp3/lib/pkgconfig:\
@@ -580,7 +580,7 @@ jobs:
 
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
-            tflags: '--min=1900'
+            tflags: '--min=1880'
             PKG_CONFIG_PATH: /home/runner/pkg/wolfssl/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/ngtcp2/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
@@ -807,7 +807,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-unknown-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
-              -DCURL_USE_LIBUV=ON -DCURL_ENABLE_NTLM=ON \
+              -DCURL_USE_LIBUV=ON \
               -DTEST_NGHTTPX=/home/runner/pkg/nghttp2/bin/nghttpx \
               -DH2O=/home/runner/pkg/h2o/bin/h2o \
               -DHTTPD_NGHTTPX=/home/runner/pkg/nghttp2/bin/nghttpx \
@@ -816,7 +816,7 @@ jobs:
             [[ "${MATRIX_NAME}" = *'boringssl'* ]] && export CPPFLAGS="-DCURL_BORINGSSL_VERSION=\\\"${BORINGSSL_VERSION}\\\""
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror --enable-debug --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              --with-libuv --enable-ntlm \
+              --with-libuv \
               --with-test-h2o=/home/runner/pkg/h2o/bin/h2o \
               --with-test-nghttpx=/home/runner/pkg/nghttp2/bin/nghttpx \
               ${MATRIX_CONFIGURE}

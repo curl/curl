@@ -25,8 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||    \
-  !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) || \
+#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) || \
   defined(USE_SSL)
 
 #include "curl_hmac.h"
@@ -167,4 +166,4 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
   return CURLE_OK;
 }
 
-#endif /* Using NTLM (without SSPI) or AWS */
+#endif /* AWS or Digeset and TLS */

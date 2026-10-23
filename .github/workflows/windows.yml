@@ -36,7 +36,7 @@ cache-mode: write
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1900
+  CURL_TEST_MIN: 1760
   CURL_TEST_SSH_KEYALGO: ed25519
   DO_NOT_TRACK: '1'
   # https://github.com/PowerShell/Win32-OpenSSH/tags
@@ -82,7 +82,7 @@ jobs:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
     env:
-      CURL_TEST_MIN: 2040
+      CURL_TEST_MIN: 1830
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
@@ -96,7 +96,7 @@ jobs:
               install: 'libssl-devel libssh2-devel' }
           - { name: 'openssl',
               build: 'cmake', platform: 'x86_64', tflags: '',
-              config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_ENABLE_NTLM=ON',
+              config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_HTTPSIG=OFF',
               install: 'libssl-devel libssh2-devel python3' }
       fail-fast: false
     steps:
@@ -261,10 +261,10 @@ jobs:
           # MSYS
           - { name: '!proxy',
               build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON -DCURL_ENABLE_NTLM=ON' }
+              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON' }
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
-              config: '--with-openssl --enable-httpsig --enable-ntlm',
+              config: '--with-openssl --enable-httpsig',
               install: 'diffutils' }  # for tests
           # MinGW
           - { name: 'default',
@@ -272,7 +272,7 @@ jobs:
               config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib' }
           - { name: 'wolfssl c-ares U',
               build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '',
-              config: '--enable-debug --with-wolfssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native --enable-ntlm',
+              config: '--enable-debug --with-wolfssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native',
               install: 'mingw-w64-ucrt-x86_64-wolfssl' }
           - { name: 'schannel c-ares U', type: 'Debug',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '--min=1850',
@@ -292,7 +292,7 @@ jobs:
           # https://github.com/curl/curl-for-win/blob/471a065705a16c61a343b15d3e4ef195e2df2f9e/libssh.sh#L6-L94
           - { name: 'gnutls libssh', type: 'Debug', openssh: 'OpenSSH-Windows',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '',
-              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_ENABLE_NTLM=ON',
+              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON',
               install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-libssh unzip' }
           - { name: 'schannel R', type: 'Release', image: 'windows-11-arm',
               build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun',
@@ -844,7 +844,6 @@ jobs:
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
               -DCURL_USE_LIBPSL=OFF \
-              -DCURL_ENABLE_NTLM=ON \
               -D_CURL_SKIP_BUILD_CERTS=ON \
               ${options}
           else
@@ -955,7 +954,7 @@ jobs:
             type: 'Debug'
             image: 'windows-2025'
             chkprefill: '_chkprefill'
-            tflags: '--min=1980'
+            tflags: '--min=1860'
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
@@ -982,7 +981,7 @@ jobs:
               -DNGTCP2_LIBRARY=/ucrt64/lib/libngtcp2.dll.a
               -DNGTCP2_CRYPTO_OSSL_LIBRARY=/ucrt64/lib/libngtcp2_crypto_ossl.dll.a
               -DCURL_CA_NATIVE=ON
-              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
+              -DUSE_PROXY_HTTP3=ON
 
           - name: 'schannel U'
             install-msys2: 'perl'
