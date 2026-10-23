@@ -357,9 +357,10 @@ class ScoreRunner:
             error += f'exit={r.exit_code} '
         if r.exit_code != 0 or len(r.stats) != count:
             error += f'stats={len(r.stats)}/{count} '
-        fails = [s for s in r.stats if s['response_code'] != 200]
+        exp_resp = 101 if self.protocol == 'ws' else 200
+        fails = [s for s in r.stats if s['response_code'] != exp_resp]
         if len(fails) > 0:
-            error += f'{len(fails)} failed'
+            error += f'{len(fails)} failed, {fails}'
         return error if len(error) > 0 else None
 
     def dl_single(self, url: str, nsamples: int = 1):
@@ -470,7 +471,10 @@ class ScoreRunner:
                 'sval': Card.fmt_size(fsize)
             }]
             self.info(f'{row[0]["sval"]} downloads...')
-            url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/score{row[0]["sval"]}.data'
+            if self.protocol == 'ws':
+                url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/{row[0]["sval"]}'
+            else:
+                url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/score{row[0]["sval"]}.data'
             if 'single' in cols:
                 row.append(self.dl_single(url=url, nsamples=nsamples))
             if count > 1:
@@ -801,9 +805,6 @@ def run_score(args, protocol):
         if not args.uploads:
             uploads = None
         requests = args.requests
-    if protocol == 'ws':
-        downloads = None
-        requests = None
 
     rv = 0
     env = Env()
@@ -942,7 +943,8 @@ def run_score(args, protocol):
             cards.append(card)
 
         if test_ws:
-            wsserver = WsServer(env=env, name='ws_echo')
+            wsname = 'ws_echo' if args.uploads else 'ws_dl'
+            wsserver = WsServer(env=env, name=wsname)
             wsserver.startup()
             server_descr = 'WsServer/echo'
             server_port = wsserver.port
@@ -952,6 +954,8 @@ def run_score(args, protocol):
                                server_port=server_port,
                                verbose=args.verbose,
                                curl_verbose=args.curl_verbose,
+                               download_parallel=args.download_parallel,
+                               upload_parallel=args.upload_parallel,
                                with_flame=args.flame,
                                socks_args=socks_args,
                                limit_rate=args.limit_rate)

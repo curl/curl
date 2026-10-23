@@ -90,6 +90,7 @@ struct ws_decoder {
   int head_len, head_total;
   enum ws_dec_state state;
   int cont_flags;
+  BIT(seen_close);      /* decoded a CLOSE frame */
 };
 
 /* a client-side WS frame encoder, generating frame headers and
@@ -351,6 +352,7 @@ static void ws_dec_reset(struct ws_decoder *dec)
   dec->head_len = dec->head_total = 0;
   dec->state = WS_DEC_INIT;
   dec->cont_flags = 0;
+  dec->seen_close = FALSE;
 }
 
 static void ws_dec_init(struct ws_decoder *dec)
@@ -413,10 +415,13 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
-      if(dec->frame_flags & CURLWS_CLOSE && dec->head[1] > WS_MAX_CNTRL_LEN) {
-        failf(data, "[WS] received CLOSE frame is too big");
-        ws_dec_reset(dec);
-        return CURLE_RECV_ERROR;
+      if(dec->frame_flags & CURLWS_CLOSE) {
+        dec->seen_close = TRUE;
+        if(dec->head[1] > WS_MAX_CNTRL_LEN) {
+          failf(data, "[WS] received CLOSE frame is too big");
+          ws_dec_reset(dec);
+          return CURLE_RECV_ERROR;
+        }
       }
 
       /* How long is the frame head? */
@@ -765,6 +770,13 @@ out:
     failf(data, "[WS] decode ended with incomplete frame");
     result = CURLE_RECV_ERROR;
   }
+  if(!result && ws->dec.seen_close && !ws->pending.type &&
+     Curl_bufq_is_empty(&ctx->buf) &&
+     Curl_bufq_is_empty(&ws->sendbuf)) {
+    CURL_TRC_WS(data, "seen CLOSE from server, stop receiving");
+    CURL_REQ_CLEAR_RECV(data);
+  }
+
   return result;
 }
 

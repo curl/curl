@@ -57,6 +57,14 @@ class TestWebsockets:
         yield server
         server.shutdown()
 
+    @pytest.fixture(autouse=True, scope='class')
+    @classmethod
+    def ws_dl(cls, env):
+        server = WsServer('ws_dl', env)
+        server.startup()
+        yield server
+        server.shutdown()
+
     def test_20_01_basic(self, env: Env, ws_echo):
         curl = CurlClient(env=env)
         url = f'http://localhost:{ws_echo.port}/'
@@ -237,7 +245,7 @@ class TestWebsockets:
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                with_profile=True)
-        assert r.exit_code in [55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
+        assert r.exit_code in [0, 55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
         assert r.profile, f'{r}'
         rss1 = r.profile.stats['rss-max'] / (1024 * 1024)
 
@@ -251,7 +259,7 @@ class TestWebsockets:
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                with_profile=True)
-        assert r.exit_code in [55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
+        assert r.exit_code in [0, 55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
         assert r.profile, f'{r}'
         rss2 = r.profile.stats['rss-max'] / (1024 * 1024)
         assert (rss1 * 1.35) > rss2, 'bad memory increase'
@@ -285,3 +293,10 @@ class TestWebsockets:
         url = f'ws://localhost:{ws_4frames.port}/small'
         r = client.run(args=[url, payload])
         r.check_exit_code(0)
+
+    def test_20_15_dl_10mb(self, env: Env, httpd, ws_dl):
+        curl = CurlClient(env=env)
+        url = f'ws://127.0.0.1:{ws_dl.port}/10mb'
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True)
+        r.check_exit_code(0)
+

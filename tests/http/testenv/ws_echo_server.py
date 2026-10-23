@@ -54,7 +54,7 @@ def main():
 
     logging.basicConfig(
         format="%(asctime)s %(message)s",
-        level=logging.DEBUG,
+        level=logging.WARN,
     )
 
     asyncio.run(run_server(args.port))

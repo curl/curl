@@ -59,6 +59,9 @@ class WsServer:
         elif self.name == 'ws_4frames':
             self.cmd = os.path.join(env.project_dir,
                                     'tests/http/testenv/ws_4frames_server.py')
+        elif self.name == 'ws_dl':
+            self.cmd = os.path.join(env.project_dir,
+                                    'tests/http/testenv/ws_dl_server.py')
         else:
             raise WsServerError(f'unknown WsServer name {self.name}')
 
