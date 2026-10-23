@@ -41,8 +41,10 @@ from testenv import (
     ExecResult,
     H2oServer,
     Httpd,
+    LocalClient,
     NghttpxQuic,
     RunProfile,
+    WsServer,
 )
 
 log = logging.getLogger(__name__)
@@ -258,7 +260,14 @@ class ScoreRunner:
         self._limit_rate_num = 0
         self._limit_rate = limit_rate
         self._http_plain = http_plain
-        self._scheme = 'http' if http_plain else 'https'
+        if self.protocol in ['http/1.1', 'h2', 'h3']:
+            self._scheme = 'http' if http_plain else 'https'
+            self._alpn_proto = self.protocol
+        elif self.protocol == 'ws':
+            self._scheme = 'ws'
+            self._alpn_proto = 'http/1.1'
+        else:
+            raise ScoreCardError(f'unknown protocol {self.protocol}')
         if self._limit_rate:
             m = re.match(r'(\d+(\.\d+)?)([gmkb])?', self._limit_rate.lower())
             if not m:
@@ -348,9 +357,10 @@ class ScoreRunner:
             error += f'exit={r.exit_code} '
         if r.exit_code != 0 or len(r.stats) != count:
             error += f'stats={len(r.stats)}/{count} '
-        fails = [s for s in r.stats if s['response_code'] != 200]
+        exp_resp = 101 if self.protocol == 'ws' else 200
+        fails = [s for s in r.stats if s['response_code'] != exp_resp]
         if len(fails) > 0:
-            error += f'{len(fails)} failed'
+            error += f'{len(fails)} failed, {fails}'
         return error if len(error) > 0 else None
 
     def dl_single(self, url: str, nsamples: int = 1):
@@ -361,7 +371,7 @@ class ScoreRunner:
         self.info('single...')
         for _ in range(nsamples):
             curl = self.mk_curl_client()
-            r = curl.http_download(urls=[url], alpn_proto=self.protocol,
+            r = curl.http_download(urls=[url], alpn_proto=self._alpn_proto,
                                    no_save=True, with_headers=False,
                                    with_profile=True,
                                    limit_rate=self._limit_rate)
@@ -388,7 +398,7 @@ class ScoreRunner:
         self.info('serial...')
         for _ in range(nsamples):
             curl = self.mk_curl_client()
-            r = curl.http_download(urls=[url], alpn_proto=self.protocol,
+            r = curl.http_download(urls=[url], alpn_proto=self._alpn_proto,
                                    no_save=True,
                                    with_headers=False,
                                    with_profile=True,
@@ -417,7 +427,7 @@ class ScoreRunner:
         self.info('parallel...')
         for _ in range(nsamples):
             curl = self.mk_curl_client()
-            r = curl.http_download(urls=[url], alpn_proto=self.protocol,
+            r = curl.http_download(urls=[url], alpn_proto=self._alpn_proto,
                                    no_save=True,
                                    with_headers=False,
                                    with_profile=True,
@@ -461,7 +471,10 @@ class ScoreRunner:
                 'sval': Card.fmt_size(fsize)
             }]
             self.info(f'{row[0]["sval"]} downloads...')
-            url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/score{row[0]["sval"]}.data'
+            if self.protocol == 'ws':
+                url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/{row[0]["sval"]}'
+            else:
+                url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/score{row[0]["sval"]}.data'
             if 'single' in cols:
                 row.append(self.dl_single(url=url, nsamples=nsamples))
             if count > 1:
@@ -499,16 +512,36 @@ class ScoreRunner:
             error += f'[{f["response_code"]}]'
         return error if len(error) > 0 else None
 
-    def ul_single(self, url: str, fpath: str, nsamples: int = 1):
+    def ul_run(self, url, count, fsize, fpath, xargs=None):
+        if self.protocol == 'ws':
+            frame_size = 16384
+            nframes = max(fsize / frame_size, 1)
+            url = f'ws://localhost:{self.server_port}/'
+            client = LocalClient(env=self.env, name='cli_ws_data')
+            if not client.exists():
+                raise ScoreCardError(f'example client not built: {client.name}')
+            r = client.run(args=['-1', '-c', str(nframes), '-m', str(frame_size), url],
+                           with_profile=True)
+            if r.exit_code == 0:
+                r.set_stats([{
+                    'size_upload': fsize,
+                    'response_code': 200,
+                }])
+            return r
+
+        curl = self.mk_curl_client()
+        return curl.http_put(urls=[url], fdata=fpath, alpn_proto=self._alpn_proto,
+                             with_headers=False, with_profile=True,
+                             suppress_cl=self.suppress_cl,
+                             extra_args=xargs)
+
+    def ul_single(self, url: str, fsize: int, fpath: str, nsamples: int = 1):
         samples = []
         errors = []
         profiles = []
         self.info('single...')
         for _ in range(nsamples):
-            curl = self.mk_curl_client()
-            r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
-                              with_headers=False, with_profile=True,
-                              suppress_cl=self.suppress_cl)
+            r = self.ul_run(url, 1, fsize, fpath)
             err = self._check_uploads(r, 1)
             if err:
                 errors.append(err)
@@ -518,17 +551,14 @@ class ScoreRunner:
                 profiles.append(r.profile)
         return Card.mk_mbs_cell(samples, profiles, errors)
 
-    def ul_serial(self, url: str, fpath: str, count: int, nsamples: int = 1):
+    def ul_serial(self, url: str, fsize: int, fpath: str, count: int, nsamples: int = 1):
         samples = []
         errors = []
         profiles = []
         url = f'{url}?id=[0-{count - 1}]'
         self.info('serial...')
         for _ in range(nsamples):
-            curl = self.mk_curl_client()
-            r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
-                              with_headers=False, with_profile=True,
-                              suppress_cl=self.suppress_cl)
+            r = self.ul_run(url, count, fsize, fpath)
             err = self._check_uploads(r, count)
             if err:
                 errors.append(err)
@@ -538,7 +568,7 @@ class ScoreRunner:
                 profiles.append(r.profile)
         return Card.mk_mbs_cell(samples, profiles, errors)
 
-    def ul_parallel(self, url: str, fpath: str, count: int, nsamples: int = 1):
+    def ul_parallel(self, url: str, fsize: int, fpath: str, count: int, nsamples: int = 1):
         samples = []
         errors = []
         profiles = []
@@ -546,14 +576,9 @@ class ScoreRunner:
         url = f'{url}?id=[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(nsamples):
-            curl = self.mk_curl_client()
-            r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
-                              with_headers=False, with_profile=True,
-                              suppress_cl=self.suppress_cl,
-                              extra_args=[
-                                   '--parallel',
-                                   '--parallel-max', str(max_parallel),
-                              ])
+            r = self.ul_run(url, count, fsize, fpath, xargs=[
+                '--parallel', '--parallel-max', str(max_parallel),
+            ])
             err = self._check_uploads(r, count)
             if err:
                 errors.append(err)
@@ -588,11 +613,11 @@ class ScoreRunner:
             fpath = self._make_docs_file(docs_dir=self.env.gen_dir,
                                          fname=fname, fsize=fsize)
             if run_single:
-                row.append(self.ul_single(url=url, fpath=fpath, nsamples=nsamples))
+                row.append(self.ul_single(url=url, fsize=fsize, fpath=fpath, nsamples=nsamples))
             if run_serial:
-                row.append(self.ul_serial(url=url, fpath=fpath, count=count, nsamples=nsamples))
+                row.append(self.ul_serial(url=url, fsize=fsize, fpath=fpath, count=count, nsamples=nsamples))
             if run_parallel:
-                row.append(self.ul_parallel(url=url, fpath=fpath, count=count, nsamples=nsamples))
+                row.append(self.ul_parallel(url=url, fsize=fsize, fpath=fpath, count=count, nsamples=nsamples))
             rows.append(row)
             self.info('done.\n')
         title = f'Uploads to {meta["server"]}'
@@ -623,7 +648,7 @@ class ScoreRunner:
         self.info(f'{max_parallel}...')
         for _ in range(nsamples):
             curl = self.mk_curl_client()
-            r = curl.http_download(urls=[url], alpn_proto=self.protocol, no_save=True,
+            r = curl.http_download(urls=[url], alpn_proto=self._alpn_proto, no_save=True,
                                    with_headers=False, with_profile=True,
                                    with_stats=False, extra_args=extra_args)
             if r.exit_code != 0:
@@ -718,6 +743,9 @@ class ScoreRunner:
         elif self.protocol == 'h1' or self.protocol == 'http/1.1':
             score['meta']['protocol'] = 'http/1.1'
             score['meta']['implementation'] = 'native'
+        elif self.protocol == 'ws':
+            score['meta']['protocol'] = 'ws'
+            score['meta']['implementation'] = 'native'
         else:
             raise ScoreCardError(f"unknown protocol: {self.protocol}")
 
@@ -744,13 +772,13 @@ class ScoreRunner:
 
 
 def run_score(args, protocol):
-    if protocol not in ['http/1.1', 'h1', 'h2', 'h3']:
+    if protocol not in ['http/1.1', 'h1', 'h2', 'h3', 'ws']:
         sys.stderr.write(f'ERROR: protocol "{protocol}" not known to scorecard\n')
         sys.exit(1)
     if protocol == 'h1':
         protocol = 'http/1.1'
 
-    handshakes = True
+    handshakes = protocol in ['http/1.1', 'h1', 'h2', 'h3']
     downloads = [1024 * 1024, 10 * 1024 * 1024, 100 * 1024 * 1024]
     if args.download_sizes is not None:
         downloads = []
@@ -783,13 +811,14 @@ def run_score(args, protocol):
     env.setup()
     env.test_timeout = None
 
-    test_httpd = protocol != 'h3'
+    test_httpd = protocol in ['http/1.1', 'h2']
     test_h2o = protocol == 'h3' and env.have_h2o()
     test_caddy = protocol == 'h3' and not test_h2o
     if args.caddy or args.httpd or args.h2o:
         test_caddy = args.caddy
         test_httpd = args.httpd
         test_h2o = args.h2o
+    test_ws = protocol == 'ws'
 
     sockd = None
     socks_args = None
@@ -808,6 +837,7 @@ def run_score(args, protocol):
     nghttpx = None
     caddy = None
     h2o = None
+    wsserver = None
     try:
         cards = []
 
@@ -912,6 +942,28 @@ def run_score(args, protocol):
             card.setup_resources(server_docs, downloads)
             cards.append(card)
 
+        if test_ws:
+            wsname = 'ws_echo' if args.uploads else 'ws_dl'
+            wsserver = WsServer(env=env, name=wsname)
+            wsserver.startup()
+            server_descr = 'WsServer/echo'
+            server_port = wsserver.port
+            card = ScoreRunner(env=env,
+                               protocol=protocol,
+                               server_descr=server_descr,
+                               server_port=server_port,
+                               verbose=args.verbose,
+                               curl_verbose=args.curl_verbose,
+                               download_parallel=args.download_parallel,
+                               upload_parallel=args.upload_parallel,
+                               with_flame=args.flame,
+                               socks_args=socks_args,
+                               limit_rate=args.limit_rate)
+            cards.append(card)
+
+        if not len(cards):
+            raise ScoreCardError(f"no cards selected for {protocol}")
+
         if args.start_only:
             print('started servers:')
             for card in cards:
@@ -952,6 +1004,8 @@ def run_score(args, protocol):
             httpd.stop()
         if sockd:
             sockd.stop()
+        if wsserver:
+            wsserver.shutdown()
     return rv
 
 

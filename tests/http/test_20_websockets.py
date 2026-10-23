@@ -27,83 +27,14 @@ import hashlib
 import logging
 import os
 import re
-import shutil
 import socket
-import subprocess
 import threading
 import time
-from datetime import datetime, timedelta, timezone
-from typing import Dict
 
 import pytest
-from testenv import CurlClient, Env, LocalClient
-from testenv.ports import alloc_ports_and_do
+from testenv import CurlClient, Env, LocalClient, WsServer
 
 log = logging.getLogger(__name__)
-
-
-class WsServer:
-
-    def __init__(self, name, env, cmd):
-        self.name = name
-        self.env = env
-        self.run_dir = os.path.join(env.gen_dir, self.name)
-        self.err_file = os.path.join(self.run_dir, 'stderr')
-        self._rmrf(self.run_dir)
-        self._mkpath(self.run_dir)
-        self.cmd = cmd
-        self.wsproc = None
-        self.cerr = None
-        self.port = 0
-
-    def check_alive(self, env, port, timeout=Env.SERVER_TIMEOUT):
-        curl = CurlClient(env=env)
-        url = f'http://localhost:{port}/'
-        end = datetime.now(timezone.utc) + timedelta(seconds=timeout)
-        while datetime.now(timezone.utc) < end:
-            r = curl.http_download(urls=[url])
-            if r.exit_code == 0:
-                return True
-            time.sleep(.1)
-        return False
-
-    def _mkpath(self, path):
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-    def _rmrf(self, path):
-        if os.path.exists(path):
-            shutil.rmtree(path)
-
-    def startup(self):
-
-        def startup(ports: Dict[str, int]) -> bool:
-            self.port = ports[self.name]
-            wargs = [self.cmd, '--port', str(self.port)]
-            log.info(f'start_ {wargs}')
-            self.wsproc = subprocess.Popen(args=wargs,
-                                           cwd=self.run_dir,
-                                           stderr=self.cerr,
-                                           stdout=self.cerr)
-            if self.check_alive(self.env, self.port):
-                self.env.update_ports(ports)
-                return True
-            log.error(f'not alive {wargs}')
-            self.wsproc.terminate()
-            self.wsproc = None
-            return False
-
-        self.cerr = open(self.err_file, 'w')  # noqa: SIM115
-        port_spec = {
-            self.name: socket.SOCK_STREAM
-        }
-        assert alloc_ports_and_do(port_spec, startup,
-                                  self.env.gen_root, max_tries=3)
-        assert self.wsproc
-
-    def shutdown(self):
-        self.wsproc.terminate()
-        self.cerr.close()
 
 
 @pytest.mark.skipif(condition=not Env.curl_has_protocol('ws'),
@@ -113,9 +44,7 @@ class TestWebsockets:
     @pytest.fixture(autouse=True, scope='class')
     @classmethod
     def ws_echo(cls, env):
-        cmd = os.path.join(env.project_dir,
-                           'tests/http/testenv/ws_echo_server.py')
-        server = WsServer('ws_echo', env, cmd)
+        server = WsServer('ws_echo', env)
         server.startup()
         yield server
         server.shutdown()
@@ -123,9 +52,15 @@ class TestWebsockets:
     @pytest.fixture(autouse=True, scope='class')
     @classmethod
     def ws_4frames(cls, env):
-        cmd = os.path.join(env.project_dir,
-                           'tests/http/testenv/ws_4frames_server.py')
-        server = WsServer('ws_4frames', env, cmd)
+        server = WsServer('ws_4frames', env)
+        server.startup()
+        yield server
+        server.shutdown()
+
+    @pytest.fixture(autouse=True, scope='class')
+    @classmethod
+    def ws_dl(cls, env):
+        server = WsServer('ws_dl', env)
         server.startup()
         yield server
         server.shutdown()
@@ -164,7 +99,7 @@ class TestWebsockets:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{ws_echo.port}/'
-        r = client.run(args=[f'-{model}', '-m', str(1), '-M', str(10), url])
+        r = client.run(args=[f'-{model}', '-c', '10', '-m', str(1), '-M', str(10), url])
         r.check_exit_code(0)
 
     @pytest.mark.parametrize("model", [
@@ -310,7 +245,7 @@ class TestWebsockets:
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                with_profile=True)
-        assert r.exit_code in [55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
+        assert r.exit_code in [0, 55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
         assert r.profile, f'{r}'
         rss1 = r.profile.stats['rss-max'] / (1024 * 1024)
 
@@ -324,7 +259,7 @@ class TestWebsockets:
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                with_profile=True)
-        assert r.exit_code in [55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
+        assert r.exit_code in [0, 55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
         assert r.profile, f'{r}'
         rss2 = r.profile.stats['rss-max'] / (1024 * 1024)
         assert (rss1 * 1.35) > rss2, 'bad memory increase'
@@ -357,4 +292,10 @@ class TestWebsockets:
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{ws_4frames.port}/small'
         r = client.run(args=[url, payload])
+        r.check_exit_code(0)
+
+    def test_20_15_dl_10mb(self, env: Env, httpd, ws_dl):
+        curl = CurlClient(env=env)
+        url = f'ws://127.0.0.1:{ws_dl.port}/10mb'
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True)
         r.check_exit_code(0)

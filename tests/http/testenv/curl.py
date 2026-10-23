@@ -378,6 +378,9 @@ class ExecResult:
     def stats(self) -> List:
         return self._stats
 
+    def set_stats(self, stats):
+        self._stats = stats
+
     @property
     def total_connects(self) -> Optional[int]:
         if self.stats:
