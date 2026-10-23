@@ -244,8 +244,8 @@ static CURLcode test_lib571(const char *URL)
     goto test_cleanup;
   }
 
-  /* A TCP close mid-frame must also prevent connection reuse. The RTSP
-   * reply itself is complete, so the next transfer must use a fresh connection. */
+  /* A TCP close mid-frame must also prevent connection reuse. The RTSP reply
+   * is complete, so the next transfer must use a fresh connection. */
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;
@@ -274,8 +274,8 @@ static CURLcode test_lib571(const char *URL)
   if(result)
     goto test_cleanup;
   if(rtp_packet_count != packets_before) {
-    curl_mfprintf(stderr,
-                  "RTSP response after TCP close was delivered to the RTP callback\n");
+    curl_mfprintf(stderr, "RTSP response after TCP close was delivered "
+                          "to the RTP callback\n");
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
