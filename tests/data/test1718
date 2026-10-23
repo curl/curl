@@ -25,7 +25,6 @@ Content-Length: 0
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -41,7 +40,6 @@ initial content
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 23
