@@ -103,7 +103,7 @@ class NghttpxUtil:
             cls.CMD = cmd
             cls.CAN_ECH = False
             for line in p.stdout.splitlines(keepends=False):
-                if re.search(r'--ech-config-file', line):
+                if '--ech-config-file' in line:
                     cls.CAN_ECH = True
                     break
         return cls.CAN_ECH
