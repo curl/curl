@@ -22,13 +22,13 @@
 #
 ###########################################################################
 #
-from datetime import datetime, timedelta, timezone
 import logging
 import os
 import shutil
 import socket
 import subprocess
 import time
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 from testenv import CurlClient, Env
