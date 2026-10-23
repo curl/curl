@@ -408,7 +408,13 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     MY_SETOPT_STR(curl, CURLOPT_SSL_SIGNATURE_ALGORITHMS,
                   config->ssl_signature_algorithms);
 
-  if(config->writeout)
+  /* certinfo costs a copy of every chain cert as text and can fail a
+     transfer on a huge chain, only ask for it when the writeout
+     format uses it */
+  if(config->writeout &&
+     (strstr(config->writeout, "{certs}") ||
+      strstr(config->writeout, "{num_certs}") ||
+      strstr(config->writeout, "{json}")))
     my_setopt_long(curl, CURLOPT_CERTINFO, 1);
 
   MY_SETOPT_STR(curl, CURLOPT_SSLCERT, config->cert);
