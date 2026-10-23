@@ -421,7 +421,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     }
 #elif defined(LDAP_OPT_X_TLS) /* !USE_WIN32_LDAP */
     int ldap_option;
+#ifndef LDAP_OPT_X_TLS_PASSPHRASE /* Apple LDAP uses the system CA store */
     const char *ldap_ca = conn->ssl_config.CAfile;
+#endif
     if(conn->ssl_config.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
       if(conn->ssl_config.cert_type &&
@@ -430,6 +432,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
+#ifndef LDAP_OPT_X_TLS_PASSPHRASE
       if(!ldap_ca) {
         failf(data, "LDAP local: ERROR PEM CA cert not set");
         result = CURLE_SSL_CERTPROBLEM;
@@ -438,11 +441,11 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       infof(data, "LDAP local: using PEM CA cert: %s", ldap_ca);
       rc = ldap_set_option(server, LDAP_OPT_X_TLS_CACERTFILE, ldap_ca);
       if(rc != LDAP_SUCCESS) {
-        failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
-              ldap_err2string(rc));
+        failf(data, "LDAP local: ERROR setting PEM CA cert");
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
+#endif
       ldap_option = LDAP_OPT_X_TLS_DEMAND;
     }
     else
@@ -450,19 +453,26 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
     rc = ldap_set_option(server, LDAP_OPT_X_TLS_REQUIRE_CERT, &ldap_option);
     if(rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ERROR setting cert verify mode: %s",
-            ldap_err2string(rc));
+      failf(data, "LDAP local: ERROR setting cert verify mode");
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
     ldap_option = LDAP_OPT_X_TLS_HARD;
     rc = ldap_set_option(server, LDAP_OPT_X_TLS, &ldap_option);
     if(rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ERROR setting SSL/TLS mode: %s",
-            ldap_err2string(rc));
+      failf(data, "LDAP local: ERROR setting SSL/TLS mode");
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
+#ifdef LDAP_OPT_X_TLS_NEWCTX
+    ldap_option = 0;
+    rc = ldap_set_option(server, LDAP_OPT_X_TLS_NEWCTX, &ldap_option);
+    if(rc != LDAP_SUCCESS) {
+      failf(data, "LDAP local: ERROR creating TLS context");
+      result = CURLE_SSL_CERTPROBLEM;
+      goto quit;
+    }
+#endif
 #else /* !USE_WIN32_LDAP && !LDAP_OPT_X_TLS */
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
