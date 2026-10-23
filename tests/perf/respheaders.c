@@ -149,6 +149,38 @@ static int rh_prereq(void *clientp, char *conn_primary_ip,
   return CURL_PREREQFUNC_OK;
 }
 
+/* The whole response is queued before libcurl reads any of it, so it must
+   fit in the socket buffers. Ask for more room than the default, which is
+   only 8 KiB on some systems, and check that a response fits. */
+static bool rh_fits(struct respctx *ctx)
+{
+  int size = 256 * 1024;
+  char buf[4096];
+  const char *p = ctx->resp;
+  size_t left = ctx->resplen;
+  size_t got = 0;
+
+  (void)setsockopt(ctx->sock[1], SOL_SOCKET, SO_SNDBUF,
+                   (void *)&size, sizeof(size));
+  (void)setsockopt(ctx->sock[0], SOL_SOCKET, SO_RCVBUF,
+                   (void *)&size, sizeof(size));
+  while(left) {
+    ssize_t n = swrite(ctx->sock[1], p, left);
+    if(n <= 0)
+      break;
+    p += n;
+    left -= (size_t)n;
+  }
+  /* read back what was written to leave the socket pair empty */
+  while(got < ctx->resplen - left) {
+    ssize_t n = sread(ctx->sock[0], buf, sizeof(buf));
+    if(n <= 0)
+      return FALSE;
+    got += (size_t)n;
+  }
+  return !left;
+}
+
 static size_t rh_write(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   (void)ptr;
@@ -181,6 +213,12 @@ static int run_one(const char *name, const char *resp, size_t resplen,
   }
   ctx.resp = resp;
   ctx.resplen = resplen;
+  if(!rh_fits(&ctx)) {
+    curl_mfprintf(stderr, "%s: a %zu byte response does not fit in the "
+                  "socket buffers\n", name, resplen);
+    rc = 1;
+    goto out;
+  }
 
   curl = curl_easy_init();
   if(!curl) {
