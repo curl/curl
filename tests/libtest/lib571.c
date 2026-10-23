@@ -194,8 +194,8 @@ static CURLcode test_lib571(const char *URL)
   if(result)
     goto test_cleanup;
 
-  /* An incomplete RTP frame at transfer end makes the connection unsafe to
-   * reuse. The next RTSP response must not be consumed as RTP data. */
+  /* If the next control response arrives mid-frame, it must be parsed as
+   * RTSP rather than delivered to the RTP callback. */
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;
@@ -237,9 +237,9 @@ static CURLcode test_lib571(const char *URL)
   result = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &numconnects);
   if(result)
     goto test_cleanup;
-  if(numconnects != 1) {
-    curl_mfprintf(stderr, "Expected a new connection after incomplete RTP "
-                  "frame, got %ld connects\n", numconnects);
+  if(numconnects != 0) {
+    curl_mfprintf(stderr, "Expected RTSP connection reuse after incomplete RTP "
+                  "frame, got %ld new connects\n", numconnects);
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
