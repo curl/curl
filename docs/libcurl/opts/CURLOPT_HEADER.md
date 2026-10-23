@@ -12,6 +12,7 @@ Protocol:
   - SMTP
 See-also:
   - CURLOPT_HEADERFUNCTION (3)
+  - CURLOPT_HEADEREXTFUNCTION (3)
   - CURLOPT_HTTPHEADER (3)
 Added-in: 7.1
 ---
@@ -30,10 +31,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADER, long onoff);
 
 # DESCRIPTION
 
-Pass the long value *onoff* set to 1 to ask libcurl to include the headers
-in the write callback (CURLOPT_WRITEFUNCTION(3)). This option is
-relevant for protocols that actually have headers or other meta-data (like
-HTTP and FTP).
+Pass the long value *onoff* set to 1 to ask libcurl to include the headers in
+the write callback (CURLOPT_WRITEFUNCTION(3)). This option is relevant for
+protocols that actually have headers or other meta-data (like HTTP and FTP).
 
 When asking to get the headers passed to the same callback as the body, it is
 not possible to accurately separate them again without detailed knowledge
