@@ -573,6 +573,12 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       failf(data, "cannot get the size of file.");
       return CURLE_READ_ERROR;
     }
+    if((curl_off_t)statbuf.st_size < -data->state.resume_from) {
+      failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
+            FMT_OFF_T ")", data->state.resume_from,
+            (curl_off_t)statbuf.st_size);
+      return CURLE_BAD_DOWNLOAD_RESUME;
+    }
     data->state.resume_from += (curl_off_t)statbuf.st_size;
   }
 
