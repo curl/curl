@@ -713,7 +713,7 @@ static ParameterError data_urlencode(const char *nextarg,
       return PARAM_NO_MEM;
     size = 0;
   }
-  else if(size > INT_MAX) {
+  if(size > INT_MAX) {
     /* curl_easy_escape() takes an int length */
     errorf("too much data to URL encode");
     curlx_free(postdata);
