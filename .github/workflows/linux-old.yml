@@ -68,9 +68,10 @@ jobs:
           sed -E -i -e s@[a-z]+\.debian\.org/@archive.debian.org/debian-archive/@ -e '/ stretch-updates /d' /etc/apt/sources.list
           apt-get -o Dpkg::Use-Pty=0 update
           # See comment above if this fails after 2025-05-20
-          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends httrack curl ca-certificates
-          httrack --get https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb
-          sha256sum freexian-archive-keyring_2022.06.08_all.deb && dpkg -i freexian-archive-keyring_2022.06.08_all.deb
+          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends curl ca-certificates
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+            https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb --output pkg.deb
+          sha256sum pkg.deb | tee /dev/stderr | grep -qwF -- a8160d1aa1a40aa9988bf0b389b650550c7460ec3b4ec1d847778fe44b9c4dbc && dpkg -i pkg.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get -o Dpkg::Use-Pty=0 update
           apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends \
@@ -78,9 +79,13 @@ jobs:
           # GitHub's actions/checkout needs newer glibc and libstdc++. The latter also depends on
           # gcc-8-base, but it does not actually seem used in our situation and is not available in
           # the main repo, so force the install.
-          httrack --get https://deb.freexian.com/extended-lts/pool/main/g/glibc/libc6_2.28-10+deb10u5_amd64.deb
-          httrack --get https://deb.freexian.com/extended-lts/pool/main/g/gcc-8/libstdc++6_8.3.0-6_amd64.deb
-          sha256sum libc6_*_amd64.deb libstdc++6_*_amd64.deb && dpkg -i --force-depends libc6_*_amd64.deb libstdc++6_*_amd64.deb
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+            https://deb.freexian.com/extended-lts/pool/main/g/glibc/libc6_2.28-10+deb10u5_amd64.deb --output pkg-c.deb
+          sha256sum pkg-c.deb | tee /dev/stderr | grep -qwF -- 0eec8ab0c8a4d018548a0ee3b23b6dadafcd9903d62ea50f36c86be24530471a
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+            https://deb.freexian.com/extended-lts/pool/main/g/gcc-8/libstdc++6_8.3.0-6_amd64.deb --output pkg-cpp.deb
+          sha256sum pkg-cpp.deb | tee /dev/stderr | grep -qwF -- 5cc70625329655ff9382580971d4616db8aa39af958b7c995ee84598f142a4ee
+          dpkg -i --force-depends pkg-c.deb pkg-cpp.deb
 
       - name: 'install prereqs (cmake)'
         env:
