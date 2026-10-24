@@ -404,6 +404,10 @@ Details via CMake
 
 ## Dependency options (libraries)
 
+- `CURL_BORINGSSL_WITHOUT_POSIX_THREADS`:   Omit detecting/using the POSIX threads library for AWS-LC/BoringSSL. Default: `OFF`
+                                            E.g. AWS-LC 5.6.0+ versions support native Windows threading, in which case
+                                            the POSIX threads library can be safely disabled with this options.
+
 - `AMISSL_INCLUDE_DIR`:                     Absolute path to AmiSSL include directory.
 - `AMISSL_STUBS_LIBRARY`:                   Absolute path to `amisslstubs` library.
 - `AMISSL_AUTO_LIBRARY`:                    Absolute path to `amisslauto` library.
