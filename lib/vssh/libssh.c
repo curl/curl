@@ -419,6 +419,21 @@ static int myssh_to_GSSAPI_AUTH(struct Curl_easy *data,
   return myssh_to_KEY_AUTH(data, sshc);
 }
 
+/* The key file did not authenticate. A file the user named
+   (CURLOPT_SSH_PRIVATE_KEYFILE) ends public key auth here. The default guess
+   from Curl_ssh_setup_pkey() does not: let libssh try ssh-agent and its
+   default key files, the way the libssh2 backend goes on to the agent. The
+   agent search needs CURLSSH_AUTH_AGENT, as in myssh_in_AUTHLIST(). */
+static int myssh_to_PKEY_AUTO(struct Curl_easy *data,
+                              struct ssh_conn *sshc)
+{
+  if(CURL_EASY_STR(data, STRING_SSH_PRIVATE_KEY) ||
+     !(data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))
+    return myssh_to_GSSAPI_AUTH(data, sshc);
+  myssh_to(data, sshc, SSH_AUTH_PKEY_AUTO);
+  return SSH_OK;
+}
+
 static int myssh_in_SFTP_READDIR_INIT(struct Curl_easy *data,
                                       struct ssh_conn *sshc,
                                       struct SSHPROTO *sshp)
@@ -863,8 +878,9 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
     return rc;
   }
 
-  /* Two choices, (1) private key was given on CMD,
-   * (2) use the "default" keys. */
+  /* Two choices, (1) a private key file, named by the user or the default
+   * guess from Curl_ssh_setup_pkey(), (2) libssh's own search of ssh-agent
+   * and the default key files. */
   if(sshc->priv_key && sshc->priv_key[0]) {
     if(sshc->pubkey && !sshc->passphrase) {
       rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
@@ -872,7 +888,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
         return SSH_AGAIN;
 
       if(rc != SSH_OK) {
-        rc = myssh_to_GSSAPI_AUTH(data, sshc);
+        rc = myssh_to_PKEY_AUTO(data, sshc);
         return rc;
       }
     }
@@ -881,30 +897,21 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
                                      sshc->passphrase, NULL,
                                      NULL, &sshc->privkey);
     if(rc != SSH_OK) {
-      failf(data, "Could not load private key file %s", sshc->priv_key);
-      rc = myssh_to_ERROR(data, sshc, CURLE_LOGIN_DENIED);
+      if(CURL_EASY_STR(data, STRING_SSH_PRIVATE_KEY)) {
+        failf(data, "Could not load private key file %s", sshc->priv_key);
+        rc = myssh_to_ERROR(data, sshc, CURLE_LOGIN_DENIED);
+        return rc;
+      }
+      infof(data, "Could not load private key file %s", sshc->priv_key);
+      rc = myssh_to_PKEY_AUTO(data, sshc);
       return rc;
     }
 
     myssh_to(data, sshc, SSH_AUTH_PKEY);
   }
-  else {
-    rc = ssh_userauth_publickey_auto(sshc->ssh_session, NULL,
-                                     sshc->passphrase);
-    if(rc == SSH_AUTH_AGAIN)
-      return SSH_AGAIN;
-
-    if(rc == SSH_AUTH_SUCCESS) {
-      rc = SSH_OK;
-      sshc->authed = TRUE;
-      infof(data, "Completed public key authentication");
-      myssh_to(data, sshc, SSH_AUTH_DONE);
-      return rc;
-    }
-
-    rc = myssh_to_GSSAPI_AUTH(data, sshc);
-  }
-  return rc;
+  else
+    myssh_to(data, sshc, SSH_AUTH_PKEY_AUTO);
+  return SSH_OK;
 }
 
 static int myssh_in_AUTH_PKEY(struct Curl_easy *data,
@@ -921,8 +928,24 @@ static int myssh_in_AUTH_PKEY(struct Curl_easy *data,
   }
   else {
     infof(data, "Failed public key authentication (rc: %d)", rc);
-    return myssh_to_GSSAPI_AUTH(data, sshc);
+    return myssh_to_PKEY_AUTO(data, sshc);
   }
+}
+
+static int myssh_in_AUTH_PKEY_AUTO(struct Curl_easy *data,
+                                   struct ssh_conn *sshc)
+{
+  int rc = ssh_userauth_publickey_auto(sshc->ssh_session, NULL,
+                                       sshc->passphrase);
+  if(rc == SSH_AUTH_AGAIN)
+    return SSH_AGAIN;
+  else if(rc == SSH_AUTH_SUCCESS) {
+    sshc->authed = TRUE;
+    infof(data, "Completed public key authentication");
+    myssh_to(data, sshc, SSH_AUTH_DONE);
+    return SSH_OK;
+  }
+  return myssh_to_GSSAPI_AUTH(data, sshc);
 }
 
 static int myssh_in_AUTH_GSSAPI(struct Curl_easy *data,
@@ -2292,6 +2315,9 @@ static CURLcode myssh_statemachine(struct Curl_easy *data,
       break;
     case SSH_AUTH_PKEY:
       rc = myssh_in_AUTH_PKEY(data, sshc);
+      break;
+    case SSH_AUTH_PKEY_AUTO:
+      rc = myssh_in_AUTH_PKEY_AUTO(data, sshc);
       break;
     case SSH_AUTH_GSSAPI:
       rc = myssh_in_AUTH_GSSAPI(data, sshc);
