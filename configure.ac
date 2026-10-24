@@ -4612,9 +4612,7 @@ AS_HELP_STRING([--enable-ntlm],[Enable NTLM support])
 AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
 [ case "$enableval" in
   yes)
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(CURL_ENABLE_NTLM, 1, [enable NTLM support])
-    CURL_ENABLE_NTLM=1
+    AC_MSG_RESULT(no)
     ;;
   *)
     AC_MSG_RESULT(no)
