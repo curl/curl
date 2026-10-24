@@ -89,7 +89,7 @@ jobs:
         run: |
           cd ~
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
-          httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
+          httrack --get "https://cmake.org/files/v${CMAKE_VERSION}/${fn}.tar.gz"  # use cmake.org mirror, github.com no longer appears compatible with httrack
           sha256sum "${fn}".tar*.gz | tee /dev/stderr | grep -qwF -- "${CMAKE_SHA256}" && tar -xf "${fn}".tar*.gz && rm -f "${fn}".tar*.gz
           mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 
