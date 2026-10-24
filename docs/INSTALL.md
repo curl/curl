@@ -593,7 +593,6 @@ disabling support for some features (run `./configure --help` to see them all):
 - `--disable-http-auth` (all HTTP authentication)
 - `--disable-kerberos-auth` (cryptographic authentication)
 - `--disable-negotiate-auth` (cryptographic authentication)
-- `--disable-ntlm` (NTLM authentication)
 - `--disable-alt-svc` (HTTP Alt-Svc)
 - `--disable-ares` (the C-ARES DNS library)
 - `--disable-cookies` (HTTP cookies)

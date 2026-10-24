@@ -55,15 +55,12 @@ authentication:
               docs/libcurl/opts/CURLOPT_USERPWD*,\
               docs/libcurl/opts/CURLOPT_XOAUTH*,\
               lib/*gssapi*,\
-              lib/*ntlm*,\
               lib/creds.*,\
-              lib/curl_ntlm*,\
               lib/curl_sasl.*,\
               lib/http_aws*,\
               lib/http_digest.*,\
               lib/http_httpsig.*,\
               lib/http_negotiate.*,\
-              lib/http_ntlm.*,\
               lib/vauth/**\
               }"
 
@@ -186,7 +183,6 @@ cryptography:
               lib/*sha512*,\
               lib/curl_hmac.*,\
               lib/curl_md?.*,\
-              lib/curl_ntlm_core.*,\
               lib/md?.*,\
               lib/rand.*\
               }"
