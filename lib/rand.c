@@ -149,6 +149,12 @@ CURLcode Curl_rand_bytes(struct Curl_easy *data,
 
   DEBUGASSERT(num);
 
+#ifdef USE_SSL
+  /* get all bytes in one call unless they are forced for testing */
+  if(!env_override || !getenv("CURL_ENTROPY"))
+    return Curl_ssl_random(data, rnd, num);
+#endif
+
   while(num) {
     unsigned int r;
     size_t left = num < sizeof(unsigned int) ? num : sizeof(unsigned int);

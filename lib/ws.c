@@ -99,9 +99,11 @@ struct ws_encoder {
   curl_off_t payload_len;  /* payload length of current frame */
   curl_off_t payload_remain;  /* remaining payload of current */
   unsigned int xori; /* xor index */
+  unsigned int maskpool_left; /* bytes not yet used at the end of maskpool */
   uint8_t mask[4]; /* 32-bit mask for this connection */
   uint8_t firstbyte; /* first byte of frame we encode */
   BIT(contfragment); /* set TRUE if the previous fragment sent was not final */
+  uint8_t maskpool[256]; /* random bytes for the masks of coming frames */
 };
 
 /* Control frames are allowed up to 125 characters, rfc6455, ch. 5.5 */
@@ -865,6 +867,7 @@ static void ws_enc_reset(struct ws_encoder *enc)
 static void ws_enc_init(struct ws_encoder *enc)
 {
   ws_enc_reset(enc);
+  enc->maskpool_left = 0;
 }
 
 /* RFC 6455 Section 5.2
@@ -966,9 +969,15 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
 
   /* 4 bytes random */
 
-  result = Curl_rand(data, (uint8_t *)&enc->mask, sizeof(enc->mask));
-  if(result)
-    return result;
+  if(enc->maskpool_left < sizeof(enc->mask)) {
+    result = Curl_rand(data, enc->maskpool, sizeof(enc->maskpool));
+    if(result)
+      return result;
+    enc->maskpool_left = sizeof(enc->maskpool);
+  }
+  memcpy(enc->mask, &enc->maskpool[sizeof(enc->maskpool) -
+                                   enc->maskpool_left], sizeof(enc->mask));
+  enc->maskpool_left -= (unsigned int)sizeof(enc->mask);
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_WS_FORCE_ZERO_MASK"))
