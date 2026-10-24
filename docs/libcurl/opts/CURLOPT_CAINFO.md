@@ -59,6 +59,9 @@ For LDAP, this option only has an effect when using the OpenLDAP backend,
 which routes TLS through libcurl. It is not supported by Apple's OpenLDAP
 fork. WinLDAP uses the Windows CA store for root certificates.
 
+See libcurl-pool(3) for more considerations on connection reuse when changing
+this option.
+
 # DEFAULT
 
 Built-in system specific. When curl is built with Schannel, this option is not
