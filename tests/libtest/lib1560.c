@@ -1211,6 +1211,10 @@ static const struct setcase set_parts_list[] = {
    "scheme=https,host=example.com,path=/,url=\"\",", /* redirect to "" */
    "https://example.com/",
    0, 0, CURLUE_OK, CURLUE_OK},
+  {NULL, /* start fresh! */
+   "scheme=file,", /* no path set */
+   "file:///",
+   0, 0, CURLUE_OK, CURLUE_OK},
   {"https://example.com/",
    "path=one\ntwo,",
    "https://example.com/one\ntwo",

@@ -1562,7 +1562,8 @@ static CURLUcode file_url(const CURLU *u, char **part,
                           const char *querysep)
 {
   char *url = curl_maprintf("file://%s%s%s%s%s",
-                            u->path, querysep, u->query ? u->query : "",
+                            u->path ? u->path : "/",
+                            querysep, u->query ? u->query : "",
                             fragmentsep, u->fragment ? u->fragment : "");
   if(!url)
     return CURLUE_OUT_OF_MEMORY;
