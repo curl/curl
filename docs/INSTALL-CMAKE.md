@@ -404,7 +404,7 @@ Details via CMake
 
 ## Dependency options (libraries)
 
-- `CURL_BORINGSSL_WITHOUT_POSIX_THREADS`:   Omit detecting/using the POSIX threads library for AWS-LC/BoringSSL. Default: `OFF`
+- `CURL_BORINGSSL_WITHOUT_THREADS_POSIX`:   Omit detecting/using the POSIX threads library for AWS-LC/BoringSSL. Default: `OFF`
                                             E.g. AWS-LC 5.6.0+ versions support native Windows threading, in which case
                                             the POSIX threads library can be safely disabled with this options.
 
