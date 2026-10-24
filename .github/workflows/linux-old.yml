@@ -88,10 +88,10 @@ jobs:
           CMAKE_SHA256: 4d9a9d3351161073a67e49366d701b6fa4b0343781982dc5eef08a02a750d403
         run: |
           cd ~
-          fn="cmake-${CMAKE_VERSION}-linux-x86_64"
+          fn="cmake-${CMAKE_VERSION}-Linux-x86_64"
           httrack --get "https://cmake.org/files/v${CMAKE_VERSION%.*}/${fn}.tar.gz"  # use cmake.org mirror, github.com no longer appears compatible with httrack
           sha256sum "${fn}".tar*.gz | tee /dev/stderr | grep -qwF -- "${CMAKE_SHA256}" && tar -xf "${fn}".tar*.gz && rm -f "${fn}".tar*.gz
-          mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
+          mv "${fn}" cmake
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
