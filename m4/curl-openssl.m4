@@ -126,7 +126,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
       AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
       AC_MSG_NOTICE([pkg-config: SSL_CPPFLAGS: "$SSL_CPPFLAGS"])
 
-      LIB_OPENSSL=`echo $SSL_LDFLAGS | sed -e 's/^-L//'`
+      LIB_OPENSSL=`echo $SSL_LDFLAGS | $SED -e 's/^-L//'`
 
       dnl use the values pkg-config reported.  This is here
       dnl instead of below with CPPFLAGS and LDFLAGS because we only
