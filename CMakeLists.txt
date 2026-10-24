@@ -867,8 +867,9 @@ if(CURL_USE_OPENSSL)
   endif()
 
   if(HAVE_AWSLC OR HAVE_BORINGSSL)
-    # AWS-LC/BoringSSL MSVC and AWS-LC 5.6.0+ MINGW builds use native Windows threads
-    if(NOT MSVC AND NOT (MINGW AND AWSLC_VERSION VERSION_GREATER_EQUAL 5.6.0) AND NOT ANDROID)
+    # AWS-LC/BoringSSL MSVC and AWS-LC 5.6.0+ clang builds use native Windows threads
+    if(NOT MSVC AND NOT (MINGW AND CMAKE_C_COMPILER_ID STREQUAL "Clang" AND AWSLC_VERSION VERSION_GREATER_EQUAL 5.6.0) AND
+       NOT ANDROID)
       find_package(Threads)
       if(CMAKE_USE_PTHREADS_INIT)
         set(HAVE_THREADS_POSIX_BORINGSSL 1)
