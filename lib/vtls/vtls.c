@@ -349,7 +349,6 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
 CURLcode Curl_ssl_random(struct Curl_easy *data,
                          unsigned char *buffer, size_t length)
 {
-  DEBUGASSERT(length == sizeof(int));
   if(Curl_ssl->random)
     return Curl_ssl->random(data, buffer, length);
   else
