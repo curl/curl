@@ -863,11 +863,12 @@ if(CURL_USE_OPENSSL)
       unset(_version_regex)
       unset(_version_str)
     endif()
+    message(STATUS "Found AWS-LC version \"${AWSLC_VERSION}\"")
   endif()
 
   if(HAVE_AWSLC OR HAVE_BORINGSSL)
     # AWS-LC/BoringSSL MSVC and AWS-LC 5.6.0+ MINGW builds use native Windows threads
-    if(NOT MSVC AND NOT ANDROID AND NOT (MINGW AND AWSLC_VERSION VERSION_GREATER_EQUAL 5.6.0))
+    if(NOT MSVC AND NOT (MINGW AND AWSLC_VERSION VERSION_GREATER_EQUAL 5.6.0) AND NOT ANDROID)
       find_package(Threads)
       if(CMAKE_USE_PTHREADS_INIT)
         set(HAVE_THREADS_POSIX_BORINGSSL 1)
