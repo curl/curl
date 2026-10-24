@@ -68,7 +68,7 @@ jobs:
           sed -E -i -e s@[a-z]+\.debian\.org/@archive.debian.org/debian-archive/@ -e '/ stretch-updates /d' /etc/apt/sources.list
           apt-get -o Dpkg::Use-Pty=0 update
           # See comment above if this fails after 2025-05-20
-          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends httrack
+          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends httrack curl
           httrack --get https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb
           sha256sum freexian-archive-keyring_2022.06.08_all.deb && dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
@@ -88,11 +88,10 @@ jobs:
           CMAKE_SHA256: 4d9a9d3351161073a67e49366d701b6fa4b0343781982dc5eef08a02a750d403
         run: |
           cd ~
-          fn="cmake-${CMAKE_VERSION}-Linux-x86_64"
-          httrack --get "https://cmake.org/files/v${CMAKE_VERSION%.*}/${fn}.tar.gz"  # use cmake.org mirror, github.com no longer appears compatible with httrack
-          ls -l
-          sha256sum "${fn}".tar*.gz | tee /dev/stderr | grep -qwF -- "${CMAKE_SHA256}" && tar -xf "${fn}".tar*.gz && rm -f "${fn}".tar*.gz
-          mv "${fn}" cmake
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+            --location --proto-redir =https "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.tar.gz" --output pkg.bin
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${CMAKE_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
+          mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
