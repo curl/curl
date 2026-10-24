@@ -80,6 +80,7 @@ struct rtspd_httprequest {
   bool pipelining;    /* true if request is pipelined */
   char *rtp_buffer;
   size_t rtp_buffersize;
+  bool rtp_coalesce; /* send response and selected RTP bytes in one write */
 };
 
 #define RTSPDVERSION "curl test suite RTSP server/0.1"
@@ -311,15 +312,24 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
               logmsg("instructed to skip this number of bytes %d", num);
               req->skip = num;
             }
-            else if(3 <= sscanf(ptr,
+            else if(3 <= sscanf(
+                                ptr,
                                 "rtp: part %d channel %d size %d size_err %d",
                                 &rtp_partno, &rtp_channel, &rtp_size,
                                 &rtp_size_err)) {
 
               if(rtp_partno == req->partno) {
                 int i = 0;
+                const char coalesce[] = " coalesce";
+                const char *line_end = strchr(ptr, '\n');
+                size_t line_len = line_end ? (size_t)(line_end - ptr) :
+                  strlen(ptr);
                 logmsg("RTP: part %d channel %d size %d size_err %d",
                        rtp_partno, rtp_channel, rtp_size, rtp_size_err);
+                if((line_len >= sizeof(coalesce) - 1) &&
+                   !memcmp(ptr + line_len - (sizeof(coalesce) - 1),
+                           coalesce, sizeof(coalesce) - 1))
+                  req->rtp_coalesce = TRUE;
 
                 /* Make our scratch buffer enough to fit all the
                  * desired data and one for padding */
@@ -606,6 +616,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
   req->pipelining = FALSE;
   req->rtp_buffer = NULL;
   req->rtp_buffersize = 0;
+  req->rtp_coalesce = FALSE;
 
   /* end of httprequest init */
 
@@ -696,6 +707,8 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   bool persistent = TRUE;
   bool sendfailure = FALSE;
   size_t responsesize;
+  size_t response_count = 0;
+  size_t response_written = 0;
   int error = 0;
   char errbuf[STRERROR_LEN];
   static char weare[256];
@@ -843,6 +856,26 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   else
     rtspd_prevbounce = FALSE;
 
+  response_count = count;
+  if(req->rtp_coalesce && req->rtp_buffer && req->rtp_buffersize) {
+    char *combined = realloc(ptr, count + req->rtp_buffersize);
+    if(!combined) {
+      free(ptr);
+      free(cmd);
+      free(req->rtp_buffer);
+      req->rtp_buffer = NULL;
+      req->rtp_buffersize = 0;
+      return -1;
+    }
+    memcpy(combined + count, req->rtp_buffer, req->rtp_buffersize);
+    ptr = combined;
+    buffer = ptr;
+    count += req->rtp_buffersize;
+    free(req->rtp_buffer);
+    req->rtp_buffer = NULL;
+    req->rtp_buffersize = 0;
+  }
+
   dump = curlx_fopen(responsedump, "ab");
   if(!dump) {
     error = errno;
@@ -855,7 +888,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     return -1;
   }
 
-  responsesize = count;
+  responsesize = response_count;
   do {
     /* Ok, we send no more than 200 bytes at a time, to make sure that
        larger chunks are split up so that the client needs to do multiple
@@ -871,8 +904,14 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     else {
       logmsg("Sent off %ld bytes", (long)written);
     }
-    /* write to file as well */
-    fwrite(buffer, 1, (size_t)written, dump);
+    /* Dump only the RTSP response, not coalesced RTP bytes. */
+    if(response_written < responsesize) {
+      size_t dump_size = (size_t)written;
+      if(dump_size > responsesize - response_written)
+        dump_size = responsesize - response_written;
+      fwrite(buffer, 1, dump_size, dump);
+      response_written += dump_size;
+    }
     if(got_exit_signal)
       break;
 

@@ -85,6 +85,8 @@ static CURLcode test_lib571(const char *URL)
   CURL *curl;
   char *stream_uri = NULL;
   int request = 1;
+  int packets_before;
+  long numconnects;
 
   FILE *protofile = curlx_fopen(libtest_arg2, "wb");
   if(!protofile) {
@@ -142,6 +144,15 @@ static CURLcode test_lib571(const char *URL)
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;
+  result = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &numconnects);
+  if(result)
+    goto test_cleanup;
+  if(numconnects) {
+    curl_mfprintf(stderr, "Expected RTSP connection reuse, got %ld connects\n",
+                  numconnects);
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
 
   /* The DESCRIBE request tries to consume data after the Content */
   stream_uri = tutil_suburl(URL, request++);
@@ -179,6 +190,102 @@ static CURLcode test_lib571(const char *URL)
     curl_mfprintf(stderr, "LOOPY LOOP!\n");
     easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_RECEIVE);
     result = curl_easy_perform(curl);
+  }
+  if(result)
+    goto test_cleanup;
+
+  /* If the next control response arrives mid-frame, it must be parsed as
+   * RTSP rather than delivered to the RTP callback. */
+  stream_uri = tutil_suburl(URL, request++);
+  if(!stream_uri) {
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  curl_free(stream_uri);
+  stream_uri = NULL;
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
+
+  packets_before = rtp_packet_count;
+  result = curl_easy_perform(curl);
+  if(result) {
+    curl_mfprintf(stderr,
+                  "Expected RTSP response with incomplete RTP frame, got %s\n",
+                  curl_easy_strerror(result));
+    goto test_cleanup;
+  }
+
+  stream_uri = tutil_suburl(URL, request++);
+  if(!stream_uri) {
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  curl_free(stream_uri);
+  stream_uri = NULL;
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_GET_PARAMETER);
+
+  result = curl_easy_perform(curl);
+  if(result)
+    goto test_cleanup;
+  if(rtp_packet_count != packets_before) {
+    curl_mfprintf(stderr, "RTSP response was delivered to the RTP callback\n");
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+
+  result = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &numconnects);
+  if(result)
+    goto test_cleanup;
+  if(numconnects != 0) {
+    curl_mfprintf(stderr, "Expected RTSP connection reuse after incomplete RTP "
+                  "frame, got %ld new connects\n", numconnects);
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+
+  /* A TCP close mid-frame must also prevent connection reuse. The RTSP reply
+   * is complete, so the next transfer must use a fresh connection. */
+  stream_uri = tutil_suburl(URL, request++);
+  if(!stream_uri) {
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  curl_free(stream_uri);
+  stream_uri = NULL;
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
+
+  result = curl_easy_perform(curl);
+  if(result)
+    goto test_cleanup;
+
+  stream_uri = tutil_suburl(URL, request++);
+  if(!stream_uri) {
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  curl_free(stream_uri);
+  stream_uri = NULL;
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_GET_PARAMETER);
+
+  result = curl_easy_perform(curl);
+  if(result)
+    goto test_cleanup;
+  if(rtp_packet_count != packets_before) {
+    curl_mfprintf(stderr, "RTSP response after TCP close was delivered "
+                          "to the RTP callback\n");
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  result = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &numconnects);
+  if(result)
+    goto test_cleanup;
+  if(numconnects != 1) {
+    curl_mfprintf(stderr, "Expected a new connection after TCP close, got "
+                  "%ld connects\n", numconnects);
+    result = TEST_ERR_MAJOR_BAD;
   }
 
 test_cleanup:
