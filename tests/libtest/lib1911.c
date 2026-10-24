@@ -71,8 +71,7 @@ static CURLcode test_lib1911(const char *URL)
       result = curl_easy_setopt(curl, o->id, testbuf);
       switch(result) {
       case CURLE_BAD_FUNCTION_ARGUMENT: /* the most normal */
-      case CURLE_UNKNOWN_OPTION: /* left out from the build */
-      case CURLE_NOT_BUILT_IN: /* not supported */
+      case CURLE_NOT_BUILT_IN: /* left out from the build or not supported */
       case CURLE_UNSUPPORTED_PROTOCOL: /* detected by protocol2num() */
         break;
       default:
