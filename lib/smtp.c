@@ -1174,7 +1174,7 @@ static CURLcode smtp_state_starttls_resp(struct Curl_easy *data,
   (void)instate;
 
   /* Pipelining in response is forbidden. */
-  if(smtpc->pp.overflow)
+  if(Curl_pp_pipelined(data, &smtpc->pp))
     return CURLE_WEIRD_SERVER_REPLY;
 
   if(smtpcode != 220) {

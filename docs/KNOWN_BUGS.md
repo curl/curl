@@ -73,12 +73,6 @@ See [curl issue 4080](https://github.com/curl/curl/issues/4080)
 
 See [curl issue 10073](https://github.com/curl/curl/issues/10073)
 
-## POP3 issue when reading small chunks
-
-    CURL_DBG_SOCK_RMAX=4 ./runtests.pl -v 982
-
-See [curl issue 12063](https://github.com/curl/curl/issues/12063)
-
 # Command line
 
 ## `-T /dev/stdin` may upload with an incorrect content length
