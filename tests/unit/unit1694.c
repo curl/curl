@@ -89,8 +89,8 @@ static CURLcode test_unit1694(const char *arg)
     /* Text instead of a numerical range */
     { TRUE,  "NotANumber",            CURLE_RANGE_ERROR, -7, -8 },
     /* Hexadecimal not supported */
-    { TRUE,  "0XDEAD-0XBEEF",         CURLE_RANGE_ERROR, -7, -8 },
-    { TRUE,  "0xdead-0xbeef",         CURLE_RANGE_ERROR, -7, -8 },
+    { TRUE,  "0XBEEF-0XDEAD",         CURLE_RANGE_ERROR, -7, -8 },
+    { TRUE,  "0xbeef-0xdead",         CURLE_RANGE_ERROR, -7, -8 },
     /* Passing in "-0" should fail */
     { TRUE,  "-0",                    CURLE_RANGE_ERROR, -7, -8 },
     /* Passing in a "from" greater than the "to" should fail */
