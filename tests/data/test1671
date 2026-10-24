@@ -19,9 +19,9 @@ ETag: "21025-dc7-39462498"
 Accept-Ranges: bytes
 Set-Cookie: firstcookie=want1; path=/
 Funny-head: yesyes
-X-Latin1: caf%hex[%e9]hex%
-X-Utf8: caf%hex[%c3%a9]hex%
-X-Cut: caf%hex[%c3]hex%
+X-Latin1: abc%hex[%e9]hex%
+X-Utf8: abc%hex[%c3%a9]hex%
+X-Cut: abc%hex[%c3]hex%
 Set-Cookie: 2cookie=want2; path=/
 Content-Type: text/html
 Set-Cookie: cookie3=want3; path=/
@@ -63,9 +63,9 @@ Accept: */*
 "accept-ranges":["bytes"],
 "set-cookie":["firstcookie=want1; path=/","2cookie=want2; path=/","cookie3=want3; path=/"],
 "funny-head":["yesyes"],
-"x-latin1":["caf\u00e9"],
-"x-utf8":["caf%hex[%c3%a9]hex%"],
-"x-cut":["caf\u00c3"],
+"x-latin1":["abc\u00e9"],
+"x-utf8":["abc%hex[%c3%a9]hex%"],
+"x-cut":["abc\u00c3"],
 "content-type":["text/html"],
 "content-length":["6"],
 "connection":["close"]
