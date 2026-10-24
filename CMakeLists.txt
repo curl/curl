@@ -854,7 +854,6 @@ if(CURL_USE_OPENSSL)
 
   if(HAVE_AWSLC)
     unset(AWSLC_VERSION CACHE)
-    curl_dumptargetprops(OpenSSL::Crypto)
     get_target_property(_awslc_include_dir OpenSSL::Crypto INTERFACE_INCLUDE_DIRECTORIES)
     if(_awslc_include_dir AND EXISTS "${_awslc_include_dir}/openssl/base.h")
       set(_version_regex "#[\t ]*define[\t ]+AWSLC_VERSION_NUMBER_STRING[\t ]+\"([0-9.]+)\"")
