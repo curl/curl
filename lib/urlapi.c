@@ -2071,6 +2071,12 @@ static CURLUcode url_sethost(CURLU *u, struct dynbuf *encp,
     CURLcode result = Curl_urldecode(newp, n, &decoded, &dlen, REJECT_CTRL);
     if(result || hostname_check6(u, decoded, dlen))
       bad = TRUE;
+    else if(decoded[0] == '[') {
+      /* store the normalized IPv6 address, the zone id is kept separately */
+      curlx_dyn_reset(encp);
+      if(curlx_dyn_add(encp, decoded))
+        bad = TRUE;
+    }
     else {
       struct dynbuf dbuf;
       curlx_dyn_init(&dbuf, CURL_MAX_INPUT_LENGTH);
