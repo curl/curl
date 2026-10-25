@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+# The server writes 20 bytes at a time. The headers are 157 bytes including
+# CRLFs, so the CLOSE frame starts 3 bytes before a write boundary and its
+# payload arrives in separate reads. Keep the header length when editing.
+<reply>
+<data crlf="headers" nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets
+Server: server/fake-ws
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+%hex[%88%1f%03%e9]hex%going away, see you next time
+</data>
+<servercmd>
+upgrade
+writedelay: 100
+</servercmd>
+</reply>
+
+<client>
+# require Debug for the forced CURL_ENTROPY
+<features>
+Debug
+ws
+</features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
+<server>
+http
+</server>
+<name>
+WebSockets CLOSE frame payload split over several reads
+</name>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+Connection: Upgrade
+
+</protocol>
+<stdout nonewline="yes">
+%hex[%03%e9]hex%going away, see you next time
+</stdout>
+</verify>
+</testcase>

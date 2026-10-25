@@ -90,7 +90,7 @@ struct ws_decoder {
   int head_len, head_total;
   enum ws_dec_state state;
   int cont_flags;
-  BIT(seen_close);      /* decoded a CLOSE frame */
+  BIT(seen_close);      /* passed on a complete CLOSE frame */
 };
 
 /* a client-side WS frame encoder, generating frame headers and
@@ -417,13 +417,11 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
-      if(dec->frame_flags & CURLWS_CLOSE) {
-        dec->seen_close = TRUE;
-        if(dec->head[1] > WS_MAX_CNTRL_LEN) {
-          failf(data, "[WS] received CLOSE frame is too big");
-          ws_dec_reset(dec);
-          return CURLE_RECV_ERROR;
-        }
+      if((dec->frame_flags & CURLWS_CLOSE) &&
+         (dec->head[1] > WS_MAX_CNTRL_LEN)) {
+        failf(data, "[WS] received CLOSE frame is too big");
+        ws_dec_reset(dec);
+        return CURLE_RECV_ERROR;
       }
 
       /* How long is the frame head? */
@@ -576,6 +574,9 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     /* we covered all enums above, but some code analyzers are wimps */
     result = CURLE_FAILED_INIT;
   }
+  if(!result && (dec->state == WS_DEC_INIT) &&
+     (dec->frame_flags & CURLWS_CLOSE))
+    dec->seen_close = TRUE;
   return result;
 }
 
