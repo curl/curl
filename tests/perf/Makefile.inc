@@ -55,4 +55,5 @@ TESTS_C = \
   urldecode.c \
   urlencode.c \
   urlparser.c \
-  wsrecv.c
+  wsrecv.c \
+  wssend.c
