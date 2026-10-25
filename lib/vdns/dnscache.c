@@ -57,6 +57,7 @@
 #include "curlx/strparse.h"
 
 #define MAX_DNS_CACHE_SIZE 29999
+#define DNSCACHE_NEG_FALLBACK_MS 60000
 
 /* @unittest 3217 */
 UNITTEST void dnsc_peer2id(struct dnsc_id *pid, char type,
@@ -142,23 +143,34 @@ static int dnscache_entry_is_stale(void *datap, void *hc)
   struct Curl_dns_entry *dns = (struct Curl_dns_entry *)hc;
 
   if(!dns->permanent) {
-    /* get age in milliseconds */
-    timediff_t age_ms = curlx_ptimediff_ms(prune->pnow, &dns->added);
+    timediff_t age_ms;
+    timediff_t max_age_ms = prune->max_age_ms;
+    bool negative = FALSE;
+
     switch(dns->type) {
     case CURL_DNST_ADDR:
-      if(!dns->addr)
-        age_ms *= 2; /* negative entries age twice as fast */
+      negative = !dns->addr;
       break;
 #ifdef USE_HTTPSRR
     case CURL_DNST_HTTPS:
-      if(!dns->hinfo)
-        age_ms *= 2; /* negative entries age twice as fast */
+      negative = !dns->hinfo;
       break;
 #endif
     default:
       break;
     }
-    if(age_ms >= prune->max_age_ms)
+
+    if(max_age_ms == -1) {
+      if(!negative)
+        return FALSE; /* Positive under -1: pinned as documented. */
+      max_age_ms = DNSCACHE_NEG_FALLBACK_MS;
+    }
+
+    age_ms = curlx_ptimediff_ms(prune->pnow, &dns->added);
+    if(negative)
+      age_ms *= 2; /* Negative entries age twice as fast. */
+
+    if(age_ms >= max_age_ms)
       return TRUE;
     if(age_ms > prune->oldest_ms)
       prune->oldest_ms = age_ms;
@@ -217,10 +229,9 @@ static void dnscache_unlock(struct Curl_easy *data,
 void Curl_dnscache_prune(struct Curl_easy *data, const struct curltime *pnow)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
-  /* the timeout may be set -1 (forever) */
   timediff_t timeout_ms = data->set.dns_cache_timeout_ms;
 
-  if(!dnscache || (timeout_ms == -1))
+  if(!dnscache)
     /* NULL hostcache means we cannot do it */
     return;
 
@@ -295,7 +306,7 @@ static CURLcode fetch_entry(struct Curl_easy *data,
     dns = Curl_hash_pick(&dnscache->entries, key.data, key.len);
   }
 
-  if(dns && (data->set.dns_cache_timeout_ms != -1)) {
+  if(dns) {
     /* See whether the returned entry is stale. Done before we release lock */
     struct dnscache_prune_data user;
 
