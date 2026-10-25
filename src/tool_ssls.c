@@ -77,7 +77,7 @@ CURLcode tool_ssls_load(struct OperationConfig *config,
     goto out;
 
   i = imported = 0;
-  while(my_get_line(fp, &buf, &error)) {
+  while(my_get_line(fp, &buf, &error, NULL)) {
     ++i;
     curlx_safefree(shmac);
     curlx_safefree(sdata);

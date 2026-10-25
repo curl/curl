@@ -272,9 +272,8 @@ ParameterError parseconfig(const char *filename, int max_recursive,
     curlx_dyn_init(&pbuf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
 
-    while(!err && my_get_line(file, &buf, &fileerror)) {
+    while(!err && my_get_line(file, &buf, &fileerror, &lineno)) {
       ParameterError res;
-      lineno++;
       line = curlx_dyn_ptr(&buf);
       if(!line) {
         err = PARAM_NO_MEM; /* out of memory */
@@ -381,14 +380,18 @@ static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
 /*
  * Returns a line from the given file. Every line is null-terminated (no
  * newline). Skips #-commented and space/tabs-only lines automatically.
+ * If lineno is not NULL, it is increased for every line read, including the
+ * skipped ones.
  */
-bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
+bool my_get_line(FILE *input, struct dynbuf *buf, bool *error, int *lineno)
 {
   bool retcode;
   do {
     retcode = get_line(input, buf, error);
     if(!*error && retcode) {
       size_t len = curlx_dyn_len(buf);
+      if(lineno)
+        (*lineno)++;
       if(len) {
         const char *line = curlx_dyn_ptr(buf);
         while(ISBLANK(*line))

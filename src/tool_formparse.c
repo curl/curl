@@ -447,7 +447,7 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
   int err = 0;
 
   curlx_dyn_init(&line, HEADER_LINE_BUFFER_SIZE);
-  while(my_get_line(fp, &line, &error)) {
+  while(my_get_line(fp, &line, &error, NULL)) {
     const char *ptr = curlx_dyn_ptr(&line);
     size_t len = curlx_dyn_len(&line);
     bool folded = FALSE;

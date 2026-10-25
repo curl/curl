@@ -1156,7 +1156,7 @@ static ParameterError parse_url(struct OperationConfig *config,
       f = curlx_fopen(&nextarg[1], FOPEN_READTEXT);
     if(f) {
       curlx_dyn_init(&line, 8092);
-      while(my_get_line(f, &line, &error)) {
+      while(my_get_line(f, &line, &error, NULL)) {
         const char *ptr = curlx_dyn_ptr(&line);
         err = add_url(config, ptr, TRUE);
         if(err)
@@ -1315,7 +1315,7 @@ static ParameterError parse_header(struct OperationConfig *config,
       struct dynbuf line;
       bool error = FALSE;
       curlx_dyn_init(&line, 1024 * 100);
-      while(my_get_line(file, &line, &error)) {
+      while(my_get_line(file, &line, &error, NULL)) {
         const char *ptr = curlx_dyn_ptr(&line);
         err = add2list(cmd == C_PROXY_HEADER ? /* --proxy-header? */
                        &config->proxyheaders :
