@@ -1201,7 +1201,7 @@ CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r)
   cl_reset_reader(data);
   result = do_init_reader_stack(data, r);
   if(result)
-    Curl_creader_free(data, r);
+    cl_reset_reader(data);
   return result;
 }
 
