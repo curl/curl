@@ -62,6 +62,71 @@ static size_t utf8len(const unsigned char *i, const unsigned char *end)
   return n;
 }
 
+/* The longest json form of one character is \u00XX. */
+#define JSON_ESC_MAX 6
+
+/* Write the json form of the character at *inp to buf, which must have room
+   for JSON_ESC_MAX bytes, and move *inp past it. A valid UTF-8 sequence is
+   one character. Return the number of bytes written. */
+static size_t jsonescape(const unsigned char **inp, const unsigned char *end,
+                         bool lowercase, char *buf)
+{
+  static const char hex[] = "0123456789abcdef";
+  const unsigned char *i = *inp;
+  const char *esc = NULL;
+
+  *inp = i + 1;
+  switch(*i) {
+  case '\\':
+    esc = "\\\\";
+    break;
+  case '\"':
+    esc = "\\\"";
+    break;
+  case '\b':
+    esc = "\\b";
+    break;
+  case '\f':
+    esc = "\\f";
+    break;
+  case '\n':
+    esc = "\\n";
+    break;
+  case '\r':
+    esc = "\\r";
+    break;
+  case '\t':
+    esc = "\\t";
+    break;
+  default:
+    break;
+  }
+  if(esc) {
+    memcpy(buf, esc, 2);
+    return 2;
+  }
+  if(*i >= 0x80) {
+    size_t n = utf8len(i, end);
+    if(n) {
+      memcpy(buf, i, n);
+      *inp = i + n;
+      return n;
+    }
+    /* not UTF-8, escape the byte as if it was ISO-8859-1 */
+  }
+  if(*i < 32 || *i >= 0x80) {
+    memcpy(buf, "\\u00", 4);
+    buf[4] = hex[*i >> 4];
+    buf[5] = hex[*i & 0xf];
+    return JSON_ESC_MAX;
+  }
+  buf[0] = (char)*i;
+  if(lowercase && (*i >= 'A' && *i <= 'Z'))
+    /* do not use tolower() since that is locale specific */
+    buf[0] |= ('a' - 'A');
+  return 1;
+}
+
 /* provide the given string in dynbuf as a quoted json string, but without the
    outer quotes. The buffer is not inited by this function.
 
@@ -72,51 +137,10 @@ int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
   const unsigned char *in_end = &i[len];
   CURLcode result = CURLE_OK;
 
-  for(; (i < in_end) && !result; i++) {
-    switch(*i) {
-    case '\\':
-      result = curlx_dyn_addn(out, "\\\\", 2);
-      break;
-    case '\"':
-      result = curlx_dyn_addn(out, "\\\"", 2);
-      break;
-    case '\b':
-      result = curlx_dyn_addn(out, "\\b", 2);
-      break;
-    case '\f':
-      result = curlx_dyn_addn(out, "\\f", 2);
-      break;
-    case '\n':
-      result = curlx_dyn_addn(out, "\\n", 2);
-      break;
-    case '\r':
-      result = curlx_dyn_addn(out, "\\r", 2);
-      break;
-    case '\t':
-      result = curlx_dyn_addn(out, "\\t", 2);
-      break;
-    default:
-      if(*i < 32)
-        result = curlx_dyn_addf(out, "\\u%04x", *i);
-      else if(*i >= 0x80) {
-        size_t n = utf8len(i, in_end);
-        if(n) {
-          result = curlx_dyn_addn(out, i, n);
-          i += n - 1;
-        }
-        else
-          /* not UTF-8, escape the byte as if it was ISO-8859-1 */
-          result = curlx_dyn_addf(out, "\\u%04x", *i);
-      }
-      else {
-        char o = (char)*i;
-        if(lowercase && (o >= 'A' && o <= 'Z'))
-          /* do not use tolower() since that is locale specific */
-          o |= ('a' - 'A');
-        result = curlx_dyn_addn(out, &o, 1);
-      }
-      break;
-    }
+  while((i < in_end) && !result) {
+    char esc[JSON_ESC_MAX];
+    size_t elen = jsonescape(&i, in_end, lowercase, esc);
+    result = curlx_dyn_addn(out, esc, elen);
   }
   if(result)
     return (int)result;
