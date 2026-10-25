@@ -54,4 +54,5 @@ TESTS_C = \
   snprintf.c \
   urldecode.c \
   urlencode.c \
-  urlparser.c
+  urlparser.c \
+  wsrecv.c

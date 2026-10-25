@@ -101,3 +101,13 @@ them: `./perf urlparser URLs.txt [loops]`
 
 A test sample of 100K URLs can be found
 [here](https://raw.githubusercontent.com/ada-url/url-various-datasets/refs/heads/main/top100/top100.txt)
+
+## `wsrecv`
+
+This test upgrades a connection to WebSocket over a local socket pair, with no
+server involved, and receives unmasked binary frames of 16, 125, 1024 and
+16384 bytes, the last ones `loops` / 16 times. Like an application, the write
+callback calls `curl_ws_meta()` for each frame to learn its type. It exercises
+the frame decoding and the delivery of each frame to the application:
+
+    ./perf wsrecv [loops]
