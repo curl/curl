@@ -27,8 +27,6 @@
 #include "tool_writeout_json.h"
 #include "tool_writeout.h"
 
-#define MAX_JSON_STRING 100000
-
 /* return the length of the valid UTF-8 sequence that starts at 'i', or 0 */
 static size_t utf8len(const unsigned char *i, const unsigned char *end)
 {
@@ -149,16 +147,25 @@ int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
 
 void jsonWriteString(FILE *stream, const char *in, bool lowercase)
 {
-  struct dynbuf out;
-  curlx_dyn_init(&out, MAX_JSON_STRING);
+  const unsigned char *i = (const unsigned char *)in;
+  const unsigned char *in_end = &i[strlen(in)];
+  char buf[128];
+  size_t len = 0;
 
-  if(!jsonquoted(in, strlen(in), &out, lowercase)) {
-    fputc('\"', stream);
-    if(curlx_dyn_len(&out))
-      fputs(curlx_dyn_ptr(&out), stream);
-    fputc('\"', stream);
+  /* escape into a small buffer and write it whenever it gets full: there is
+     no size limit to pick and no allocation that can fail and lose the value,
+     and an unbuffered stream gets no write call per byte */
+  fputc('\"', stream);
+  while(i < in_end) {
+    len += jsonescape(&i, in_end, lowercase, &buf[len]);
+    if(len > sizeof(buf) - JSON_ESC_MAX) {
+      fwrite(buf, 1, len, stream);
+      len = 0;
+    }
   }
-  curlx_dyn_free(&out);
+  if(len)
+    fwrite(buf, 1, len, stream);
+  fputc('\"', stream);
 }
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
