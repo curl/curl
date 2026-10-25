@@ -25,7 +25,7 @@
  * Show how CURLOPT_OPENSOCKETFUNCTION can be used to block IP addresses.
  * </DESC>
  */
-/* This is an advanced example that defines a whitelist or a blocklist to
+/* This is an advanced example that defines a allowlist or a blocklist to
  * filter IP addresses.
  */
 
@@ -86,7 +86,7 @@ struct ip {
 
 enum connection_filter_t {
   CONNECTION_FILTER_BLOCKLIST,
-  CONNECTION_FILTER_WHITELIST
+  CONNECTION_FILTER_ALLOWLIST
 };
 
 struct connection_filter {
@@ -272,13 +272,13 @@ static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
         }
         return CURL_SOCKET_BAD;
       }
-      else if(!ip && filter->type == CONNECTION_FILTER_WHITELIST) {
+      else if(!ip && filter->type == CONNECTION_FILTER_ALLOWLIST) {
         if(filter->verbose) {
           char buf[128] = { 0 };
           /* !checksrc! disable BANNEDFUNC 1 */
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
           fprintf(stderr,
-                  "* Rejecting IP %s due to missing whitelist entry.\n", buf);
+                  "* Rejecting IP %s due to missing allowlist entry.\n", buf);
         }
         return CURL_SOCKET_BAD;
       }
