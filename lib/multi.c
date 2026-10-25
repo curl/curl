@@ -119,8 +119,9 @@ static void mstate_enter_completed(struct Curl_easy *data,
                                    CURLMstate from_state)
 {
   /* we sometimes directly jump to COMPLETED, trigger things
-   * we then missed. */
-  if(from_state < MSTATE_DID) {
+   * we then missed. Not when coming from before DO: the transfer
+   * failed to resolve/connect and never sent any request. */
+  if((from_state >= MSTATE_DO) && (from_state < MSTATE_DID)) {
     Curl_pgrsTime(data, TIMER_PRETRANSFER);
     Curl_pgrsTime(data, TIMER_POSTRANSFER);
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
