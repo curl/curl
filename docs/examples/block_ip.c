@@ -25,7 +25,7 @@
  * Show how CURLOPT_OPENSOCKETFUNCTION can be used to block IP addresses.
  * </DESC>
  */
-/* This is an advanced example that defines a whitelist or a blacklist to
+/* This is an advanced example that defines a whitelist or a blocklist to
  * filter IP addresses.
  */
 
@@ -85,7 +85,7 @@ struct ip {
 };
 
 enum connection_filter_t {
-  CONNECTION_FILTER_BLACKLIST,
+  CONNECTION_FILTER_BLOCKLIST,
   CONNECTION_FILTER_WHITELIST
 };
 
@@ -262,12 +262,12 @@ static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
 #endif
       }
 
-      if(ip && filter->type == CONNECTION_FILTER_BLACKLIST) {
+      if(ip && filter->type == CONNECTION_FILTER_BLOCKLIST) {
         if(filter->verbose) {
           char buf[128] = { 0 };
           /* !checksrc! disable BANNEDFUNC 1 */
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
-          fprintf(stderr, "* Rejecting IP %s due to blacklist entry %s.\n",
+          fprintf(stderr, "* Rejecting IP %s due to blocklist entry %s.\n",
                   buf, ip->str);
         }
         return CURL_SOCKET_BAD;
@@ -318,7 +318,7 @@ int main(void)
    * If an address has CIDR notation then it matches the network.
    * For example 74.6.143.25/24 matches 74.6.143.0 - 74.6.143.255.
    */
-  filter->type = CONNECTION_FILTER_BLACKLIST;
+  filter->type = CONNECTION_FILTER_BLOCKLIST;
   filter->list = ip_list_append(filter->list, "98.137.11.164");
   filter->list = ip_list_append(filter->list, "127.0.0.0/8");
 #ifdef AF_INET6
