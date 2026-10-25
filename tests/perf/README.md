@@ -111,3 +111,12 @@ callback calls `curl_ws_meta()` for each frame to learn its type. It exercises
 the frame decoding and the delivery of each frame to the application:
 
     ./perf wsrecv [loops]
+
+## `wssend`
+
+This test upgrades a connection to WebSocket over a local socket pair, with no
+server involved, and sends binary frames with `curl_ws_send()`. It times
+frames with 16, 125 and 1024 bytes of payload, and one sixteenth as many with
+16384 bytes. The other end of the socket pair only reads and drops the data:
+
+    ./perf wssend [loops]
