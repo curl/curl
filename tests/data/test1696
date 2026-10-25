@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTPS
+connect timeout
+--write-out
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<features>
+SSL
+</features>
+<server>
+http
+</server>
+<name>
+-w transfer timers stay zero after TLS handshake timeout
+</name>
+# The plain HTTP server never answers the TLS ClientHello, so the TCP
+# connect succeeds and the TLS handshake times out before any request
+<command>
+-k https://%HOSTIP:%HTTPPORT/%TESTNUMBER --connect-timeout 2 -w 'pre=%{time_pretransfer} post=%{time_posttransfer} start=%{time_starttransfer}\n'
+</command>
+</client>
+
+<verify>
+<errorcode>
+28
+</errorcode>
+<stdout mode="text">
+pre=0.000000 post=0.000000 start=0.000000
+</stdout>
+</verify>
+</testcase>
