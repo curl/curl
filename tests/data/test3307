@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+upload
+CRLF
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+TrackMemory
+!torture
+</features>
+<name>
+Reader stack cleanup after line-conversion allocation failure
+</name>
+</client>
+</testcase>

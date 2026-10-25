@@ -1142,8 +1142,13 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
 #endif
     ) {
     result = cr_lc_add(data);
-    if(result)
+    if(result) {
+      /* Adding the line-conversion reader failed. Undo the publication of
+       * `r` so no freed reader remains reachable from
+       * `data->req.reader.stack`, and free the readers already installed. */
+      cl_reset_reader(data);
       return result;
+    }
   }
 
   return result;
@@ -1192,17 +1197,12 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
 
 CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r)
 {
-  CURLcode result;
-
   DEBUGASSERT(r);
   DEBUGASSERT(r->crt);
   DEBUGASSERT(r->phase == CURL_CR_CLIENT);
 
   cl_reset_reader(data);
-  result = do_init_reader_stack(data, r);
-  if(result)
-    Curl_creader_free(data, r);
-  return result;
+  return do_init_reader_stack(data, r);
 }
 
 CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
