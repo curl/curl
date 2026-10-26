@@ -50,7 +50,7 @@ env:
   # renovate: datasource=github-tags depName=libressl/portable
   LIBRESSL_VERSION: 4.4.0
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
-  OPENSSL_VERSION: 4.0.3
+  OPENSSL_VERSION: 4.1.0
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>3\.5\..+)$
   OPENSSL_PREV_VERSION: 3.5.9
   # renovate: datasource=github-tags depName=cloudflare/quiche
@@ -122,18 +122,18 @@ jobs:
 
       - name: 'cache openssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache2-openssl-http3-no-deprecated
+        id: cache2-openssl-no-deprecated
         env:
-          cache-name: cache2-openssl-http3-no-deprecated
+          cache-name: cache2-openssl-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
 
       - name: 'cache openssl-prev'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache2-openssl-prev-http3
+        id: cache2-openssl-prev
         env:
-          cache-name: cache2-openssl-prev-http3
+          cache-name: cache2-openssl-prev
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
@@ -191,8 +191,7 @@ jobs:
           cache-name: cache1-nghttp2
         with:
           path: ~/pkg/nghttp2
-          key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
-            ${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}-${{ runner.arch }}"
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}-${{ runner.arch }}
 
       - name: 'cache h2o'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -210,8 +209,8 @@ jobs:
               !steps.cache1-nettle.outputs.cache-hit ||
               !steps.cache1-gnutls.outputs.cache-hit ||
               !steps.cache1-libressl.outputs.cache-hit ||
-              !steps.cache2-openssl-http3-no-deprecated.outputs.cache-hit ||
-              !steps.cache2-openssl-prev-http3.outputs.cache-hit ||
+              !steps.cache2-openssl-no-deprecated.outputs.cache-hit ||
+              !steps.cache2-openssl-prev.outputs.cache-hit ||
               !steps.cache1-wolfssl.outputs.cache-hit ||
               !steps.cache1-nghttp3.outputs.cache-hit ||
               !steps.cache1-ngtcp2-boringssl.outputs.cache-hit ||
@@ -302,7 +301,7 @@ jobs:
           cmake --install .
 
       - name: 'build openssl'
-        if: ${{ !steps.cache2-openssl-http3-no-deprecated.outputs.cache-hit }}
+        if: ${{ !steps.cache2-openssl-no-deprecated.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
@@ -313,7 +312,7 @@ jobs:
           make -j1 install_sw
 
       - name: 'build openssl-prev'
-        if: ${{ !steps.cache2-openssl-prev-http3.outputs.cache-hit }}
+        if: ${{ !steps.cache2-openssl-prev.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
@@ -407,11 +406,11 @@ jobs:
           autoreconf -fi
           # required (for nghttpx application): libc-ares-dev libev-dev zlib1g-dev
           # optional (for nghttpx application): libbrotli-dev
-          export PKG_CONFIG_PATH=/home/runner/pkg/openssl/lib/pkgconfig
+          export PKG_CONFIG_PATH=/home/runner/pkg/awslc/lib/pkgconfig
           PKG_CONFIG_PATH+=:/home/runner/pkg/nghttp3/lib/pkgconfig
           PKG_CONFIG_PATH+=:/home/runner/pkg/ngtcp2/lib/pkgconfig
           ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/nghttp2 --enable-app --enable-http3 \
-            LDFLAGS=-Wl,-rpath,/home/runner/pkg/openssl/lib \
+            LDFLAGS=-Wl,-rpath,/home/runner/pkg/awslc/lib \
             --with-libbrotlienc --with-libbrotlidec
           make install
 
@@ -600,7 +599,7 @@ jobs:
             ${{ matrix.build.install_packages }}
 
       - name: 'cache awslc'
-        if: ${{ contains(matrix.build.name, 'awslc') }}
+        # always restore for nghttp2/bin/nghttpx
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-awslc
         env:
@@ -611,7 +610,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache boringssl'
-        if: ${{ contains(matrix.build.name, 'boringssl') }}
+        if: ${{ matrix.build.name == 'boringssl' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-boringssl
         env:
@@ -622,7 +621,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache nettle'
-        if: ${{ contains(matrix.build.name, 'gnutls') }}
+        if: ${{ matrix.build.name == 'gnutls' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-nettle
         env:
@@ -633,7 +632,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache gnutls'
-        if: ${{ contains(matrix.build.name, 'gnutls') }}
+        if: ${{ matrix.build.name == 'gnutls' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-gnutls
         env:
@@ -644,7 +643,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache libressl'
-        if: ${{ contains(matrix.build.name, 'libressl') }}
+        if: ${{ matrix.build.name == 'libressl' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-libressl
         env:
@@ -655,28 +654,29 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache openssl'
+        if: ${{ matrix.build.name == 'openssl' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache2-openssl-http3-no-deprecated
+        id: cache2-openssl-no-deprecated
         env:
-          cache-name: cache2-openssl-http3-no-deprecated
+          cache-name: cache2-openssl-no-deprecated
         with:
           path: ~/pkg/openssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: 'cache openssl-prev'
-        if: ${{ contains(matrix.build.name, 'openssl-prev') }}
+        if: ${{ matrix.build.name == 'openssl-prev' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache2-openssl-prev-http3
+        id: cache2-openssl-prev
         env:
-          cache-name: cache2-openssl-prev-http3
+          cache-name: cache2-openssl-prev
         with:
           path: ~/pkg/openssl-prev
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: 'cache wolfssl'
-        if: ${{ contains(matrix.build.name, 'wolfssl') }}
+        if: ${{ matrix.build.name == 'wolfssl' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-wolfssl
         env:
@@ -708,7 +708,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2 boringssl'
-        if: ${{ contains(matrix.build.name, 'boringssl') }}
+        if: ${{ matrix.build.name == 'boringssl' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-ngtcp2-boringssl
         env:
@@ -719,7 +719,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2 openssl-prev'
-        if: ${{ contains(matrix.build.name, 'openssl-prev') }}
+        if: ${{ matrix.build.name == 'openssl-prev' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-ngtcp2-openssl-prev
         env:
@@ -736,7 +736,7 @@ jobs:
           cache-name: cache1-nghttp2
         with:
           path: ~/pkg/nghttp2
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}-${{ runner.arch }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: 'cache h2o'
@@ -750,7 +750,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache quiche'
-        if: ${{ contains(matrix.build.name, 'quiche') }}
+        if: ${{ matrix.build.name == 'quiche' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-quiche
         env:
@@ -760,7 +760,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}-${{ runner.arch }}
 
       - name: 'build quiche and boringssl'
-        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache1-quiche.outputs.cache-hit }}
+        if: ${{ matrix.build.name == 'quiche' && !steps.cache1-quiche.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
