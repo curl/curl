@@ -203,6 +203,9 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
   }
   else {
 #ifdef USE_IDN
+    failf(data, "URL hostname to proxy: %.*s [%d]",
+          (int)curlx_strlen(&pp->host_user), curlx_str(&pp->host_user),
+          (int)curlx_strlen(&pp->host_user));
     if(!Curl_is_ASCII_str(&pp->host_user)) {
       CURLcode result;
       if(!pp->tmp_host_user) {
