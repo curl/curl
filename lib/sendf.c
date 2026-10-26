@@ -26,10 +26,7 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-
-#ifdef HAVE_LINUX_TCP_H
-#include <linux/tcp.h>
-#elif defined(HAVE_NETINET_TCP_H)
+#if defined(HAVE_NETINET_TCP_H)
 #include <netinet/tcp.h>
 #endif
 
