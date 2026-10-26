@@ -27,9 +27,7 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef HAVE_LINUX_TCP_H
-#include <linux/tcp.h> /* for TCP_FASTOPEN_CONNECT */
-#elif defined(HAVE_NETINET_TCP_H)
+#ifdef HAVE_NETINET_TCP_H
 #include <netinet/tcp.h> /* for TCP_FASTOPEN_CONNECT */
 #endif
 
