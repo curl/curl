@@ -867,6 +867,9 @@ jobs:
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
+          echo '--------------'
+          /home/runner/pkg/nghttp2/bin/nghttpx --version || true
+          echo '--------------'
           TFLAGS+=' -n'
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
@@ -877,6 +880,9 @@ jobs:
       - name: 'run tests (valgrind)'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
+          echo '--------------'
+          /home/runner/pkg/nghttp2/bin/nghttpx --version || true
+          echo '--------------'
           export TFLAGS='-j6 --min=4 HTTP/3'
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
