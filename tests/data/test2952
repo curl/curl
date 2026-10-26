@@ -13,7 +13,7 @@ IDN
 <client>
 <features>
 IDN
-!WinIDN
+!win32
 proxy
 codeset-utf8
 </features>
