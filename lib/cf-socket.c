@@ -29,9 +29,7 @@
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
 #endif
-#ifdef HAVE_LINUX_TCP_H
-#include <linux/tcp.h> /* for TCP_FASTOPEN_CONNECT, TCP_NODELAY */
-#elif defined(HAVE_NETINET_TCP_H)
+#ifdef HAVE_NETINET_TCP_H
 #include <netinet/tcp.h> /* for TCP_FASTOPEN_CONNECT, TCP_NODELAY */
 #endif
 #ifdef HAVE_NETINET_UDP_H
