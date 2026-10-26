@@ -51,6 +51,8 @@ The fields for every CVE in `vuln.pm` are, in order:
 13. severity: `low`, `medium`, `high` or `critical`
 14. URL to the initial report (often on HackerOne)
 
+A line to use can be generated with `./md2vuln.pl [markdown file name]`.
+
 ### `Makefile`
 
 The new CVE webpage filename needs to be added in the `Makefile`'s `CVELIST`
@@ -86,6 +88,13 @@ CWE Id, starting on its own line. We write CWE identifiers in advisories with
 the full (official) explanation on the right side of a colon. Like this:
 
 `CWE-305: Authentication Bypass by Primary Weakness`
+
+There should also be two lines for area and original report URL:
+
+~~~
+- Area: [single word]
+- Original report: [URL]
+~~~
 
 ### AFFECTED VERSIONS
 
