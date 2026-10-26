@@ -870,7 +870,9 @@ jobs:
           export LD_LIBRARY_PATH="/home/runner/pkg/awslc/lib:$LD_LIBRARY_PATH"  # for nghttpx to load awslc shared libs
           echo '--------------'
           ldd /home/runner/pkg/nghttp2/bin/nghttpx || true
-          find /home/runner/pkg/nghttp2 || true
+          find /home/runner/pkg/awslc/lib || true
+          echo '--------------'
+          find /home/runner/pkg/awslc || true
           echo '--------------'
           /home/runner/pkg/nghttp2/bin/nghttpx --version || true
           echo '--------------'
