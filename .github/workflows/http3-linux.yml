@@ -867,7 +867,10 @@ jobs:
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
-          export LD_LIBRARY_PATH=/home/runner/pkg/awslc/lib  # for nghttpx to load awslc shared libs
+          export LD_LIBRARY_PATH="/home/runner/pkg/awslc/lib:$LD_LIBRARY_PATH"  # for nghttpx to load awslc shared libs
+          echo '--------------'
+          ldd /home/runner/pkg/nghttp2/bin/nghttpx || true
+          find /home/runner/pkg/nghttp2/bin/nghttpx/lib || true
           echo '--------------'
           /home/runner/pkg/nghttp2/bin/nghttpx --version || true
           echo '--------------'
@@ -881,7 +884,7 @@ jobs:
       - name: 'run tests (valgrind)'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
-          export LD_LIBRARY_PATH=/home/runner/pkg/awslc/lib  # for nghttpx to load awslc shared libs
+          export LD_LIBRARY_PATH="/home/runner/pkg/awslc/lib:$LD_LIBRARY_PATH"  # for nghttpx to load awslc shared libs
           echo '--------------'
           /home/runner/pkg/nghttp2/bin/nghttpx --version || true
           echo '--------------'
