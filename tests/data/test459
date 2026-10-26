@@ -32,9 +32,12 @@ http
 COLUMNS=10000
 </setenv>
 <name>
-config file with argument using whitespace missing quotes
+config file argument with whitespace missing quotes, check line number
 </name>
 <file name="%LOGDIR/config">
+# comment
+
+  # indented comment
 data = arg with space
 </file>
 <command>
@@ -54,7 +57,7 @@ Content-Type: application/x-www-form-urlencoded
 arg
 </protocol>
 <stderr mode="warn">
-Warning: %LOGDIR/config:1 Option 'data' uses argument with unquoted whitespace. This may cause side-effects. Consider double quotes.
+Warning: %LOGDIR/config:4 Option 'data' uses argument with unquoted whitespace. This may cause side-effects. Consider double quotes.
 </stderr>
 </verify>
 </testcase>
