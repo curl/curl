@@ -517,7 +517,7 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
 }
 
 /* the input is a confirmed hostname, never an IPv6 address */
-static CURLUcode hostname_check(char *hostname, size_t hlen)
+CURLUcode Curl_hostname_check(const char *hostname, size_t hlen)
 {
   size_t i;
   for(i = 0; i < hlen; i++) {
@@ -545,7 +545,7 @@ static CURLUcode hostname_check6(struct Curl_URL *u, char *hostname,
   else if(hostname[0] == '[')
     return ipv6_parse(u, hostname, hlen);
 
-  return hostname_check(hostname, hlen);
+  return Curl_hostname_check(hostname, hlen);
 }
 
 /*
@@ -738,7 +738,7 @@ static CURLUcode parse_authority(struct Curl_URL *u,
     int type = ipv4_normalize(host);
 
     if(type == HOST_NAME)
-      uc = hostname_check(curlx_dyn_ptr(host), curlx_dyn_len(host));
+      uc = Curl_hostname_check(curlx_dyn_ptr(host), curlx_dyn_len(host));
     else if(type == HOST_ERROR)
       uc = CURLUE_OUT_OF_MEMORY;
   }
@@ -1537,7 +1537,7 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
       curlx_free(part);
       if(uc)
         return uc;
-      uc = hostname_check(punyversion, strlen(punyversion));
+      uc = Curl_hostname_check(punyversion, strlen(punyversion));
       if(uc) {
         curlx_free(punyversion);
         return uc;
@@ -1645,7 +1645,7 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
       if(!Curl_is_ASCII_name(u->host)) {
         CURLUcode ret = host_decode(u->host, &allochost);
         if(!ret)
-          ret = hostname_check(allochost, strlen(allochost));
+          ret = Curl_hostname_check(allochost, strlen(allochost));
         if(ret) {
           curlx_safefree(allochost);
           return ret;
