@@ -28,9 +28,9 @@
 #endif
 
 #ifdef HAVE_LINUX_TCP_H
-#include <linux/tcp.h> /* for TCP_FASTOPEN_CONNECT */
+#include <linux/tcp.h> /* for MSG_FASTOPEN */
 #elif defined(HAVE_NETINET_TCP_H)
-#include <netinet/tcp.h> /* for MSG_FASTOPEN */
+#include <netinet/tcp.h> /* for TCP_FASTOPEN_CONNECT */
 #endif
 
 #include "urldata.h"
