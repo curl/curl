@@ -60,6 +60,19 @@
 
 #if defined(HAVE_LIBZ) || defined(HAVE_BROTLI) || defined(HAVE_ZSTD)
 #define DECOMPRESS_BUFFER_SIZE 16384 /* buffer size for decompressed data */
+
+/* Pass EOS on separately, after all output from the final input buffer, so
+   downstream decoders can validate their complete input. */
+static CURLcode unencode_write_eos(struct Curl_easy *data,
+                                  struct Curl_cwriter *writer, int type,
+                                  bool complete)
+{
+  if(!complete) {
+    failf(data, "Unexpected end of %s compressed data", writer->cwt->name);
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+  return Curl_cwriter_write(data, writer->next, type, "", 0);
+}
 #endif
 
 #ifdef HAVE_LIBZ
@@ -83,6 +96,8 @@ struct zlib_writer {
   char buffer[DECOMPRESS_BUFFER_SIZE]; /* Put the decompressed data here. */
   uInt trailerlen;           /* Remaining trailer byte count. */
   z_stream z;                /* State structure for zlib. */
+  BIT(has_input);            /* Empty bodies need no decoding. */
+  BIT(eos);                 /* EOS has been handled. */
 };
 
 static voidpf zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
@@ -270,19 +285,31 @@ static CURLcode deflate_do_write(struct Curl_easy *data,
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
   z_stream *z = &zp->z; /* zlib state structure */
+  CURLcode result = CURLE_OK;
 
-  if(!(type & CLIENTWRITE_BODY) || !nbytes)
+  if(!(type & CLIENTWRITE_BODY))
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
-  /* Set the compressed input when this function is called */
-  z->next_in = (z_const Bytef *)buf;
-  z->avail_in = (uInt)nbytes;
+  if(nbytes) {
+    zp->has_input = TRUE;
+    /* Set the compressed input when this function is called */
+    z->next_in = (z_const Bytef *)buf;
+    z->avail_in = (uInt)nbytes;
 
-  if(zp->zlib_init == ZLIB_EXTERNAL_TRAILER)
-    return process_trailer(data, zp);
+    if(zp->zlib_init == ZLIB_EXTERNAL_TRAILER)
+      result = process_trailer(data, zp);
+    else
+      result = inflate_stream(data, writer, type & ~CLIENTWRITE_EOS,
+                              ZLIB_INFLATING);
+  }
 
-  /* Now uncompress the data */
-  return inflate_stream(data, writer, type, ZLIB_INFLATING);
+  if(!result && (type & CLIENTWRITE_EOS) && !zp->eos) {
+    zp->eos = TRUE;
+    result = unencode_write_eos(data, writer, type, !zp->has_input ||
+                               zp->zlib_init == ZLIB_UNINIT ||
+                               zp->zlib_init == ZLIB_EXTERNAL_TRAILER);
+  }
+  return result;
 }
 
 static void deflate_do_close(struct Curl_easy *data,
@@ -332,20 +359,30 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
   z_stream *z = &zp->z; /* zlib state structure */
+  CURLcode result = CURLE_OK;
 
-  if(!(type & CLIENTWRITE_BODY) || !nbytes)
+  if(!(type & CLIENTWRITE_BODY))
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
-  if(zp->zlib_init == ZLIB_INIT_GZIP) {
+  if(nbytes) {
+    if(zp->zlib_init != ZLIB_INIT_GZIP)
+      return exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
+
+    zp->has_input = TRUE;
     /* Let zlib handle the gzip decompression entirely */
     z->next_in = (z_const Bytef *)buf;
     z->avail_in = (uInt)nbytes;
     /* Now uncompress the data */
-    return inflate_stream(data, writer, type, ZLIB_INIT_GZIP);
+    result = inflate_stream(data, writer, type & ~CLIENTWRITE_EOS,
+                            ZLIB_INIT_GZIP);
   }
 
-  /* We are running with an old version: return error. */
-  return exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
+  if(!result && (type & CLIENTWRITE_EOS) && !zp->eos) {
+    zp->eos = TRUE;
+    result = unencode_write_eos(data, writer, type, !zp->has_input ||
+                               zp->zlib_init == ZLIB_UNINIT);
+  }
+  return result;
 }
 
 static void gzip_do_close(struct Curl_easy *data,
@@ -376,6 +413,8 @@ struct brotli_writer {
   struct Curl_cwriter super;
   char buffer[DECOMPRESS_BUFFER_SIZE];
   BrotliDecoderState *br; /* State structure for brotli. */
+  BIT(has_input);         /* Empty bodies need no decoding. */
+  BIT(eos);              /* EOS has been handled. */
 };
 
 static CURLcode brotli_map_error(BrotliDecoderErrorCode be)
@@ -433,14 +472,17 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
   uint8_t *dst;
   size_t dstleft;
   CURLcode result = CURLE_OK;
-  BrotliDecoderResult r = BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT;
+  BrotliDecoderResult r = BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT;
   int i = 0;
 
-  if(!(type & CLIENTWRITE_BODY) || !nbytes)
+  if(!(type & CLIENTWRITE_BODY))
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
-  if(!bp->br)
+  if(nbytes && !bp->br)
     return CURLE_WRITE_ERROR; /* Stream already ended. */
+
+  if(nbytes)
+    bp->has_input = TRUE;
 
   while((nbytes || r == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) &&
         result == CURLE_OK) {
@@ -458,7 +500,7 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
     dstleft = DECOMPRESS_BUFFER_SIZE;
     r = BrotliDecoderDecompressStream(bp->br,
                                       &nbytes, &src, &dstleft, &dst, NULL);
-    result = Curl_cwriter_write(data, writer->next, type,
+    result = Curl_cwriter_write(data, writer->next, type & ~CLIENTWRITE_EOS,
                                 bp->buffer, DECOMPRESS_BUFFER_SIZE - dstleft);
     if(result)
       break;
@@ -476,6 +518,11 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
       result = brotli_map_error(BrotliDecoderGetErrorCode(bp->br));
       break;
     }
+  }
+  if(!result && (type & CLIENTWRITE_EOS) && !bp->eos) {
+    bp->eos = TRUE;
+    result = unencode_write_eos(data, writer, type,
+                               !bp->has_input || !bp->br);
   }
   return result;
 }
@@ -510,6 +557,9 @@ struct zstd_writer {
   struct Curl_cwriter super;
   ZSTD_DStream *zds; /* State structure for zstd. */
   char buffer[DECOMPRESS_BUFFER_SIZE];
+  BIT(has_input);   /* Empty bodies need no decoding. */
+  BIT(complete);    /* The last frame has ended. */
+  BIT(eos);         /* EOS has been handled. */
 };
 
 #ifdef ZSTD_STATIC_LINKING_ONLY
@@ -557,14 +607,17 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
   size_t errorCode;
   int i = 0;
 
-  if(!(type & CLIENTWRITE_BODY) || !nbytes)
+  if(!(type & CLIENTWRITE_BODY))
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+
+  if(nbytes)
+    zp->has_input = TRUE;
 
   in.pos = 0;
   in.src = buf;
   in.size = nbytes;
 
-  for(;;) {
+  while(nbytes) {
     if(++i > (1024 * 1024 / DECOMPRESS_BUFFER_SIZE)) {
       /* check every MB of output if we are not exceeding time limit */
       i = 0;
@@ -582,16 +635,23 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
     if(ZSTD_isError(errorCode)) {
       return CURLE_BAD_CONTENT_ENCODING;
     }
+    zp->complete = (errorCode == 0);
     if(out.pos > 0) {
-      result = Curl_cwriter_write(data, writer->next, type,
+      result = Curl_cwriter_write(data, writer->next, type & ~CLIENTWRITE_EOS,
                                   zp->buffer, out.pos);
       if(result)
         break;
     }
-    if((in.pos == nbytes) && (out.pos < out.size))
+    /* A completed frame is fully flushed, even if it filled the buffer. */
+    if((in.pos == nbytes) && (zp->complete || (out.pos < out.size)))
       break;
   }
 
+  if(!result && (type & CLIENTWRITE_EOS) && !zp->eos) {
+    zp->eos = TRUE;
+    result = unencode_write_eos(data, writer, type,
+                               !zp->has_input || zp->complete);
+  }
   return result;
 }
 

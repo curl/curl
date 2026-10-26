@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+compressed
+</keywords>
+</info>
+
+<reply>
+# The last byte of the zstd frame is missing.
+<data crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: zstd
+Content-Length: 20
+
+%hex[%28%b5%2f%fd%20%0c%61%00%00%68%65%6c%6c%6f%20%77%6f%72%6c%64]hex%
+</data>
+
+<datacheck nonewline="yes">
+hello world
+</datacheck>
+</reply>
+
+<client>
+<features>
+zstd
+</features>
+<server>
+http
+</server>
+<name>
+Zstd content with an incomplete frame
+</name>
+<command option="no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
+</command>
+</client>
+
+<verify>
+<strippart>
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
+</strippart>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+<errorcode>
+61
+</errorcode>
+</verify>
+</testcase>

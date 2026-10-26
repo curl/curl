@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+compressed
+</keywords>
+</info>
+
+<reply>
+# These HTTP responses do not carry an encoded body.
+<data crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: gzip
+Content-Length: 32
+
+
+</data>
+<data1 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 204 No Content
+Content-Encoding: br
+
+
+</data1>
+<data2 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 304 Not Modified
+Content-Encoding: zstd
+Content-Length: 21
+
+
+</data2>
+</reply>
+
+<client>
+<features>
+libz
+brotli
+zstd
+</features>
+<server>
+http
+</server>
+<name>
+Content encodings on HEAD, 204 and 304 responses need no body
+</name>
+<command option="no-include">
+--fail-early --compressed --head http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--next --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+--next --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
+</command>
+</client>
+
+<verify>
+<strippart>
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
+</strippart>
+<protocol crlf="yes">
+HEAD /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+<stdout crlf="headers">
+HTTP/1.1 200 OK
+Content-Encoding: gzip
+Content-Length: 32
+
+</stdout>
+</verify>
+</testcase>

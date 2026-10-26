@@ -407,6 +407,7 @@ CURLcode Curl_httpchunk_read(struct Curl_easy *data,
 struct chunked_writer {
   struct Curl_cwriter super;
   struct Curl_chunker ch;
+  BIT(eos);
 };
 
 static CURLcode cw_chunked_init(struct Curl_easy *data,
@@ -458,6 +459,11 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
     data->req.download_done = TRUE;
     if(blen) {
       infof(data, "Leftovers after chunking: %zu bytes", blen);
+    }
+    if(!ctx->eos) {
+      ctx->eos = TRUE;
+      return Curl_cwriter_write(data, writer->next,
+                                CLIENTWRITE_BODY | CLIENTWRITE_EOS, "", 0);
     }
   }
   else if((type & CLIENTWRITE_EOS) && !data->req.no_body) {

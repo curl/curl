@@ -230,15 +230,17 @@ static CURLcode cw_download_write(struct Curl_easy *data,
       nwrite = wmax;
     }
 
-    if(nwrite == wmax) {
-      data->req.download_done = TRUE;
-    }
-
     if((type & CLIENTWRITE_EOS) && !data->req.no_body &&
        (data->req.size > data->req.bytecount)) {
       failf(data, "end of response with %" FMT_OFF_T " bytes missing",
             data->req.size - data->req.bytecount);
       return CURLE_PARTIAL_FILE;
+    }
+
+    if(nwrite == wmax) {
+      data->req.download_done = TRUE;
+      /* Decoders need to see EOS even when the connection stays open. */
+      type |= CLIENTWRITE_EOS;
     }
   }
 
@@ -248,6 +250,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     size_t wmax = get_max_body_write_len(data, data->set.max_filesize);
     if(nwrite > wmax) {
       nwrite = wmax;
+      type &= ~CLIENTWRITE_EOS;
     }
   }
 

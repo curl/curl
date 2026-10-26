@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+compressed
+</keywords>
+</info>
+
+<reply>
+# The first gzip stream is complete; the second lacks a trailer byte.
+# Both HTTP chunked bodies have valid terminating chunks.
+<data crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: gzip
+Transfer-Encoding: chunked
+
+a%CR
+%hex[%1f%8b%08%00%00%00%00%00%00%03]hex%%CR
+16%CR
+%hex[%cb%48%cd%c9%c9%57%28%cf%2f%ca%49%e1%02%00%2d%3b%08%af%0c%00%00%00]hex%%CR
+0%CR
+%CR
+
+</data>
+<data1 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: gzip
+Transfer-Encoding: chunked
+
+a%CR
+%hex[%1f%8b%08%00%00%00%00%00%00%03]hex%%CR
+15%CR
+%hex[%cb%48%cd%c9%c9%57%28%cf%2f%ca%49%e1%02%00%2d%3b%08%af%0c%00%00]hex%%CR
+0%CR
+%CR
+
+</data1>
+
+</reply>
+
+<client>
+<features>
+libz
+</features>
+<server>
+http
+</server>
+<name>
+Chunked gzip content validates the stream after the last chunk
+</name>
+<command option="no-include">
+--fail-early --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--next --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+</command>
+</client>
+
+<verify>
+<strippart>
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
+</strippart>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+<errorcode>
+61
+</errorcode>
+<stdout>
+hello world
+hello world
+</stdout>
+</verify>
+</testcase>

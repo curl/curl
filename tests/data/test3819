@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+compressed
+</keywords>
+</info>
+
+<reply>
+# Valid empty gzip, deflate, raw deflate, brotli and zstd streams, followed
+# by a zstd frame whose output exactly fills a 16384-byte decoder buffer.
+<data crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: gzip
+Content-Length: 20
+
+%hex[%1f%8b%08%00%00%00%00%00%00%03%03%00%00%00%00%00%00%00%00%00]hex%
+</data>
+<data1 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: deflate
+Content-Length: 8
+
+%hex[%78%9c%03%00%00%00%00%01]hex%
+</data1>
+<data2 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: deflate
+Content-Length: 2
+
+%hex[%03%00]hex%
+</data2>
+<data3 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: br
+Content-Length: 1
+
+%hex[%3b]hex%
+</data3>
+<data4 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: zstd
+Content-Length: 9
+
+%hex[%28%b5%2f%fd%20%00%01%00%00]hex%
+</data4>
+<data5 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: zstd
+Content-Length: 19
+
+%hex[%28%b5%2f%fd%60%00%3f%4d%00%00%10%41%41%01%00%fb%9f%07%58]hex%
+</data5>
+
+</reply>
+
+<client>
+<features>
+libz
+brotli
+zstd
+</features>
+<server>
+http
+</server>
+<name>
+Complete empty compressed streams and a full zstd output buffer
+</name>
+<command option="no-include">
+--fail-early --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--next --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+--next --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
+--next --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003
+--next --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER0004
+--next --compressed http://%HOSTIP:%HTTPPORT/%TESTNUMBER0005
+</command>
+</client>
+
+<verify>
+<strippart>
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
+</strippart>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+GET /%TESTNUMBER0003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+GET /%TESTNUMBER0004 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+GET /%TESTNUMBER0005 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+<stdout nonewline="yes">
+%repeat[16384 x A]%
+</stdout>
+</verify>
+</testcase>
