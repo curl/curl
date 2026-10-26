@@ -596,6 +596,8 @@ static void update_meta(struct websocket *ws,
 struct ws_cw_ctx {
   struct Curl_cwriter super;
   struct bufq buf;
+  /* the frame being passed on, for curl_ws_meta() in the write callback */
+  struct curl_ws_frame recvframe;
 };
 
 static CURLcode ws_cw_init(struct Curl_easy *data,
@@ -617,6 +619,7 @@ static void ws_cw_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 struct ws_cw_dec_ctx {
   struct Curl_easy *data;
   struct websocket *ws;
+  struct ws_cw_ctx *cw_ctx;
   struct Curl_cwriter *next_writer;
   int cw_type;
 };
@@ -693,6 +696,7 @@ static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
     /* forward the decoded frame to the next client writer. */
     update_meta(ws, frame_age, frame_flags, payload_offset,
                 payload_len, buflen);
+    ctx->cw_ctx->recvframe = ws->recvframe;
 
     CURL_TRC_WRITE(data, "[WS] pass %zu decoded bytes", buflen);
     result = Curl_cwriter_write(data, ctx->next_writer,
@@ -741,6 +745,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     struct ws_cw_dec_ctx pass_ctx;
     pass_ctx.data = data;
     pass_ctx.ws = ws;
+    pass_ctx.cw_ctx = ctx;
     pass_ctx.next_writer = writer->next;
     pass_ctx.cw_type = type;
     result = ws_dec_pass(&ws->dec, data, &ctx->buf,
@@ -807,6 +812,7 @@ static CURLcode ws_cw_flush(struct Curl_easy *data,
       struct ws_cw_dec_ctx pass_ctx;
       pass_ctx.data = data;
       pass_ctx.ws = ws;
+      pass_ctx.cw_ctx = ctx;
       pass_ctx.next_writer = writer->next;
       pass_ctx.cw_type = CLIENTWRITE_BODY;
       result = ws_dec_pass(&ws->dec, data, &ctx->buf,
@@ -2006,7 +2012,14 @@ const struct curl_ws_frame *curl_ws_meta(CURL *curl)
   struct Curl_easy *data = curl;
   if(GOOD_EASY_HANDLE(data) && Curl_api_is_in_callback(data) &&
      data->conn && !data->set.ws_raw_mode) {
+    /* called for every frame: take it from our writer, which is quicker
+       than looking up the connection's websocket. With CONNECT_ONLY,
+       curl_ws_recv() updates the websocket's frame and not ours. */
+    struct Curl_cwriter *writer = data->set.connect_only ? NULL :
+      Curl_cwriter_get_by_type(data, &ws_cw_decode);
     struct websocket *ws;
+    if(writer)
+      return &((struct ws_cw_ctx *)writer->ctx)->recvframe;
     ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
     if(ws)
       return &ws->recvframe;
