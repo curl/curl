@@ -6,15 +6,8 @@ SPDX-License-Identifier: curl
 
 # Security Policy
 
-Read our [Vulnerability Disclosure Policy](docs/VULN-DISCLOSURE-POLICY.md).
-
-## Reporting a Vulnerability
-
 If you have found or suspect a security problem somewhere in curl or libcurl,
 [report it](https://curl.se/dev/vuln-disclosure.html)!
-
-We treat security issues with confidentiality until controlled and disclosed
-responsibly.
 
 ## OpenSSF Best Practices
 
