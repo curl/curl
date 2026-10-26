@@ -67,7 +67,7 @@ the socket_action API. Transfers done this way should work exactly the same
 as with the non-event based API.
 
 To be able to use `--test-event` together with `--parallel`, curl requires
-*libuv* to be present and enabled in the build: `configure --enable-libuv`
+*libuv* to be present and enabled in the build: `configure --with-libuv`
 
 ## Duplicated handles
 
