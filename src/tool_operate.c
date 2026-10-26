@@ -2380,7 +2380,10 @@ static CURLcode run_all_transfers(CURLSH *share,
   for(per = transfers; per;) {
     bool retry;
     uint32_t delay;
-    CURLcode result2 = post_per_transfer(per, result, &retry, &delay);
+    CURLcode result2;
+    /* No further retries can be performed during final cleanup. */
+    per->retry_remaining = 0;
+    result2 = post_per_transfer(per, result, &retry, &delay);
     if(!result)
       /* do not overwrite the original error */
       result = result2;
