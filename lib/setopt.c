@@ -30,7 +30,7 @@
 #ifdef HAVE_LINUX_TCP_H
 #include <linux/tcp.h> /* for TCP_FASTOPEN_CONNECT */
 #elif defined(HAVE_NETINET_TCP_H)
-#include <netinet/tcp.h>
+#include <netinet/tcp.h> /* for MSG_FASTOPEN */
 #endif
 
 #include "urldata.h"
