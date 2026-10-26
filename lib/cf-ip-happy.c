@@ -26,9 +26,6 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* <netinet/tcp.h> may need it */
 #endif
-#if defined(HAVE_NETINET_TCP_H)
-#include <netinet/tcp.h>
-#endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif

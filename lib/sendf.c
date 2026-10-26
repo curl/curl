@@ -26,9 +26,6 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if defined(HAVE_NETINET_TCP_H)
-#include <netinet/tcp.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"
