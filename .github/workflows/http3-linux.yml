@@ -86,9 +86,9 @@ jobs:
 
       - name: 'cache boringssl'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache2-boringssl
+        id: cache1-boringssl
         env:
-          cache-name: cache2-boringssl
+          cache-name: cache1-boringssl
         with:
           path: ~/pkg/boringssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}-${{ runner.arch }}
@@ -205,7 +205,7 @@ jobs:
       - id: settings
         if: >-
           ${{ !steps.cache1-awslc.outputs.cache-hit ||
-              !steps.cache2-boringssl.outputs.cache-hit ||
+              !steps.cache1-boringssl.outputs.cache-hit ||
               !steps.cache1-nettle.outputs.cache-hit ||
               !steps.cache1-gnutls.outputs.cache-hit ||
               !steps.cache1-libressl.outputs.cache-hit ||
@@ -247,14 +247,14 @@ jobs:
           cmake --install .
 
       - name: 'build boringssl'
-        if: ${{ !steps.cache2-boringssl.outputs.cache-hit }}
+        if: ${{ !steps.cache1-boringssl.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/google/boringssl/releases/download/${BORINGSSL_VERSION}/boringssl-${BORINGSSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "boringssl-${BORINGSSL_VERSION}"
-          cmake -B . -G Ninja -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/boringssl
+          cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/boringssl
           cmake --build .
           cmake --install .
 
@@ -612,9 +612,9 @@ jobs:
       - name: 'cache boringssl'
         if: ${{ matrix.build.name == 'boringssl' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache2-boringssl
+        id: cache1-boringssl
         env:
-          cache-name: cache2-boringssl
+          cache-name: cache1-boringssl
         with:
           path: ~/pkg/boringssl
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}-${{ runner.arch }}
