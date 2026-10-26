@@ -868,15 +868,6 @@ jobs:
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
-          export LD_LIBRARY_PATH="/home/runner/pkg/awslc/lib:$LD_LIBRARY_PATH"  # for nghttpx to load awslc shared libs
-          echo '--------------'
-          ldd /home/runner/pkg/nghttp2/bin/nghttpx || true
-          find /home/runner/pkg/awslc/lib || true
-          echo '--------------'
-          find /home/runner/pkg/awslc || true
-          echo '--------------'
-          /home/runner/pkg/nghttp2/bin/nghttpx --version || true
-          echo '--------------'
           TFLAGS+=' -n'
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
@@ -887,10 +878,6 @@ jobs:
       - name: 'run tests (valgrind)'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
-          export LD_LIBRARY_PATH="/home/runner/pkg/awslc/lib:$LD_LIBRARY_PATH"  # for nghttpx to load awslc shared libs
-          echo '--------------'
-          /home/runner/pkg/nghttp2/bin/nghttpx --version || true
-          echo '--------------'
           export TFLAGS='-j6 --min=4 HTTP/3'
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
