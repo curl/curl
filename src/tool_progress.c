@@ -64,7 +64,14 @@ UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen)
   return max5;
 }
 
-static void add_offt(curl_off_t *val, curl_off_t add);
+static void add_offt(curl_off_t *val, curl_off_t add)
+{
+  if(CURL_OFF_T_MAX - *val < add)
+    /* maxed out! */
+    *val = CURL_OFF_T_MAX;
+  else
+    *val += add;
+}
 
 int xferinfo_cb(void *clientp,
                 curl_off_t dltotal,
@@ -146,15 +153,6 @@ struct speedcount {
 static unsigned int speedindex;
 static bool indexwrapped;
 static struct speedcount speedstore[SPEEDCNT];
-
-static void add_offt(curl_off_t *val, curl_off_t add)
-{
-  if(CURL_OFF_T_MAX - *val < add)
-    /* maxed out! */
-    *val = CURL_OFF_T_MAX;
-  else
-    *val += add;
-}
 
 /*
    |DL% UL%  Dled  Uled  Xfers  Live Total     Current  Left    Speed
