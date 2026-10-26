@@ -64,6 +64,8 @@ UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen)
   return max5;
 }
 
+static void add_offt(curl_off_t *val, curl_off_t add);
+
 int xferinfo_cb(void *clientp,
                 curl_off_t dltotal,
                 curl_off_t dlnow,
@@ -74,6 +76,9 @@ int xferinfo_cb(void *clientp,
   struct OperationConfig *config = per->config;
   per->dltotal = dltotal;
   per->dlnow = dlnow;
+  if(dltotal)
+    add_offt(&per->dltotal, per->dlretry);
+  add_offt(&per->dlnow, per->dlretry);
   per->ultotal = ultotal;
   per->ulnow = ulnow;
 
@@ -127,8 +132,8 @@ UNITTEST void timebuf(char *r, size_t rlen, curl_off_t seconds)
   }
 }
 
-static curl_off_t all_dltotal = 0;
-static curl_off_t all_ultotal = 0;
+static curl_off_t all_dltotal_done = 0;
+static curl_off_t all_ultotal_done = 0;
 static curl_off_t all_dlalready = 0;
 static curl_off_t all_ulalready = 0;
 
@@ -185,6 +190,8 @@ bool progress_meter(CURLM *multi, struct curltime *start, bool final)
     struct per_transfer *per;
     curl_off_t all_dlnow = 0;
     curl_off_t all_ulnow = 0;
+    curl_off_t all_dltotal = all_dltotal_done;
+    curl_off_t all_ultotal = all_ultotal_done;
     curl_off_t xfers_added = 0;
     curl_off_t xfers_running = 0;
     bool dlknown = TRUE;
@@ -202,18 +209,12 @@ bool progress_meter(CURLM *multi, struct curltime *start, bool final)
       add_offt(&all_ulnow, per->ulnow);
       if(!per->dltotal)
         dlknown = FALSE;
-      else if(!per->dltotal_added) {
-        /* only add this amount once */
+      else
         add_offt(&all_dltotal, per->dltotal);
-        per->dltotal_added = TRUE;
-      }
       if(!per->ultotal)
         ulknown = FALSE;
-      else if(!per->ultotal_added) {
-        /* only add this amount once */
+      else
         add_offt(&all_ultotal, per->ultotal);
-        per->ultotal_added = TRUE;
-      }
     }
     if(dlknown && all_dltotal)
       curl_msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
@@ -312,12 +313,18 @@ void progress_finalize(struct per_transfer *per)
   /* get the numbers before this transfer goes away */
   add_offt(&all_dlalready, per->dlnow);
   add_offt(&all_ulalready, per->ulnow);
-  if(!per->dltotal_added) {
-    add_offt(&all_dltotal, per->dltotal);
-    per->dltotal_added = TRUE;
-  }
-  if(!per->ultotal_added) {
-    add_offt(&all_ultotal, per->ultotal);
-    per->ultotal_added = TRUE;
-  }
+  add_offt(&all_dltotal_done, per->dltotal);
+  add_offt(&all_ultotal_done, per->ultotal);
+}
+
+void progress_reset_retry(struct per_transfer *per)
+{
+  per->dlnow = per->dlretry;
+  per->ulnow = 0;
+  per->dltotal = 0;
+  per->ultotal = 0;
+
+  /* Discarded bytes can make the counters decrease between samples. */
+  speedindex = 0;
+  indexwrapped = FALSE;
 }

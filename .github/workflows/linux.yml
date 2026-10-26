@@ -447,8 +447,8 @@ jobs:
 
           - name: 'event-based'
             image: ubuntu-24.04
-            install_packages: libssh-dev
-            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm
+            install_packages: libssh-dev libuv1-dev
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm --with-libuv
             tflags: '-n --test-event --min=1520'
 
           - name: 'duphandle'

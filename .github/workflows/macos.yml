@@ -291,7 +291,8 @@ jobs:
 
           - name: 'OpenSSL event-based'
             compiler: clang
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_ENABLE_NTLM=ON
+            install: libuv
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_ENABLE_NTLM=ON -DCURL_USE_LIBUV=ON
             tflags: '--test-event --min=1450'
 
           - name: 'OpenSSL gsasl AppleIDN SecTrust +examples'
