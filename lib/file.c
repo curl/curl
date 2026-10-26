@@ -640,10 +640,19 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
       nread = read(fd, xfer_buf, bytestoread);
 
+      if(nread < 0) {
+        /* !checksrc! disable ERRNOVAR 1 */
+        if(errno == EINTR)
+          continue;
+        failf(data, "Failed to read file");
+        result = CURLE_READ_ERROR;
+        break;
+      }
+
       if(nread > 0)
         xfer_buf[nread] = 0;
 
-      if(nread <= 0 || (size_known && (expected_size == 0)))
+      if(!nread || (size_known && (expected_size == 0)))
         break;
 
       if(size_known)
