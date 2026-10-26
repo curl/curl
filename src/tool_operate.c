@@ -560,6 +560,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         }
         truncate = FALSE;
         outs->init += outs->bytes;
+        per->dlretry += outs->bytes;
         outs->bytes = 0;
         config->resume_from = outs->init;
         curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, config->resume_from);
@@ -1893,6 +1894,7 @@ static CURLcode parallel_event(struct parastate *s)
 
   /* We need to cleanup the multi here, since the uv context lives on the
    * stack and about to be gone. multi_cleanup can trigger events! */
+  (void)progress_meter(s->multi, &s->start, TRUE);
   curl_multi_cleanup(s->multi);
 
 #if DEBUG_UV
@@ -1928,15 +1930,16 @@ static CURLcode check_finished(struct parastate *s)
                        "in another transfer");
       }
       tres = post_per_transfer(ended, tres, &retry, &delay);
-      progress_finalize(ended); /* before it goes away */
       all_added--; /* one fewer added */
       checkmore = TRUE;
       if(retry) {
+        progress_reset_retry(ended);
         ended->added = FALSE; /* add it again */
         /* we delay retries in full integer seconds only */
         ended->startat = delay ? time(NULL) + (delay / 1000) : 0;
       }
       else {
+        progress_finalize(ended); /* before it goes away */
         /* result receives this transfer's error unless the transfer was
            marked for abort due to a critical error in another transfer */
         if(tres && (!ended->abort || !result))
