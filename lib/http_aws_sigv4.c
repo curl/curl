@@ -315,11 +315,23 @@ static int compare_header_names(const char *a, const char *b)
   return cmp;
 }
 
-/* qsort wrapper for compare_header_names */
+/* Entry used when sorting headers; carries the original index so that
+   qsort() can be made stable (equal names keep their insertion order). */
+struct sort_hdr {
+  size_t  idx;
+  char   *data;
+};
+
+/* qsort comparator: sort by header name, break ties by original index */
 static int qsort_compare_header_names(const void *a, const void *b)
 {
-  return compare_header_names(*(const char *const *)a,
-                              *(const char *const *)b);
+  const struct sort_hdr *ha = (const struct sort_hdr *)a;
+  const struct sort_hdr *hb = (const struct sort_hdr *)b;
+  int r = compare_header_names(ha->data, hb->data);
+  if(r)
+    return r;
+  /* preserve insertion order for duplicate names (stable sort) */
+  return (ha->idx < hb->idx) ? -1 : 1;
 }
 
 /* Merge duplicate header definitions by comma delimiting their values
@@ -379,13 +391,13 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
 static CURLcode sort_headers(struct curl_slist *head)
 {
   size_t n = 0;
-  char **arr;
-  char *stackbuf[SORT_HEADERS_STACK_MAX];
+  struct sort_hdr *arr;
+  struct sort_hdr stackbuf[SORT_HEADERS_STACK_MAX];
   struct curl_slist *l;
+  size_t i;
   for(l = head; l; l = l->next)
     ++n;
   if(n > 1) {
-    size_t i;
     if(n < SORT_HEADERS_STACK_MAX)
       arr = stackbuf;
     else {
@@ -393,11 +405,13 @@ static CURLcode sort_headers(struct curl_slist *head)
       if(!arr)
         return CURLE_OUT_OF_MEMORY;
     }
-    for(i = 0, l = head; l; l = l->next, ++i)
-      arr[i] = l->data;
+    for(i = 0, l = head; l; l = l->next, ++i) {
+      arr[i].idx  = i;
+      arr[i].data = l->data;
+    }
     qsort(arr, n, sizeof(*arr), qsort_compare_header_names);
     for(i = 0, l = head; l; l = l->next, ++i)
-      l->data = arr[i];
+      l->data = arr[i].data;
     if(arr != stackbuf)
       curlx_free(arr);
   }
