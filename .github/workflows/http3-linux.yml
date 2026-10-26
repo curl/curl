@@ -191,8 +191,7 @@ jobs:
           cache-name: cache1-nghttp2
         with:
           path: ~/pkg/nghttp2
-          key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
-            ${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}-${{ runner.arch }}"
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}-${{ runner.arch }}
 
       - name: 'cache h2o'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -407,11 +406,11 @@ jobs:
           autoreconf -fi
           # required (for nghttpx application): libc-ares-dev libev-dev zlib1g-dev
           # optional (for nghttpx application): libbrotli-dev
-          export PKG_CONFIG_PATH=/home/runner/pkg/openssl/lib/pkgconfig
+          export PKG_CONFIG_PATH=/home/runner/pkg/awslc/lib/pkgconfig
           PKG_CONFIG_PATH+=:/home/runner/pkg/nghttp3/lib/pkgconfig
           PKG_CONFIG_PATH+=:/home/runner/pkg/ngtcp2/lib/pkgconfig
           ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/nghttp2 --enable-app --enable-http3 \
-            LDFLAGS=-Wl,-rpath,/home/runner/pkg/openssl/lib \
+            LDFLAGS=-Wl,-rpath,/home/runner/pkg/awslc/lib \
             --with-libbrotlienc --with-libbrotlidec
           make install
 
@@ -736,7 +735,7 @@ jobs:
           cache-name: cache1-nghttp2
         with:
           path: ~/pkg/nghttp2
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}-${{ runner.arch }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}-${{ runner.arch }}
           fail-on-cache-miss: true
 
       - name: 'cache h2o'
