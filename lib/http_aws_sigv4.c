@@ -315,6 +315,13 @@ static int compare_header_names(const char *a, const char *b)
   return cmp;
 }
 
+/* qsort wrapper for compare_header_names */
+static int qsort_compare_header_names(const void *a, const void *b)
+{
+  return compare_header_names(*(const char *const *)a,
+                              *(const char *const *)b);
+}
+
 /* Merge duplicate header definitions by comma delimiting their values
    in the order defined the headers are defined, expecting headers to
    be alpha-sorted and use ':' at this point */
@@ -366,6 +373,37 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
   return CURLE_OK;
 }
 
+/* alpha-sort by header name in a case sensitive manner */
+#define SORT_HEADERS_STACK_MAX 32
+
+static CURLcode sort_headers(struct curl_slist *head)
+{
+  size_t n = 0;
+  char **arr;
+  char *stackbuf[SORT_HEADERS_STACK_MAX];
+  struct curl_slist *l;
+  for(l = head; l; l = l->next)
+    ++n;
+  if(n > 1) {
+    size_t i;
+    if(n < SORT_HEADERS_STACK_MAX)
+      arr = stackbuf;
+    else {
+      arr = curlx_malloc(n * sizeof(*arr));
+      if(!arr)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    for(i = 0, l = head; l; l = l->next, ++i)
+      arr[i] = l->data;
+    qsort(arr, n, sizeof(*arr), qsort_compare_header_names);
+    for(i = 0, l = head; l; l = l->next, ++i)
+      l->data = arr[i];
+    if(arr != stackbuf)
+      curlx_free(arr);
+  }
+  return CURLE_OK;
+}
+
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
 static CURLcode make_headers(struct Curl_easy *data,
                              char *timestamp,
@@ -382,7 +420,6 @@ static CURLcode make_headers(struct Curl_easy *data,
   struct curl_slist *tmp_head = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
   struct curl_slist *l;
-  bool again = TRUE;
 
   curl_msnprintf(date_hdr_key, DATE_HDR_KEY_LEN, "X-%.*s-Date",
                  (int)plen, provider1);
@@ -490,23 +527,9 @@ static CURLcode make_headers(struct Curl_easy *data,
     *date_header = NULL;
   }
 
-  /* alpha-sort by header name in a case sensitive manner */
-  do {
-    again = FALSE;
-    for(l = head; l; l = l->next) {
-      struct curl_slist *next = l->next;
-
-      if(next && compare_header_names(l->data, next->data) > 0) {
-        char *tmp = l->data;
-
-        l->data = next->data;
-        next->data = tmp;
-        again = TRUE;
-      }
-    }
-  } while(again);
-
-  result = merge_duplicate_headers(head);
+  result = sort_headers(head);
+  if(!result)
+    result = merge_duplicate_headers(head);
   if(result)
     goto fail;
 
