@@ -1079,6 +1079,7 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
   Curl_strntoupper(str_to_sign, curlx_str(provider0),
                    curlx_strlen(provider0));
 
+  infof(data, "aws_sigv4: canonical request - [%s]", canonical_request);
   infof(data, "aws_sigv4: String to sign (enclosed in []) - [%s]",
         str_to_sign);
 
