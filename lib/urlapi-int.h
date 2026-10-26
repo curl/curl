@@ -67,4 +67,6 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href);
 
 CURLUcode Curl_url_get_port(CURLU *u, uint16_t *pport);
 
+CURLUcode Curl_hostname_check(const char *hostname, size_t hlen);
+
 #endif /* HEADER_CURL_URLAPI_INT_H */

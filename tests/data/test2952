@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IDN
+--proxytunnel
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<features>
+IDN
+!WinIDN
+proxy
+codeset-utf8
+</features>
+<setenv>
+LC_ALL=C.UTF-8
+</setenv>
+<server>
+http
+</server>
+<name>
+URL with commercial at character and proxy tunnel
+</name>
+
+# %ef%bc%a0 is the UTF-8 fullwidth commercial at
+<command>
+-x http://%HOSTIP:%HTTPPORT %hex[http://prefix%ef%bc%a0suffix/echo]hex% --proxytunnel
+</command>
+</client>
+
+<verify>
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

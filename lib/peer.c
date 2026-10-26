@@ -213,6 +213,11 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
           return CURLE_OUT_OF_MEMORY;
       }
       result = Curl_idn_decode(pp->tmp_host_user, &pp->tmp_host);
+      if(!result &&
+         Curl_hostname_check(pp->tmp_host, strlen(pp->tmp_host))) {
+        failf(data, "Illegal hostname: %s", pp->tmp_host);
+        result = CURLE_URL_MALFORMAT;
+      }
       if(result)
         return result;
       pp->host.str = pp->tmp_host;
