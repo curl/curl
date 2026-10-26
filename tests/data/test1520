@@ -14,7 +14,7 @@ smtp
 </server>
 
 <name>
-SMTP with CRLF-dot-CRLF in upload payload
+SMTP dot-stuffing and overflowing upload size
 </name>
 <stdin crlf="yes">
 From: different
@@ -35,6 +35,10 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 
 <verify>
 <protocol crlf="yes">
+EHLO %TESTNUMBER
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
+DATA
 EHLO %TESTNUMBER
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient@example.com%GT
