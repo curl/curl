@@ -315,11 +315,11 @@ static int compare_header_names(const char *a, const char *b)
   return cmp;
 }
 
-/* Entry used when sorting headers; carries the original index so that
-   qsort() can be made stable (equal names keep their insertion order). */
+/* Entry used when sorting headers; carries the original index to keep equal
+   names at their insertion order. */
 struct sort_hdr {
-  size_t  idx;
-  char   *data;
+  int idx;
+  char *data;
 };
 
 /* qsort comparator: sort by header name, break ties by original index */
@@ -331,7 +331,7 @@ static int qsort_compare_header_names(const void *a, const void *b)
   if(r)
     return r;
   /* preserve insertion order for duplicate names (stable sort) */
-  return (ha->idx < hb->idx) ? -1 : 1;
+  return ha->idx - hb->idx;
 }
 
 /* Merge duplicate header definitions by comma delimiting their values
@@ -394,7 +394,7 @@ static CURLcode sort_headers(struct curl_slist *head)
   struct sort_hdr *arr;
   struct sort_hdr stackbuf[SORT_HEADERS_STACK_MAX];
   struct curl_slist *l;
-  size_t i;
+  int i;
   for(l = head; l; l = l->next)
     ++n;
   if(n > 1) {
