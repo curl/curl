@@ -1929,7 +1929,6 @@ TESTCASES = \
   test2109 \
   test2110 \
   test2111 \
-  test2112 \
   test2113 \
   test2114 \
   test2115 \

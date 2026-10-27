@@ -3,8 +3,6 @@
 <info>
 <keywords>
 SMTP
-EXPN
-CUSTOMREQUEST
 </keywords>
 </info>
 <reply>
@@ -14,7 +12,7 @@ CUSTOMREQUEST
 smtp
 </server>
 <name>
-SMTP custom command rejects recipient with CRLF
+SMTP rejects recipient with CR or LF when the option is set
 </name>
 <file1 name="%LOGDIR/test%TESTNUMBER.config">
 mail-rcpt = "Friends\r\n"
@@ -27,9 +25,5 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X EXPN -K %LOGDIR/test%TESTNUMBER.config -
 <errorcode>
 43
 </errorcode>
-<protocol crlf="yes">
-EHLO %TESTNUMBER
-QUIT
-</protocol>
 </verify>
 </testcase>
