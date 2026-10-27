@@ -345,7 +345,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
     CURL_CBAPI_END(&guard);
   }
 
-  if(Curl_llist_count(llist) > MAX_FTP_DIR_ENTRIES) {
+  if(add && (Curl_llist_count(llist) >= MAX_FTP_DIR_ENTRIES)) {
     infof(data, "Reached maximum number of dir entries (%d)",
           MAX_FTP_DIR_ENTRIES);
     add = FALSE;
