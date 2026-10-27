@@ -60,10 +60,11 @@ else
 fi
 
 mkdir -p _tarballs
-rm -rf _tarballs/*
+verification_dir=$(mktemp -d "_tarballs/$(date -u +%Y%m%dT%H%M%SZ)-XXXXXX")
+echo "*** Save verification files in $verification_dir"
 
 # checksum the original tarball to compare with later
-sha256sum -- "$tarball" >_tarballs/checksum
+sha256sum -- "$tarball" >"$verification_dir/checksum"
 
 # extract version number from filename
 tarver=$(echo "$tarball" | sed 's/curl-\([0-9.]*\)\..*/\1/')
@@ -85,23 +86,30 @@ if test "$withgit" = 0; then
   tar xf "$tarball"
 
   # move away the original tarball
-  mv -- "$tarball" "_tarballs/orig-$tarball"
+  mv -- "$tarball" "$verification_dir/orig-$tarball"
 
-  pwd=$(pwd)
+  source_dir=$(pwd)
   cd "curl-$curlver"
   ./configure --without-ssl --without-libpsl
   ./scripts/dmaketgz "$curlver" "$timestamp"
 
   for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
-    mv "$f" ../_tarballs/
+    mv "$f" "../$verification_dir/"
   done
-  cd "$pwd"
+  cd "$source_dir"
 else
   tag=$(tar xOf "$tarball" "curl-$tarver/docs/RELEASE-TOOLS.md" | grep 'tag/commit: curl-' | head -n 1 | sed 's/.*\(curl-[0-9_]*\).*/\1/')
   echo "*** Use git tag $tag"
 
   # move away the original tarball
-  mv -- "$tarball" "_tarballs/orig-$tarball"
+  mv -- "$tarball" "$verification_dir/orig-$tarball"
+
+  # Protect published provenance and its signature from the rebuild.
+  for f in "curl-$curlver.intoto.jsonl" "curl-$curlver.intoto.jsonl.asc"; do
+    if test -f "$f"; then
+      mv -- "$f" "$verification_dir/orig-$f"
+    fi
+  done
 
   prevtag=$(git symbolic-ref -q --short HEAD || git rev-parse HEAD)
   git checkout -f "$tag"
@@ -112,10 +120,13 @@ else
   git checkout -f "$prevtag"
 
   for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
-    mv "$f" _tarballs/
+    mv "$f" "$verification_dir/"
   done
+  if test -f "curl-$curlver.intoto.jsonl"; then
+    mv -- "curl-$curlver.intoto.jsonl" "$verification_dir/"
+  fi
 fi
-cd _tarballs
+cd "$verification_dir"
 
 # compare the new tarball against the original
 sha256sum -c checksum

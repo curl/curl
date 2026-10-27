@@ -116,6 +116,7 @@ EXTRA_DIST =                                     \
   MAIL-ETIQUETTE.md                              \
   MANUAL.md                                      \
   options-in-versions                            \
+  PROVENANCE.md                                  \
   README.md                                      \
   RELEASE-PROCEDURE.md                           \
   ROADMAP.md                                     \

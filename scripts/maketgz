@@ -66,6 +66,26 @@ if test -z "$patch"; then
   exit
 fi
 
+source_commit=""
+provenance="curl-$version.intoto.jsonl"
+if test -z "$only"; then
+  # Capture the source before generating distribution files. An extracted
+  # tarball can be inside another checkout, so require the actual git root.
+  rm -f -- "$provenance" "$provenance.asc"
+  source_root=$(pwd -P)
+  git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
+  if test -n "$git_root" &&
+     test "$source_root" = "$(cd "$git_root" && pwd -P)" &&
+     git diff --cached --quiet --no-ext-diff HEAD -- &&
+     git diff --quiet --no-ext-diff --; then
+    source_commit=$(git rev-parse --verify HEAD)
+    # These modules are provided by perl in the release Docker image.
+    perl -MJSON::PP -MDigest::SHA -MMIME::Base64 -MFile::Basename -e 1
+  else
+    echo "Warning: skipping provenance without a clean source checkout" >&2
+  fi
+fi
+
 #
 # As a precaution, remove all *.dist files that may be lying around, to reduce
 # the risk of old leftovers getting shipped.
@@ -236,6 +256,20 @@ makezip
 # Set deterministic timestamp
 touch -c -t "$filestamp" "$targz" "$bzip2" "$xz" "$zip"
 
+if test -n "$source_commit"; then
+  echo "Generating $provenance"
+  provenance_tmp=$(mktemp "$provenance.XXXXXX")
+  trap 'rm -f -- "$provenance_tmp"' 0
+  trap 'exit 1' 1 2 15
+  scripts/make-provenance.pl "$source_commit" "$version" "$cmd" \
+    "$timestamp" docs/RELEASE-TOOLS.md.dist \
+    "$targz" "$bzip2" "$xz" "$zip" > "$provenance_tmp"
+  chmod 644 "$provenance_tmp"
+  mv -- "$provenance_tmp" "$provenance"
+  trap - 0 1 2 15
+  touch -c -t "$filestamp" "$provenance"
+fi
+
 echo "------------------"
 echo "maketgz report:"
 echo ""
@@ -243,4 +277,8 @@ ls -l "$targz" "$bzip2" "$xz" "$zip"
 sha256sum "$targz" "$bzip2" "$xz" "$zip"
 
 echo "Run this:"
-echo "gpg -b -a '$targz' && gpg -b -a '$bzip2' && gpg -b -a '$xz' && gpg -b -a '$zip'"
+printf '%s' "gpg -b -a '$targz' && gpg -b -a '$bzip2' && gpg -b -a '$xz' && gpg -b -a '$zip'"
+if test -n "$source_commit"; then
+  printf '%s' " && gpg -b -a '$provenance'"
+fi
+printf '\n'
