@@ -856,6 +856,9 @@ static CURLcode parse_unix(struct Curl_easy *data,
       break;
     if(parser->state.UNIX.main != PL_UNIX_FILETYPE)
       break;
+    if(c == '\n')
+      /* the "total" line just ended, the newline is not a file type */
+      break;
     FALLTHROUGH();
   case PL_UNIX_FILETYPE:
     result = unix_filetype(c, &finfo->filetype);
