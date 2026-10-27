@@ -143,6 +143,58 @@ my %banfunc = (
     "WSASocketW" => 1,
     );
 
+# Leading word of a type expression. Used by cast checker.
+my %typewords = (
+    # C keywords.
+    "bool" => 1,
+    "char" => 1,
+    "const" => 1,
+    "double" => 1,
+    "enum" => 1,
+    "float" => 1,
+    "int" => 1,
+    "long" => 1,
+    "short" => 1,
+    "signed" => 1,
+    "struct" => 1,
+    "union" => 1,
+    "unsigned" => 1,
+    "void" => 1,
+    "volatile" => 1,
+    # Standard headers typedefs.
+    "size_t" => 1,
+    "time_t" => 1,
+    "uint8_t" => 1,
+    "uint16_t" => 1,
+    "uint32_t" => 1,
+    "uint64_t" => 1,
+    "uintptr_t" => 1,
+    # Curl public typedefs.
+    "CURL" => 1,
+    "CURLFORMcode" => 1,
+    "CURLHcode" => 1,
+    "CURLINFO" => 1,
+    "CURLM" => 1,
+    "CURLMSG" => 1,
+    "CURLMcode" => 1,
+    "CURLMoption" => 1,
+    "CURLMsg" => 1,
+    "CURLSH" => 1,
+    "CURLSHcode" => 1,
+    "CURLSHoption" => 1,
+    "CURLU" => 1,
+    "CURLUPart" => 1,
+    "CURLUcode" => 1,
+    "CURLcode" => 1,
+    "CURLformoption" => 1,
+    "CURLoption" => 1,
+    "CURLversion" => 1,
+    "curl_mime" => 1,
+    "curl_mimepart" => 1,
+    "curl_off_t" => 1,
+    "curl_socket_t" => 1,
+    );
+
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
     'PRINTFZ'          => '%zd, %zu or %zx printf mask detected',
@@ -195,6 +247,7 @@ my %warnings = (
     'RETURNPAREN'           => 'return with paren',
     'SEMINOSPACE'           => 'semicolon without following space',
     'SIZEOFNOPAREN'         => 'use of sizeof without parentheses',
+    'SPACEAFTERCAST'        => 'space after type cast',
     'SPACEAFTERPAREN'       => 'space after open parenthesis',
     'SPACEBEFORECLOSE'      => 'space before a close parenthesis',
     'SPACEBEFORECOMMA'      => 'space before a comma',
@@ -976,6 +1029,33 @@ sub scanfile {
         if($l =~ /^( *(case .+|default)) :/) {
             checkwarn("SPACESWITCHCOLON",
                       $line, length($1), $file, $ol, "no space before colon of switch label");
+        }
+
+        # check for space after cast.
+        my @stk;
+        my $ln = $l;            # Replace string literals by "XXX...XXX" first.
+        $ln =~ s/"(?:[^"\\]|\\.)*"/'"' . ('X' x ($+[0] - $-[0] - 2)) . '"'/eg;
+        while($ln =~ /([()])/g) {
+            my $col = $-[0] + 1;
+            if($1 eq '(') {
+                push @stk, $col;
+            }
+            elsif(@stk) {
+                my $beg = pop @stk;
+                next if substr($ln, $col, 1) ne ' ' ||
+                        ($beg > 2 && substr($ln, $beg - 2, 1) =~ /^[\w)]/);
+                my $contents = substr $ln, $beg, $col - $beg - 1;
+
+                # A cast always starts with a word.
+                if ($contents =~ /^(\w+)/) {
+                    # The word must be a known type keyword/identifier or the
+                    #  cast must end with a '*'.
+                    if (exists $typewords{$1} || $contents =~ /\*$/) {
+                        checkwarn("SPACEAFTERCAST", $line, $col, $file, $ol,
+                                  "space after type cast");
+                    }
+                }
+            }
         }
 
         if($prevl !~ /\?\z/ && $l =~ /^ +([A-Za-z_][A-Za-z0-9_]*):$/ && $1 ne 'default') {
