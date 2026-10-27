@@ -307,6 +307,9 @@ static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
     case '8':
     case '9': {
       curl_off_t num;
+      if(flags & FLAGS_WIDTHPARAM)
+        /* a width cannot be both '*' and a number */
+        return PFMT_WIDTH;
       flags |= FLAGS_WIDTH;
       fmt--;
       if(curlx_str_number(&fmt, &num, INT_MAX))

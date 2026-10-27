@@ -1048,6 +1048,18 @@ static int test_weird_arguments(void)
 
   errors += string_check(buf, "");
 
+  /* a '*' width followed by digits is invalid */
+  rc = curl_msnprintf(buf, sizeof(buf), "%*128d", 1, 2);
+  if(rc) {
+    curl_mprintf("curl_mprintf() returned %d and not 0\n", rc);
+    errors++;
+  }
+  rc = curl_msnprintf(buf, sizeof(buf), "%*2147483647d", 1, 2);
+  if(rc) {
+    curl_mprintf("curl_mprintf() returned %d and not 0\n", rc);
+    errors++;
+  }
+
   errors += test_width_precision();
 
   if(errors)
