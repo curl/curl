@@ -26,7 +26,7 @@
 #if defined(HAVE_SOCKETPAIR) && defined(AF_UNIX) && \
   !defined(CURL_DISABLE_WEBSOCKETS)
 
-/* libcurl does not check Sec-WebSocket-Accept, so any value works */
+/* RFC 6455 sample response for the fixed test key installed below. */
 static const char ws_upgrade[] =
   "HTTP/1.1 101 Switching Protocols\r\n"
   "Upgrade: websocket\r\n"
@@ -98,6 +98,7 @@ static int ws_run_one(const char *name, const unsigned char *payload,
   long long hn;
   curl_off_t loop;
   CURLcode result;
+  struct curl_slist *headers = NULL;
   CURL *curl;
   int size = 256 * 1024;
   int rc = 0;
@@ -124,6 +125,13 @@ static int ws_run_one(const char *name, const unsigned char *payload,
     goto out;
   }
   curl_easy_setopt(curl, CURLOPT_URL, "ws://127.0.0.1:1/");
+  headers = curl_slist_append(NULL,
+    "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==");
+  if(!headers) {
+    rc = 1;
+    goto cleanup;
+  }
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_PROXY, "");
   curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L);
   curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, ws_opensocket);
@@ -173,6 +181,7 @@ static int ws_run_one(const char *name, const unsigned char *payload,
                us ? (long long)(loop * (curl_off_t)plen / us) : 0LL);
 cleanup:
   curl_easy_cleanup(curl);
+  curl_slist_free_all(headers);
 out:
   sclose(ctx.sock[0]);
   sclose(ctx.sock[1]);

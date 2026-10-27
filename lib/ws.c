@@ -28,6 +28,7 @@
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 #include "url.h"
+#include "http.h"
 #include "bufq.h"
 #include "curlx/dynbuf.h"
 #include "rand.h"
@@ -1369,6 +1370,168 @@ struct wsfield {
   const char *val;
 };
 
+#define WS_HDR_UPGRADE    0x01
+#define WS_HDR_CONNECTION 0x02
+#define WS_HDR_ACCEPT     0x04
+#define WS_HDR_SUBPROTOCOL 0x08
+#define WS_HDR_REQUIRED   (WS_HDR_UPGRADE | WS_HDR_CONNECTION | WS_HDR_ACCEPT)
+
+/* SHA-1 for the WebSocket opening handshake. A valid Sec-WebSocket-Key is
+ * 24 characters, and the RFC 6455 GUID adds 36, giving exactly 60 bytes.
+ * This fixed-size implementation also works in builds without TLS support. */
+static uint32_t ws_sha1_rotate(uint32_t value, unsigned int shift)
+{
+  return (value << shift) | (value >> (32 - shift));
+}
+
+static void ws_sha1_accept(const char *key, uint8_t digest[20])
+{
+  static const char guid[] = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+  uint8_t input[128] = { 0 };
+  uint32_t h[5] = {
+    0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0
+  };
+  uint32_t w[80];
+  size_t block, i, j;
+
+  DEBUGASSERT(sizeof(guid) == 37);
+  memcpy(input, key, 24);
+  memcpy(input + 24, guid, sizeof(guid) - 1);
+  input[60] = 0x80;
+  input[126] = 0x01;
+  input[127] = 0xe0; /* 60 bytes = 480 bits */
+
+  for(block = 0; block < 2; ++block) {
+    uint32_t a, b, c, d, e;
+    for(i = 0; i < 16; ++i) {
+      size_t pos = block * 64 + i * 4;
+      w[i] = ((uint32_t)input[pos] << 24) |
+             ((uint32_t)input[pos + 1] << 16) |
+             ((uint32_t)input[pos + 2] << 8) |
+             input[pos + 3];
+    }
+    for(i = 16; i < 80; ++i)
+      w[i] = ws_sha1_rotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
+
+    a = h[0]; b = h[1]; c = h[2]; d = h[3]; e = h[4];
+    for(i = 0; i < 80; ++i) {
+      uint32_t f, constant, tmp;
+      if(i < 20) {
+        f = (b & c) | (~b & d);
+        constant = 0x5a827999;
+      }
+      else if(i < 40) {
+        f = b ^ c ^ d;
+        constant = 0x6ed9eba1;
+      }
+      else if(i < 60) {
+        f = (b & c) | (b & d) | (c & d);
+        constant = 0x8f1bbcdc;
+      }
+      else {
+        f = b ^ c ^ d;
+        constant = 0xca62c1d6;
+      }
+      tmp = ws_sha1_rotate(a, 5) + f + e + constant + w[i];
+      e = d; d = c; c = ws_sha1_rotate(b, 30); b = a; a = tmp;
+    }
+    h[0] += a; h[1] += b; h[2] += c; h[3] += d; h[4] += e;
+  }
+
+  for(i = 0; i < 5; ++i) {
+    for(j = 0; j < 4; ++j)
+      digest[i * 4 + j] = (uint8_t)(h[i] >> (24 - j * 8));
+  }
+}
+
+static CURLcode ws_handshake_error(struct Curl_easy *data, const char *reason)
+{
+  failf(data, "[WS] invalid opening handshake: %s", reason);
+  return CURLE_WEIRD_SERVER_REPLY;
+}
+
+/* Unlike Upgrade and Connection, subprotocol names are case-sensitive. */
+static bool ws_subprotocol_requested(const char *requested, const char *name)
+{
+  const char *p = requested;
+  size_t nlen = strlen(name);
+
+  while(*p) {
+    const char *start = p, *end;
+    while(*p && *p != ',')
+      ++p;
+    end = p;
+    while(start < end && ISBLANK(*start))
+      ++start;
+    while(end > start && ISBLANK(end[-1]))
+      --end;
+    if((size_t)(end - start) == nlen && !memcmp(start, name, nlen))
+      return TRUE;
+    if(*p == ',')
+      ++p;
+  }
+  return FALSE;
+}
+
+/* Called for the header lines of the 101 response, before switching the
+ * HTTP response parser into WebSocket frame mode. */
+CURLcode Curl_ws_header(struct Curl_easy *data,
+                        const char *header, size_t headerlen)
+{
+  struct SingleRequest *k = &data->req;
+  (void)headerlen;
+
+  if(curl_strnequal(header, "Upgrade:", 8)) {
+    if(!Curl_compareheader(header, STRCONST("Upgrade:"),
+                           STRCONST("websocket")))
+      return ws_handshake_error(data, "wrong Upgrade protocol");
+    k->ws_headers |= WS_HDR_UPGRADE;
+  }
+  else if(curl_strnequal(header, "Connection:", 11)) {
+    if(!Curl_compareheader(header, STRCONST("Connection:"),
+                           STRCONST("Upgrade")))
+      return ws_handshake_error(data, "missing Connection upgrade token");
+    k->ws_headers |= WS_HDR_CONNECTION;
+  }
+  else if(curl_strnequal(header, "Sec-WebSocket-Accept:", 21)) {
+    char *value = Curl_copy_header_value(header);
+    CURLcode result = CURLE_OK;
+    if(!value)
+      return CURLE_OUT_OF_MEMORY;
+    if(k->ws_headers & WS_HDR_ACCEPT)
+      result = ws_handshake_error(data, "duplicate Sec-WebSocket-Accept");
+    else if(strcmp(value, k->ws_accept))
+      result = ws_handshake_error(data, "wrong Sec-WebSocket-Accept");
+    else
+      k->ws_headers |= WS_HDR_ACCEPT;
+    curlx_free(value);
+    return result;
+  }
+  else if(curl_strnequal(header, "Sec-WebSocket-Extensions:", 25)) {
+    /* libcurl does not offer any WebSocket extensions to the server. */
+    return ws_handshake_error(data, "unsolicited WebSocket extension");
+  }
+  else if(curl_strnequal(header, "Sec-WebSocket-Protocol:", 23)) {
+    const char *requested = Curl_checkheaders(data,
+                                              STRCONST("Sec-WebSocket-Protocol"));
+    char *value = Curl_copy_header_value(header);
+    char *request_value = requested ? Curl_copy_header_value(requested) : NULL;
+    CURLcode result = CURLE_OK;
+    if(!value || (requested && !request_value))
+      result = CURLE_OUT_OF_MEMORY;
+    else if((k->ws_headers & WS_HDR_SUBPROTOCOL) ||
+            !request_value || !*value || strchr(value, ',') ||
+            !ws_subprotocol_requested(request_value, value))
+      result = ws_handshake_error(data, "unrequested WebSocket subprotocol");
+    else
+      k->ws_headers |= WS_HDR_SUBPROTOCOL;
+    curlx_free(value);
+    curlx_free(request_value);
+    return result;
+  }
+  return CURLE_OK;
+}
+
 CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
 {
   unsigned int i;
@@ -1377,6 +1540,10 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   char *randstr;
   size_t randlen;
   char keyval[40];
+  char *accept = NULL;
+  size_t acceptlen;
+  uint8_t digest[20];
+  const char *custom_key;
   struct SingleRequest *k = &data->req;
   struct wsfield heads[] = {
     {
@@ -1415,6 +1582,44 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   }
   curlx_strcopy(keyval, sizeof(keyval), randstr, randlen);
   curlx_free(randstr);
+  custom_key = Curl_checkheaders(data, STRCONST("Sec-WebSocket-Key"));
+  if(custom_key) {
+    char *provided = Curl_copy_header_value(custom_key);
+    uint8_t *decoded = NULL;
+    size_t decodedlen = 0;
+    CURLcode decresult;
+    if(!provided)
+      return CURLE_OUT_OF_MEMORY;
+    if(strlen(provided) != 24) {
+      curlx_free(provided);
+      failf(data, "[WS] Sec-WebSocket-Key must encode a 16-byte nonce");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    decresult = curlx_base64_decode(provided, &decoded, &decodedlen);
+    curlx_free(decoded);
+    if(decresult || decodedlen != 16) {
+      curlx_free(provided);
+      failf(data, "[WS] Sec-WebSocket-Key must contain a 16-byte nonce");
+      return decresult == CURLE_OUT_OF_MEMORY ? decresult :
+             CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    memcpy(keyval, provided, 25);
+    curlx_free(provided);
+  }
+  if(strlen(keyval) != 24)
+    return CURLE_FAILED_INIT;
+  ws_sha1_accept(keyval, digest);
+  result = curlx_base64_encode(digest, sizeof(digest), &accept, &acceptlen);
+  if(result)
+    return result;
+  DEBUGASSERT(acceptlen == 28);
+  if(acceptlen != 28) {
+    curlx_free(accept);
+    return CURLE_FAILED_INIT;
+  }
+  memcpy(k->ws_accept, accept, acceptlen + 1);
+  k->ws_headers = 0;
+  curlx_free(accept);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {
       result = curlx_dyn_addf(req, "%s: %s\r\n", heads[i].name, heads[i].val);
@@ -1450,6 +1655,8 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(data->conn);
+  if((k->ws_headers & WS_HDR_REQUIRED) != WS_HDR_REQUIRED)
+    return ws_handshake_error(data, "missing required response headers");
   ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     size_t chunk_size = WS_CHUNK_SIZE;
@@ -1483,24 +1690,6 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
     ws_dec_reset(&ws->dec);
     ws_enc_reset(&ws->enc);
   }
-  /* Verify the Sec-WebSocket-Accept response.
-
-     The sent value is the base64 encoded version of a SHA-1 hash done on the
-     |Sec-WebSocket-Key| header field concatenated with
-     the string "258EAFA5-E914-47DA-95CA-C5AB0DC85B11". */
-
-  /* If the response includes a |Sec-WebSocket-Extensions| header field and
-     this header field indicates the use of an extension that was not present
-     in the client's handshake (the server has indicated an extension not
-     requested by the client), the client MUST Fail the WebSocket Connection.
-   */
-
-  /* If the response includes a |Sec-WebSocket-Protocol| header field
-     and this header field indicates the use of a subprotocol that was
-     not present in the client's handshake (the server has indicated a
-     subprotocol not requested by the client), the client MUST Fail
-     the WebSocket Connection. */
-
   infof(data, "[WS] Received 101, switch to WebSocket");
 
   /* Install our client writer that decodes WS frames payload */

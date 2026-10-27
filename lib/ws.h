@@ -33,6 +33,8 @@ extern const struct Curl_protocol Curl_protocol_ws;
 #define CURL_META_PROTO_WS_CONN   "meta:proto:ws:conn"
 
 CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
+CURLcode Curl_ws_header(struct Curl_easy *data,
+                        const char *header, size_t headerlen);
 CURLcode Curl_ws_accept(struct Curl_easy *data,
                         const char *mem, size_t nread);
 

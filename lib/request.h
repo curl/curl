@@ -98,6 +98,10 @@ struct SingleRequest {
   uint8_t httpversion_sent;     /* Version in request (09, 10, 11, etc.) */
   uint8_t httpversion;          /* Version in response (09, 10, 11, etc.) */
   uint8_t upgr101;              /* 101 upgrade state */
+#ifndef CURL_DISABLE_WEBSOCKETS
+  char ws_accept[29];           /* expected Sec-WebSocket-Accept (base64) */
+  unsigned char ws_headers;     /* validated WebSocket response headers */
+#endif
   uint8_t io_flags;             /* REQ_IO_RECV | REQ_IO_SEND */
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol

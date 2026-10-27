@@ -299,3 +299,96 @@ class TestWebsockets:
         url = f'ws://127.0.0.1:{ws_dl.port}/10mb'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True)
         r.check_exit_code(0)
+
+    @pytest.mark.parametrize('case,accepted', [
+        ('valid', True),
+        ('connection-token-list', True),
+        ('custom-key', True),
+        ('requested-subprotocol', True),
+        ('missing-accept', False),
+        ('wrong-accept', False),
+        ('duplicate-accept', False),
+        ('missing-upgrade', False),
+        ('wrong-upgrade', False),
+        ('missing-connection', False),
+        ('wrong-connection', False),
+        ('unrequested-extension', False),
+        ('unrequested-subprotocol', False),
+        ('wrong-requested-subprotocol', False),
+    ])
+    def test_20_16_handshake_validation(self, env: Env, case, accepted):
+        ready = threading.Event()
+        status = {}
+
+        def server():
+            try:
+                with socket.socket() as listener:
+                    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    listener.bind(('127.0.0.1', 0))
+                    listener.listen(1)
+                    status['port'] = listener.getsockname()[1]
+                    ready.set()
+                    with listener.accept()[0] as conn:
+                        conn.settimeout(Env.SERVER_TIMEOUT)
+                        request = b''
+                        while b'\r\n\r\n' not in request:
+                            chunk = conn.recv(4096)
+                            if not chunk:
+                                return
+                            request += chunk
+                        key = re.search(rb'(?im)^Sec-WebSocket-Key:\s*(\S+)', request).group(1)
+                        accept = base64.b64encode(hashlib.sha1(
+                            key + b'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
+                        ).digest()).decode()
+                        headers = {
+                            'Upgrade': 'websocket',
+                            'Connection': 'Upgrade',
+                            'Sec-WebSocket-Accept': accept,
+                        }
+                        if case == 'connection-token-list':
+                            headers['Connection'] = 'keep-alive, Upgrade'
+                        elif case == 'missing-accept':
+                            del headers['Sec-WebSocket-Accept']
+                        elif case == 'wrong-accept':
+                            headers['Sec-WebSocket-Accept'] = 'incorrect'
+                        elif case == 'missing-upgrade':
+                            del headers['Upgrade']
+                        elif case == 'wrong-upgrade':
+                            headers['Upgrade'] = 'h2c'
+                        elif case == 'missing-connection':
+                            del headers['Connection']
+                        elif case == 'wrong-connection':
+                            headers['Connection'] = 'keep-alive'
+                        elif case == 'unrequested-extension':
+                            headers['Sec-WebSocket-Extensions'] = 'permessage-deflate'
+                        elif case in ('unrequested-subprotocol',
+                                      'wrong-requested-subprotocol'):
+                            headers['Sec-WebSocket-Protocol'] = 'admin'
+                        elif case == 'requested-subprotocol':
+                            headers['Sec-WebSocket-Protocol'] = 'chat'
+                        lines = ['HTTP/1.1 101 Switching Protocols'] + [
+                            f'{name}: {value}' for name, value in headers.items()
+                        ]
+                        if case == 'duplicate-accept':
+                            lines.append(f'Sec-WebSocket-Accept: {accept}')
+                        response = ('\r\n'.join(lines) + '\r\n\r\n').encode()
+                        conn.sendall(response + b'\x88\x00')
+                        time.sleep(0.1)
+            except OSError as e:
+                status['error'] = e
+
+        worker = threading.Thread(target=server, daemon=True)
+        worker.start()
+        assert ready.wait(Env.SERVER_TIMEOUT)
+        curl = CurlClient(env=env)
+        extra_args = ['--max-time', '2']
+        if case == 'custom-key':
+            extra_args.extend(['-H', 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ=='])
+        elif case in ('requested-subprotocol', 'wrong-requested-subprotocol'):
+            extra_args.extend(['-H', 'Sec-WebSocket-Protocol: chat, superchat'])
+        url = f'ws://127.0.0.1:{status["port"]}/'
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1',
+                               extra_args=extra_args)
+        worker.join(Env.SERVER_TIMEOUT)
+        assert 'error' not in status, f'WebSocket test server failed: {status}'
+        r.check_exit_code(0 if accepted else 8)

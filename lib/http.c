@@ -3685,6 +3685,12 @@ static CURLcode http_header(struct Curl_easy *data,
     break;
   }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+  if(!result && (data->req.upgr101 == UPGR101_WS) &&
+     (data->req.httpcode == 101))
+    result = Curl_ws_header(data, hd, hdlen);
+#endif
+
   if(!result) {
     struct connectdata *conn = data->conn;
     if(conn->scheme->protocol & CURLPROTO_RTSP)
@@ -3898,8 +3904,8 @@ static CURLcode http_on_101_upgrade(struct Curl_easy *data,
   conn->bits.upgrade_in_progress = FALSE;
   *conn_changed = TRUE;
 
-  /* To be fully compliant, we would check the "Upgrade:" response header to
-   * mention the protocol we requested. */
+  /* WebSocket upgrade response headers are validated as they are parsed.
+   * HTTP/2 upgrade response validation is not handled here yet. */
 #ifdef USE_NGHTTP2
   if(upgr101_requested == UPGR101_H2) {
     /* Switch to HTTP/2, where we will get more responses. blen bytes in buf
