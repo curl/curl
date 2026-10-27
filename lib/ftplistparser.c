@@ -25,6 +25,8 @@
 
 #ifndef CURL_DISABLE_FTP
 
+#include "curl_trc.h"
+
 /**
  * Now implemented:
  *
@@ -302,6 +304,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
   struct ftp_parselist_data *parser = ftpwc->parser;
   bool add = TRUE;
   struct curl_fileinfo *finfo = &infop->info;
+  CURLcode result = CURLE_OK;
 
   /* set the finfo pointers */
   char *str = curlx_dyn_ptr(&infop->buf);
@@ -342,6 +345,13 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
     CURL_CBAPI_END(&guard);
   }
 
+  if(add && (Curl_llist_count(llist) >= MAX_FTP_DIR_ENTRIES)) {
+    infof(data, "Reached maximum number of dir entries (%d)",
+          MAX_FTP_DIR_ENTRIES);
+    add = FALSE;
+    result = CURLE_FTP_BAD_FILE_LIST;
+  }
+
   if(add) {
     Curl_llist_append(llist, finfo, &infop->list);
   }
@@ -350,7 +360,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
   }
 
   ftpwc->parser->file_data = NULL;
-  return CURLE_OK;
+  return result;
 }
 
 #define MAX_FTPLIST_BUFFER 10000 /* arbitrarily set */
