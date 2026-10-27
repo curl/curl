@@ -58,6 +58,8 @@ typedef enum {
 
 typedef void (*wildcard_dtor)(void *ptr);
 
+#define MAX_FTP_DIR_ENTRIES 100000
+
 /* struct keeping information about wildcard download process */
 struct WildcardData {
   char *path; /* path to the directory, where we trying wildcard-match */

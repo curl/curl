@@ -34,8 +34,11 @@ option, using an **fnmatch**-like pattern (Shell Pattern Matching) in the last
 part of URL (filename).
 
 By default, libcurl uses its internal wildcard matching implementation. You
-can provide your own matching function by the
-CURLOPT_FNMATCH_FUNCTION(3) option.
+can provide your own matching function with the CURLOPT_FNMATCH_FUNCTION(3)
+option.
+
+Starting in curl 8.24.0, curl limits the maximum number of matching directory
+entries in a single directory to 100,000.
 
 A brief introduction of its syntax follows:
 
