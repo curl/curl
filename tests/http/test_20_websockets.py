@@ -423,6 +423,16 @@ class TestWebsockets:
                      id='raw-invalid-quoted-value'),
         pytest.param(['-'], 'permessage-deflate', False,
                      id='raw-without-offer'),
+        pytest.param([
+            'Sec-WebSocket-Extensions: ' +
+            ','.join(f'x{i}' for i in range(1000)) + ',x-accepted'],
+            ','.join(['x-accepted'] * 300), False,
+            id='raw-excessive-extension-scan'),
+        pytest.param([
+            'Sec-WebSocket-Extensions: ' +
+            ','.join(f'x{i}' for i in range(1000)) + ',x-accepted'],
+            [','.join(['x-accepted'] * 150)] * 2, False,
+            id='raw-excessive-extension-scan-split'),
     ])
     def test_20_17_raw_handshake_extensions(self, env: Env, offers,
                                              selection, accepted):
@@ -454,11 +464,14 @@ class TestWebsockets:
                         accept = base64.b64encode(hashlib.sha1(
                             key + b'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
                         ).digest()).decode()
+                        extensions = ([selection] if isinstance(selection, str)
+                                      else selection)
                         response = ('HTTP/1.1 101 Switching Protocols\r\n'
                                     'Upgrade: websocket\r\n'
                                     'Connection: Upgrade\r\n'
-                                    f'Sec-WebSocket-Accept: {accept}\r\n'
-                                    f'Sec-WebSocket-Extensions: {selection}\r\n'
+                                    f'Sec-WebSocket-Accept: {accept}\r\n' +
+                                    ''.join(f'Sec-WebSocket-Extensions: {s}\r\n'
+                                            for s in extensions) +
                                     '\r\n').encode()
                         conn.sendall(response)
                         time.sleep(0.1)

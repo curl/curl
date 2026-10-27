@@ -58,7 +58,8 @@ CURLOPT_HTTPHEADER(3). libcurl only accepts extension names explicitly offered
 by the application and checks the response header syntax; it does not validate
 extension-specific negotiation parameters. The application must validate those
 parameters and handle any extension-specific framing itself. In normal
-(non-raw) mode, libcurl rejects responses that select extensions.
+(non-raw) mode, libcurl rejects responses that select extensions. Excessive
+extension negotiation is rejected to bound the time spent validating offers.
 
 # MESSAGES
 

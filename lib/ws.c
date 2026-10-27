@@ -1376,6 +1376,10 @@ struct wsfield {
 #define WS_HDR_SUBPROTOCOL 0x08
 #define WS_HDR_REQUIRED   (WS_HDR_UPGRADE | WS_HDR_CONNECTION | WS_HDR_ACCEPT)
 
+/* Limit cumulative scanning of client extension offers while processing the
+ * server handshake. Repeated selections must not cause quadratic CPU use. */
+#define WS_EXT_SCAN_MAX (1024 * 1024)
+
 /* SHA-1 for the WebSocket opening handshake. A valid Sec-WebSocket-Key is
  * 24 characters, and the RFC 6455 GUID adds 36, giving exactly 60 bytes.
  * This fixed-size implementation also works in builds without TLS support. */
@@ -1561,9 +1565,23 @@ static bool ws_extension_offered(struct Curl_easy *data,
                                  const char *wanted, size_t wantedlen)
 {
   struct curl_slist *head;
+  struct SingleRequest *k = &data->req;
   for(head = data->set.headers; head; head = head->next) {
+    /* Comparing against unrelated custom headers also costs CPU. */
+    if(k->ws_ext_scan_used > WS_EXT_SCAN_MAX - 25)
+      return FALSE;
+    k->ws_ext_scan_used += 25;
     if(curl_strnequal(head->data, "Sec-WebSocket-Extensions:", 25)) {
       const char *p = head->data + 25;
+      size_t scanlen = strlen(p);
+
+      /* Charge for the complete header even when the match is near its
+       * start. This also caps the work across split response headers. */
+      if(scanlen > WS_EXT_SCAN_MAX ||
+         k->ws_ext_scan_used > WS_EXT_SCAN_MAX - scanlen)
+        return FALSE;
+      k->ws_ext_scan_used += scanlen;
+
       while(p) {
         const char *name;
         size_t namelen;
@@ -1744,6 +1762,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   }
   memcpy(k->ws_accept, accept, acceptlen + 1);
   k->ws_headers = 0;
+  k->ws_ext_scan_used = 0;
   curlx_free(accept);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {
