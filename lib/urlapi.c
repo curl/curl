@@ -871,6 +871,8 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
   }
 
   while(clen && !result) { /* until end of path content */
+    const char *next;
+    size_t seglen;
     if(ISSLASH(*input)) {
       const char *p = &input[1];
       size_t blen = clen - 1;
@@ -919,9 +921,11 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
        subsequent characters up to, but not including, the next "/" character
        or the end of the input buffer. */
 
-    result = curlx_dyn_addn(&out, input, 1);
-    input++;
-    clen--;
+    next = memchr(input + 1, '/', clen - 1);
+    seglen = next ? (size_t)(next - input) : clen;
+    result = curlx_dyn_addn(&out, input, seglen);
+    input += seglen;
+    clen -= seglen;
   }
 end:
   if(!result) {
