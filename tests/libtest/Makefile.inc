@@ -66,6 +66,7 @@ TESTS_C = \
   cli_ws_data.c \
   cli_ws_pause.c \
   cli_ws_pingpong.c \
+  cli_ws_raw_extensions.c \
   cli_ws_write_err.c \
   \
   lib464.c \

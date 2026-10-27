@@ -392,3 +392,84 @@ class TestWebsockets:
         worker.join(Env.SERVER_TIMEOUT)
         assert 'error' not in status, f'WebSocket test server failed: {status}'
         r.check_exit_code(0 if accepted else 8)
+
+    @pytest.mark.parametrize('offers,selection,accepted', [
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
+                     'permessage-deflate', True, id='raw-requested'),
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate; '
+                      'client_max_window_bits'],
+                     'permessage-deflate; client_max_window_bits=12', True,
+                     id='raw-negotiated-parameter'),
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
+                     'PERMESSAGE-DEFLATE', True, id='raw-case-insensitive'),
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
+                     'permessage-deflate; client_max_window_bits="12"', True,
+                     id='raw-quoted-parameter'),
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate, x-test'],
+                     'permessage-deflate, x-test; mode=fast', True,
+                     id='raw-multiple-extensions'),
+        pytest.param(['Sec-WebSocket-Extensions: x-test',
+                      'Sec-WebSocket-Extensions: permessage-deflate'],
+                     'permessage-deflate', True, id='raw-split-request'),
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
+                     'x-unknown', False, id='raw-unrequested'),
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
+                     'permessage-deflate-extra', False,
+                     id='raw-name-prefix'),
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
+                     'permessage-deflate,', False, id='raw-trailing-comma'),
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
+                     'permessage-deflate; mode="two words"', False,
+                     id='raw-invalid-quoted-value'),
+        pytest.param(['-'], 'permessage-deflate', False,
+                     id='raw-without-offer'),
+    ])
+    def test_20_17_raw_handshake_extensions(self, env: Env, offers,
+                                             selection, accepted):
+        client = LocalClient(env=env, name='cli_ws_raw_extensions')
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+
+        ready = threading.Event()
+        status = {}
+
+        def server():
+            try:
+                with socket.socket() as listener:
+                    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    listener.bind(('127.0.0.1', 0))
+                    listener.listen(1)
+                    status['port'] = listener.getsockname()[1]
+                    ready.set()
+                    with listener.accept()[0] as conn:
+                        conn.settimeout(Env.SERVER_TIMEOUT)
+                        request = b''
+                        while b'\r\n\r\n' not in request:
+                            chunk = conn.recv(4096)
+                            if not chunk:
+                                return
+                            request += chunk
+                        key = re.search(rb'(?im)^Sec-WebSocket-Key:\s*(\S+)',
+                                        request).group(1)
+                        accept = base64.b64encode(hashlib.sha1(
+                            key + b'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
+                        ).digest()).decode()
+                        response = ('HTTP/1.1 101 Switching Protocols\r\n'
+                                    'Upgrade: websocket\r\n'
+                                    'Connection: Upgrade\r\n'
+                                    f'Sec-WebSocket-Accept: {accept}\r\n'
+                                    f'Sec-WebSocket-Extensions: {selection}\r\n'
+                                    '\r\n').encode()
+                        conn.sendall(response)
+                        time.sleep(0.1)
+            except OSError as e:
+                status['error'] = e
+
+        worker = threading.Thread(target=server, daemon=True)
+        worker.start()
+        assert ready.wait(Env.SERVER_TIMEOUT)
+        url = f'ws://127.0.0.1:{status["port"]}/'
+        r = client.run(args=[url, *offers])
+        worker.join(Env.SERVER_TIMEOUT)
+        assert 'error' not in status, f'WebSocket test server failed: {status}'
+        r.check_exit_code(0 if accepted else 8)

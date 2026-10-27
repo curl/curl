@@ -1473,6 +1473,110 @@ static bool ws_subprotocol_requested(const char *requested, const char *name)
   return FALSE;
 }
 
+/* Parse one extension and its parameters according to RFC 6455 section 9.1.
+ * Return the extension name and advance to the next entry, or NULL at end.
+ * In raw mode the application owns extension-specific parameter negotiation. */
+static bool ws_extension_token_char(unsigned char c)
+{
+  return ISALNUM(c) || (c && strchr("!#$%&'*+-.^_`|~", c));
+}
+
+static bool ws_extension_next(const char **value,
+                              const char **name, size_t *namelen)
+{
+  const char *p = *value;
+  const char *start;
+
+  if(!p)
+    return FALSE;
+  curlx_str_passblanks(&p);
+  start = p;
+  while(ws_extension_token_char((unsigned char)*p))
+    ++p;
+  if(p == start)
+    return FALSE;
+  *name = start;
+  *namelen = (size_t)(p - start);
+  curlx_str_passblanks(&p);
+
+  while(*p == ';') {
+    ++p;
+    curlx_str_passblanks(&p);
+    start = p;
+    while(ws_extension_token_char((unsigned char)*p))
+      ++p;
+    if(p == start)
+      return FALSE;
+    curlx_str_passblanks(&p);
+    if(*p == '=') {
+      ++p;
+      curlx_str_passblanks(&p);
+      if(*p == '"') {
+        bool nonempty = FALSE;
+        ++p;
+        while(*p && *p != '"') {
+          if(*p == '\\') {
+            ++p;
+            if(!*p)
+              return FALSE;
+          }
+          /* After unescaping, a quoted parameter must be a token. */
+          if(!ws_extension_token_char((unsigned char)*p))
+            return FALSE;
+          nonempty = TRUE;
+          ++p;
+        }
+        if(!nonempty || *p != '"')
+          return FALSE;
+        ++p;
+      }
+      else {
+        start = p;
+        while(ws_extension_token_char((unsigned char)*p))
+          ++p;
+        if(p == start)
+          return FALSE;
+      }
+      curlx_str_passblanks(&p);
+    }
+  }
+
+  if(*p == ',') {
+    ++p;
+    curlx_str_passblanks(&p);
+    if(!*p)
+      return FALSE;
+    *value = p;
+  }
+  else if(!*p)
+    *value = NULL;
+  else
+    return FALSE;
+  return TRUE;
+}
+
+/* Only accept an extension offered by the caller. Search every custom
+ * header: applications may split their offers across header lines. */
+static bool ws_extension_offered(struct Curl_easy *data,
+                                 const char *wanted, size_t wantedlen)
+{
+  struct curl_slist *head;
+  for(head = data->set.headers; head; head = head->next) {
+    if(curl_strnequal(head->data, "Sec-WebSocket-Extensions:", 25)) {
+      const char *p = head->data + 25;
+      while(p) {
+        const char *name;
+        size_t namelen;
+        if(!ws_extension_next(&p, &name, &namelen))
+          break;
+        if(namelen == wantedlen && curl_strnequal(name, wanted, namelen))
+          return TRUE;
+      }
+    }
+  }
+  return FALSE;
+}
+
 /* Called for the header lines of the 101 response, before switching the
  * HTTP response parser into WebSocket frame mode. */
 CURLcode Curl_ws_header(struct Curl_easy *data,
@@ -1508,8 +1612,29 @@ CURLcode Curl_ws_header(struct Curl_easy *data,
     return result;
   }
   else if(curl_strnequal(header, "Sec-WebSocket-Extensions:", 25)) {
-    /* libcurl does not offer any WebSocket extensions to the server. */
-    return ws_handshake_error(data, "unsolicited WebSocket extension");
+    char *value = Curl_copy_header_value(header);
+    const char *p = value;
+    CURLcode result = CURLE_OK;
+    if(!value)
+      return CURLE_OUT_OF_MEMORY;
+    /* Framed mode cannot interpret extension-specific WebSocket frames.
+     * Raw mode leaves frame processing and extension parameters to the app. */
+    if(!data->set.ws_raw_mode)
+      result = ws_handshake_error(data, "unsupported WebSocket extension");
+    else {
+      while(p) {
+        const char *name;
+        size_t namelen;
+        if(!ws_extension_next(&p, &name, &namelen) ||
+           !ws_extension_offered(data, name, namelen)) {
+          result = ws_handshake_error(data,
+                                      "unrequested or malformed extension");
+          break;
+        }
+      }
+    }
+    curlx_free(value);
+    return result;
   }
   else if(curl_strnequal(header, "Sec-WebSocket-Protocol:", 23)) {
     const char *requested = Curl_checkheaders(data,

@@ -45,6 +45,13 @@ callback.
 In raw mode, libcurl does not handle pings or any other frame for the
 application.
 
+An application can offer WebSocket extensions in raw mode using a custom
+Sec-WebSocket-Extensions request header with CURLOPT_HTTPHEADER(3). libcurl
+verifies that the server selects only extension names that were offered, but
+the application must validate the negotiated extension parameters and handle
+the resulting frames itself. In non-raw mode, libcurl does not support
+extensions.
+
 ## CURLWS_NOAUTOPONG (2)
 
 Disable the automatic reply to PING messages. This means users must

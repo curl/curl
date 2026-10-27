@@ -52,8 +52,13 @@ the server. The communication can happen in both directions at the same time.
 The WebSocket protocol allows the client to request and negotiate *extensions*
 can add additional features and restrictions to the protocol.
 
-libcurl does not support the use of extensions and always sets up a connection
-without them.
+libcurl does not implement WebSocket extensions and does not request any by
+default. In CURLWS_RAW_MODE, an application can request extensions with
+CURLOPT_HTTPHEADER(3). libcurl only accepts extension names explicitly offered
+by the application and checks the response header syntax; it does not validate
+extension-specific negotiation parameters. The application must validate those
+parameters and handle any extension-specific framing itself. In normal
+(non-raw) mode, libcurl rejects responses that select extensions.
 
 # MESSAGES
 
