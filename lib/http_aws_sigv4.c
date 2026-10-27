@@ -398,7 +398,7 @@ static CURLcode sort_headers(struct curl_slist *head)
   for(l = head; l; l = l->next)
     ++n;
   if(n > 1) {
-    if(n < SORT_HEADERS_STACK_MAX)
+    if(n <= SORT_HEADERS_STACK_MAX)
       arr = stackbuf;
     else {
       arr = curlx_malloc(n * sizeof(*arr));
