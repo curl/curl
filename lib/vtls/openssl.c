@@ -2969,7 +2969,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
         char cert_name[256];
         if(CertGetNameStringA(pContext, CERT_NAME_ATTR_TYPE, 0,
                               CURL_UNCONST(szOID_COMMON_NAME),
-                              cert_name, sizeof(cert_name))) {
+                              cert_name, sizeof(cert_name)) > 1) {
           const char * const *b;
           for(b = blacklist; *b && strcmp(cert_name, *b); ++b)
             ;
