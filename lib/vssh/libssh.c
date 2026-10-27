@@ -547,20 +547,19 @@ static int myssh_in_SFTP_READDIR_LINK(struct Curl_easy *data,
   if(!sshc->readdir_link_attrs->name) {
     sshc->readdir_tmp = sftp_readlink(sshc->sftp_session,
                                       sshc->readdir_linkPath);
-    if(!sshc->readdir_tmp)
-      sshc->readdir_len = 0;
-    else
-      sshc->readdir_len = strlen(sshc->readdir_tmp);
-    sshc->readdir_longentry = NULL;
-    sshc->readdir_filename = sshc->readdir_tmp;
-  }
-  else {
-    if(!sshc->readdir_link_attrs->name) {
+    if(!sshc->readdir_tmp) {
+      /* the lstat attributes had no name and readlink gave nothing either,
+         same version mismatch as in READDIR, do not format a NULL target */
       failf(data, "SFTP readdir: link target without a name");
       myssh_to(data, sshc, SSH_SFTP_CLOSE);
       sshc->actualcode = CURLE_SSH;
       return SSH_ERROR;
     }
+    sshc->readdir_len = strlen(sshc->readdir_tmp);
+    sshc->readdir_longentry = NULL;
+    sshc->readdir_filename = sshc->readdir_tmp;
+  }
+  else {
     sshc->readdir_len = strlen(sshc->readdir_link_attrs->name);
     sshc->readdir_filename = sshc->readdir_link_attrs->name;
     sshc->readdir_longentry = sshc->readdir_link_attrs->longname ?
