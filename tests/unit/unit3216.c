@@ -41,7 +41,6 @@ static void rlimit_init(struct Curl_rlimit *r,
   r->blocked = FALSE;
 }
 
-
 static CURLcode test_unit3216(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
