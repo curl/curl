@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 non-existing host
+may-retry-on-valgrind
 </keywords>
 </info>
 
@@ -13,7 +14,6 @@ non-existing host
 <client>
 <features>
 http
-may-retry-on-valgrind
 </features>
 <name>
 attempt connect to non-existing hostname
