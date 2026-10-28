@@ -300,11 +300,6 @@ static struct cpool *cpool_get_instance(struct Curl_easy *data)
   return NULL;
 }
 
-struct cpool *Curl_cpool_get_instance(struct Curl_easy *data)
-{
-  return cpool_get_instance(data);
-}
-
 void Curl_cpool_xfer_init(struct Curl_easy *data)
 {
   struct cpool *cpool = cpool_get_instance(data);

@@ -169,6 +169,34 @@ static bool hash_key_is_valid(uint8_t type, size_t key_len)
 }
 
 #if 0 /* useful function for debugging hashes and their contents */
+static struct Curl_hash_element *hash_next_element(
+  struct Curl_hash_iterator *iter)
+{
+  struct Curl_hash *h;
+  DEBUGASSERT(iter->init == ITERINIT);
+  h = iter->hash;
+  if(!h->table)
+    return NULL; /* empty hash, nothing to return */
+
+  /* Get the next element in the current list, if any */
+  if(iter->current)
+    iter->current = iter->current->next;
+
+  /* If we have reached the end of the list, find the next one */
+  if(!iter->current) {
+    size_t i;
+    for(i = iter->slot_index; i < h->slots; i++) {
+      if(h->table[i]) {
+        iter->current = h->table[i];
+        iter->slot_index = i + 1;
+        break;
+      }
+    }
+  }
+
+  return iter->current;
+}
+
 void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 {
   struct Curl_hash_iterator iter;
@@ -182,7 +210,7 @@ void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 
   Curl_hash_start_iterate(h, &iter);
 
-  he = Curl_hash_next_element(&iter);
+  he = hash_next_element(&iter);
   while(he) {
     if(iter.slot_index != last_index) {
       curl_mfprintf(stderr, "index %d:", (int)iter.slot_index);
@@ -199,7 +227,7 @@ void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
                     (int)he->key_len, hash_elem_key(he),
                     (void *)he, (void *)he->ptr);
 
-    he = Curl_hash_next_element(&iter);
+    he = hash_next_element(&iter);
   }
   curl_mfprintf(stderr, "\n");
 }
@@ -479,32 +507,4 @@ void Curl_hash_start_iterate(struct Curl_hash *hash,
 #ifdef DEBUGBUILD
   iter->init = ITERINIT;
 #endif
-}
-
-struct Curl_hash_element *Curl_hash_next_element(
-  struct Curl_hash_iterator *iter)
-{
-  struct Curl_hash *h;
-  DEBUGASSERT(iter->init == ITERINIT);
-  h = iter->hash;
-  if(!h->table)
-    return NULL; /* empty hash, nothing to return */
-
-  /* Get the next element in the current list, if any */
-  if(iter->current)
-    iter->current = iter->current->next;
-
-  /* If we have reached the end of the list, find the next one */
-  if(!iter->current) {
-    size_t i;
-    for(i = iter->slot_index; i < h->slots; i++) {
-      if(h->table[i]) {
-        iter->current = h->table[i];
-        iter->slot_index = i + 1;
-        break;
-      }
-    }
-  }
-
-  return iter->current;
 }

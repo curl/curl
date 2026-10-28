@@ -87,8 +87,6 @@ void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
                                     int (*comp)(void *, void *));
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter);
-struct Curl_hash_element *Curl_hash_next_element(
-  struct Curl_hash_iterator *iter);
 
 void Curl_hash_print(struct Curl_hash *h, void (*func)(void *));
 

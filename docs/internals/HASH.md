@@ -130,18 +130,3 @@ void Curl_hash_start_iterate(struct Curl_hash *hash,
 
 This function initializes a `struct Curl_hash_iterator` that `iter` points to.
 It can then be used to iterate over all the entries in the hash.
-
-## `Curl_hash_next_element`
-
-~~~c
-struct Curl_hash_element *
-Curl_hash_next_element(struct Curl_hash_iterator *iter);
-~~~
-
-Given the iterator `iter`, this function returns a pointer to the next hash
-entry if there is one, or NULL if there is no more entries.
-
-Called repeatedly, it iterates over all the entries in the hash table.
-
-Note: it only guarantees functionality if the hash table remains untouched
-during its iteration.
