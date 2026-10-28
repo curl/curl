@@ -26,7 +26,7 @@ runs:
             '/^(===|###) /{skip=0} $0==s{skip=1} !skip' /opt/homebrew/etc/ca-certificates/cert.pem | \
           awk -v s='=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services' \
             '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
-          [ -s "$t" ] && install -m 0644 -o root -g wheel "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
+          [ -s "$t" ] && install -m 0644 "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
         sudo ln -sf /opt/homebrew/etc/ca-certificates/cert.pem /etc/ssl/cert.pem
 
     - name: 'install (apt)'
