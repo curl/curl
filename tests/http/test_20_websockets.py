@@ -245,7 +245,7 @@ class TestWebsockets:
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                with_profile=True)
-        assert r.exit_code in [0, 55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
+        assert r.exit_code in [52, 55, 56], f'{r.dump_logs()}'  # NOTHING/SEND/RECV_ERROR
         assert r.profile, f'{r}'
         rss1 = r.profile.stats['rss-max'] / (1024 * 1024)
 
@@ -259,7 +259,7 @@ class TestWebsockets:
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                with_profile=True)
-        assert r.exit_code in [0, 55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
+        assert r.exit_code in [52, 55, 56], f'{r.dump_logs()}'  # NOTHING/SEND/RECV_ERROR
         assert r.profile, f'{r}'
         rss2 = r.profile.stats['rss-max'] / (1024 * 1024)
         assert (rss1 * 1.35) > rss2, 'bad memory increase'

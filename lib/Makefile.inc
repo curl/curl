@@ -185,6 +185,7 @@ LIB_CFILES =         \
   cf-recvbuf.c       \
   cf-setup.c         \
   cf-socket.c        \
+  cf-ws.c            \
   cfilters.c         \
   conncache.c        \
   connect.c          \
@@ -315,6 +316,7 @@ LIB_HFILES =         \
   cf-recvbuf.h       \
   cf-setup.h         \
   cf-socket.h        \
+  cf-ws.h            \
   cfilters.h         \
   conncache.h        \
   cshutdn.h          \

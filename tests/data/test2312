@@ -46,7 +46,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </client>
 
 <verify>
-<protocol crlf="headers">
+<protocol crlf="headers" nonewline="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -56,6 +56,7 @@ Sec-WebSocket-Version: 13
 Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
 Connection: Upgrade
 
+%hex[%88%808321]hex%
 </protocol>
 <stdout nonewline="yes">
 %hex[%03%e9]hex%going away, see you next time

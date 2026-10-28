@@ -885,6 +885,20 @@ curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data)
   return data->conn->sock[FIRSTSOCKET];
 }
 
+struct Curl_cfilter *
+Curl_conn_get_first_cf(struct connectdata *conn,
+                       const struct Curl_cftype *cft)
+{
+  if(conn) {
+    struct Curl_cfilter *cf;
+    for(cf = conn->cfilter[FIRSTSOCKET]; cf; cf = cf->next) {
+      if(cf->cft == cft)
+        return cf;
+    }
+  }
+  return NULL;
+}
+
 const struct Curl_sockaddr_ex *Curl_conn_get_remote_addr(
   struct Curl_easy *data, int8_t sockindex)
 {

@@ -129,9 +129,14 @@ libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
 there can be an error message stored in the error buffer when non-zero is
 returned.
 
-Instead of blocking, the function returns **CURLE_AGAIN**. The correct
-behavior is then to wait until the socket is writable before calling
-this function again. Retry with the same data and length.
+Starting in curl 8.24.0, this function sends blocking and times out
+on the transfer timeout setting. The previous non-blocking behaviour
+was difficult to handle correctly in an application.
+
+Before 8.24.0, the call was non-blocking and could return
+**CURLE_AGAIN**. The correct behavior is then to wait until the socket
+is writable before calling this function again. Retry with the same
+data and length.
 
 Any other non-zero return value indicates an error. See the libcurl-errors(3)
 man page for the full list with descriptions.

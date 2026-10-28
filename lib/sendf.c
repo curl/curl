@@ -251,7 +251,8 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     }
   }
 
-  if(!data->req.ignorebody && (nwrite || (type & CLIENTWRITE_EOS))) {
+  if(!data->req.ignorebody &&
+    (nwrite || (type & (CLIENTWRITE_EOS|CLIENTWRITE_0LEN)))) {
     result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
     CURL_TRC_WRITE(data, "download_write body(type=%x, blen=%zu) -> %d",
                    (unsigned int)type, nbytes, (int)result);

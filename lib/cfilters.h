@@ -464,6 +464,11 @@ CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex);
  */
 curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data);
 
+/* Get the first filter of type `cft` if there is one on FIRSTSOCKET */
+struct Curl_cfilter *
+Curl_conn_get_first_cf(struct connectdata *conn,
+                       const struct Curl_cftype *cft);
+
 /* Return a pointer to the connected socket address or NULL. */
 const struct Curl_sockaddr_ex *
 Curl_conn_get_remote_addr(struct Curl_easy *data, int8_t sockindex);
