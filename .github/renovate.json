@@ -82,7 +82,6 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.circleci/config\\.yml/",
         "/^\\.github/workflows/.*\\.yml$/"
       ],
       "matchStrings": [

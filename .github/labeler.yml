@@ -93,7 +93,6 @@ CI:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - '.circleci/**'
               - '.github/**'
               - 'appveyor.*'
               - 'scripts/ci*'

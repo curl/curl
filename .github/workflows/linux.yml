@@ -11,7 +11,6 @@ name: 'Linux'
       - 'curl-*'
       - '*/ci'
     paths-ignore:
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'projects/**'
@@ -20,7 +19,6 @@ name: 'Linux'
       - master
       - 'curl-*'
     paths-ignore:
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'projects/**'
@@ -216,6 +214,38 @@ jobs:
             tflags: '--subset=1/2'
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/pkg/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
+
+          - name: 'openssl ubuntu-22.04'
+            image: ubuntu-22.04
+            configure: --disable-unity --enable-static --with-openssl
+            tflags: '--min=1700'
+
+          - name: 'openssl ubuntu-22.04-arm'
+            image: ubuntu-22.04-arm
+            configure: --disable-unity --enable-static --with-openssl
+            tflags: '--min=1700'
+
+          - name: 'openssl !proxy !examples'
+            image: ubuntu-22.04
+            configure: --with-openssl --disable-proxy
+            tflags: '--min=1500'
+
+          - name: 'openssl libssh !examples'
+            image: ubuntu-22.04
+            install_packages: libssh-dev
+            configure: --with-openssl --with-libssh
+
+          - name: 'openssl c-ares !examples'
+            image: ubuntu-22.04
+            install_packages: libc-ares-dev
+            configure: --with-openssl --enable-ares
+            tflags: '--min=1700'
+
+          - name: 'openssl c-ares debug'
+            image: ubuntu-22.04-arm
+            install_packages: libc-ares-dev
+            configure: --disable-unity --enable-static --with-openssl --enable-ares --enable-debug
+            tflags: '--min=1700'
 
           - name: 'openssl default'
             image: ubuntu-24.04
