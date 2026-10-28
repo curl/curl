@@ -19,6 +19,7 @@ runs:
   steps:
     - name: 'fixup /etc/ssl/cert.pem'
       if: ${{ contains(runner.os, 'macos') }}
+      shell: bash
       run: sudo ln -sf /opt/homebrew/etc/ca-certificates/cert.pem /etc/ssl/cert.pem
 
     - name: 'install (apt)'
