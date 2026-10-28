@@ -9,7 +9,7 @@ description: 'Remove compromised eMudhra certificates from preinstalled CA bundl
 runs:
   using: 'composite'
   steps:
-    - name: 'fixup /etc/ssl/cert.pem'
+    - name: 'fix /etc/ssl/cert.pem'
       if: ${{ contains(runner.os, 'macos') }}
       shell: bash
       run: |
@@ -23,7 +23,7 @@ runs:
           [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
         ls -lA /etc/ssl/cert.pem
 
-    - name: 'fixup /opt/homebrew/etc/ca-certificates/cert.pem'
+    - name: 'fix /opt/homebrew/etc/ca-certificates/cert.pem'
       if: ${{ contains(runner.os, 'macos') }}
       shell: bash
       run: |
