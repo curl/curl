@@ -273,7 +273,37 @@ jobs:
     steps:
       - name: 'fixup /etc/ssl/cert.pem'
         if: ${{ contains(runner.os, 'macos') }}
-        run: sudo ln -sf /opt/homebrew/etc/ca-certificates/cert.pem /etc/ssl/cert.pem
+        run: |
+          which curl
+          curl -V
+          # Apple's vulnerable cert
+          ls -lA /etc/ssl/cert.pem
+          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+          t="$(mktemp)" && \
+            awk -v s='=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3' \
+              '/^(===|###) /{skip=0} $0==s{skip=1} !skip' /etc/ssl/cert.pem | \
+            awk -v s='=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services' \
+              '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
+            [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
+          ls -lA /etc/ssl/cert.pem
+          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+
+          # Obsolete Homebrew cert.pem preinstalled on the runners
+          ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
+          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+          t="$(mktemp)" && \
+            awk 'BEGIN { \
+              toskip["MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG"]; \
+              toskip["MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb"]; \
+              toskip["MIIDlDCCAnygAwIBAgIKMfXkYgxsWO3W2DANBgkqhkiG9w0BAQsFADBnMQswCQYD"] } \
+              /^-----BEGIN CERTIFICATE-----$/ \
+              { h=$0; inside=1; first=1; next } inside && first \
+              { first=0; skip=($0 in toskip); if(!skip) print h; if(!skip) print; next } inside \
+              { if(!skip) print; if(/^-----END CERTIFICATE-----$/) inside=0; next; } \
+              { print }' < /opt/homebrew/etc/ca-certificates/cert.pem > "$t" && \
+            [ -s "$t" ] && install -m 0644 "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
+          ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
+          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
 
       - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         if: ${{ contains(matrix.image, 'windows') }}
