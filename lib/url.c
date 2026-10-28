@@ -2527,10 +2527,12 @@ out:
     DEBUGASSERT(!conn);
 
   if(result && conn) {
-    /* We are not allowed to return failure with memory left allocated in the
-       connectdata struct, free those here */
+    /* Detach on error and close the connection if
+     * - it was not reused (meaning, ok before we picked it)
+     * - there are no other transfers attached to it */
     Curl_detach_connection(data);
-    Curl_conn_close(data, conn, TRUE);
+    if(!conn->bits.reuse && !CONN_INUSE(conn))
+      Curl_conn_close(data, conn, TRUE);
   }
 
   return result;
