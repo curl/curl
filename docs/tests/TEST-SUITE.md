@@ -290,7 +290,7 @@ make a new libcurl test that is where you add your code.
 
 ### unit tests
 
-Unit tests are placed in `tests/unit`. There is a tests/unit/README
+Unit tests are placed in `tests/unit`. There is a tests/unit/README.md
 describing the specific set of checks and macros that may be used when
 writing tests that verify behaviors of specific individual functions.
 
