@@ -153,6 +153,12 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] = {
+  { "https://@example.com",
+    "https |  | [12] | [13] | example.com | [15] | / | [16] | [17]",
+    0, CURLU_URLENCODE, CURLUE_OK },
+  { "https://@example.com",
+    "https |  | [12] | [13] | example.com | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
   /* backslash mistakes */
   {"http:\\\\hostname", "",
    CURLU_GUESS_SCHEME, 0, CURLUE_BACKSLASH },

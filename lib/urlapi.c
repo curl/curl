@@ -1521,7 +1521,7 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
     part = decoded;
     partlen = dlen;
   }
-  if(urlencode) {
+  if(urlencode && partlen) {
     struct dynbuf enc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
     uc = urlencode_str(&enc, part, partlen, TRUE, what == CURLUPART_QUERY ?
