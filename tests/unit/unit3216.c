@@ -24,6 +24,24 @@
 #include "unitcheck.h"
 #include "ratelimit.h"
 
+static void rlimit_init(struct Curl_rlimit *r,
+                        int64_t rate_per_sec,
+                        int64_t burst_per_sec,
+                        const struct curltime *pts)
+{
+  DEBUGASSERT(rate_per_sec >= 0);
+  DEBUGASSERT(burst_per_sec >= rate_per_sec || !burst_per_sec);
+  DEBUGASSERT(pts);
+  r->rate_per_step = r->rate_per_sec = rate_per_sec;
+  r->burst_per_step = r->burst_per_sec = burst_per_sec;
+  r->step_us = CURL_US_PER_SEC;
+  r->spare_us = 0;
+  r->tokens = r->rate_per_step;
+  r->ts = *pts;
+  r->blocked = FALSE;
+}
+
+
 static CURLcode test_unit3216(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -32,7 +50,7 @@ static CURLcode test_unit3216(const char *arg)
 
   /* A ratelimit that is unlimited */
   ts = curlx_now();
-  Curl_rlimit_init(&r, 0, 0, &ts);
+  rlimit_init(&r, 0, 0, &ts);
   fail_unless(Curl_rlimit_avail(&r, &ts) == CURL_OFF_T_MAX, "inf");
   Curl_rlimit_drain(&r, 1000000, &ts);
   fail_unless(Curl_rlimit_avail(&r, &ts) == CURL_OFF_T_MAX, "drain keep inf");
@@ -48,7 +66,7 @@ static CURLcode test_unit3216(const char *arg)
 
   /* A ratelimit that give 10 tokens per second */
   ts = curlx_now();
-  Curl_rlimit_init(&r, 10, 0, &ts);
+  rlimit_init(&r, 10, 0, &ts);
   fail_unless(Curl_rlimit_avail(&r, &ts) == 10, "initial 10");
   Curl_rlimit_drain(&r, 5, &ts);
   fail_unless(Curl_rlimit_avail(&r, &ts) == 5, "drain to 5");
@@ -73,7 +91,7 @@ static CURLcode test_unit3216(const char *arg)
 
   /* A ratelimit that give 10 tokens per second, max burst 15/s */
   ts = curlx_now();
-  Curl_rlimit_init(&r, 10, 15, &ts);
+  rlimit_init(&r, 10, 15, &ts);
   fail_unless(Curl_rlimit_avail(&r, &ts) == 10, "initial 10");
   Curl_rlimit_drain(&r, 5, &ts);
   fail_unless(Curl_rlimit_avail(&r, &ts) == 5, "drain to 5");

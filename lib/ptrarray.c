@@ -33,16 +33,30 @@ void Curl_ptrarray_init(struct ptrarray *pa)
   pa->n = pa->capacity = 0;
 }
 
-void Curl_ptrarray_clear(struct ptrarray *pa)
+/* @unittest 3211 */
+
+UNITTEST void ptrarray_clear(struct ptrarray *pa);
+UNITTEST void ptrarray_clear(struct ptrarray *pa)
 {
   curlx_safefree(pa->data);
   pa->n = pa->capacity = 0;
 }
 
-uint32_t Curl_ptrarray_count(struct ptrarray *pa)
+#ifdef UNITTESTS
+/* @unittest 3211 */
+UNITTEST uint32_t ptrarray_count(struct ptrarray *pa);
+UNITTEST uint32_t ptrarray_count(struct ptrarray *pa)
 {
   return pa->n;
 }
+
+/* @unittest 3211 */
+UNITTEST void *ptrarray_get(struct ptrarray *pa, uint32_t idx);
+UNITTEST void *ptrarray_get(struct ptrarray *pa, uint32_t idx)
+{
+  return (idx < pa->n) ? pa->data[idx] : NULL;
+}
+#endif
 
 CURLcode Curl_ptrarray_add(struct ptrarray *pa, void *ptr)
 {
@@ -86,13 +100,8 @@ void *Curl_ptrarray_remove(struct ptrarray *pa, uint32_t idx)
       memmove(pa->data + idx, pa->data + idx + 1, rem * sizeof(void *));
     pa->n--;
     if(!pa->n)
-      Curl_ptrarray_clear(pa);
+      ptrarray_clear(pa);
     return ptr;
   }
   return NULL;
-}
-
-void *Curl_ptrarray_get(struct ptrarray *pa, uint32_t idx)
-{
-  return (idx < pa->n) ? pa->data[idx] : NULL;
 }

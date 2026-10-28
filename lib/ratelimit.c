@@ -26,7 +26,6 @@
 #include "urldata.h"
 #include "ratelimit.h"
 
-#define CURL_US_PER_SEC         1000000
 #define CURL_RLIMIT_MIN_RATE    (4 * 1024)  /* minimum step rate */
 #define CURL_RLIMIT_STEP_MIN_MS 2  /* minimum step duration */
 
@@ -149,23 +148,6 @@ static void rlimit_tune_steps(struct Curl_rlimit *r,
       }
     }
   }
-}
-
-void Curl_rlimit_init(struct Curl_rlimit *r,
-                      int64_t rate_per_sec,
-                      int64_t burst_per_sec,
-                      const struct curltime *pts)
-{
-  DEBUGASSERT(rate_per_sec >= 0);
-  DEBUGASSERT(burst_per_sec >= rate_per_sec || !burst_per_sec);
-  DEBUGASSERT(pts);
-  r->rate_per_step = r->rate_per_sec = rate_per_sec;
-  r->burst_per_step = r->burst_per_sec = burst_per_sec;
-  r->step_us = CURL_US_PER_SEC;
-  r->spare_us = 0;
-  r->tokens = r->rate_per_step;
-  r->ts = *pts;
-  r->blocked = FALSE;
 }
 
 void Curl_rlimit_change(struct Curl_rlimit *r,
