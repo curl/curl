@@ -65,6 +65,9 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->sendbuf_hds_len = 0;
 
   curlx_safefree(req->hd_auth);
+#ifndef CURL_DISABLE_WEBSOCKETS
+  curlx_safefree(req->ws_hs);
+#endif
 #ifndef CURL_DISABLE_PROXY
   curlx_safefree(req->hd_proxy_auth);
 #endif
@@ -115,6 +118,9 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 
   curlx_safefree(req->newurl);
   curlx_safefree(req->hd_auth);
+#ifndef CURL_DISABLE_WEBSOCKETS
+  curlx_safefree(req->ws_hs);
+#endif
 #ifndef CURL_DISABLE_PROXY
   curlx_safefree(req->hd_proxy_auth);
 #endif
@@ -175,6 +181,9 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
 {
   curlx_safefree(req->newurl);
   curlx_safefree(req->hd_auth);
+#ifndef CURL_DISABLE_WEBSOCKETS
+  curlx_safefree(req->ws_hs);
+#endif
 #ifndef CURL_DISABLE_PROXY
   curlx_safefree(req->hd_proxy_auth);
 #endif

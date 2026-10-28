@@ -130,6 +130,14 @@ struct websocket {
   BIT(using_reader);      /* sending WS data is handled via a client reader */
 };
 
+/* Only needed while validating the server's opening handshake. Keeping this
+ * off Curl_easy avoids permanently enlarging every easy handle. */
+struct ws_handshake {
+  char accept[29];
+  uint32_t ext_scan_used;
+  unsigned char headers;
+};
+
 #ifdef CURLVERBOSE
 static const char *ws_frame_name_of_op(uint8_t firstbyte)
 {
@@ -1566,12 +1574,12 @@ static bool ws_extension_offered(struct Curl_easy *data,
                                  const char *wanted, size_t wantedlen)
 {
   struct curl_slist *head;
-  struct SingleRequest *k = &data->req;
+  struct ws_handshake *hs = data->req.ws_hs;
   for(head = data->set.headers; head; head = head->next) {
     /* Comparing against unrelated custom headers also costs CPU. */
-    if(k->ws_ext_scan_used > WS_EXT_SCAN_MAX - 25)
+    if(hs->ext_scan_used > WS_EXT_SCAN_MAX - 25)
       return FALSE;
-    k->ws_ext_scan_used += 25;
+    hs->ext_scan_used += 25;
     if(curl_strnequal(head->data, "Sec-WebSocket-Extensions:", 25)) {
       const char *p = head->data + 25;
       size_t scanlen = strlen(p);
@@ -1579,9 +1587,9 @@ static bool ws_extension_offered(struct Curl_easy *data,
       /* Charge for the complete header even when the match is near its
        * start. This also caps the work across split response headers. */
       if(scanlen > WS_EXT_SCAN_MAX ||
-         k->ws_ext_scan_used > WS_EXT_SCAN_MAX - scanlen)
+         hs->ext_scan_used > WS_EXT_SCAN_MAX - scanlen)
         return FALSE;
-      k->ws_ext_scan_used += (uint32_t)scanlen;
+      hs->ext_scan_used += (uint32_t)scanlen;
 
       while(p) {
         const char *name;
@@ -1601,32 +1609,35 @@ static bool ws_extension_offered(struct Curl_easy *data,
 CURLcode Curl_ws_header(struct Curl_easy *data,
                         const char *header, size_t headerlen)
 {
-  struct SingleRequest *k = &data->req;
+  struct ws_handshake *hs = data->req.ws_hs;
   (void)headerlen;
+
+  if(!hs)
+    return ws_handshake_error(data, "missing handshake state");
 
   if(curl_strnequal(header, "Upgrade:", 8)) {
     if(!Curl_compareheader(header, STRCONST("Upgrade:"),
                            STRCONST("websocket")))
       return ws_handshake_error(data, "wrong Upgrade protocol");
-    k->ws_headers |= WS_HDR_UPGRADE;
+    hs->headers |= WS_HDR_UPGRADE;
   }
   else if(curl_strnequal(header, "Connection:", 11)) {
     if(!Curl_compareheader(header, STRCONST("Connection:"),
                            STRCONST("Upgrade")))
       return ws_handshake_error(data, "missing Connection upgrade token");
-    k->ws_headers |= WS_HDR_CONNECTION;
+    hs->headers |= WS_HDR_CONNECTION;
   }
   else if(curl_strnequal(header, "Sec-WebSocket-Accept:", 21)) {
     char *value = Curl_copy_header_value(header);
     CURLcode result = CURLE_OK;
     if(!value)
       return CURLE_OUT_OF_MEMORY;
-    if(k->ws_headers & WS_HDR_ACCEPT)
+    if(hs->headers & WS_HDR_ACCEPT)
       result = ws_handshake_error(data, "duplicate Sec-WebSocket-Accept");
-    else if(strcmp(value, k->ws_accept))
+    else if(strcmp(value, hs->accept))
       result = ws_handshake_error(data, "wrong Sec-WebSocket-Accept");
     else
-      k->ws_headers |= WS_HDR_ACCEPT;
+      hs->headers |= WS_HDR_ACCEPT;
     curlx_free(value);
     return result;
   }
@@ -1663,12 +1674,12 @@ CURLcode Curl_ws_header(struct Curl_easy *data,
     CURLcode result = CURLE_OK;
     if(!value || (requested && !request_value))
       result = CURLE_OUT_OF_MEMORY;
-    else if((k->ws_headers & WS_HDR_SUBPROTOCOL) ||
+    else if((hs->headers & WS_HDR_SUBPROTOCOL) ||
             !request_value || !*value || strchr(value, ',') ||
             !ws_subprotocol_requested(request_value, value))
       result = ws_handshake_error(data, "unrequested WebSocket subprotocol");
     else
-      k->ws_headers |= WS_HDR_SUBPROTOCOL;
+      hs->headers |= WS_HDR_SUBPROTOCOL;
     curlx_free(value);
     curlx_free(request_value);
     return result;
@@ -1689,6 +1700,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   uint8_t digest[20];
   const char *custom_key;
   struct SingleRequest *k = &data->req;
+  struct ws_handshake *hs;
   struct wsfield heads[] = {
     {
       /* The request MUST contain an |Upgrade| header field whose value
@@ -1761,9 +1773,14 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
     curlx_free(accept);
     return CURLE_FAILED_INIT;
   }
-  memcpy(k->ws_accept, accept, acceptlen + 1);
-  k->ws_headers = 0;
-  k->ws_ext_scan_used = 0;
+  hs = curlx_calloc(1, sizeof(*hs));
+  if(!hs) {
+    curlx_free(accept);
+    return CURLE_OUT_OF_MEMORY;
+  }
+  memcpy(hs->accept, accept, acceptlen + 1);
+  curlx_free(k->ws_hs);
+  k->ws_hs = hs;
   curlx_free(accept);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {
@@ -1794,13 +1811,14 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
                         const char *mem, size_t nread)
 {
   struct SingleRequest *k = &data->req;
+  struct ws_handshake *hs = k->ws_hs;
   struct websocket *ws;
   struct Curl_cwriter *ws_dec_writer = NULL;
   struct Curl_creader *ws_enc_reader = NULL;
   CURLcode result;
 
   DEBUGASSERT(data->conn);
-  if((k->ws_headers & WS_HDR_REQUIRED) != WS_HDR_REQUIRED)
+  if(!hs || (hs->headers & WS_HDR_REQUIRED) != WS_HDR_REQUIRED)
     return ws_handshake_error(data, "missing required response headers");
   ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {

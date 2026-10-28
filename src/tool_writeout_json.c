@@ -113,7 +113,10 @@ static size_t jsonescape(const unsigned char **inp, const unsigned char *end,
     /* not UTF-8, escape the byte as if it was ISO-8859-1 */
   }
   if(*i < 32 || *i >= 0x80) {
-    memcpy(buf, "\\u00", 4);
+    buf[0] = '\\';
+    buf[1] = 'u';
+    buf[2] = '0';
+    buf[3] = '0';
     buf[4] = hex[*i >> 4];
     buf[5] = hex[*i & 0xf];
     return JSON_ESC_MAX;

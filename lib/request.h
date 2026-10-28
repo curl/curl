@@ -99,9 +99,7 @@ struct SingleRequest {
   uint8_t httpversion;          /* Version in response (09, 10, 11, etc.) */
   uint8_t upgr101;              /* 101 upgrade state */
 #ifndef CURL_DISABLE_WEBSOCKETS
-  char ws_accept[29];           /* expected Sec-WebSocket-Accept (base64) */
-  unsigned char ws_headers;     /* validated WebSocket response headers */
-  uint32_t ws_ext_scan_used;    /* cumulative extension offer scanning */
+  struct ws_handshake *ws_hs;   /* WebSocket opening handshake state */
 #endif
   uint8_t io_flags;             /* REQ_IO_RECV | REQ_IO_SEND */
 
