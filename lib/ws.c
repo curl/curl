@@ -1581,7 +1581,7 @@ static bool ws_extension_offered(struct Curl_easy *data,
       if(scanlen > WS_EXT_SCAN_MAX ||
          k->ws_ext_scan_used > WS_EXT_SCAN_MAX - scanlen)
         return FALSE;
-      k->ws_ext_scan_used += scanlen;
+      k->ws_ext_scan_used += (uint32_t)scanlen;
 
       while(p) {
         const char *name;

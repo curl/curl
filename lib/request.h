@@ -101,7 +101,7 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_WEBSOCKETS
   char ws_accept[29];           /* expected Sec-WebSocket-Accept (base64) */
   unsigned char ws_headers;     /* validated WebSocket response headers */
-  size_t ws_ext_scan_used;      /* cumulative extension offer scanning */
+  uint32_t ws_ext_scan_used;    /* cumulative extension offer scanning */
 #endif
   uint8_t io_flags;             /* REQ_IO_RECV | REQ_IO_SEND */
 
