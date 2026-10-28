@@ -860,7 +860,8 @@ jobs:
           fi
 
       - name: 'single-use function check'
-        if: ${{ (contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc') }}
+        if: "${{ ((contains(matrix.build.configure, '--disable-unity') && contains(matrix.build.configure, '--enable-static')) || \
+                   contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc-----') }}"
         background: true
         run: |
           git config --global --add safe.directory "*"
