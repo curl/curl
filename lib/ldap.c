@@ -948,6 +948,9 @@ void Curl_ldap_version(char *buf, size_t bufsz)
 #ifdef USE_WIN32_LDAP
   curl_msnprintf(buf, bufsz, "WinLDAP");
 #elif defined(LDAP_OPT_X_TLS_PASSPHRASE)
+  /* Skip querying version for Apple's OpenLDAP fork. It was reported to make
+     DNS/network requests during the process, which in cases can take a long
+     time. The returned version is 2.4.28 in all known OS releases. */
   curl_msnprintf(buf, bufsz, "AppleLDAP");
 #else
   static const char flavor[] = "";
