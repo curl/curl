@@ -182,7 +182,9 @@ sub doublecheck {
     return @also;
 }
 
-open(N, '-|', 'nm', $file) or die;
+if(!open(N, '-|', 'nm', $file)) {
+    exit 1;
+}
 
 my %exist;
 my %uses;
