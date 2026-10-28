@@ -217,6 +217,33 @@ jobs:
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/pkg/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
+          - name: 'openssl'
+            image: ubuntu-22.04
+            configure: --disable-unity --enable-static --with-openssl
+
+          - name: 'openssl'
+            image: ubuntu-22.04-arm
+            configure: --disable-unity --enable-static --with-openssl
+
+          - name: 'openssl !proxy !examples'
+            image: ubuntu-22.04
+            configure: --disable-unity --enable-static --with-openssl --disable-proxy
+
+          - name: 'openssl libssh !examples'
+            image: ubuntu-22.04
+            install_packages: libssh-dev
+            configure: --disable-unity --enable-static --with-openssl --with-libssh
+
+          - name: 'openssl c-ares !examples'
+            image: ubuntu-22.04
+            install_packages: libc-ares-dev
+            configure: --disable-unity --enable-static --with-openssl --enable-ares
+
+          - name: 'openssl c-ares debug'
+            image: ubuntu-22.04-arm
+            install_packages: libc-ares-dev
+            configure: --disable-unity --enable-static --with-openssl --enable-ares --enable-debug
+
           - name: 'openssl default'
             image: ubuntu-24.04
             install_steps: pytest
