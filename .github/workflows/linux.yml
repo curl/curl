@@ -229,18 +229,18 @@ jobs:
 
           - name: 'openssl !proxy !examples'
             image: ubuntu-22.04
-            configure: --disable-unity --enable-static --with-openssl --disable-proxy
+            configure: --with-openssl --disable-proxy
             tflags: '--min=1500'
 
           - name: 'openssl libssh !examples'
             image: ubuntu-22.04
             install_packages: libssh-dev
-            configure: --disable-unity --enable-static --with-openssl --with-libssh
+            configure: --with-openssl --with-libssh
 
           - name: 'openssl c-ares !examples'
             image: ubuntu-22.04
             install_packages: libc-ares-dev
-            configure: --disable-unity --enable-static --with-openssl --enable-ares
+            configure: --with-openssl --enable-ares
             tflags: '--min=1700'
 
           - name: 'openssl c-ares debug'
