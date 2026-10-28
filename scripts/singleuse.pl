@@ -192,11 +192,11 @@ while(<N>) {
     chomp $l;
     $anyinput = 1;
 
-    if($l =~ /^([0-9a-z_-]+)\.o:/) {
+    if($l =~ /^([0-9a-z_-]+)(\.c)?\.o:/) {
         $file = $1;
     }
     # libcurl.a(unity_0_c.c.o):
-    elsif($l =~ /\(([0-9a-z_.-]+)\.o\):/) {  # Apple nm
+    elsif($l =~ /\(([0-9a-z_.-]+)(\.c)?\.o\):/) {  # Apple nm
         $file = $1;
     }
     if($l =~ /^([0-9a-f]+) T _?(.*)/) {
