@@ -869,6 +869,9 @@ jobs:
           else
             libcurla=bld/lib/.libs/libcurl.a
           fi
+          echo '-----------'
+          nm "${libcurla}" || true
+          echo '-----------'
           ./scripts/singleuse.pl --unit "${libcurla}"
 
       - name: 'curl -V'
