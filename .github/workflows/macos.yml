@@ -86,8 +86,6 @@ jobs:
     steps:
       - name: 'fixup /etc/ssl/cert.pem'
         run: |
-          which curl
-          curl -V
           # Apple's vulnerable cert
           ls -lA /etc/ssl/cert.pem
           t="$(mktemp)" && \
@@ -717,8 +715,6 @@ jobs:
     steps:
       - name: 'fixup /etc/ssl/cert.pem'
         run: |
-          which curl
-          curl -V
           # Apple's vulnerable cert
           ls -lA /etc/ssl/cert.pem
           t="$(mktemp)" && \

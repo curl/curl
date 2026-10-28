@@ -91,8 +91,6 @@ jobs:
       - name: 'fixup /etc/ssl/cert.pem'
         if: ${{ contains(runner.os, 'macos') }}
         run: |
-          which curl
-          curl -V
           # Apple's vulnerable cert
           ls -lA /etc/ssl/cert.pem
           t="$(mktemp)" && \
