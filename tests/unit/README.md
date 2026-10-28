@@ -121,7 +121,7 @@ An example `add_two_integers()` function for unit testing:
 ~~~
 
 Since the function is static and is private for this source file, it should
-not have its prototype in any header file. It must have the `@unitest` tag
+not have its prototype in any header file. It must have the `@unittest` tag
 referring to which unit test that uses this function in a comment immediately
 above the function itself.
 
