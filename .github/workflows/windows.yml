@@ -521,6 +521,7 @@ jobs:
           fi
 
       - name: 'run tests'
+        id: test_run
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: ${{ contains(matrix.tflags, '-t') && 15 || 10 }}
         env:
@@ -566,6 +567,28 @@ jobs:
             PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld V=1 test-ci
           fi
+
+      - name: 'diagnose failed torture run'
+        if: ${{ failure() && steps.test_run.outcome == 'failure' && contains(matrix.tflags, '-t') }}
+        timeout-minutes: 2
+        run: |
+          echo 'Recent test log files (newest first):'
+          if [ -d bld/tests/log ]; then
+            find bld/tests/log -type f -printf '%T@ %p\n' | sort -nr | sed -n '1,40p'
+          fi
+          echo 'Windows process list after the failed test run:'
+          ps -W || true
+          echo 'Available disk space:'
+          df -h . || true
+
+      - name: 'upload failed torture logs'
+        if: ${{ failure() && steps.test_run.outcome == 'failure' && contains(matrix.tflags, '-t') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: torture-logs-${{ matrix.env }}-${{ matrix.name }}
+          path: bld/tests/log/
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: 'build examples'
         if: ${{ matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}  # Save time by skipping this for autotools running tests
