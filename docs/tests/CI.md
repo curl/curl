@@ -75,6 +75,6 @@ options.
 
 As of October 2025 `@bagder`, `@mback2k`, `@jay`, `@vszakats`, `@dfandrich`
 and `@danielgustafsson` have administrator access to the AppVeyor CI
-environment.  Additional admins/group members can be added on request.
+environment. Additional admins/group members can be added on request.
 
 The tests are configured in `appveyor.yml`.
