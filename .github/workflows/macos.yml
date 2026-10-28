@@ -400,6 +400,12 @@ jobs:
 
     steps:
       - name: 'brew unlink openssl'
+        run: |
+          ls -lA /etc/ssl/cert.pem
+          sudo cp -p /opt/homebrew/opt/ca-certificates/share/ca-certificates/cacert.pem /etc/ssl/cert.pem
+          ls -lA /etc/ssl/cert.pem
+
+      - name: 'brew unlink openssl'
         if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'openssl@4') }}
         run: |
           if [ -d "$(brew --prefix)"/include/openssl ]; then
