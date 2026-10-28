@@ -480,6 +480,20 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
   return result;
 }
 
+static CURLcode brotli_do_flush(struct Curl_easy *data,
+                                struct Curl_cwriter *writer, bool eos)
+{
+  struct brotli_writer *bp = (struct brotli_writer *)writer;
+
+  /* A decoder that consumed input must reach SUCCESS before the transfer
+   * ends. An unused decoder is fine for responses without a body. */
+  if(eos && bp->br && BrotliDecoderIsUsed(bp->br)) {
+    failf(data, "Brotli stream ended before completion");
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+  return Curl_cwriter_flush(data, writer->next, eos);
+}
+
 static void brotli_do_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer)
 {
@@ -498,7 +512,7 @@ static const struct Curl_cwtype brotli_encoding = {
   CURL_CW_FLAG_BLOWUP,
   brotli_do_init,
   brotli_do_write,
-  Curl_cwriter_def_flush,
+  brotli_do_flush,
   brotli_do_close,
   sizeof(struct brotli_writer)
 };
