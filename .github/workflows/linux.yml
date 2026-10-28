@@ -220,7 +220,7 @@ jobs:
           - name: 'openssl default'
             image: ubuntu-24.04
             install_steps: pytest
-            configure: --with-openssl --enable-debug --disable-unity
+            configure: --with-openssl --enable-debug --disable-unity --enable-static
 
           - name: 'openssl libssh2 sync-resolver valgrind 1'
             image: ubuntu-26.04-arm
@@ -861,7 +861,7 @@ jobs:
 
       - name: 'single-use function check'
         if: "${{ ((contains(matrix.build.configure, '--disable-unity') && contains(matrix.build.configure, '--enable-static')) || \
-                   contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc-----') }}"
+                   contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc') }}"
         background: true
         run: |
           git config --global --add safe.directory "*"
