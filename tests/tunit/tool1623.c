@@ -105,6 +105,12 @@ static CURLcode test_tool1623(const char *arg)
     { NULL, 0, PARAM_OK } /* end of list */
   };
   static const struct secs1623 secs[] = {
+#if SIZEOF_LONG > 4
+    { "9223372036854774", 9223372036854774000, PARAM_OK },
+    { "00000000000000000009223372036854774", 9223372036854774000, PARAM_OK },
+    { "9223372036854775", 0, PARAM_BAD_NUMERIC },
+    { "9223372036854780", 0, PARAM_BAD_NUMERIC },
+#endif
     { "0", 0, PARAM_OK },
     { "1", 1000, PARAM_OK },
     { "10", 10000, PARAM_OK },
