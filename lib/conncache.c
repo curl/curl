@@ -402,10 +402,9 @@ static void cpool_conn_close(struct cpool *cpool,
   if(!cpool)
     return;
 
-  /* If this connection is not marked to force-close, leave it open if there
-   * are other users of it */
-  if(CONN_INUSE(conn) && !aborted) {
-    DEBUGASSERT(0); /* does this ever happen? */
+  /* If this connection is still used by transfers, we cannot close it. */
+  if(CONN_INUSE(conn)) {
+    DEBUGASSERT(0); /* we'd like to know when this happens */
     DEBUGF(infof(data, "conn terminate when inuse: %u", conn->attached_xfers));
     return;
   }
