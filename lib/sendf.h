@@ -62,7 +62,8 @@ struct Curl_easy;
 CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
                            size_t len) WARN_UNUSED_RESULT;
 
-CURLcode Curl_client_flush(struct Curl_easy *data);
+/* Flush buffered data. Set eos when no more input will be written. */
+CURLcode Curl_client_flush(struct Curl_easy *data, bool eos);
 
 /**
  * Free all resources related to client writing.
@@ -124,7 +125,7 @@ struct Curl_cwtype {
                        struct Curl_cwriter *writer, int type,
                        const char *buf, size_t nbytes);
   CURLcode (*do_flush)(struct Curl_easy *data,
-                       struct Curl_cwriter *writer);
+                       struct Curl_cwriter *writer, bool eos);
   void (*do_close)(struct Curl_easy *data,
                    struct Curl_cwriter *writer);
   size_t cwriter_size;  /* sizeof() allocated struct Curl_cwriter */
@@ -187,8 +188,8 @@ struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
 #define Curl_cwriter_write(d, w, t, b, n) \
   ((w) ? (w)->cwt->do_write((d), (w), (t), (b), (n)) : CURLE_WRITE_ERROR)
 
-#define Curl_cwriter_flush(d, w) \
-  ((w) ? (w)->cwt->do_flush((d), (w)) : CURLE_WRITE_ERROR)
+#define Curl_cwriter_flush(d, w, eos) \
+  ((w) ? (w)->cwt->do_flush((d), (w), (eos)) : CURLE_WRITE_ERROR)
 
 /* TRUE if client writer is paused. */
 #define Curl_cwriter_is_paused(d)     ((bool)(d)->req.writer.paused)
@@ -208,7 +209,7 @@ CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
                                 struct Curl_cwriter *writer, int type,
                                 const char *buf, size_t nbytes);
 CURLcode Curl_cwriter_def_flush(struct Curl_easy *data,
-                                struct Curl_cwriter *writer);
+                                struct Curl_cwriter *writer, bool eos);
 void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
 
