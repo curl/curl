@@ -2298,6 +2298,9 @@ typedef enum {
   /* Bitmask of CURLCOOKIE_* bits describing the request context */
   CURLOPT(CURLOPT_COOKIECONTEXT, CURLOPTTYPE_LONG, 334),
 
+  /* SQLite database file to keep the cookies in */
+  CURLOPT(CURLOPT_COOKIEDB, CURLOPTTYPE_STRINGPOINT, 335),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

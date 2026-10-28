@@ -27,6 +27,7 @@
 
 #include "urldata.h"
 #include "cookie.h"
+#include "cookie_db.h"
 #include "psl.h"
 #include "curl_trc.h"
 #include "transfer.h"
@@ -540,6 +541,7 @@ static void remove_expired(struct CookieInfo *ci)
       if(co->expires) {
         if(co->expires < now) {
           Curl_node_remove(n);
+          Curl_cookie_db_remove(ci, co);
           freecookie(co, TRUE);
           ci->numcookies--;
         }
@@ -1386,12 +1388,14 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   myhash = cookiehash(co->domain);
   Curl_llist_append(&ci->cookielist[myhash], co, &co->node);
 
-  if(ci->running)
+  if(ci->running) {
     /* Only show this when NOT reading the cookies from a file */
     infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, "
           "expire %" FMT_OFF_T,
           replaces ? "Replaced" : "Added", co->name, co->value,
           co->domain, co->path, co->expires);
+    Curl_cookie_db_store(ci, co);
+  }
 
   if(!replaces)
     ci->numcookies++; /* one more cookie in the jar */
@@ -1543,7 +1547,8 @@ CURLcode Curl_cookie_loadfiles(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct curl_slist *list = data->state.cookielist;
-  if(list) {
+  const char *dbpath = CURL_EASY_STR(data, STRING_COOKIEDB);
+  if(list || dbpath) {
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     if(!data->cookies)
       data->cookies = Curl_cookie_init();
@@ -1551,12 +1556,18 @@ CURLcode Curl_cookie_loadfiles(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
     else {
       data->state.cookie_engine = TRUE;
-      while(list) {
+      if(dbpath)
+        result = Curl_cookie_db_open(data, data->cookies, dbpath,
+                                     !!(flags & COOKIE_NOSESSION));
+      while(!result && list) {
         result = cookie_load(data, list->data, data->cookies, flags);
-        if(result)
-          break;
         list = list->next;
       }
+      if(!result && dbpath)
+        /* the cookies in memory, from the files and from before the first
+           transfer, go into the database too */
+        result = Curl_cookie_db_import(data, data->cookies,
+                                       !!data->state.cookielist);
     }
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
@@ -1661,8 +1672,13 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
 
   Curl_llist_init(list, NULL);
 
-  if(!ci || !Curl_llist_count(&ci->cookielist[myhash]))
-    return CURLE_OK; /* no cookie struct or no cookies in the struct */
+  if(!ci)
+    return CURLE_OK; /* no cookie struct */
+  result = Curl_cookie_db_sync(data, ci);
+  if(result)
+    return result;
+  if(!Curl_llist_count(&ci->cookielist[myhash]))
+    return CURLE_OK; /* no cookies in the struct */
 
   if(site) {
     const bool secure_xfer = Curl_xfer_is_secure(data);
@@ -1837,6 +1853,7 @@ void Curl_cookie_clearsess(struct CookieInfo *ci)
 void Curl_cookie_cleanup(struct CookieInfo *ci)
 {
   if(ci) {
+    Curl_cookie_db_close(ci);
     Curl_cookie_clearall(ci);
     curlx_free(ci); /* free the base struct as well */
   }

@@ -326,6 +326,13 @@ libcurl ignore cookies with a domain that is on the list.
 libcurl was built with support for SPNEGO authentication (Simple and Protected
 GSS-API Negotiation Mechanism, defined in RFC 2478.)
 
+## `SQLite`
+
+*features* mask bit: non-existent
+
+libcurl was built with SQLite and can keep cookies in a database with
+CURLOPT_COOKIEDB(3). (Added in 8.24.0)
+
 ## `SSL`
 
 *features* mask bit: CURL_VERSION_SSL

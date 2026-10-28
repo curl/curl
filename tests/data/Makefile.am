@@ -1743,6 +1743,7 @@ TESTCASES = \
   test1923 \
   test1924 \
   test1925 \
+  test1927 \
   \
   test1933 \
   test1934 \

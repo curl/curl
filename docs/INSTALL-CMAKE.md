@@ -367,6 +367,7 @@ Details via CMake
                                             Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
 - `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS (experimental). Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
+- `CURL_USE_SQLITE`:                        Use SQLite for the cookie database. Default: `OFF`
 - `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `CURL_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`

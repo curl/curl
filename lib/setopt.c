@@ -42,6 +42,7 @@
 #include "setopt.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "cookie_db.h"
 #include "tftp.h"
 #include "curlx/strdup.h"
 #include "escape.h"
@@ -1500,12 +1501,14 @@ static CURLcode cookielist(struct Curl_easy *data, const char *ptr)
     /* clear all cookies */
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     Curl_cookie_clearall(data->cookies);
+    Curl_cookie_db_clear(data->cookies, FALSE);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
   else if(curl_strequal(ptr, "SESS")) {
     /* clear session cookies */
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     Curl_cookie_clearsess(data->cookies);
+    Curl_cookie_db_clear(data->cookies, TRUE);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
   else if(curl_strequal(ptr, "FLUSH")) {
@@ -2104,6 +2107,16 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      * Cookie string to send to the remote server in the request.
      */
     return Curl_setstropt(data, STRING_COOKIE, ptr);
+
+  case CURLOPT_COOKIEDB:
+    /*
+     * An SQLite database to keep the cookies in.
+     */
+#ifdef USE_SQLITE
+    return Curl_setstropt(data, STRING_COOKIEDB, ptr);
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
 
   case CURLOPT_COOKIESITE:
     /*

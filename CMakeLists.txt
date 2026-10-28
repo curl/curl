@@ -1341,6 +1341,23 @@ if(CURL_USE_LIBPSL)
   set(USE_LIBPSL ON)
 endif()
 
+# SQLite, for the cookie database
+option(CURL_USE_SQLITE "Use SQLite for the cookie database" OFF)
+mark_as_advanced(CURL_USE_SQLITE)
+set(USE_SQLITE OFF)
+if(CURL_USE_SQLITE)
+  find_package(SQLite3 REQUIRED)
+  if(TARGET SQLite3::SQLite3)
+    set(_sqlite_target SQLite3::SQLite3)
+  else()
+    set(_sqlite_target SQLite::SQLite3)  # CMake before 4.3
+  endif()
+  set_target_properties(${_sqlite_target} PROPERTIES
+    INTERFACE_LIBCURL_PC_MODULES "sqlite3")
+  list(APPEND CURL_LIBS ${_sqlite_target})
+  set(USE_SQLITE ON)
+endif()
+
 # libssh2
 option(CURL_USE_LIBSSH2 "Use libssh2" ON)
 mark_as_advanced(CURL_USE_LIBSSH2)
@@ -2088,6 +2105,7 @@ curl_add_if("Debug"         ENABLE_DEBUG)
 curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
 curl_add_if("HTTPSRR"       _ssl_enabled AND USE_HTTPSRR)
 curl_add_if("PSL"           USE_LIBPSL)
+curl_add_if("SQLite"        USE_SQLITE)
 curl_add_if("CAcert"        CURL_CA_EMBED_SET)
 curl_add_if("SSLS-EXPORT"   _ssl_enabled AND USE_SSLS_EXPORT)
 curl_add_if("AppleSecTrust" USE_APPLE_SECTRUST AND _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS))
@@ -2427,6 +2445,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_GSASL
   #   USE_LIBPSL
   #   USE_LIBSSH
+  #   USE_SQLITE
   #   USE_LIBSSH2
   #   USE_LIBUV
   #   USE_MBEDTLS

@@ -1084,6 +1084,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
   case CURLOPT_CAINFO:
   case CURLOPT_CAPATH:
   case CURLOPT_COOKIE:
+  case CURLOPT_COOKIEDB:
   case CURLOPT_COOKIEFILE:
   case CURLOPT_COOKIEJAR:
   case CURLOPT_COOKIELIST:

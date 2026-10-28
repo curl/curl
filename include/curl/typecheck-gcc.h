@@ -413,6 +413,7 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_CAPATH ||                                        \
    (option) == CURLOPT_COOKIE ||                                        \
    (option) == CURLOPT_COOKIEFILE ||                                    \
+   (option) == CURLOPT_COOKIEDB ||                                      \
    (option) == CURLOPT_COOKIEJAR ||                                     \
    (option) == CURLOPT_COOKIELIST ||                                    \
    (option) == CURLOPT_COOKIESITE ||                                    \

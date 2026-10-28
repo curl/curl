@@ -157,6 +157,7 @@ man_MANS =                                      \
   CURLOPT_CONV_TO_NETWORK_FUNCTION.3            \
   CURLOPT_COOKIE.3                              \
   CURLOPT_COOKIECONTEXT.3                       \
+  CURLOPT_COOKIEDB.3                            \
   CURLOPT_COOKIEFILE.3                          \
   CURLOPT_COOKIEJAR.3                           \
   CURLOPT_COOKIELIST.3                          \

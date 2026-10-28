@@ -1729,6 +1729,8 @@
      d                 c                   10333
      d  CURLOPT_COOKIECONTEXT...
      d                 c                   00334
+     d  CURLOPT_COOKIEDB...
+     d                 c                   10335
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001

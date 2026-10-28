@@ -189,6 +189,7 @@ curl_unix_sockets_msg="no       (--enable-unix-sockets)"
         curl_ipfs_msg="no       (--enable-ipfs)"
         curl_rtsp_msg="no       (--enable-rtsp)"
          curl_psl_msg="no       (--with-libpsl)"
+      curl_sqlite_msg="no       (--with-sqlite)"
       curl_altsvc_msg="enabled  (--disable-alt-svc)"
      curl_headers_msg="enabled  (--disable-headers-api)"
         curl_hsts_msg="enabled  (--disable-hsts)"
@@ -2341,6 +2342,78 @@ if test "x$OPT_LIBPSL" != "xno"; then
   fi
 fi
 AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])
+
+dnl **********************************************************************
+dnl Check for SQLite, for the cookie database
+dnl **********************************************************************
+
+OPT_SQLITE=no
+AC_ARG_WITH(sqlite,
+AS_HELP_STRING([--with-sqlite=PATH],[Where to look for SQLite, PATH points to the SQLite installation;
+  when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--without-sqlite], [disable SQLite]),
+  OPT_SQLITE=$withval)
+
+if test "x$OPT_SQLITE" != "xno"; then
+  dnl backup the pre-sqlite variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_SQLITE" in
+    yes)
+      dnl --with-sqlite (without path) used
+      CURL_CHECK_PKGCONFIG(sqlite3)
+
+      if test "$PKGCONFIG" != "no"; then
+        LIB_SQLITE=`$PKGCONFIG --libs-only-l sqlite3`
+        LD_SQLITE=`$PKGCONFIG --libs-only-L sqlite3`
+        CPP_SQLITE=`$PKGCONFIG --cflags-only-I sqlite3`
+      else
+        dnl no sqlite3 pkg-config found
+        LIB_SQLITE="-lsqlite3"
+      fi
+
+      ;;
+    *)
+      dnl use the given --with-sqlite spot
+      LIB_SQLITE="-lsqlite3"
+      PREFIX_SQLITE=$OPT_SQLITE
+      ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_SQLITE"; then
+    LD_SQLITE=-L${PREFIX_SQLITE}/lib$libsuff
+    CPP_SQLITE=-I${PREFIX_SQLITE}/include
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_SQLITE"
+  LDFLAGSPC="$LDFLAGSPC $LD_SQLITE"
+  CPPFLAGS="$CPPFLAGS $CPP_SQLITE"
+  LIBS="$LIB_SQLITE $LIBS"
+
+  AC_CHECK_LIB(sqlite3, sqlite3_open_v2,
+    [
+      AC_CHECK_HEADERS(sqlite3.h,
+        curl_sqlite_msg="enabled"
+        AC_DEFINE(USE_SQLITE, 1, [if SQLite is in use for the cookie database])
+        USE_SQLITE=1
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE sqlite3"
+      )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      LDFLAGSPC=$CLEANLDFLAGSPC
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
+  )
+
+  if test "$USE_SQLITE" != "1"; then
+    AC_MSG_ERROR([SQLite libs and/or directories were not found!])
+  fi
+fi
 
 dnl **********************************************************************
 dnl Check for libgsasl
@@ -5236,6 +5309,10 @@ if test "$curl_psl_msg" = "enabled"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES PSL"
 fi
 
+if test "$curl_sqlite_msg" = "enabled"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES SQLite"
+fi
+
 if test "$USE_PROXY_HTTP3" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES proxy-HTTP3"
 fi
@@ -5558,6 +5635,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   IPFS/IPNS:        ${curl_ipfs_msg}
   RTSP:             ${curl_rtsp_msg}
   PSL:              ${curl_psl_msg}
+  SQLite:           ${curl_sqlite_msg}
   Alt-svc:          ${curl_altsvc_msg}
   Headers API:      ${curl_headers_msg}
   HSTS:             ${curl_hsts_msg}

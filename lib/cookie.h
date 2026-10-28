@@ -63,9 +63,12 @@ struct Cookie {
 
 #define COOKIE_HASH_SIZE 63
 
+struct cookie_db;
+
 struct CookieInfo {
   /* linked lists of cookies we know of */
   struct Curl_llist cookielist[COOKIE_HASH_SIZE];
+  struct cookie_db *db;       /* the SQLite store, CURLOPT_COOKIEDB */
   curl_off_t next_expiration; /* the next time at which expiration happens */
   unsigned int numcookies;    /* number of cookies in the "jar" */
   unsigned int lastct;        /* last creation-time used in the jar */

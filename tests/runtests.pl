@@ -697,6 +697,8 @@ sub checksystemfeatures {
             $feature{"SPNEGO"} = $feat =~ /SPNEGO/i;
             # PSL enabled
             $feature{"PSL"} = $feat =~ /PSL/i;
+            # SQLite cookie database
+            $feature{"SQLite"} = $feat =~ /SQLite/i;
             # alt-svc enabled
             $feature{"alt-svc"} = $feat =~ /alt-svc/i;
             # HSTS support

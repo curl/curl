@@ -93,6 +93,16 @@ TAB. That file is called the cookie jar in curl terminology.
 When libcurl saves a cookie jar, it creates a file header of its own in
 which there is a URL mention that links to the web version of this document.
 
+## SQLite cookie database
+
+When built with SQLite, libcurl can keep the cookies in an SQLite database
+instead of a cookie jar file, set with CURLOPT_COOKIEDB(3). The database is
+read when a transfer starts and every cookie received from a server is
+written to it immediately, so several handles and even several processes can
+share one database and see each others cookies. The cookie jar file and
+CURLINFO_COOKIELIST(3) keep working as before. The database holds the
+`SameSite` and `Partitioned` attributes in their own columns.
+
 ## Cookie file format
 
 The cookie file format is text based and stores one cookie per line. Lines

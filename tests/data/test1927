@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+cookies
+SQLite
+CURLOPT_COOKIEDB
+libtest
+</keywords>
+</info>
+
+<reply>
+<data1>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Set-Cookie: a=1
+Set-Cookie: b=2; Secure; SameSite=None
+
+boo
+</data1>
+<data2>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+
+boo
+</data2>
+<data3>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+
+boo
+</data3>
+<data4>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+
+boo
+</data4>
+<data5>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+
+boo
+</data5>
+<data6>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Set-Cookie: c=3
+
+boo
+</data6>
+<data7>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+
+boo
+</data7>
+<data8>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Set-Cookie: e=5
+
+boo
+</data8>
+<data9>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Set-Cookie: f=6
+
+boo
+</data9>
+<data10>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+
+boo
+</data10>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+cookies
+SQLite
+</features>
+<name>
+SQLite cookie database shared by several handles
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER.db %HOSTIP
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Cookie: b=2; a=1
+
+GET /%TESTNUMBER0003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Cookie: b=2; a=1
+
+GET /%TESTNUMBER0004 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0005 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0006 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0007 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Cookie: c=3
+
+GET /%TESTNUMBER0008 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Cookie: d=4
+
+GET /%TESTNUMBER0009 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Cookie: e=5; d=4
+
+GET /%TESTNUMBER0010 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Cookie: f=6; e=5; d=4
+
+</protocol>
+</verify>
+</testcase>

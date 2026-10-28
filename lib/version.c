@@ -505,6 +505,9 @@ static const struct feat features_table[] = {
 #ifdef USE_SPNEGO
   FEATURE("SPNEGO",      NULL,                CURL_VERSION_SPNEGO),
 #endif
+#ifdef USE_SQLITE
+  FEATURE("SQLite",      NULL,                0),
+#endif
 #ifdef USE_SSL
   FEATURE("SSL",         NULL,                CURL_VERSION_SSL),
 #endif

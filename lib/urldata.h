@@ -701,6 +701,7 @@ enum dupstring {
   STRING_COOKIE,          /* HTTP cookie string to send */
   STRING_COOKIESITE,      /* site the request is made for, for SameSite */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
+  STRING_COOKIEDB,        /* SQLite database holding the cookies */
 #endif
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
   STRING_DEFAULT_PROTOCOL, /* Protocol to use when the URL does not specify */

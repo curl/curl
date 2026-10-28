@@ -689,6 +689,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if libpsl is in use */
 #cmakedefine USE_LIBPSL 1
 
+/* if SQLite is in use for the cookie database */
+#cmakedefine USE_SQLITE 1
+
 /* if you want to use OpenLDAP code instead of legacy LDAP implementation */
 #cmakedefine USE_OPENLDAP 1
 

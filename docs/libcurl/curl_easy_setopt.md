@@ -199,6 +199,10 @@ Cookie(s) to send. See CURLOPT_COOKIE(3)
 
 Context of the request for cookies. See CURLOPT_COOKIECONTEXT(3)
 
+## CURLOPT_COOKIEDB
+
+SQLite database to keep cookies in. See CURLOPT_COOKIEDB(3)
+
 ## CURLOPT_COOKIEFILE
 
 File to read cookies from. See CURLOPT_COOKIEFILE(3)
