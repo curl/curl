@@ -404,7 +404,7 @@ jobs:
     steps:
       - name: 'fixup /etc/ssl/cert.pem'
         run: |
-          ls -lA /etc/ssl/cert.pem
+          ls -lA /etc/ssl/cert.pem /opt/homebrew/etc/ca-certificates/cert.pem
           curl https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
           t="$(mktemp)" && \
             awk -v s='=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3' \
@@ -413,7 +413,7 @@ jobs:
               '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
             [ -s "$t" ] && install -m 0644 "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
           sudo ln -sf /opt/homebrew/etc/ca-certificates/cert.pem /etc/ssl/cert.pem
-          ls -lA /etc/ssl/cert.pem
+          ls -lA /etc/ssl/cert.pem /opt/homebrew/etc/ca-certificates/cert.pem
           curl https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
 
       - name: 'brew unlink openssl'
