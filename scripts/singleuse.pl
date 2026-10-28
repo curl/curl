@@ -182,15 +182,15 @@ sub doublecheck {
     return @also;
 }
 
-if(!open(N, '-|', 'nm', $file)) {
-    exit 1;
-}
+open(N, '-|', 'nm', $file) or die;
 
 my %exist;
 my %uses;
+my $anyinput = 0;
 while(<N>) {
     my $l = $_;
     chomp $l;
+    $anyinput = 1;
 
     if($l =~ /^([0-9a-z_-]+)\.o:/) {
         $file = $1;
@@ -212,6 +212,11 @@ while(<N>) {
     }
 }
 close(N);
+
+if(!$anyinput) {
+    print STDERR "Bad command or input file missing: $file\n";
+    exit 1;
+}
 
 my $err = 0;
 for(sort keys %exist) {
