@@ -17,6 +17,10 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: 'fixup /etc/ssl/cert.pem'
+      if: ${{ contains(runner.os, 'macos') }}
+      run: sudo ln -sf /opt/homebrew/etc/ca-certificates/cert.pem /etc/ssl/cert.pem
+
     - name: 'install (apt)'
       if: ${{ inputs.apt }}
       shell: bash

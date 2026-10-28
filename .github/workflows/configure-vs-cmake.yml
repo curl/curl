@@ -88,6 +88,10 @@ jobs:
     name: 'macOS'
     runs-on: macos-latest
     steps:
+      - name: 'fixup /etc/ssl/cert.pem'
+        if: ${{ contains(runner.os, 'macos') }}
+        run: sudo ln -sf /opt/homebrew/etc/ca-certificates/cert.pem /etc/ssl/cert.pem
+
       - name: 'install prereqs'
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
