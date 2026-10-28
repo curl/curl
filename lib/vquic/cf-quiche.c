@@ -177,6 +177,7 @@ struct h3_stream_ctx {
   struct h1_req_parser h1; /* h1 request parsing */
   uint64_t error3;         /* HTTP/3 stream error code */
   int32_t status_code;     /* HTTP status code */
+  int pri_code;            /* RFC 9218 priority last signaled */
   CURLcode xfer_result;    /* result from cf_quiche_write_(hd/body) */
   BIT(opened);             /* TRUE after stream has been opened */
   BIT(closed);             /* TRUE on stream close */
@@ -198,6 +199,40 @@ static void h3_stream_set_free(uint32_t id, void *stream)
   (void)id;
   DEBUGASSERT(stream);
   h3_stream_ctx_free((struct h3_stream_ctx *)stream);
+}
+
+/* send a PRIORITY_UPDATE when the RFC 9218 priority of the transfer
+ * changed since it was last signaled to the server */
+static void h3_check_priority(struct Curl_cfilter *cf,
+                              struct Curl_easy *data)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  int pri_code = Curl_http_priority_code(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+
+  if(stream && ctx->h3c && stream->opened && !stream->closed &&
+     (stream->pri_code != pri_code)) {
+    quiche_h3_priority pri;
+    char pval[16];
+    size_t plen;
+    int rc;
+    /* the default urgency when none is set, RFC 9218 section 4.1 */
+    pri.urgency = (data->set.priority_urgency >= 0) ?
+      (uint8_t)data->set.priority_urgency : 3;
+    pri.incremental = data->set.priority_incremental;
+    rc = quiche_h3_send_priority_update_for_request(ctx->h3c, ctx->qconn,
+                                                    stream->id, &pri);
+    plen = Curl_http_priority_value(data, pval, sizeof(pval));
+    CURL_TRC_CF(data, cf, "[%" PRIu64 "] PRIORITY_UPDATE '%.*s' -> %d",
+                stream->id, (int)plen, pval, rc);
+    if(rc) {
+      /* try again on the next activity */
+      infof(data, "[HTTP/3] [%" PRIu64 "] failed to send PRIORITY_UPDATE: "
+            "%d", stream->id, rc);
+    }
+    else
+      stream->pri_code = pri_code;
+  }
 }
 
 typedef bool cf_quiche_svisit(struct Curl_cfilter *cf,
@@ -930,6 +965,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = CURLE_AGAIN;
 
 out:
+  h3_check_priority(cf, data);
   result = Curl_1st_fatal(result, cf_flush_egress(cf, data));
   if(*pnread > 0)
     ctx->data_recvd += *pnread;
@@ -1073,6 +1109,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
   DEBUGASSERT(!stream->opened);
   stream->id = (uint64_t)rv;
+  stream->pri_code = Curl_http_priority_code(data);
   stream->opened = TRUE;
   stream->closed = FALSE;
   stream->reset = FALSE;
@@ -1157,6 +1194,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
+  h3_check_priority(cf, data);
   result = Curl_1st_fatal(result, cf_flush_egress(cf, data));
 
   CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_send(len=%zu) -> %d, %zu",

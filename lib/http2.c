@@ -139,6 +139,7 @@ struct h2_stream_ctx {
   CURLcode xfer_result; /* Result of writing out response */
   int32_t local_window_size; /* the local recv window size */
   int32_t status_code; /* HTTP response status code */
+  int pri_code; /* RFC 9218 priority last signaled to the server */
   BIT(resp_hds_complete); /* we have a complete, final response */
   BIT(closed); /* TRUE on stream close */
   BIT(reset);  /* TRUE on stream reset */
@@ -1117,6 +1118,13 @@ int Curl_nghttp2_fr_print(const nghttp2_frame *frame, char *buffer,
                           "FRAME[PRIORITY, len=%d, flags=%d]",
                           (int)frame->hd.length, frame->hd.flags);
   }
+#ifdef USE_NGHTTP2_PRIORITY_UPDATE
+  case NGHTTP2_PRIORITY_UPDATE: {
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[PRIORITY_UPDATE, len=%d]",
+                          (int)frame->hd.length);
+  }
+#endif
   case NGHTTP2_RST_STREAM: {
     return curl_msnprintf(buffer, blen,
                           "FRAME[RST_STREAM, len=%d, flags=%d, error=%u]",
@@ -1838,6 +1846,28 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
     }
   }
 
+#ifdef USE_NGHTTP2_PRIORITY_UPDATE
+  {
+    struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
+    int pri_code = Curl_http_priority_code(data);
+    if(stream && (stream->id > 0) && !stream->closed &&
+       (stream->pri_code != pri_code)) {
+      /* the RFC 9218 priority changed, tell the server. nghttp2 only sends
+       * the frame when the server announced support for it, otherwise it
+       * silently drops it. */
+      char pri[16];
+      size_t plen = Curl_http_priority_value(data, pri, sizeof(pri));
+      CURL_TRC_CF(data, cf, "[%d] submit PRIORITY_UPDATE '%.*s'",
+                  stream->id, (int)plen, pri);
+      rv = Curl_ngh2_submit_priority_update(&ctx->ngh2, stream->id,
+                                            (const uint8_t *)pri, plen);
+      if(rv)
+        goto out;
+      stream->pri_code = pri_code;
+    }
+  }
+#endif
+
   ctx->nw_out_blocked = 0;
   while(!rv && !ctx->nw_out_blocked &&
         Curl_ngh2_session_want_write(&ctx->ngh2))
@@ -2180,6 +2210,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
     result = CURLE_SEND_ERROR;
     goto out;
   }
+  stream->pri_code = Curl_http_priority_code(data);
 
 #ifdef CURLVERBOSE
 #define MAX_ACC 60000  /* <64KB to account for some overhead */
@@ -2472,6 +2503,10 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
       goto out;
     DEBUGASSERT(stream);
     stream->id = 1;
+    /* The Upgrade request went out as HTTP/1.1 without a Priority header.
+     * With no priority signaled yet, a set priority is sent as a
+     * PRIORITY_UPDATE on the first egress. */
+    stream->pri_code = 0;
     /* queue SETTINGS frame (again) */
     rc = Curl_ngh2_session_upgrade2(
       &ctx->ngh2, binsettings, binlen, data->state.httpreq == HTTPREQ_HEAD,

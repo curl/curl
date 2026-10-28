@@ -37,6 +37,7 @@
 #include "progress.h"
 #include "curlx/win32-fopen.h"
 #include "curlx/dynbuf.h"
+#include "http.h"
 #include "http1.h"
 #include "select.h"
 #include "transfer.h"
@@ -51,6 +52,33 @@
 static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
                                 uint64_t datalen, void *user_data,
                                 void *stream_user_data);
+
+/* send a PRIORITY_UPDATE when the RFC 9218 priority of the transfer
+ * changed since it was last signaled to the server */
+static void h3_check_priority(struct Curl_cfilter *cf,
+                              struct Curl_easy *data)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  int pri_code = Curl_http_priority_code(data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+
+  if(stream && ctx->h3conn && (stream->id >= 0) && !stream->closed &&
+     (stream->pri_code != pri_code)) {
+    char pri[16];
+    size_t plen = Curl_http_priority_value(data, pri, sizeof(pri));
+    int rc = nghttp3_conn_set_client_stream_priority(
+      ctx->h3conn, stream->id, (const uint8_t *)pri, plen);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] PRIORITY_UPDATE '%.*s' -> %d",
+                stream->id, (int)plen, pri, rc);
+    if(rc) {
+      /* try again on the next activity */
+      infof(data, "[HTTP/3] [%" PRId64 "] failed to send PRIORITY_UPDATE: "
+            "%s", stream->id, nghttp3_strerror(rc));
+    }
+    else
+      stream->pri_code = pri_code;
+  }
+}
 
 static CURLcode cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
@@ -552,6 +580,7 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = CURLE_AGAIN;
 
 out:
+  h3_check_priority(cf, data);
   result = Curl_1st_fatal(result,
                           Curl_cf_ngtcp2_progress_egress(cf, data, &pktx));
   result = Curl_1st_fatal(result,
@@ -770,6 +799,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
+  stream->pri_code = Curl_http_priority_code(data);
   cf_ngtcp2_upd_rx_win(cf, data, stream);
 
   if(Curl_trc_is_verbose(data)) {
@@ -876,6 +906,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     ctx->earlydata_skip += *pnwritten;
 
   DEBUGASSERT(!result);
+  h3_check_priority(cf, data);
   result = Curl_cf_ngtcp2_progress_egress(cf, data, &pktx);
 
   if(*pnwritten > 0) {

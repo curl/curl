@@ -200,6 +200,7 @@ DPAGES = \
   post302.md \
   post303.md \
   preproxy.md \
+  priority.md \
   progress-bar.md \
   proto-default.md \
   proto-redir.md \

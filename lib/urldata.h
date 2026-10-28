@@ -972,6 +972,7 @@ struct UserDefined {
   /* Priority information for an easy handle in relation to others on the same
      connection. */
   int weight;
+  signed char priority_urgency; /* RFC 9218 urgency, 0 - 7, -1 for unset */
 #endif
   short maxredirs;    /* maximum no. of http(s) redirects to follow,
                          set to -1 for infinity */
@@ -1037,6 +1038,9 @@ struct UserDefined {
   BIT(sep_headers);     /* handle host and proxy headers separately */
 #ifndef CURL_DISABLE_COOKIES
   BIT(cookiesession);   /* new cookie session? */
+#endif
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+  BIT(priority_incremental); /* RFC 9218 incremental flag */
 #endif
   BIT(crlf);            /* convert crlf on ftp upload(?) */
 #ifdef USE_SSH

@@ -284,6 +284,19 @@ int Curl_ngh2_submit_priority(
     nghttp2_submit_priority(ngh2->s, flags, stream_id, pri_spec));
 }
 
+#ifdef USE_NGHTTP2_PRIORITY_UPDATE
+int Curl_ngh2_submit_priority_update(
+  struct curl_ngh2 *ngh2, int32_t stream_id,
+  const uint8_t *field_value, size_t field_value_len)
+{
+  if(ngh2->fatal_rv)
+    return ngh2->fatal_rv;
+  return ngh2_check(ngh2,
+    nghttp2_submit_priority_update(ngh2->s, NGHTTP2_FLAG_NONE, stream_id,
+                                   field_value, field_value_len));
+}
+#endif
+
 int32_t Curl_ngh2_submit_request(
   struct curl_ngh2 *ngh2, const nghttp2_priority_spec *pri_spec,
   const nghttp2_nv *nva, size_t nvlen, const nghttp2_data_provider *data_prd,

@@ -33,6 +33,7 @@
 
 #include "urldata.h"
 #include "url.h"
+#include "multiif.h"
 #include "progress.h"
 #include "content_encoding.h"
 #include "strcase.h"
@@ -1049,6 +1050,35 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
     if((arg >= 1) && (arg <= 256))
       s->weight = (int)arg;
+    break;
+#else
+    result = CURLE_NOT_BUILT_IN;
+    break;
+#endif
+  case CURLOPT_PRIORITY_URGENCY:
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+    if((arg < -1) || (arg > 7))
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    else if(s->priority_urgency != (signed char)arg) {
+      s->priority_urgency = (signed char)arg;
+      /* make a running transfer send the update right away */
+      if(data->multi) {
+        Curl_multi_mark_dirty(data);
+      }
+    }
+    break;
+#else
+    result = CURLE_NOT_BUILT_IN;
+    break;
+#endif
+  case CURLOPT_PRIORITY_INCREMENTAL:
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+    if(s->priority_incremental != !!arg) {
+      s->priority_incremental = !!arg;
+      if(data->multi) {
+        Curl_multi_mark_dirty(data);
+      }
+    }
     break;
 #else
     result = CURLE_NOT_BUILT_IN;

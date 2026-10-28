@@ -743,6 +743,14 @@ is made on that connection. See CURLOPT_PREREQFUNCTION(3)
 
 Socks proxy to use. See CURLOPT_PRE_PROXY(3)
 
+## CURLOPT_PRIORITY_INCREMENTAL
+
+Set the RFC 9218 incremental flag. See CURLOPT_PRIORITY_INCREMENTAL(3)
+
+## CURLOPT_PRIORITY_URGENCY
+
+Set the RFC 9218 urgency. See CURLOPT_PRIORITY_URGENCY(3)
+
 ## CURLOPT_PRIVATE
 
 Private pointer to store. See CURLOPT_PRIVATE(3)

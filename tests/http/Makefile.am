@@ -72,6 +72,7 @@ EXTRA_DIST =             \
   test_22_httpsrr.py     \
   test_23_ech.py         \
   test_24_ocsp.py        \
+  test_25_priority.py    \
   test_30_vsftpd.py      \
   test_31_vsftpds.py     \
   test_32_ftps_vsftpd.py \

@@ -45,6 +45,7 @@ struct OperationConfig *config_alloc(void)
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;
+  config->priority_urgency = -1;
   config->proto_present = FALSE;
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
