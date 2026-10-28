@@ -39,6 +39,7 @@
 #include "curl_trc.h"
 #include "multiif.h"
 #include "easyif.h"
+#include "progress.h"
 #include "transfer.h"
 #include "select.h"
 #include "curlx/strparse.h"
@@ -374,7 +375,10 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   size_t nwritten;
-
+  const struct curltime *pnow = Curl_pgrs_now(data);
+  struct curltime started = *pnow;
+  timediff_t timeout_ms = data->set.timeout ?
+                          data->set.timeout : (2 * 60 * 1000);
   if(!data)
     return result;
 
@@ -401,7 +405,12 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
 
       CURL_TRC_WS(data, "ws_send_raw_blocking() partial, %zu left to send",
                   buflen);
-      left_ms = Curl_timeleft_ms(data);
+      pnow = Curl_pgrs_now(data);
+      left_ms = Curl_timeleft_now_ms(data, pnow);
+      if(left_ms == 0) {
+        /* No transfer timeout in effect. Check local one. */
+        left_ms = timeout_ms - curlx_ptimediff_ms(pnow, &started);
+      }
       if(left_ms < 0) {
         failf(data, "[WS] Timeout waiting for socket becoming writable");
         return CURLE_SEND_ERROR;

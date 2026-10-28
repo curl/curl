@@ -1170,11 +1170,16 @@ static CURLcode cf_ws_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       size_t n;
       result = Curl_cf_recv_bufq(cf->next, data, &ctx->recvbuf, 0, &n);
       if(result) {
-        if((result == CURLE_AGAIN) && ctx->dec.seen_close) {
-          /* Server send a close, we got nothing. This looks like
-           * the EOS of this ws connection. */
-          *pnread = 0;
-          result = CURLE_OK;
+        if(result == CURLE_AGAIN) {
+          /* Not a real error, try a flush before leaving */
+          CURLcode r2 = cf_ws_flush(cf, data);
+          if(r2 && (r2 != CURLE_AGAIN))
+            result = r2;
+          else if(ctx->dec.seen_close) {
+            /* This looks like the EOS on this ws connection. */
+            *pnread = 0;
+            result = CURLE_OK;
+          }
         }
         goto out;
       }
@@ -1241,8 +1246,11 @@ static CURLcode cf_ws_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
               FMT_OFF_T ", %" FMT_OFF_T " left)",
               blen, *pnread, ctx->recvframe.offset,
               ctx->recvframe.bytesleft);
-  if(!result)
-    result = cf_ws_flush(cf, data);
+  if(!result) {
+    CURLcode r2 = cf_ws_flush(cf, data);
+    if(r2 && (r2 != CURLE_AGAIN))
+      result = r2;
+  }
 
 out:
   CURL_TRC_CF(data, cf, "recv(len=%zu, raw=%d) -> %d, %zu",
@@ -1439,7 +1447,7 @@ CURLcode Curl_cf_ws_start_frame(struct Curl_cfilter *cf,
   struct cf_ws_ctx *ctx = cf->ctx;
   CURLcode result;
 
-  if(ctx->enc.payload_remain || Curl_bufq_is_full(&ctx->sendbuf)) {
+  if(ctx->enc.payload_remain) {
     CURL_TRC_CF(data, cf, "start_frame denied, previous frame not finished");
     return CURLE_AGAIN;
   }

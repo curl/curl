@@ -130,8 +130,11 @@ there can be an error message stored in the error buffer when non-zero is
 returned.
 
 Starting in curl 8.24.0, this function sends blocking and times out
-on the transfer timeout setting. The previous non-blocking behaviour
-was difficult to handle correctly in an application.
+on the transfer timeout setting (the previous non-blocking behaviour
+was difficult to handle correctly in an application).
+
+For CURLOPT_CONNECT_ONLY(3) transfers, the timeout of each call to this
+function can be adjusted by CURLOPT_TIMEOUT(3). The default is 120 seconds.
 
 Before 8.24.0, the call was non-blocking and could return
 **CURLE_AGAIN**. The correct behavior is then to wait until the socket
