@@ -120,13 +120,3 @@ size_t Curl_hash_count(struct Curl_hash *h)
 ~~~
 
 Returns the number of entries stored in the hash.
-
-## `Curl_hash_start_iterate`
-
-~~~c
-void Curl_hash_start_iterate(struct Curl_hash *hash,
-                             struct Curl_hash_iterator *iter):
-~~~
-
-This function initializes a `struct Curl_hash_iterator` that `iter` points to.
-It can then be used to iterate over all the entries in the hash.

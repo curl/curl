@@ -197,6 +197,18 @@ static struct Curl_hash_element *hash_next_element(
   return iter->current;
 }
 
+static void hash_start_iterate(struct Curl_hash *hash,
+                               struct Curl_hash_iterator *iter)
+{
+  DEBUGASSERT(hash->init == HASHINIT);
+  iter->hash = hash;
+  iter->slot_index = 0;
+  iter->current = NULL;
+#ifdef DEBUGBUILD
+  iter->init = ITERINIT;
+#endif
+}
+
 void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 {
   struct Curl_hash_iterator iter;
@@ -208,7 +220,7 @@ void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 
   curl_mfprintf(stderr, "=Hash dump=\n");
 
-  Curl_hash_start_iterate(h, &iter);
+  hash_start_iterate(h, &iter);
 
   he = hash_next_element(&iter);
   while(he) {
@@ -495,16 +507,4 @@ void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
         he_anchor = &(*he_anchor)->next;
     }
   }
-}
-
-void Curl_hash_start_iterate(struct Curl_hash *hash,
-                             struct Curl_hash_iterator *iter)
-{
-  DEBUGASSERT(hash->init == HASHINIT);
-  iter->hash = hash;
-  iter->slot_index = 0;
-  iter->current = NULL;
-#ifdef DEBUGBUILD
-  iter->init = ITERINIT;
-#endif
 }
