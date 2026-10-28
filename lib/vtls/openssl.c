@@ -2939,6 +2939,45 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
       else
         continue;
 
+      {
+        /* Blacklisted roots and intermediates.
+         * https://emudhra.we-have-a-problem.com/
+         *
+         * Microsoft blocked the bad eMudhra intermediate certificates in
+         * supported versions of Windows that receive updates, but may still
+         * trust the issuer root certificates which other vendors have removed.
+         *
+         * Regardless we skip importing these certificates. OpenSSL does not
+         * check Microsoft's blacklist and assuming the user did not provide a
+         * CRL file it would otherwise be possible for verification to succeed.
+         */
+        static const char * const blacklist[] = {
+          "emSign Root TLS CA - G3",
+          "emSign Root CS CA - G3",
+          "AAA Certificate Services",
+          "emSign ECC Root CA - G3",
+          "EM DV TLS CA - G3B",
+          "EM OV TLS CA - G3B",
+          "EM EV TLS CA - G3B",
+          "EM DV TLS CA - G3C",
+          "EM OV TLS CA - G3C",
+          "EM EV TLS CA - G3C",
+          "EM OV CS CA - G3B",
+          "EM OV CS CA - G3C",
+          NULL
+        };
+        char cert_name[256];
+        if(CertGetNameStringA(pContext, CERT_NAME_ATTR_TYPE, 0,
+                              CURL_UNCONST(szOID_COMMON_NAME),
+                              cert_name, sizeof(cert_name)) > 1) {
+          const char * const *b;
+          for(b = blacklist; *b && strcmp(cert_name, *b); ++b)
+            ;
+          if(*b)
+            continue;
+        }
+      }
+
       x509 = d2i_X509(NULL, &encoded_cert, (long)pContext->cbCertEncoded);
       if(!x509)
         continue;

@@ -271,6 +271,9 @@ jobs:
       matrix:
         image: [ubuntu-26.04-arm, macos-latest, windows-2022]
     steps:
+      - uses: $/.github/actions/macos-fix-certs
+        if: ${{ contains(runner.os, 'macos') }}
+
       - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         if: ${{ contains(matrix.image, 'windows') }}
         with:

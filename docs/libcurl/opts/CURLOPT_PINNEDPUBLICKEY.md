@@ -58,8 +58,7 @@ If the transfer is set to follow redirects to other origins, they are *not*
 checked against this key.
 
 For LDAP, this option only has an effect when using the OpenLDAP backend,
-which routes TLS through libcurl. It is not supported by Apple's OpenLDAP
-fork.
+which routes TLS through libcurl. It is not supported by AppleLDAP.
 
 # DEFAULT
 
