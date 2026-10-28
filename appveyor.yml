@@ -144,7 +144,6 @@ branches:
 
 skip_commits:
   files:
-    - '.circleci/*'
     - '.github/**/*'
     - 'Dockerfile'
     - 'projects/OS400/*'

@@ -13,7 +13,6 @@ name: 'Source'
       - 'curl-*'
       - '*/ci'
     paths-ignore:
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
   pull_request:
@@ -21,7 +20,6 @@ name: 'Source'
       - master
       - 'curl-*'
     paths-ignore:
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
 

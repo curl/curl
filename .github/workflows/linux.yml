@@ -11,7 +11,6 @@ name: 'Linux'
       - 'curl-*'
       - '*/ci'
     paths-ignore:
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'projects/**'
@@ -20,7 +19,6 @@ name: 'Linux'
       - master
       - 'curl-*'
     paths-ignore:
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'projects/**'
