@@ -122,8 +122,8 @@ An example `add_two_integers()` function for unit testing:
 
 Since the function is static and is private for this source file, it should
 not have its prototype in any header file. It must have the `@unitest` tag
-referferring to which unit test that uses this fucntion in a comment
-immediately above the function itself.
+referring to which unit test that uses this function in a comment immediately
+above the function itself.
 
 When building unit tests, the build system automatically generates the
 `lib/unitprotos.h` header file with all the prototypes for `UNITTEST`
