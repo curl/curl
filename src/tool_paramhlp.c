@@ -291,6 +291,8 @@ ParameterError str2unummax(long *val, const char *str, long max)
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
+ *
+ * Verified in test 1623
  */
 
 ParameterError secs2ms(long *val, const char *str)
