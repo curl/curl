@@ -907,6 +907,14 @@ CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex)
                             CF_CTRL_FLUSH, 0, NULL);
 }
 
+CURLcode Curl_conn_do_maintenance(struct Curl_easy *data, int8_t sockindex)
+{
+  if(!CONN_SOCK_IDX_VALID(sockindex))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
+                            CF_CTRL_MAINTENANCE, 0, NULL);
+}
+
 /**
  * Notify connection filters that the transfer represented by `data`
  * is done with sending data (e.g. has uploaded everything).

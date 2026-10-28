@@ -2308,6 +2308,15 @@ static CURLMcode multistate_ratelimiting(struct Curl_easy *data,
   else {
     if(!mspeed_check(data))
       mresult = CURLM_CALL_MULTI_PERFORM;
+
+    if((data->mstate == MSTATE_RATELIMITING) &&
+       Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
+      result = Curl_conn_do_maintenance(data, FIRSTSOCKET);
+      if(result) {
+        multi_posttransfer(data);
+        multi_done(data, result, TRUE);
+      }
+    }
   }
   *resultp = result;
   return mresult;
