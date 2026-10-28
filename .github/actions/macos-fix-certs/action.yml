@@ -14,6 +14,7 @@ runs:
       shell: bash
       run: |
         # Apple's vulnerable cert
+        # https://emudhra.we-have-a-problem.com/#macos-curl
         ls -lA /etc/ssl/cert.pem
         t="$(mktemp)" && \
           awk -v s='=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3' \
