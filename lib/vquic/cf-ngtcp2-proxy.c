@@ -1205,7 +1205,7 @@ static CURLcode cf_h3_proxy_shutdown(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_h3_proxy = {
   "H3-PROXY",
-  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY | CF_TYPE_SSL,
+  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY | CF_TYPE_SSL | CF_TYPE_MAINTENANCE,
   CURL_LOG_LVL_NONE,
   cf_h3_proxy_destroy,
   cf_h3_proxy_connect,
@@ -1214,7 +1214,7 @@ struct Curl_cftype Curl_cft_h3_proxy = {
   cf_h3_proxy_data_pending,
   cf_h3_proxy_send,
   cf_h3_proxy_recv,
-  Curl_cf_def_cntrl,
+  Curl_cf_ngtcp2_cmn_cntrl,
   Curl_cf_ngtcp2_cmn_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_ngtcp2_cmn_query,
