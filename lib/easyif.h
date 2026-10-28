@@ -26,9 +26,6 @@
 /*
  * Prototypes for library-wide functions provided by easy.c
  */
-CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
-                       size_t buflen, size_t *n);
-
 #ifndef CURL_DISABLE_WEBSOCKETS
 CURLcode Curl_connect_only_attach(struct Curl_easy *data);
 #endif

@@ -33,7 +33,6 @@
 #include "rand.h"
 #include "curlx/base64.h"
 #include "cfilters.h"
-#include "cf-recvbuf.h"
 #include "cf-ws.h"
 #include "connect.h"
 #include "sendf.h"
