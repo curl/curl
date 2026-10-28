@@ -481,9 +481,6 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
       char zoneid[MAX_ZONEID_LEN];
       int i = 0;
       char *h = &hostname[len + 1];
-      /* pass '25' if present and is a URL encoded percent sign */
-      if(!strncmp(h, "25", 2) && h[2] && (h[2] != ']'))
-        h += 2;
       while(!invalid_host_char[(unsigned char)*h] && (*h != ']') &&
             (i < (MAX_ZONEID_LEN - 1)))
         zoneid[i++] = *h++;
