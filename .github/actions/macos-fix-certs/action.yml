@@ -28,7 +28,7 @@ runs:
       if: ${{ contains(runner.os, 'macos') }}
       shell: bash
       run: |
-        # Obsolete Homebrew cert.pem preinstalled on the runners
+        # Obsolete Homebrew cert.pem preinstalled on GitHub runners
         ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
         t="$(mktemp)" && \
           awk 'BEGIN { \
