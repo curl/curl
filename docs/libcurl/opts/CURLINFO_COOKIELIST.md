@@ -37,6 +37,10 @@ received) the 'struct curl_slist *' is made a NULL pointer.
 Cookies that were imported in the Set-Cookie format without a domain name are
 not exported by this option.
 
+The lines do not carry the `SameSite` and `Partitioned` attributes of the
+cookies. The cookie jar file written with CURLOPT_COOKIEJAR(3) does, on a
+`#curl:` comment line before each such cookie.
+
 # %PROTOCOLS%
 
 # EXAMPLE

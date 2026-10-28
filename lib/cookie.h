@@ -34,15 +34,25 @@ struct Cookie {
   char *value;                    /* name = <this> */
   char *path;                     /* canonical path */
   char *domain;                   /* domain = <this> */
+  char *partkey;                  /* partition key, the site a Partitioned
+                                     cookie was set under, or NULL */
   curl_off_t expires;             /* expires = <this> */
   unsigned int creationtime;      /* time when the cookie was written */
+  unsigned char samesite;         /* COOKIE_SAMESITE_* */
   BIT(tailmatch);                 /* tail-match the domain name */
   BIT(secure);                    /* the 'secure' keyword was used */
   BIT(livecookie);                /* updated from server, not a stored file */
   BIT(httponly);                  /* the httponly directive is present */
   BIT(prefix_secure);             /* secure prefix is set */
   BIT(prefix_host);               /* host prefix is set */
+  BIT(partitioned);               /* the Partitioned attribute is set */
 };
+
+/* SameSite attribute values, RFC 6265bis section 5.4.7 */
+#define COOKIE_SAMESITE_DEFAULT 0 /* no (valid) attribute, treated as Lax */
+#define COOKIE_SAMESITE_NONE    1
+#define COOKIE_SAMESITE_LAX     2
+#define COOKIE_SAMESITE_STRICT  3
 
 /*
  * Available cookie prefixes, as defined in
@@ -59,6 +69,13 @@ struct CookieInfo {
   curl_off_t next_expiration; /* the next time at which expiration happens */
   unsigned int numcookies;    /* number of cookies in the "jar" */
   unsigned int lastct;        /* last creation-time used in the jar */
+  /* attributes read from a "#curl:" line, applied to the next cookie line */
+  char *pending_partkey;
+  unsigned char pending_samesite;
+  BIT(pending_partitioned);
+  BIT(pending);               /* a "#curl:" line was read */
+  BIT(attrs_used);            /* SameSite/Partitioned attributes are in use,
+                                 write them to the jar */
   BIT(running);               /* state info, for cookie adding information */
   BIT(newsession); /* new session, discard session cookies on load */
 };

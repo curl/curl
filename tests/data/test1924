@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+cookies
+SameSite
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+cookies
+</features>
+<name>
+cookie same-site check for CURLOPT_COOKIE_SITE
+</name>
+</client>
+</testcase>

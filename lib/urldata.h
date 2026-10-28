@@ -712,6 +712,7 @@ enum dupstring {
 #endif
 #ifndef CURL_DISABLE_COOKIES
   STRING_COOKIE,          /* HTTP cookie string to send */
+  STRING_COOKIE_SITE,     /* site the request is made for, for SameSite */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
 #endif
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */
@@ -1037,6 +1038,7 @@ struct UserDefined {
   BIT(sep_headers);     /* handle host and proxy headers separately */
 #ifndef CURL_DISABLE_COOKIES
   BIT(cookiesession);   /* new cookie session? */
+  BIT(cookie_navigation); /* request is a top-level navigation */
 #endif
   BIT(crlf);            /* convert crlf on ftp upload(?) */
 #ifdef USE_SSH

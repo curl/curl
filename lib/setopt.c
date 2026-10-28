@@ -430,6 +430,10 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->http09_allowed = enabled;
     break;
 #ifndef CURL_DISABLE_COOKIES
+  case CURLOPT_COOKIE_CONTEXT:
+    s->cookie_navigation = !!(arg & CURLCOOKIE_NAVIGATION);
+    break;
+
   case CURLOPT_COOKIESESSION:
     /*
      * Set this option to TRUE to start a new "cookie session". It will
@@ -2102,6 +2106,20 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      * Cookie string to send to the remote server in the request.
      */
     return Curl_setstropt(data, STRING_COOKIE, ptr);
+
+  case CURLOPT_COOKIE_SITE:
+    /*
+     * The site this request is made for, used to evaluate SameSite and
+     * Partitioned cookies. It ends up in cookie jar files, so it must not
+     * contain anything that breaks a line there.
+     */
+    if(ptr) {
+      const unsigned char *p;
+      for(p = (const unsigned char *)ptr; *p; p++)
+        if((*p <= ' ') || (*p == 0x7f) || (*p == ';'))
+          return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    return Curl_setstropt(data, STRING_COOKIE_SITE, ptr);
 
   case CURLOPT_COOKIEFILE:
     return cookiefile(data, ptr);
