@@ -122,6 +122,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
 #define CF_CTRL_FLUSH            (256 + 2) /* 0          NULL     first fail */
 #define CF_CTRL_REPORT_STATS     (256 + 3) /* 0          NULL     ignored */
+#define CF_CTRL_MAINTENANCE      (256 + 4) /* 0          NULL     ignored */
 
 /**
  * Handle event/control for the filter.
@@ -456,6 +457,10 @@ bool Curl_conn_needs_flush(struct Curl_easy *data, int8_t sockindex);
  * Flush any pending data on the connection filters at chain `sockindex`.
  */
 CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex);
+
+/* Performe maintenance on the connection filters at chain `sockindex`.
+ * Sends CF_CTRL_MAINTENANCE to filters. */
+CURLcode Curl_conn_do_maintenance(struct Curl_easy *data, int8_t sockindex);
 
 /**
  * Return the socket used on data's connection for FIRSTSOCKET,

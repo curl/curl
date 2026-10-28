@@ -87,6 +87,10 @@ static CURLcode cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
     result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
+  else {
+    /* We always want to process server packets */
+    result = Curl_pollset_add_in(data, ps, sock);
+  }
   return result;
 }
 
