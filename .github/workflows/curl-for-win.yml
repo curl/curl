@@ -137,7 +137,6 @@ jobs:
           curl -V
           # Apple's vulnerable cert
           ls -lA /etc/ssl/cert.pem
-          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
           t="$(mktemp)" && \
             awk -v s='=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3' \
               '/^(===|###) /{skip=0} $0==s{skip=1} !skip' /etc/ssl/cert.pem | \
@@ -145,11 +144,9 @@ jobs:
               '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
             [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
           ls -lA /etc/ssl/cert.pem
-          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
 
           # Obsolete Homebrew cert.pem preinstalled on the runners
           ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
-          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
           t="$(mktemp)" && \
             awk 'BEGIN { \
               toskip["MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG"]; \
@@ -162,7 +159,6 @@ jobs:
               { print }' < /opt/homebrew/etc/ca-certificates/cert.pem > "$t" && \
             [ -s "$t" ] && install -m 0644 "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
           ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
-          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
