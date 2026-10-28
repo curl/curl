@@ -458,7 +458,7 @@ bool Curl_conn_needs_flush(struct Curl_easy *data, int8_t sockindex);
  */
 CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex);
 
-/* Performe maintenance on the connection filters at chain `sockindex`.
+/* Perform maintenance on the connection filters at chain `sockindex`.
  * Sends CF_CTRL_MAINTENANCE to filters. */
 CURLcode Curl_conn_do_maintenance(struct Curl_easy *data, int8_t sockindex);
 
