@@ -98,7 +98,7 @@ jobs:
               '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
             [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
           ls -lA /etc/ssl/cert.pem
-          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ && false
 
           # Obsolete Homebrew cert.pem preinstalled on the runners
           ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
@@ -115,7 +115,7 @@ jobs:
               { print }' < /opt/homebrew/etc/ca-certificates/cert.pem > "$t" && \
             [ -s "$t" ] && install -m 0644 "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
           ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
-          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ && false
 
       - name: 'install prereqs'
         if: ${{ matrix.build.configure }}
@@ -446,7 +446,7 @@ jobs:
               '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
             [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
           ls -lA /etc/ssl/cert.pem
-          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ && false
 
           # Obsolete Homebrew cert.pem preinstalled on the runners
           ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
@@ -463,7 +463,7 @@ jobs:
               { print }' < /opt/homebrew/etc/ca-certificates/cert.pem > "$t" && \
             [ -s "$t" ] && install -m 0644 "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
           ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
-          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ && false
 
       - name: 'brew unlink openssl'
         if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'openssl@4') }}
@@ -739,7 +739,7 @@ jobs:
               '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
             [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
           ls -lA /etc/ssl/cert.pem
-          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+          curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ && false
 
           # Obsolete Homebrew cert.pem preinstalled on the runners
           ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
@@ -756,7 +756,7 @@ jobs:
               { print }' < /opt/homebrew/etc/ca-certificates/cert.pem > "$t" && \
             [ -s "$t" ] && install -m 0644 "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
           ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
-          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ || true
+          CURL_CA_BUNDLE=/opt/homebrew/etc/ca-certificates/cert.pem curl -fsS https://dv-g3b-noct-emudhra.we-have-a-problem.com/ && false
 
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
