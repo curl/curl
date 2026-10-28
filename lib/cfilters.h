@@ -429,10 +429,6 @@ uint8_t Curl_conn_cf_http_version(struct Curl_easy *data,
 unsigned char Curl_conn_get_transport(struct Curl_easy *data,
                                       struct connectdata *conn);
 
-/* Get the negotiated ALPN protocol or NULL if none in play */
-const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
-                                          struct connectdata *conn);
-
 void Curl_conn_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
 

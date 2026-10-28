@@ -607,13 +607,6 @@ int Curl_protocol_for_transport(uint8_t transport)
   }
 }
 
-const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
-                                          struct connectdata *conn)
-{
-  struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
-  return Curl_conn_cf_get_alpn_negotiated(cf, data);
-}
-
 uint8_t Curl_conn_cf_http_version(struct Curl_easy *data,
                                   struct Curl_cfilter *cf)
 {
