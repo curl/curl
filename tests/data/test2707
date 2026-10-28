@@ -26,6 +26,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <setenv>
 CURL_WS_FORCE_ZERO_MASK=1
+CURL_ENTROPY=12345678
 </setenv>
 </client>
 
@@ -48,7 +49,7 @@ HTTP/1.1 101 Switching to WebSockets
 Server: server/%TESTNUMBER
 Upgrade: Websocket
 Connection: Upgrade
-Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+Sec-WebSocket-Accept: Dut04YXKjDKbXFLrc+AVmMeFsWM=
 
 %hex[%81%00]hex%%hex[%81%7d]hex%%repeat[125 x _]%%hex[%81%7e%00%7e]hex%%repeat[126 x _]%%hex[%81%7e%00%7f]hex%%repeat[127 x _]%%hex[%81%7e%ff%ff]hex%%repeat[65535 x _]%%hex[%81%7f%00%00%00%00%00%01%00%00]hex%%repeat[65536 x _]%%hex[%88%00]hex%
 </data>

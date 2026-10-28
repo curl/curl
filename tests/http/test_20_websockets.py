@@ -336,7 +336,10 @@ class TestWebsockets:
                             if not chunk:
                                 return
                             request += chunk
-                        key = re.search(rb'(?im)^Sec-WebSocket-Key:\s*(\S+)', request).group(1)
+                        match = re.search(rb'(?im)^Sec-WebSocket-Key:\s*(\S+)',
+                                          request)
+                        assert match is not None
+                        key = match.group(1)
                         accept = base64.b64encode(hashlib.sha1(
                             key + b'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
                         ).digest()).decode()
@@ -396,8 +399,8 @@ class TestWebsockets:
     @pytest.mark.parametrize('offers,selection,accepted', [
         pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
                      'permessage-deflate', True, id='raw-requested'),
-        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate; '
-                      'client_max_window_bits'],
+        pytest.param(['Sec-WebSocket-Extensions: permessage-deflate; ' +
+                     'client_max_window_bits'],
                      'permessage-deflate; client_max_window_bits=12', True,
                      id='raw-negotiated-parameter'),
         pytest.param(['Sec-WebSocket-Extensions: permessage-deflate'],
@@ -459,8 +462,10 @@ class TestWebsockets:
                             if not chunk:
                                 return
                             request += chunk
-                        key = re.search(rb'(?im)^Sec-WebSocket-Key:\s*(\S+)',
-                                        request).group(1)
+                        match = re.search(rb'(?im)^Sec-WebSocket-Key:\s*(\S+)',
+                                          request)
+                        assert match is not None
+                        key = match.group(1)
                         accept = base64.b64encode(hashlib.sha1(
                             key + b'258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
                         ).digest()).decode()

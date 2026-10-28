@@ -12,7 +12,7 @@ HTTP/1.1 101 Switching to WebSockets swsclose
 Server: test-server/fake
 Upgrade: websocket
 Connection: Upgrade
-Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+Sec-WebSocket-Accept: Dut04YXKjDKbXFLrc+AVmMeFsWM=
 
 </data>
 # allow upgrade

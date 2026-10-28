@@ -14,7 +14,7 @@ Server: test-server/fake
 Upgrade: websocket
 Connection: Upgrade
 Something: else
-Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+Sec-WebSocket-Accept: Dut04YXKjDKbXFLrc+AVmMeFsWM=
 
 %hex[%89%00]hex%
 </data>

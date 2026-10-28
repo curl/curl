@@ -1479,7 +1479,8 @@ static bool ws_subprotocol_requested(const char *requested, const char *name)
 
 /* Parse one extension and its parameters according to RFC 6455 section 9.1.
  * Return the extension name and advance to the next entry, or NULL at end.
- * In raw mode the application owns extension-specific parameter negotiation. */
+ * In raw mode the application owns extension-specific parameter
+ * negotiation. */
 static bool ws_extension_token_char(unsigned char c)
 {
   return ISALNUM(c) || (c && strchr("!#$%&'*+-.^_`|~", c));
@@ -1655,8 +1656,8 @@ CURLcode Curl_ws_header(struct Curl_easy *data,
     return result;
   }
   else if(curl_strnequal(header, "Sec-WebSocket-Protocol:", 23)) {
-    const char *requested = Curl_checkheaders(data,
-                                              STRCONST("Sec-WebSocket-Protocol"));
+    const char *requested =
+      Curl_checkheaders(data, STRCONST("Sec-WebSocket-Protocol"));
     char *value = Curl_copy_header_value(header);
     char *request_value = requested ? Curl_copy_header_value(requested) : NULL;
     CURLcode result = CURLE_OK;

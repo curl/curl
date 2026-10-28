@@ -15,7 +15,7 @@ HTTP/1.1 101 Switching to WebSockets
 Server: server/fake-ws
 Upgrade: websocket
 Connection: Upgrade
-Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+Sec-WebSocket-Accept: Dut04YXKjDKbXFLrc+AVmMeFsWM=
 
 %hex[%88%1f%03%e9]hex%going away, see you next time
 </data>
