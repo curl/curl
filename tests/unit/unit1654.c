@@ -186,6 +186,59 @@ static CURLcode test_unit1654(const char *arg)
 
   Curl_altsvc_save(curl, asi, outname);
 
+  /* RFC 7838 section 3: the protocol-id is a token where octets not
+     allowed in a token are percent-encoded, so "http%2F1.1" is the
+     conforming spelling of "http/1.1". See issue #23654. */
+  {
+    static const struct {
+      const char *header;
+      enum alpnid expected;
+    } cases[] = {
+      { "http%2F1.1=\":8080\"\r\n", ALPN_h1 },
+      /* Noncanonical spellings are tolerated by the URL decoder. */
+      { "http%2f1.1=\":8080\"\r\n", ALPN_h1 },
+      { "%68%32=\":8080\"\r\n", ALPN_h2 },
+      { "http%2G1.1=\":8080\"\r\n", ALPN_none },
+      { "http%2=\":8080\"\r\n", ALPN_none },
+      { "http%=\":8080\"\r\n", ALPN_none },
+      { "h2%00=\":8080\"\r\n", ALPN_none },
+      { "%00h2=\":8080\"\r\n", ALPN_none },
+      { "h2%1F=\":8080\"\r\n", ALPN_none },
+      { "=\":8080\"\r\n", ALPN_none },
+      { "  =\":8080\"\r\n", ALPN_none },
+      { "http%2G1.1=\":8443\", h2=\":8080\"\r\n", ALPN_h2 },
+      { "h2%00=\":8443\", h2=\":8080\"\r\n", ALPN_h2 },
+      { "h2%1F=\":8443\", http%2F1.1=\":8080\"\r\n", ALPN_h1 },
+      { "h2=\":8080\", h2%00=\":8443\"\r\n", ALPN_h2 }
+    };
+    size_t i;
+
+    if(Curl_peer_create(curl, scheme, "percent.example", 443, &origin))
+      goto fail;
+    for(i = 0; i < CURL_ARRAYSIZE(cases); i++) {
+      bool found;
+
+      /* Each case starts without an entry for this origin. */
+      result = Curl_altsvc_parse(curl, asi, "clear\r\n", origin, ALPN_h1);
+      fail_if(result, "Curl_altsvc_parse(clear) failed!");
+      if(result)
+        goto fail;
+      result = Curl_altsvc_parse(curl, asi, cases[i].header, origin, ALPN_h1);
+      fail_if(result, cases[i].header);
+      if(result)
+        goto fail;
+      found = Curl_altsvc_lookup(asi, origin, ALPN_h1, &dstentry,
+                                 CURLALTSVC_H1 | CURLALTSVC_H2 | CURLALTSVC_H3,
+                                 &same_destination);
+      fail_unless(found == (cases[i].expected != ALPN_none), cases[i].header);
+      if(found) {
+        fail_unless(dstentry->dst.alpnid == cases[i].expected,
+                    cases[i].header);
+        fail_unless(dstentry->dst.port == 8080, cases[i].header);
+      }
+    }
+  }
+
 fail:
   curl_easy_cleanup(curl);
   Curl_altsvc_cleanup(&asi);
