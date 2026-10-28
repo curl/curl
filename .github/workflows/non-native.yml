@@ -97,7 +97,7 @@ jobs:
               options: '-DCURL_USE_GNUTLS=ON' }
 
           # https://pkgsrc.se/
-          - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl !examples', tflags: 'skipall',
+          - { os: 'netbsd'      , version: '10.2' , build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl !examples', tflags: 'skipall',
               install: 'autoconf automake libtool mit-krb5',
               options: '--with-openssl --with-gssapi' }
 
@@ -113,7 +113,7 @@ jobs:
               options: '--with-openssl' }
 
           # Skip test 2707 'ws: Peculiar frame sizes' on suspicion of hangs
-          - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
+          - { os: 'openbsd'     , version: '8.0'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
               install: 'cmake ninja openldap-client-- libidn2' }
 
       fail-fast: false
@@ -123,7 +123,7 @@ jobs:
           persist-credentials: false
 
       - name: 'setup VM'
-        uses: cross-platform-actions/action@e0b9770014ba65d5e0815f15b74031c3a635f641 # v1.6.0
+        uses: cross-platform-actions/action@82668f1fbd89d9c99487604f822cbf6716f124d3 # v1.7.0
         with:
           environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS MATRIX_VERSION TFLAGS'
           operating_system: '${{ matrix.os }}'
