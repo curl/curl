@@ -84,6 +84,9 @@ jobs:
               -DCURL_USE_LIBPSL=OFF -DCURL_ENABLE_NTLM=ON
 
     steps:
+      - name: 'fixup /etc/ssl/cert.pem'
+        run: sudo cp -p /opt/homebrew/opt/ca-certificates/share/ca-certificates/cacert.pem /etc/ssl/cert.pem
+
       - name: 'install prereqs'
         if: ${{ matrix.build.configure }}
         timeout-minutes: 5
@@ -399,7 +402,7 @@ jobs:
             tflags: '-t --shallow=25 --subset=2/3'
 
     steps:
-      - name: 'brew unlink openssl'
+      - name: 'fixup /etc/ssl/cert.pem'
         run: |
           ls -lA /etc/ssl/cert.pem
           sudo cp -p /opt/homebrew/opt/ca-certificates/share/ca-certificates/cacert.pem /etc/ssl/cert.pem
@@ -665,6 +668,9 @@ jobs:
           - { image: macos-15,     build: autotools }
           - { image: macos-26,     build: autotools }
     steps:
+      - name: 'fixup /etc/ssl/cert.pem'
+        run: sudo cp -p /opt/homebrew/opt/ca-certificates/share/ca-certificates/cacert.pem /etc/ssl/cert.pem
+
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
         uses: $/.github/actions/pkg-install
