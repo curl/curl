@@ -220,7 +220,7 @@ jobs:
           - name: 'openssl default'
             image: ubuntu-24.04
             install_steps: pytest
-            configure: --with-openssl --enable-debug --disable-unity --enable-static
+            configure: --with-openssl --enable-debug --disable-unity
 
           - name: 'openssl libssh2 sync-resolver valgrind 1'
             image: ubuntu-26.04-arm
@@ -280,7 +280,7 @@ jobs:
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
             image: ubuntu-24.04-arm
-            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --enable-static --disable-libcurl-option --disable-digest-auth --enable-ntlm
+            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth --enable-ntlm
 
           - name: 'curl_global_init_mem debug valgrind 1'
             image: ubuntu-24.04-arm
