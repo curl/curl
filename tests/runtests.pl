@@ -3298,7 +3298,7 @@ if(%skipped && !$short) {
         # now gather all test case numbers that had this reason for being
         # skipped
         my $c = 0;
-        my $max = 9;
+        my $max = 10000;
         for(0 .. scalar @teststat) {
             my $t = $_;
             if($teststat[$t] && ($teststat[$t] eq $r)) {
