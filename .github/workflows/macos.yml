@@ -549,10 +549,14 @@ jobs:
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_steps, 'torture') && 20 || 10 }}
         env:
+          MATRIX_INSTALL: '${{ matrix.build.install }}'
           TEST_TARGET: ${{ contains(matrix.build.install_steps, 'torture') && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           TFLAGS="-j20 ${TFLAGS}"
+          if [[ "${MATRIX_INSTALL}" != *'libssh'* ]]; then
+            TFLAGS+=' !664 !665'  # MD5 support is disabled in Homebrew since libssh2 1.11.1_6
+          fi
           if [ "${TEST_TARGET}" != 'test-ci' ]; then
             TFLAGS+=' --buildinfo'  # only test-ci sets this by default, set it manually for test-torture
           fi
