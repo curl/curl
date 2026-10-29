@@ -245,7 +245,7 @@ See [curl issue 6968](https://github.com/curl/curl/issues/6968)
 
 ## A fixed directory listing format
 
-Since listing the contents of a remove directory with FTP is returning the
+Since listing the contents of a remote directory with FTP is returning the
 list in a format and style the server likes without any established or even
 defacto standard existing, it would be a feature to users if curl could parse
 the directory listing and output a general curl format that is fixed and the
