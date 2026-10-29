@@ -36,6 +36,7 @@ upgrade
 http
 </server>
 <features>
+http/2
 nghttpx
 </features>
 <name>
