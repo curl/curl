@@ -55,7 +55,7 @@ A cookie with `SameSite=Strict` is only sent in a same-site request.
 A cookie with `SameSite=Lax`, or without a valid `SameSite` attribute, is sent
 in a same-site request. It is also sent in a cross-site request that is a
 navigation and uses one of the methods GET, HEAD, OPTIONS, TRACE or QUERY, the
-methods that are not meant to change anything on the server.
+methods that do not change anything on the server.
 
 A cookie with `SameSite=None` is sent in every request. It is only stored and
 sent when it also has the `Secure` attribute.
