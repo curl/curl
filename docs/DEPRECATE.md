@@ -12,27 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## Local crypto implementations
-
-Since the dawn of time, curl bundles code for a few crypto and hash algorithms
-in order to enable functionality for builds without TLS libraries. This list
-includes MD4, MD5, SHA256, SHA256_512 and perhaps something more.
-
-Meanwhile, curl is almost always built to use a TLS/crypto library which for
-sure has better maintained and better performing versions of these algorithms.
-
-Also, the local curl implementations are not as widely tested since curl
-builds without TLS are rare.
-
-Since these implementations are going away, a good idea is to verify ahead of
-time that builds using your preferred TLS library use the crypto functions
-provided by that library and are not bundled by curl.
-
-The removal of local crypto functions subsequently disables some functions in
-future curl versions when built without TLS support. For example Digest.
-
-Local crypto gets removed in October 2026.
-
 ## HTTP/2 Server Push
 
 This protocol feature has been deprecated in specifications, by major browsers,
@@ -86,3 +65,4 @@ Pending PR: https://github.com/curl/curl/pull/22845
 - TLS-SRP (removed in 8.22.0)
 - SMB support (removed in 8.23.0)
 - NTLM (removed in 8.24.0)
+- Local crypto implementations (removed in 8.24.0)
