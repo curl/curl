@@ -74,9 +74,9 @@ static void freecookie(struct Cookie *co, bool maintoo)
 }
 
 /*
- * The site the request is made for, as set with CURLOPT_COOKIE_SITE. Returns
- * NULL when the application did not provide one, in which case SameSite and
- * Partitioned are not evaluated at all.
+ * The site the request is made for, as set with CURLOPT_COOKIE_SITE.
+ * Returns NULL when the application did not provide one, in which case
+ * SameSite and Partitioned are not evaluated at all.
  */
 static const char *cookie_site(struct Curl_easy *data)
 {
