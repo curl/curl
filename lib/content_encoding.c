@@ -76,6 +76,12 @@ typedef enum {
   ZLIB_INIT_GZIP             /* initialized in transparent gzip mode */
 } zlibInitState;
 
+typedef enum {
+  SSTATE_INIT,               /* Stream initialized */
+  SSTATE_PROCESSING,         /* Stream processing is ongoing */
+  SSTATE_ENDED               /* Stream processing has completed */
+} zlibStreamState;
+
 /* Deflate and gzip writer. */
 struct zlib_writer {
   struct Curl_cwriter super;
@@ -83,7 +89,7 @@ struct zlib_writer {
   char buffer[DECOMPRESS_BUFFER_SIZE]; /* Put the decompressed data here. */
   uInt trailerlen;           /* Remaining trailer byte count. */
   z_stream z;                /* State structure for zlib. */
-  bool stream_ended;         /* Stream has ended with Z_STREAM_END? */
+  zlibStreamState sstate;    /* State of the stream. */
 };
 
 static voidpf zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
@@ -163,6 +169,9 @@ static CURLcode inflate_stream(struct Curl_easy *data,
      zp->zlib_init != ZLIB_INIT_GZIP)
     return exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
 
+  if(zp->sstate == SSTATE_INIT)
+    zp->sstate = SSTATE_PROCESSING;
+
   /* because the buffer size is fixed, iteratively decompress and transfer to
      the client via next_write function. */
   while(!done) {
@@ -216,7 +225,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
         break;
       }
       result = process_trailer(data, zp);
-      zp->stream_ended = TRUE;
+      zp->sstate = SSTATE_ENDED;
       break;
     case Z_DATA_ERROR:
       /* some servers seem to not generate zlib headers, so this is an attempt
@@ -263,7 +272,7 @@ static CURLcode deflate_do_init(struct Curl_easy *data,
   if(inflateInit(z) != Z_OK)
     return process_zlib_error(data, z);
   zp->zlib_init = ZLIB_INIT;
-  zp->stream_ended = FALSE;
+  zp->sstate = SSTATE_INIT;
   return CURLE_OK;
 }
 
@@ -302,7 +311,7 @@ static CURLcode deflate_do_flush(struct Curl_easy *data,
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
 
-  if(eos && !zp->stream_ended) {
+  if(eos && zp->sstate == SSTATE_PROCESSING) {
     failf(data, "Deflate stream ended before completion");
     return CURLE_BAD_CONTENT_ENCODING;
   }
@@ -338,7 +347,7 @@ static CURLcode gzip_do_init(struct Curl_easy *data,
     return process_zlib_error(data, z);
 
   zp->zlib_init = ZLIB_INIT_GZIP; /* Transparent gzip decompress state */
-  zp->stream_ended = FALSE;
+  zp->sstate = SSTATE_INIT;
   return CURLE_OK;
 }
 
@@ -378,7 +387,7 @@ static CURLcode gzip_do_flush(struct Curl_easy *data,
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
 
-  if(eos && !zp->stream_ended) {
+  if(eos && zp->sstate == SSTATE_PROCESSING) {
     failf(data, "Gzip stream ended before completion");
     return CURLE_BAD_CONTENT_ENCODING;
   }
