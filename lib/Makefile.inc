@@ -191,7 +191,6 @@ LIB_CFILES =         \
   creds.c            \
   cshutdn.c          \
   curl_addrinfo.c    \
-  curl_endian.c      \
   curl_fnmatch.c     \
   curl_fopen.c       \
   curl_get_line.c    \
@@ -319,7 +318,6 @@ LIB_HFILES =         \
   creds.h            \
   curl_addrinfo.h    \
   curl_ctype.h       \
-  curl_endian.h      \
   curl_fnmatch.h     \
   curl_fopen.h       \
   curl_get_line.h    \
