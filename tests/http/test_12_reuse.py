@@ -92,7 +92,7 @@ class TestReuse:
         assert r.total_connects == 2, r.dump_logs()
 
     # HTTP uses PROTOPT_CREDSPERREQUEST: Basic credentials are per request, so
-    # different -u values still reuse the idle connection (unlike NTLM/Negotiate
+    # different -u values still reuse the idle connection (unlike Negotiate
     # which bind credentials onto the connection).
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_12_04_reuse_different_basic_credentials(self, env: Env, httpd, nghttpx, proto):

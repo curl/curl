@@ -683,10 +683,6 @@ sub checksystemfeatures {
             $feature{"brotli"} = $feat =~ /brotli/i;
             # Zstd compression
             $feature{"zstd"} = $feat =~ /zstd/i;
-            # NTLM enabled
-            $feature{"NTLM"} = $feat =~ /NTLM/i;
-            # NTLM delegation to winbind daemon ntlm_auth helper enabled
-            $feature{"NTLM_WB"} = $feat =~ /NTLM_WB/i;
             # SSPI enabled
             $feature{"SSPI"} = $feat =~ /SSPI/i;
             # GSS-API enabled
@@ -813,7 +809,7 @@ sub checksystemfeatures {
     $feature{"nghttpx-h3"} = !!$nghttpx_h3;
 
     # Use this as a proxy for any cryptographic authentication
-    $feature{"crypto"} = $feature{"NTLM"} || $feature{"Kerberos"} || $feature{"SPNEGO"};
+    $feature{"crypto"} = $feature{"SSL"} || $feature{"Kerberos"} || $feature{"SPNEGO"};
     $feature{"local-http"} = servers::localhttp();
     $feature{"codeset-utf8"} = is_utf8_supported();
     if($feature{"codeset-utf8"}) {
