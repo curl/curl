@@ -57,7 +57,6 @@ static const struct {
   { "DIGEST-MD5",   10, SASL_MECH_DIGEST_MD5 },
   { "GSSAPI",       6,  SASL_MECH_GSSAPI },
   { "EXTERNAL",     8,  SASL_MECH_EXTERNAL },
-  { "NTLM",         4,  SASL_MECH_NTLM },
   { "XOAUTH2",      7,  SASL_MECH_XOAUTH2 },
   { "OAUTHBEARER",  11, SASL_MECH_OAUTHBEARER },
   { "SCRAM-SHA-1",  11, SASL_MECH_SCRAM_SHA_1 },
@@ -163,8 +162,6 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
       mechs |= SASL_MECH_PLAIN | SASL_MECH_LOGIN;
     if(auth & CURLAUTH_DIGEST)
       mechs |= SASL_MECH_DIGEST_MD5;
-    if(auth & CURLAUTH_NTLM)
-      mechs |= SASL_MECH_NTLM;
     if(auth & CURLAUTH_BEARER)
       mechs |= SASL_MECH_OAUTHBEARER | SASL_MECH_XOAUTH2;
     if(auth & CURLAUTH_GSSAPI)
@@ -194,8 +191,6 @@ static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
     "CRAMMD5",
     "DIGESTMD5",
     "DIGESTMD5_RESP",
-    "NTLM",
-    "NTLM_TYPE2MSG",
     "GSSAPI",
     "GSSAPI_TOKEN",
     "GSSAPI_NO_DATA",
@@ -217,7 +212,7 @@ static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
   sasl->state = newstate;
 }
 
-#if defined(USE_NTLM) || defined(USE_GSASL) || defined(USE_KERBEROS5) || \
+#if defined(USE_GSASL) || defined(USE_KERBEROS5) || \
   !defined(CURL_DISABLE_DIGEST_AUTH)
 /* Get the SASL server message and convert it to binary. */
 static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
@@ -404,35 +399,6 @@ static bool sasl_choose_digest(struct Curl_easy *data, struct sasl_ctx *sctx)
 }
 #endif /* !CURL_DISABLE_DIGEST_AUTH */
 
-#ifdef USE_NTLM
-static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
-{
-  if((sctx->enabledmechs & SASL_MECH_NTLM) &&
-     Curl_auth_is_ntlm_supported()) {
-     const char *service = Curl_creds_has_sasl_service(sctx->conn->creds) ?
-      Curl_creds_sasl_service(sctx->conn->creds) : sctx->sasl->params->service;
-    const char *hostname;
-
-    Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, NULL);
-
-    sctx->mech = SASL_MECH_STRING_NTLM;
-    sctx->state1 = SASL_NTLM;
-    sctx->state2 = SASL_NTLM_TYPE2MSG;
-    sctx->sasl->authused = SASL_MECH_NTLM;
-
-    if(sctx->sasl->force_ir || data->set.sasl_ir) {
-      struct ntlmdata *ntlm = Curl_auth_ntlm_get(sctx->conn, FALSE);
-      sctx->result = !ntlm ? CURLE_OUT_OF_MEMORY :
-        Curl_auth_create_ntlm_type1_message(data, sctx->conn->creds,
-                                            service, hostname,
-                                            ntlm, &sctx->resp);
-    }
-    return TRUE;
-  }
-  return FALSE;
-}
-#endif /* USE_NTLM */
-
 static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
   if(Curl_creds_has_oauth_bearer(data->state.creds) &&
@@ -535,9 +501,6 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
      sasl_choose_digest(data, &sctx) ||
-#endif
-#ifdef USE_NTLM
-     sasl_choose_ntlm(data, &sctx) ||
 #endif
      sasl_choose_oauth(data, &sctx) ||
      sasl_choose_oauth2(data, &sctx) ||
@@ -656,31 +619,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_DIGESTMD5_RESP:
     /* Keep response NULL to output an empty line. */
     break;
-#endif
-
-#ifdef USE_NTLM
-  case SASL_NTLM: {
-    /* Create the type-1 message */
-    struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, FALSE);
-    result = !ntlm ? CURLE_OUT_OF_MEMORY :
-      Curl_auth_create_ntlm_type1_message(data, conn->creds,
-                                          sasl->params->service, hostname,
-                                          ntlm, &resp);
-    newstate = SASL_NTLM_TYPE2MSG;
-    break;
-  }
-  case SASL_NTLM_TYPE2MSG: {
-    /* Decode the type-2 message */
-    struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, FALSE);
-    result = !ntlm ? CURLE_OUT_OF_MEMORY :
-      get_server_message(sasl, data, &serverdata);
-    if(!result)
-      result = Curl_auth_decode_ntlm_type2_message(data, &serverdata, ntlm);
-    if(!result)
-      result = Curl_auth_create_ntlm_type3_message(data, conn->creds,
-                                                   ntlm, &resp);
-    break;
-  }
 #endif
 
 #ifdef USE_KERBEROS5
@@ -859,11 +797,7 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
 #else
 #define CURL_SASL_DIGEST      FALSE
 #endif
-#ifndef USE_NTLM
-#define CURL_SASL_NTLM        TRUE
-#else
-#define CURL_SASL_NTLM        FALSE
-#endif
+
   /* Failing SASL authentication is a pain. Give a helping hand if
    * we were unable to select an AUTH mechanism.
    * `sasl->authmechs` are mechanisms offered by the peer
@@ -890,8 +824,6 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
                   CURL_SASL_DIGEST, Curl_auth_is_digest_supported(), NULL);
     sasl_unchosen(data, SASL_MECH_CRAM_MD5, enabledmechs,
                   CURL_SASL_DIGEST, TRUE, NULL);
-    sasl_unchosen(data, SASL_MECH_NTLM, enabledmechs,
-                  CURL_SASL_NTLM, Curl_auth_is_ntlm_supported(), NULL);
     sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs, TRUE, TRUE,
                   Curl_creds_has_oauth_bearer(data->conn->creds) ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");

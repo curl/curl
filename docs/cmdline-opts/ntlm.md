@@ -16,6 +16,9 @@ Example:
 
 # `--ntlm`
 
+NTLM authentication support was removed in 8.24.0. This option is no longer
+supported and causes curl to fail with an unsupported-feature error.
+
 Use NTLM authentication. The NTLM authentication method was designed by
 Microsoft and is used by IIS web servers. It is a proprietary protocol,
 reverse-engineered by clever people and implemented in curl based on their
