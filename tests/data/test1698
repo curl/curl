@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+--write-out
+</keywords>
+</info>
+
+<client>
+<features>
+http
+</features>
+<name>
+-w transfer timers stay zero when connect fails
+</name>
+<command>
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER -w "pre=%{time_pretransfer} post=%{time_posttransfer} start=%{time_starttransfer}\n"
+</command>
+</client>
+
+<verify>
+<errorcode>
+7
+</errorcode>
+<stdout mode="text">
+pre=0.000000 post=0.000000 start=0.000000
+</stdout>
+</verify>
+</testcase>
