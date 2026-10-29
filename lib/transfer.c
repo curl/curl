@@ -358,7 +358,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
 
   if(Curl_xfer_is_blocked(data)) {
-    result = CURLE_OK;
+    result = Curl_conn_do_maintenance(data, FIRSTSOCKET);
     goto out;
   }
 
