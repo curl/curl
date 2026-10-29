@@ -178,6 +178,7 @@ struct h3_stream_ctx {
   uint64_t error3;         /* HTTP/3 stream error code */
   int32_t status_code;     /* HTTP status code */
   CURLcode xfer_result;    /* result from cf_quiche_write_(hd/body) */
+  uint8_t rfc9218prio;     /* RFC 9218 priority value */
   BIT(opened);             /* TRUE after stream has been opened */
   BIT(closed);             /* TRUE on stream close */
   BIT(reset);              /* TRUE on stream reset */
@@ -1076,6 +1077,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
   stream->opened = TRUE;
   stream->closed = FALSE;
   stream->reset = FALSE;
+  stream->rfc9218prio = data->set.priority.rfc9218;
 
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRIu64 "] OPENED stream for %s",
@@ -1217,6 +1219,32 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static void cf_quiche_prio_changed(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+
+  if(!ctx->h3c || !stream || (stream->id <= 0))
+    return;
+
+  if(data->set.priority.rfc9218 != stream->rfc9218prio) {
+    quiche_h3_priority pri;
+    int rv = 0;
+
+    stream->rfc9218prio = data->set.priority.rfc9218;
+    pri.urgency = stream->rfc9218prio & 0x07U;
+    pri.incremental = (stream->rfc9218prio & CURL_HTTP_PRIO_I);
+    rv = quiche_h3_send_priority_update_for_request(
+      ctx->h3c, ctx->qconn, stream->id, &pri);
+    CURL_TRC_CF(data, cf, "[%" PRIu64
+                "] PRIORITY_UPDATE urgency=%u, inc=%d -> %d",
+                stream->id, pri.urgency, pri.incremental, rv);
+    (void)rv;
+    (void)cf_flush_egress(cf, data); /* best effort */
+  }
+}
+
 static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int event, int arg1, void *arg2)
@@ -1262,6 +1290,9 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
       Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
       ctx->stats_reported = TRUE;
     }
+    break;
+  case CF_CTRL_DATA_PRIO_CHANGED:
+    cf_quiche_prio_changed(cf, data);
     break;
   default:
     break;
