@@ -39,6 +39,7 @@ my $incomment = 0;
 # Options allowed to return CURLE_BAD_FUNCTION_ARGUMENT if given a string they
 # do not recognize as valid
 my @bad_function_argument = (
+    'CURLOPT_COOKIE_SITE',
     'CURLOPT_DNS_LOCAL_IP4',
     'CURLOPT_DNS_LOCAL_IP6',
     'CURLOPT_DNS_SERVERS',
