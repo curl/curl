@@ -11,7 +11,7 @@ See-also:
   - RFC 9218
 Protocol:
   - HTTP
-Added-in: 8.21.0
+Added-in: 8.24.0
 ---
 
 # NAME
