@@ -2880,7 +2880,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_PRIORITY:
-    if(!Curl_http_prio_is_default(&data->set.priority) &&
+    if((data->set.priority.rfc9218 != CURL_HTTP_PRIO_U3) &&
        !Curl_checkheaders(data, STRCONST("Priority"))) {
       char buf[128];
       Curl_http_prio_hd_val(&data->set.priority, buf, sizeof(buf));
@@ -5014,11 +5014,6 @@ void Curl_http_prio_init(struct http_priority *prio)
   prio->rfc7540 = 16; /* NGHTTP2_DEFAULT_WEIGHT */
 #endif
   prio->rfc9218 = CURL_HTTP_PRIO_U3;
-}
-
-bool Curl_http_prio_is_default(struct http_priority *prio)
-{
-  return (prio->rfc9218 == CURL_HTTP_PRIO_U3);
 }
 
 size_t Curl_http_prio_hd_val(struct http_priority *prio,
