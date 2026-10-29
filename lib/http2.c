@@ -408,7 +408,6 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
     h2_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
-  stream->prio = data->set.priority;
 
   *pstream = stream;
   return CURLE_OK;
@@ -2046,6 +2045,57 @@ static CURLcode cf_h2_body_send(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static CURLcode cf_h2_prio_changed(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
+{
+  struct cf_h2_ctx *ctx = cf->ctx;
+  struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
+  int rv = 0;
+
+  if(!Curl_ngh2_valid(&ctx->ngh2) || !stream || (stream->id <= 0))
+    /* Someone may change the priority of a stream we no longer have or
+     * never had. */
+    return CURLE_OK;
+
+  if(data->set.priority.rfc7540 != stream->prio.rfc7540) {
+    nghttp2_priority_spec pri_spec;
+
+    stream->prio.rfc7540 = data->set.priority.rfc7540;
+    nghttp2_priority_spec_init(&pri_spec, 0, stream->prio.rfc7540, FALSE);
+
+    rv = Curl_ngh2_submit_priority(&ctx->ngh2, NGHTTP2_FLAG_NONE,
+                                   stream->id, &pri_spec);
+    if(rv) {
+      CURL_TRC_CF(data, cf, "submit_priority() failed: %s(%d)",
+                  nghttp2_strerror(rv), rv);
+      return CURLE_SEND_ERROR;
+    }
+    CURL_TRC_CF(data, cf, "[%d] sending PRIORITY, rfc7540 weight=%u",
+                stream->id, stream->prio.rfc7540);
+  }
+
+#if NGHTTP2_HAS_PRIORITY_UPDATE
+  if(data->set.priority.rfc9218 != stream->prio.rfc9218) {
+    char buf[128];
+    size_t len;
+
+    stream->prio.rfc9218 = data->set.priority.rfc9218;
+    len = Curl_http_prio_hd_val(&stream->prio, buf, sizeof(buf));
+    rv = Curl_ngh2_submit_priority_update(&ctx->ngh2, NGHTTP2_FLAG_NONE,
+                                          stream->id,
+                                          (const uint8_t *)buf, len);
+    if(rv) {
+      CURL_TRC_CF(data, cf, "submit_priority_update() failed: %s(%d)",
+                  nghttp2_strerror(rv), rv);
+      return CURLE_SEND_ERROR;
+    }
+    CURL_TRC_CF(data, cf, "[%d] sending PRIORITY, '%.*s'",
+                stream->id, (int)len, buf);
+  }
+#endif
+  return CURLE_OK;
+}
+
 static CURLcode h2_submit(struct h2_stream_ctx **pstream,
                           struct Curl_cfilter *cf, struct Curl_easy *data,
                           const uint8_t *buf, size_t len,
@@ -2159,6 +2209,10 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
 
   body = (const char *)buf + *pnwritten;
   bodylen = len - *pnwritten;
+
+  result = cf_h2_prio_changed(cf, data);
+  if(result)
+    goto out;
 
   if(bodylen || eos) {
     size_t n;
@@ -2439,8 +2493,13 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
     if(rc) {
       infof(data, "http/2: failed to set user_data for stream %d",
             stream->id);
-      DEBUGASSERT(0);
+      result = CURLE_FAILED_INIT;
+      goto out;
     }
+
+    result = cf_h2_prio_changed(cf, data);
+    if(result)
+      goto out;
     CURL_TRC_CF(data, cf, "created session via Upgrade");
   }
   else {
@@ -2476,51 +2535,6 @@ out:
   if(cbs)
     nghttp2_session_callbacks_del(cbs);
   return result;
-}
-
-static void cf_h2_prio_changed(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
-{
-  struct cf_h2_ctx *ctx = cf->ctx;
-  struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
-  int rv = 0;
-  bool changed = FALSE;
-
-  if(!Curl_ngh2_valid(&ctx->ngh2) || !stream || (stream->id <= 0))
-    return;
-
-  if(data->set.priority.rfc7540 != stream->prio.rfc7540) {
-    nghttp2_priority_spec pri_spec;
-
-    stream->prio.rfc7540 = data->set.priority.rfc7540;
-    nghttp2_priority_spec_init(&pri_spec, 0, stream->prio.rfc7540, FALSE);
-
-    rv = nghttp2_submit_priority(ctx->ngh2.s, NGHTTP2_FLAG_NONE,
-                                 stream->id, &pri_spec);
-    CURL_TRC_CF(data, cf, "[%d] sending PRIORITY, rfc7540 weight=%u -> %d",
-                stream->id, stream->prio.rfc7540, rv);
-    changed = TRUE;
-  }
-
-#if NGHTTP2_HAS_PRIORITY_UPDATE
-  if(data->set.priority.rfc9218 != stream->prio.rfc9218) {
-    char buf[128];
-    size_t len;
-
-    stream->prio.rfc9218 = data->set.priority.rfc9218;
-    len = Curl_http_prio_hd_val(&stream->prio, buf, sizeof(buf));
-    rv = Curl_ngh2_submit_priority_update(&ctx->ngh2, NGHTTP2_FLAG_NONE,
-                                          stream->id,
-                                          (const uint8_t *)buf, len);
-    CURL_TRC_CF(data, cf, "[%d] sending PRIORITY, '%.*s' -> %d",
-                stream->id, (int)len, buf, rv);
-    changed = TRUE;
-  }
-#endif
-
-  (void)rv; /* for non-verbose builds */
-  if(changed)
-    (void)h2_progress_egress(cf, data); /* best effort */
 }
 
 static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
@@ -2700,7 +2714,7 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
     }
     break;
   case CF_CTRL_DATA_PRIO_CHANGED:
-    cf_h2_prio_changed(cf, data);
+    result = cf_h2_prio_changed(cf, data);
     break;
   default:
     break;

@@ -277,6 +277,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
 
   stream->id = -1;
+  stream->rfc9218prio = CURL_HTTP_PRIO_U3;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
   if(Curl_u32_ptrset_set(&ctx->streams, data->mid, stream)) {
@@ -1219,14 +1220,14 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void cf_quiche_prio_changed(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data)
+static CURLcode cf_quiche_prio_changed(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
-  if(!ctx->h3c || !stream || (stream->id <= 0))
-    return;
+  if(!ctx->h3c || !stream || !stream->opened)
+    return CURLE_OK;
 
   if(data->set.priority.rfc9218 != stream->rfc9218prio) {
     quiche_h3_priority pri;
@@ -1237,12 +1238,15 @@ static void cf_quiche_prio_changed(struct Curl_cfilter *cf,
     pri.incremental = (stream->rfc9218prio & CURL_HTTP_PRIO_I);
     rv = quiche_h3_send_priority_update_for_request(
       ctx->h3c, ctx->qconn, stream->id, &pri);
-    CURL_TRC_CF(data, cf, "[%" PRIu64
-                "] PRIORITY_UPDATE urgency=%u, inc=%d -> %d",
-                stream->id, pri.urgency, pri.incremental, rv);
-    (void)rv;
-    (void)cf_flush_egress(cf, data); /* best effort */
+    if(rv) {
+      CURL_TRC_CF(data, cf, "[%" PRIu64 "] PRIORITY_UPDATE failed: %d",
+                  stream->id, rv);
+      return CURLE_SEND_ERROR;
+    }
+    CURL_TRC_CF(data, cf, "[%" PRIu64 "] PRIORITY_UPDATE urgency=%u, inc=%d",
+                stream->id, pri.urgency, pri.incremental);
   }
+  return CURLE_OK;
 }
 
 static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
@@ -1292,7 +1296,7 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
     }
     break;
   case CF_CTRL_DATA_PRIO_CHANGED:
-    cf_quiche_prio_changed(cf, data);
+    result = cf_quiche_prio_changed(cf, data);
     break;
   default:
     break;
