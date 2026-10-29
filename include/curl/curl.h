@@ -2288,6 +2288,9 @@ typedef enum {
   /* Space-separated list of components to sign for HTTP Message Signatures */
   CURLOPT(CURLOPT_HTTPSIG_HEADERS, CURLOPTTYPE_STRINGPOINT, 332),
 
+  /* HTTP priorities, RFC 9218 */
+  CURLOPT(CURLOPT_HTTP_PRIO, CURLOPTTYPE_LONG, 333),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2358,6 +2361,21 @@ typedef enum {
    not 2.0. The 2_0 version of the enum name was set while the version was
    still planned to be 2.0 and we stick to it for compatibility. */
 #define CURL_HTTP_VERSION_2 CURL_HTTP_VERSION_2_0
+
+/* Values for CURLOPT_HTTP_PRIO
+ * Urgency: defined in RFC 9218 ch. 4.1: */
+#define CURL_HTTP_PRIO_U0          0L
+#define CURL_HTTP_PRIO_U1          1L
+#define CURL_HTTP_PRIO_U2          2L
+#define CURL_HTTP_PRIO_U3          3L
+#define CURL_HTTP_PRIO_U4          4L
+#define CURL_HTTP_PRIO_U5          5L
+#define CURL_HTTP_PRIO_U6          6L
+#define CURL_HTTP_PRIO_U7          7L
+/* Incremental: defined in RFC 9218 ch. 4.2: */
+#define CURL_HTTP_PRIO_I           (1L << 3)
+
+#define CURL_HTTP_PRIO_NONE        (1L << 4)
 
 /*
  * Public API enums for RTSP requests

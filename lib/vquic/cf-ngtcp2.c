@@ -771,6 +771,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   }
 
   cf_ngtcp2_upd_rx_win(cf, data, stream);
+  stream->rfc9218prio = data->set.priority.rfc9218;
 
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRId64 "] OPENED stream for %s",
@@ -924,6 +925,31 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static void cf_ngtcp2_prio_changed(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+
+  if(!ctx->h3conn || !stream || (stream->id <= 0))
+    return;
+
+  if(data->set.priority.rfc9218 != stream->rfc9218prio) {
+    char buf[128];
+    size_t len;
+    int rv = 0;
+
+    stream->rfc9218prio = data->set.priority.rfc9218;
+    len = Curl_http_prio_hd_val(&data->set.priority, buf, sizeof(buf));
+    rv = nghttp3_conn_set_client_stream_priority(
+      ctx->h3conn, stream->id, (const uint8_t *)buf, len);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] PRIORITY_UPDATE '%.*s' -> %d",
+                stream->id, (int)len, buf, rv);
+    (void)rv;
+    (void)Curl_cf_ngtcp2_progress_egress(cf, data, NULL); /* best effort */
+  }
+}
+
 static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int event, int arg1, void *arg2)
@@ -957,6 +983,9 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
       cf->conn->httpversion_seen = 30;
       Curl_conn_set_multiplex(cf->conn);
     }
+    break;
+  case CF_CTRL_DATA_PRIO_CHANGED:
+    cf_ngtcp2_prio_changed(cf, data);
     break;
   default:
     result = Curl_cf_ngtcp2_cmn_cntrl(cf, data, event, arg1, arg2);

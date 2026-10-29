@@ -178,6 +178,7 @@ struct h3_stream_ctx {
   uint32_t mid;                 /* `mid` of transfer owning this stream */
   int32_t status_code;              /* HTTP status code */
   CURLcode xfer_result;         /* result from xfer_resp_write(_hd) */
+  uint8_t rfc9218prio;          /* RFC 9218 priority value */
   BIT(resp_hds_complete);       /* we have a complete, final response */
   BIT(closed);                  /* TRUE on stream close */
   BIT(reset);                   /* TRUE on stream reset */
