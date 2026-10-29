@@ -64,7 +64,8 @@ $(top_builddir)/lib/unitprotos.h:
 	(cd $(top_builddir)/lib && $(MAKE) unitprotos.h)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_units_SOURCES = $(BUNDLE).c
+# Variables cannot be used in SOURCES due to automake < 1.16
+nodist_units_SOURCES = units.c
 LDADD = $(top_builddir)/lib/libcurlu.la
 CLEANFILES = $(BUNDLE).c
 else
