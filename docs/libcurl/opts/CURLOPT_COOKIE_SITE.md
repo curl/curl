@@ -28,61 +28,63 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIE_SITE, char *site);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string holding the *site* this request is
-made for. In browser terms this is the "site for cookies": the registrable
-domain of the top-level document the request belongs to, such as
-`example.com` for a page on `https://www.example.com/`. The string may be
-prefixed with a scheme and `://`, as in `https://example.com`, in which case
-the scheme of the request must match as well for the request to count as
-same-site (schemeful same-site). A port or path in the string is ignored, as
-in `https://example.com:8443/`. When libcurl is built with libpsl, both the
-site and the request host are reduced to their registrable domains for the
-check, so `www.example.com` given as site matches the host `example.com`.
+made for: the scheme and the domain name of the page the request belongs to,
+as in `https://example.com`. The scheme must be `http` or `https` and the
+string must contain nothing else, like a port number or a path. Any other
+string makes this option return CURLE_BAD_FUNCTION_ARGUMENT.
 
-When a site is set, libcurl evaluates the `SameSite` and `Partitioned`
-attributes of cookies as described in RFC 6265bis and the CHIPS proposal:
+The domain name is the top-most name libcurl should treat as part of the site.
+libcurl uses it as given and does not shorten it: the application decides what
+the site is. With the site set to `https://example.com`, a request is
+*same-site* when it uses `https` and its hostname is `example.com` or ends
+with `.example.com`, like a request to `https://www.example.com/`. Every other
+request is *cross-site*, like a request to `http://example.com/`,
+`https://example.org/` or `https://notexample.com/`. With the site set to
+`https://www.example.com`, a request to `https://example.com/` is cross-site,
+since `example.com` does not end with `.www.example.com`.
 
-A request is *same-site* when its hostname equals the site or is a subdomain
-of it. Cookies with `SameSite=Strict` are only sent on same-site requests.
-Cookies with `SameSite=Lax`, or without a valid `SameSite` attribute, are sent
-on same-site requests and on cross-site top-level navigations using a safe
-method (GET, HEAD, OPTIONS or TRACE). See CURLOPT_COOKIE_CONTEXT(3) for how
-to mark a request as a top-level navigation. Cookies with `SameSite=None` are
-sent on all requests.
+A request is a *navigation* when the application sets the
+CURLCOOKIE_NAVIGATION bit with CURLOPT_COOKIE_CONTEXT(3). Any other request is
+made for a part of a page, like an image, a script or a frame.
 
-Cookies received in a cross-site response that are not `SameSite=None` are
-not stored, unless the request was a top-level navigation.
+With a site set, libcurl uses the `SameSite` and `Partitioned` attributes of
+cookies like this.
 
-A cookie with the `Partitioned` attribute is stored together with the
-top-level site it was received under, its *partition key*. It is only sent
-again in requests made for the same site. Such a cookie set under one site
-does not exist for another site, so an application does not need to keep
-one cookie store per site to isolate them. On a top-level navigation the
-top-level site is the site navigated to, the registrable domain of the
-request host, not the site given here. The key is the canonical form of a
-site: the scheme when one was given, and the host in lowercase without port,
-path or trailing dot. A `Partitioned` cookie received while no site is set
-gets its own domain as key, so it is only sent in requests made for that
-site.
+A cookie with `SameSite=Strict` is only sent in a same-site request.
 
-The string must not contain whitespace, control characters or semicolons,
-since it is written to the cookie jar file. Such a string makes this option
-return CURLE_BAD_FUNCTION_ARGUMENT.
+A cookie with `SameSite=Lax`, or without a valid `SameSite` attribute, is sent
+in a same-site request. It is also sent in a cross-site request that is a
+navigation and uses one of the methods GET, HEAD, OPTIONS, TRACE or QUERY, the
+methods that are not meant to change anything on the server.
 
-When no site is set, which is the default, nothing changes: libcurl stores
-and sends cookies, and writes the cookie jar, exactly as versions before this
-option existed. The `SameSite` and `Partitioned` attributes are only
-remembered in the cookie jar, on a `#curl:` comment line before the cookie,
-once a site has been used with the cookie store or such a line was read
-from a jar. CURLINFO_COOKIELIST(3) never includes the attributes.
+A cookie with `SameSite=None` is sent in every request. It is only stored and
+sent when it also has the `Secure` attribute.
 
-A request redirected to another method, like a POST answered with a 303,
-evaluates the cookies for the redirected request with the method actually
-used, so a cross-site navigation that turns into a GET gets the `Lax`
-cookies.
+A cookie in the response to a cross-site request is not stored, unless the
+cookie has `SameSite=None` or the request is a navigation.
 
-With a site set, libcurl does not store cookies that have `SameSite=None`
-or `Partitioned` without the `Secure` attribute, and does not send such
-cookies when they were stored earlier without a site.
+A cookie with the `Partitioned` attribute is only stored when it also has the
+`Secure` attribute. libcurl stores it together with a *partition key* and only
+sends it in a request with the same partition key. The partition key of a
+request is the site set with this option, in lowercase. In a navigation, the
+partition key is instead the scheme and hostname of the request URL, since the
+page it loads becomes the new site. A `Partitioned` cookie received while no
+site is set gets the scheme of the request and its own domain as partition
+key.
+
+A redirect that libcurl follows with CURLOPT_FOLLOWLOCATION(3) keeps the site
+and the context set, and libcurl evaluates each request in the chain on its
+own: with the hostname of the URL it goes to and with the method it actually
+uses. A cross-site POST navigation that a 303 response turns into a GET sends
+the `SameSite=Lax` cookies in that GET.
+
+When no site is set, which is the default, nothing changes: libcurl stores and
+sends cookies, and writes the cookie jar, exactly as versions before this
+option existed. The `SameSite` and `Partitioned` attributes are then only
+remembered in the cookie jar, on a `#curl:` comment line immediately before
+the cookie line, once a site has been used with the cookie store or such a
+line was read from a jar. CURLINFO_COOKIELIST(3) never includes the
+attributes.
 
 The application does not keep the string around after setting this option.
 
@@ -100,8 +102,8 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode result;
-    /* a subresource of a page on https://www.example.com/ */
-    curl_easy_setopt(curl, CURLOPT_URL, "https://cdn.example.net/style.css");
+    /* an image on a page on https://www.example.com/ */
+    curl_easy_setopt(curl, CURLOPT_URL, "https://cdn.example.net/logo.png");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
     curl_easy_setopt(curl, CURLOPT_COOKIE_SITE, "https://example.com");
 

@@ -2110,15 +2110,10 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
   case CURLOPT_COOKIE_SITE:
     /*
      * The site this request is made for, used to evaluate SameSite and
-     * Partitioned cookies. It ends up in cookie jar files, so it must not
-     * contain anything that breaks a line there.
+     * Partitioned cookies: "http://host" or "https://host"
      */
-    if(ptr) {
-      const unsigned char *p;
-      for(p = (const unsigned char *)ptr; *p; p++)
-        if((*p <= ' ') || (*p == 0x7f) || (*p == ';'))
-          return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
+    if(ptr && !Curl_cookie_site_ok(ptr))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     return Curl_setstropt(data, STRING_COOKIE_SITE, ptr);
 
   case CURLOPT_COOKIEFILE:

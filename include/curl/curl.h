@@ -2293,10 +2293,10 @@ typedef enum {
 
   /* The site the request is made for, used for SameSite and Partitioned
      cookies */
-  CURLOPT(CURLOPT_COOKIE_SITE, CURLOPTTYPE_STRINGPOINT, 335),
+  CURLOPT(CURLOPT_COOKIE_SITE, CURLOPTTYPE_STRINGPOINT, 333),
 
   /* Bitmask of CURLCOOKIE_* bits describing the request context */
-  CURLOPT(CURLOPT_COOKIE_CONTEXT, CURLOPTTYPE_LONG, 336),
+  CURLOPT(CURLOPT_COOKIE_CONTEXT, CURLOPTTYPE_LONG, 334),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

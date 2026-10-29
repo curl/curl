@@ -27,7 +27,7 @@
    CURLOPT_COOKIE_CONTEXT. The request sequence is checked by the test server
    and the resulting cookie jar by the test harness. The last requests go to
    "localhost", a secure context, resolved to the test server: a Partitioned
-   cookie received on a cross-site top-level navigation is keyed by the site
+   cookie received in a cross-site navigation is keyed by the scheme and host
    navigated to and sent again for that site only. */
 
 #define T1923_GET          0
@@ -35,6 +35,7 @@
 #define T1923_POST         2 /* POST with an empty body */
 #define T1923_POST_REDIR   3 /* custom POST, following a 303 to a GET */
 
+#define T1923_OTHER         "http://other.example" /* another site */
 #define T1923_SITE_HOST     "<host>"   /* the test server host */
 #define T1923_SITE_HOST_DOT "<host.>"  /* the host with a trailing dot */
 
@@ -49,42 +50,49 @@ struct t1923_req {
 static CURLcode test_lib1923(const char *URL)
 {
   static const struct t1923_req reqs[] = {
-    /* 1: cross-site subresource request */
-    { 1, "other.example", 0L, T1923_GET, FALSE },
-    /* 2: cross-site top-level navigation */
-    { 2, "other.example", CURLCOOKIE_NAVIGATION, T1923_GET, FALSE },
+    /* 1: cross-site request for a part of a page */
+    { 1, T1923_OTHER, 0L, T1923_GET, FALSE },
+    /* 2: cross-site navigation */
+    { 2, T1923_OTHER, CURLCOOKIE_NAVIGATION, T1923_GET, FALSE },
     /* 3: same-site request, the site is given with a trailing dot */
     { 3, T1923_SITE_HOST_DOT, 0L, T1923_GET, FALSE },
     /* 4: cross-site POST, no navigation */
-    { 4, "other.example", 0L, T1923_CUSTOM_POST, FALSE },
+    { 4, T1923_OTHER, 0L, T1923_CUSTOM_POST, FALSE },
     /* 5: cross-site POST navigation, unsafe method */
-    { 5, "other.example", CURLCOOKIE_NAVIGATION, T1923_POST, FALSE },
+    { 5, T1923_OTHER, CURLCOOKIE_NAVIGATION, T1923_POST, FALSE },
     /* 6: cross-site navigation again, now with Lax cookies to send */
-    { 6, "other.example", CURLCOOKIE_NAVIGATION, T1923_GET, FALSE },
+    { 6, T1923_OTHER, CURLCOOKIE_NAVIGATION, T1923_GET, FALSE },
     /* 7: cross-site POST navigation redirected with 303 to a GET (8) */
-    { 7, "other.example", CURLCOOKIE_NAVIGATION, T1923_POST_REDIR, FALSE },
+    { 7, T1923_OTHER, CURLCOOKIE_NAVIGATION, T1923_POST_REDIR, FALSE },
     /* 9: no site given, all cookies are sent, a Partitioned cookie is
        received without a site */
     { 9, NULL, 0L, T1923_GET, FALSE },
     /* 10: cross-site, the Partitioned cookie from 9 is not sent */
-    { 10, "other.example", 0L, T1923_GET, FALSE },
+    { 10, T1923_OTHER, 0L, T1923_GET, FALSE },
     /* 11: same-site, the Partitioned cookie from 9 is sent */
     { 11, T1923_SITE_HOST, 0L, T1923_GET, FALSE },
     /* 12: a link on other.example is followed to localhost, the response
-           sets a Partitioned cookie keyed by localhost */
-    { 12, "other.example", CURLCOOKIE_NAVIGATION, T1923_GET, TRUE },
-    /* 13: a subresource of a page on localhost gets the cookie */
-    { 13, "LocalHost.", 0L, T1923_GET, TRUE },
-    /* 14: a subresource of a page on other.example does not */
-    { 14, "other.example", 0L, T1923_GET, TRUE },
+           sets a Partitioned cookie keyed by http://localhost */
+    { 12, T1923_OTHER, CURLCOOKIE_NAVIGATION, T1923_GET, TRUE },
+    /* 13: a part of a page on localhost gets the cookie */
+    { 13, "http://LocalHost.", 0L, T1923_GET, TRUE },
+    /* 14: a part of a page on other.example does not */
+    { 14, T1923_OTHER, 0L, T1923_GET, TRUE },
     /* 15: another navigation to localhost gets it again */
-    { 15, "other.example", CURLCOOKIE_NAVIGATION, T1923_GET, TRUE }
+    { 15, T1923_OTHER, CURLCOOKIE_NAVIGATION, T1923_GET, TRUE }
+  };
+  /* strings that are not a site: no scheme, another scheme, a port number,
+     a path, a space or no host */
+  static const char *const badsites[] = {
+    "example.com", "ftp://example.com", "https://example.com:8443",
+    "https://example.com/", "https://exa mple.com", "https://", ""
   };
   CURLcode result = CURLE_OK;
   CURL *curl = NULL;
   struct curl_slist *resolve = NULL;
   char *host = NULL;
-  char *host_dot = NULL;
+  char *site_host = NULL;
+  char *site_host_dot = NULL;
   char *port = NULL;
   char *local = NULL;  /* the URL with "localhost" as host */
   char *entry = NULL;
@@ -113,9 +121,10 @@ static CURLcode test_lib1923(const char *URL)
       goto test_cleanup;
     }
     curl_url_cleanup(u);
-    host_dot = curl_maprintf("%s.", host);
+    site_host = curl_maprintf("http://%s", host);
+    site_host_dot = curl_maprintf("http://%s.", host);
     entry = curl_maprintf("localhost:%s:%s", port, host);
-    if(!host_dot || !entry) {
+    if(!site_host || !site_host_dot || !entry) {
       result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
@@ -135,9 +144,9 @@ static CURLcode test_lib1923(const char *URL)
       goto test_cleanup;
     }
     if(site && !strcmp(site, T1923_SITE_HOST))
-      site = host;
+      site = site_host;
     else if(site && !strcmp(site, T1923_SITE_HOST_DOT))
-      site = host_dot;
+      site = site_host_dot;
     easy_setopt(curl, CURLOPT_URL, url);
     curlx_safefree(url);
     easy_setopt(curl, CURLOPT_COOKIE_SITE, site);
@@ -172,18 +181,21 @@ static CURLcode test_lib1923(const char *URL)
     }
   }
 
-  /* a site that would break the cookie jar is refused */
-  if(curl_easy_setopt(curl, CURLOPT_COOKIE_SITE, "bad site") !=
-     CURLE_BAD_FUNCTION_ARGUMENT) {
-    curl_mfprintf(stderr, "a site with a space was accepted\n");
-    result = TEST_ERR_MAJOR_BAD;
-    goto test_cleanup;
+  /* a site is a scheme and a hostname, nothing else */
+  for(i = 0; i < CURL_ARRAYSIZE(badsites); i++) {
+    if(curl_easy_setopt(curl, CURLOPT_COOKIE_SITE, badsites[i]) !=
+       CURLE_BAD_FUNCTION_ARGUMENT) {
+      curl_mfprintf(stderr, "site '%s' was accepted\n", badsites[i]);
+      result = TEST_ERR_MAJOR_BAD;
+      goto test_cleanup;
+    }
   }
 
 test_cleanup:
   curlx_free(url);
   curlx_free(entry);
-  curlx_free(host_dot);
+  curlx_free(site_host_dot);
+  curlx_free(site_host);
   curl_free(local);
   curl_free(port);
   curl_free(host);

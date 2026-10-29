@@ -42,14 +42,14 @@ and the `Partitioned` attribute of cookies.
 
 These attributes are only used if the application tells libcurl which *site*
 a request is made for, with CURLOPT_COOKIE_SITE(3), and whether the request
-is a top-level navigation, with CURLOPT_COOKIE_CONTEXT(3). A cookie with
-`SameSite=Strict` is then only sent on requests to the same site, a cookie
-with `SameSite=Lax` (or without a `SameSite` attribute) also on cross-site
-top-level navigations using a safe method and a cookie with `SameSite=None`
-on all requests. A cookie with `SameSite=None` or `Partitioned` needs the
-`Secure` attribute to be stored or sent, as browsers require. A
-`Partitioned` cookie is stored with the top-level site it was received under
-as its partition key and is only sent again in requests made for that site.
+is a navigation to a new page, with CURLOPT_COOKIE_CONTEXT(3). A cookie with
+`SameSite=Strict` is then only sent in requests to the same site, a cookie
+with `SameSite=Lax` (or without a `SameSite` attribute) also in a cross-site
+navigation using a safe method and a cookie with `SameSite=None` in all
+requests. A cookie with `SameSite=None` or `Partitioned` needs the `Secure`
+attribute to be stored or sent, as browsers require. A `Partitioned` cookie
+is stored with the site it was received under as its partition key and is
+only sent again in requests made for that site.
 
 Without a site set, which is the default and what the curl tool does,
 nothing changes: all matching cookies are stored and sent regardless of
@@ -109,12 +109,12 @@ curl stores them on a comment line immediately before the cookie line, as in
 (with the fields of the cookie line separated by TAB as usual)
 
 `SameSite` is `Strict` or `None` (`Lax` is the default and is not written)
-and `Partitioned` holds the partition key, the site the cookie was received
-under. Readers that do not know the line treat it as a comment and still
-load the cookie, without the attributes. A `#curl:` line only applies
-to the cookie line that follows it directly. The lines are only written once
-the attributes are in use, that is when a site was given with
-CURLOPT_COOKIE_SITE(3) or such a line was read; otherwise the file is
+and `Partitioned` holds the partition key, the scheme and hostname of the
+site the cookie was received under. Readers that do not know the line treat
+it as a comment and still load the cookie, without the attributes. A `#curl:`
+line only applies to the cookie line immediately following it. The lines are
+only written once the attributes are in use, that is when a site was given
+with CURLOPT_COOKIE_SITE(3) or such a line was read; otherwise the file is
 identical to what earlier curl versions write.
 
 Each line that specifies a single cookie consists of seven text fields

@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_COOKIEFILE (3)
   - CURLOPT_COOKIE_SITE (3)
+  - CURLOPT_FOLLOWLOCATION (3)
 Protocol:
   - HTTP
 Added-in: 8.24.0
@@ -35,15 +36,29 @@ Available bits in the bitmask
 
 ## CURLCOOKIE_NAVIGATION (1)
 
-The request is a top-level navigation, like a user following a link or
-submitting a form, as opposed to a request for a subresource like an image
-or a script or a request made from a subframe.
+The request is a *navigation*: it loads a new page, like when a user follows a
+link or submits a form. Without this bit, the request is made for a part of
+the page of the site, like an image, a script or a frame.
 
-Cookies with `SameSite=Lax`, or without a `SameSite` attribute, are sent on
-cross-site top-level navigations when the request method is safe (GET, HEAD,
-OPTIONS or TRACE). Cookies received in response to a top-level navigation
-are stored even when the navigation is cross-site. `Partitioned` cookies
-are keyed by, and sent for, the site navigated to.
+A navigation to a hostname that is not same-site with the site set with
+CURLOPT_COOKIE_SITE(3) is a *cross-site navigation*. libcurl treats it
+differently from other cross-site requests. Cookies with `SameSite=Lax`, or
+without a `SameSite` attribute, are sent when the request uses one of the
+methods GET, HEAD, OPTIONS, TRACE or QUERY. Cookies in the response are stored
+even when they do not have `SameSite=None`. `Partitioned` cookies get the
+scheme and hostname of the request URL as partition key instead of the site,
+since the page navigated to becomes the new site. For the requests made for
+parts of that page, set CURLOPT_COOKIE_SITE(3) to that scheme and hostname to
+get the cookies sent again.
+
+# REDIRECTS
+
+When libcurl follows a redirect with CURLOPT_FOLLOWLOCATION(3), the site and
+this context remain set for every request in the chain. libcurl evaluates each
+request on its own, with the hostname of the URL it goes to and the method it
+actually uses. A redirect to another hostname can therefore be a cross-site
+request while the first request was same-site, and a POST navigation that a
+303 response turns into a GET sends the `SameSite=Lax` cookies in that GET.
 
 # DEFAULT
 

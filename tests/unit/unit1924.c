@@ -26,7 +26,8 @@
 #include "cookie.h"
 
 /* Test cookie_same_site(): the same-site check between the site a request
- * is made for (CURLOPT_COOKIE_SITE) and the request host. */
+ * is made for (CURLOPT_COOKIE_SITE) and the request host, and
+ * Curl_cookie_site_ok(): the check of the site string itself. */
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
 
@@ -37,48 +38,72 @@ struct t1924_case {
   bool same;
 };
 
+struct t1924_site {
+  const char *site;
+  bool ok;
+};
+
 static CURLcode test_unit1924(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
   static const struct t1924_case cases[] = {
-    /* the site itself and subdomains */
-    { "example.com", "example.com", FALSE, TRUE },
-    { "example.com", "www.example.com", FALSE, TRUE },
-    { "example.com", "a.b.example.com", TRUE, TRUE },
-    { "Example.COM", "WWW.example.com", FALSE, TRUE },
+    /* the host of the site and subdomains of it */
+    { "http://example.com", "example.com", FALSE, TRUE },
+    { "http://example.com", "www.example.com", FALSE, TRUE },
+    { "https://example.com", "a.b.example.com", TRUE, TRUE },
+    { "http://Example.COM", "WWW.example.com", FALSE, TRUE },
+    { "HTTP://example.com", "example.com", FALSE, TRUE },
     /* a suffix that is not a subdomain */
-    { "example.com", "notexample.com", FALSE, FALSE },
-    { "example.com", "example.com.evil", FALSE, FALSE },
-    { "example.com", "example.org", FALSE, FALSE },
-    /* a parent domain is another site */
-    { "www.example.com", "example.com", FALSE, FALSE },
+    { "http://example.com", "notexample.com", FALSE, FALSE },
+    { "http://example.com", "example.com.evil", FALSE, FALSE },
+    { "http://example.com", "example.org", FALSE, FALSE },
+    /* a parent domain is another site, the site is used as given */
+    { "http://www.example.com", "example.com", FALSE, FALSE },
     /* trailing dots are ignored */
-    { "example.com.", "example.com", FALSE, TRUE },
-    { "example.com", "www.example.com.", FALSE, TRUE },
-    /* schemeful same-site */
+    { "http://example.com.", "example.com", FALSE, TRUE },
+    { "http://example.com", "www.example.com.", FALSE, TRUE },
+    /* the scheme must match */
     { "https://example.com", "example.com", TRUE, TRUE },
     { "https://example.com", "www.example.com", FALSE, FALSE },
-    { "http://example.com", "example.com", FALSE, TRUE },
     { "http://example.com", "example.com", TRUE, FALSE },
-    { "https://example.com/", "example.com", TRUE, TRUE },
-    { "https://example.com/path", "example.com", TRUE, TRUE },
-    /* ports are not part of a site */
-    { "https://example.com:8443", "example.com", TRUE, TRUE },
-    { "example.com:8080", "www.example.com", FALSE, TRUE },
-    { "http://127.0.0.1:8000", "127.0.0.1", FALSE, TRUE },
-    { "[::1]:8000", "::1", FALSE, TRUE },
     /* IP addresses only match exactly */
-    { "127.0.0.1", "127.0.0.1", FALSE, TRUE },
-    { "0.0.1", "127.0.0.1", FALSE, FALSE },
-    { "[::1]", "::1", FALSE, TRUE },
+    { "http://127.0.0.1", "127.0.0.1", FALSE, TRUE },
+    { "http://0.0.1", "127.0.0.1", FALSE, FALSE },
+    { "http://[::1]", "::1", FALSE, TRUE },
     { "https://[::1]", "::1", TRUE, TRUE },
-    { "[::1]", "::2", FALSE, FALSE },
-    /* junk */
+    { "http://[::1]", "::2", FALSE, FALSE },
+    /* not a site */
     { "", "example.com", FALSE, FALSE },
     { "https://", "example.com", TRUE, FALSE },
-    { "example.com", "", FALSE, FALSE },
-    { ".", "example.com", FALSE, FALSE }
+    { "example.com", "example.com", FALSE, FALSE },
+    { "ftp://example.com", "example.com", FALSE, FALSE },
+    { "http://example.com", "", FALSE, FALSE },
+    { "http://.", "example.com", FALSE, FALSE }
+  };
+  static const struct t1924_site sites[] = {
+    { "http://example.com", TRUE },
+    { "https://example.com", TRUE },
+    { "HTTPS://Example.COM.", TRUE },
+    { "https://a-b_c.example.com", TRUE },
+    { "https://127.0.0.1", TRUE },
+    { "https://[::1]", TRUE },
+    { "https://[fe80::1%25eth0]", FALSE },
+    { "https://[::1", FALSE },
+    { "https://[::1]x", FALSE },
+    { "https://example.com:8443", FALSE },
+    { "https://example.com/", FALSE },
+    { "https://example.com/path", FALSE },
+    { "https://example.com;x", FALSE },
+    { "https://exa mple.com", FALSE },
+    { "https://.example.com", FALSE },
+    { "https://-example.com", FALSE },
+    { "https://", FALSE },
+    { "http://", FALSE },
+    { "example.com", FALSE },
+    { "ftp://example.com", FALSE },
+    { "ws://example.com", FALSE },
+    { "", FALSE }
   };
   size_t i;
 
@@ -90,6 +115,16 @@ static CURLcode test_unit1924(const char *arg)
                     "got %d, expected %d\n", i, c->site, c->host,
                     (int)c->secure, (int)same, (int)c->same);
       fail_unless(same == c->same, "same-site mismatch");
+    }
+  }
+
+  for(i = 0; i < CURL_ARRAYSIZE(sites); i++) {
+    const struct t1924_site *c = &sites[i];
+    bool ok = Curl_cookie_site_ok(c->site);
+    if(ok != c->ok) {
+      curl_mfprintf(stderr, "site %zu: '%s': got %d, expected %d\n",
+                    i, c->site, (int)ok, (int)c->ok);
+      fail_unless(ok == c->ok, "site check mismatch");
     }
   }
 
