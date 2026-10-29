@@ -49,9 +49,6 @@ http
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP priorities
 </name>
