@@ -183,6 +183,14 @@ static CURLcode rtsp_done(struct Curl_easy *data,
 
   result = Curl_http_done(data, status, premature);
 
+  /* An incomplete RTP frame is recoverable on a live connection, but a
+   * dead connection cannot provide the remaining bytes and must not be reused. */
+  if(rtspc->state != RTP_PARSE_SKIP) {
+    bool input_pending;
+    if(!Curl_conn_is_alive(data, data->conn, &input_pending))
+      connclose(data->conn);
+  }
+
   if(!status && !result) {
     /* Check the sequence numbers */
     uint32_t CSeq_sent = rtsp->CSeq_sent;
@@ -669,6 +677,21 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
     bool in_body = (data->req.headerline && !rtspc->in_header) &&
                    (data->req.size >= 0) &&
                    (data->req.bytecount < data->req.size);
+
+    /* A control response must not be consumed as the tail of an RTP frame.
+     * The stream may legitimately split RTP packets across reads, so keep
+     * parser state until an RTSP response actually starts. */
+    if((rtspc->state != RTP_PARSE_SKIP) && data->req.header &&
+       (data->set.rtspreq != RTSPREQ_RECEIVE) && (buf[0] == 'R') &&
+       !strncmp(buf, "RTSP/", (blen < 5) ? blen : 5)) {
+      curlx_dyn_free(&rtspc->buf);
+      rtspc->rtp_channel = -1;
+      rtspc->rtp_len = 0;
+      rtspc->state = RTP_PARSE_SKIP;
+      rtspc->in_header = TRUE;
+      goto out;
+    }
+
     switch(rtspc->state) {
 
     case RTP_PARSE_SKIP: {
