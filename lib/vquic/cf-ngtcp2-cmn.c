@@ -2109,7 +2109,8 @@ static CURLcode cf_ngtcp2_cmn_maintenance(struct Curl_cfilter *cf,
     result = Curl_cf_ngtcp2_progress_ingress(cf, data, &pktx);
     if(!result)
       result = Curl_cf_ngtcp2_progress_egress(cf, data, &pktx);
-
+    if(!result)
+      result = Curl_cf_ngtcp2_cmn_set_expiry(cf, data, &pktx);
     CURL_TRC_CF(data, cf, "maintenance() -> %d", (int)result);
     CF_DATA_RESTORE(cf, save);
   }

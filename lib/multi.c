@@ -974,7 +974,7 @@ static CURLcode multi_adjust_pollset(struct Curl_easy *data,
         if(sock == CURL_SOCKET_BAD)
           continue;
         if(recv_blocked && Curl_pollset_want_recv(data, ps, sock) &&
-           !Curl_conn_is_multiplex(data->conn, i)) {
+           !Curl_conn_wants_maintenance(data->conn, i)) {
           result = Curl_pollset_remove_in(data, ps, sock);
           if(result)
             break;
@@ -1110,6 +1110,27 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
   return result;
 }
 
+static CURLcode mstate_ratelimit_pollset(struct Curl_easy *data,
+                                         struct easy_pollset *ps)
+{
+  struct connectdata *conn = data->conn;
+  CURLcode result = CURLE_OK;
+
+  /* Normally, we do not want to poll sockets for a ratelimited transfer,
+   * but if any filter wants maintenance, add the socket for input. */
+  if(conn && Curl_conn_wants_maintenance(conn, FIRSTSOCKET)) {
+    curl_socket_t sock = data->conn->sock[FIRSTSOCKET];
+    if(sock != CURL_SOCKET_BAD) {
+      result = Curl_pollset_add_in(data, ps, sock);
+    }
+  }
+  if(!result)
+    result = multi_adjust_pollset(data, ps);
+  if(!result)
+    result = Curl_conn_adjust_pollset(data, conn, ps);
+  return result;
+}
+
 #ifdef CURLVERBOSE
 static size_t multi_timeouts_count(struct expire_timers *timeouts)
 {
@@ -1175,7 +1196,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
       break;
 
     case MSTATE_RATELIMITING:
-      /* we need to let time pass, ignore socket(s) */
+      result = mstate_ratelimit_pollset(data, ps);
       break;
 
     case MSTATE_DONE:
