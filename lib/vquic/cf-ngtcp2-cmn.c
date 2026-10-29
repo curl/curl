@@ -1922,7 +1922,7 @@ CURLcode Curl_cf_ngtcp2_h3_stream_setup(struct Curl_cfilter *cf,
   stream->rx_offset = 0;
   stream->rx_offset_max = H3_STREAM_WINDOW_SIZE_INITIAL;
   stream->tx_in_flight_ideal = H3_STREAM_SEND_BUF_INITIAL;
-
+  stream->rfc9218prio = CURL_HTTP_PRIO_U3;
   /* on send, we control how much we put into the buffer */
   Curl_bufq_initp(&stream->sendbuf, &ctx->stream_bufcp,
                   H3_STREAM_SEND_CHUNKS, BUFQ_OPT_NONE);

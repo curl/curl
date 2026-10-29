@@ -925,14 +925,14 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void cf_ngtcp2_prio_changed(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data)
+static CURLcode cf_ngtcp2_prio_changed(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
-  if(!ctx->h3conn || !stream || (stream->id <= 0))
-    return;
+  if(!ctx->h3conn || !stream || (stream->id < 0))
+    return CURLE_OK;
 
   if(data->set.priority.rfc9218 != stream->rfc9218prio) {
     char buf[128];
@@ -943,11 +943,15 @@ static void cf_ngtcp2_prio_changed(struct Curl_cfilter *cf,
     len = Curl_http_prio_hd_val(&data->set.priority, buf, sizeof(buf));
     rv = nghttp3_conn_set_client_stream_priority(
       ctx->h3conn, stream->id, (const uint8_t *)buf, len);
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] PRIORITY_UPDATE '%.*s' -> %d",
-                stream->id, (int)len, buf, rv);
-    (void)rv;
-    (void)Curl_cf_ngtcp2_progress_egress(cf, data, NULL); /* best effort */
+    if(rv) {
+      CURL_TRC_CF(data, cf, "h3sid[%" PRId64 "] failed to set priority -> "
+              "%d (%s)", stream->id, rv, nghttp3_strerror(rv));
+      return CURLE_SEND_ERROR;
+    }
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] PRIORITY_UPDATE '%.*s'",
+                stream->id, (int)len, buf);
   }
+  return CURLE_OK;
 }
 
 static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
@@ -985,7 +989,7 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
     }
     break;
   case CF_CTRL_DATA_PRIO_CHANGED:
-    cf_ngtcp2_prio_changed(cf, data);
+    result = cf_ngtcp2_prio_changed(cf, data);
     break;
   default:
     result = Curl_cf_ngtcp2_cmn_cntrl(cf, data, event, arg1, arg2);
