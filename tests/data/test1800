@@ -25,6 +25,7 @@ Content-Type: text/html
 <features>
 h2c
 http/2
+nghttpx
 </features>
 <server>
 http
