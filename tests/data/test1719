@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+FTP
+wildcardmatch
+ftplistparser
+libtest
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+total 12
+drwxr-xr-x   2 ftp-default ftp-default     4096 Jan 11 10:00 dir1
+lrwxrwxrwx   1 ftp-default ftp-default        4 Jan 11 10:00 link1 -> dir1
+-rw-r--r--   1 ftp-default ftp-default       10 Jan 11 10:00 someothertext.txt
+</data>
+</reply>
+
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib576
+</tool>
+<name>
+FTP wildcard - UNIX listing that starts with a total line
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/total/*
+</command>
+</client>
+
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout>
+=============================================================
+Remains:      3
+Filename:     dir1
+Permissions:  rwxr-xr-x (parsed => 755)
+Size:         4096B
+User:         ftp-default
+Group:        ftp-default
+Time:         Jan 11 10:00
+Filetype:     directory
+=============================================================
+Remains:      2
+Filename:     link1
+Permissions:  rwxrwxrwx (parsed => 777)
+Size:         4B
+User:         ftp-default
+Group:        ftp-default
+Time:         Jan 11 10:00
+Filetype:     symlink
+Target:       dir1
+=============================================================
+Remains:      1
+Filename:     someothertext.txt
+Permissions:  rw-r--r-- (parsed => 644)
+Size:         10B
+User:         ftp-default
+Group:        ftp-default
+Time:         Jan 11 10:00
+Filetype:     regular file
+Content:
+-------------------------------------------------------------
+# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #
+-------------------------------------------------------------
+=============================================================
+</stdout>
+</verify>
+</testcase>
