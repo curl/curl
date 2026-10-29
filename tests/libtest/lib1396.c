@@ -64,6 +64,36 @@ static CURLcode test_lib1396(const char *arg)
     { "%FF%00%ff", 9, "\xff\x00\xff", 3 },
     { "%-2", 0, "%-2", 3 },
     { "%FG", 0, "%FG", 3 },
+    /* Adjacent escapes, malformed pairs, and a truncated second escape. */
+    { "%41%42", 6, "AB", 2 },
+    { "%aB%cD", 6, "\xab\xcd", 2 },
+    { "%00%1f", 6, "\x00\x1f", 2 },
+    { "%1f%00", 6, "\x1f\x00", 2 },
+    { "%G4%41", 6, "%G4A", 4 },
+    { "%4G%41", 6, "%4GA", 4 },
+    { "%41%G4", 6, "A%G4", 4 },
+    { "%41%4G", 6, "A%4G", 4 },
+    { "%41%42", 3, "A", 1 },
+    { "%41%42", 4, "A%", 2 },
+    { "%41%42", 5, "A%4", 3 },
+    { "%41%42%43", 9, "ABC", 3 },
+    { "x%41%42y", 8, "xABy", 4 },
+    { "%41%\x00\xff", 6, "A%\x00\xff", 4 },
+    /* Single-byte raw spans before and between escapes. */
+    { "x%41y%42", 8, "xAyB", 4 },
+    { "\x00%41", 4, "\x00" "A", 2 },
+    { "%41\xff%42", 7, "A\xff" "B", 3 },
+    /* Distinct bytes in raw spans around the small-copy boundaries. */
+    { "%41b%5A", 7, "AbZ", 3 },
+    { "%41bc%5A", 8, "AbcZ", 4 },
+    { "%41bcd%5A", 9, "AbcdZ", 5 },
+    { "%41bcde%5A", 10, "AbcdeZ", 6 },
+    { "%41bcdef%5A", 11, "AbcdefZ", 7 },
+    { "%41bcdefg%5A", 12, "AbcdefgZ", 8 },
+    { "%41bcdefgh%5A", 13, "AbcdefghZ", 9 },
+    { "%41bcdefghi%5A", 14, "AbcdefghiZ", 10 },
+    { "%41bcdefghij%5A", 15, "AbcdefghijZ", 11 },
+    { "%41b\x00\xff" "c%5A", 10, "Ab\x00\xff" "cZ", 6 },
     { NULL, 0, NULL, 0 } /* end of list marker */
   };
   /* escape, this => that */
