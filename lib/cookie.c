@@ -1120,6 +1120,15 @@ static bool is_public_suffix(struct Curl_easy *data,
 }
 
 /* returns TRUE when replaced */
+/* TRUE when the two cookies live in the same partition: both without a
+   partition key, or both with the same key */
+static bool same_partition(const struct Cookie *a, const struct Cookie *b)
+{
+  if(!a->partkey != !b->partkey)
+    return FALSE;
+  return !a->partkey || curl_strequal(a->partkey, b->partkey);
+}
+
 static bool replace_existing(struct Curl_easy *data,
                              struct Cookie *co,
                              const struct CookieInfo *ci,
@@ -1147,6 +1156,7 @@ static bool replace_existing(struct Curl_easy *data,
         matching_domains = TRUE;
 
       if(matching_domains && /* the domains were identical */
+         same_partition(clist, co) && /* the same partition */
          clist->path && co->path && /* both have paths */
          clist->secure && !co->secure && !secure) {
         size_t cllen;
@@ -1196,9 +1206,7 @@ static bool replace_existing(struct Curl_easy *data,
         else if(!clist->path != !co->path)
           replace_old = FALSE;
         /* cookies in different partitions live side by side */
-        else if(!clist->partkey != !co->partkey)
-          replace_old = FALSE;
-        else if(clist->partkey && !curl_strequal(clist->partkey, co->partkey))
+        else if(!same_partition(clist, co))
           replace_old = FALSE;
       }
 
@@ -1294,6 +1302,7 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
      cookies are stored and sent exactly as before these attributes were
      understood. */
   if(site) {
+    ci->attrs_used = TRUE;
     if((co->samesite == COOKIE_SAMESITE_NONE) && !co->secure) {
       /* RFC 6265bis 5.6 step 16 */
       infof(data, "cookie '%s' dropped, SameSite=None requires Secure",
@@ -1310,16 +1319,13 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   if((flags & COOKIE_HTTPHEADER) && domain) {
     /* set by a server response, evaluate the request context */
     const bool secure_xfer = Curl_xfer_is_secure(data);
-    if(site) {
-      ci->attrs_used = TRUE;
-      if((co->samesite != COOKIE_SAMESITE_NONE) &&
-         !data->set.cookie_navigation &&
-         !cookie_same_site(site, domain, secure_xfer)) {
-        /* RFC 6265bis 5.6 step 17: not storable from a cross-site request */
-        infof(data, "cookie '%s' dropped, SameSite cookie set in "
-              "cross-site request", co->name);
-        goto fail;
-      }
+    if(site && (co->samesite != COOKIE_SAMESITE_NONE) &&
+       !data->set.cookie_navigation &&
+       !cookie_same_site(site, domain, secure_xfer)) {
+      /* RFC 6265bis 5.6 step 17: not storable from a cross-site request */
+      infof(data, "cookie '%s' dropped, SameSite cookie set in "
+            "cross-site request", co->name);
+      goto fail;
     }
     if(partitioned) {
       /* A Partitioned cookie gets the partition key of the request. Without
