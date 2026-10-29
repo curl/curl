@@ -33,9 +33,6 @@ swsclose
 </reply>
 
 <client>
-<features>
-h2c
-</features>
 <server>
 http
 </server>
