@@ -175,7 +175,6 @@ struct http_priority {
 };
 
 void Curl_http_prio_init(struct http_priority *prio);
-bool Curl_http_prio_is_default(struct http_priority *prio);
 size_t Curl_http_prio_hd_val(struct http_priority *prio,
                              char *buf, size_t buflen);
 
