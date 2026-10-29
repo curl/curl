@@ -36,10 +36,11 @@ the transfers send buffer for WebSocket encoded data. Intended for
 use in a CURLOPT_READFUNCTION(3) callback.
 
 When using a CURLOPT_READFUNCTION(3) in a WebSocket transfer, any
-data returned by that function is sent as a *CURLWS_BINARY* frame
-with the length being the amount of data read.
+data returned by that function is sent as one or more *CURLWS_BINARY* frames
+(usually one, but rate limits might lead to splitting).
 
-To send larger frames or frames of a different type, call
+To send larger frames or frames of a different type or frames where
+the length must be fixed, call
 curl_ws_start_frame() from within the read function and then return
 the data belonging to the frame.
 

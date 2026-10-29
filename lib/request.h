@@ -150,6 +150,9 @@ struct SingleRequest {
   BIT(ignore_cl);     /* ignore content-length */
   BIT(upload_chunky); /* set TRUE if we are doing chunked transfer-encoding
                          on upload */
+  BIT(send_no_merge); /* Do not merge more than one Curl_client_read()
+                         into sendbuf. WebSockets uses this to keep
+                         frame meta and payload data in sync. */
   BIT(no_body);      /* the response has no body */
   BIT(authneg);      /* TRUE when the auth phase has started, which means
                         that we are creating a request with an auth header,

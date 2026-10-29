@@ -53,6 +53,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->eos_sent = FALSE;
   req->ignorebody = FALSE;
   req->shutdown = FALSE;
+  req->send_no_merge = FALSE;
   req->bytecount = 0;
   req->writebytecount = 0;
   req->header = FALSE;
@@ -166,6 +167,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
   req->shutdown = FALSE;
+  req->send_no_merge = FALSE;
   /* Unpause all directions */
   Curl_rlimit_block(&data->progress.dl.rlimit, FALSE, &t0);
   Curl_rlimit_block(&data->progress.ul.rlimit, FALSE, &t0);
@@ -462,6 +464,8 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
   /* Fill our send buffer if more from client can be read. */
   if(!data->req.upload_aborted &&
      !data->req.eos_read &&
+     /* with send_no_merge we only add more when sendbuf is empty */
+     (!data->req.send_no_merge || Curl_bufq_is_empty(&data->req.sendbuf)) &&
      !Curl_xfer_send_is_paused(data) &&
      !Curl_bufq_is_full(&data->req.sendbuf)) {
     size_t nread;

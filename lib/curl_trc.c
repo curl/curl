@@ -28,7 +28,6 @@
 #include "cfilters.h"
 #include "multiif.h"
 
-#include "cf-recvbuf.h"
 #include "cf-socket.h"
 #include "cf-setup.h"
 #include "http2.h"
@@ -38,6 +37,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
+#include "cf-ws.h"
 #include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
@@ -569,9 +569,6 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_unix,           TRC_CT_NETWORK },
   { &Curl_cft_tcp_accept,     TRC_CT_NETWORK },
   { &Curl_cft_ip_happy,       TRC_CT_NETWORK },
-#ifndef CURL_DISABLE_WEBSOCKETS
-  { &Curl_cft_recvbuf,        TRC_CT_PROTOCOL },
-#endif
   { &Curl_cft_setup,          TRC_CT_PROTOCOL },
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   { &Curl_cft_nghttp2,        TRC_CT_PROTOCOL },
@@ -601,6 +598,9 @@ static struct trc_cft_def trc_cfts[] = {
 #endif
 #ifndef CURL_DISABLE_HTTP
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
+#endif
+#ifndef CURL_DISABLE_WEBSOCKETS
+  { &Curl_cft_ws,             TRC_CT_PROTOCOL },
 #endif
 };
 

@@ -1331,8 +1331,8 @@ CURLcode Curl_connect_only_attach(struct Curl_easy *data)
  *
  * This is the private internal version of curl_easy_send()
  */
-CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
-                       size_t buflen, size_t *n)
+static CURLcode easy_senddata(struct Curl_easy *data, const void *buffer,
+                              size_t buflen, size_t *n)
 {
   CURLcode result;
   struct connectdata *c = NULL;
@@ -1375,7 +1375,7 @@ CURLcode curl_easy_send(CURL *curl, const void *buffer, size_t buflen,
       result = CURLE_BAD_FUNCTION_ARGUMENT;
       goto out;
     }
-    result = Curl_senddata(data, buffer, buflen, &written);
+    result = easy_senddata(data, buffer, buflen, &written);
     *n = written;
   }
 out:
