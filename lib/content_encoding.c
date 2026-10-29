@@ -83,6 +83,7 @@ struct zlib_writer {
   char buffer[DECOMPRESS_BUFFER_SIZE]; /* Put the decompressed data here. */
   uInt trailerlen;           /* Remaining trailer byte count. */
   z_stream z;                /* State structure for zlib. */
+  bool stream_ended;         /* Whether the stream has ended with Z_STREAM_END. */
 };
 
 static voidpf zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
@@ -215,6 +216,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
         break;
       }
       result = process_trailer(data, zp);
+      zp->stream_ended = TRUE;
       break;
     case Z_DATA_ERROR:
       /* some servers seem to not generate zlib headers, so this is an attempt
@@ -261,6 +263,7 @@ static CURLcode deflate_do_init(struct Curl_easy *data,
   if(inflateInit(z) != Z_OK)
     return process_zlib_error(data, z);
   zp->zlib_init = ZLIB_INIT;
+  zp->stream_ended = FALSE;
   return CURLE_OK;
 }
 
@@ -294,13 +297,25 @@ static void deflate_do_close(struct Curl_easy *data,
   exit_zlib(data, z, &zp->zlib_init, CURLE_OK);
 }
 
+static CURLcode deflate_do_flush(struct Curl_easy *data,
+                                 struct Curl_cwriter *writer, bool eos)
+{
+  struct zlib_writer *zp = (struct zlib_writer *)writer;
+
+  if(eos && !zp->stream_ended) {
+    failf(data, "Deflate stream ended before completion");
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+  return Curl_cwriter_flush(data, writer->next, eos);
+}
+
 static const struct Curl_cwtype deflate_encoding = {
   "deflate",
   NULL,
   CURL_CW_FLAG_BLOWUP,
   deflate_do_init,
   deflate_do_write,
-  Curl_cwriter_def_flush,
+  deflate_do_flush,
   deflate_do_close,
   sizeof(struct zlib_writer)
 };
@@ -323,6 +338,7 @@ static CURLcode gzip_do_init(struct Curl_easy *data,
     return process_zlib_error(data, z);
 
   zp->zlib_init = ZLIB_INIT_GZIP; /* Transparent gzip decompress state */
+  zp->stream_ended = FALSE;
   return CURLE_OK;
 }
 
@@ -357,13 +373,25 @@ static void gzip_do_close(struct Curl_easy *data,
   exit_zlib(data, z, &zp->zlib_init, CURLE_OK);
 }
 
+static CURLcode gzip_do_flush(struct Curl_easy *data,
+                              struct Curl_cwriter *writer, bool eos)
+{
+  struct zlib_writer *zp = (struct zlib_writer *)writer;
+
+  if(eos && !zp->stream_ended) {
+    failf(data, "Gzip stream ended before completion");
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+  return Curl_cwriter_flush(data, writer->next, eos);
+}
+
 static const struct Curl_cwtype gzip_encoding = {
   "gzip",
   "x-gzip",
   CURL_CW_FLAG_BLOWUP,
   gzip_do_init,
   gzip_do_write,
-  Curl_cwriter_def_flush,
+  gzip_do_flush,
   gzip_do_close,
   sizeof(struct zlib_writer)
 };
