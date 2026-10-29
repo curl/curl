@@ -968,12 +968,13 @@ static CURLcode multi_adjust_pollset(struct Curl_easy *data,
     recv_blocked = (Curl_rlimit_avail(&data->progress.dl.rlimit, NULL) <= 0);
     send_blocked = (Curl_rlimit_avail(&data->progress.ul.rlimit, NULL) <= 0);
     if(send_blocked || recv_blocked) {
-      int i;
+      uint8_t i;
       for(i = 0; i <= SECONDARYSOCKET; ++i) {
         curl_socket_t sock = data->conn->sock[i];
         if(sock == CURL_SOCKET_BAD)
           continue;
-        if(recv_blocked && Curl_pollset_want_recv(data, ps, sock)) {
+        if(recv_blocked && Curl_pollset_want_recv(data, ps, sock) &&
+           !Curl_conn_is_multiplex(data->conn, i)) {
           result = Curl_pollset_remove_in(data, ps, sock);
           if(result)
             break;
@@ -2309,8 +2310,7 @@ static CURLMcode multistate_ratelimiting(struct Curl_easy *data,
     if(!mspeed_check(data))
       mresult = CURLM_CALL_MULTI_PERFORM;
 
-    if((data->mstate == MSTATE_RATELIMITING) &&
-       Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
+    if(data->mstate == MSTATE_RATELIMITING) {
       result = Curl_conn_do_maintenance(data, FIRSTSOCKET);
       if(result) {
         multi_posttransfer(data);
