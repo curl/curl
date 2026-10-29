@@ -83,7 +83,7 @@ struct zlib_writer {
   char buffer[DECOMPRESS_BUFFER_SIZE]; /* Put the decompressed data here. */
   uInt trailerlen;           /* Remaining trailer byte count. */
   z_stream z;                /* State structure for zlib. */
-  bool stream_ended;         /* Whether the stream has ended with Z_STREAM_END. */
+  bool stream_ended;         /* Stream has ended with Z_STREAM_END? */
 };
 
 static voidpf zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
