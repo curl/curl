@@ -205,6 +205,8 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  * CF_TYPE_SETUP       filter is only needed for connection setup and
  *                     can be removed once connected
  * CF_TYPE_DNS         filter managing DNS resolve operations
+ * CF_TYPE_MAINTENANCE filter wants "maintenance" calls when transfers
+ *                     are blocked/ratelimited.
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
@@ -213,6 +215,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 #define CF_TYPE_HTTP        (1 << 4)
 #define CF_TYPE_SETUP       (1 << 5)
 #define CF_TYPE_DNS         (1 << 6)
+#define CF_TYPE_MAINTENANCE (1 << 7)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -413,6 +416,9 @@ CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
  * Connection provides multiplexing of easy handles at `socketindex`.
  */
 bool Curl_conn_is_multiplex(struct connectdata *conn, int8_t sockindex);
+
+/* TRUE if any filters are of type CF_TYPE_MAINTENANCE */
+bool Curl_conn_wants_maintenance(struct connectdata *conn, int8_t sockindex);
 
 /**
  * Return the HTTP version used on the FIRSTSOCKET connection filters
