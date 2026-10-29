@@ -481,19 +481,13 @@ static CURLcode cw_out_do_flush(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode cw_out_flush(struct Curl_easy *data,
-                             struct Curl_cwriter *writer)
-{
-  return cw_out_do_flush(data, writer, FALSE);
-}
-
 const struct Curl_cwtype Curl_cwt_out = {
   "cw-out",
   NULL,
   0,
   cw_out_init,
   cw_out_write,
-  cw_out_flush,
+  cw_out_do_flush,
   cw_out_close,
   sizeof(struct cw_out_ctx)
 };
@@ -506,9 +500,7 @@ CURLcode Curl_cw_out_done(struct Curl_easy *data)
   cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
   if(cw_out) {
     CURL_TRC_WRITE(data, "[OUT] done");
-    result = Curl_client_flush(data);
-    if(!result)
-      result = cw_out_do_flush(data, cw_out, TRUE);
+    result = Curl_client_flush(data, TRUE);
   }
   return result;
 }

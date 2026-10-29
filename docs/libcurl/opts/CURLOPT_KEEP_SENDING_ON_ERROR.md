@@ -32,10 +32,6 @@ A long parameter set to 1 tells the library to keep sending the request body
 if the HTTP code returned is equal to or larger than 300. The default action
 would be to stop sending and close the stream or connection.
 
-This option is suitable for manual NTLM authentication, i.e. if an application
-does not use CURLOPT_HTTPAUTH(3), but instead sets "Authorization: NTLM ..."
-headers manually using CURLOPT_HTTPHEADER(3).
-
 Most applications do not need this option.
 
 # DEFAULT

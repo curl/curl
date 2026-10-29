@@ -135,9 +135,9 @@ CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
 }
 
 CURLcode Curl_cwriter_def_flush(struct Curl_easy *data,
-                                struct Curl_cwriter *writer)
+                                struct Curl_cwriter *writer, bool eos)
 {
-  return Curl_cwriter_flush(data, writer->next);
+  return Curl_cwriter_flush(data, writer->next, eos);
 }
 
 void Curl_cwriter_def_close(struct Curl_easy *data,
@@ -392,7 +392,7 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
   return result;
 }
 
-CURLcode Curl_client_flush(struct Curl_easy *data)
+CURLcode Curl_client_flush(struct Curl_easy *data, bool eos)
 {
   CURLcode result;
 
@@ -403,8 +403,8 @@ CURLcode Curl_client_flush(struct Curl_easy *data)
     DEBUGASSERT(data->req.writer.stack);
   }
 
-  result = Curl_cwriter_flush(data, data->req.writer.stack);
-  CURL_TRC_WRITE(data, "client_flush() -> %d", (int)result);
+  result = Curl_cwriter_flush(data, data->req.writer.stack, eos);
+  CURL_TRC_WRITE(data, "client_flush(eos=%d) -> %d", eos, (int)result);
   return result;
 }
 
@@ -522,7 +522,7 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
 CURLcode Curl_cwriter_unpause(struct Curl_easy *data)
 {
   data->req.writer.paused = FALSE;
-  return Curl_cwriter_flush(data, data->req.writer.stack);
+  return Curl_cwriter_flush(data, data->req.writer.stack, FALSE);
 }
 
 CURLcode Curl_creader_read(struct Curl_easy *data,
