@@ -68,6 +68,7 @@
 #include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curlx/wait.h"
 #include "curl_ctype.h"
 
 #ifndef NI_MAXHOST
