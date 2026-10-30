@@ -169,7 +169,7 @@ static char *auth_digest_string_quoted(const char *s)
       if(!result)
         result = curlx_dyn_addn(&out, s, 1);
     }
-    else if((*s < ' ') || (*s > 0x7e)) {
+    else if(((unsigned char)*s < 0x20) || (*s == 0x7f)) {
       unsigned char buf[3] = { '%' };
       Curl_hexbyte(&buf[1], (unsigned char)*s);
       result = curlx_dyn_addn(&out, buf, 3);
