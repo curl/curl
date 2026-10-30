@@ -39,6 +39,23 @@ typedef enum {
   PPTRANSFER_NONE  /* do not get anything and do not get info */
 } curl_pp_transfer;
 
+/* callbacks for doing pingpong I/O */
+typedef CURLcode Curl_pp_send_cb(struct Curl_easy *data,
+                                 void *io_user_data,
+                                 char *buf, size_t blen,
+                                 bool eos,
+                                 size_t *nwritten);
+
+typedef CURLcode Curl_pp_recv_cb(struct Curl_easy *data,
+                                 void *io_user_data,
+                                 char *buf, size_t blen,
+                                 size_t *nread);
+
+typedef CURLcode Curl_pp_poll_cb(struct Curl_easy *data,
+                                 void *io_user_data,
+                                 bool want_send, bool want_recv,
+                                 timediff_t timeout_ms);
+
 /*
  * 'pingpong' is the generic struct used for protocols doing server<->client
  * conversations in a back-and-forth style such as FTP, IMAP, POP3, SMTP etc.
@@ -64,6 +81,13 @@ struct pingpong {
   CURLcode (*statemachine)(struct Curl_easy *data, struct connectdata *conn);
   bool (*endofresp)(struct Curl_easy *data, struct connectdata *conn,
                     const char *ptr, size_t len, int *code);
+  /* If != NULL, perform I/O via these callbacks instead of using
+   * the data connection directly. */
+  Curl_pp_send_cb *do_send;
+  Curl_pp_recv_cb *do_recv;
+  Curl_pp_poll_cb *do_poll;
+  void *io_user_data;
+
   BIT(initialized);
   BIT(pending_resp);  /* set TRUE when a server response is pending or in
                          progress, and is cleared once the last response is
@@ -79,6 +103,15 @@ struct pingpong {
     (pp)->statemachine = s;      \
     (pp)->endofresp = e;         \
   } while(0)
+
+/* Set the callbacks to use for I/O.
+ * Setting a callback to NULL makes pingpong use the tranfer's
+ * connection directly. */
+void Curl_pp_set_io(struct pingpong *pp,
+                    Curl_pp_send_cb *do_send,
+                    Curl_pp_recv_cb *do_recv,
+                    Curl_pp_poll_cb *do_poll,
+                    void *io_user_data);
 
 /*
  * Curl_pp_statemach()
@@ -134,7 +167,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
  * Reads a piece of a server response.
  */
 CURLcode Curl_pp_readresp(struct Curl_easy *data,
-                          int8_t sockindex,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
                           size_t *size); /* size of the response */

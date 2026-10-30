@@ -590,13 +590,12 @@ static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
 
 static CURLcode ftp_readresp(struct Curl_easy *data,
                              struct ftp_conn *ftpc,
-                             int8_t sockindex,
                              struct pingpong *pp,
                              int *ftpcodep, /* return the ftp-code if done */
                              size_t *size) /* size of the response */
 {
   int code;
-  CURLcode result = Curl_pp_readresp(data, sockindex, pp, &code, size);
+  CURLcode result = Curl_pp_readresp(data, pp, &code, size);
   DEBUGASSERT(ftpcodep);
 
   /* store the latest code for later retrieval, except during shutdown */
@@ -695,7 +694,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
     else if(!Curl_conn_data_pending(data, FIRSTSOCKET)) {
       curl_socket_t wsock = Curl_pp_needs_flush(data, pp) ?
         sockfd : CURL_SOCKET_BAD;
-      int ev = Curl_socket_check(sockfd, CURL_SOCKET_BAD, wsock, interval_ms);
+      int ev = Curl_socket_check(sockfd, wsock, interval_ms);
       if(ev < 0) {
         failf(data, "FTP response aborted due to select/poll error: %d",
               SOCKERRNO);
@@ -713,7 +712,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
         break;
     }
 
-    result = ftp_readresp(data, ftpc, FIRSTSOCKET, pp, ftpcodep, &nread);
+    result = ftp_readresp(data, ftpc, pp, ftpcodep, &nread);
     if(result)
       break;
 
@@ -3194,7 +3193,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   if(pp->sendleft)
     return Curl_pp_flushsend(data, pp);
 
-  result = ftp_readresp(data, ftpc, FIRSTSOCKET, pp, &ftpcode, &nread);
+  result = ftp_readresp(data, ftpc, pp, &ftpcode, &nread);
   if(result || !ftpcode)
     return result;
 

@@ -1297,7 +1297,7 @@ upgrade_tls:
 
   do {
      /* Read the response from the server */
-    result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &pop3code, &nread);
+    result = Curl_pp_readresp(data, pp, &pop3code, &nread);
     if(result)
       return result;
 

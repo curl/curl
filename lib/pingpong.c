@@ -56,6 +56,54 @@ timediff_t Curl_pp_state_timeleft_ms(struct Curl_easy *data,
   return remain_ms;
 }
 
+static CURLcode pp_recv(struct pingpong *pp,
+                        struct Curl_easy *data,
+                        char *buf, size_t blen,
+                        size_t *pnread)
+{
+  if(pp->do_recv)
+    return pp->do_recv(data, pp->io_user_data, buf, blen, pnread);
+  else
+    return Curl_conn_recv(data, FIRSTSOCKET, buf, blen, pnread);
+}
+
+static CURLcode pp_send(struct pingpong *pp,
+                        struct Curl_easy *data,
+                        char *buf, size_t blen,
+                        bool eos,
+                        size_t *pnwritten)
+{
+  if(pp->do_send)
+    return pp->do_send(data, pp->io_user_data, buf, blen, eos, pnwritten);
+  else
+    return Curl_conn_send(data, FIRSTSOCKET, buf, blen, eos, pnwritten);
+}
+
+static CURLcode pp_poll(struct pingpong *pp,
+                        struct Curl_easy *data,
+                        bool want_send, bool want_recv,
+                        timediff_t timeout_ms)
+{
+  if(pp->do_poll)
+    return pp->do_poll(data, pp->io_user_data, want_send, want_recv,
+                       timeout_ms);
+  else {
+    if(Curl_conn_data_pending(data, FIRSTSOCKET))
+      return CURLE_OK;
+    else {
+      curl_socket_t sock = data->conn->sock[FIRSTSOCKET];
+      int rc = Curl_socket_check(want_send ? sock : CURL_SOCKET_BAD,
+                                 want_recv ? sock : CURL_SOCKET_BAD,
+                                 timeout_ms);
+      if(rc == -1) {
+        failf(data, "select/poll error");
+        return want_send ? CURLE_SEND_ERROR : CURLE_RECV_ERROR;
+      }
+      return rc ? CURLE_OK : CURLE_AGAIN;
+    }
+  }
+}
+
 /*
  * Curl_pp_statemach()
  */
@@ -63,10 +111,6 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
                            struct pingpong *pp, bool block,
                            bool disconnecting)
 {
-  struct connectdata *conn = data->conn;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
-  int rc;
-  timediff_t interval_ms;
   timediff_t timeout_ms = Curl_pp_state_timeleft_ms(data, pp);
   CURLcode result = CURLE_OK;
 
@@ -75,47 +119,30 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     return CURLE_OPERATION_TIMEDOUT; /* already too little time */
   }
 
-  if(block) {
-    interval_ms = 1000;  /* use 1 second timeout intervals */
-    if(timeout_ms < interval_ms)
-      interval_ms = timeout_ms;
-  }
-  else {
-    interval_ms = 0; /* immediate */
+  if(!pp->overflow) {
+    timediff_t interval_ms = 0;
+
+    if(block) {
+      interval_ms = 1000;  /* use 1 second timeout intervals */
+      if(timeout_ms < interval_ms)
+        interval_ms = timeout_ms;
+    }
+
     /* Wake the multi socket API even when the server sends no response. */
     Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
+    result = pp_poll(pp, data, pp->sendleft, !pp->sendleft, interval_ms);
   }
 
-  if(Curl_conn_data_pending(data, FIRSTSOCKET))
-    rc = 1;
-  else if(pp->overflow)
-    /* We are receiving and there is data in the cache so read it */
-    rc = 1;
-  else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
-    /* We are receiving and there is data ready in the SSL library */
-    rc = 1;
-  else {
-    rc = Curl_socket_check(pp->sendleft ? CURL_SOCKET_BAD : sock, /* reading */
-                           CURL_SOCKET_BAD,
-                           pp->sendleft ? sock : CURL_SOCKET_BAD, /* writing */
-                           interval_ms);
+  if(result == CURLE_AGAIN) {
+    if(disconnecting)
+      result = CURLE_OPERATION_TIMEDOUT;
+    else {
+      result = Curl_pgrsCheck(data);
+    }
   }
 
-  if(block) {
-    /* if we did not wait, we do not have to spend time on this now */
-    result = Curl_pgrsCheck(data);
-    if(result)
-      return result;
-  }
-
-  if(rc == -1) {
-    failf(data, "select/poll error");
-    result = CURLE_OUT_OF_MEMORY;
-  }
-  else if(rc)
+  if(!result)
     result = pp->statemachine(data, data->conn);
-  else if(disconnecting)
-    return CURLE_OPERATION_TIMEDOUT;
 
   return result;
 }
@@ -130,6 +157,19 @@ void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow)
   curlx_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
   curlx_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
   pp->initialized = TRUE;
+}
+
+void Curl_pp_set_io(struct pingpong *pp,
+                    Curl_pp_send_cb *do_send,
+                    Curl_pp_recv_cb *do_recv,
+                    Curl_pp_poll_cb *do_poll,
+                    void *io_user_data)
+{
+  DEBUGASSERT(pp->initialized);
+  pp->do_send = do_send;
+  pp->do_recv = do_recv;
+  pp->do_poll = do_poll;
+  pp->io_user_data = io_user_data;
 }
 
 CURLcode Curl_pp_vsendf(struct Curl_easy *data,
@@ -172,8 +212,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   write_len = curlx_dyn_len(&pp->sendbuf);
   s = curlx_dyn_ptr(&pp->sendbuf);
 
-  result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, FALSE,
-                          &bytes_written);
+  result = pp_send(pp, data, s, write_len, FALSE, &bytes_written);
   if(result == CURLE_AGAIN) {
     bytes_written = 0;
   }
@@ -211,22 +250,12 @@ CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
   return result;
 }
 
-static CURLcode pingpong_read(struct Curl_easy *data,
-                              int8_t sockindex,
-                              char *buffer,
-                              size_t buflen,
-                              size_t *nread)
-{
-  return Curl_conn_recv(data, sockindex, buffer, buflen, nread);
-}
-
 /*
  * Curl_pp_readresp()
  *
  * Reads a piece of a server response.
  */
 CURLcode Curl_pp_readresp(struct Curl_easy *data,
-                          int8_t sockindex,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
                           size_t *size) /* size of the response */
@@ -256,8 +285,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       if(!maxloops--) /* don't get stuck */
         return CURLE_OK;
 
-      result = pingpong_read(data, sockindex, buffer, sizeof(buffer),
-                             &gotbytes);
+      result = pp_recv(pp, data, buffer, sizeof(buffer), &gotbytes);
       if(result == CURLE_AGAIN)
         return CURLE_OK;
 
@@ -366,9 +394,9 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   if(!Curl_pp_needs_flush(data, pp))
     return CURLE_OK;
 
-  result = Curl_conn_send(data, FIRSTSOCKET,
-                          pp->sendthis + pp->sendsize - pp->sendleft,
-                          pp->sendleft, FALSE, &written);
+  result = pp_send(pp, data,
+                   pp->sendthis + pp->sendsize - pp->sendleft,
+                   pp->sendleft, FALSE, &written);
   if(result == CURLE_AGAIN) {
     result = CURLE_OK;
     written = 0;

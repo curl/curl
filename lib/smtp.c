@@ -1539,8 +1539,7 @@ upgrade_tls:
 
   do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(data, FIRSTSOCKET, &smtpc->pp,
-                              &smtpcode, &nread);
+    result = Curl_pp_readresp(data, &smtpc->pp, &smtpcode, &nread);
     if(result)
       return result;
 
