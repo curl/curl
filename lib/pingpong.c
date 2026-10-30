@@ -42,15 +42,16 @@
 timediff_t Curl_pp_state_timeleft_ms(struct Curl_easy *data,
                                      struct pingpong *pp)
 {
+  const struct curltime *pnow = Curl_pgrs_now(data);
   timediff_t xfer_remain_ms;
   timediff_t remain_ms = data->set.server_response_timeout ?
     data->set.server_response_timeout : PINGPONG_TIMEOUT_MS;
 
   /* If the overall transfer has less time remaining than pingpong
    * has otherwise for the state, return that. */
-  remain_ms -= curlx_ptimediff_ms(Curl_pgrs_now(data), &pp->response);
+  remain_ms -= curlx_ptimediff_ms(pnow, &pp->response);
   /* transfer remaining time is 0, when it has no timeout. */
-  xfer_remain_ms = Curl_timeleft_ms(data);
+  xfer_remain_ms = Curl_timeleft_now_ms(data, pnow);
   if(xfer_remain_ms)
     return CURLMIN(remain_ms, xfer_remain_ms);
   return remain_ms;
@@ -131,13 +132,14 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     /* Wake the multi socket API even when the server sends no response. */
     Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
     result = pp_poll(pp, data, pp->sendleft, !pp->sendleft, interval_ms);
-  }
 
-  if(result == CURLE_AGAIN) {
-    if(disconnecting)
-      result = CURLE_OPERATION_TIMEDOUT;
-    else {
-      result = Curl_pgrsCheck(data);
+    (void)disconnecting;
+    if(result == CURLE_AGAIN) {
+      if(interval_ms && (Curl_pp_state_timeleft_ms(data, pp) <= 0))
+        result = CURLE_OPERATION_TIMEDOUT;
+      else {
+        result = Curl_pgrsCheck(data);
+      }
     }
   }
 
