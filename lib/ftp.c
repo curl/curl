@@ -704,7 +704,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
     else if(!Curl_conn_data_pending(data)) {
       curl_socket_t wsock = Curl_pp_needs_flush(data, pp) ?
         sockfd : CURL_SOCKET_BAD;
-      int ev = Curl_socket_check(sockfd, CURL_SOCKET_BAD, wsock, interval_ms);
+      int ev = Curl_socket_check(sockfd, wsock, interval_ms);
       if(ev < 0) {
         failf(data, "FTP response aborted due to select/poll error: %d",
               SOCKERRNO);
