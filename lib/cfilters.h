@@ -122,6 +122,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
 #define CF_CTRL_FLUSH            (256 + 2) /* 0          NULL     first fail */
 #define CF_CTRL_REPORT_STATS     (256 + 3) /* 0          NULL     ignored */
+#define CF_CTRL_MAINTENANCE      (256 + 4) /* 0          NULL     ignored */
 
 /**
  * Handle event/control for the filter.
@@ -204,6 +205,8 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  * CF_TYPE_SETUP       filter is only needed for connection setup and
  *                     can be removed once connected
  * CF_TYPE_DNS         filter managing DNS resolve operations
+ * CF_TYPE_MAINTENANCE filter wants "maintenance" calls when transfers
+ *                     are blocked/ratelimited.
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
@@ -212,6 +215,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 #define CF_TYPE_HTTP        (1 << 4)
 #define CF_TYPE_SETUP       (1 << 5)
 #define CF_TYPE_DNS         (1 << 6)
+#define CF_TYPE_MAINTENANCE (1 << 7)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -413,6 +417,9 @@ CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
  */
 bool Curl_conn_is_multiplex(struct connectdata *conn, int8_t sockindex);
 
+/* TRUE if any filters are of type CF_TYPE_MAINTENANCE */
+bool Curl_conn_wants_maintenance(struct connectdata *conn, int8_t sockindex);
+
 /**
  * Return the HTTP version used on the FIRSTSOCKET connection filters
  * or 0 if unknown. Value otherwise is 09, 10, 11, etc.
@@ -456,6 +463,10 @@ bool Curl_conn_needs_flush(struct Curl_easy *data, int8_t sockindex);
  * Flush any pending data on the connection filters at chain `sockindex`.
  */
 CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex);
+
+/* Perform maintenance on the connection filters at chain `sockindex`.
+ * Sends CF_CTRL_MAINTENANCE to filters. */
+CURLcode Curl_conn_do_maintenance(struct Curl_easy *data, int8_t sockindex);
 
 /**
  * Return the socket used on data's connection for FIRSTSOCKET,

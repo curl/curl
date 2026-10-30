@@ -576,6 +576,19 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int8_t sockindex)
   return FALSE;
 }
 
+bool Curl_conn_wants_maintenance(struct connectdata *conn, int8_t sockindex)
+{
+  struct Curl_cfilter *cf;
+
+  if(!conn || !CONN_SOCK_IDX_VALID(sockindex))
+    return FALSE;
+  for(cf = conn->cfilter[sockindex]; cf; cf = cf->next) {
+    if(cf->cft->flags & CF_TYPE_MAINTENANCE)
+      return TRUE;
+  }
+  return FALSE;
+}
+
 unsigned char Curl_conn_get_transport(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
@@ -905,6 +918,14 @@ CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
                             CF_CTRL_FLUSH, 0, NULL);
+}
+
+CURLcode Curl_conn_do_maintenance(struct Curl_easy *data, int8_t sockindex)
+{
+  if(!CONN_SOCK_IDX_VALID(sockindex))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
+                            CF_CTRL_MAINTENANCE, 0, NULL);
 }
 
 /**

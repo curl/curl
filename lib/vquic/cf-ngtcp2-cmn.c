@@ -2094,6 +2094,29 @@ CURLcode Curl_cf_ngtcp2_cmn_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+static CURLcode cf_ngtcp2_cmn_maintenance(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data)
+{
+  CURLcode result = CURLE_OK;
+
+  if(cf->connected && !cf->shutdown) {
+    struct cf_call_data save;
+    struct cf_ngtcp2_io_ctx pktx;
+
+    CF_DATA_SAVE(save, cf, data);
+    Curl_cf_ngtcp2_io_ctx_init(&pktx, cf, data);
+
+    result = Curl_cf_ngtcp2_progress_ingress(cf, data, &pktx);
+    if(!result)
+      result = Curl_cf_ngtcp2_progress_egress(cf, data, &pktx);
+    if(!result)
+      result = Curl_cf_ngtcp2_cmn_set_expiry(cf, data, &pktx);
+    CURL_TRC_CF(data, cf, "maintenance() -> %d", (int)result);
+    CF_DATA_RESTORE(cf, save);
+  }
+  return result;
+}
+
 CURLcode Curl_cf_ngtcp2_cmn_cntrl(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   int event, int arg1, void *arg2)
@@ -2118,6 +2141,9 @@ CURLcode Curl_cf_ngtcp2_cmn_cntrl(struct Curl_cfilter *cf,
         ctx->stats_reported = TRUE;
       }
     }
+    break;
+  case CF_CTRL_MAINTENANCE:
+    result = cf_ngtcp2_cmn_maintenance(cf, data);
     break;
   default:
     break;
