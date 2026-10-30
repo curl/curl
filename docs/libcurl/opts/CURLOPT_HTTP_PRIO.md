@@ -93,7 +93,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_HTTP_PRIO,
                      CURL_HTTP_PRIO_U0 | CURL_HTTP_PRIO_I);
 
-    /* then add both to a multi handle and transfer them */
+    /* then add to a multi handle for processing */
   }
 }
 ~~~
