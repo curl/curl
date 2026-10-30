@@ -2197,7 +2197,7 @@ static CURLcode ftp_statemach(struct Curl_easy *data,
                               struct ftp_conn *ftpc,
                               bool *done)
 {
-  CURLcode result = Curl_pp_statemach(data, &ftpc->pp, FALSE, FALSE);
+  CURLcode result = Curl_pp_statemach(data, &ftpc->pp, FALSE);
 
   /* Check for the state outside of the Curl_socket_check() return code checks
      since at times we are in fact already in this state when this function
