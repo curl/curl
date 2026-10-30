@@ -127,6 +127,10 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
       interval_ms = 1000;  /* use 1 second timeout intervals */
       if(timeout_ms < interval_ms)
         interval_ms = timeout_ms;
+      if(disconnecting)  /* test balloon */
+        interval_ms = CURLMAX(interval_ms, 1000);
+      DEBUGF(infof(data, "pp_statematch, interval_ms=%" FMT_TIMEDIFF_T,
+                   interval_ms));
     }
 
     /* Wake the multi socket API even when the server sends no response. */
