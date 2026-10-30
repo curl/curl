@@ -1214,7 +1214,7 @@ struct Curl_cftype Curl_cft_h3_proxy = {
   cf_h3_proxy_data_pending,
   cf_h3_proxy_send,
   cf_h3_proxy_recv,
-  Curl_cf_def_cntrl,
+  Curl_cf_ngtcp2_cmn_cntrl,
   Curl_cf_ngtcp2_cmn_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_ngtcp2_cmn_query,
