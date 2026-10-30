@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "urldata.h"
+#include "vtls/vtls.h"
 
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
