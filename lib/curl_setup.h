@@ -1110,6 +1110,17 @@ error:                                                                 \
 #ifdef USE_WINSOCK
 #define SOCKERRNO         ((int)WSAGetLastError())
 #define SET_SOCKERRNO(x)  WSASetLastError((int)(x))
+#elif defined(__AMIGA__) && defined(HAVE_PROTO_BSDSOCKET_H) && \
+  !defined(__amigaos4__) && !defined(__MORPHOS__) && !defined(__AROS__)
+/* Native socket errors need not share libc's errno storage. */
+#define SOCKERRNO        ((int)Errno())
+#define SET_SOCKERRNO(x)                                       \
+  do {                                                         \
+    struct TagItem curl_errno_tags[] = {                       \
+      { SBTM_SETVAL(SBTC_ERRNO), (ULONG)(x) }, { TAG_DONE, 0 } \
+    };                                                         \
+    (void)SocketBaseTagList(curl_errno_tags);                  \
+  } while(0)
 #else
 #define SOCKERRNO         errno
 #define SET_SOCKERRNO(x)  (errno = (x))
