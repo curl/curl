@@ -2105,6 +2105,9 @@ TESTCASES = \
   test4039 \
   test4040 \
   test4271 \
+  test4272 \
+  test4273 \
+  test4274 \
   test4644 \
   test4656 \
   test4657 \
