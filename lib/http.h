@@ -37,6 +37,16 @@ typedef enum {
   HTTPREQ_HEAD
 } Curl_HttpReq;
 
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+/* The RFC 9218 priority of the transfer as a single number, to detect
+   changes. 0 when no priority is set. */
+int Curl_http_priority_code(struct Curl_easy *data);
+/* Write the RFC 9218 priority field value of the transfer, like "u=1, i",
+   to `buf`. Returns the length, 0 when no priority is set. */
+size_t Curl_http_priority_value(struct Curl_easy *data,
+                                char *buf, size_t blen);
+#endif
+
 #define CURL_HTTP_V1x   (1 << 0)
 #define CURL_HTTP_V2x   (1 << 1)
 #define CURL_HTTP_V3x   (1 << 2)

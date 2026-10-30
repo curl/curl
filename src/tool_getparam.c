@@ -237,6 +237,7 @@ static const struct LongShort aliases[] = {
   {"post302",                    ARG_BOOL, ' ', C_POST302},
   {"post303",                    ARG_BOOL, ' ', C_POST303},
   {"preproxy",                   ARG_STRG, ' ', C_PREPROXY},
+  {"priority",                   ARG_STRG, ' ', C_PRIORITY},
   {"progress-bar",               ARG_BOOL, '#', C_PROGRESS_BAR},
   {"progress-meter",             ARG_BOOL|ARG_NO, ' ', C_PROGRESS_METER},
   {"proto",                      ARG_STRG, ' ', C_PROTO},
@@ -2487,6 +2488,84 @@ static ParameterError opt_secs(struct OperationConfig *config,
 }
 
 /* opt_string handles string options */
+/*
+ * Parse an RFC 9218 priority field value, a structured field dictionary
+ * with the members "u=<0-7>" and "i" (or "i=?1" / "i=?0") separated by
+ * commas. Unknown members and parameters are ignored.
+ */
+static ParameterError parse_priority(const char *p,
+                                     struct OperationConfig *config)
+{
+  long urgency = -1;
+  bool incremental = FALSE;
+  bool first = TRUE;
+
+  if(!*p)
+    return PARAM_BLANK_STRING;
+  while(*p) {
+    const char *key;
+    size_t klen;
+    if(!first) {
+      while(ISBLANK(*p))
+        p++;
+      if(*p != ',')
+        return PARAM_BAD_USE;
+      p++;
+    }
+    first = FALSE;
+    while(ISBLANK(*p))
+      p++;
+    /* sf-key: a lowercase letter or '*' followed by lowercase letters,
+       digits and the characters "_-.*" */
+    key = p;
+    if(!ISLOWER(*p) && (*p != '*'))
+      return PARAM_BAD_USE;
+    while(ISLOWER(*p) || ISDIGIT(*p) ||
+          (*p == '_') || (*p == '-') || (*p == '.') || (*p == '*'))
+      p++;
+    klen = (size_t)(p - key);
+    if((klen == 1) && (*key == 'u')) {
+      if((p[0] == '=') && ISDIGIT(p[1]) && (p[1] <= '7') && !ISDIGIT(p[2])) {
+        urgency = p[1] - '0';
+        p += 2;
+      }
+      else
+        return PARAM_BAD_USE;
+    }
+    else if((klen == 1) && (*key == 'i')) {
+      if(*p != '=')
+        incremental = TRUE;
+      else if((p[1] == '?') && ((p[2] == '0') || (p[2] == '1'))) {
+        incremental = (p[2] == '1');
+        p += 3;
+      }
+      else
+        return PARAM_BAD_USE;
+    }
+    else if(*p == '=') {
+      /* skip the value of an unknown member */
+      p++;
+      while(*p && (*p != ',') && (*p != ';') && !ISBLANK(*p))
+        p++;
+    }
+    /* skip parameters */
+    while(*p == ';') {
+      p++;
+      while(ISBLANK(*p))
+        p++;
+      while(*p && (*p != ',') && (*p != ';') && !ISBLANK(*p))
+        p++;
+      while(ISBLANK(*p))
+        p++;
+    }
+    while(ISBLANK(*p))
+      p++;
+  }
+  config->priority_urgency = urgency;
+  config->priority_incremental = incremental;
+  return PARAM_OK;
+}
+
 static ParameterError opt_string(struct OperationConfig *config,
                                  const struct LongShort *a,
                                  const char *nextarg)
@@ -2570,6 +2649,11 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = getstr(&config->ipfs_gateway, nextarg, DENY_BLANK);
     break;
 #endif
+  case C_PRIORITY: /* --priority */
+    if(!feature_http2 && !feature_http3)
+      return PARAM_LIBCURL_DOESNT_SUPPORT;
+    err = parse_priority(nextarg, config);
+    break;
   case C_AWS_SIGV4: /* --aws-sigv4 */
     config->authtype |= CURLAUTH_AWS_SIGV4;
     err = getstr(&config->aws_sigv4, nextarg, ALLOW_BLANK);

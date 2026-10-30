@@ -64,12 +64,16 @@ struct transfer_d {
   int resumed;
   int done;
   int checked_ssl;
+  int reprioritized;
   CURLcode result;
 };
 
 static size_t transfer_count_d = 1;
 static struct transfer_d *transfer_d;
 static int forbid_reuse_d = 0;
+static long urgency_d = -1;       /* RFC 9218 urgency of the requests */
+static int incremental_d = 0;     /* RFC 9218 incremental flag */
+static long new_urgency_d = -1;   /* urgency after the first response data */
 
 static struct transfer_d *get_transfer_for_easy_d(CURL *curl)
 {
@@ -98,6 +102,16 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
     t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
       return 0;
+  }
+
+  if((new_urgency_d >= 0) && !t->reprioritized) {
+    /* the first response data arrived, change the priority so that
+       libcurl sends a PRIORITY_UPDATE */
+    t->reprioritized = 1;
+    curl_mfprintf(stderr, "[t-%zu] PRIORITY urgency=%ld\n", t->idx,
+                  new_urgency_d);
+    curl_easy_setopt(t->curl, CURLOPT_PRIORITY_URGENCY, new_urgency_d);
+    curl_easy_setopt(t->curl, CURLOPT_PRIORITY_INCREMENTAL, 0L);
   }
 
   if(!t->resumed &&
@@ -254,6 +268,10 @@ static int setup_hx_download(CURL *curl, const char *url, struct transfer_d *t,
     curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
   if(fresh_connect)
     curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
+  if(urgency_d >= 0)
+    curl_easy_setopt(curl, CURLOPT_PRIORITY_URGENCY, urgency_d);
+  if(incremental_d)
+    curl_easy_setopt(curl, CURLOPT_PRIORITY_INCREMENTAL, 1L);
 
   /* please be verbose */
   if(verbose_d) {
@@ -278,15 +296,20 @@ static void usage_hx_download(const char *msg)
     "  -m number  max parallel downloads\n"
     "  -e         use TLS early data when possible\n"
     "  -f         forbid connection reuse\n"
-    "  -n number  total downloads\n");
+    "  -n number  total downloads\n"
+    "  -u number  change the urgency to `number` after the first response "
+    "bytes\n");
   curl_mfprintf(stderr,
     "  -A number  abort transfer after `number` response bytes\n"
     "  -F number  fail writing response after `number` response bytes\n"
+    "  -I         mark the requests incremental (RFC 9218)\n"
     "  -M number  max concurrent connections to a host\n"
-    "  -P number  pause transfer after `number` response bytes\n"
+    "  -P number  pause transfer after `number` response bytes\n");
+  curl_mfprintf(stderr,
     "  -r <host>:<port>:<addr>  resolve information\n"
     "  -S         share connections between easy handles\n"
     "  -T number  max concurrent connections total\n"
+    "  -U number  urgency 0-7 of the requests (RFC 9218)\n"
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
     "  -6 use IPv6 for resolving the FIRST URL\n"
   );
@@ -322,8 +345,8 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   (void)URL;
 
-  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:C:F:M:P:r:ST:V:6"))
-        != -1) {
+  while((ch = cgetopt(test_argc, test_argv,
+                      "aefhm:n:u:xA:C:F:IM:P:r:ST:U:V:6")) != -1) {
     const char *opt = coptarg;
     curl_off_t num;
     switch(ch) {
@@ -348,6 +371,10 @@ static CURLcode test_cli_hx_download(const char *URL)
       if(!curlx_str_number(&opt, &num, LONG_MAX))
         transfer_count_d = (size_t)num;
       break;
+    case 'u':
+      if(!curlx_str_number(&opt, &num, 7))
+        new_urgency_d = (long)num;
+      break;
     case 'x':
       fresh_connect = 1;
       break;
@@ -362,6 +389,9 @@ static CURLcode test_cli_hx_download(const char *URL)
     case 'F':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
         fail_offset = (size_t)num;
+      break;
+    case 'I':
+      incremental_d = 1;
       break;
     case 'M':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
@@ -381,6 +411,10 @@ static CURLcode test_cli_hx_download(const char *URL)
     case 'T':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
         max_total_conns = (size_t)num;
+      break;
+    case 'U':
+      if(!curlx_str_number(&opt, &num, 7))
+        urgency_d = (long)num;
       break;
     case 'V': {
       if(!strcmp("http/1.1", coptarg))

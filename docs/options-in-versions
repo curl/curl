@@ -164,6 +164,7 @@
 --post302                            7.19.1
 --post303                            7.26.0
 --preproxy                           7.52.0
+--priority                           8.24.0
 --progress-bar (-#)                  5.10
 --proto                              7.21.0
 --proto-default                      7.45.0

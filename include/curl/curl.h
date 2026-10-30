@@ -2288,6 +2288,12 @@ typedef enum {
   /* Space-separated list of components to sign for HTTP Message Signatures */
   CURLOPT(CURLOPT_HTTPSIG_HEADERS, CURLOPTTYPE_STRINGPOINT, 332),
 
+  /* RFC 9218 priority urgency of the request, 0 - 7, -1 for none */
+  CURLOPT(CURLOPT_PRIORITY_URGENCY, CURLOPTTYPE_LONG, 333),
+
+  /* RFC 9218 priority incremental flag of the request */
+  CURLOPT(CURLOPT_PRIORITY_INCREMENTAL, CURLOPTTYPE_LONG, 334),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

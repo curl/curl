@@ -1708,6 +1708,32 @@ static unsigned char http_request_version(struct Curl_easy *data)
   return v;
 }
 
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+int Curl_http_priority_code(struct Curl_easy *data)
+{
+  int code = 0;
+  if(data->set.priority_urgency >= 0)
+    code = 0x10 | data->set.priority_urgency;
+  if(data->set.priority_incremental)
+    code |= 0x20;
+  return code;
+}
+
+size_t Curl_http_priority_value(struct Curl_easy *data,
+                                char *buf, size_t blen)
+{
+  size_t len = 0;
+  DEBUGASSERT(blen >= 8);
+  if(data->set.priority_urgency >= 0)
+    len = (size_t)curl_msnprintf(buf, blen, "u=%d",
+                                 (int)data->set.priority_urgency);
+  if(data->set.priority_incremental)
+    len += (size_t)curl_msnprintf(buf + len, blen - len, "%si",
+                                  len ? ", " : "");
+  return len;
+}
+#endif
+
 static const char *get_http_string(int httpversion)
 {
   switch(httpversion) {
@@ -2776,6 +2802,7 @@ typedef enum {
   H1_HD_TE,
   H1_HD_ACCEPT_ENCODING,
   H1_HD_REFERER,
+  H1_HD_PRIORITY,
 #ifndef CURL_DISABLE_PROXY
   H1_HD_PROXY_CONNECTION,
 #endif
@@ -2876,6 +2903,18 @@ static CURLcode http_add_hd(struct Curl_easy *data,
        !Curl_checkheaders(data, STRCONST("Referer")))
       result = curlx_dyn_addf(req, "Referer: %s\r\n",
                               Curl_bufref_ptr(&data->state.referer));
+    break;
+
+  case H1_HD_PRIORITY:
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+    /* the RFC 9218 priority signal, only meaningful for HTTP/2 and 3 */
+    if((httpversion >= 20) &&
+       !Curl_checkheaders(data, STRCONST("Priority"))) {
+      char pri[16];
+      if(Curl_http_priority_value(data, pri, sizeof(pri)))
+        result = curlx_dyn_addf(req, "Priority: %s\r\n", pri);
+    }
+#endif
     break;
 
 #ifndef CURL_DISABLE_PROXY

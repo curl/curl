@@ -429,6 +429,9 @@ void Curl_init_userdefined(struct Curl_easy *data)
   set->ws_raw_mode = FALSE;
   set->ws_no_auto_pong = FALSE;
 #endif
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+  set->priority_urgency = -1;
+#endif
 }
 
 /* easy->meta_hash destructor. Should never be called as elements

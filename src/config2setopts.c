@@ -676,6 +676,12 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
     return CURLE_OK;
 
   my_setopt_long(curl, CURLOPT_FOLLOWLOCATION, config->followlocation);
+
+  if(config->priority_urgency >= 0)
+    my_setopt_long(curl, CURLOPT_PRIORITY_URGENCY,
+                   config->priority_urgency);
+  if(config->priority_incremental)
+    my_setopt_long(curl, CURLOPT_PRIORITY_INCREMENTAL, 1);
   my_setopt_long(curl, CURLOPT_UNRESTRICTED_AUTH, config->unrestricted_auth);
 #ifndef CURL_DISABLE_AWS
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);

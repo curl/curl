@@ -191,6 +191,8 @@ struct OperationConfig {
   long tftp_blksize;        /* TFTP BLKSIZE option */
   long alivetime;           /* keepalive-time */
   long alivecnt;            /* keepalive-cnt */
+  long priority_urgency;    /* --priority, RFC 9218 urgency, -1 unset */
+  bool priority_incremental; /* --priority, RFC 9218 incremental */
   long gssapi_delegation;
   long expect100timeout_ms;
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
