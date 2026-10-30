@@ -50,5 +50,8 @@ REST 4
 RETR %TESTNUMBER
 ABOR
 </protocol>
+<strip>
+QUIT
+</strip>
 </verify>
 </testcase>
