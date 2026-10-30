@@ -37,6 +37,7 @@ Content-Type: text/html
 <client>
 <features>
 h2c
+nghttpx
 </features>
 <server>
 http/2

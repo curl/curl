@@ -24,6 +24,7 @@ MooMoo
 SSL
 !Schannel
 local-http
+!libressl-4.4.0
 </features>
 <server>
 https-mtls

@@ -35,6 +35,7 @@ crap data
 <client>
 <features>
 http/2
+nghttpx
 http
 </features>
 <server>

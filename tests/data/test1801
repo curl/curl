@@ -37,6 +37,7 @@ http
 </server>
 <features>
 http/2
+nghttpx
 </features>
 <name>
 HTTP/2 upgrade with lying server
