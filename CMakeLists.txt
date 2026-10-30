@@ -493,8 +493,6 @@ option(CURL_DISABLE_BINDLOCAL "Disable local binding support" OFF)
 mark_as_advanced(CURL_DISABLE_BINDLOCAL)
 option(CURL_DISABLE_NETRC "Disable netrc parser" OFF)
 mark_as_advanced(CURL_DISABLE_NETRC)
-option(CURL_ENABLE_NTLM "Enable NTLM support" OFF)
-mark_as_advanced(CURL_ENABLE_NTLM)
 option(CURL_DISABLE_PARSEDATE "Disable date parsing" OFF)
 mark_as_advanced(CURL_DISABLE_PARSEDATE)
 option(CURL_DISABLE_POP3 "Disable POP3" OFF)
@@ -853,6 +851,8 @@ if(CURL_USE_OPENSSL)
   cmake_pop_check_state()
 
   unset(AWSLC_VERSION CACHE)
+  unset(LIBRESSL_VERSION CACHE)
+
   if(HAVE_AWSLC)
     get_target_property(_awslc_include_dir OpenSSL::Crypto INTERFACE_INCLUDE_DIRECTORIES)
     if(_awslc_include_dir AND EXISTS "${_awslc_include_dir}/openssl/base.h")
@@ -864,6 +864,17 @@ if(CURL_USE_OPENSSL)
       unset(_version_str)
     endif()
     message(STATUS "Found AWS-LC version \"${AWSLC_VERSION}\"")
+  elseif(HAVE_LIBRESSL)
+    get_target_property(_libressl_include_dir OpenSSL::Crypto INTERFACE_INCLUDE_DIRECTORIES)
+    if(_libressl_include_dir AND EXISTS "${_libressl_include_dir}/openssl/opensslv.h")
+      set(_version_regex "#[\t ]*define[\t ]+LIBRESSL_VERSION_TEXT[\t ]+\"LibreSSL ([0-9.]+)\"")
+      file(STRINGS "${_libressl_include_dir}/openssl/opensslv.h" _version_str REGEX "${_version_regex}")
+      string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+      set(LIBRESSL_VERSION "${_version_str}")
+      unset(_version_regex)
+      unset(_version_str)
+    endif()
+    message(STATUS "Found LibreSSL version \"${LIBRESSL_VERSION}\"")
   endif()
 
   if(HAVE_AWSLC OR HAVE_BORINGSSL)
@@ -896,8 +907,14 @@ if(CURL_USE_OPENSSL)
     set(_openssl "BoringSSL")
   elseif(HAVE_LIBRESSL)
     set(_openssl "LibreSSL")
+    if(LIBRESSL_VERSION AND LIBRESSL_VERSION VERSION_LESS 3.4.1)
+      message(FATAL_ERROR "LibreSSL 3.4.1 or greater required")
+    endif()
   else()
     set(_openssl "OpenSSL")
+    if(OPENSSL_VERSION VERSION_LESS 3.0.0)
+      message(FATAL_ERROR "OpenSSL 3.0.0 or greater required")
+    endif()
   endif()
 endif()
 
@@ -1995,17 +2012,6 @@ macro(curl_add_if _label)
   endif()
 endmacro()
 
-# NTLM support requires crypto functions from various SSL libs.
-# These conditions must match those in lib/curl_setup.h.
-if(CURL_ENABLE_NTLM AND
-   ((USE_OPENSSL AND HAVE_DES_ECB_ENCRYPT) OR
-    (USE_MBEDTLS AND HAVE_MBEDTLS_DES_CRYPT_ECB) OR
-    USE_GNUTLS OR
-    USE_WIN32_CRYPTO OR
-    (USE_WOLFSSL AND HAVE_WC_DES_ECBENCRYPT)))
-  set(_use_curl_ntlm_core ON)
-endif()
-
 # Clear list and try to detect available protocols
 set(_items "")
 curl_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
@@ -2070,8 +2076,6 @@ curl_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 curl_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-curl_add_if("NTLM"          CURL_ENABLE_NTLM AND
-                            (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 curl_add_if("HTTP2"         USE_NGHTTP2)
 curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 curl_add_if("proxy-HTTP3"   USE_PROXY_HTTP3)

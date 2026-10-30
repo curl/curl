@@ -121,10 +121,10 @@ or specify user and password separately like in
     curl -u name:passwd https://http.server.example/full/path/to/file
 
 HTTP offers many different methods of authentication and curl supports
-several: Basic, Digest, NTLM and Negotiate (SPNEGO). Without telling which
-method to use, curl defaults to Basic. You can also ask curl to pick the most
-secure ones out of the ones that the server accepts for the given URL, by
-using `--anyauth`.
+several: Basic, Digest and Negotiate (SPNEGO). Without telling which method to
+use, curl defaults to Basic. You can also ask curl to pick the most secure
+ones out of the ones that the server accepts for the given URL, by using
+`--anyauth`.
 
 **Note**! According to the URL specification, HTTP URLs can not contain a user
 and password, so that style does not work when using curl via a proxy, even

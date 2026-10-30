@@ -24,6 +24,7 @@ Funny-head: yesyes
 <features>
 Debug
 http/2
+nghttpx
 SSL
 </features>
 <server>

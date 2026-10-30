@@ -33,7 +33,7 @@ cache-mode: write
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 1800
+  CURL_TEST_MIN: 1710
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc
   AWSLC_VERSION: 5.11.0
@@ -75,7 +75,7 @@ jobs:
           - name: 'awslc'
             install_steps: awslc pytest test-linter
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/awslc/lib
-            configure: --with-openssl=/home/runner/pkg/awslc --enable-ech --enable-ntlm
+            configure: --with-openssl=/home/runner/pkg/awslc --enable-ech
 
           - name: 'awslc'
             install_packages: libidn2-dev
@@ -84,7 +84,7 @@ jobs:
 
           - name: 'boringssl'
             install_steps: boringssl pytest
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/boringssl -DOPENSSL_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/boringssl -DOPENSSL_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DUSE_ECH=ON
 
           - name: 'libressl krb5'
             image: ubuntu-24.04-arm
@@ -98,14 +98,14 @@ jobs:
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl-c
             tflags: '--subset=0/2'
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl krb5 valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl-c
             tflags: '--subset=1/2'
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl clang'
             image: ubuntu-24.04-arm
@@ -124,7 +124,6 @@ jobs:
               -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DCURL_USE_LIBPSL=OFF
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
               -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCURL_ENABLE_NTLM=ON
 
           - name: 'mbedtls gss valgrind 1'
             image: ubuntu-24.04-arm
@@ -257,14 +256,14 @@ jobs:
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
             tflags: '--subset=0/2'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
           - name: 'openssl libssh2 sync-resolver valgrind 2 +analyzer'
             image: ubuntu-26.04-arm
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
             tflags: '--subset=1/2'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON -DCURL_GCC_ANALYZER=ON
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON
 
           - name: 'openssl intel C89'
             image: ubuntu-24.04
@@ -283,14 +282,14 @@ jobs:
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--subset=0/2'
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl -O3 libssh valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--subset=1/2'
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl clang krb5 openldap static'
             image: ubuntu-24.04
@@ -310,23 +309,23 @@ jobs:
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
             image: ubuntu-24.04-arm
-            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth --enable-ntlm
+            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth
 
           - name: 'curl_global_init_mem debug valgrind 1'
             image: ubuntu-24.04-arm
             install_packages: valgrind
             tflags: '--subset=0/2'
-            configure: --enable-init-mem-debug --with-openssl --disable-debug --enable-ntlm
+            configure: --enable-init-mem-debug --with-openssl --disable-debug
 
           - name: 'curl_global_init_mem debug valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: valgrind
             tflags: '--subset=1/2'
-            configure: --enable-init-mem-debug --with-openssl --disable-debug --enable-ntlm
+            configure: --enable-init-mem-debug --with-openssl --disable-debug
 
           - name: 'openssl https-only'
             image: ubuntu-24.04-arm
-            tflags: '--min=1360'
+            tflags: '--min=1270'
             configure: >-
               --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
@@ -334,19 +333,18 @@ jobs:
               --disable-rtsp
               --without-libssh2 --without-libssh
               --disable-tftp --disable-ftp --disable-file
-              --enable-ntlm
 
           - name: 'openssl torture 1'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             tflags: '-t --shallow=25 --subset=0/2'
             torture: true
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl torture 2'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             tflags: '-t --shallow=25 --subset=1/2'
             torture: true
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl i686'
             image: ubuntu-24.04
@@ -478,8 +476,8 @@ jobs:
           - name: 'event-based'
             image: ubuntu-24.04
             install_packages: libssh-dev libuv1-dev
-            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm --with-libuv
-            tflags: '-n --test-event --min=1520'
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --with-libuv
+            tflags: '-n --test-event --min=1430'
 
           - name: 'duphandle'
             image: ubuntu-26.04-arm

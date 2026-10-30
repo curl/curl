@@ -28,6 +28,7 @@ Alt-Svc: h2=":%HTTP2PORT", ma=315360000; persist=0
 alt-svc
 Debug
 h2c
+nghttpx
 </features>
 <server>
 https

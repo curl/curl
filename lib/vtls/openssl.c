@@ -1914,10 +1914,24 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
       *done = TRUE;
       goto out;
     }
-    if(SSL_get_error(octx->ssl, rc) == SSL_ERROR_WANT_WRITE) {
-      CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
-      connssl->io_need = CURL_SSL_IO_NEED_SEND;
-      goto out;
+    if(rc < 0) {
+      err = SSL_get_error(octx->ssl, rc);
+      if(err == SSL_ERROR_WANT_WRITE) {
+        CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
+        goto out;
+      }
+      if(err != SSL_ERROR_WANT_READ) {
+        VERBOSE(unsigned long sslerr = ERR_get_error());
+        CURL_TRC_CF(data, cf,
+                    "SSL shutdown, ignore send error: %s (%s), errno %d",
+                    SSL_ERROR_to_str(err),
+                    (sslerr ? ossl_strerror(sslerr, buf, sizeof(buf)) :
+                     "no OpenSSL error"),
+                    SOCKERRNO);
+        *done = TRUE;
+        goto out;
+      }
     }
     /* Having sent the close notify, we use SSL_read() to get the
      * missing close notify from the server. */
