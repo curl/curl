@@ -68,7 +68,6 @@
 #include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
-#include "curlx/wait.h"
 #include "curl_ctype.h"
 
 #ifndef NI_MAXHOST
@@ -4295,11 +4294,9 @@ static CURLcode ftp_quit(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  curl_mfprintf(stderr, "ftp_quit() start\n");
   if(ftpc->ctl_valid) {
     CURL_TRC_FTP(data, "sending QUIT to close session");
     result = Curl_pp_sendf(data, &ftpc->pp, "%s", "QUIT");
-    curl_mfprintf(stderr, "ftp_quit(), sent QUIT -> %d\n", (int)result);
     if(result) {
       failf(data, "Failure sending QUIT command: %s",
             curl_easy_strerror(result));
@@ -4312,12 +4309,7 @@ static CURLcode ftp_quit(struct Curl_easy *data,
     ftp_state(data, ftpc, FTP_QUIT);
 
     result = ftp_block_statemach(data, ftpc);
-    curl_mfprintf(stderr, "ftp_quit(), block_statematch() -> %d\n",
-                  (int)result);
-    curlx_wait_ms(1000);
   }
-  else
-    curl_mfprintf(stderr, "ftp_quit(), ctl not valid\n");
 
   return result;
 }
