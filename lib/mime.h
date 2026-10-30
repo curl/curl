@@ -139,6 +139,11 @@ CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
 /* Prototypes. */
 void Curl_mime_initpart(struct curl_mimepart *part);
 void Curl_mime_cleanpart(struct curl_mimepart *part);
+/* Set the transfer's custom headers as the mail headers of 'part', leaving
+   out "Authorization:" and "Cookie:" when they may not be sent to the host
+   the transfer ended up on. */
+CURLcode Curl_mime_mail_headers(struct Curl_easy *data,
+                                struct curl_mimepart *part);
 CURLcode Curl_mime_duppart(struct Curl_easy *data,
                            struct curl_mimepart *dst,
                            const curl_mimepart *src);
