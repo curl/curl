@@ -508,7 +508,7 @@ jobs:
           done
           if command -v pccritic >/dev/null 2>&1; then
             pccritic --version
-            pccritic --min-score 96 bld/libcurl.pc
+            pccritic --min-score 100 bld/libcurl.pc
           fi
 
       - name: 'test configs'
