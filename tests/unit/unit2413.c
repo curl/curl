@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "urldata.h"
+#include "vtls/vtls.h"
 
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
@@ -142,6 +143,50 @@ out:
   return result;
 }
 
+#ifndef CURL_DISABLE_PROXY
+static CURLcode t2413_proxy(const char *name,
+                            CURL *curl,
+                            const char *proxy,
+                            uint8_t proxytype,
+                            long proxyport,
+                            uint16_t exp_port)
+{
+  struct Curl_peer *peer = NULL;
+  uint8_t ptype = proxytype;
+  CURLU *uh = curl_url();
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  if(!uh)
+    goto out;
+  /* parse it the same way the proxy setup does */
+  if(curl_url_set(uh, CURLUPART_URL, proxy,
+                  CURLU_NON_SUPPORT_SCHEME | CURLU_GUESS_SCHEME)) {
+    curl_mfprintf(stderr, "%s: failed to parse %s", name, proxy);
+    result = CURLE_URL_MALFORMAT;
+    goto out;
+  }
+  curl_easy_setopt(curl, CURLOPT_PROXYPORT, proxyport);
+
+  result = Curl_peer_from_proxy_url(uh, (struct Curl_easy *)curl, proxy,
+                                    proxytype, &peer, &ptype);
+  if(result) {
+    curl_mfprintf(stderr, "%s: create failed %d", name, (int)result);
+    goto out;
+  }
+  if(peer->port != exp_port) {
+    curl_mfprintf(stderr, "%s: port=%u, expected %u", name,
+                  peer->port, exp_port);
+    result = CURLE_FAILED_INIT;
+  }
+
+out:
+  Curl_peer_unlink(&peer);
+  curl_url_cleanup(uh);
+  fail_unless(!result, "check failed");
+  return result;
+}
+#endif
+
 static uint32_t t2413_scopeid(const char *zone)
 {
 #ifdef HAVE_IF_NAMETOINDEX
@@ -201,6 +246,32 @@ static CURLcode test_unit2413(const char *arg)
   t2413_cmp("cmp6", curl,
             &Curl_scheme_https, "[::1%tada]", 443,
             &Curl_scheme_https, "[::1%Tada]", 443, FALSE, FALSE);
+
+#ifndef CURL_DISABLE_PROXY
+  /* an explicit port is used, even when it is the default for the
+     (possibly guessed) scheme */
+  t2413_proxy("proxy1", curl, "127.0.0.1:80", CURLPROXY_SOCKS5, 0, 80);
+  t2413_proxy("proxy2", curl, "127.0.0.1:443", CURLPROXY_SOCKS4, 0, 443);
+  t2413_proxy("proxy3", curl, "socks5h://127.0.0.1:80", CURLPROXY_HTTP, 0,
+              80);
+  /* an explicit port overrides CURLOPT_PROXYPORT */
+  t2413_proxy("proxy4", curl, "http://127.0.0.1:80", CURLPROXY_HTTP, 3128,
+              80);
+  t2413_proxy("proxy5", curl, "socks5://127.0.0.1:1080", CURLPROXY_HTTP,
+              9999, 1080);
+  /* without a port, use CURLOPT_PROXYPORT or the default */
+  t2413_proxy("proxy6", curl, "127.0.0.1", CURLPROXY_HTTP, 3128, 3128);
+  t2413_proxy("proxy7", curl, "127.0.0.1", CURLPROXY_HTTP, 0, 1080);
+  t2413_proxy("proxy8", curl, "http://127.0.0.1", CURLPROXY_HTTP, 0, 1080);
+  t2413_proxy("proxy9", curl, "socks4://127.0.0.1", CURLPROXY_HTTP, 0, 1080);
+  if(Curl_ssl_supports((struct Curl_easy *)curl, SSLSUPP_HTTPS_PROXY)) {
+    t2413_proxy("proxy10", curl, "https://127.0.0.1", CURLPROXY_HTTP, 0,
+                443);
+    t2413_proxy("proxy11", curl, "https://127.0.0.1:443", CURLPROXY_HTTP,
+                3129, 443);
+  }
+  curl_easy_setopt(curl, CURLOPT_PROXYPORT, 0L);
+#endif
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
