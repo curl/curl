@@ -1674,20 +1674,19 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done)
   *done = FALSE;
   if(!imapc)
     return CURLE_FAILED_INIT;
-  result = Curl_pp_statemach(data, &imapc->pp, FALSE, FALSE);
+  result = Curl_pp_statemach(data, &imapc->pp, FALSE);
   *done = (imapc->state == IMAP_STOP);
 
   return result;
 }
 
 static CURLcode imap_block_statemach(struct Curl_easy *data,
-                                     struct imap_conn *imapc,
-                                     bool disconnecting)
+                                     struct imap_conn *imapc)
 {
   CURLcode result = CURLE_OK;
 
   while(imapc->state != IMAP_STOP && !result)
-    result = Curl_pp_statemach(data, &imapc->pp, TRUE, disconnecting);
+    result = Curl_pp_statemach(data, &imapc->pp, TRUE);
 
   return result;
 }
@@ -2037,7 +2036,7 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
 
     /* Run the state-machine */
     if(!result)
-      result = imap_block_statemach(data, imapc, FALSE);
+      result = imap_block_statemach(data, imapc);
   }
 
   imap_easy_reset(imap);
@@ -2215,7 +2214,7 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
      !dead_connection && conn->bits.protoconnstart &&
      !Curl_pp_needs_flush(data, &imapc->pp) &&
      !imap_perform_logout(data, imapc))
-    (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
+    (void)imap_block_statemach(data, imapc); /* ignore errors */
 
   return CURLE_OK;
 }

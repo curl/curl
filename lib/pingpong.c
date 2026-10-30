@@ -109,8 +109,7 @@ static CURLcode pp_poll(struct pingpong *pp,
  * Curl_pp_statemach()
  */
 CURLcode Curl_pp_statemach(struct Curl_easy *data,
-                           struct pingpong *pp, bool block,
-                           bool disconnecting)
+                           struct pingpong *pp, bool block)
 {
   timediff_t timeout_ms = Curl_pp_state_timeleft_ms(data, pp);
   CURLcode result = CURLE_OK;
@@ -127,15 +126,12 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
       interval_ms = 1000;  /* use 1 second timeout intervals */
       if(timeout_ms < interval_ms)
         interval_ms = timeout_ms;
-      DEBUGF(infof(data, "pp_statematch, interval_ms=%" FMT_TIMEDIFF_T,
-                   interval_ms));
     }
 
     /* Wake the multi socket API even when the server sends no response. */
     Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
     result = pp_poll(pp, data, pp->sendleft, !pp->sendleft, interval_ms);
 
-    (void)disconnecting;
     if(result == CURLE_AGAIN) {
       if(interval_ms && (Curl_pp_state_timeleft_ms(data, pp) <= 0))
         result = CURLE_OPERATION_TIMEDOUT;

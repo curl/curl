@@ -120,7 +120,7 @@ void Curl_pp_set_io(struct pingpong *pp,
  * socket if there is no traffic.
  */
 CURLcode Curl_pp_statemach(struct Curl_easy *data, struct pingpong *pp,
-                           bool block, bool disconnecting);
+                           bool block);
 
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow);

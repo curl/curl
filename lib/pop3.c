@@ -1367,15 +1367,14 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
-  result = Curl_pp_statemach(data, &pop3c->pp, FALSE, FALSE);
+  result = Curl_pp_statemach(data, &pop3c->pp, FALSE);
   *done = (pop3c->state == POP3_STOP);
 
   return result;
 }
 
 static CURLcode pop3_block_statemach(struct Curl_easy *data,
-                                     struct connectdata *conn,
-                                     bool disconnecting)
+                                     struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
@@ -1384,7 +1383,7 @@ static CURLcode pop3_block_statemach(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   while(pop3c->state != POP3_STOP && !result)
-    result = Curl_pp_statemach(data, &pop3c->pp, TRUE, disconnecting);
+    result = Curl_pp_statemach(data, &pop3c->pp, TRUE);
 
   return result;
 }
@@ -1623,7 +1622,7 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
   if(!dead_connection && conn->bits.protoconnstart &&
      !Curl_pp_needs_flush(data, &pop3c->pp) &&
      !pop3_perform_quit(data, conn))
-    (void)pop3_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
+    (void)pop3_block_statemach(data, conn); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
