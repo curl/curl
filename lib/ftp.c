@@ -68,6 +68,7 @@
 #include "curlx/strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curlx/wait.h"
 #include "curl_ctype.h"
 
 #ifndef NI_MAXHOST
@@ -4313,6 +4314,7 @@ static CURLcode ftp_quit(struct Curl_easy *data,
     result = ftp_block_statemach(data, ftpc);
     curl_mfprintf(stderr, "ftp_quit(), block_statematch() -> %d\n",
                   (int)result);
+    curlx_wait_ms(1000);
   }
   else
     curl_mfprintf(stderr, "ftp_quit(), ctl not valid\n");
