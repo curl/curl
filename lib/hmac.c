@@ -41,6 +41,9 @@
 static const unsigned char hmac_ipad = 0x36;
 static const unsigned char hmac_opad = 0x5C;
 
+/* Some hash contexts need 16-byte alignment, e.g. wolfSSL on 64-bit CPUs */
+#define HMAC_CTXT_OFFSET ((sizeof(struct HMAC_context) + 15) & ~(size_t)15)
+
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
                                     const unsigned char *key,
                                     unsigned int keylen)
@@ -51,14 +54,14 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   unsigned char b;
 
   /* Create HMAC context. */
-  i = sizeof(*ctxt) + (2 * hashparams->ctxtsize) + hashparams->resultlen;
+  i = HMAC_CTXT_OFFSET + (2 * hashparams->ctxtsize) + hashparams->resultlen;
   ctxt = curlx_malloc(i);
 
   if(!ctxt)
     return ctxt;
 
   ctxt->hash = hashparams;
-  ctxt->hashctxt1 = (void *)(ctxt + 1);
+  ctxt->hashctxt1 = (void *)((char *)ctxt + HMAC_CTXT_OFFSET);
   ctxt->hashctxt2 = (void *)((char *)ctxt->hashctxt1 + hashparams->ctxtsize);
 
   /* If the key is too long, replace it by its hash digest. */

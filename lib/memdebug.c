@@ -37,6 +37,7 @@
 
 struct memdebug {
   size_t size;
+  char pad[16 - sizeof(size_t)]; /* keep mem aligned like malloc(), up to 16 */
   union {
     curl_off_t o;
     double d;
