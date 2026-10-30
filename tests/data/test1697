@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+SEARCH
+huge response
+</keywords>
+</info>
+
+# Server-side
+<reply>
+# a single ~70000 bytes response line, larger than the 64 KB pingpong
+# receive buffer limit, so it only works when streamed to the body
+<data crlf="yes" nocheck="yes">
+* SEARCH 1%repeat[7000 x %20123456789]%
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+imap
+</server>
+<name>
+IMAP custom SEARCH with excessively large response line
+</name>
+<command>
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -u user:secret -X 'SEARCH ALL'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT %TESTNUMBER
+A004 SEARCH ALL
+A005 LOGOUT
+</protocol>
+<stdout crlf="yes">
+* SEARCH 1%repeat[7000 x %20123456789]%
+</stdout>
+</verify>
+</testcase>
