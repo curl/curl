@@ -64,7 +64,17 @@ struct pingpong {
   CURLcode (*statemachine)(struct Curl_easy *data, struct connectdata *conn);
   bool (*endofresp)(struct Curl_easy *data, struct connectdata *conn,
                     const char *ptr, size_t len, int *code);
+  /* Optional. Called with the incomplete response line buffered so far (no
+     terminating newline yet) to ask the protocol whether its content should be
+     streamed to the download body as it arrives instead of being buffered
+     whole (as for an IMAP "* SEARCH ..." reply that lists all matching message
+     numbers on one line, which can be arbitrarily long). Returns TRUE to
+     stream, keeping the receive buffer bounded no matter how long the line
+     gets. Once streaming starts, the rest of the line is streamed too. */
+  bool (*stream_resp)(struct Curl_easy *data, struct connectdata *conn,
+                      const char *line, size_t len);
   BIT(initialized);
+  BIT(streaming);     /* streaming a long response line to the body */
   BIT(pending_resp);  /* set TRUE when a server response is pending or in
                          progress, and is cleared once the last response is
                          read */
