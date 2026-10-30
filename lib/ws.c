@@ -125,6 +125,7 @@ struct websocket {
   struct bufq sendbuf;    /* raw data to be sent to the server */
   struct curl_ws_frame recvframe;  /* the current WS FRAME received */
   struct ws_cntrl_frame pending; /* a control frame pending to be sent */
+  uint8_t ping[WS_MAX_CNTRL_LEN]; /* received PING payload for auto PONG */
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
   BIT(using_reader);      /* sending WS data is handled via a client reader */
 };
@@ -661,6 +662,28 @@ static curl_off_t ws_payload_remain(curl_off_t payload_total,
   return remain - buffered;
 }
 
+/* Collect the payload of a received PING, which may arrive in several
+ * pieces, and answer with a PONG carrying the same payload once complete. */
+static CURLcode ws_auto_pong(struct Curl_easy *data, struct websocket *ws,
+                             const uint8_t *buf, size_t buflen,
+                             curl_off_t payload_offset,
+                             curl_off_t payload_len, curl_off_t remain)
+{
+  /* the decoder rejects PING frames larger than WS_MAX_CNTRL_LEN */
+  if((payload_len > WS_MAX_CNTRL_LEN) ||
+     (buflen > (size_t)(payload_len - payload_offset)))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(buflen)
+    memcpy(ws->ping + (size_t)payload_offset, buf, buflen);
+  if(remain)
+    return CURLE_OK;
+  CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T "]",
+              payload_len);
+  /* send back the exact same content as a PONG */
+  return ws_enc_add_cntrl(data, ws, ws->ping, (size_t)payload_len,
+                          CURLWS_PONG);
+}
+
 static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
                                int frame_age, int frame_flags,
                                curl_off_t payload_offset,
@@ -683,12 +706,9 @@ static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
-    /* auto-respond to PINGs, only works for single-frame payloads atm */
-    CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T
-                "/%" FMT_OFF_T "]", payload_offset, payload_len);
-    /* send back the exact same content as a PONG */
-    result = ws_enc_add_cntrl(data, ws, buf, buflen, CURLWS_PONG);
+  if(auto_pong && (frame_flags & CURLWS_PING)) {
+    result = ws_auto_pong(data, ws, buf, buflen, payload_offset,
+                          payload_len, remain);
     if(result)
       return result;
   }
@@ -1620,12 +1640,9 @@ static CURLcode ws_client_collect(const uint8_t *buf, size_t buflen,
     ctx->payload_len = payload_len;
   }
 
-  if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
-    /* auto-respond to PINGs, only works for single-frame payloads atm */
-    CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T
-                "/%" FMT_OFF_T "]", payload_offset, payload_len);
-    /* send back the exact same content as a PONG */
-    result = ws_enc_add_cntrl(ctx->data, ctx->ws, buf, buflen, CURLWS_PONG);
+  if(auto_pong && (frame_flags & CURLWS_PING)) {
+    result = ws_auto_pong(data, ctx->ws, buf, buflen, payload_offset,
+                          payload_len, remain);
     if(result)
       return result;
     *pnwritten = buflen;
