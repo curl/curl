@@ -27,6 +27,16 @@
 
 #ifdef USE_NGHTTP2
 
+#if NGHTTP2_VERSION_NUM < 0x010f00
+#error "nghttp2 1.15.0 or greater required"
+#endif
+
+#define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
+
+#if NGHTTP2_VERSION_NUM >= 0x012f00 /* with 1.47.0 */
+#define NGHTTP2_HAS_PRIORITY_UPDATE 1
+#endif
+
 /* From the nghttp2 documentation:
  * > The errors < :enum:`nghttp2_error.NGHTTP2_ERR_FATAL` mean that
  * > the library is under unexpected condition and processing was
@@ -97,6 +107,11 @@ int Curl_ngh2_session_consume(
 int Curl_ngh2_submit_priority(
   struct curl_ngh2 *ngh2, uint8_t flags,
   int32_t stream_id, const nghttp2_priority_spec *pri_spec);
+#if NGHTTP2_HAS_PRIORITY_UPDATE
+int Curl_ngh2_submit_priority_update(
+  struct curl_ngh2 *ngh2, uint8_t flags, int32_t stream_id,
+  const uint8_t *field_value, size_t field_value_len);
+#endif
 int32_t Curl_ngh2_submit_request(
   struct curl_ngh2 *ngh2, const nghttp2_priority_spec *pri_spec,
   const nghttp2_nv *nva, size_t nvlen, const nghttp2_data_provider *data_prd,

@@ -49,12 +49,6 @@
 #include "headers.h"
 #include "curl_share.h"
 
-#if NGHTTP2_VERSION_NUM < 0x010f00
-#error "nghttp2 1.15.0 or greater required"
-#endif
-
-#define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
-
 /* buffer dimensioning:
  * use 16K as chunk size, as that fits H2 DATA frames well */
 #define H2_CHUNK_SIZE           (16 * 1024)
@@ -129,6 +123,7 @@ struct h2_stream_ctx {
   curl_off_t xfer_id;  /* transfer `id` owning this stream */
   curl_off_t nrcvd_data;  /* number of DATA bytes received */
 
+  struct http_priority prio; /* priority information */
   char **push_headers;       /* allocated array */
   size_t push_headers_used;  /* number of entries filled in */
   size_t push_headers_alloc; /* number of entries allocated */
@@ -276,6 +271,7 @@ static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx,
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   Curl_dynhds_init(&stream->resp_trailers,
                    MAX_HTTP_RESP_HEADER_COUNT, DYN_HTTP_REQUEST);
+  Curl_http_prio_init(&stream->prio);
   stream->bodystarted = FALSE;
   stream->status_code = -1;
   stream->closed = FALSE;
@@ -1781,34 +1777,6 @@ out:
   return result;
 }
 
-static int sweight_wanted(const struct Curl_easy *data)
-{
-  /* 0 weight is not set by user and we take the nghttp2 default one */
-  return data->set.weight ?
-    data->set.weight : NGHTTP2_DEFAULT_WEIGHT;
-}
-
-static int sweight_in_effect(const struct Curl_easy *data)
-{
-  /* 0 weight is not set by user and we take the nghttp2 default one */
-  return data->state.weight ?
-    data->state.weight : NGHTTP2_DEFAULT_WEIGHT;
-}
-
-/*
- * h2_pri_spec() fills in the pri_spec struct, used by nghttp2 to send weight
- * and dependency to the peer. It also stores the updated values in the state
- * struct.
- */
-
-static void h2_pri_spec(struct Curl_easy *data,
-                        nghttp2_priority_spec *pri_spec)
-{
-  int prio = data->set.weight;
-  nghttp2_priority_spec_init(pri_spec, 0, sweight_wanted(data), FALSE);
-  data->state.weight = prio;
-}
-
 /*
  * Check if there is been an update in the priority /
  * dependency settings and if so it submits a PRIORITY frame with the updated
@@ -1821,29 +1789,11 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   int rv = 0;
 
-  if(sweight_wanted(data) != sweight_in_effect(data)) {
-    struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
-    if(stream && stream->id > 0 &&
-       (sweight_wanted(data) != sweight_in_effect(data))) {
-      /* send new weight and/or dependency */
-      nghttp2_priority_spec pri_spec;
-
-      h2_pri_spec(data, &pri_spec);
-      CURL_TRC_CF(data, cf, "[%d] Queuing PRIORITY", stream->id);
-      DEBUGASSERT(stream->id != -1);
-      rv = Curl_ngh2_submit_priority(
-        &ctx->ngh2, NGHTTP2_FLAG_NONE, stream->id, &pri_spec);
-      if(rv)
-        goto out;
-    }
-  }
-
   ctx->nw_out_blocked = 0;
   while(!rv && !ctx->nw_out_blocked &&
         Curl_ngh2_session_want_write(&ctx->ngh2))
     rv = Curl_ngh2_session_send(&ctx->ngh2);
 
-out:
   if(Curl_ngh2_is_fatal(&ctx->ngh2, rv)) {
     VERBOSE(rv = Curl_ngh2_fatal(&ctx->ngh2));
     CURL_TRC_CF(data, cf, "nghttp2_session_send error (%s)%d",
@@ -2095,6 +2045,57 @@ static CURLcode cf_h2_body_send(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static CURLcode cf_h2_prio_changed(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
+{
+  struct cf_h2_ctx *ctx = cf->ctx;
+  struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
+  int rv = 0;
+
+  if(!Curl_ngh2_valid(&ctx->ngh2) || !stream || (stream->id <= 0))
+    /* Someone may change the priority of a stream we no longer have or
+     * never had. */
+    return CURLE_OK;
+
+  if(data->set.priority.rfc7540 != stream->prio.rfc7540) {
+    nghttp2_priority_spec pri_spec;
+
+    stream->prio.rfc7540 = data->set.priority.rfc7540;
+    nghttp2_priority_spec_init(&pri_spec, 0, stream->prio.rfc7540, FALSE);
+
+    rv = Curl_ngh2_submit_priority(&ctx->ngh2, NGHTTP2_FLAG_NONE,
+                                   stream->id, &pri_spec);
+    if(rv) {
+      CURL_TRC_CF(data, cf, "submit_priority() failed: %s(%d)",
+                  nghttp2_strerror(rv), rv);
+      return CURLE_SEND_ERROR;
+    }
+    CURL_TRC_CF(data, cf, "[%d] sending PRIORITY, rfc7540 weight=%u",
+                stream->id, stream->prio.rfc7540);
+  }
+
+#if NGHTTP2_HAS_PRIORITY_UPDATE
+  if(data->set.priority.rfc9218 != stream->prio.rfc9218) {
+    char buf[128];
+    size_t len;
+
+    stream->prio.rfc9218 = data->set.priority.rfc9218;
+    len = Curl_http_prio_hd_val(&stream->prio, buf, sizeof(buf));
+    rv = Curl_ngh2_submit_priority_update(&ctx->ngh2, NGHTTP2_FLAG_NONE,
+                                          stream->id,
+                                          (const uint8_t *)buf, len);
+    if(rv) {
+      CURL_TRC_CF(data, cf, "submit_priority_update() failed: %s(%d)",
+                  nghttp2_strerror(rv), rv);
+      return CURLE_SEND_ERROR;
+    }
+    CURL_TRC_CF(data, cf, "[%d] sending PRIORITY, '%.*s'",
+                stream->id, (int)len, buf);
+  }
+#endif
+  return CURLE_OK;
+}
+
 static CURLcode h2_submit(struct h2_stream_ctx **pstream,
                           struct Curl_cfilter *cf, struct Curl_easy *data,
                           const uint8_t *buf, size_t len,
@@ -2146,7 +2147,6 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
     goto out;
   }
 
-  h2_pri_spec(data, &pri_spec);
   if(!Curl_ngh2_session_check_request_allowed(&ctx->ngh2))
     CURL_TRC_CF(data, cf, "send request NOT allowed (via nghttp2)");
 
@@ -2158,6 +2158,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
     if(result)
       goto out;
   }
+  nghttp2_priority_spec_init(&pri_spec, 0, stream->prio.rfc7540, FALSE);
 
   switch(data->state.httpreq) {
   case HTTPREQ_POST:
@@ -2208,6 +2209,10 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
 
   body = (const char *)buf + *pnwritten;
   bodylen = len - *pnwritten;
+
+  result = cf_h2_prio_changed(cf, data);
+  if(result)
+    goto out;
 
   if(bodylen || eos) {
     size_t n;
@@ -2488,8 +2493,13 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
     if(rc) {
       infof(data, "http/2: failed to set user_data for stream %d",
             stream->id);
-      DEBUGASSERT(0);
+      result = CURLE_FAILED_INIT;
+      goto out;
     }
+
+    result = cf_h2_prio_changed(cf, data);
+    if(result)
+      goto out;
     CURL_TRC_CF(data, cf, "created session via Upgrade");
   }
   else {
@@ -2702,6 +2712,9 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
       cf->conn->httpversion_seen = 20;
       Curl_conn_set_multiplex(cf->conn);
     }
+    break;
+  case CF_CTRL_DATA_PRIO_CHANGED:
+    result = cf_h2_prio_changed(cf, data);
     break;
   default:
     break;
