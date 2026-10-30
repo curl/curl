@@ -105,7 +105,7 @@ struct pingpong {
   } while(0)
 
 /* Set the callbacks to use for I/O.
- * Setting a callback to NULL makes pingpong use the tranfer's
+ * Setting a callback to NULL makes pingpong use the transfer's
  * connection directly. */
 void Curl_pp_set_io(struct pingpong *pp,
                     Curl_pp_send_cb *do_send,
