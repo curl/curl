@@ -229,8 +229,9 @@ sub runner_init {
         $thisrunnerid = $child;
     }
     else {
-        # Create our pid directory
+        # Create our pid and lock directory
         mkdir("$LOGDIR/$PIDDIR", 0777);
+        mkdir("$LOGDIR/$LOCKDIR", 0777);
 
         # Do not create a separate process
         $thisrunnerid = "integrated";
