@@ -85,7 +85,9 @@ header among the regular response-headers mention what header(s) to expect in
 the trailer.
 
 For non-HTTP protocols like FTP, POP3, IMAP and SMTP this function gets called
-with the server responses to the commands that libcurl sends.
+with the server responses to the commands that libcurl sends. An IMAP SEARCH
+response line too long for libcurl's receive buffer is streamed to the download
+body as it arrives and is not passed to this callback.
 
 A more convenient way to get HTTP headers might be to use
 curl_easy_header(3).

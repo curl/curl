@@ -280,7 +280,72 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 
     do {
       const char *line = curlx_dyn_ptr(&pp->recvbuf);
-      const char *nl = memchr(line, '\n', curlx_dyn_len(&pp->recvbuf));
+      size_t buflen = curlx_dyn_len(&pp->recvbuf);
+      const char *nl = memchr(line, '\n', buflen);
+
+      /* When an incomplete response line is buffered and the protocol opts
+         in for it (an IMAP SEARCH reply, which lists every matching message
+         on one line and can be arbitrarily long), stream its content to the
+         download body as it arrives instead of waiting for the whole line.
+         The line is still kept in the receive buffer for the header callback
+         for as long as it fits there, so a line that fits is passed on whole
+         once complete, exactly as any other line, while a longer one, which
+         used to fail the transfer with CURLE_TOO_LARGE, is delivered to the
+         body only. Once started (pp->streaming) the line is streamed until
+         its terminating newline arrives. */
+      if(pp->streaming ||
+         (!nl && pp->stream_resp &&
+          pp->stream_resp(data, conn, line, buflen))) {
+        size_t end = nl ? (size_t)(nl - line + 1) : buflen;
+        if(end > pp->streamed) {
+          /* the part of the line not yet written to the body */
+          const char *chunk = line + pp->streamed;
+          size_t chunklen = end - pp->streamed;
+          if(memchr(chunk, 0, chunklen)) {
+            failf(data, "NUL byte in server response line");
+            return CURLE_WEIRD_SERVER_REPLY;
+          }
+          result = Curl_client_write(data, CLIENTWRITE_BODY, chunk, chunklen);
+          if(result)
+            return result;
+          pp->streamed = end;
+        }
+        if(nl) {
+          /* the streamed line is complete */
+          if(!pp->stream_dropped) {
+            /* it fitted the buffer: pass it on whole, like any other line */
+            Curl_debug(data, CURLINFO_HEADER_IN, line, end);
+            result = Curl_client_write(data, CLIENTWRITE_INFO, line, end);
+            if(result)
+              return result;
+          }
+          pp->streaming = FALSE;
+          pp->stream_dropped = FALSE;
+          pp->streamed = 0;
+          if(buflen > end)
+            /* keep whatever follows (e.g. the tagged response line) */
+            curlx_dyn_tail(&pp->recvbuf, buflen - end);
+          else
+            curlx_dyn_reset(&pp->recvbuf);
+          continue; /* re-scan any remaining buffered data */
+        }
+        /* still no newline: wait for more */
+        pp->streaming = TRUE;
+        pp->overflow = 0;
+        if(!pp->stream_dropped &&
+           (buflen + sizeof(buffer) >= DYN_PINGPPONG_CMD)) {
+          /* the next read would not fit the buffer: the line is too long to
+             be passed on to the header callback, keep streaming it to the
+             body only */
+          infof(data, "Response line too long for the header callback, "
+                "delivered to the body only");
+          pp->stream_dropped = TRUE;
+          pp->streamed = 0;
+          curlx_dyn_reset(&pp->recvbuf);
+        }
+        break;
+      }
+
       if(nl) {
         /* a newline is CRLF in pp-talk, so the CR is ignored as
            the line is not really terminated until the LF comes */
