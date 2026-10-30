@@ -155,7 +155,8 @@ static void auth_digest_sha256_to_ascii(
     curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
 }
 
-/* Perform quoted-string escaping as described in RFC2616 and its errata */
+/* Perform quoted-string escaping as described in RFC 9110, ch. 5.6.4,
+ * esp. passing %80-FF unencoded as defined for 'obs-text'. */
 static char *auth_digest_string_quoted(const char *s)
 {
   struct dynbuf out;
