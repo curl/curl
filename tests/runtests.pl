@@ -597,6 +597,9 @@ sub checksystemfeatures {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
+                if($libcurl =~ /\slibressl\/4\.4\.0\b/i) {
+                    $feature{"libressl-4.4.0"} = 1;
+                }
             }
             elsif($libcurl =~ /\squictls\b/i) {
                 # OpenSSL compatible API
