@@ -52,5 +52,8 @@ RETR %TESTNUMBER
 ABOR
 QUIT
 </protocol>
+<strip>
+QUIT
+</strip>
 </verify>
 </testcase>
