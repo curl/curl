@@ -1276,17 +1276,6 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            bool *input_pending)
-{
-  /*
-   * This function tries to determine connection status.
-   */
-  return cf->next ?
-    cf->next->cft->is_alive(cf->next, data, input_pending) :
-    FALSE; /* pessimistic in absence of data */
-}
-
 struct Curl_cftype Curl_cft_ssl = {
   "SSL",
   CF_TYPE_SSL,
@@ -1299,7 +1288,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_send,
   ssl_cf_recv,
   ssl_cf_cntrl,
-  cf_ssl_is_alive,
+  Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   ssl_cf_query,
 };
@@ -1318,7 +1307,7 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_send,
   ssl_cf_recv,
   Curl_cf_def_cntrl,
-  cf_ssl_is_alive,
+  Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   ssl_cf_query,
 };
