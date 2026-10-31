@@ -211,6 +211,14 @@ Add or control cookies. See CURLOPT_COOKIELIST(3)
 
 Start a new cookie session. See CURLOPT_COOKIESESSION(3)
 
+## CURLOPT_COOKIE_CONTEXT
+
+Context of the request for cookies. See CURLOPT_COOKIE_CONTEXT(3)
+
+## CURLOPT_COOKIE_SITE
+
+Site the request is made for. See CURLOPT_COOKIE_SITE(3)
+
 ## CURLOPT_COPYPOSTFIELDS
 
 Send a POST with this data - and copy it. See CURLOPT_COPYPOSTFIELDS(3)

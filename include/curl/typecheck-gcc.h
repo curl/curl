@@ -415,6 +415,7 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_COOKIEFILE ||                                    \
    (option) == CURLOPT_COOKIEJAR ||                                     \
    (option) == CURLOPT_COOKIELIST ||                                    \
+   (option) == CURLOPT_COOKIE_SITE ||                                   \
    (option) == CURLOPT_CRLFILE ||                                       \
    (option) == CURLOPT_CUSTOMREQUEST ||                                 \
    (option) == CURLOPT_DEFAULT_PROTOCOL ||                              \

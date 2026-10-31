@@ -30,6 +30,7 @@
 #include "psl.h"
 #include "curl_trc.h"
 #include "transfer.h"
+#include "http.h"
 #include "slist.h"
 #include "curl_share.h"
 #include "strcase.h"
@@ -67,8 +68,246 @@ static void freecookie(struct Cookie *co, bool maintoo)
   curlx_free(co->path);
   curlx_free(co->name);
   curlx_free(co->value);
+  curlx_free(co->partkey);
   if(maintoo)
     curlx_free(co);
+}
+
+/*
+ * The site the request is made for, as set with CURLOPT_COOKIE_SITE.
+ * Returns NULL when the application did not provide one, in which case
+ * SameSite and Partitioned are not evaluated at all.
+ */
+static const char *cookie_site(struct Curl_easy *data)
+{
+  const char *site = CURL_EASY_STR(data, STRING_COOKIE_SITE);
+  return (site && *site) ? site : NULL;
+}
+
+static bool cookie_tailmatch(const char *cookie_domain,
+                             const size_t cookie_domain_len,
+                             const char *hostname);
+
+/*
+ * Return the host part of a site string, "http://host" or "https://host",
+ * and set *secure to TRUE for https. Returns NULL when the string does not
+ * start with one of the two schemes.
+ */
+static const char *cookie_site_host(const char *site, bool *secure)
+{
+  if(checkprefix("https://", site)) {
+    *secure = TRUE;
+    return site + 8;
+  }
+  if(checkprefix("http://", site)) {
+    *secure = FALSE;
+    return site + 7;
+  }
+  return NULL;
+}
+
+/*
+ * Check a string given to CURLOPT_COOKIE_SITE: "http://" or "https://"
+ * followed by a hostname and nothing else, no port number or path. The string
+ * is written to the cookie jar as partition key, another reason to only
+ * accept hostname characters.
+ */
+bool Curl_cookie_site_ok(const char *site)
+{
+  bool secure;
+  const char *p = cookie_site_host(site, &secure);
+  if(!p)
+    return FALSE;
+  if(*p == '[') {
+    /* a bracketed IPv6 address */
+    for(p++; *p && (*p != ']'); p++)
+      if(!ISXDIGIT(*p) && (*p != ':') && (*p != '.'))
+        return FALSE;
+    return (*p == ']') && !p[1];
+  }
+  if(!ISALNUM(*p))
+    return FALSE;
+  for(; *p; p++)
+    if(!ISALNUM(*p) && (*p != '-') && (*p != '.') && (*p != '_'))
+      return FALSE;
+  return TRUE;
+}
+
+/*
+ * The partition key for a host: "scheme://host" in lowercase, without a
+ * trailing dot and with brackets around an IPv6 address. Returns NULL on out
+ * of memory.
+ */
+static char *cookie_host_key(const char *host, bool secure)
+{
+  size_t len = strlen(host);
+  bool ipv6 = strchr(host, ':') && (*host != '[');
+  char *key;
+  if(len && (host[len - 1] == '.'))
+    len--;
+  key = curl_maprintf("%s://%s%.*s%s", secure ? "https" : "http",
+                      ipv6 ? "[" : "", (int)len, host, ipv6 ? "]" : "");
+  if(key)
+    Curl_strntolower(key, key, strlen(key));
+  return key;
+}
+
+/*
+ * The partition key of a site string: its canonical form. Returns NULL on out
+ * of memory or when the string is not a site.
+ */
+static char *cookie_site_canon(const char *site)
+{
+  bool secure;
+  const char *host = cookie_site_host(site, &secure);
+  return host ? cookie_host_key(host, secure) : NULL;
+}
+
+/*
+ * Check if the request host is "same-site" with the site the request is made
+ * for, a string accepted by Curl_cookie_site_ok(). It is when the scheme of
+ * the site matches the one of the request and the host is the host of the
+ * site or a subdomain of it. The site is used as given, libcurl does not
+ * shorten it.
+ *
+ * @unittest 1924
+ */
+UNITTEST bool cookie_same_site(const char *site, const char *host,
+                               bool secure);
+UNITTEST bool cookie_same_site(const char *site, const char *host,
+                               bool secure)
+{
+  bool ssecure = FALSE;
+  const char *shost = cookie_site_host(site, &ssecure);
+  size_t slen, hlen;
+  char hbuf[256];
+
+  if(!shost || (ssecure != secure))
+    return FALSE; /* not a site, or https versus http */
+  slen = strlen(shost);
+  if(slen && (shost[slen - 1] == '.'))
+    slen--; /* a trailing dot does not make another site */
+  if(slen && (*shost == '[')) {
+    /* the request host is given without brackets */
+    shost++;
+    slen = (slen >= 2) ? slen - 2 : 0;
+  }
+  hlen = strlen(host);
+  if(hlen && (host[hlen - 1] == '.')) {
+    if(hlen >= sizeof(hbuf))
+      return FALSE;
+    memcpy(hbuf, host, hlen - 1);
+    hbuf[hlen - 1] = 0;
+    host = hbuf;
+    hlen--;
+  }
+  if(!slen || !hlen)
+    return FALSE;
+  if((hlen == slen) && curl_strnequal(host, shost, slen))
+    return TRUE;
+  if(Curl_host_is_ipnum(host))
+    return FALSE; /* IP addresses have no subdomains */
+  return cookie_tailmatch(shost, slen, host);
+}
+
+/*
+ * The partition key of a request. When the request is a navigation
+ * (CURLCOOKIE_NAVIGATION), the page it loads becomes the top-level site and
+ * the key is the scheme and host of the request. Otherwise the key is the
+ * site the request is made for. Returns NULL on out of memory.
+ */
+static char *cookie_partition_key(struct Curl_easy *data, const char *site,
+                                  const char *host, bool secure)
+{
+  if(data->set.cookie_navigation)
+    return cookie_host_key(host, secure);
+  return cookie_site_canon(site);
+}
+
+/* TRUE when the request is done with a "safe" method: GET, HEAD, OPTIONS,
+   TRACE or QUERY. Uses the same method selection as the request itself, so
+   that a custom method ignored after a redirect does not count. */
+static bool cookie_safe_method(struct Curl_easy *data)
+{
+  const char *method = NULL;
+  Curl_HttpReq httpreq;
+
+  if(!data->conn)
+    return FALSE;
+  Curl_http_method(data, &method, &httpreq);
+  return method &&
+    (!strcmp(method, "GET") || !strcmp(method, "HEAD") ||
+     !strcmp(method, "OPTIONS") || !strcmp(method, "TRACE") ||
+     !strcmp(method, "QUERY"));
+}
+
+/* forget attributes read from a "#curl:" line */
+static void cookie_clear_pending(struct CookieInfo *ci)
+{
+  curlx_safefree(ci->pending_partkey);
+  ci->pending_samesite = COOKIE_SAMESITE_DEFAULT;
+  ci->pending = FALSE;
+}
+
+/*
+ * Parse a "#curl: <attributes>" line of a cookie file, holding the SameSite
+ * and Partitioned attributes of the cookie on the following line, as
+ * "SameSite=<value>" and "Partitioned=<partition key>" separated by ';'. A
+ * "Partitioned" without a key is ignored.
+ */
+static CURLcode cookie_parse_attrline(struct CookieInfo *ci, const char *p)
+{
+  cookie_clear_pending(ci);
+  while(*p) {
+    struct Curl_str name, val;
+
+    curlx_str_passblanks(&p);
+    if(!*p || ISNEWLINE(*p))
+      break;
+    if(curlx_str_cspn(&p, &name, ";=\r\n"))
+      return CURLE_OK; /* malformed, ignore the line */
+    curlx_str_trimblanks(&name);
+    curlx_str_init(&val);
+    if(!curlx_str_single(&p, '=')) {
+      if(!curlx_str_cspn(&p, &val, ";\r\n"))
+        curlx_str_trimblanks(&val);
+    }
+    if(curlx_str_casecompare(&name, "SameSite")) {
+      if(curlx_str_casecompare(&val, "Strict"))
+        ci->pending_samesite = COOKIE_SAMESITE_STRICT;
+      else if(curlx_str_casecompare(&val, "Lax"))
+        ci->pending_samesite = COOKIE_SAMESITE_LAX;
+      else if(curlx_str_casecompare(&val, "None"))
+        ci->pending_samesite = COOKIE_SAMESITE_NONE;
+      else
+        ci->pending_samesite = COOKIE_SAMESITE_DEFAULT;
+    }
+    else if(curlx_str_casecompare(&name, "Partitioned") &&
+            curlx_strlen(&val)) {
+      curlx_free(ci->pending_partkey);
+      ci->pending_partkey = curlx_memdup0(curlx_str(&val),
+                                          curlx_strlen(&val));
+      if(!ci->pending_partkey)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    /* unknown attributes are ignored */
+    if(curlx_str_single(&p, ';'))
+      break;
+  }
+  ci->pending = TRUE;
+  ci->attrs_used = TRUE;
+  return CURLE_OK;
+}
+
+/* the cookie line following a "#curl:" line gets its attributes */
+static void cookie_apply_pending(struct CookieInfo *ci, struct Cookie *co)
+{
+  if(ci->pending) {
+    co->samesite = ci->pending_samesite;
+    co->partkey = ci->pending_partkey; /* ownership moves to the cookie */
+    ci->pending_partkey = NULL;
+  }
+  cookie_clear_pending(ci);
 }
 
 static bool cookie_tailmatch(const char *cookie_domain,
@@ -566,6 +805,7 @@ static CURLcode
 parse_cookie_header(struct Curl_easy *data,
                     struct Cookie *co,
                     bool *okay, /* if the cookie was fine */
+                    bool *partitioned, /* the Partitioned attribute is set */
                     const char *ptr, /* the header */
                     const char *domain, /* default domain */
                     /* full path used when this cookie is set */
@@ -628,10 +868,23 @@ parse_cookie_header(struct Curl_easy *data,
       }
       else if(curlx_str_casecompare(&name, "httponly"))
         co->httponly = TRUE;
+      else if(curlx_str_casecompare(&name, "partitioned"))
+        *partitioned = TRUE;
       else if(sep) {
         /* only if a separating equals sign is present */
         if(curlx_str_casecompare(&name, "path"))
           cookie[COOKIE_PATH] = val;
+        else if(curlx_str_casecompare(&name, "samesite")) {
+          /* RFC 6265bis 5.4.7: unknown values are treated as "Default" */
+          if(curlx_str_casecompare(&val, "strict"))
+            co->samesite = COOKIE_SAMESITE_STRICT;
+          else if(curlx_str_casecompare(&val, "lax"))
+            co->samesite = COOKIE_SAMESITE_LAX;
+          else if(curlx_str_casecompare(&val, "none"))
+            co->samesite = COOKIE_SAMESITE_NONE;
+          else
+            co->samesite = COOKIE_SAMESITE_DEFAULT;
+        }
         else if(curlx_str_casecompare(&name, "domain")) {
           if(curlx_strlen(&val) &&
              !parse_domain(data, co, &cookie[COOKIE_DOMAIN], &val, &domain))
@@ -867,6 +1120,15 @@ static bool is_public_suffix(struct Curl_easy *data,
 }
 
 /* returns TRUE when replaced */
+/* TRUE when the two cookies live in the same partition: both without a
+   partition key, or both with the same key */
+static bool same_partition(const struct Cookie *a, const struct Cookie *b)
+{
+  if(!a->partkey != !b->partkey)
+    return FALSE;
+  return !a->partkey || curl_strequal(a->partkey, b->partkey);
+}
+
 static bool replace_existing(struct Curl_easy *data,
                              struct Cookie *co,
                              const struct CookieInfo *ci,
@@ -894,6 +1156,7 @@ static bool replace_existing(struct Curl_easy *data,
         matching_domains = TRUE;
 
       if(matching_domains && /* the domains were identical */
+         same_partition(clist, co) && /* the same partition */
          clist->path && co->path && /* both have paths */
          clist->secure && !co->secure && !secure) {
         size_t cllen;
@@ -941,6 +1204,9 @@ static bool replace_existing(struct Curl_easy *data,
            strcmp(clist->path, co->path))
           replace_old = FALSE;
         else if(!clist->path != !co->path)
+          replace_old = FALSE;
+        /* cookies in different partitions live side by side */
+        else if(!same_partition(clist, co))
           replace_old = FALSE;
       }
 
@@ -997,6 +1263,8 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   CURLcode result;
   bool replaces = FALSE;
   bool okay;
+  bool partitioned = FALSE; /* the Partitioned attribute was in the header */
+  const char *site = cookie_site(data);
 
   DEBUGASSERT(data);
   DEBUGASSERT(MAX_SET_COOKIE_AMOUNT <= 255); /* counter is an unsigned char */
@@ -1006,11 +1274,21 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   co = &comem;
   memset(co, 0, sizeof(comem));
 
-  if(flags & COOKIE_HTTPHEADER)
-    result = parse_cookie_header(data, co, &okay,
+  if(flags & COOKIE_HTTPHEADER) {
+    cookie_clear_pending(ci);
+    result = parse_cookie_header(data, co, &okay, &partitioned,
                                  lineptr, domain, path, flags & COOKIE_SECURE);
-  else
+  }
+  else if(checkprefix("#curl:", lineptr))
+    /* attributes for the cookie on the next line */
+    return cookie_parse_attrline(ci, lineptr + 6);
+  else {
     result = parse_netscape(co, ci, &okay, lineptr, flags & COOKIE_SECURE);
+    if(!result && okay)
+      cookie_apply_pending(ci, co);
+    else
+      cookie_clear_pending(ci);
+  }
 
   if(result || !okay)
     goto fail;
@@ -1018,6 +1296,50 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   if(co->prefix_secure && !co->secure)
     /* The __Secure- prefix only requires that the cookie be set secure */
     goto fail;
+
+  /* The SameSite and Partitioned rules only apply when the application
+     tells libcurl which site the request is made for. Without a site,
+     cookies are stored and sent exactly as before these attributes were
+     understood. */
+  if(site) {
+    ci->attrs_used = TRUE;
+    if((co->samesite == COOKIE_SAMESITE_NONE) && !co->secure) {
+      /* RFC 6265bis 5.6 step 16 */
+      infof(data, "cookie '%s' dropped, SameSite=None requires Secure",
+            co->name);
+      goto fail;
+    }
+    if(partitioned && !co->secure) {
+      infof(data, "cookie '%s' dropped, Partitioned requires Secure",
+            co->name);
+      goto fail;
+    }
+  }
+
+  if((flags & COOKIE_HTTPHEADER) && domain) {
+    /* set by a server response, evaluate the request context */
+    const bool secure_xfer = Curl_xfer_is_secure(data);
+    if(site && (co->samesite != COOKIE_SAMESITE_NONE) &&
+       !data->set.cookie_navigation &&
+       !cookie_same_site(site, domain, secure_xfer)) {
+      /* RFC 6265bis 5.6 step 17: not storable from a cross-site request */
+      infof(data, "cookie '%s' dropped, SameSite cookie set in "
+            "cross-site request", co->name);
+      goto fail;
+    }
+    if(partitioned) {
+      /* A Partitioned cookie gets the partition key of the request. Without
+         a site, it belongs to its own site: it is only sent in requests made
+         for the site that set it. */
+      co->partkey = site ?
+        cookie_partition_key(data, site, domain, secure_xfer) :
+        cookie_host_key(co->domain, secure_xfer);
+      if(!co->partkey) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
+    }
+  }
 
   if(!(flags & COOKIE_NOPSL) && is_public_suffix(data, co, domain))
     goto fail;
@@ -1323,6 +1645,10 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
   const bool secure = Curl_secure_context(data, host);
   struct CookieInfo *ci = data->cookies;
   const char *path = data->state.up.path;
+  const char *site = cookie_site(data);
+  char *partkey = NULL;   /* the partition of this request */
+  bool same_site = TRUE;  /* Strict cookies may be sent */
+  bool lax_ok = TRUE;     /* Lax and Default cookies may be sent */
   CURLcode result = CURLE_OK;
   *okay = FALSE;
 
@@ -1331,11 +1657,40 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
   if(!ci || !Curl_llist_count(&ci->cookielist[myhash]))
     return CURLE_OK; /* no cookie struct or no cookies in the struct */
 
+  if(site) {
+    const bool secure_xfer = Curl_xfer_is_secure(data);
+    /* RFC 6265bis 5.8.3 step 1: Lax cookies are also sent in a cross-site
+       navigation using a safe method */
+    same_site = cookie_same_site(site, host, secure_xfer);
+    lax_ok = same_site ||
+      (data->set.cookie_navigation && cookie_safe_method(data));
+    partkey = cookie_partition_key(data, site, host, secure_xfer);
+    if(!partkey)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
   /* at first, remove expired cookies */
   remove_expired(ci);
 
   for(n = Curl_llist_head(&ci->cookielist[myhash]); n; n = Curl_node_next(n)) {
     struct Cookie *co = Curl_node_elem(n);
+
+    if(site) {
+      /* evaluate SameSite in the context of the request */
+      if(co->samesite == COOKIE_SAMESITE_STRICT) {
+        if(!same_site)
+          continue;
+      }
+      else if((co->samesite != COOKIE_SAMESITE_NONE) && !lax_ok)
+        continue;
+      /* cookies stored without a site may lack the Secure these need */
+      if(((co->samesite == COOKIE_SAMESITE_NONE) || co->partkey) &&
+         !co->secure)
+        continue;
+      /* a Partitioned cookie is only sent back in its own partition */
+      if(co->partkey && !curl_strequal(co->partkey, partkey))
+        continue;
+    }
 
     /* if the cookie requires we are secure we must only continue if we are! */
     if(co->secure ? secure : TRUE) {
@@ -1404,11 +1759,13 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
     curlx_free(array); /* remove the temporary data again */
   }
 
+  curlx_free(partkey);
   *okay = TRUE;
   return CURLE_OK; /* success */
 
 fail:
   /* failure, clear up the allocated chain and return NULL */
+  curlx_free(partkey);
   Curl_llist_destroy(list, NULL);
   return result; /* error */
 }
@@ -1433,6 +1790,7 @@ void Curl_cookie_clearall(struct CookieInfo *ci)
       }
     }
     ci->numcookies = 0;
+    cookie_clear_pending(ci);
   }
 }
 
@@ -1511,6 +1869,44 @@ static char *get_netscape_format(const struct Cookie *co)
 }
 
 /*
+ * get_attrs_format()
+ *
+ * Formats the "#curl:" comment line that precedes a cookie in the file and
+ * holds the SameSite and Partitioned attributes, which the Netscape format
+ * has no fields for. Readers that do not know the line treat it as a
+ * comment. Returns NULL when the cookie has none of the attributes.
+ */
+static char *get_attrs_format(const struct Cookie *co, bool *pnomem)
+{
+  const char *samesite = NULL;
+  *pnomem = FALSE;
+  switch(co->samesite) {
+  case COOKIE_SAMESITE_STRICT:
+    samesite = "Strict";
+    break;
+  case COOKIE_SAMESITE_NONE:
+    samesite = "None";
+    break;
+  default:
+    /* Lax is what a cookie without the attribute gets, say nothing */
+    break;
+  }
+  if(!samesite && !co->partkey)
+    return NULL;
+  else {
+    char *line = curl_maprintf("#curl: %s%s%s%s%s",
+                               samesite ? "SameSite=" : "",
+                               samesite ? samesite : "",
+                               (samesite && co->partkey) ? "; " : "",
+                               co->partkey ? "Partitioned=" : "",
+                               co->partkey ? co->partkey : "");
+    if(!line)
+      *pnomem = TRUE;
+    return line;
+  }
+}
+
+/*
  * cookie_output()
  *
  * Writes all internally known cookies to the specified file. Specify
@@ -1575,13 +1971,20 @@ static CURLcode cookie_output(struct Curl_easy *data,
     qsort(array, nvalid, sizeof(struct Cookie *), cookie_sort_ct);
 
     for(i = 0; i < nvalid; i++) {
-      char *format_ptr = get_netscape_format(array[i]);
+      bool nomem = FALSE;
+      char *attrs = ci->attrs_used ? get_attrs_format(array[i], &nomem) :
+        NULL;
+      char *format_ptr = nomem ? NULL : get_netscape_format(array[i]);
       if(!format_ptr) {
+        curlx_free(attrs);
         curlx_free(array);
         result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
+      if(attrs)
+        curl_mfprintf(out, "%s\n", attrs);
       curl_mfprintf(out, "%s\n", format_ptr);
+      curlx_free(attrs);
       curlx_free(format_ptr);
     }
 
