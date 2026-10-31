@@ -1015,7 +1015,10 @@ jobs:
     steps:
       - name: 'debug 1'
         shell: pwsh
-        run: (Get-MpComputerStatus).RealTimeProtectionEnabled
+        run: |
+          (Get-MpComputerStatus).RealTimeProtectionEnabled
+          Set-MpPreference -DisableRealtimeMonitoring $true
+          (Get-MpComputerStatus).RealTimeProtectionEnabled
 
       - name: 'preinstalled tools'
         shell: bash
