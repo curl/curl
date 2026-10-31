@@ -22,6 +22,9 @@ extend-ignore-re = [
   ".*spellchecker:disable-line",
 ]
 
+[default.extend-words]
+intoto = "intoto"
+
 [files]
 extend-exclude = [
   ".github/scripts/codespell-ignore.words",

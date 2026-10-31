@@ -20,13 +20,16 @@ SPDX-License-Identifier: curl
   tag and we use underscores instead of dots in the version number. Make sure
   the tag is GPG signed (using -s).
 
-- run `./scripts/dmaketgz 7.34.0` to build the release tarballs.
+- run `./scripts/dmaketgz 7.34.0` to build the release tarballs and
+  `curl-7.34.0.intoto.jsonl`. Provenance requires a source-root git checkout
+  with no tracked changes.
 
 - push the git commits and the new tag
 
-- GPG sign the 4 tarballs as `maketgz` suggests
+- GPG sign the 4 tarballs and provenance as `maketgz` suggests
 
-- upload the 8 resulting files to the primary download directory
+- upload the 10 resulting files to the primary download directory: 4 tarballs,
+  provenance, and their 5 detached signatures
 
 ## in the curl-www repo
 
@@ -45,6 +48,9 @@ SPDX-License-Identifier: curl
 ## on GitHub
 
 - edit the newly made release tag so that it is listed as the latest release
+
+- attach the provenance and its detached signature to the release, alongside
+  the release archive and its signature
 
 ## inform
 

@@ -218,6 +218,7 @@ doxygen
 drftpd
 dsa
 DSN
+DSSE
 dtrace
 Dudka
 Dymond
@@ -504,6 +505,7 @@ macOS
 macos
 Makefile
 makefiles
+maketgz
 malloc
 mallocs
 manpage
@@ -765,6 +767,7 @@ Satiro
 Schannel
 Schindelin
 SCO
+Scorecard
 SCP
 scp
 SDK
@@ -792,6 +795,7 @@ SLE
 slist
 sln
 Slowloris
+SLSA
 SMB
 SMBS
 SMBv
@@ -853,6 +857,7 @@ Structs
 stunnel
 subdirectories
 subdirectory
+subkey
 submitters
 substring
 substrings
@@ -894,6 +899,7 @@ toolchains
 toolset
 toplevel
 TOS
+toto
 TPF
 TrackMemory
 transcode
@@ -938,6 +944,7 @@ unpausing
 unsanitized
 Unshare
 unsharing
+unstaged
 untrusted
 unwrite
 UPN
@@ -1002,6 +1009,7 @@ Wireshark
 wolfCrypt
 wolfSSH
 wolfSSL
+worktrees
 ws
 WS
 WSS

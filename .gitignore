@@ -49,6 +49,7 @@ config.log
 config.status
 config.sub
 configure
+curl-*.intoto.jsonl
 curl-*.tar.bz2
 curl-*.tar.gz
 curl-*.tar.xz

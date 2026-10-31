@@ -46,7 +46,18 @@ docker build \
        --build-arg GID="$(id -g)" \
        -t curl/curl .
 
+# Linked worktrees keep their Git metadata outside the source directory.
+set --
+if test -f .git &&
+   git_common_dir=$(git rev-parse --git-common-dir 2>/dev/null); then
+    git_common_dir=$(cd "$git_common_dir" && pwd)
+    git_dir=$(git rev-parse --absolute-git-dir)
+    set -- -v "$git_common_dir:$git_common_dir:ro" \
+           -e "GIT_DIR=$git_dir" -e GIT_WORK_TREE=/usr/src
+fi
+
 docker run --rm -u "$(id -u):$(id -g)" \
+       "$@" \
        -v "$(pwd):/usr/src" -w /usr/src curl/curl sh -c "
   set -e
   autoreconf -fi

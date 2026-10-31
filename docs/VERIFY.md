@@ -23,6 +23,31 @@ provided, they could be detected using these signatures.
 
 Daniel's public GPG key: [27ED EAF2 2F3A BCEB 50DB 9A12 5CC9 08FD B71E 12C2](https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x27edeaf22f3abceb50db9a125cc908fdb71e12c2)
 
+## Release provenance
+
+When provided, `curl-X.Y.Z.intoto.jsonl` describes the source commit, packaging
+process, tool versions and SHA-256 digests of all four release archives. It is
+signed with the same GPG key as the archives. Replace `X.Y.Z` below with the
+release version and verify its detached signature first:
+
+    gpg --verify curl-X.Y.Z.intoto.jsonl.asc curl-X.Y.Z.intoto.jsonl
+
+Check that the signer's primary key fingerprint matches Daniel's fingerprint
+listed above. A signing subkey can have a different fingerprint; compare its
+associated primary key.
+
+Compare the SHA-256 digest of your downloaded archive with its entry in the
+statement's `subject` list. For example:
+
+    sha256sum curl-X.Y.Z.tar.xz
+
+Also check that the recorded git commit matches the expected release tag.
+The statement provides evidence from the local release builder. An independent
+rebuild provides the additional check described below.
+
+See [the provenance format](PROVENANCE.md) for the fields, builder guarantees
+and signing format.
+
 ## Reproducible releases
 
 The curl project ships *reproducible releases*. This means that everyone is
@@ -49,6 +74,12 @@ Invoke it like this:
     cd curl
     mv [download-dir]/curl-8.19.0.tar.xz .
     ./scripts/verify-release curl-8.19.0.tar.xz
+
+Each invocation creates a separate directory under `_tarballs`, named with a
+UTC timestamp and a unique suffix, and prints its path. Earlier runs are kept.
+Full verification saves input provenance and its signature there with an
+`orig-` prefix, alongside the original archive. Rebuilt provenance describes
+the local verification build and has no signature from the release manager.
 
 A successful check ends up with a final output similar to:
 
