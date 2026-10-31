@@ -1017,7 +1017,7 @@ jobs:
         shell: pwsh
         run: |
           (Get-MpComputerStatus).RealTimeProtectionEnabled
-          Set-MpPreference -DisableRealtimeMonitoring $true
+          Set-MpPreference -DisableRealtimeMonitoring $false
           (Get-MpComputerStatus).RealTimeProtectionEnabled
 
       - name: 'preinstalled tools'
