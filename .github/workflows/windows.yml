@@ -1018,6 +1018,7 @@ jobs:
         run: |
           (Get-MpComputerStatus).RealTimeProtectionEnabled
           Set-MpPreference -DisableRealtimeMonitoring $false
+          sleep 5
           (Get-MpComputerStatus).RealTimeProtectionEnabled
 
       - name: 'preinstalled tools'
@@ -1217,6 +1218,14 @@ jobs:
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
           fi
+
+      - name: 'debug 1'
+        shell: pwsh
+        run: |
+          (Get-MpComputerStatus).RealTimeProtectionEnabled
+          Set-MpPreference -DisableRealtimeMonitoring $false
+          sleep 5
+          (Get-MpComputerStatus).RealTimeProtectionEnabled
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
