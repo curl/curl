@@ -54,6 +54,10 @@ should be specified using the mailing list name, such as `Friends` or
 Using this option multiple times makes the last set list override the previous
 ones. Set it to NULL to disable its use again.
 
+A recipient that contains a carriage return or line feed character is
+rejected: curl_easy_setopt(3) returns CURLE_BAD_FUNCTION_ARGUMENT and the
+previously set list remains in use.
+
 # DEFAULT
 
 NULL
