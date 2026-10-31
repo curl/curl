@@ -51,6 +51,9 @@ static int wakeup_eventfd(curl_socket_t socks[2], bool nonblocking)
 #ifdef HAVE_FCNTL
 #include <fcntl.h>
 #endif
+#if defined(__APPLE__) && !defined(HAVE_PIPE2)
+#include <dlfcn.h>
+#endif
 
 static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
 {
@@ -69,9 +72,14 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
    (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
             __VISION_OS_VERSION_MAX_ALLOWED >= 270000))
   if(__builtin_available(macOS 27, iOS 27, tvOS 27, watchOS 27, visionOS 27,
-                         macCatalyst 27, *))
-    return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;
-  else
+                         macCatalyst 27, *)) {
+    /* Avoid importing a symbol absent from older SDKs linking static curl. */
+    int (*pipe2_func)(int *, int) =
+      (int (*)(int *, int))dlsym(RTLD_DEFAULT, "pipe2");
+    if(pipe2_func)
+      return pipe2_func(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ?
+        -1 : 0;
+  }
 #endif
   if(pipe(socks))
     return -1;
