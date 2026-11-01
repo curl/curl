@@ -145,7 +145,7 @@ runs:
         echo '::endgroup::'
 
         options=''
-        # Debian/Ubuntu ships with bad certs, but patches the vendored certifi to use /etc/ssl/certs/ca-certificates.crt
+        # Debian/Ubuntu ships with bad certs, but patches the vendored 'certifi' to use /etc/ssl/certs/ca-certificates.crt
         if [ "${RUNNER_OS}" = 'macOS' ]; then
           options='--cert /opt/homebrew/etc/ca-certificates/cert.pem'
         fi
