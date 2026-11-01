@@ -81,7 +81,7 @@ runs:
         bad+=')'
         # https://pip.pypa.io/en/stable/topics/https-certificates/
         {
-          for e in PIP_CERT REQUESTS_CA_BUNDLE CURL_CA_BUNDLE SSL_CERT_DIR SSL_CERT_FILE; do
+          for e in PIP_CERT REQUESTS_CA_BUNDLE CURL_CA_BUNDLE SSL_CERT_DIR SSL_CERT_FILE GIT_SSL_CAINFO NODE_EXTRA_CA_CERTS; do
             >&2 printf 'env: %s' "${e}"
             f="$(printenv "${e}" || true)"
             if [ -n "${f}" ]; then
@@ -101,12 +101,16 @@ runs:
             fi
             >&2 printf '\n'
           done
-          for f in \
-            /etc/ssl/certs/ca-certificates.crt \
-            /etc/ssl/cert.pem \
-            /opt/homebrew/etc/ca-certificates/cert.pem \
-            /usr/local/etc/ca-certificates/cert.pem \
-          ; do
+
+          {
+            echo /etc/ssl/certs/ca-certificates.crt
+            echo /etc/ssl/cert.pem
+            echo /opt/homebrew/etc/ca-certificates/cert.pem
+            echo /usr/local/etc/ca-certificates/cert.pem
+            if command -v brew >/dev/null 2>&1; then
+              echo "$(brew --prefix)"/etc/ca-certificates/cert.pem
+            fi
+          } | sort -u | while read -r f; do
             if [ -d "${f}" ]; then
               >&2 printf '%s (directory exists)' "${f}"
               echo "${f}"
@@ -120,6 +124,7 @@ runs:
               echo "${f}"
             fi
           done
+
           if [ -d ~/venv ]; then
             find ~/venv -name cacert.pem || true
           fi
