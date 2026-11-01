@@ -122,11 +122,17 @@ runs:
             find ~/venv -name cacert.pem || true
           fi
          } | sort -u | while read -r f; do
+          echo "::group::${f}"
           if [ -d "${f}" ]; then
-            echo "::group::${f}"; grep -a -E "${bad}" -R -- "${f}" || true; echo '::endgroup::'
+            if grep -a -E "${bad}" -R -- "${f}"; then
+              echo "::group::full dump"; cat "${f}"; echo '::endgroup::'
+            fi
           elif [ -f "${f}" ]; then
-            echo "::group::${f}"; grep -a -E "${bad}" -- "${f}" || true; echo '::endgroup::'
+            if grep -a -E "${bad}" -- "${f}"; then
+              echo "::group::full dump"; cat "${f}"; echo '::endgroup::'
+            fi
           fi
+          echo '::endgroup::'
         done
         echo '::endgroup::'
 
