@@ -149,7 +149,8 @@ init:
       Rename-Item -Verbose -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak'
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }  # Older versions
-      $null = taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe *>$null
+      taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe
+      $LASTEXITCODE = 0
 
 on_finish:
   - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
