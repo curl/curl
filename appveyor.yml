@@ -135,21 +135,26 @@ init:
   - ps: |
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
-      Remove-Item -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -Force
+      taskkill -f -t -im taskhostw.exe
+      Remove-Item -LiteralPath 'C:\Windows\System32\taskhostw.exe' -Force
+      Rename-Item -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak' -Force
       taskkill -f -t -im TrustedInstaller.exe
-      Remove-Item -LiteralPath 'C:\Windows\servicing\TrustedInstaller.exe' -Force
+      Rename-Item -LiteralPath 'C:\Windows\servicing\TrustedInstaller.exe' -NewName 'TrustedInstaller.exe.bak' -Force
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im MicrosoftEdgeUpdate.exe
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse | Remove-Item -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' } -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im GoogleUpdate.exe
-      Remove-Item -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -Force
+      Rename-Item -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak' -Force
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im updater.exe
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse | Remove-Item -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' } -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       # Older versions
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im GoogleUpdate.exe
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Remove-Item -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' } -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
 
 on_finish:
   - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
