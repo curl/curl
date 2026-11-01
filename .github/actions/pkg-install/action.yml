@@ -145,9 +145,8 @@ runs:
         echo '::endgroup::'
 
         options=''
-        if [ "${RUNNER_OS}" = 'Linux' ]; then
-          options='--cert /etc/ssl/certs/ca-certificates.crt'
-        elif [ "${RUNNER_OS}" = 'macOS' ]; then
+        # Debian/Ubuntu ships with bad certs, but patches the vendored certifi to use /etc/ssl/certs/ca-certificates.crt
+        if [ "${RUNNER_OS}" = 'macOS' ]; then
           options='--cert /opt/homebrew/etc/ca-certificates/cert.pem'
         fi
         echo "options: |${options}|"
