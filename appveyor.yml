@@ -145,7 +145,7 @@ init:
       Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse | Select-Object -ExpandProperty FullName
-      taskkill -f -t -im chrmstp.exe
+      taskkill -f -t -im setup.exe
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im TrustedInstaller.exe
