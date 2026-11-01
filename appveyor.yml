@@ -135,9 +135,9 @@ init:
   - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
   - cmd: |
       if exist C:\Windows\System32\taskhostw.exe mv C:\Windows\System32\taskhostw.exe C:\Windows\System32\taskhostw.exe.bak
-      taskkill -f -t -im taskhostw.exe
+      taskkill -f -t -im taskhostw.exe || echo "No taskhostw.exe process"
       mv C:\Windows\servicing\TrustedInstaller.exe C:\Windows\servicing\TrustedInstaller.exe.bak
-      taskkill -f -t -im TrustedInstaller.exe
+      taskkill -f -t -im TrustedInstaller.exe || echo "No TrustedInstaller.exe process"
   - ps: |
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
