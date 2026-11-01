@@ -69,6 +69,7 @@ runs:
       shell: bash
       env:
         PACKAGES: ${{ inputs.pip }}
+        RUNNER_OS: ${{ runner.os }}
       run: |
         [ -d ~/venv ] || python3 -m venv ~/venv
 
@@ -143,4 +144,11 @@ runs:
         done
         echo '::endgroup::'
 
-        ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}
+        options=''
+        if [ "${RUNNER_OS}" = 'Linux' ]; then
+          options='--cert /etc/ssl/certs/ca-certificates.crt'
+        elif [ "${RUNNER_OS}" = 'macOS' ]; then
+          options='--cert /opt/homebrew/etc/ca-certificates/cert.pem'
+        fi
+
+        ~/venv/bin/pip ${options} --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}
