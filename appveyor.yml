@@ -135,12 +135,13 @@ init:
   - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
   - cmd: |
       if exist C:\Windows\System32\taskhostw.exe mv C:\Windows\System32\taskhostw.exe C:\Windows\System32\taskhostw.exe.bak
-      taskkill -f -t -im taskhostw.exe || echo "No taskhostw.exe process"
       mv C:\Windows\servicing\TrustedInstaller.exe C:\Windows\servicing\TrustedInstaller.exe.bak
-      taskkill -f -t -im TrustedInstaller.exe || echo "No TrustedInstaller.exe process"
   - ps: |
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
+      taskkill -f -t -im __nonexistent__.exe
+      taskkill -f -t -im taskhostw.exe
+      taskkill -f -t -im TrustedInstaller.exe
       Rename-Item -Verbose -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak'
       Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       taskkill -f -t -im chrmstp.exe
@@ -155,7 +156,6 @@ init:
       taskkill -f -t -im updater.exe
       # Older versions
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }
-      taskkill -f -t -im GoogleUpdate.exe
 
 on_finish:
   - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
