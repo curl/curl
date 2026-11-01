@@ -154,7 +154,7 @@ init:
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       taskkill -f -t -im updater.exe
       # Older versions
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }
       taskkill -f -t -im GoogleUpdate.exe
 
 on_finish:
