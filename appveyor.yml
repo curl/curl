@@ -144,11 +144,12 @@ init:
       Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      #
       $null = New-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe" -ItemType Directory
       Rename-Item -Verbose -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak'
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }  # Older versions
-      taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe | out-null
+      $null = taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe | out-null
 
 on_finish:
   - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
