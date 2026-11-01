@@ -96,6 +96,8 @@ runs:
                 fi
                 echo "${f}"
               fi
+            else
+              >&2 printf ' (not set)'
             fi
             >&2 printf '\n'
           done
