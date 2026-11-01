@@ -132,11 +132,11 @@ runs:
           echo "::group::${f}"
           if [ -d "${f}" ]; then
             if grep -a -E "${bad}" -R -- "${f}"; then
-              echo "::group::full dump"; cat "${f}"; echo '::endgroup::'
+              echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
             fi
           elif [ -f "${f}" ]; then
             if grep -a -E "${bad}" -- "${f}"; then
-              echo "::group::full dump"; cat "${f}"; echo '::endgroup::'
+              echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
             fi
           fi
           echo '::endgroup::'
