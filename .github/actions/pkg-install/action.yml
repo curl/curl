@@ -71,6 +71,63 @@ runs:
         PACKAGES: ${{ inputs.pip }}
       run: |
         [ -d ~/venv ] || python3 -m venv ~/venv
-        # shellcheck disable=SC2046
-        grep -E '(emSign|AAA Certificate Services)' -- $(find ~/venv -name cacert.pem)
+
+        echo '::group::bad certs'
+        bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
+        bad+='|MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
+        bad+='|MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
+        bad+='|MIIDczCCAlugAwIBAgILAK7PALrEzzL4Q7IwDQYJKoZIhvcNAQELBQAwVjELMAkG'  # emSign Root CA - C1
+        bad+='|MIICKzCCAbGgAwIBAgIKe3G2gla4EnycqDAKBggqhkjOPQQDAzBaMQswCQYDVQQG'  # emSign ECC Root CA - C3
+        bad+=')'
+        # https://pip.pypa.io/en/stable/topics/https-certificates/
+        {
+          for e in PIP_CERT REQUESTS_CA_BUNDLE CURL_CA_BUNDLE SSL_CERT_DIR SSL_CERT_FILE; do
+            >&2 printf 'env: %s' "${e}"
+            f="$(printenv "${e}")"
+            if [ -n "${f}" ]; then
+              >&2 printf ': %s' "${f}"
+              if [ -d "${f}" ]; then
+                >&2 printf ' (directory exists)'
+                echo "${f}"
+              elif [ -r "${f}" ]; then
+                >&2 printf ' (file exists and readable)'
+                if [ -w "${f}" ]; then
+                  >&2 printf ' (WARNING: also writable)'
+                fi
+                echo "${f}"
+              fi
+            fi
+            >&2 printf '\n'
+          done
+          for f in \
+            /etc/ssl/certs/ca-certificates.crt \
+            /etc/ssl/cert.pem \
+            /opt/homebrew/etc/ca-certificates/cert.pem \
+            /usr/local/etc/ca-certificates/cert.pem \
+          ; do
+            if [ -d "${f}" ]; then
+              >&2 printf '%s (directory exists)' "${f}"
+              echo "${f}"
+              >&2 printf '\n'
+            elif [ -r "${f}" ]; then
+              >&2 printf '%s (file exists and readable)' "${f}"
+              if [ -w "${f}" ]; then
+                >&2 printf ' (WARNING: also writable)'
+              fi
+              >&2 printf '\n'
+              echo "${f}"
+            fi
+          done
+          if [ -d ~/venv ]; then
+            find ~/venv -name cacert.pem
+          fi
+         } | sort -u | while read -r f; do
+          if [ -d "${f}" ]; then
+            echo "::group::${f}"; grep -a -E "${bad}" -R -- "${f}" || true; echo '::endgroup::'
+          elif [ -f "${f}" ]; then
+            echo "::group::${f}"; grep -a -E "${bad}" -- "${f}" || true; echo '::endgroup::'
+          fi
+        done
+        echo '::endgroup::'
+
         ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}

@@ -832,6 +832,13 @@ jobs:
         with:
           persist-credentials: false
 
+      # TEMP
+      - name: 'install pytest prereqs'
+        if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: -r tests/http/requirements.txt
+
       - name: 'autoreconf'
         if: ${{ matrix.build.configure }}
         run: autoreconf -fi
