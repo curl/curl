@@ -18,6 +18,10 @@ runs:
         t="$(mktemp)" && \
           awk -v s='=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3' \
             '/^(===|###) /{skip=0} $0==s{skip=1} !skip' /etc/ssl/cert.pem | \
+          awk -v s='=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign ECC Root CA - C3' \
+            '/^(===|###) /{skip=0} $0==s{skip=1} !skip' | \
+          awk -v s='=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1' \
+            '/^(===|###) /{skip=0} $0==s{skip=1} !skip' | \
           awk -v s='=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services' \
             '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
           [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
