@@ -71,4 +71,6 @@ runs:
         PACKAGES: ${{ inputs.pip }}
       run: |
         [ -d ~/venv ] || python3 -m venv ~/venv
+        # shellcheck disable=SC2046
+        grep -E '(emSign|AAA Certificate Services)' -- $(find venv -name cacert.pem)
         ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}
