@@ -52,6 +52,33 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
+  # Delete vctip.exe telemetry tool
+  if [[ "${CMAKE_GENERATOR}" =~ [0-9]{4} ]]; then
+    vcver="${BASH_REMATCH[0]//2026/18}"  # 2017, 2019, 2022, 2026
+    if [[ "${CMAKE_GENERATE}" =~ -A\ (ARM64|Win32|x64) ]]; then
+      target="${BASH_REMATCH[1]}"
+      target="${target//ARM64/arm64}"
+      target="${target//Win32/x86}"
+      hosts='Hostx64'
+      if [[ "${vcver}" =~ (2017|2019) ]]; then
+        root="$(printenv 'ProgramFiles(x86)')"
+        hosts='Hostx86'
+      else
+        root="${PROGRAMFILES}"
+      fi
+      root+="/Microsoft Visual Studio/${vcver}/Community/VC/Tools/MSVC"
+      [ ! -d "${root}" ] && continue
+      root="$(/usr/bin/find "${root}" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
+      for host in $hosts; do
+        vctip="$root/bin/${host}/${target}/vctip.exe"
+        if [ -x "${vctip}" ]; then
+          echo "Deleting: ${vctip}"
+          rm -f "${vctip}"
+        fi
+      done
+    fi
+  fi
+
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
     cmake_ver="$(printf '%02d%02d' \
