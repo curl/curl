@@ -66,12 +66,11 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
       else
         root="${PROGRAMFILES}"
       fi
-      root+="/Microsoft Visual Studio/${vcver}/Community/VC/Tools/MSVC"
-      [ ! -d "${root}" ] && continue
-      root="$(/usr/bin/find "${root}" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
+      root="$(/usr/bin/find \
+        "$(cygpath --unix "${root}/Microsoft Visual Studio/${vcver}/Community/VC/Tools/MSVC")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
       for host in $hosts; do
         vctip="$root/bin/${host}/${target}/vctip.exe"
-        if [ -x "${vctip}" ]; then
+        if [ -f "${vctip}" ]; then
           echo "Deleting: ${vctip}"
           rm -f "${vctip}"
         fi
