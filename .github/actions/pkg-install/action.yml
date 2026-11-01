@@ -83,7 +83,7 @@ runs:
         {
           for e in PIP_CERT REQUESTS_CA_BUNDLE CURL_CA_BUNDLE SSL_CERT_DIR SSL_CERT_FILE; do
             >&2 printf 'env: %s' "${e}"
-            f="$(printenv "${e}")"
+            f="$(printenv "${e}" || true)"
             if [ -n "${f}" ]; then
               >&2 printf ': %s' "${f}"
               if [ -d "${f}" ]; then
@@ -119,7 +119,7 @@ runs:
             fi
           done
           if [ -d ~/venv ]; then
-            find ~/venv -name cacert.pem
+            find ~/venv -name cacert.pem || true
           fi
          } | sort -u | while read -r f; do
           if [ -d "${f}" ]; then
