@@ -73,7 +73,7 @@ runs:
       run: |
         [ -d ~/venv ] || python3 -m venv ~/venv
 
-        echo '::group::bad certs'
+        echo '::group::check for bad certs'
         bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
         bad+='|MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
         bad+='|MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
@@ -150,5 +150,6 @@ runs:
         elif [ "${RUNNER_OS}" = 'macOS' ]; then
           options='--cert /opt/homebrew/etc/ca-certificates/cert.pem'
         fi
+        echo "options: |${options}|"
 
         ~/venv/bin/pip ${options} --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}
