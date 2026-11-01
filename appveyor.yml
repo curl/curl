@@ -133,8 +133,8 @@ build_script:
 init:
   - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
   - cmd: |
-      mv C:\Windows\servicing\TrustedInstaller.exe TrustedInstaller.exe.bak
-      mv C:\Windows\System32\taskhostw.exe taskhostw.exe.bak
+      mv C:\Windows\servicing\TrustedInstaller.exe C:\Windows\servicing\TrustedInstaller.exe.bak
+      mv C:\Windows\System32\taskhostw.exe C:\Windows\System32\taskhostw.exe.bak
   - ps: |
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
