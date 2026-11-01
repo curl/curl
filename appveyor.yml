@@ -136,13 +136,22 @@ init:
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
       taskkill -f -t -im taskhostw.exe
-      Remove-Item -LiteralPath 'C:\Windows\System32\taskhostw.exe' -Force
+      Rename-Item -LiteralPath 'C:\Windows\System32\taskhostw.exe' -NewName 'taskhostw.exe.bak' -Force
       Rename-Item -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak' -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse | Select-Object -ExpandProperty FullName
+      taskkill -f -t -im chrmstp.exe
+      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' } -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse | Select-Object -ExpandProperty FullName
+      taskkill -f -t -im chrmstp.exe
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' } -Force
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im TrustedInstaller.exe
       Rename-Item -LiteralPath 'C:\Windows\servicing\TrustedInstaller.exe' -NewName 'TrustedInstaller.exe.bak' -Force
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im MicrosoftEdgeUpdate.exe
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse | Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' } -Force
+      New-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe" -ItemType Directory
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im GoogleUpdate.exe
       Rename-Item -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak' -Force
