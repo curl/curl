@@ -141,29 +141,19 @@ init:
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
       Rename-Item -Verbose -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak'
-      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im chrmstp.exe
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im setup.exe
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       New-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe" -ItemType Directory
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im MicrosoftEdgeUpdate.exe
       Rename-Item -Verbose -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak'
       taskkill -f -t -im GoogleUpdate.exe
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im updater.exe
       # Older versions
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Select-Object -ExpandProperty FullName
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse | Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe*' -File -Recurse | Select-Object -ExpandProperty FullName
       taskkill -f -t -im GoogleUpdate.exe
 
 on_finish:
