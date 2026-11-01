@@ -55,7 +55,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   # Delete vctip.exe telemetry tool
   if [[ "${CMAKE_GENERATOR}" =~ [0-9]{4} ]]; then
     vcver="${BASH_REMATCH[0]//2026/18}"  # 2017, 2019, 2022, 2026
-    if [[ "${CMAKE_GENERATE}" =~ -A\ (ARM64|Win32|x64) ]]; then
+    if [[ ! "${vcver}" =~ (2010|2012|2013|2015) && "${CMAKE_GENERATE}" =~ -A\ (ARM64|Win32|x64) ]]; then
       target="${BASH_REMATCH[1]}"
       target="${target//ARM64/arm64}"
       target="${target//Win32/x86}"
