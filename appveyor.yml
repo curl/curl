@@ -32,6 +32,7 @@ version: 7.50.0.{build}
 
 environment:
   DO_NOT_TRACK: '1'
+  VSCMD_SKIP_SENDTELEMETRY: '1'
   CURL_TEST_MIN: 200
 
   matrix:

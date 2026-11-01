@@ -43,6 +43,7 @@ env:
   OPENSSH_WINDOWS_SHA256_WIN64: b67ff8becd203502190ec42ac7787c24c2cd3325ed7700485fe7a1c83d2a7957
   # renovate: datasource=github-tags depName=mtrojnar/stunnel versioning=semver-coerced extractVersion=^stunnel-(?<version>.+)$
   STUNNEL_VERSION: 5.82
+  VSCMD_SKIP_SENDTELEMETRY: '1'
 
 jobs:
   build-cache:
