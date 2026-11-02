@@ -71,7 +71,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
       for host in $hosts; do
         vctip="$root/bin/${host}/${target}/vctip.exe"
         if [ -f "${vctip}" ]; then
-          echo "Deleting: ${vctip}"
           rm -f "${vctip}"
         fi
       done
