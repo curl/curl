@@ -604,14 +604,10 @@ static bool multi_conn_should_close(struct connectdata *conn,
   if(conn->bits.close)
     return TRUE;
 
-  /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
-     forced us to close this connection. This is ignored for requests taking
-     place in a NTLM/NEGOTIATE authentication handshake. */
+  /* if data->set.reuse_forbid is TRUE, it means the libcurl client has forced
+     us to close this connection. This is ignored for requests taking place in
+     a NEGOTIATE authentication handshake. */
   if(data->set.reuse_forbid
-#ifdef USE_NTLM
-     && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
-          conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
-#endif
 #ifdef USE_SPNEGO
      && !(conn->http_negotiate_state == CURL_NEGO_AUTH_RECV ||
           conn->proxy_negotiate_state == CURL_NEGO_AUTH_RECV)

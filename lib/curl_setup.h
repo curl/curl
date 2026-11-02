@@ -723,20 +723,6 @@
 #define USE_KERBEROS5
 #endif
 
-/* Single point where USE_NTLM definition might be defined */
-#ifdef CURL_ENABLE_NTLM
-#  if (defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)) ||   \
-  defined(USE_GNUTLS) ||                                           \
-  (defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)) || \
-  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||         \
-  (defined(USE_WOLFSSL) && defined(HAVE_WC_DES_ECBENCRYPT))
-#    define USE_CURL_NTLM_CORE
-#  endif
-#  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
-#    define USE_NTLM
-#  endif
-#endif
-
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
 #define USE_SSH
 #endif
@@ -1124,6 +1110,17 @@ error:                                                                 \
 #ifdef USE_WINSOCK
 #define SOCKERRNO         ((int)WSAGetLastError())
 #define SET_SOCKERRNO(x)  WSASetLastError((int)(x))
+#elif defined(__AMIGA__) && defined(HAVE_PROTO_BSDSOCKET_H) && \
+  !defined(__amigaos4__) && !defined(__MORPHOS__) && !defined(__AROS__)
+/* Native socket errors need not share libc's errno storage. */
+#define SOCKERRNO        ((int)Errno())
+#define SET_SOCKERRNO(x)                                       \
+  do {                                                         \
+    struct TagItem curl_errno_tags[] = {                       \
+      { SBTM_SETVAL(SBTC_ERRNO), (ULONG)(x) }, { TAG_DONE, 0 } \
+    };                                                         \
+    (void)SocketBaseTagList(curl_errno_tags);                  \
+  } while(0)
 #else
 #define SOCKERRNO         errno
 #define SET_SOCKERRNO(x)  (errno = (x))
@@ -1604,7 +1601,6 @@ typedef struct sockaddr_un {
 #ifdef USE_OPENSSL
 /* OpenSSL 3 marks these functions deprecated but we have no replacements (yet)
    so tell the compiler to not warn for them:
-   - DES_* (for NTLM)
    - EVP_PKEY_get1_RSA, RSA_flags, RSA_free (auto-skipped for OpenSSL built
      with no-deprecated) */
 #  define OPENSSL_SUPPRESS_DEPRECATED

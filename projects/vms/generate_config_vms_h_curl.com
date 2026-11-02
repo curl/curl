@@ -263,7 +263,7 @@ $write cvh "#undef CURL_DISABLE_LIBCURL_OPTION"
 $write cvh "#endif"
 $write cvh "#ifndef __VAX"
 $write cvh "#else"
-$! NTLM needs long long or int64 support, missing from DECC C.
+
 $write cvh "#ifdef __DECC
 $write cvh "#endif"
 $write cvh "#endif"

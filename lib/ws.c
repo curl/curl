@@ -736,7 +736,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     }
   }
 
-  result = Curl_cwriter_flush(data, writer->next);
+  result = Curl_cwriter_flush(data, writer->next, FALSE);
   if(result)
     goto out;
 
@@ -784,7 +784,7 @@ out:
 }
 
 static CURLcode ws_cw_flush(struct Curl_easy *data,
-                            struct Curl_cwriter *writer)
+                            struct Curl_cwriter *writer, bool eos)
 {
   CURLcode result = CURLE_OK;
 
@@ -796,7 +796,7 @@ static CURLcode ws_cw_flush(struct Curl_easy *data,
     /* Frames should be written one by one, else the meta data does
      * not fit. Flush the next writer first, so it does not aggregate
      * our flushed data with anything it might have buffered. */
-    result = Curl_cwriter_flush(data, writer->next);
+    result = Curl_cwriter_flush(data, writer->next, FALSE);
     if(result)
       goto out;
 
@@ -830,7 +830,7 @@ static CURLcode ws_cw_flush(struct Curl_easy *data,
 
 out:
   if(!result)
-    result = Curl_cwriter_flush(data, writer->next);
+    result = Curl_cwriter_flush(data, writer->next, eos);
   return result;
 }
 

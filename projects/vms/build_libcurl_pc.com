@@ -167,9 +167,9 @@ $ if f$locate("@SUPPORT_FEATURES@", line_in) .lt line_in_len
 $ then
 $    if arch_name .eqs. "VAX"
 $    then
-$        write pco "supported_features=""SSL libz NTLM"""
+$        write pco "supported_features=""SSL libz"""
 $    else
-$        write pco "supported_features=""SSL IPv6 libz NTLM"""
+$        write pco "supported_features=""SSL IPv6 libz"""
 $    endif
 $    goto pc_file_loop
 $ endif

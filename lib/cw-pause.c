@@ -100,7 +100,7 @@ static void cw_pause_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 }
 
 static CURLcode cw_pause_flush(struct Curl_easy *data,
-                               struct Curl_cwriter *cw_pause)
+                               struct Curl_cwriter *cw_pause, bool eos)
 {
   struct cw_pause_ctx *ctx = (struct cw_pause_ctx *)cw_pause;
   CURLcode result = CURLE_OK;
@@ -146,7 +146,7 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
   }
 
   if(!result)
-    result = Curl_cwriter_flush(data, cw_pause->next);
+    result = Curl_cwriter_flush(data, cw_pause->next, eos && !ctx->buf);
   return result;
 }
 
@@ -159,7 +159,7 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
   size_t wlen = 0;
 
   if(ctx->buf && !Curl_cwriter_is_paused(data)) {
-    result = cw_pause_flush(data, writer);
+    result = cw_pause_flush(data, writer, FALSE);
     if(result)
       return result;
   }

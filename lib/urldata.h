@@ -161,14 +161,6 @@ struct digestdata {
 };
 #endif
 
-typedef enum {
-  NTLMSTATE_NONE,
-  NTLMSTATE_TYPE1,
-  NTLMSTATE_TYPE2,
-  NTLMSTATE_TYPE3,
-  NTLMSTATE_LAST
-} curlntlm;
-
 #define CURL_NEGO_AUTH_NONE   0U
 #define CURL_NEGO_AUTH_RECV   1U
 #define CURL_NEGO_AUTH_SENT   2U
@@ -323,11 +315,6 @@ struct connectdata {
   /*************** Request - specific items ************/
 #ifdef USE_WINDOWS_SSPI
   CtxtHandle *sslContext;
-#endif
-
-#ifdef USE_NTLM
-  curlntlm http_ntlm_state;
-  curlntlm proxy_ntlm_state;
 #endif
 
   /* When this connection is created, store the conditions for the local end

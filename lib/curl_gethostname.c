@@ -30,8 +30,7 @@
  * Curl_gethostname() is a wrapper around gethostname() which allows
  * overriding the hostname that the function would normally return.
  * This capability is used by the test suite to verify exact matching
- * of NTLM authentication, which exercises libcurl's MD4 and DES code
- * as well as by the SMTP module when a hostname is not provided.
+ * by the SMTP module when a hostname is not provided.
  *
  * For libcurl debug enabled builds hostname overriding takes place
  * when environment variable CURL_GETHOSTNAME is set, using the value

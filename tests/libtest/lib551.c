@@ -28,10 +28,10 @@
 
 #include "first.h"
 
-static const char t547_uploadthis[] = "this is the blurb we want to upload\n";
-static const size_t t547_datalen = CURL_CSTRLEN(t547_uploadthis);
+static const char t551_uploadthis[] = "this is the blurb we want to upload\n";
+static const size_t t551_datalen = CURL_CSTRLEN(t551_uploadthis);
 
-static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
+static size_t t551_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {
   int *counter = (int *)clientp;
 
@@ -42,16 +42,16 @@ static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
   }
   (*counter)++; /* bump */
 
-  if(size * nmemb >= t547_datalen) {
+  if(size * nmemb >= t551_datalen) {
     curl_mfprintf(stderr, "READ!\n");
-    memcpy(ptr, t547_uploadthis, t547_datalen);
-    return t547_datalen;
+    memcpy(ptr, t551_uploadthis, t551_datalen);
+    return t551_datalen;
   }
   curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
 
-static curlioerr t547_ioctl_callback(CURL *curl, int cmd, void *clientp)
+static curlioerr t551_ioctl_callback(CURL *curl, int cmd, void *clientp)
 {
   int *counter = (int *)clientp;
   (void)curl;
@@ -62,7 +62,7 @@ static curlioerr t547_ioctl_callback(CURL *curl, int cmd, void *clientp)
   return CURLIOE_OK;
 }
 
-static CURLcode test_lib547(const char *URL)
+static CURLcode test_lib551(const char *URL)
 {
   CURLcode result;
   CURL *curl;
@@ -85,18 +85,18 @@ static CURLcode test_lib547(const char *URL)
   easy_setopt(curl, CURLOPT_HEADER, 1L);
   if(testnum == 548) {
     /* set the data to POST with a mere pointer to a null-terminated string */
-    easy_setopt(curl, CURLOPT_POSTFIELDS, t547_uploadthis);
+    easy_setopt(curl, CURLOPT_POSTFIELDS, t551_uploadthis);
   }
   else {
-    /* 547 style, which means reading the POST data from a callback */
-    easy_setopt(curl, CURLOPT_IOCTLFUNCTION, t547_ioctl_callback);
+    /* 551 style, which means reading the POST data from a callback */
+    easy_setopt(curl, CURLOPT_IOCTLFUNCTION, t551_ioctl_callback);
     easy_setopt(curl, CURLOPT_IOCTLDATA, &counter);
 
-    easy_setopt(curl, CURLOPT_READFUNCTION, t547_read_cb);
+    easy_setopt(curl, CURLOPT_READFUNCTION, t551_read_cb);
     easy_setopt(curl, CURLOPT_READDATA, &counter);
     /* We CANNOT do the POST fine without setting the size (or choose
        chunked)! */
-    easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)t547_datalen);
+    easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)t551_datalen);
   }
   easy_setopt(curl, CURLOPT_POST, 1L);
   easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);

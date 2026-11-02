@@ -168,12 +168,6 @@ static ULONG ldap_win_bind_auth(LDAP *server, const char *user,
   }
   else
 #endif
-#ifdef USE_NTLM
-  if(authflags & CURLAUTH_NTLM) {
-    method = LDAP_AUTH_NTLM;
-  }
-  else
-#endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
   if(authflags & CURLAUTH_DIGEST) {
     method = LDAP_AUTH_DIGEST;

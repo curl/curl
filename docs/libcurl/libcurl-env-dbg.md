@@ -99,7 +99,7 @@ an edge case
 
 ## `CURL_GETHOSTNAME`
 
-Fake the local machine's unqualified hostname for NTLM and SMTP.
+Fake the local machine's unqualified hostname for SMTP.
 
 ## `CURL_HSTS_HTTP`
 
@@ -107,7 +107,7 @@ Bypass the HSTS HTTPS protocol restriction if this variable exists.
 
 ## `CURL_FORCETIME`
 
-A time of 0 is used for AWS signatures and NTLM if this variable exists.
+A time of 0 is used for AWS signatures if this variable exists.
 
 ## `CURL_ENTROPY`
 

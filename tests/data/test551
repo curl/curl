@@ -56,9 +56,7 @@ Contents of that page you requested, sir.
 <server>
 http
 </server>
-<tool>
-lib547
-</tool>
+
 <features>
 !SSPI
 crypto

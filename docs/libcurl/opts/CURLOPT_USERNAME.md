@@ -41,9 +41,6 @@ include the domain name in order for the server to successfully obtain a
 Kerberos Ticket. If you do not then the initial part of the authentication
 handshake may fail.
 
-When using NTLM, the username can be specified without the domain name should
-the server be part of a single domain and forest.
-
 To include the domain name use either Down-Level Logon Name or UPN (User
 Principal Name) formats. For example, **EXAMPLE\user** and
 **user@example.com** respectively.
@@ -57,13 +54,13 @@ CURLOPT_PASSWORD(3) and CURLOPT_LOGIN_OPTIONS(3) options.
 The application does not have to keep the string around after setting this
 option.
 
-For some authentication methods (`Negotiate`, or `NTLM` when built to use
-SSPI), setting it to a zero-length string (`""`) makes libcurl use an implied
-*ambient* user decided by the environment. libcurl cannot identify this user
-and may reuse an authenticated connection for a later transfer on the same
-easy handle. If the ambient user changes while that connection remains
-reusable, the later transfer can be authenticated as the previous user.
-Applications must prevent such reuse when changing ambient users.
+For some authentication methods (like `Negotiate`), setting it to a
+zero-length string (`""`) makes libcurl use an implied *ambient* user decided
+by the environment. libcurl cannot identify this user and may reuse an
+authenticated connection for a later transfer on the same easy handle. If the
+ambient user changes while that connection remains reusable, the later
+transfer can be authenticated as the previous user. Applications must prevent
+such reuse when changing ambient users.
 
 # DEFAULT
 

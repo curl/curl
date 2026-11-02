@@ -3,16 +3,22 @@
 <info>
 <keywords>
 unittest
-MD4
+OpenSSL
+TLS
 </keywords>
 </info>
 
 <client>
 <features>
 unittest
+OpenSSL
+verbose-strings
 </features>
 <name>
-MD4 unit tests
+OpenSSL terminal shutdown errors stop further TLS I/O
 </name>
+<command>
+%CERTDIR/certs/test-localhost.pem
+</command>
 </client>
 </testcase>

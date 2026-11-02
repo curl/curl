@@ -37,6 +37,7 @@
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "connect.h"
+#include "escape.h"
 
 #define MAX_ALTSVC_LINE    4095
 #define MAX_ALTSVC_DATELEN 17
@@ -632,7 +633,23 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
     if(curlx_str_until(&p, &alpn, MAX_ALTSVC_LINE, '='))
       break; /* not another entry, leave */
     curlx_str_trimblanks(&alpn);
-    dstalpnid = Curl_str2alpnid(&alpn);
+    if(memchr(curlx_str(&alpn), '%', curlx_strlen(&alpn))) {
+      char *decoded;
+      size_t dlen;
+      /* RFC 7838 section 3: protocol-id is a percent-encoded ALPN name. */
+      CURLcode result = Curl_urldecode(curlx_str(&alpn), curlx_strlen(&alpn),
+                                       &decoded, &dlen, REJECT_CTRL);
+      if(result == CURLE_URL_MALFORMAT)
+        dstalpnid = ALPN_none;
+      else if(result)
+        return result;
+      else {
+        dstalpnid = Curl_alpn2alpnid((const unsigned char *)decoded, dlen);
+        curlx_free(decoded);
+      }
+    }
+    else
+      dstalpnid = Curl_str2alpnid(&alpn);
 
     if(curlx_str_single(&p, '='))
       break;
