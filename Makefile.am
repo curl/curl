@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign 1.16
 
 ACLOCAL_AMFLAGS = -I m4
 
