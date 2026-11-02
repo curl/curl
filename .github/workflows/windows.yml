@@ -1061,6 +1061,7 @@ jobs:
             MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
             MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
             rm -f "$MSVC_BINU/vctip.exe"  # delete telemetry tool
+            options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
 
             if [ "${TFLAGS}" = 'skiprun' ]; then
               [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
@@ -1100,7 +1101,6 @@ jobs:
               ldflags+=" -libpath:$MSDK_LIBW/km/$MATRIX_ARCH"
               options+=" -DCMAKE_RC_COMPILER=$MSDK_BINU/rc.exe"
               options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
-              options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
               export CMAKE_GENERATOR='Ninja Multi-Config'  # pass it via env to avoid space issues
               echo "Using MSVC: ${MSVC_ROOTW}"
               echo "Using Windows SDK: ${MSDK_VER}"
