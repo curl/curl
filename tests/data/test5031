@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--write-out
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+-w timer values for a failed connection
+</name>
+# Nothing listens on %NOLISTENPORT so the transfer fails before any
+# request is sent: PRETRANSFER, POSTTRANSFER and STARTTRANSFER must
+# remain unset
+<command>
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --write-out 'pretransfer == %{time_pretransfer}\nposttransfer == %{time_posttransfer}\nstarttransfer == %{time_starttransfer}\nexitcode == %{exitcode}\n'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 7 CURLE_COULDNT_CONNECT (expected since nothing listens on %NOLISTENPORT)
+<errorcode>
+7
+</errorcode>
+<stdout>
+pretransfer == 0.000000
+posttransfer == 0.000000
+starttransfer == 0.000000
+exitcode == 7
+</stdout>
+</verify>
+</testcase>
