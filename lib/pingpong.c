@@ -93,8 +93,8 @@ static CURLcode pp_poll(struct pingpong *pp,
       return CURLE_OK;
     else {
       curl_socket_t sock = data->conn->chain.sock;
-      int rc = Curl_socket_check(want_send ? sock : CURL_SOCKET_BAD,
-                                 want_recv ? sock : CURL_SOCKET_BAD,
+      int rc = Curl_socket_check(want_recv ? sock : CURL_SOCKET_BAD,
+                                 want_send ? sock : CURL_SOCKET_BAD,
                                  timeout_ms);
       if(rc == -1) {
         failf(data, "select/poll error");
@@ -134,12 +134,13 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 
     if(result == CURLE_AGAIN) {
       if(interval_ms && (Curl_pp_state_timeleft_ms(data, pp) <= 0))
-        result = CURLE_OPERATION_TIMEDOUT;
-      else {
-        result = Curl_pgrsCheck(data);
-      }
+        return CURLE_OPERATION_TIMEDOUT;
+      result = CURLE_OK;
     }
   }
+
+  if(!result)
+    result = Curl_pgrsCheck(data);
 
   if(!result)
     result = pp->statemachine(data, data->conn);
