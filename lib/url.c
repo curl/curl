@@ -854,7 +854,7 @@ static bool url_match_proto_config(struct connectdata *conn,
 #endif
 #ifndef CURL_DISABLE_FTP
   else if(get_protocol_family(m->needle->scheme) & PROTO_FAMILY_FTP) {
-    if(!Curl_ftp_conns_match(m->needle, conn))
+    if(!Curl_ftp_conn_matches(m->data, conn))
       return FALSE;
   }
 #endif

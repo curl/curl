@@ -99,9 +99,8 @@ struct pathcomp {
   int len;   /* length in bytes */
 };
 
-/* ftp_conn is used for struct connection-oriented data in the connectdata
-   struct */
-struct ftp_conn {
+/* cf_ftp_ctx is the FTP filter contect struct */
+struct cf_ftp_ctx {
   struct pingpong pp;
   char *account;
   char *alternative_to_user;
@@ -140,13 +139,11 @@ struct ftp_conn {
   BIT(cwdfail);     /* set TRUE if a CWD command fails, as then we must prevent
                        caching the current directory */
   BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
-  BIT(shutdown);    /* connection is being shutdown, e.g. QUIT */
+  BIT(sent_quit);    /* QUIT has been dispatched */
 };
 
 /* meta key for storing `struct FTP` as easy meta data */
 #define CURL_META_FTP_EASY   "meta:proto:ftp:easy"
-/* meta key for storing `struct ftp_conn` as connection meta data */
-#define CURL_META_FTP_CONN   "meta:proto:ftp:conn"
 
 #endif /* CURL_DISABLE_FTP */
 

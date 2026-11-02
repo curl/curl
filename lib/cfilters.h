@@ -479,6 +479,10 @@ CURLcode Curl_conn_do_maintenance(struct Curl_easy *data);
  */
 curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data);
 
+/* Get first filter instance of given type in the primary chain */
+struct Curl_cfilter *Curl_conn_get_first_cf(struct connectdata *conn,
+                                            const struct Curl_cftype *cft);
+
 /* Return a pointer to the connected socket address or NULL. */
 const struct Curl_sockaddr_ex *
 Curl_conn_get_remote_addr(struct Curl_easy *data);
