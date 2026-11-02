@@ -18,26 +18,11 @@ runs:
         t="$(mktemp)" && \
           awk -v s='=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3' \
             '/^(===|###) /{skip=0} $0==s{skip=1} !skip' /etc/ssl/cert.pem | \
+          awk -v s='=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign ECC Root CA - C3' \
+            '/^(===|###) /{skip=0} $0==s{skip=1} !skip' | \
+          awk -v s='=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1' \
+            '/^(===|###) /{skip=0} $0==s{skip=1} !skip' | \
           awk -v s='=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services' \
             '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
           [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
         ls -lA /etc/ssl/cert.pem
-
-    # Outdated Homebrew cert.pem version preinstalled on GitHub runners
-    - name: 'fix /opt/homebrew/etc/ca-certificates/cert.pem'
-      if: ${{ contains(runner.os, 'macos') }}
-      shell: bash
-      run: |
-        ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
-        t="$(mktemp)" && \
-          awk 'BEGIN { \
-            toskip["MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG"]; \
-            toskip["MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb"]; \
-            toskip["MIIDlDCCAnygAwIBAgIKMfXkYgxsWO3W2DANBgkqhkiG9w0BAQsFADBnMQswCQYD"] } \
-            /^-----BEGIN CERTIFICATE-----$/ \
-            { h=$0; inside=1; first=1; next } inside && first \
-            { first=0; skip=($0 in toskip); if(!skip) print h; if(!skip) print; next } inside \
-            { if(!skip) print; if(/^-----END CERTIFICATE-----$/) inside=0; next; } \
-            { print }' < /opt/homebrew/etc/ca-certificates/cert.pem > "$t" && \
-          [ -s "$t" ] && install -m 0644 "$t" /opt/homebrew/etc/ca-certificates/cert.pem; rm -f "$t"
-        ls -lA /opt/homebrew/etc/ca-certificates/cert.pem
