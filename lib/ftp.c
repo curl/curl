@@ -580,7 +580,6 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
 
   ftpc->pp.pending_resp = TRUE; /* expect server response */
   ftp_state(data, ftpc, FTP_STOP);
-
   return CURLE_OK;
 }
 
@@ -773,38 +772,6 @@ static CURLcode ftp_state_pwd(struct Curl_easy *data,
     ftp_state(data, ftpc, FTP_PWD);
 
   return result;
-}
-
-/* For the FTP "protocol connect" and "doing" phases only */
-static CURLcode ftp_pollset(struct Curl_easy *data,
-                            struct easy_pollset *ps)
-{
-  struct cf_ftp_ctx *ftpc = ftp_get_cf_ctx(data->conn);
-  return ftpc ? Curl_pp_pollset(data, &ftpc->pp, ps) : CURLE_OK;
-}
-
-/* For the FTP "DO_MORE" phase only */
-static CURLcode ftp_domore_pollset(struct Curl_easy *data,
-                                   struct easy_pollset *ps)
-{
-  struct cf_ftp_ctx *ftpc = ftp_get_cf_ctx(data->conn);
-
-  if(!ftpc)
-    return CURLE_OK;
-
-  /* When in DO_MORE state, we could be either waiting for us to connect to a
-   * remote site, or we could wait for that site to connect to us. Or handle
-   * ordinary commands.
-   */
-  CURL_TRC_FTP(data, "[%s] ftp_domore_pollset()", FTP_CSTATE(ftpc));
-
-  if(FTP_STOP == ftpc->state) {
-    /* if stopped and still in this state, we listen for server
-     * responses on the control chain */
-    struct Curl_cfchain *chain_alt = &data->conn->chain;
-    return Curl_pollset_add_in(data, ps, chain_alt->sock);
-  }
-  return Curl_pp_pollset(data, &ftpc->pp, ps);
 }
 
 static int pathlen(struct cf_ftp_ctx *ftpc, int num)
@@ -4406,6 +4373,26 @@ static CURLcode cf_ftp_shutdown(struct Curl_cfilter *cf,
   return result;
 }
 
+static CURLcode cf_ftp_adjust_pollset(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      struct easy_pollset *ps)
+{
+  struct cf_ftp_ctx *ftpc = cf->ctx;
+  curl_socket_t sock;
+
+  if(!ftpc || !cf->next)
+    return CURLE_OK;
+
+  sock = Curl_conn_cf_get_socket(cf->next, data);
+  if(sock == CURL_SOCKET_BAD)
+    return CURLE_OK;
+  else if(ftpc->pp.sendleft)
+    return Curl_pollset_change(data, ps, sock,
+      CURL_POLL_IN | CURL_POLL_OUT, 0);
+  else
+    return Curl_pollset_set_in_only(data, ps, sock);
+}
+
 struct Curl_cftype Curl_cft_ftp = {
   "FTP",
   0,
@@ -4413,7 +4400,7 @@ struct Curl_cftype Curl_cft_ftp = {
   cf_ftp_destroy,
   cf_ftp_connect,
   cf_ftp_shutdown,
-  Curl_cf_def_adjust_pollset,
+  cf_ftp_adjust_pollset,
   Curl_cf_def_data_pending,
   cf_ftp_send,
   cf_ftp_recv,
@@ -4589,6 +4576,21 @@ bool Curl_ftp_conn_matches(struct Curl_easy *data,
   }
 }
 
+static CURLcode ftp_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps)
+{
+  /* We just add out control connection socket for input to get
+   * things started. The filters "adjust_pollset()" callback will
+   * then adjust it to current needs.
+   *
+   * NOTE: we need this kick-staring as our "send index" is SECONDARYSOCKET
+   * and that as no valid socket until the DATA connection is established.
+   * Without this function, we get errors about that or an empty pollset
+   * which does not work at all.
+   */
+  return Curl_pollset_add_in(data, ps, data->conn->chain.sock);
+}
+
 /*
  * FTP protocol.
  */
@@ -4603,7 +4605,7 @@ const struct Curl_protocol Curl_protocol_ftp = {
   ftp_doing,                       /* doing */
   ftp_pollset,                     /* proto_pollset */
   ftp_pollset,                     /* doing_pollset */
-  ftp_domore_pollset,              /* domore_pollset */
+  ftp_pollset,                     /* domore_pollset */
   ZERO_NULL,                       /* perform_pollset */
   ZERO_NULL,                       /* disconnect */
   ZERO_NULL,                       /* write_resp */
