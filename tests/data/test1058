@@ -8,7 +8,6 @@ Content-Range
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 206 Partial Content
@@ -25,7 +24,6 @@ in the request
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -38,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r -101
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1

@@ -47,7 +47,7 @@ HEAD
 
 while(<STDIN>) {
     my $line = $_;
-    foreach my $n (split //, $line) {
+    foreach my $n (split(//, $line)) {
         my $ord = ord($n);
         printf("%s,", $ord);
         if($ord == 10) {

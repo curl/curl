@@ -7,11 +7,9 @@ Range
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 file
@@ -27,7 +25,6 @@ file
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout nonewline="yes">
 1234

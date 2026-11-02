@@ -49,7 +49,7 @@ my $srcdir;
 
 my $flags  = "";
 my $path   = '.';
-my $logdir = $path .'/log';
+my $logdir = $path . '/log';
 
 while(@ARGV) {
     if($ARGV[0] eq '--pidfile') {
@@ -119,11 +119,11 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$flags .= "--pidfile \"$pidfile\" ".
-    "--portfile \"$portfile\" ".
-    "--logfile \"$logfile\" ".
+$flags .= "--pidfile \"$pidfile\" " .
+    "--portfile \"$portfile\" " .
+    "--logfile \"$logfile\" " .
     "--logdir \"$logdir\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;
-exec("exec ".server_exe('tftpd')." $flags");
+exec("exec " . server_exe('tftpd') . " $flags");

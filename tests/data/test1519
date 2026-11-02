@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 # This reproduces issue #3340
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 redirect to broken URL
@@ -22,12 +21,10 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib1518
 </tool>
@@ -40,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 

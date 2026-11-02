@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ Content-Length: 0
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%H
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^Content-Length:.*

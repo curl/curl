@@ -10,7 +10,6 @@ RFC2449
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 CAPA TOP USER
@@ -19,7 +18,6 @@ CAPA TOP USER
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3
@@ -32,7 +30,6 @@ pop3://%HOSTIP:%POP3PORT -u user:secret -X 'STAT'
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 CAPA

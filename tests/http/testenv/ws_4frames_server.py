@@ -62,7 +62,7 @@ async def handler(websocket):
 
 
 async def main():
-    parser = argparse.ArgumentParser(prog='scorecard', description="""
+    parser = argparse.ArgumentParser(prog='ws_4frames_server', description="""
         Run a websocket 4frames server.
         """)
     parser.add_argument("--port", type=int,

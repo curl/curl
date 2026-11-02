@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -21,13 +20,13 @@ MooMoo
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
 !Schannel
 !GnuTLS
 local-http
+!libressl-4.4.0
 </features>
 <server>
 https-mtls
@@ -43,7 +42,6 @@ https://localhost:%HTTPS-MTLSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt %CERTDI
 </precheck>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

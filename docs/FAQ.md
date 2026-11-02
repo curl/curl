@@ -645,6 +645,18 @@ different set of events.
 Accordingly, by using `-XPOST` on a command line that for example would follow
 a 303 redirect, you effectively prevent curl from behaving correctly. Be aware.
 
+## Why is no `LOGOUT` or `QUIT` sent when the login fails?
+
+When curl fails to log in to an IMAP, POP3 or SMTP server, for example because
+the server rejects the username or password, it closes the connection without
+first sending the disconnect command of the protocol (`LOGOUT` for IMAP, `QUIT`
+for POP3 and SMTP).
+
+libcurl handles authentication as part of setting up the connection, and a
+connection that fails during setup is closed directly. Servers need to cope
+with clients that disconnect without a goodbye anyway, so this is expected and
+accepted behavior.
+
 # Running
 
 ## Why do I get problems when I use & or % in the URL?
@@ -758,8 +770,8 @@ anyone would call security.
 Also note that regular HTTP (using Basic authentication) and FTP passwords are
 sent as cleartext across the network. All it takes for anyone to fetch them is
 to listen on the network. Eavesdropping is easy. Use more secure
-authentication methods (like Digest, Negotiate or even NTLM) or consider the
-SSL-based alternatives HTTPS and FTPS.
+authentication methods (like Digest or Negotiate) or consider the SSL-based
+alternatives HTTPS and FTPS.
 
 ## I found a bug
 
@@ -772,11 +784,6 @@ you have.
 
 If there is a bug, read the BUGS document first. Then report it as described
 in there.
-
-## curl cannot authenticate to a server that requires NTLM?
-
-NTLM support requires OpenSSL, GnuTLS, mbedTLS or Microsoft Windows libraries
-at build-time to provide this functionality.
 
 ## My HTTP request using HEAD, PUT or DELETE does not work
 

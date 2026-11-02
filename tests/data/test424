@@ -7,7 +7,6 @@
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 301 OK
@@ -38,7 +37,6 @@ Funny-head: yesyes
 </data2>
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -59,7 +57,6 @@ http
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 anotherhost.example+/4240002+http+++2023+moo.html+

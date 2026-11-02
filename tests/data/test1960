@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ Content-Length: 0
 </data>
 </reply>
 
-# Client-side
 <client>
 <precheck>
 %LIBTESTS lib%TESTNUMBER check
@@ -39,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/file %HOSTIP %HTTPPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /file HTTP/1.1

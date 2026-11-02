@@ -78,7 +78,8 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
   }
   in = curlx_dyn_uptr(buf);
   ptr = getASN1Element(&elem, in, in + curlx_dyn_len(buf));
-  result = ptr ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
+  result = !ptr ? CURLE_BAD_FUNCTION_ARGUMENT :
+           ptr != in + curlx_dyn_len(buf) ? CURLE_SSL_CERTPROBLEM : CURLE_OK;
   if(result != spec->result_exp) {
     curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
                   i, (int)spec->result_exp, (int)result);

@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 301 Moved Permanently
@@ -31,7 +30,6 @@ Content-Length: 0
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -46,7 +44,6 @@ HTTP retry-after reset
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 Retry-After 2

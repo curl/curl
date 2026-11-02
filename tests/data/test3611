@@ -16,7 +16,6 @@ Set-Cookie: session=content;=path=/insane; HttpOnly; Secure; path=/moo
 
 </reply>
 
-# Client-side
 <client>
 <features>
 cookies
@@ -32,7 +31,6 @@ Get cookies with a nameless property
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /moo/%TESTNUMBER HTTP/1.1

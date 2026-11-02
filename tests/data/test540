@@ -11,7 +11,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 connection-monitor
@@ -57,12 +56,10 @@ Nice proxy auth sir!
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <features>
 !SSPI
 crypto
@@ -77,7 +74,6 @@ http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT silly:p
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1

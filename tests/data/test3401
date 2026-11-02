@@ -9,7 +9,6 @@ Secure
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -19,7 +18,6 @@ foo
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -41,7 +39,6 @@ test.example	FALSE	/	TRUE	9999999999	session	secret
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 GET http://test.example/%TESTNUMBER HTTP/1.1

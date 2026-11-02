@@ -355,8 +355,11 @@ customers only. They are made as releases branches off previous standard curl
 releases, and use version numbers that were never used by the freely available
 version.
 
-- Rock-solid curl 8.18.1: February 25, 2026
+- Rock-solid curl 8.14.3: October 14, 2026
+- Rock-solid curl 8.16.2: October 14, 2026
+- Rock-solid curl 8.20.2: October 14, 2026
 - Rock-solid curl 8.18.2: September 2, 2026
 - Rock-solid curl 8.14.2: September 7, 2026
 - Rock-solid curl 8.16.1: September 7, 2026
 - Rock-solid curl 8.20.1: September 7, 2026
+- Rock-solid curl 8.18.1: February 25, 2026

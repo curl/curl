@@ -7,7 +7,6 @@ protocol
 --write-out
 </keywords>
 </info>
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ testdata
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -35,7 +33,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{scheme}'
 </command>
 </client>
 
-# Verify data
 <verify>
 <stdout nonewline="yes">
 HTTP/1.1 200 OK

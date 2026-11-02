@@ -9,7 +9,6 @@ RFC2831
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH DIGEST-MD5
@@ -28,7 +27,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -50,7 +48,6 @@ IMAP DIGEST-MD5 authentication
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

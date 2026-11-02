@@ -7,7 +7,6 @@ HTTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -25,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -34,9 +32,12 @@ http
 COLUMNS=10000
 </setenv>
 <name>
-config file with argument using whitespace missing quotes
+config file argument with whitespace missing quotes, check line number
 </name>
 <file name="%LOGDIR/config">
+# comment
+
+  # indented comment
 data = arg with space
 </file>
 <command>
@@ -44,7 +45,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --config %LOGDIR/config --silent
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
@@ -57,7 +57,7 @@ Content-Type: application/x-www-form-urlencoded
 arg
 </protocol>
 <stderr mode="warn">
-Warning: %LOGDIR/config:1 Option 'data' uses argument with unquoted whitespace. This may cause side-effects. Consider double quotes.
+Warning: %LOGDIR/config:4 Option 'data' uses argument with unquoted whitespace. This may cause side-effects. Consider double quotes.
 </stderr>
 </verify>
 </testcase>

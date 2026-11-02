@@ -1,0 +1,28 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+
+# https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action
+name: 'fix macos runner CA root bundles'
+description: 'Remove compromised eMudhra certificates from preinstalled CA bundles'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'fix /etc/ssl/cert.pem'
+      if: ${{ contains(runner.os, 'macos') }}
+      shell: bash
+      run: |
+        # https://emudhra.we-have-a-problem.com/#macos-curl
+        ls -lA /etc/ssl/cert.pem
+        t="$(mktemp)" && \
+          awk -v s='=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3' \
+            '/^(===|###) /{skip=0} $0==s{skip=1} !skip' /etc/ssl/cert.pem | \
+          awk -v s='=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign ECC Root CA - C3' \
+            '/^(===|###) /{skip=0} $0==s{skip=1} !skip' | \
+          awk -v s='=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1' \
+            '/^(===|###) /{skip=0} $0==s{skip=1} !skip' | \
+          awk -v s='=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services' \
+            '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
+          [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
+        ls -lA /etc/ssl/cert.pem

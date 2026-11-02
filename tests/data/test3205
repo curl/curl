@@ -7,7 +7,6 @@ cipher_suite
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

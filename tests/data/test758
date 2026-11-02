@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -31,7 +30,6 @@ Funny-head: yesyes
 OpenSSL
 </features>
 
-# Client-side
 <client>
 <server>
 https
@@ -44,7 +42,6 @@ https://localhost:%HTTPSPORT/file%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

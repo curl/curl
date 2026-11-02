@@ -8,7 +8,6 @@ HTTP proxy
 Resume
 </keywords>
 </info>
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.0 200 Mooo
@@ -20,7 +19,6 @@ todelooooo lalalala yada yada, we know nothing about ranges ;-)
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -40,7 +38,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 33

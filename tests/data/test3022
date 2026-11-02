@@ -8,14 +8,12 @@ SHA256
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 test
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 scp
@@ -36,7 +34,6 @@ test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

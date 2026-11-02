@@ -88,6 +88,8 @@ jobs:
     name: 'macOS'
     runs-on: macos-latest
     steps:
+      - uses: $/.github/actions/macos-fix-certs
+
       - name: 'install prereqs'
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install

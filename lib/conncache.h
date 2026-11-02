@@ -61,9 +61,6 @@ struct cpool {
   BIT(in_shutdown);
 };
 
-/* Get connection pool instance for data or NULL if none exists */
-struct cpool *Curl_cpool_get_instance(struct Curl_easy *data);
-
 /* Init the pool, pass multi only if pool is owned by it.
  * Cannot fail.
  */

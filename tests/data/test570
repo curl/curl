@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1 crlf="headers">
 RTSP/1.0 200 OK
@@ -37,7 +36,6 @@ CSeq: 1000
 
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp

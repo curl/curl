@@ -147,6 +147,10 @@ class Credentials:
         return self._cert.subject
 
     @property
+    def serial_number(self):
+        return self._cert.serial_number
+
+    @property
     def key_type(self):
         if isinstance(self._pkey, RSAPrivateKey):
             return f"rsa{self._pkey.key_size}"

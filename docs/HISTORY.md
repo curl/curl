@@ -504,4 +504,4 @@ December 15: the website served 78 TB over the last month.
 
 April: removed support for RTMP
 
-September: removed support for SMB
+September: removed support for SMB and NTLM

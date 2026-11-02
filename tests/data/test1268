@@ -6,11 +6,9 @@ warning
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 UnixSockets

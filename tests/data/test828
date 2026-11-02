@@ -10,7 +10,6 @@ RFC6749
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH XOAUTH2
@@ -28,7 +27,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -41,7 +39,6 @@ IMAP OAuth 2.0 (XOAUTH2) authentication with initial response
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

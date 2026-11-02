@@ -53,6 +53,23 @@ static CURLcode test_lib1308(const char *URL)
   global_init(CURL_GLOBAL_ALL);
 
   rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
+                    CURLFORM_COPYCONTENTS, "content",
+                    CURLFORM_FILENAME, (char *)NULL, CURLFORM_END);
+  t1308_fail_unless(rc == CURL_FORMADD_NULL,
+                   "NULL filename should return CURL_FORMADD_NULL");
+  curl_formfree(post);
+  post = last = NULL;
+
+  rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
+                    CURLFORM_BUFFER, (char *)NULL,
+                    CURLFORM_BUFFERPTR, buffer,
+                    CURLFORM_BUFFERLENGTH, (long)sizeof(buffer), CURLFORM_END);
+  t1308_fail_unless(rc == CURL_FORMADD_NULL,
+                   "NULL buffer filename should return CURL_FORMADD_NULL");
+  curl_formfree(post);
+  post = last = NULL;
+
+  rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
                     CURLFORM_COPYCONTENTS, "content", CURLFORM_END);
   t1308_fail_unless(rc == 0, "curl_formadd returned error");
 

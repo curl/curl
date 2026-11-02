@@ -7,7 +7,6 @@ HTTP POST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -38,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -X POST -d foo -o %LOGDIR/out%TESTNUMBER --
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

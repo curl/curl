@@ -1346,6 +1346,7 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
  */
 const struct Curl_protocol Curl_protocol_tftp = {
   tftp_setup_connection,                /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   tftp_do,                              /* do_it */
   tftp_done,                            /* done */
   ZERO_NULL,                            /* do_more */

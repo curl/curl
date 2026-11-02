@@ -43,6 +43,10 @@ specified separated from the name with a colon (`:`).
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
+Since curl 8.24.0, the engine and provider initialization is done during
+transfer setup, making many errors only detected then, not when set using
+curl_easy_setopt(3).
+
 # DEFAULT
 
 NULL
@@ -70,11 +74,6 @@ int main(void)
 # RETURN VALUE
 
 CURLE_OK - Engine found.
-
-CURLE_SSL_ENGINE_NOTFOUND - Engine not found, or OpenSSL was not built with
-engine support.
-
-CURLE_SSL_ENGINE_INITFAILED - Engine found but initialization failed.
 
 CURLE_NOT_BUILT_IN - Option not built in, OpenSSL is not the SSL backend.
 

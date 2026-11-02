@@ -291,6 +291,8 @@ ParameterError str2unummax(long *val, const char *str, long max)
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
+ *
+ * Verified in test 1623
  */
 
 ParameterError secs2ms(long *val, const char *str)
@@ -314,8 +316,11 @@ ParameterError secs2ms(long *val, const char *str)
     curl_off_t fracs;
     const char *s = str;
     size_t len;
-    if(curlx_str_number(&str, &fracs, CURL_OFF_T_MAX))
+    int rc = curlx_str_number(&str, &fracs, CURL_OFF_T_MAX);
+    if(rc == STRE_OVERFLOW)
       return PARAM_NUMBER_TOO_LARGE;
+    else if(rc)
+      return PARAM_BAD_NUMERIC;
     /* how many milliseconds are in fracs ? */
     len = (str - s);
     while((len > CURL_ARRAYSIZE(digs) || (fracs > LONG_MAX / 100))) {
@@ -324,6 +329,8 @@ ParameterError secs2ms(long *val, const char *str)
     }
     ms = ((long)fracs * 100) / digs[len - 1];
   }
+  if(curlx_str_single(&str, '\0'))
+    return PARAM_BAD_NUMERIC; /* trailing garbage */
 
   *val = ((long)secs * 1000) + ms;
   return PARAM_OK;

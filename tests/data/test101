@@ -7,7 +7,6 @@ PORT
 LIST
 </keywords>
 </info>
-# Server-side
 <reply>
 <data mode="text">
 total 20
@@ -24,7 +23,6 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -37,7 +35,6 @@ ftp://%HOSTIP:%FTPPORT/ -P %CLIENTIP
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Strip all valid kinds of PORT and EPRT that curl can send
 <strip>

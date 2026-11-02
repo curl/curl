@@ -8,11 +8,9 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 wakeup
@@ -22,7 +20,6 @@ wakeup before poll with no easy handles
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

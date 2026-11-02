@@ -549,6 +549,10 @@ CURLMcode Curl_multi_add_handle(struct Curl_multi *multi,
    * a timeout callback invocation. */
   mresult = Curl_update_timer(multi);
   if(mresult) {
+    /* undo the additions above */
+    Curl_uint32_bset_remove(&multi->process, data->mid);
+    Curl_uint32_bset_remove(&multi->dirty, data->mid);
+    --multi->xfers_alive;
     data->multi = NULL; /* not anymore */
     Curl_uint32_tbl_remove(&multi->xfers, data->mid);
     data->mid = UINT32_MAX;
@@ -600,14 +604,10 @@ static bool multi_conn_should_close(struct connectdata *conn,
   if(conn->bits.close)
     return TRUE;
 
-  /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
-     forced us to close this connection. This is ignored for requests taking
-     place in a NTLM/NEGOTIATE authentication handshake. */
+  /* if data->set.reuse_forbid is TRUE, it means the libcurl client has forced
+     us to close this connection. This is ignored for requests taking place in
+     a NEGOTIATE authentication handshake. */
   if(data->set.reuse_forbid
-#ifdef USE_NTLM
-     && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
-          conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
-#endif
 #ifdef USE_SPNEGO
      && !(conn->http_negotiate_state == CURL_NEGO_AUTH_RECV ||
           conn->proxy_negotiate_state == CURL_NEGO_AUTH_RECV)
@@ -1740,7 +1740,9 @@ static bool multi_ischanged(struct Curl_multi *multi, bool clear)
  */
 void Curl_multi_connchanged(struct Curl_multi *multi)
 {
-  multi->recheckstate = TRUE;
+  /* May be invoked for a `data->multi` when no multi is present. */
+  if(multi)
+    multi->recheckstate = TRUE;
 }
 
 CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
@@ -3263,8 +3265,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     mresult = multi_perform(multi, running_handles);
 
     if(mresult != CURLM_BAD_HANDLE) {
-      /* Reassess event status of all active transfers */
-      mresult = Curl_multi_ev_assess_xfer_bset(multi, &multi->process);
+      /* Reassess event status of all active transfers, but keep any error
+         from multi_perform() */
+      CURLMcode mresult2 =
+        Curl_multi_ev_assess_xfer_bset(multi, &multi->process);
+      if(!mresult)
+        mresult = mresult2;
     }
     goto out;
   }

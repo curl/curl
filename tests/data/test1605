@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Test negative data lengths as input to libcurl functions

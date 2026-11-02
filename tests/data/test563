@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
@@ -22,7 +21,6 @@ hello
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -48,7 +46,6 @@ ftp_proxy=http://%HOSTIP:%HTTPPORT/
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=A HTTP/1.1

@@ -8,7 +8,6 @@ NLST
 --data-binary
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 </data>
@@ -17,7 +16,6 @@ REPLY NLST 450 No files found
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -30,7 +28,6 @@ ftp://%HOSTIP:%FTPPORT/ -P - -l
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Strip all valid kinds of PORT and EPRT that curl can send
 <strip>

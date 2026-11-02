@@ -6,7 +6,6 @@ HTTP
 netrc
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -24,7 +23,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -40,7 +38,6 @@ machine %HOSTIP login "user one" password "with spaces and \"\n\r\t\a"
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET / HTTP/1.1

@@ -179,6 +179,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
                               struct connectdata *conn, int8_t sockindex)
 {
+  conn->connect_start_ms = -1;
   conn->shutdown.start_ms[sockindex] = -1;
   Curl_conn_cf_discard_chain(&conn->cfilter[sockindex], data);
 }
@@ -606,21 +607,12 @@ int Curl_protocol_for_transport(uint8_t transport)
   }
 }
 
-const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
-                                          struct connectdata *conn)
+uint8_t Curl_conn_cf_http_version(struct Curl_easy *data,
+                                  struct Curl_cfilter *cf)
 {
-  struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
-  return Curl_conn_cf_get_alpn_negotiated(cf, data);
-}
-
-unsigned char Curl_conn_http_version(struct Curl_easy *data,
-                                     struct connectdata *conn)
-{
-  struct Curl_cfilter *cf;
   CURLcode result = CURLE_UNKNOWN_OPTION;
-  unsigned char v = 0;
+  uint8_t v = 0;
 
-  cf = conn->cfilter[FIRSTSOCKET];
   for(; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_HTTP) {
       int value = 0;
@@ -628,13 +620,19 @@ unsigned char Curl_conn_http_version(struct Curl_easy *data,
       if(!result && ((value < 0) || (value > 255)))
         result = CURLE_FAILED_INIT;
       else
-        v = (unsigned char)value;
+        v = (uint8_t)value;
       break;
     }
     if(cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_SSL))
       break;
   }
-  return (unsigned char)(result ? 0 : v);
+  return (uint8_t)(result ? 0 : v);
+}
+
+uint8_t Curl_conn_http_version(struct Curl_easy *data,
+                               struct connectdata *conn)
+{
+  return Curl_conn_cf_http_version(data, conn->cfilter[FIRSTSOCKET]);
 }
 
 bool Curl_conn_data_pending(struct Curl_easy *data, int8_t sockindex)

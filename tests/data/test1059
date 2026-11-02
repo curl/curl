@@ -9,7 +9,6 @@ FTP
 </keywords>
 
 </info>
-# Server-side
 <reply>
 <connect crlf="headers">
 HTTP/1.1 501 Method not implemented swsclose
@@ -20,7 +19,6 @@ Content-Length: 0
 </connect>
 </reply>
 
-# Client-side
 <client>
 <features>
 ftp
@@ -37,7 +35,6 @@ ftp://test-number:%TESTNUMBER/wanted/page -p -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # The server does not implement CONNECT for ftp, so this must be a failure test
 <errorcode>

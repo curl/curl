@@ -29,7 +29,8 @@ use POSIX qw(strftime);
 my @ts;
 if(defined($ENV{SOURCE_DATE_EPOCH})) {
     @ts = localtime($ENV{SOURCE_DATE_EPOCH});
-} else {
+}
+else {
     @ts = localtime;
 }
 my $date = strftime "%b %e, %Y", @ts;

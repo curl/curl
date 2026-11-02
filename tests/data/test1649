@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -21,7 +20,6 @@ hello
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -35,7 +33,6 @@ http://%HOSTIP:%HTTPPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET / HTTP/1.1

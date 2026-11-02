@@ -9,7 +9,6 @@ connection reuse
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY "PASS secret" +OK Login successful
@@ -25,7 +24,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3
@@ -38,7 +36,6 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER001 -u user.one:secret -: pop3://%HOSTIP:%PO
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 CAPA

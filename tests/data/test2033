@@ -8,7 +8,6 @@ PEM certificate
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ MooMoo
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -43,7 +41,6 @@ CURL_SSL_BACKEND=schannel
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

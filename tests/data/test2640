@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+rustls
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+rustls
+</features>
+<name>
+Rustls blocked send retry accounting
+</name>
+</client>
+</testcase>

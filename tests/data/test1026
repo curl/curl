@@ -6,11 +6,9 @@
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 manual
@@ -23,7 +21,6 @@ curl --manual
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Search for these two sentinel lines in the manual output; if they are found,
 # then chances are good the entire manual is there.

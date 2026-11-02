@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SFTP
+known_hosts
+libssh2
+</keywords>
+</info>
+<reply>
+<data>
+Test data
+</data>
+</reply>
+<client>
+<server>
+sftp
+</server>
+<features>
+sftp
+libssh2
+</features>
+<precheck>
+%PERL %SRCDIR/test3990.pl %LOGDIR/server/curl_host_key.pub %LOGDIR/known%TESTNUMBER "[127.0.0]:%SSHPORT" "[%HOSTIP]:%SSHPORT"
+</precheck>
+<name>
+SFTP known_hosts, [host]:port entry for a prefix of the host first
+</name>
+<command>
+--knownhosts %LOGDIR/known%TESTNUMBER --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt
+</command>
+<file name="%LOGDIR/file%TESTNUMBER.txt">
+Test data
+</file>
+</client>
+<verify>
+</verify>
+</testcase>

@@ -8,7 +8,6 @@ FILE
 
 # no Server-side
 
-# Client-side
 <client>
 <server>
 file
@@ -28,7 +27,6 @@ write
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 23 => CURLE_WRITE_ERROR
 <errorcode>

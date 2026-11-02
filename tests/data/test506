@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1>
 HTTP/1.1 200 OK
@@ -52,7 +51,6 @@ run 3: overwrite cookie 1 and 4, set cookie 6 with and without tailmatch
 </data3>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -77,7 +75,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/jar%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 GLOBAL_INIT

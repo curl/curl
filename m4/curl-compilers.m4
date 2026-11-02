@@ -455,7 +455,7 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
   ],[
     tmp_compiler_works="no"
     echo " " >&6
-    sed 's/^/cc-fail: /' conftest.err >&6
+    $SED 's/^/cc-fail: /' conftest.err >&6
     echo " " >&6
   ])
   dnl linking capability verification
@@ -471,7 +471,7 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
     ],[
       tmp_compiler_works="no"
       echo " " >&6
-      sed 's/^/link-fail: /' conftest.err >&6
+      $SED 's/^/link-fail: /' conftest.err >&6
       echo " " >&6
     ])
   fi
@@ -1450,8 +1450,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_STRUCT_MEMBER_SIZE], [
     tst_compiler_check_one_works="yes"
   ],[
     tst_compiler_check_one_works="no"
-    sed 's/^/cc-src: /' conftest.$ac_ext >&6
-    sed 's/^/cc-err: /' conftest.err >&6
+    $SED 's/^/cc-src: /' conftest.$ac_ext >&6
+    $SED 's/^/cc-err: /' conftest.err >&6
   ])
   tst_compiler_check_two_works="unknown"
   AC_COMPILE_IFELSE([
@@ -1577,8 +1577,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
     ],[
       supports_symbol_hiding="no"
       echo " " >&6
-      sed 's/^/cc-src: /' conftest.$ac_ext >&6
-      sed 's/^/cc-err: /' conftest.err >&6
+      $SED 's/^/cc-src: /' conftest.$ac_ext >&6
+      $SED 's/^/cc-err: /' conftest.err >&6
       echo " " >&6
     ])
     CFLAGS="$tmp_save_CFLAGS"

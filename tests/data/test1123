@@ -8,7 +8,6 @@ compressed
 Transfer-Encoding
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK%CR
@@ -40,7 +39,6 @@ Transfer-Encoding: deflate, chunked%CR
 
 </reply>
 
-# Client-side
 <client>
 <features>
 libz
@@ -56,7 +54,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

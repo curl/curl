@@ -9,7 +9,6 @@ query-special-chars
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -23,7 +22,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -40,7 +38,6 @@ httpsig: query string with special characters
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER/resource?name=me%AMPnoval%AMPaim=b%25ad HTTP/1.1

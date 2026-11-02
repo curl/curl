@@ -10,7 +10,6 @@ RFC7628
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH OAUTHBEARER
@@ -28,7 +27,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -43,7 +41,6 @@ IMAP OAuth 2.0 (OAUTHBEARER) authentication
 # base64 encoded message so we must assert this
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

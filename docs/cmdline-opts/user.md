@@ -37,14 +37,11 @@ Windows domain name in the username, in order for the server to successfully
 obtain a Kerberos Ticket. If you do not, then the initial authentication
 handshake may fail.
 
-When using NTLM, the username can be specified without the domain, if
-there is a single domain and forest in your setup for example.
-
 To specify the domain name use either Down-Level Logon Name or UPN (User
 Principal Name) formats. For example, EXAMPLE\user and user@example.com
 respectively.
 
 If you use a Windows SSPI-enabled curl binary and perform Kerberos V5,
-Negotiate, NTLM or Digest authentication then you can tell curl to select the
-username and password from your environment by specifying a single colon with
-this option: "-u :".
+Negotiate, Digest authentication then you can tell curl to select the username
+and password from your environment by specifying a single colon with this
+option: "-u :". Also known as ambient user.

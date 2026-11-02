@@ -7,7 +7,6 @@ FTP
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 moo
@@ -21,12 +20,10 @@ moo
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
 <tool>
 lib500
 </tool>
@@ -39,7 +36,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

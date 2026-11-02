@@ -102,10 +102,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx)
 {
 #ifdef USE_OPENSSL
-  if(ctx->ossl.ssl)
-    SSL_free(ctx->ossl.ssl);
-  if(ctx->ossl.ssl_ctx)
-    SSL_CTX_free(ctx->ossl.ssl_ctx);
+  Curl_osslctx_cleanup(&ctx->ossl);
 #elif defined(USE_GNUTLS)
   if(ctx->gtls.session)
     gnutls_deinit(ctx->gtls.session);

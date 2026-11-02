@@ -99,6 +99,7 @@ This curl supports multiple TLS backends.
 
 ## `NTLM`
 NTLM authentication is supported.
+This feature was removed from curl in 8.23.0.
 
 ## `NTLM_WB`
 NTLM delegation to winbind helper is supported.

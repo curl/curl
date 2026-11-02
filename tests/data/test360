@@ -36,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail-with-body --fail --no-progress-meter
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
 Warning: --fail deselects --fail-with-body here

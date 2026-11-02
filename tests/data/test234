@@ -11,7 +11,6 @@ followlocation
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 302 OK
@@ -57,7 +56,6 @@ contents
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -73,7 +71,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://first.host.it.is/we/want/that/page/%TESTNUMBER HTTP/1.1

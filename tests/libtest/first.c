@@ -220,6 +220,15 @@ int main(int argc, const char *argv[])
   const char *env;
   size_t tmp;
 
+  CURL_MSVC_CRTDBG_INIT();
+
+#ifdef _WIN32
+  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
+    CURL_DUMP_MODULE_PATHS(curl_mprintf);
+    return 0;
+  }
+#endif
+
   CURL_BINMODE(stdout);
 
   memory_tracking_init();

@@ -65,7 +65,6 @@
 #include "progress.h"
 #include "curlx/strdup.h"
 #include "curlx/strcopy.h"
-#include "vtls/x509asn1.h"
 #ifdef USE_ECH
 #include "curlx/base64.h"
 #endif
@@ -1550,6 +1549,7 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
                                  struct wssl_ctx *wssl)
 {
   WOLFSSL_X509 *x509 = NULL;
+  unsigned char *pubkey = NULL;
   CURLcode result = CURLE_OK;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
@@ -1563,10 +1563,7 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
 
   if(pinnedpubkey) {
 #ifdef KEEP_PEER_CERT
-    const uint8_t *x509_der;
-    int x509_der_len;
-    struct Curl_X509certificate x509_parsed;
-    struct Curl_asn1Element *pubkey;
+    int pubkey_len = 0;
 
     result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
@@ -1576,25 +1573,26 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
       goto end;
     }
 
-    x509_der = wolfSSL_X509_get_der(x509, &x509_der_len);
-    if(!x509_der) {
-      failf(data, "SSL: failed retrieving ASN.1 server certificate");
+    /* Get the SubjectPublicKeyInfo from wolfSSL's own parse of the
+       certificate, so the pinned key is the one the handshake used. */
+    if(wolfSSL_X509_get_pubkey_buffer(x509, NULL, &pubkey_len) !=
+       WOLFSSL_SUCCESS || pubkey_len <= 0) {
+      failf(data, "SSL: failed retrieving public key from server certificate");
       goto end;
     }
-
-    memset(&x509_parsed, 0, sizeof(x509_parsed));
-    if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
+    pubkey = curlx_malloc((size_t)pubkey_len);
+    if(!pubkey) {
+      result = CURLE_OUT_OF_MEMORY;
       goto end;
-
-    pubkey = &x509_parsed.subjectPublicKeyInfo;
-    if(!pubkey->header || pubkey->end <= pubkey->header) {
+    }
+    if(wolfSSL_X509_get_pubkey_buffer(x509, pubkey, &pubkey_len) !=
+       WOLFSSL_SUCCESS) {
       failf(data, "SSL: failed retrieving public key from server certificate");
       goto end;
     }
 
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey,
-                                  (const unsigned char *)pubkey->header,
-                                  (size_t)(pubkey->end - pubkey->header));
+    result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
+                                  (size_t)pubkey_len);
     if(result)
       failf(data, "SSL: public key does not match pinned public key");
 #else
@@ -1603,6 +1601,7 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
 #endif
   }
 end:
+  curlx_free(pubkey);
   wolfSSL_FreeX509(x509);
   return result;
 }
@@ -1714,22 +1713,25 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
   detail = wolfSSL_get_error(wssl->ssl, ret);
   CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);
 
-  /* On a successful handshake with an IP address, do an extra check
-   * on the peer certificate */
+  /* On a successful handshake, require a peer certificate when it is to be
+   * verified. With an anonymous cipher suite the server sends none and
+   * neither the CA nor the hostname check runs. For an IP address as
+   * hostname, also check the certificate for an IP match. */
   if(ret == WOLFSSL_SUCCESS &&
-     conn_config->verifyhost &&
-     !connssl->peer.sni) {
-    /* we have an IP address as hostname. */
+     (conn_config->verifypeer || conn_config->verifyhost)) {
     WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(wssl->ssl);
     if(!cert) {
       failf(data, "unable to get peer certificate");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.origin->hostname, 0);
-    CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
-                connssl->peer.origin->hostname, ret);
-    if(ret != WOLFSSL_SUCCESS)
-      detail = DOMAIN_NAME_MISMATCH;
+    if(conn_config->verifyhost && !connssl->peer.sni) {
+      ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.origin->hostname,
+                                      0);
+      CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
+                  connssl->peer.origin->hostname, ret);
+      if(ret != WOLFSSL_SUCCESS)
+        detail = DOMAIN_NAME_MISMATCH;
+    }
     wolfSSL_X509_free(cert);
   }
 
@@ -2312,8 +2314,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wssl_get_internals,              /* get_internals */
   wssl_close,                      /* close_one */
   NULL,                            /* close_all */
-  NULL,                            /* set_engine */
-  NULL,                            /* set_engine_default */
   NULL,                            /* engines_list */
   wssl_sha256sum,                  /* sha256sum */
   wssl_recv,                       /* recv decrypted data */

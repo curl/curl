@@ -14,7 +14,6 @@ STOR 552 disk full
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -35,7 +34,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <upload>
 data

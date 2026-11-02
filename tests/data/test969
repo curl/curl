@@ -9,7 +9,6 @@ IDN
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 CAPA SMTPUTF8
@@ -21,7 +20,6 @@ CAPA SMTPUTF8
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -38,7 +36,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

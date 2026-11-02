@@ -8,11 +8,9 @@ SFTP put
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -29,14 +27,13 @@ for ssh upload test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <upload>
 Test data
 for ssh upload test
 </upload>
 <postcheck>
-%PERL %SRCDIR/libtest/test610.pl move %PWD/%LOGDIR/test%TESTNUMBER.dir/upload.%TESTNUMBER %PWD/%LOGDIR/upload.%TESTNUMBER rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/test610.pl move %PWD/%LOGDIR/test%TESTNUMBER.dir/upload.%TESTNUMBER %PWD/%LOGDIR/upload.%TESTNUMBER rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </postcheck>
 </verify>
 </testcase>

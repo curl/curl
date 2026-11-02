@@ -7,7 +7,6 @@ CURLOPT_GSSAPI_DELEGATION
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

@@ -9,7 +9,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -20,8 +19,13 @@ ETag: "21025-dc7-39462498"
 Accept-Ranges: bytes
 Set-Cookie: firstcookie=want1; path=/
 Funny-head: yesyes
+X-Latin1: abc%hex[%e9]hex%
+X-Utf8: abc%hex[%c3%a9]hex%
+X-Cut: abc%hex[%c3]hex%
 Set-Cookie: 2cookie=want2; path=/
 Content-Type: text/html
+X-Large: small
+X-Large: %repeat[60000 x "]%
 Set-Cookie: cookie3=want3; path=/
 Content-Length: 6
 Connection: close
@@ -30,7 +34,6 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 headers-api
@@ -46,7 +49,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{header_json}\n' -o %LOGDIR/%TESTNUMBE
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
@@ -63,7 +65,11 @@ Accept: */*
 "accept-ranges":["bytes"],
 "set-cookie":["firstcookie=want1; path=/","2cookie=want2; path=/","cookie3=want3; path=/"],
 "funny-head":["yesyes"],
+"x-latin1":["abc\u00e9"],
+"x-utf8":["abc%hex[%c3%a9]hex%"],
+"x-cut":["abc\u00c3"],
 "content-type":["text/html"],
+"x-large":["small","%repeat[60000 x \"]%"],
 "content-length":["6"],
 "connection":["close"]
 }

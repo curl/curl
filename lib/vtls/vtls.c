@@ -256,24 +256,6 @@ CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-/* Selects an SSL crypto engine
- */
-CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine)
-{
-  if(Curl_ssl->set_engine)
-    return Curl_ssl->set_engine(data, engine);
-  return CURLE_NOT_BUILT_IN;
-}
-
-/* Selects the default SSL crypto engine
- */
-CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data)
-{
-  if(Curl_ssl->set_engine_default)
-    return Curl_ssl->set_engine_default(data);
-  return CURLE_NOT_BUILT_IN;
-}
-
 /* Return list of OpenSSL crypto engine names. */
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
 {
@@ -367,7 +349,6 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
 CURLcode Curl_ssl_random(struct Curl_easy *data,
                          unsigned char *buffer, size_t length)
 {
-  DEBUGASSERT(length == sizeof(int));
   if(Curl_ssl->random)
     return Curl_ssl->random(data, buffer, length);
   else
@@ -675,8 +656,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
   NULL,                              /* close_all */
-  NULL,                              /* set_engine */
-  NULL,                              /* set_engine_default */
   NULL,                              /* engines_list */
   NULL,                              /* sha256sum */
   multissl_recv_plain,               /* recv decrypted data */
@@ -1297,17 +1276,6 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            bool *input_pending)
-{
-  /*
-   * This function tries to determine connection status.
-   */
-  return cf->next ?
-    cf->next->cft->is_alive(cf->next, data, input_pending) :
-    FALSE; /* pessimistic in absence of data */
-}
-
 struct Curl_cftype Curl_cft_ssl = {
   "SSL",
   CF_TYPE_SSL,
@@ -1320,7 +1288,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_send,
   ssl_cf_recv,
   ssl_cf_cntrl,
-  cf_ssl_is_alive,
+  Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   ssl_cf_query,
 };
@@ -1339,7 +1307,7 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_send,
   ssl_cf_recv,
   Curl_cf_def_cntrl,
-  cf_ssl_is_alive,
+  Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   ssl_cf_query,
 };

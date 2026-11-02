@@ -6,11 +6,9 @@ FTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -26,7 +24,6 @@ send away this contents
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Strip all valid kinds of PORT and EPRT that curl can send
 <strip>

@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 307 Temporary Redirect OK swsclose
@@ -18,7 +17,6 @@ Location: /%TESTNUMBER
 </data>
 </reply>
 
-# Client side
 <client>
 <server>
 http

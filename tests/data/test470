@@ -6,7 +6,6 @@ HTTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -24,7 +23,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -40,7 +38,6 @@ warn about Unicode quote character read from config file
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
 %hex[Warning: The argument '%e2%80%9chost:fake%e2%80%9d' starts with a Unicode character. Maybe ]hex%

@@ -331,7 +331,7 @@ class TestH3Proxy:
         curl = CurlClient(env=env, run_env={"CURL_DEBUG": "all"})
         url = f"https://localhost:{h2o_server.port}/data.json"
         proxy_args = curl.get_proxy_args(proto="h3", tunnel=True)
-        proxy_args.extend(["--cacert", env.ca.cert_file, "--insecure"])
+        proxy_args.extend(["--cacert", env.ca.cert_file, "--insecure", '--parallel'])
 
         r = curl.http_download(
             urls=[url], alpn_proto="h3", with_stats=True, extra_args=proxy_args
@@ -494,7 +494,7 @@ class TestH3Proxy:
             urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=xargs
         )
         r2.check_response(count=1, http_status=200)
-        reuses = [line for line in r2.trace_lines if '[SSLS] took session for proxy.http.curl.se' in line]
+        reuses = [line for line in r2.trace_lines if '[SSLS] took session for https:proxy.http.curl.se' in line]
         assert len(reuses), f'{r2.dump_logs()}'
 
     # CONNECT-UDP tunnel payload size and capsule-protocol tests.

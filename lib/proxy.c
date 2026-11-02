@@ -48,14 +48,16 @@
  * cidr4_match() returns TRUE if the given IPv4 address is within the
  * specified CIDR address range.
  *
+ * bits is passed as -1 if not provided.
+ *
  * @unittest 1614
  */
 UNITTEST bool cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
                           const char *network, /* 1.2.3.4 address */
-                          unsigned int bits);
+                          int bits);
 UNITTEST bool cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
                           const char *network, /* 1.2.3.4 address */
-                          unsigned int bits)
+                          int bits)
 {
   unsigned int address = 0;
   unsigned int check = 0;
@@ -69,7 +71,7 @@ UNITTEST bool cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
   if(curlx_inet_pton(AF_INET, network, &check) != 1)
     return FALSE;
 
-  if(bits && (bits != 32)) {
+  if((bits > 0) && (bits != 32)) {
     unsigned int mask = 0xffffffff << (32 - bits);
     unsigned int haddr = htonl(address);
     unsigned int hcheck = htonl(check);
@@ -83,22 +85,34 @@ UNITTEST bool cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
       return FALSE;
     return TRUE;
   }
+  else if(!bits && !check)
+    /* 0.0.0.0/0 matches everything */
+    return TRUE;
+
   return address == check;
 }
 
-/* @unittest 1614 */
+/*
+ * cidr6_match() returns TRUE if the given IPv6 address is within the
+ * specified CIDR address range.
+ *
+ * bits is passed as -1 if not provided.
+ *
+ * @unittest 1614
+ */
 UNITTEST bool cidr6_match(const char *ipv6, const char *network,
-                          unsigned int bits);
+                          int bits);
 UNITTEST bool cidr6_match(const char *ipv6, const char *network,
-                          unsigned int bits)
+                          int bits)
 {
 #ifdef USE_IPV6
+  static const char null6[16]= { 0 };
   unsigned int bytes;
   unsigned int rest;
   unsigned char address[16];
   unsigned char check[16];
 
-  if(!bits)
+  if(bits == -1)
     bits = 128;
 
   bytes = bits / 8;
@@ -109,6 +123,9 @@ UNITTEST bool cidr6_match(const char *ipv6, const char *network,
     return FALSE;
   if(curlx_inet_pton(AF_INET6, network, check) != 1)
     return FALSE;
+  if((bytes == 16) && !bits && !memcmp(null6, check, 16))
+    /* ::/0 matches everything */
+    return TRUE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
   if(rest && ((address[bytes] ^ check[bytes]) & (0xff << (8 - rest))))
@@ -163,7 +180,7 @@ static bool match_ip(int type, const char *token, size_t tokenlen,
                      const char *name)
 {
   char *slash;
-  unsigned int bits = 0;
+  int bits = -1; /* negative means not provided */
   char checkip[128];
   if(tokenlen >= sizeof(checkip))
     /* this cannot match */
@@ -180,7 +197,7 @@ static bool match_ip(int type, const char *token, size_t tokenlen,
     if(curlx_str_number(&p, &value, 128) || *p)
       return FALSE;
     /* a too large value is rejected in the cidr function below */
-    bits = (unsigned int)value;
+    bits = (int)value;
     *slash = 0; /* null-terminate there */
   }
   if(type == TYPE_IPV6)

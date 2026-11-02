@@ -23,13 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN6_H
-#include <netinet/in6.h>
-#endif
-
 static CURLcode t1664_setup(void)
 {
   CURLcode result = CURLE_OK;

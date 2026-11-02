@@ -723,20 +723,6 @@
 #define USE_KERBEROS5
 #endif
 
-/* Single point where USE_NTLM definition might be defined */
-#ifdef CURL_ENABLE_NTLM
-#  if (defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)) ||   \
-  defined(USE_GNUTLS) ||                                           \
-  (defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)) || \
-  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||         \
-  (defined(USE_WOLFSSL) && defined(HAVE_WC_DES_ECBENCRYPT))
-#    define USE_CURL_NTLM_CORE
-#  endif
-#  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
-#    define USE_NTLM
-#  endif
-#endif
-
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
 #define USE_SSH
 #endif
@@ -986,6 +972,10 @@ typedef int bool;
  * global namespace though, so use bool_false and bool_true.
  */
 #ifndef HAVE_BOOL_T
+/* This replacement type does not preserve C99 bool's normalization semantics:
+   converting a non-zero value to C99 bool results in 1. This is significant
+   when the value is assigned to a bit-field. Make sure to normalize manually
+   in such cases. */
 typedef enum {
   bool_false = 0,
   bool_true = 1
@@ -1049,6 +1039,70 @@ typedef unsigned int curl_bit;
 #define DEBUGASSERT(x) do {} while(0)
 #endif
 
+/* Macro to configure Visual Studio debug CRT to output errors to stderr and
+   the debugger, replacing the interactive GUI dialog. */
+#if defined(_MSC_VER) && defined(_DEBUG) && defined(CURL_DEBUG_MSVC_CRTDBG)
+#include <crtdbg.h> /* for _CrtSetReportFile(), _CRT* macros */
+#define CURL_MSVC_CRTDBG_INIT()                                             \
+  do {                                                                      \
+    _set_error_mode(_OUT_TO_STDERR);  /* needs stdlib.h */                  \
+    _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG); \
+    _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);                    \
+    _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);  \
+    _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);                     \
+    _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);   \
+    _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);                      \
+  } while(0)
+#else
+#define CURL_MSVC_CRTDBG_INIT() do {} while(0)
+#endif
+
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#include <tlhelp32.h>
+/* Print the list of all loaded modules with full paths. */
+#define CURL_DUMP_MODULE_PATHS(printf_f)                               \
+  do {                                                                 \
+    HANDLE hnd = INVALID_HANDLE_VALUE;                                 \
+    MODULEENTRY32 mod = { 0 };                                         \
+                                                                       \
+    mod.dwSize = sizeof(MODULEENTRY32);                                \
+                                                                       \
+    do {                                                               \
+      hnd = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);            \
+    } while(hnd == INVALID_HANDLE_VALUE &&                             \
+            GetLastError() == ERROR_BAD_LENGTH);                       \
+                                                                       \
+    if(hnd == INVALID_HANDLE_VALUE)                                    \
+      goto error;                                                      \
+                                                                       \
+    if(!Module32First(hnd, &mod))                                      \
+      goto error;                                                      \
+                                                                       \
+    do {                                                               \
+      char buffer[sizeof(mod.szExePath) * 2];                          \
+      char *path; /* points to stack allocated buffer */               \
+      if(sizeof(*mod.szExePath) > 1) {  /* _UNICODE */                 \
+        /* sizeof(mod.szExePath) is the max total bytes of   */        \
+        /* wchars. the max total bytes of multibyte chars is */        \
+        /* not more than twice that.                         */        \
+        if(!WideCharToMultiByte(CP_ACP, 0, (WCHAR *)mod.szExePath, -1, \
+                                buffer, sizeof(buffer), NULL, NULL))   \
+          goto error;                                                  \
+        path = (char *)buffer;                                         \
+      }                                                                \
+      else                                                             \
+        path = (char *)mod.szExePath;                                  \
+      (printf_f)("%s\n", path);                                        \
+    } while(Module32Next(hnd, &mod));                                  \
+                                                                       \
+error:                                                                 \
+    if(hnd != INVALID_HANDLE_VALUE)                                    \
+      CloseHandle(hnd);                                                \
+  } while(0)
+#else
+#define CURL_DUMP_MODULE_PATHS(printf_f) do {} while(0)
+#endif
+
 /*
  * Macro SOCKERRNO / SET_SOCKERRNO() returns / sets the *socket-related* errno
  * (or equivalent) on this platform to hide platform details to code using it.
@@ -1056,6 +1110,17 @@ typedef unsigned int curl_bit;
 #ifdef USE_WINSOCK
 #define SOCKERRNO         ((int)WSAGetLastError())
 #define SET_SOCKERRNO(x)  WSASetLastError((int)(x))
+#elif defined(__AMIGA__) && defined(HAVE_PROTO_BSDSOCKET_H) && \
+  !defined(__amigaos4__) && !defined(__MORPHOS__) && !defined(__AROS__)
+/* Native socket errors need not share libc's errno storage. */
+#define SOCKERRNO        ((int)Errno())
+#define SET_SOCKERRNO(x)                                       \
+  do {                                                         \
+    struct TagItem curl_errno_tags[] = {                       \
+      { SBTM_SETVAL(SBTC_ERRNO), (ULONG)(x) }, { TAG_DONE, 0 } \
+    };                                                         \
+    (void)SocketBaseTagList(curl_errno_tags);                  \
+  } while(0)
 #else
 #define SOCKERRNO         errno
 #define SET_SOCKERRNO(x)  (errno = (x))
@@ -1536,7 +1601,6 @@ typedef struct sockaddr_un {
 #ifdef USE_OPENSSL
 /* OpenSSL 3 marks these functions deprecated but we have no replacements (yet)
    so tell the compiler to not warn for them:
-   - DES_* (for NTLM)
    - EVP_PKEY_get1_RSA, RSA_flags, RSA_free (auto-skipped for OpenSSL built
      with no-deprecated) */
 #  define OPENSSL_SUPPRESS_DEPRECATED

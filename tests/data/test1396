@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 curl_easy_escape and curl_easy_unescape

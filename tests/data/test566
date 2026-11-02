@@ -7,7 +7,6 @@ HTTP GET
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -24,12 +23,10 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 HTTP GET with CURLINFO_CONTENT_LENGTH_DOWNLOAD and 0 bytes transfer
@@ -39,7 +36,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/ip%TESTNUMBER">
 CL 0

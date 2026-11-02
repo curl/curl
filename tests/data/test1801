@@ -7,7 +7,6 @@ HTTP/2
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 101 Switching!
@@ -32,13 +31,13 @@ upgrade
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
 <features>
 http/2
+nghttpx
 </features>
 <name>
 HTTP/2 upgrade with lying server

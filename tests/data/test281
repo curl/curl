@@ -6,7 +6,6 @@ HTTP
 HTTP PUT
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 100 Continue
@@ -20,7 +19,6 @@ Server: test-server/fake
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ Weird
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 22

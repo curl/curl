@@ -207,7 +207,7 @@ static CURLcode test_unit1675(const char *arg)
     static const struct ipv6_test tests[] = {
       { "[::1]", "[::1]", NULL },
       { "[fe80::1%eth0]", "[fe80::1]", "eth0" },
-      { "[fe80::1%25eth0]", "[fe80::1]", "eth0" },
+      { "[fe80::1%25eth0]", "[fe80::1]", "25eth0" },
       { "[::1", NULL, NULL }, /* missing bracket */
       { "[]", NULL, NULL }, /* empty */
     };

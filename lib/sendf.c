@@ -27,12 +27,6 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef HAVE_LINUX_TCP_H
-#include <linux/tcp.h>
-#elif defined(HAVE_NETINET_TCP_H)
-#include <netinet/tcp.h>
-#endif
-
 #include "urldata.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -141,9 +135,9 @@ CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
 }
 
 CURLcode Curl_cwriter_def_flush(struct Curl_easy *data,
-                                struct Curl_cwriter *writer)
+                                struct Curl_cwriter *writer, bool eos)
 {
-  return Curl_cwriter_flush(data, writer->next);
+  return Curl_cwriter_flush(data, writer->next, eos);
 }
 
 void Curl_cwriter_def_close(struct Curl_easy *data,
@@ -398,7 +392,7 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
   return result;
 }
 
-CURLcode Curl_client_flush(struct Curl_easy *data)
+CURLcode Curl_client_flush(struct Curl_easy *data, bool eos)
 {
   CURLcode result;
 
@@ -409,8 +403,8 @@ CURLcode Curl_client_flush(struct Curl_easy *data)
     DEBUGASSERT(data->req.writer.stack);
   }
 
-  result = Curl_cwriter_flush(data, data->req.writer.stack);
-  CURL_TRC_WRITE(data, "client_flush() -> %d", (int)result);
+  result = Curl_cwriter_flush(data, data->req.writer.stack, eos);
+  CURL_TRC_WRITE(data, "client_flush(eos=%d) -> %d", eos, (int)result);
   return result;
 }
 
@@ -528,7 +522,7 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
 CURLcode Curl_cwriter_unpause(struct Curl_easy *data)
 {
   data->req.writer.paused = FALSE;
-  return Curl_cwriter_flush(data, data->req.writer.stack);
+  return Curl_cwriter_flush(data, data->req.writer.stack, FALSE);
 }
 
 CURLcode Curl_creader_read(struct Curl_easy *data,
@@ -1142,8 +1136,13 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
 #endif
     ) {
     result = cr_lc_add(data);
-    if(result)
+    if(result) {
+      /* Adding the line-conversion reader failed. Undo the publication of
+       * `r` so no freed reader remains reachable from
+       * `data->req.reader.stack`, and free the readers already installed. */
+      cl_reset_reader(data);
       return result;
+    }
   }
 
   return result;
@@ -1192,17 +1191,12 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
 
 CURLcode Curl_creader_set(struct Curl_easy *data, struct Curl_creader *r)
 {
-  CURLcode result;
-
   DEBUGASSERT(r);
   DEBUGASSERT(r->crt);
   DEBUGASSERT(r->phase == CURL_CR_CLIENT);
 
   cl_reset_reader(data);
-  result = do_init_reader_stack(data, r);
-  if(result)
-    cl_reset_reader(data);
-  return result;
+  return do_init_reader_stack(data, r);
 }
 
 CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,

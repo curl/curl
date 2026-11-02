@@ -43,7 +43,7 @@ http
 HTTP connection not reused when target host changes
 </name>
 <command>
-http://host-a.example.test:%HTTPPORT/%TESTNUMBER --resolve host-a.example.test:%HTTPPORT:%HOSTIP -o %LOGDIR/3225-1 -w "connects=%{num_connects}/" --next http://host-b.example.test:%HTTPPORT/%TESTNUMBER0001 --resolve host-b.example.test:%HTTPPORT:%HOSTIP -o %LOGDIR/3225-2 -w "connects=%{num_connects}/"
+http://host-a.example.test:%HTTPPORT/%TESTNUMBER --resolve host-a.example.test:%HTTPPORT:%HOSTIP -o %LOGDIR/%TESTNUMBER-1 -w "connects=%{num_connects}/" --next http://host-b.example.test:%HTTPPORT/%TESTNUMBER0001 --resolve host-b.example.test:%HTTPPORT:%HOSTIP -o %LOGDIR/%TESTNUMBER-2 -w "connects=%{num_connects}/"
 </command>
 </client>
 <verify>

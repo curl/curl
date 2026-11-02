@@ -213,6 +213,11 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
           return CURLE_OUT_OF_MEMORY;
       }
       result = Curl_idn_decode(pp->tmp_host_user, &pp->tmp_host);
+      if(!result &&
+         Curl_hostname_check(pp->tmp_host, strlen(pp->tmp_host))) {
+        failf(data, "Illegal hostname: %s", pp->tmp_host);
+        result = CURLE_URL_MALFORMAT;
+      }
       if(result)
         return result;
       pp->host.str = pp->tmp_host;
@@ -671,7 +676,7 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
     goto out;
   }
 
-  uc = curl_url_get(uh, CURLUPART_PORT, &portptr, CURLU_NO_DEFAULT_PORT);
+  uc = curl_url_get(uh, CURLUPART_PORT, &portptr, 0);
   if(uc == CURLUE_OUT_OF_MEMORY) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -685,11 +690,13 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
     curlx_free(portptr);
   }
   else {
-    /* No port in URL, take the set one or the scheme's default */
+    /* No port in URL, take the set one or the proxy default */
     if(data->set.proxyport)
       pp.port = data->set.proxyport;
+    else if(CURL_PROXY_IS_HTTPS(proxytype))
+      pp.port = CURL_DEFAULT_HTTPS_PROXY_PORT;
     else
-      pp.port = pp.scheme->defport;
+      pp.port = CURL_DEFAULT_PROXY_PORT;
   }
 
   /* now, clone the proxy hostname */

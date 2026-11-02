@@ -101,7 +101,9 @@ class TestShutdown:
         r.check_response(http_status=200, count=count)
         shutdowns = [line for line in r.trace_lines
                      if re.match(r'.*\[SHUTDOWN] shutdown, done=1', line)]
-        assert len(shutdowns) == count, f'{shutdowns}'
+        # count-1 shutdowns should definitely happen and the last connection
+        # *may* remain until the share shuts down and just terminates the conn
+        assert len(shutdowns) >= count - 1, f'{shutdowns}'
 
     # run downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
     # the connection after each request

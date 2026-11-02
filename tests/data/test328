@@ -8,7 +8,6 @@ Content-Encoding
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ Q- What did 0 say to 8? A- Nice Belt!
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -40,7 +38,6 @@ http://%HOSTIP:%HTTPPORT/hello/%TESTNUMBER --compressed
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^Accept-Encoding:.*

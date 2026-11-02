@@ -2326,9 +2326,10 @@ static CURLcode ftp_do_more(struct Curl_easy *data, domore *more)
       }
 
       if(result)
-        ;
-      else if((data->state.list_only || !ftpc->file) &&
-              !data->set.prequote) {
+        return result;
+
+      if((data->state.list_only || !ftpc->file) &&
+         !data->set.prequote) {
         /* The specified path ends with a slash, and therefore we think this
            is a directory that is requested, use LIST. Before that, we also
            need to set ASCII transfer mode. */
@@ -4497,6 +4498,7 @@ bool Curl_ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
  */
 const struct Curl_protocol Curl_protocol_ftp = {
   ftp_setup_connection,            /* setup_connection */
+  ZERO_NULL,                       /* setup_filters */
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
   ftp_do_more,                     /* do_more */

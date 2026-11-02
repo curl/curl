@@ -64,7 +64,7 @@ if(APPLE OR
    CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
   set(HAVE_EVENTFD 0)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
-       CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
+       CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR  # 13.0+
        CMAKE_SYSTEM_NAME STREQUAL "MidnightBSD" OR
        CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
   set(HAVE_EVENTFD 1)
@@ -180,11 +180,6 @@ else()
   set(HAVE_IO_H 0)
 endif()
 set(HAVE_LIBGEN_H 1)
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  # Requires Linux kernel userspace headers. Expected with glibc. May be missing by default with MUSL.
-else()
-  set(HAVE_LINUX_TCP_H 0)
-endif()
 set(HAVE_LOCALE_H 1)
 set(HAVE_LOCALTIME_R 1)
 if(APPLE)
@@ -235,7 +230,7 @@ if(APPLE OR
    CMAKE_SYSTEM_NAME STREQUAL "DragonFlyBSD")
   set(HAVE_SENDMMSG 0)
 else()
-  set(HAVE_SENDMMSG 1)
+  set(HAVE_SENDMMSG 1)  # OpenBSD 7.2+
 endif()
 set(HAVE_SENDMSG 1)
 set(HAVE_SETLOCALE 1)
@@ -274,7 +269,7 @@ if(APPLE OR
    CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
   set(HAVE_SYS_EVENTFD_H 0)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
-       CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
+       CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR  # 13.0+
        CMAKE_SYSTEM_NAME STREQUAL "MidnightBSD" OR
        CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
   set(HAVE_SYS_EVENTFD_H 1)

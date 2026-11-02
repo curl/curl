@@ -8,7 +8,6 @@ retry
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK swsclose swsbounce
@@ -26,7 +25,6 @@ data
 </data1>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ HTTP GET --retry-all-errors to overcome partial transfer
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

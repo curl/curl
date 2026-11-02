@@ -34,15 +34,9 @@ struct ptrarray {
 
 void Curl_ptrarray_init(struct ptrarray *pa);
 
-void Curl_ptrarray_clear(struct ptrarray *pa);
-
-uint32_t Curl_ptrarray_count(struct ptrarray *pa);
-
 CURLcode Curl_ptrarray_add(struct ptrarray *pa, void *ptr);
 
 void *Curl_ptrarray_remove(struct ptrarray *pa, uint32_t idx);
-
-void *Curl_ptrarray_get(struct ptrarray *pa, uint32_t idx);
 
 #define CURL_PTRARRAY_COUNT(a)    ((a)->n)
 #define CURL_PTRARRAY_GET(a, i)   (((i) < ((a)->n)) ? (a)->data[(i)] : NULL)

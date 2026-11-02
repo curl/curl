@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 all good!
@@ -23,7 +22,6 @@ Hello World
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -31,7 +29,6 @@ http
 <features>
 http
 </features>
-# tool is what to use instead of 'curl'
 
 <name>
 curl_multi_wait

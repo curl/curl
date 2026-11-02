@@ -8,7 +8,6 @@ HTTP Digest auth
 --resolve
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 401 Authorization Required
@@ -67,7 +66,6 @@ This IS the real page!
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -94,7 +92,6 @@ machine host.corp.com
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

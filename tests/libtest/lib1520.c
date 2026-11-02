@@ -94,6 +94,17 @@ static CURLcode test_lib1520(const char *URL)
   easy_setopt(curl, CURLOPT_MAIL_FROM, "<sender@example.com>");
   easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, CURL_OFF_T_MAX);
+
+  result = curl_easy_perform(curl);
+  if(result != CURLE_TOO_LARGE) {
+    curl_mfprintf(stderr, "Expected CURLE_TOO_LARGE, got %d\n", (int)result);
+    result = TEST_ERR_FAILURE;
+    goto test_cleanup;
+  }
+
+  upload_ctx.lines_read = 0;
+  easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)-1);
 
   result = curl_easy_perform(curl);
 

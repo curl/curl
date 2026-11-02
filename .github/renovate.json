@@ -34,7 +34,8 @@
       "commitMessagePrefix": "GHA: ",
       "labels": [
         "CI"
-      ]
+      ],
+      "minimumReleaseAge": "3 days"
     },
     {
       "matchDepNames": [
@@ -81,7 +82,6 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.circleci/config\\.yml/",
         "/^\\.github/workflows/.*\\.yml$/"
       ],
       "matchStrings": [

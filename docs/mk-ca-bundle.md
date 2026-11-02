@@ -42,9 +42,8 @@ backup an existing version of *output*
 ## -d [name]
 
 specify which Mozilla tree to pull *certdata.txt* from (or a custom URL).
-Valid names are: **aurora**, **beta**, **central**, **Mozilla**, **nss**,
-**release** (default). They are shortcuts for which source tree to get the
-certificate data from.
+Valid names are: **autoland**, **beta**, **nss**, and **release** (default).
+They are shortcuts for which source tree to get the certificate data from.
 
 ## -f
 
@@ -70,6 +69,8 @@ print license info about *certdata.txt*
 specific information about each certificate that is stored in the original
 file as comments and using this option makes those comments get passed on to
 the output file. The meta data is not parsed in any way by mk-ca-bundle.
+
+(Added in 1.34) SHA-256 fingerprints are always included by default.
 
 ## -n
 
@@ -114,6 +115,11 @@ unlink (remove) *certdata.txt* after processing
 ## -v
 
 be verbose and print out processed certificate authorities
+
+## -x
+
+(Added in 1.35) Exclude list of SHA-256 fingerprints. Comma separated,
+case-insensitive, whitespace and ':' byte delimiters are ignored.
 
 # EXIT STATUS
 

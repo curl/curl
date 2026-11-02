@@ -13,7 +13,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 connection-monitor
@@ -42,13 +41,11 @@ ETag: "21025-dc7-39462498"
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 http-proxy
 </server>
-# tool is what to use instead of 'curl'
 <features>
 proxy
 </features>
@@ -67,7 +64,6 @@ moo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT machine.%TESTNUMBER:%HTTPPORT HTTP/1.1

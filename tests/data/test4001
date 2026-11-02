@@ -6,11 +6,9 @@ ECH try real and fail
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 ECH
@@ -27,7 +25,6 @@ Make real ECH attempt and fail with "ech required" error (101)
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 %if !wolfssl

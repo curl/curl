@@ -56,7 +56,6 @@ ok
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -78,7 +77,6 @@ test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 HTTP/1.1

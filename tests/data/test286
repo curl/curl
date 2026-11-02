@@ -7,7 +7,6 @@ TFTP WRQ
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 tftp
@@ -50,7 +49,6 @@ condition in the TFTP transmit code.
 </file>
 </client>
 
-# Verify pseudo protocol after the test has been "shot"
 <verify>
 <upload>
 A chunk of data which exactly fits into

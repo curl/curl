@@ -8,11 +8,9 @@ SOCKS4
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -29,7 +27,6 @@ http://fake --limit-rate 1 -x socks4a://%repeat[1015 x a]%@%HOSTIP:%SOCKSPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # CURLE_PROXY
 <errorcode>

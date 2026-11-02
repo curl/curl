@@ -7,18 +7,15 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 Avoid redundant CWDs
@@ -28,7 +25,6 @@ ftp://%HOSTIP:%FTPPORT/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

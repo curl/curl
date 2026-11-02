@@ -97,12 +97,16 @@ UNITTEST void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id)
   key->len = namelen + 3;
 }
 
-static bool dnsc_id_matches_entry(struct dnsc_id *id,
-                                  struct Curl_dns_entry *dns)
+/* @unittest 3271 */
+UNITTEST bool dnsc_id_matches_entry(struct dnsc_id *id,
+                                    struct Curl_dns_entry *dns);
+UNITTEST bool dnsc_id_matches_entry(struct dnsc_id *id,
+                                    struct Curl_dns_entry *dns)
 {
   return dns &&
-         /* hash key was not truncated  OR */
-         ((dns->hostlen <= (MAX_HOSTCACHE_LEN - 3)) ||
+         /* Neither the requested nor the cached key was truncated. */
+         (((dns->hostlen <= (MAX_HOSTCACHE_LEN - 3)) &&
+           (id->name.len <= (MAX_HOSTCACHE_LEN - 3))) ||
           /* port and host string are the same, case insensitive */
           ((id->port == dns->port) && (id->name.len == dns->hostlen) &&
            /* for most lookups, case is the same, try that first */

@@ -7,7 +7,6 @@ SLOWDOWN
 </keywords>
 </info>
 
-# Server-side
 <reply>
 # When doing LIST, we get the default list output hard-coded in the test
 # FTP server
@@ -29,7 +28,6 @@ SLOWDOWN
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -42,7 +40,6 @@ ftp://%HOSTIP:%FTPPORT/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous

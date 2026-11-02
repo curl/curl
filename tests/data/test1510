@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1 crlf="headers">
 HTTP/1.1 200 OK
@@ -45,7 +44,6 @@ file contents should appear once for each file
 </data4>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -58,7 +56,6 @@ HTTP GET connection cache limit (CURLOPT_MAXCONNECTS)
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /path/%TESTNUMBER0001 HTTP/1.1

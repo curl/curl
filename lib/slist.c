@@ -104,17 +104,18 @@ struct curl_slist *curl_slist_append(struct curl_slist *list, const char *data)
 struct curl_slist *Curl_slist_duplicate(struct curl_slist *inlist)
 {
   struct curl_slist *outlist = NULL;
-  struct curl_slist *tmp;
+  struct curl_slist **tail = &outlist;
 
   while(inlist) {
-    tmp = curl_slist_append(outlist, inlist->data);
+    struct curl_slist *tmp = curl_slist_append(NULL, inlist->data);
 
     if(!tmp) {
       curl_slist_free_all(outlist);
       return NULL;
     }
 
-    outlist = tmp;
+    *tail = tmp;
+    tail = &tmp->next;
     inlist = inlist->next;
   }
   return outlist;

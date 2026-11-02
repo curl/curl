@@ -7,7 +7,6 @@ HTTP proxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 <data crlf="headers" nocheck="yes">
@@ -34,7 +33,6 @@ Content-Disposition: attachment; filename="proxy-chosen.bin"
 
 </reply>
 
-# Client-side
 <client>
 <features>
 IPv6
@@ -53,7 +51,6 @@ https://remotesite:%HTTPSPORT/%TESTNUMBER -L -O -J -x %HOSTIP:%PROXYPORT --insec
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT remotesite:%HTTPSPORT HTTP/1.1

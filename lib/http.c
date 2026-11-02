@@ -58,7 +58,6 @@
 #include "vauth/vauth.h"
 #include "vquic/vquic.h"
 #include "http_digest.h"
-#include "http_ntlm.h"
 #include "http_negotiate.h"
 #include "http_aws_sigv4.h"
 #include "http_httpsig.h"
@@ -121,20 +120,6 @@ void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg)
     neg->allowed = (CURL_HTTP_V1x | CURL_HTTP_V2x | CURL_HTTP_V3x);
     break;
   }
-}
-
-CURLcode Curl_http_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn)
-{
-  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
-     during this request */
-  if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
-    /* only HTTP/3, needs to work */
-    CURLcode result = Curl_conn_may_http3(data, conn);
-    if(result)
-      return result;
-  }
-  return CURLE_OK;
 }
 
 #ifndef CURL_DISABLE_PROXY
@@ -367,8 +352,6 @@ static bool pickoneauth(struct auth *pick, unsigned long mask,
   else if((avail & CURLAUTH_DIGEST) && have_user_pass)
     pick->picked = CURLAUTH_DIGEST;
 #endif
-  else if(avail & CURLAUTH_NTLM)
-    pick->picked = CURLAUTH_NTLM;
 #ifndef CURL_DISABLE_BASIC_AUTH
   else if((avail & CURLAUTH_BASIC) && have_user_pass)
     pick->picked = CURLAUTH_BASIC;
@@ -416,7 +399,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
    * checks below influence of the upload is to be continued
    * or aborted early.
    * This depends on how much remains to be sent and in what state
-   * the authentication is. Some auth schemes such as NTLM do not work
+   * the authentication is. Some auth schemes such as Negotiate do not work
    * for a new connection. */
   if(needs_rewind) {
     infof(data, "Need to rewind upload for next request");
@@ -429,18 +412,6 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
   if(abort_upload) {
     /* We would like to abort the upload - but should we? */
-#ifdef USE_NTLM
-    if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
-       (data->state.authhost.picked == CURLAUTH_NTLM)) {
-      VERBOSE(ongoing_auth = "NTLM");
-      if((conn->http_ntlm_state != NTLMSTATE_NONE) ||
-         (conn->proxy_ntlm_state != NTLMSTATE_NONE)) {
-        /* The NTLM-negotiation has started, keep on sending.
-         * Need to do further work on same connection */
-        abort_upload = FALSE;
-      }
-    }
-#endif
 #ifdef USE_SPNEGO
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
@@ -578,13 +549,6 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
       data->state.authproblem = TRUE;
     else
       data->info.httpauthpicked = data->state.authhost.picked;
-    if(data->state.authhost.picked == CURLAUTH_NTLM &&
-       (data->req.httpversion_sent > 11)) {
-      infof(data, "Forcing HTTP/1.1 for NTLM");
-      connclose(conn);
-      data->state.http_neg.wanted = CURL_HTTP_V1x;
-      data->state.http_neg.allowed = CURL_HTTP_V1x;
-    }
   }
 #ifndef CURL_DISABLE_PROXY
   if(conn->http_proxy.creds &&
@@ -695,19 +659,6 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
        Curl_auth_allowed_to_host(data))) {
       auth = "Negotiate";
       result = Curl_output_negotiate(data, conn, proxy);
-      if(result)
-        return result;
-    }
-    else
-      authstatus->done = TRUE;
-  }
-  else
-#endif
-#ifdef USE_NTLM
-  if(authstatus->picked == CURLAUTH_NTLM) {
-    if(proxy || Curl_auth_allowed_to_host(data)) {
-      auth = "NTLM";
-      result = Curl_output_ntlm(data, proxy);
       if(result)
         return result;
     }
@@ -919,7 +870,7 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
 }
 #endif /* !CURL_DISABLE_HTTP_AUTH, else */
 
-#if defined(USE_SPNEGO) || defined(USE_NTLM) || \
+#if defined(USE_SPNEGO) || \
   !defined(CURL_DISABLE_DIGEST_AUTH) || \
   !defined(CURL_DISABLE_BASIC_AUTH) || \
   !defined(CURL_DISABLE_BEARER_AUTH)
@@ -958,35 +909,6 @@ static CURLcode auth_spnego(struct Curl_easy *data,
       }
       else
         data->state.authproblem = TRUE;
-    }
-  }
-  return CURLE_OK;
-}
-#endif
-
-#ifdef USE_NTLM
-static CURLcode auth_ntlm(struct Curl_easy *data,
-                          bool proxy,
-                          const char *auth,
-                          struct auth *authp,
-                          uint32_t *availp)
-{
-  /* NTLM support requires the SSL crypto libs */
-  if((authp->avail & CURLAUTH_NTLM) || Curl_auth_is_ntlm_supported()) {
-    *availp |= CURLAUTH_NTLM;
-    authp->avail |= CURLAUTH_NTLM;
-
-    if(authp->picked == CURLAUTH_NTLM) {
-      /* NTLM authentication is picked and activated */
-      CURLcode result = Curl_input_ntlm(data, proxy, auth);
-      if(!result)
-        data->state.authproblem = FALSE;
-      else {
-        if(result == CURLE_OUT_OF_MEMORY)
-          return result;
-        infof(data, "NTLM authentication problem, ignoring.");
-        data->state.authproblem = TRUE;
-      }
     }
   }
   return CURLE_OK;
@@ -1076,7 +998,6 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
    * This resource requires authentication
    */
 #if defined(USE_SPNEGO) ||                      \
-  defined(USE_NTLM) ||                          \
   !defined(CURL_DISABLE_DIGEST_AUTH) ||         \
   !defined(CURL_DISABLE_BASIC_AUTH) ||          \
   !defined(CURL_DISABLE_BEARER_AUTH)
@@ -1116,10 +1037,6 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 #ifdef USE_SPNEGO
     if(authcmp("Negotiate", auth))
       result = auth_spnego(data, proxy, auth, authp, availp);
-#endif
-#ifdef USE_NTLM
-    if(!result && authcmp("NTLM", auth))
-      result = auth_ntlm(data, proxy, auth, authp, availp);
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
     if(!result && authcmp("Digest", auth))
@@ -2784,55 +2701,6 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static CURLcode http_check_new_conn(struct Curl_easy *data)
-{
-  struct connectdata *conn = data->conn;
-  const char *info_version = NULL;
-  const char *alpn;
-  CURLcode result;
-
-  alpn = Curl_conn_get_alpn_negotiated(data, conn);
-  if(alpn && !strcmp("h3", alpn)) {
-#ifndef CURL_DISABLE_PROXY
-    if(!conn->bits.origin_is_proxy)
-#endif
-      DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
-    info_version = "HTTP/3";
-  }
-  else if(alpn && !strcmp("h2", alpn)) {
-#ifndef CURL_DISABLE_PROXY
-    if((Curl_conn_http_version(data, conn) != 20) &&
-       conn->bits.origin_is_proxy) {
-      result = Curl_http2_switch(data);
-      if(result)
-        return result;
-    }
-    else
-#endif
-    DEBUGASSERT(Curl_conn_http_version(data, conn) == 20);
-    info_version = "HTTP/2";
-  }
-  else {
-    /* Check if user wants to use HTTP/2 with clear TCP */
-    if(Curl_http2_may_switch(data)) {
-      DEBUGF(infof(data, "HTTP/2 over clean TCP"));
-      result = Curl_http2_switch(data);
-      if(result)
-        return result;
-      info_version = "HTTP/2";
-      /* There is no ALPN here, but the connection is now definitely h2 */
-      conn->httpversion_seen = 20;
-      Curl_conn_set_multiplex(conn);
-    }
-    else
-      info_version = "HTTP/1.x";
-  }
-
-  if(info_version)
-    infof(data, "using %s", info_version);
-  return CURLE_OK;
-}
-
 static CURLcode http_add_connection_hd(struct Curl_easy *data,
                                        struct dynbuf *req)
 {
@@ -3098,12 +2966,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      previous transfer */
   curlx_dyn_reset(&data->state.headerb);
   data->state.maybe_folded = FALSE;
-
-  if(!data->conn->bits.reuse) {
-    result = http_check_new_conn(data);
-    if(result)
-      goto out;
-  }
 
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse
@@ -3882,25 +3744,17 @@ CURLcode Curl_verify_header(struct Curl_easy *data,
                             const char *hd, size_t hdlen)
 {
   struct SingleRequest *k = &data->req;
-  size_t i;
-  bool has_colon = FALSE;
-  for(i = 0; i < hdlen; i++) {
-    switch(hd[i]) {
-    case '\0':
-      /* this is bad, bail out */
-      failf(data, "NUL byte in header");
-      return CURLE_WEIRD_SERVER_REPLY;
-    case '\r':
-      if(i < hdlen - 2) {
-        /* CR may only precede the LF, nothing else */
-        failf(data, "Carriage return found in header");
-        return CURLE_WEIRD_SERVER_REPLY;
-      }
-      break;
-    case ':':
-      has_colon = TRUE;
-      break;
-    }
+  const char *nul = memchr(hd, '\0', hdlen);
+  const char *cr = memchr(hd, '\r', nul ? (size_t)(nul - hd) : hdlen);
+  /* CR may only precede the LF, nothing else */
+  if(cr && ((size_t)(cr - hd) < hdlen - 2)) {
+    failf(data, "Carriage return found in header");
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
+  if(nul) {
+    /* this is bad, bail out */
+    failf(data, "NUL byte in header");
+    return CURLE_WEIRD_SERVER_REPLY;
   }
   if(k->headerline < 2)
     /* the first "header" is the status-line and it has no colon */
@@ -3908,7 +3762,7 @@ CURLcode Curl_verify_header(struct Curl_easy *data,
   if(((hd[0] == ' ') || (hd[0] == '\t')) && k->headerline > 2)
     /* line folding, cannot happen on line 2 */
     ;
-  else if(!has_colon) {
+  else if(!memchr(hd, ':', hdlen)) {
     /* this is bad, bail out */
     failf(data, "Header without colon");
     return CURLE_WEIRD_SERVER_REPLY;
@@ -4039,27 +3893,16 @@ static CURLcode http_on_1xx_response(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#if defined(USE_NTLM) || defined(USE_SPNEGO)
+#ifdef USE_SPNEGO
 /*
- * Check if NTLM or SPNEGO authentication negotiation failed due to
- * connection closure (typically on HTTP/1.0 servers).
+ * Check if SPNEGO authentication negotiation failed due to connection closure
+ * (typically on HTTP/1.0 servers).
  */
 static void http_check_auth_closure(struct Curl_easy *data,
                                     struct connectdata *conn)
 {
   /* At this point we have some idea about the fate of the connection. If we
      are closing the connection it may result auth failure. */
-#ifdef USE_NTLM
-  if(conn->bits.close &&
-     (((data->req.httpcode == 401) &&
-       (conn->http_ntlm_state == NTLMSTATE_TYPE2)) ||
-      ((data->req.httpcode == 407) &&
-       (conn->proxy_ntlm_state == NTLMSTATE_TYPE2)))) {
-    infof(data, "Connection closure while negotiating auth (HTTP 1.0?)");
-    data->state.authproblem = TRUE;
-  }
-#endif
-#ifdef USE_SPNEGO
   if(conn->bits.close &&
     (((data->req.httpcode == 401) &&
       (conn->http_negotiate_state == CURL_NEGO_AUTH_RECV)) ||
@@ -4076,7 +3919,6 @@ static void http_check_auth_closure(struct Curl_easy *data,
      (data->req.httpcode != 407)) {
     conn->proxy_negotiate_state = CURL_NEGO_AUTH_SUCC;
   }
-#endif
 }
 #else
 #define http_check_auth_closure(x, y) /* empty */
@@ -5108,11 +4950,59 @@ void Curl_http_resp_free(struct http_resp *resp)
   }
 }
 
+CURLcode Curl_http_setup_conn(struct Curl_easy *data,
+                              struct connectdata *conn)
+{
+  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
+     during this request */
+  if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
+    /* only HTTP/3, needs to work */
+    CURLcode result = Curl_conn_may_http3(data, conn);
+    if(result)
+      return result;
+  }
+  return CURLE_OK;
+}
+
+CURLcode Curl_http_setup_filters(struct Curl_easy *data,
+                                 struct Curl_cfilter *cf)
+{
+  const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf, data);
+  CURLcode result;
+
+  if(alpn && !strcmp("h3", alpn)) {
+    CURL_TRC_CF(data, cf, "using HTTP/3 (via ALPN)");
+  }
+  else if(alpn && !strcmp("h2", alpn)) {
+    if(Curl_conn_cf_http_version(data, cf) != 20) {
+      CURL_TRC_CF(data, cf, "adding HTTP/2 filter");
+      result = Curl_http2_switch_at(data, cf);
+      if(result)
+        return result;
+    }
+    CURL_TRC_CF(data, cf, "using HTTP/2 (via ALPN)");
+  }
+  else {
+    /* Check if user wants to use HTTP/2 with clear TCP */
+    if(Curl_http2_may_switch_at(data, cf)) {
+      CURL_TRC_CF(data, cf, "adding HTTP/2 filter");
+      result = Curl_http2_switch_at(data, cf);
+      if(result)
+        return result;
+      CURL_TRC_CF(data, cf, "using HTTP/2 (over clean TCP)");
+    }
+    else
+      CURL_TRC_CF(data, cf, "using HTTP/1.x");
+  }
+  return CURLE_OK;
+}
+
 /*
  * HTTP handler interface.
  */
 const struct Curl_protocol Curl_protocol_http = {
   Curl_http_setup_conn,                 /* setup_connection */
+  Curl_http_setup_filters,              /* setup_filters */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */

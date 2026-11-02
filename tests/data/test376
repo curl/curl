@@ -25,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -38,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save-%TESTNUMBER --remove-on-err
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 18

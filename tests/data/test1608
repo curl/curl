@@ -7,7 +7,6 @@ curlopt_dns_shuffle_addresses
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

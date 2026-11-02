@@ -9,7 +9,6 @@ HTTP proxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
@@ -18,7 +17,6 @@ smtp: sure hit me
 </connect>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -42,7 +40,6 @@ smtp://smtp.%TESTNUMBER:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com 
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

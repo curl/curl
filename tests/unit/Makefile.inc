@@ -42,7 +42,6 @@ TESTS_C = \
   unit1395.c \
   unit1397.c \
   unit1399.c \
-  unit1600.c \
   unit1601.c \
   unit1602.c \
   unit1603.c \
@@ -50,7 +49,6 @@ TESTS_C = \
   unit1607.c \
   unit1608.c \
   unit1610.c \
-  unit1611.c \
   unit1612.c \
   unit1614.c \
   unit1615.c \
@@ -80,6 +78,7 @@ TESTS_C = \
   unit1675.c \
   unit1676.c \
   unit1693.c \
+  unit1694.c \
   unit1961.c \
   unit1979.c \
   unit1980.c \
@@ -91,6 +90,9 @@ TESTS_C = \
   unit2604.c \
   unit2605.c \
   unit2606.c \
+  unit2607.c \
+  unit2640.c \
+  unit2641.c \
   unit3200.c \
   unit3205.c \
   unit3211.c \
@@ -108,6 +110,8 @@ TESTS_C = \
   unit3303.c \
   unit3304.c \
   unit3306.c \
+  unit3307.c \
   unit3310.c \
   unit3400.c \
-  unit4781.c
+  unit4781.c \
+  unit4782.c

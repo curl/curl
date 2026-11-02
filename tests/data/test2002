@@ -13,7 +13,6 @@ multiprotocol
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -45,7 +44,6 @@ returned
 </data3>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -68,7 +66,6 @@ moo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^timeout = [5-6]$

@@ -9,7 +9,6 @@ SASL-IR
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH LOGIN
@@ -28,7 +27,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -41,7 +39,6 @@ IMAP login authentication with initial response
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

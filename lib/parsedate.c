@@ -397,21 +397,14 @@ struct when {
   int wday;  /* day of the week, 0-6 (mon-sun) */
   int mon;   /* month of the year, 0-11 */
   int mday;  /* day of month, 1 - 31 */
-  int hour;  /* hour of day, 0 - 23 */
-  int min;   /* minute of hour, 0 - 59 */
-  int sec;   /* second of minute, 0 - 60 (leap second) */
+  int dsecs; /* number of seconds into the day */
   int year;  /* year, >= 1583 */
   int tzoff; /* time zone offset in seconds */
 };
 
-enum assume {
-  DATE_MDAY,
-  DATE_YEAR,
-  DATE_TIME
-};
-
 /* (1969 / 4) - (1969 / 100) + (1969 / 400) = 492 - 19 + 4 = 477 */
 #define LEAP_DAYS_BEFORE_1969 477
+#define SECONDS_PER_DAY 86400
 
 /*
  * time2epoch: time stamp to seconds since epoch in GMT time zone. Similar to
@@ -427,7 +420,7 @@ static curl_off_t time2epoch(struct when *w)
   curl_off_t days = (curl_off_t)(w->year - 1970) * 365 + leap_days +
     cumulative_days[w->mon] + w->mday - 1;
 
-  return (((days * 24 + w->hour) * 60 + w->min) * 60) + w->sec;
+  return (days * SECONDS_PER_DAY) + w->dsecs;
 }
 
 /* Returns the value of a single-digit or two-digit decimal number, return
@@ -468,9 +461,7 @@ static bool match_time(const char *date, struct when *w, char **endp)
   }
   return FALSE; /* not a time string */
 match:
-  w->hour = hh;
-  w->min = mm;
-  w->sec = ss;
+  w->dsecs = (hh * 3600) + (mm * 60) + ss;
   *endp = (char *)CURL_UNCONST(p);
   return TRUE;
 }
@@ -487,12 +478,11 @@ match:
  */
 
 /* Wednesday is the longest name this parser knows about */
-#define NAME_LEN 12
+#define NAME_LEN 10
 
 static void initwhen(struct when *w)
 {
-  w->wday = w->mon = w->mday = w->hour = w->min = w->sec = w->year = w->tzoff =
-    -1;
+  w->wday = w->mon = w->mday = w->dsecs = w->year = w->tzoff = -1;
 }
 
 static int datestring(const char **datep, struct when *w)
@@ -500,48 +490,41 @@ static int datestring(const char **datep, struct when *w)
   /* a name coming up */
   size_t len = 0;
   const char *p = *datep;
-  bool found = FALSE;
-  while(ISALPHA(*p) && (len < NAME_LEN)) {
-    p++;
+  while(ISALPHA(p[len]) && (len < NAME_LEN))
     len++;
-  }
 
   if(len != NAME_LEN) {
     if(w->wday == -1) {
-      w->wday = checkday(*datep, len);
+      w->wday = checkday(p, len);
       if(w->wday != -1)
-        found = TRUE;
+        goto found;
     }
-    if(!found && (w->mon == -1)) {
-      w->mon = checkmonth(*datep, len);
+    if(w->mon == -1) {
+      w->mon = checkmonth(p, len);
       if(w->mon != -1)
-        found = TRUE;
+        goto found;
     }
-
-    if(!found && (w->tzoff == -1)) {
+    if(w->tzoff == -1) {
       /* this must be a time zone string */
-      w->tzoff = checktz(*datep, len);
+      w->tzoff = checktz(p, len);
       if(w->tzoff != -1)
-        found = TRUE;
+        goto found;
     }
   }
-  if(!found)
-    return PARSEDATE_FAIL; /* bad string */
-
+  return PARSEDATE_FAIL; /* bad string */
+found:
   *datep += len;
   return PARSEDATE_OK;
 }
 
-static int datenum(const char *indate, const char **datep, struct when *w,
-                   enum assume *dignextp)
+static int datenum(const char *indate, const char **datep, struct when *w)
 {
   /* a digit */
   unsigned int val;
   char *end;
   const char *date = *datep;
-  enum assume dignext = *dignextp;
 
-  if((w->sec == -1) && match_time(date, w, &end)) {
+  if((w->dsecs == -1) && match_time(date, w, &end)) {
     /* time stamp */
     date = end;
   }
@@ -584,18 +567,19 @@ static int datenum(const char *indate, const char **datep, struct when *w,
       found = TRUE;
       w->year = val / 10000;
       w->mon = ((val % 10000) / 100) - 1; /* month is 0 - 11 */
+      if(w->mon > 11)
+        return PARSEDATE_FAIL;
       w->mday = val % 100;
     }
 
-    if(!found && (dignext == DATE_MDAY) && (w->mday == -1)) {
+    if(!found && (w->mday == -1)) {
       if((val > 0) && (val < 32)) {
         w->mday = val;
         found = TRUE;
       }
-      dignext = DATE_YEAR;
     }
 
-    if(!found && (dignext == DATE_YEAR) && (w->year == -1)) {
+    if(!found && (w->year == -1)) {
       w->year = val;
       found = TRUE;
       if(w->year < 100) {
@@ -604,8 +588,6 @@ static int datenum(const char *indate, const char **datep, struct when *w,
         else
           w->year += 2000;
       }
-      if(w->mday == -1)
-        dignext = DATE_MDAY;
     }
 
     if(!found)
@@ -614,28 +596,22 @@ static int datenum(const char *indate, const char **datep, struct when *w,
     date = p;
   }
   *datep = date;
-  *dignextp = dignext;
   return PARSEDATE_OK;
 }
 
-static int datecheck(struct when *w)
+static bool datecheck(struct when *w)
 {
-  if(w->sec == -1)
-    w->sec = w->min = w->hour = 0; /* no time, make it zero */
+  if(w->dsecs == -1)
+    w->dsecs = 0; /* no time available, make it zero */
 
-  if((w->mday == -1) || (w->mon == -1) || (w->year == -1))
+  if((w->mday == -1) || (w->mon == -1) || (w->year == -1) ||
     /* lacks vital info, fail */
-    return PARSEDATE_FAIL;
+     (w->year < 1583) ||
+     /* The Gregorian calendar was introduced 1582 */
+     (w->mday > 31) /* too long month */ )
+    return TRUE;
 
-  /* The Gregorian calendar was introduced 1582 */
-  else if(w->year < 1583)
-    return PARSEDATE_FAIL;
-
-  else if((w->mday > 31) || (w->mon > 11) || (w->hour > 23) ||
-          (w->min > 59) || (w->sec > 60))
-    return PARSEDATE_FAIL; /* clearly an illegal date */
-
-  return PARSEDATE_OK;
+  return FALSE;
 }
 
 static void tzadjust(curl_off_t *tp, struct when *w)
@@ -675,7 +651,6 @@ static int mktimet(curl_off_t seconds, time_t *output)
 static int parsedate(const char *date, time_t *output)
 {
   curl_off_t seconds = 0;
-  enum assume dignext = DATE_MDAY;
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
   int rc = 0;
@@ -688,16 +663,15 @@ static int parsedate(const char *date, time_t *output)
     if(ISALPHA(*date))
       rc = datestring(&date, &w);
     else if(ISDIGIT(*date))
-      rc = datenum(indate, &date, &w, &dignext);
+      rc = datenum(indate, &date, &w);
     if(rc)
       return rc;
 
     part++;
   }
 
-  rc = datecheck(&w);
-  if(rc)
-    return rc;
+  if(datecheck(&w))
+    return PARSEDATE_FAIL;
 
   seconds = time2epoch(&w); /* get number of seconds */
   tzadjust(&seconds, &w); /* handle the time zone offset */

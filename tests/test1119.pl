@@ -107,7 +107,7 @@ sub checkmanpage {
 
     # detect global-looking 'CURL[BLABLA]_*' symbols
     my $global_pat = '\W(CURL(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|' .
-        'ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|'.
+        'ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|' .
         '_TIMECOND|_VERSION)_[a-zA-Z0-9_]+)';
     my $global_re = qr/$global_pat/;
 
@@ -185,13 +185,13 @@ for my $e (sort @syms) {
     }
     if($doc{$e}) {
         if($verbose) {
-            print $e."\n";
+            print $e . "\n";
         }
         $doc{$e} = "used";
         next;
     }
     else {
-        print $e."\n";
+        print $e . "\n";
         $misses++;
     }
 }

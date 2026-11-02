@@ -7,7 +7,6 @@ HTTP POST
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -25,12 +24,10 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 
 <name>
 HTTP POST lower than MAX_INITIAL_POST_SIZE with progress callback
@@ -40,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/ip%TESTNUMBER">
 PASSED, UL data matched data size

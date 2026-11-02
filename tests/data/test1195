@@ -7,7 +7,6 @@ MQTT SUBSCRIBE
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 hello
@@ -18,7 +17,6 @@ short-PUBLISH TRUE
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <features>
 mqtt
@@ -34,7 +32,6 @@ mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # These are hexadecimal protocol dumps from the client
 # Strip out the random part of the client id from the CONNECT message

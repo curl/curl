@@ -11,7 +11,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <connect crlf="headers">
 HTTP/1.1 200 OK
@@ -30,7 +29,6 @@ stop
 </data>
 
 </reply>
-# Client-side
 <client>
 <server>
 http
@@ -47,7 +45,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 GET http://the.old.moo:%HTTPPORT/%TESTNUMBER HTTP/1.1

@@ -9,7 +9,6 @@ HTTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -36,7 +34,6 @@ ftp.test --proto-default=http --resolve ftp.test:80:%HOSTIP -G -d hello -x http:
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://ftp.test/?hello HTTP/1.1

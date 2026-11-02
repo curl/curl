@@ -8,11 +8,9 @@ PEM certificate
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -30,7 +28,6 @@ HTTPS wrong DER pinnedpubkey but right CN
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 90

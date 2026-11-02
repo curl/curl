@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 401 OK
@@ -21,7 +20,6 @@ nomnom
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL

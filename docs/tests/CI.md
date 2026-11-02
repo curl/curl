@@ -75,17 +75,6 @@ options.
 
 As of October 2025 `@bagder`, `@mback2k`, `@jay`, `@vszakats`, `@dfandrich`
 and `@danielgustafsson` have administrator access to the AppVeyor CI
-environment.  Additional admins/group members can be added on request.
+environment. Additional admins/group members can be added on request.
 
 The tests are configured in `appveyor.yml`.
-
-### Circle CI
-
-Circle CI runs a basic Linux test suite on Ubuntu for both x86 and ARM
-processors. This is configured in `.circleci/config.yml`.
-
-You can [view the full list of CI jobs on Circle CI's
-website](https://app.circleci.com/pipelines/github/curl/curl).
-
-`@bagder` has access to edit the "Project Settings" on that page. Additional
-admins/group members can be added on request.

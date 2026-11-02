@@ -44,13 +44,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C) \
-  mk-lib1521.pl \
-  test1013.pl \
-  test1022.pl \
-  test307.pl \
-  test610.pl \
-  test613.pl \
-  test3500.pl
+  mk-lib1521.pl
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 

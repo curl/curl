@@ -7,20 +7,18 @@ post-quote
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 Dummy test file for rename test
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
 </server>
 <precheck>
-%PERL %SRCDIR/libtest/test610.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/test610.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP post-quote rename a directory
@@ -33,10 +31,9 @@ Dummy test file for rename test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test610.pl rmdir %PWD/%LOGDIR/test%TESTNUMBER.new
+%PERL %SRCDIR/test610.pl rmdir %PWD/%LOGDIR/test%TESTNUMBER.new
 </postcheck>
 </verify>
 </testcase>

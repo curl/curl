@@ -7,7 +7,6 @@ HTTP HEAD
 -G
 </keywords>
 </info>
-# Server-side
 <reply>
 <servercmd>
 connection-monitor
@@ -19,7 +18,6 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -32,7 +30,6 @@ HTTP with -d and -G and -I
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 HEAD /%TESTNUMBER?foo=moo%AMPmoo=poo HTTP/1.1

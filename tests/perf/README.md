@@ -54,6 +54,16 @@ numbers hit the cap, some numbers are not syntactically correct.
 
     ./perf numparser [loops]
 
+## `respheaders`
+
+This test runs HTTP/1.1 transfers that each receive a canned response over a
+local socket pair, with no server involved. It reuses the connection and
+times three responses: a small one, one with the 26 headers a large web site
+typically sends and one with 200 headers. It exercises the response header
+parsing and storing:
+
+    ./perf respheaders [loops]
+
 ## `simpleformat`
 
 This test repeatedly formats a commonly used simple message with
@@ -91,3 +101,22 @@ them: `./perf urlparser URLs.txt [loops]`
 
 A test sample of 100K URLs can be found
 [here](https://raw.githubusercontent.com/ada-url/url-various-datasets/refs/heads/main/top100/top100.txt)
+
+## `wsrecv`
+
+This test upgrades a connection to WebSocket over a local socket pair, with no
+server involved, and receives unmasked binary frames of 16, 125, 1024 and
+16384 bytes, the last ones `loops` / 16 times. Like an application, the write
+callback calls `curl_ws_meta()` for each frame to learn its type. It exercises
+the frame decoding and the delivery of each frame to the application:
+
+    ./perf wsrecv [loops]
+
+## `wssend`
+
+This test upgrades a connection to WebSocket over a local socket pair, with no
+server involved, and sends binary frames with `curl_ws_send()`. It times
+frames with 16, 125 and 1024 bytes of payload, and one sixteenth as many with
+16384 bytes. The other end of the socket pair only reads and drops the data:
+
+    ./perf wssend [loops]

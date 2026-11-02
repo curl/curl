@@ -130,11 +130,82 @@ static void t3230_test_timer_updates(void)
   curl_multi_cleanup(handle);
 }
 
+static int t3230_failing_timer_cb(CURLM *multi, long timeout_ms, void *userp)
+{
+  (void)multi;
+  (void)timeout_ms;
+  (void)userp;
+  return -1;
+}
+
+/* a handle that curl_multi_add_handle() fails to add is not counted */
+static void t3230_test_add_handle_timer_failure(void)
+{
+  CURLM *multi = curl_multi_init();
+  CURL *curl = curl_easy_init();
+  curl_off_t running = -1;
+  curl_off_t current = -1;
+  CURLMcode mresult;
+
+  if(!multi || !curl) {
+    fail("handle creation failed");
+    goto out;
+  }
+
+  mresult = curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION,
+                              t3230_failing_timer_cb);
+  fail_unless(mresult == CURLM_OK, "setting timer callback failed");
+
+  mresult = curl_multi_add_handle(multi, curl);
+  fail_unless(mresult == CURLM_ABORTED_BY_CALLBACK,
+              "add_handle did not report the timer callback failure");
+
+  fail_unless(!curl_multi_get_offt(multi, CURLMINFO_XFERS_RUNNING, &running),
+              "getting running transfers failed");
+  fail_unless(!curl_multi_get_offt(multi, CURLMINFO_XFERS_CURRENT, &current),
+              "getting current transfers failed");
+  fail_unless(running == 0, "failed add counted as running");
+  fail_unless(current == 0, "failed add counted as current");
+
+out:
+  curl_multi_cleanup(multi);
+  curl_easy_cleanup(curl);
+}
+
+/* curl_multi_socket_all() returns the timer callback failure */
+static void t3230_test_socket_all_timer_failure(void)
+{
+  CURLM *handle = curl_multi_init();
+  struct Curl_multi *multi = handle;
+  struct curltime now;
+  CURLMcode mresult;
+  int running;
+
+  if(!multi) {
+    fail("multi handle creation failed");
+    return;
+  }
+
+  mresult = curl_multi_setopt(handle, CURLMOPT_TIMERFUNCTION,
+                              t3230_failing_timer_cb);
+  fail_unless(mresult == CURLM_OK, "setting timer callback failed");
+
+  now = curlx_now();
+  Curl_expire_set(multi->admin, EXPIRE_TIMEOUT, 600000, &now);
+  mresult = curl_multi_socket_all(handle, &running);
+  fail_unless(mresult == CURLM_ABORTED_BY_CALLBACK,
+              "socket_all did not report the timer callback failure");
+
+  curl_multi_cleanup(handle);
+}
+
 static CURLcode test_unit3230(const char *arg)
 {
   UNITTEST_BEGIN(t3230_setup())
 
   t3230_test_timer_updates();
+  t3230_test_add_handle_timer_failure();
+  t3230_test_socket_all_timer_failure();
 
   UNITTEST_END(curl_global_cleanup())
 }

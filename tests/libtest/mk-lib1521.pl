@@ -452,9 +452,9 @@ while(<STDIN>) {
         # the first check for an option
         my $fpref = "${exists}${w2}CURLcode first =\n${w3}curl_easy_setopt(curl, $name,";
         my $ifpresent = "${w2}if(present(first)) {\n";
-        my $pref = "${w3}result =\n".
+        my $pref = "${w3}result =\n" .
                    "${w3}  curl_easy_setopt(curl, $name,";
-        my $ignoreset = "${w3}/* set string again to check for leaks */\n".
+        my $ignoreset = "${w3}/* set string again to check for leaks */\n" .
             "${w3}(void)curl_easy_setopt(curl, $name,";
         my $i = ' ' x (length($w) + 21);
         my $fcheck = <<MOO

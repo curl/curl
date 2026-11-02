@@ -419,6 +419,21 @@ static int myssh_to_GSSAPI_AUTH(struct Curl_easy *data,
   return myssh_to_KEY_AUTH(data, sshc);
 }
 
+/* The key file did not authenticate. A file the user named
+   (CURLOPT_SSH_PRIVATE_KEYFILE) ends public key auth here. The default guess
+   from Curl_ssh_setup_pkey() does not: let libssh try ssh-agent and its
+   default key files, the way the libssh2 backend goes on to the agent. The
+   agent search needs CURLSSH_AUTH_AGENT, as in myssh_in_AUTHLIST(). */
+static int myssh_to_PKEY_AUTO(struct Curl_easy *data,
+                              struct ssh_conn *sshc)
+{
+  if(CURL_EASY_STR(data, STRING_SSH_PRIVATE_KEY) ||
+     !(data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))
+    return myssh_to_GSSAPI_AUTH(data, sshc);
+  myssh_to(data, sshc, SSH_AUTH_PKEY_AUTO);
+  return SSH_OK;
+}
+
 static int myssh_in_SFTP_READDIR_INIT(struct Curl_easy *data,
                                       struct ssh_conn *sshc,
                                       struct SSHPROTO *sshp)
@@ -863,8 +878,9 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
     return rc;
   }
 
-  /* Two choices, (1) private key was given on CMD,
-   * (2) use the "default" keys. */
+  /* Two choices, (1) a private key file, named by the user or the default
+   * guess from Curl_ssh_setup_pkey(), (2) libssh's own search of ssh-agent
+   * and the default key files. */
   if(sshc->priv_key && sshc->priv_key[0]) {
     if(sshc->pubkey && !sshc->passphrase) {
       rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
@@ -872,7 +888,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
         return SSH_AGAIN;
 
       if(rc != SSH_OK) {
-        rc = myssh_to_GSSAPI_AUTH(data, sshc);
+        rc = myssh_to_PKEY_AUTO(data, sshc);
         return rc;
       }
     }
@@ -881,30 +897,21 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
                                      sshc->passphrase, NULL,
                                      NULL, &sshc->privkey);
     if(rc != SSH_OK) {
-      failf(data, "Could not load private key file %s", sshc->priv_key);
-      rc = myssh_to_ERROR(data, sshc, CURLE_LOGIN_DENIED);
+      if(CURL_EASY_STR(data, STRING_SSH_PRIVATE_KEY)) {
+        failf(data, "Could not load private key file %s", sshc->priv_key);
+        rc = myssh_to_ERROR(data, sshc, CURLE_LOGIN_DENIED);
+        return rc;
+      }
+      infof(data, "Could not load private key file %s", sshc->priv_key);
+      rc = myssh_to_PKEY_AUTO(data, sshc);
       return rc;
     }
 
     myssh_to(data, sshc, SSH_AUTH_PKEY);
   }
-  else {
-    rc = ssh_userauth_publickey_auto(sshc->ssh_session, NULL,
-                                     sshc->passphrase);
-    if(rc == SSH_AUTH_AGAIN)
-      return SSH_AGAIN;
-
-    if(rc == SSH_AUTH_SUCCESS) {
-      rc = SSH_OK;
-      sshc->authed = TRUE;
-      infof(data, "Completed public key authentication");
-      myssh_to(data, sshc, SSH_AUTH_DONE);
-      return rc;
-    }
-
-    rc = myssh_to_GSSAPI_AUTH(data, sshc);
-  }
-  return rc;
+  else
+    myssh_to(data, sshc, SSH_AUTH_PKEY_AUTO);
+  return SSH_OK;
 }
 
 static int myssh_in_AUTH_PKEY(struct Curl_easy *data,
@@ -921,8 +928,24 @@ static int myssh_in_AUTH_PKEY(struct Curl_easy *data,
   }
   else {
     infof(data, "Failed public key authentication (rc: %d)", rc);
-    return myssh_to_GSSAPI_AUTH(data, sshc);
+    return myssh_to_PKEY_AUTO(data, sshc);
   }
+}
+
+static int myssh_in_AUTH_PKEY_AUTO(struct Curl_easy *data,
+                                   struct ssh_conn *sshc)
+{
+  int rc = ssh_userauth_publickey_auto(sshc->ssh_session, NULL,
+                                       sshc->passphrase);
+  if(rc == SSH_AUTH_AGAIN)
+    return SSH_AGAIN;
+  else if(rc == SSH_AUTH_SUCCESS) {
+    sshc->authed = TRUE;
+    infof(data, "Completed public key authentication");
+    myssh_to(data, sshc, SSH_AUTH_DONE);
+    return SSH_OK;
+  }
+  return myssh_to_GSSAPI_AUTH(data, sshc);
 }
 
 static int myssh_in_AUTH_GSSAPI(struct Curl_easy *data,
@@ -1810,7 +1833,7 @@ static void myssh_SESSION_DISCONNECT(struct Curl_easy *data,
 static int myssh_SSH_SCP_DOWNLOAD(struct Curl_easy *data,
                                   struct ssh_conn *sshc)
 {
-  curl_off_t bytecount;
+  uint64_t bytecount;
   int rc = ssh_scp_pull_request(sshc->scp_session);
   if(rc != SSH_SCP_REQUEST_NEWFILE) {
     const char *err_msg = ssh_get_error(sshc->ssh_session);
@@ -1819,9 +1842,12 @@ static int myssh_SSH_SCP_DOWNLOAD(struct Curl_easy *data,
   }
 
   /* download data */
-  bytecount = ssh_scp_request_get_size(sshc->scp_session);
-  data->req.maxdownload = bytecount;
-  Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount);
+  bytecount = ssh_scp_request_get_size64(sshc->scp_session);
+  if(bytecount > CURL_OFF_T_MAX)
+    /* unlikely to be a real file */
+    return myssh_to_ERROR(data, sshc, CURLE_TOO_LARGE);
+  data->req.maxdownload = (curl_off_t)bytecount;
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.maxdownload);
 
   /* not set by Curl_xfer_setup to preserve io_flags */
   data->conn->send_idx = 0;
@@ -2289,6 +2315,9 @@ static CURLcode myssh_statemachine(struct Curl_easy *data,
       break;
     case SSH_AUTH_PKEY:
       rc = myssh_in_AUTH_PKEY(data, sshc);
+      break;
+    case SSH_AUTH_PKEY_AUTO:
+      rc = myssh_in_AUTH_PKEY_AUTO(data, sshc);
       break;
     case SSH_AUTH_GSSAPI:
       rc = myssh_in_AUTH_GSSAPI(data, sshc);
@@ -3137,6 +3166,7 @@ void Curl_ssh_version(char *buffer, size_t buflen)
  */
 const struct Curl_protocol Curl_protocol_scp = {
   myssh_setup_connection,               /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   myssh_do_it,                          /* do_it */
   scp_done,                             /* done */
   ZERO_NULL,                            /* do_more */
@@ -3160,6 +3190,7 @@ const struct Curl_protocol Curl_protocol_scp = {
  */
 const struct Curl_protocol Curl_protocol_sftp = {
   myssh_setup_connection,               /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   myssh_do_it,                          /* do_it */
   sftp_done,                            /* done */
   ZERO_NULL,                            /* do_more */

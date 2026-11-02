@@ -10,13 +10,11 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -36,7 +34,6 @@ Moooooooooooo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Strip all valid kinds of PORT and EPRT that curl can send
 <strip>

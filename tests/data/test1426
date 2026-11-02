@@ -25,7 +25,6 @@ Funny-head: yesyes
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -46,7 +45,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --output - --no-styled-output
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

@@ -10,14 +10,12 @@ LIST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY LIST +OK %TESTNUMBER 100\r\n.
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3
@@ -38,7 +36,6 @@ ftp
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 CAPA

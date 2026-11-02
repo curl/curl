@@ -27,10 +27,8 @@
 #include <netinet/in.h>
 #endif
 
-#ifdef HAVE_LINUX_TCP_H
-#include <linux/tcp.h>
-#elif defined(HAVE_NETINET_TCP_H)
-#include <netinet/tcp.h>
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h> /* for TCP_FASTOPEN_CONNECT */
 #endif
 
 #include "urldata.h"
@@ -224,9 +222,7 @@ static CURLcode httpauth(struct Curl_easy *data, bool proxy,
     }
 
     /* switch off bits we cannot support */
-#ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM support */
-#endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without GSS-API
                                     or SSPI */
@@ -930,8 +926,13 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_ENABLE_NPN:
     break;
   case CURLOPT_SSLENGINE_DEFAULT:
-    CURL_EASY_STR_CLEAR(data, STRING_SSL_ENGINE);
-    result = Curl_ssl_set_engine_default(data);
+#ifdef USE_OPENSSL
+    if(Curl_ssl_backend() != CURLSSLBACKEND_OPENSSL)
+      return CURLE_NOT_BUILT_IN;
+    data->set.engine_default = (arg == 1);
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
@@ -1167,8 +1168,8 @@ static CURLcode setopt_long_proto(struct Curl_easy *data, CURLoption option,
     break;
 #ifndef CURL_DISABLE_WEBSOCKETS
   case CURLOPT_WS_OPTIONS:
-    s->ws_raw_mode = (bool)(arg & CURLWS_RAW_MODE);
-    s->ws_no_auto_pong = (bool)(arg & CURLWS_NOAUTOPONG);
+    s->ws_raw_mode = !!(arg & CURLWS_RAW_MODE);
+    s->ws_no_auto_pong = !!(arg & CURLWS_NOAUTOPONG);
     break;
 #endif
   default:
@@ -1739,8 +1740,8 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
      * CA certificate
      */
     result = Curl_setstropt(data, STRING_SSL_CAFILE_PROXY, ptr);
-    s->proxy_ssl.custom_cafile =
-      !!CURL_EASY_STR(data, STRING_SSL_CAFILE_PROXY);
+    if(!result)
+      s->proxy_ssl.custom_cafile = TRUE;
     return result;
   case CURLOPT_PROXY_CRLFILE:
     /*
@@ -1766,8 +1767,8 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
       result = Curl_setstropt(data, STRING_SSL_CAPATH_PROXY, ptr);
-      s->proxy_ssl.custom_capath =
-        !!CURL_EASY_STR(data, STRING_SSL_CAPATH_PROXY);
+      if(!result)
+        s->proxy_ssl.custom_capath = TRUE;
       return result;
     }
 #endif
@@ -1883,7 +1884,8 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * Set CA info for SSL connection. Specify filename of the CA certificate
      */
     result = Curl_setstropt(data, STRING_SSL_CAFILE, ptr);
-    data->set.ssl.custom_cafile = !!CURL_EASY_STR(data, STRING_SSL_CAFILE);
+    if(!result)
+      data->set.ssl.custom_cafile = TRUE;
     return result;
   case CURLOPT_CAPATH:
     /*
@@ -1893,7 +1895,8 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
       result = Curl_setstropt(data, STRING_SSL_CAPATH, ptr);
-      data->set.ssl.custom_capath = !!CURL_EASY_STR(data, STRING_SSL_CAPATH);
+      if(!result)
+        data->set.ssl.custom_capath = TRUE;
       return result;
     }
     return CURLE_NOT_BUILT_IN;
@@ -1955,12 +1958,9 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     /*
      * String that holds the SSL crypto engine.
      */
-    if(ptr && ptr[0]) {
-      result = Curl_setstropt(data, STRING_SSL_ENGINE, ptr);
-      if(!result) {
-        result = Curl_ssl_set_engine(data, ptr);
-      }
-    }
+    if(Curl_ssl_backend() != CURLSSLBACKEND_OPENSSL)
+      return CURLE_NOT_BUILT_IN;
+    result = Curl_setstropt(data, STRING_SSL_ENGINE, ptr);
     break;
   case CURLOPT_ISSUERCERT:
     /*
@@ -2758,9 +2758,8 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_send_speed = offt;
     /* use minimal burst rate of 32k. some protocol batch IO */
-    Curl_rlimit_init(&data->progress.ul.rlimit, offt,
-                     CURLMAX(offt, (32 * 1024)),
-                     Curl_pgrs_now(data));
+    Curl_rlimit_change(&data->progress.ul.rlimit, offt,
+                     CURLMAX(offt, (32 * 1024)));
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
@@ -2771,9 +2770,8 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_recv_speed = offt;
     /* use minimal burst rate of 32k. some protocol batch IO */
-    Curl_rlimit_init(&data->progress.dl.rlimit, offt,
-                     CURLMAX(offt, (32 * 1024)),
-                     Curl_pgrs_now(data));
+    Curl_rlimit_change(&data->progress.dl.rlimit, offt,
+                     CURLMAX(offt, (32 * 1024)));
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*
@@ -2827,7 +2825,8 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
       CURLcode result = Curl_setblobopt(&s->blobs[BLOB_CAINFO_PROXY], blob);
-      s->proxy_ssl.custom_cablob = !!s->blobs[BLOB_CAINFO_PROXY];
+      if(!result)
+        s->proxy_ssl.custom_cablob = TRUE;
       return result;
     }
 #endif
@@ -2853,7 +2852,8 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
       CURLcode result = Curl_setblobopt(&s->blobs[BLOB_CAINFO], blob);
-      s->ssl.custom_cablob = !!s->blobs[BLOB_CAINFO];
+      if(!result)
+        s->ssl.custom_cablob = TRUE;
       return result;
     }
 #endif

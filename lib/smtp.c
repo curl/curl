@@ -370,6 +370,9 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
       for(i = start = 0; i < nread; ++i) {
         if(ctx->n_eob >= SMTP_EOB_FIND_LEN) {
           /* matched the EOB prefix and seeing additional char, add '.' */
+          /* The additional byte cannot be represented in the upload size. */
+          if(data->state.infilesize == CURL_OFF_T_MAX)
+            return CURLE_TOO_LARGE;
           result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
           if(result)
             return result;
@@ -1994,6 +1997,7 @@ out:
  */
 const struct Curl_protocol Curl_protocol_smtp = {
   smtp_setup_connection,            /* setup_connection */
+  ZERO_NULL,                        /* setup_filters */
   smtp_do,                          /* do_it */
   smtp_done,                        /* done */
   ZERO_NULL,                        /* do_more */

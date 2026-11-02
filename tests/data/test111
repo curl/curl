@@ -7,14 +7,12 @@ EPSV
 Resume
 </keywords>
 </info>
-# Server-side
 <reply>
 <size>
 85
 </size>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -27,7 +25,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -C 2000
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 36

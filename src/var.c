@@ -122,7 +122,13 @@ static ParameterError varfunc(char *c, /* content */
       f += FUNC_URL_LEN;
       curlx_dyn_reset(out);
       if(clen) {
-        char *enc = curl_easy_escape(NULL, c, (int)clen);
+        char *enc;
+        if(clen > INT_MAX) { /* curl_easy_escape() takes an int length */
+          errorf("too much data to URL encode");
+          err = PARAM_EXPAND_ERROR;
+          break;
+        }
+        enc = curl_easy_escape(NULL, c, (int)clen);
         if(!enc) {
           err = PARAM_NO_MEM;
           break;

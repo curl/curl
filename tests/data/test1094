@@ -8,7 +8,6 @@ mode=
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 a chunk of
@@ -24,7 +23,6 @@ returned
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 tftp
@@ -37,7 +35,6 @@ TFTP retrieve with mode=netascii
 </command>
 </client>
 
-# Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>
 ^timeout = [5-6]$

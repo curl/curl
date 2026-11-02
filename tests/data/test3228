@@ -8,7 +8,6 @@ HTTP added headers
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -39,7 +37,6 @@ header "%repeat[307201 x X]%;"
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1

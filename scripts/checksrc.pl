@@ -145,6 +145,7 @@ my %banfunc = (
 
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
+    'PRINTFZ'          => '%zd, %zu or %zx printf mask detected',
     'STDERR'           => 'stderr detected',
     );
 
@@ -472,6 +473,7 @@ sub enable_warn {
     $ignore_used{$what} = 0;
     $ignore{$what} = 0;
 }
+
 sub checksrc {
     my ($cmd, $line, $file, $l) = @_;
     if($cmd =~ / *([^ ]*) *(.*)/) {
@@ -1018,6 +1020,14 @@ sub scanfile {
             goto again;
         }
         $l = $bl; # restore to pre-bannedfunc content
+
+        if($warnings{"PRINTFZ"} && $l =~ /^(.*".*)%z[dux].*"/) {
+            # %z format support is missing from VS2013 and earlier CRT printf,
+            # so directories where we call printf functions may ban %z.
+            checkwarn("PRINTFZ",
+                      $line, length($1), $file, $ol,
+                      "use of %zd/%zu/%zx is banned (use %ld/%lu/%lx with cast instead)");
+        }
 
         if($warnings{"STDERR"}) {
             # scan for use of banned stderr. This is not a BANNEDFUNC to

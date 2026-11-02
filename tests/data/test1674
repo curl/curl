@@ -21,7 +21,7 @@ CURL_TIME=1548369261
 HSTS load more than 10k entries from file
 </name>
 
-# test 1674 renders the input file itself, then reads it
+# test %TESTNUMBER renders the input file itself, then reads it
 <command>
 %LOGDIR/hsts%TESTNUMBER
 </command>

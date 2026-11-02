@@ -59,6 +59,7 @@ typedef enum {
   SSH_AUTHLIST,
   SSH_AUTH_PKEY_INIT,
   SSH_AUTH_PKEY,
+  SSH_AUTH_PKEY_AUTO,  /* libssh: ssh-agent, then the default key files */
   SSH_AUTH_PASS_INIT,
   SSH_AUTH_PASS,
   SSH_AUTH_AGENT_INIT, /* initialize then wait for connection to agent */

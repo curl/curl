@@ -7,20 +7,18 @@ Range
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 file
 </features>
 <name>
--Y range on a file:// URL to stdout
+-Y range on a file:// URL to stdout, then one larger than the file
 </name>
 <command option="no-include">
--r -9 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
+-r -9 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt --next -r -23 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 1234567890
@@ -28,10 +26,13 @@ file
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 34567890
 </stdout>
+# the file is 22 bytes, so the second transfer asks for one byte too many
+<errorcode>
+36
+</errorcode>
 </verify>
 </testcase>

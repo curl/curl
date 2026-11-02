@@ -217,21 +217,6 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   /* ballers may have failf()'d, the winner resets it, so our
    * errorbuf is clean again. */
   Curl_reset_fail(data);
-
-#ifdef USE_NGHTTP2
-  {
-    /* For a negotiated HTTP/2 connection insert the h2 filter. */
-    const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
-    if(alpn && !strcmp("h2", alpn)) {
-      CURLcode result = Curl_http2_switch_at(cf, data);
-      if(result) {
-        ctx->state = CF_HC_FAILURE;
-        ctx->result = result;
-        return result;
-      }
-    }
-  }
-#endif
   return CURLE_OK;
 }
 

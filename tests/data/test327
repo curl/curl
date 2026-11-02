@@ -13,7 +13,6 @@ header dump
 # has been removed - particularly important when the file is going to be read
 # again and thus must not contain old contents.
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -35,7 +34,6 @@ Set-Cookie: foobar=name; expires=Thu, 01 Jan 1970 00:00:00 GMT;
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -51,7 +49,6 @@ cookies
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1

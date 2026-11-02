@@ -7,7 +7,6 @@ Curl_timeleft_ms
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

@@ -7,7 +7,6 @@ HTTP GET
 cookies
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -30,7 +29,6 @@ moo
 </data2>
 </reply>
 
-# Client-side
 <client>
 <file name="%LOGDIR/jar%TESTNUMBER.txt" mode="text">
 .host.foo.com	TRUE	/we/want/	FALSE	22147483647	test	no
@@ -58,7 +56,6 @@ cookies
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1

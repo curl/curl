@@ -6,7 +6,6 @@ FILE
 </keywords>
 </info>
 
-# Server-side
 <reply>
 # 16 bytes to check
 <datacheck>
@@ -15,7 +14,6 @@ C01234567
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 file
@@ -33,7 +31,6 @@ C01234567
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

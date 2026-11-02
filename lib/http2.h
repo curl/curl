@@ -47,11 +47,9 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
 /* returns true if the HTTP/2 stream error was HTTP_1_1_REQUIRED */
 bool Curl_h2_http_1_1_error(struct Curl_easy *data);
 
-bool Curl_http2_may_switch(struct Curl_easy *data);
+bool Curl_http2_may_switch_at(struct Curl_easy *data, struct Curl_cfilter *cf);
 
-CURLcode Curl_http2_switch(struct Curl_easy *data);
-
-CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data);
+CURLcode Curl_http2_switch_at(struct Curl_easy *data, struct Curl_cfilter *cf);
 
 CURLcode Curl_http2_upgrade(struct Curl_easy *data,
                             struct connectdata *conn, int8_t sockindex,
@@ -66,10 +64,10 @@ extern struct Curl_cftype Curl_cft_nghttp2;
 
 #else /* USE_NGHTTP2 */
 
-#define Curl_http2_may_switch(a) FALSE
+#define Curl_http2_may_switch_at(a,b) FALSE
 
 #define Curl_http2_request_upgrade(x, y)  CURLE_UNSUPPORTED_PROTOCOL
-#define Curl_http2_switch(a)              CURLE_UNSUPPORTED_PROTOCOL
+#define Curl_http2_switch_at(a,b)         CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_h2_http_1_1_error(x)         0
 #endif
 

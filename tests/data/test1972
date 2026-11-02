@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK
@@ -30,7 +29,6 @@ Content-Length: 0
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -55,7 +53,6 @@ http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPP
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^Content-Type:.*

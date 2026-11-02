@@ -44,6 +44,7 @@ typedef enum {
   CF_SETUP_CNNCT_HTTP_PROXY,
   CF_SETUP_CNNCT_HAPROXY,
   CF_SETUP_CNNCT_SSL,
+  CF_SETUP_CNNCT_PROTOCOL,
   CF_SETUP_DONE
 } cf_setup_state;
 
@@ -296,6 +297,27 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
   return result;
 }
 
+static CURLcode cf_setup_add_protocol_filters(struct Curl_cfilter *cf,
+                                              struct Curl_easy *data)
+{
+  struct cf_setup_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  (void)data; /* not used in all builds */
+  if(ctx->state < CF_SETUP_CNNCT_PROTOCOL) {
+    if(cf->conn->scheme->run->setup_filters) {
+      result = cf->conn->scheme->run->setup_filters(data, cf);
+      if(result) {
+        CURL_TRC_CF(data, cf, "adding protocol filters failed -> %d",
+                    (int)result);
+        return result;
+      }
+    }
+    ctx->state = CF_SETUP_CNNCT_PROTOCOL;
+  }
+  return result;
+}
+
 static CURLcode cf_setup_connect_steps(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
                                        bool *done)
@@ -347,6 +369,12 @@ connect_sub_chain:
 #endif /* !CURL_DISABLE_PROXY */
 
   result = cf_setup_add_origin_filters(cf, data);
+  if(result)
+    return result;
+  if(!cf->next || !cf->next->connected)
+    goto connect_sub_chain;
+
+  result = cf_setup_add_protocol_filters(cf, data);
   if(result)
     return result;
   if(!cf->next || !cf->next->connected)

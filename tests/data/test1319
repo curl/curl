@@ -9,7 +9,6 @@ HTTP CONNECT
 HTTP proxy
 </keywords>
 </info>
-# Server-side
 <reply>
 
 <connect crlf="headers">
@@ -41,7 +40,6 @@ body
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3
@@ -59,7 +57,6 @@ pop3://pop.%TESTNUMBER:%POP3PORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -u user:se
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 CAPA

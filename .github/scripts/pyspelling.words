@@ -28,6 +28,7 @@ Apache
 API
 APIs
 APOP
+AppleLDAP
 AppVeyor
 archivers
 Archos
@@ -78,6 +79,7 @@ bufq
 bufref
 bugfix
 bugfixes
+bugfixing
 buildable
 buildbot
 Caddy
@@ -86,6 +88,7 @@ CAPA
 capath
 CCC
 CDN
+CDNs
 CentOS
 CFLAGS
 cflags
@@ -155,6 +158,7 @@ curldown
 CURLE
 CURLECH
 CURLH
+CURLHTTPSIG
 curlimages
 CURLINFO
 curlrc
@@ -170,9 +174,9 @@ daniel
 datagrams
 datatracker
 dbg
-decapsulation
 Debian
 DEBUGBUILD
+decapsulation
 decrypt
 decrypted
 decrypting
@@ -370,7 +374,6 @@ HTTPS
 https
 httpsig
 HTTPSIG
-CURLHTTPSIG
 HTTPSRR
 hyper's
 IANA
@@ -430,9 +433,9 @@ KDE
 keepalive
 Keil
 kerberos
-keyid
 Keychain
 keychain
+keyid
 KiB
 kibibyte
 kickstart
@@ -496,7 +499,6 @@ LPRT
 LSB
 lseek
 Lua
-lwIP
 macdef
 macOS
 macos

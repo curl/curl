@@ -53,6 +53,10 @@ sockets. This is applied to every send.
 Example: **CURL_DBG_SOCK_WPARTIAL=80** means a send with 1000 bytes would
 only send 800.
 
+## `CURL_DBG_SOCK_CONNECT_WAIT_MS`
+
+Wait this many milliseconds after first `connect()` on a socket.
+
 ## `CURL_DBG_QUIC_WBLOCK`
 
 The percentage of send() calls that should be answered with EAGAIN at random.
@@ -95,7 +99,7 @@ an edge case
 
 ## `CURL_GETHOSTNAME`
 
-Fake the local machine's unqualified hostname for NTLM and SMTP.
+Fake the local machine's unqualified hostname for SMTP.
 
 ## `CURL_HSTS_HTTP`
 
@@ -103,7 +107,7 @@ Bypass the HSTS HTTPS protocol restriction if this variable exists.
 
 ## `CURL_FORCETIME`
 
-A time of 0 is used for AWS signatures and NTLM if this variable exists.
+A time of 0 is used for AWS signatures if this variable exists.
 
 ## `CURL_ENTROPY`
 

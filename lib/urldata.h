@@ -161,14 +161,6 @@ struct digestdata {
 };
 #endif
 
-typedef enum {
-  NTLMSTATE_NONE,
-  NTLMSTATE_TYPE1,
-  NTLMSTATE_TYPE2,
-  NTLMSTATE_TYPE3,
-  NTLMSTATE_LAST
-} curlntlm;
-
 #define CURL_NEGO_AUTH_NONE   0U
 #define CURL_NEGO_AUTH_RECV   1U
 #define CURL_NEGO_AUTH_SENT   2U
@@ -290,6 +282,7 @@ struct connectdata {
   timediff_t lastused_ms; /* when returned to the connection pool as idle */
   timediff_t lastchecked_ms; /* when last checked alive status */
   timediff_t lastupkeep_ms; /* when last done conn_upkeep */
+  timediff_t connect_start_ms; /* when ongoing connect attempt started */
 
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
@@ -322,11 +315,6 @@ struct connectdata {
   /*************** Request - specific items ************/
 #ifdef USE_WINDOWS_SSPI
   CtxtHandle *sslContext;
-#endif
-
-#ifdef USE_NTLM
-  curlntlm http_ntlm_state;
-  curlntlm proxy_ntlm_state;
 #endif
 
   /* When this connection is created, store the conditions for the local end
@@ -556,15 +544,6 @@ struct UrlState {
   struct Curl_resolv_async *async;  /* asynchronous name resolver data */
 #endif
 
-#ifdef USE_OPENSSL
-  /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
-  void *engine;
-  /* void instead of OSSL_PROVIDER */
-  void *provider;
-  void *baseprov;
-  void *libctx;
-  char *propq; /* for a provider */
-#endif /* USE_OPENSSL */
   struct expire_timers timeouts; /* expire timeouts */
 
   /* a place to store the most recently set (S)FTP entrypath */
@@ -638,9 +617,6 @@ struct UrlState {
   uint8_t httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
 
-#ifdef USE_OPENSSL
-  BIT(provider_loaded);
-#endif /* USE_OPENSSL */
   BIT(really_alive); /* transfer is really alive in multi, passed INIT */
   BIT(this_is_a_follow); /* this is a followed Location: request */
   BIT(refused_stream); /* this was refused, try again */
@@ -1136,6 +1112,9 @@ struct UserDefined {
   BIT(post301); /* keep POSTs as POSTs after a 301 request */
   BIT(post302); /* keep POSTs as POSTs after a 302 request */
   BIT(post303); /* keep POSTs as POSTs after a 303 request */
+#ifdef USE_OPENSSL
+  BIT(engine_default);
+#endif
 };
 
 #ifndef CURL_DISABLE_MIME

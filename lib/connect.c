@@ -57,6 +57,20 @@ enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
 
 #endif
 
+/* Milliseconds left of the connect timeout. */
+static timediff_t connect_left_ms(struct Curl_easy *data,
+                                  const struct curltime *pnow)
+{
+  timediff_t timeout_ms = (data->set.connecttimeout > 0) ?
+    data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+  timediff_t elapsed_ms =
+    curlx_ptimediff_ms(pnow, &data->conn->created) -
+    data->conn->connect_start_ms;
+  timediff_t left_ms = timeout_ms - elapsed_ms;
+  DEBUGASSERT(data->conn->connect_start_ms >= 0);
+  return left_ms ? left_ms : -1; /* 0 is "no limit", fake 1 ms expiry */
+}
+
 /*
  * timeleft_now_ms() returns the amount of milliseconds left allowed for the
  * transfer/connection. If the value is 0, there is no timeout (ie there is
@@ -76,12 +90,17 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
   if(data->conn && CURL_CONN_IN_SHUTDOWN(data->conn, FIRSTSOCKET))
     return Curl_cshutdn_timeleft_ms(data, data->conn, FIRSTSOCKET);
   else if(Curl_is_connecting(data)) {
+    /* transfer has not reached DO phase yet */
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
       data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
     ctimeleft_ms = ctimeout_ms -
       Curl_pgrs_since_ms(data, pnow, TIMER_STARTSINGLE);
     if(!ctimeleft_ms)
       ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
+  }
+  else if(data->conn && data->conn->connect_start_ms >= 0) {
+    /* ongoing connect of filters, pbly FTP second socket */
+    ctimeleft_ms = connect_left_ms(data, pnow);
   }
   else if(!data->set.timeout || data->set.connect_only) {
     return 0; /* no timeout in place or checked, return "no limit" */
@@ -284,6 +303,11 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   if(*done)
     return CURLE_OK;
 
+  if(data->conn->connect_start_ms < 0) {
+    data->conn->connect_start_ms =
+      curlx_ptimediff_ms(Curl_pgrs_now(data), &data->conn->created);
+  }
+
   Curl_pollset_init(&ps);
   Curl_pollfds_init(&cpfds, a_few_on_stack, CF_CONN_NUM_POLLS_ON_STACK);
   while(!*done) {
@@ -317,6 +341,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
       Curl_conn_remove_setup_filters(data, sockindex);
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "reduced to"));
+      data->conn->connect_start_ms = -1;
       goto out;
     }
     else if(result) {
@@ -331,7 +356,8 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     else {
       /* check allowed time left */
-      const timediff_t timeout_ms = Curl_timeleft_ms(data);
+      const struct curltime *pnow = Curl_pgrs_now(data);
+      timediff_t timeout_ms = Curl_timeleft_now_ms(data, pnow);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       int rc;
 

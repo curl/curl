@@ -7,11 +7,9 @@ HTTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -24,7 +22,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "name[15-14]@%LOGDIR/fooo" --exp
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 2

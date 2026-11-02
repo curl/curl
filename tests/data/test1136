@@ -11,7 +11,6 @@ PSL
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -30,7 +29,6 @@ boo
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 PSL
@@ -52,7 +50,6 @@ http://www.example.ck/%TESTNUMBER http://www.ck/%TESTNUMBER http://z-1.compute-1
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/jar%TESTNUMBER.txt" mode="text">
 # Netscape HTTP Cookie File

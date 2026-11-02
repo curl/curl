@@ -12,7 +12,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
@@ -27,7 +26,6 @@ hello
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -48,7 +46,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://usingproxy.test/ HTTP/1.1

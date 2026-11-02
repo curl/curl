@@ -6,11 +6,9 @@ FTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -28,7 +26,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -K %LOGDIR/test%TESTNUMBER.config
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 43 - CURLE_BAD_FUNCTION_ARGUMENT
 <errorcode>

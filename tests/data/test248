@@ -14,7 +14,6 @@ MDTM
 </mdtm>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -35,7 +34,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt -z "apr 1 2005
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <upload>
 data

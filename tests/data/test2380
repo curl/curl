@@ -8,11 +8,14 @@ curl_mprintf errors
 </info>
 
 <client>
+<features>
+getrlimit
+</features>
 <name>
 curl_mprintf errors on out of space
 </name>
 <command>
-%LOGDIR/write2380
+%LOGDIR/write%TESTNUMBER
 </command>
 </client>
 

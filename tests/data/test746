@@ -6,7 +6,6 @@ cmdline
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 too large numerical value passed to -m

@@ -296,12 +296,14 @@ void storerequest(const char *reqbuf, size_t totalsize, const char *filename)
   } while((writeleft > 0) && (error == EINTR));
 
   if(writeleft == 0)
-    logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
+    logmsg("Wrote request (%lu bytes) input to %s",
+           (unsigned long)totalsize, dumpfile);
   else if(writeleft > 0) {
     logmsg("Error writing file %s error (%d) %s", dumpfile,
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
-           totalsize - writeleft, totalsize, dumpfile);
+    logmsg("Wrote only (%lu bytes) of (%lu bytes) request input to %s",
+           (unsigned long)(totalsize - writeleft), (unsigned long)totalsize,
+           dumpfile);
   }
 
 storerequest_cleanup:
@@ -657,7 +659,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   memset(sau, 0, sizeof(struct sockaddr_un));
   sau->sun_family = AF_UNIX;
   if(len >= sizeof(sau->sun_path) - 1) {
-    logmsg("Too long unix socket domain path (%zu)", len);
+    logmsg("Too long unix socket domain path (%lu)", (unsigned long)len);
     return -1;
   }
   curlx_strcopy(sau->sun_path, sizeof(sau->sun_path), unix_socket, len);

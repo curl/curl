@@ -193,11 +193,11 @@ struct test_ws_m1_ctx {
   char *recv_buf;
   size_t send_len, nsent;
   size_t recv_len, nrcvd;
-  int nframes;
-  int read_calls;
-  int write_calls;
-  int frames_read;
-  int frames_written;
+  size_t nframes;
+  size_t read_calls;
+  size_t write_calls;
+  size_t frames_read;
+  size_t frames_written;
   BIT(frame_reading);
 };
 
@@ -225,7 +225,7 @@ static size_t test_ws_data_m1_read(char *buf, size_t nitems, size_t buflen,
     memcpy(buf, ctx->send_buf + ctx->nsent, left);
     ctx->nsent += left;
     complete = (ctx->send_len == ctx->nsent);
-    curl_mfprintf(stderr, "m1_read(len=%zu, call #%d, frame #%d%s) -> %zu\n",
+    curl_mfprintf(stderr, "m1_read(len=%zu, call #%zu, frame #%zu%s) -> %zu\n",
                   len, ctx->read_calls, ctx->frames_read,
                   complete ? " complete" : "", left);
     if(complete) {
@@ -236,7 +236,7 @@ static size_t test_ws_data_m1_read(char *buf, size_t nitems, size_t buflen,
     return left;
   }
 out:
-  curl_mfprintf(stderr, "m1_read(len=%zu, call #%d) -> EOS\n",
+  curl_mfprintf(stderr, "m1_read(len=%zu, call #%zu) -> EOS\n",
                 len, ctx->read_calls);
   return 0;
 }
@@ -250,7 +250,7 @@ static size_t test_ws_data_m1_write(char *buf, size_t nitems, size_t buflen,
 
   ctx->write_calls++;
   if(len > (ctx->recv_len - ctx->nrcvd)) {
-    curl_mfprintf(stderr, "m1_write(len=%zu, call #%d) -> ERROR\n",
+    curl_mfprintf(stderr, "m1_write(len=%zu, call #%zu) -> ERROR\n",
                   len, ctx->write_calls);
     return CURL_WRITEFUNC_ERROR;
   }
@@ -259,7 +259,7 @@ static size_t test_ws_data_m1_write(char *buf, size_t nitems, size_t buflen,
   complete = (ctx->recv_len == ctx->nrcvd);
 
   if(memcmp(ctx->send_buf, ctx->recv_buf, ctx->nrcvd)) {
-    curl_mfprintf(stderr, "m1_write(len=%zu, call #%d, frame #%d) -> "
+    curl_mfprintf(stderr, "m1_write(len=%zu, call #%zu, frame #%zu) -> "
                   "data differs\n",
                   len, ctx->write_calls, ctx->frames_written);
     debug_dump("", "expected:", stderr,
@@ -269,7 +269,7 @@ static size_t test_ws_data_m1_write(char *buf, size_t nitems, size_t buflen,
     return CURL_WRITEFUNC_ERROR;
   }
 
-  curl_mfprintf(stderr, "m1_write(len=%zu, call #%d, frame #%d%s) -> %zu\n",
+  curl_mfprintf(stderr, "m1_write(len=%zu, call #%zu, frame #%zu%s) -> %zu\n",
                 len, ctx->write_calls, ctx->frames_written,
                 complete ? " complete" : "", len);
   if(complete) {
@@ -281,6 +281,7 @@ static size_t test_ws_data_m1_write(char *buf, size_t nitems, size_t buflen,
 
 /* WebSocket Mode 1: multi handle, READ/WRITEFUNCTION use */
 static CURLcode test_ws_data_m1_echo(const char *url,
+                                     size_t count,
                                      size_t plen_min,
                                      size_t plen_max)
 {
@@ -322,7 +323,7 @@ static CURLcode test_ws_data_m1_echo(const char *url,
     m1_ctx.nsent = 0;
     m1_ctx.recv_len = len;
     m1_ctx.nrcvd = 0;
-    m1_ctx.nframes = 2;
+    m1_ctx.nframes = count;
     m1_ctx.read_calls = 0;
     m1_ctx.write_calls = 0;
     m1_ctx.frames_read = 0;
@@ -367,13 +368,13 @@ static CURLcode test_ws_data_m1_echo(const char *url,
 
     /* check results */
     if(m1_ctx.frames_read < m1_ctx.nframes) {
-      curl_mfprintf(stderr, "m1_echo, sent only %d/%d frames\n",
+      curl_mfprintf(stderr, "m1_echo, sent only %zu/%zu frames\n",
                     m1_ctx.frames_read, m1_ctx.nframes);
       result = CURLE_SEND_ERROR;
       goto out;
     }
     if(m1_ctx.frames_written < m1_ctx.frames_read) {
-      curl_mfprintf(stderr, "m1_echo, received only %d/%d frames\n",
+      curl_mfprintf(stderr, "m1_echo, received only %zu/%zu frames\n",
                     m1_ctx.frames_written, m1_ctx.frames_read);
       result = CURLE_RECV_ERROR;
       goto out;
@@ -409,7 +410,7 @@ static CURLcode test_cli_ws_data(const char *URL)
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURLcode result = CURLE_OK;
   const char *url;
-  size_t plen_min = 0, plen_max = 0, count = 1;
+  size_t plen_min = 0, plen_max = 0, count = 2;
   int ch, model = 2;
 
   (void)URL;
@@ -468,7 +469,7 @@ static CURLcode test_cli_ws_data(const char *URL)
   }
 
   if(model == 1)
-    result = test_ws_data_m1_echo(url, plen_min, plen_max);
+    result = test_ws_data_m1_echo(url, count, plen_min, plen_max);
   else
     result = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 

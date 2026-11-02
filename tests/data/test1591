@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.0 200 OK swsclose
@@ -18,7 +17,6 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 </data>
 </reply>
-# Client-side
 <client>
 <features>
 http
@@ -37,7 +35,6 @@ more than one byte
 </stdin>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 PUT /bzz/%TESTNUMBER HTTP/1.1

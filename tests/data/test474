@@ -7,7 +7,6 @@
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 301 OK
@@ -27,7 +26,6 @@ Connection: close
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -41,7 +39,6 @@ https
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 1 https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0002 https

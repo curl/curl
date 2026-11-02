@@ -10,7 +10,6 @@ header-signing
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -24,7 +23,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -41,7 +39,6 @@ httpsig: HMAC-SHA256 with custom headers
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/Signature: sig1=:.*:/Signature: sig1=:STRIPPED:/

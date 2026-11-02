@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -24,12 +23,10 @@ And you should ignore this data.
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
 <features>
 proxy
 </features>
@@ -41,7 +38,6 @@ HTTP proxy with auth, change proxy, clear auth
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://example.com/ HTTP/1.1

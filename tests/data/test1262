@@ -8,14 +8,12 @@ RETR
 -z
 </keywords>
 </info>
-# Server-side
 <reply>
 <mdtm>
 213 20030409102659
 </mdtm>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp

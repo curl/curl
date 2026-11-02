@@ -7,7 +7,6 @@ HTTP GET
 compressed
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -40,7 +39,6 @@ Content-Length: 1056%CR
 
 </reply>
 
-# Client-side
 <client>
 <features>
 brotli
@@ -56,7 +54,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
