@@ -54,7 +54,7 @@
 #endif
 
 #ifdef __APPLE__
-/* Enable the RFC 3542 IPv6 socket options before Apple headers are included. */
+/* Enable RFC 3542 IPv6 options before Apple headers. */
 #ifndef __APPLE_USE_RFC_3542
 #define __APPLE_USE_RFC_3542
 #endif
