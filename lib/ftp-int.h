@@ -140,6 +140,7 @@ struct cf_ftp_ctx {
                        caching the current directory */
   BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
   BIT(sent_quit);    /* QUIT has been dispatched */
+  BIT(data_shutdown); /* DATA connection is in shutdown */
 };
 
 /* meta key for storing `struct FTP` as easy meta data */

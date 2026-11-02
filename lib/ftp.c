@@ -569,16 +569,15 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
 
     /* FTP upload, shutdown DATA, ignore shutdown errors, as we rely
      * on the server response on the CONTROL connection. */
-    Curl_xfer_setup_send(data, SECONDARYSOCKET);
-    Curl_xfer_set_shutdown(data, TRUE, TRUE);
+    Curl_xfer_setup_send(data, FIRSTSOCKET);
   }
   else {
     /* FTP download, shutdown, do not ignore errors */
-    Curl_xfer_setup_recv(data, SECONDARYSOCKET, data->req.size);
-    Curl_xfer_set_shutdown(data, TRUE, FALSE);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size);
   }
 
   ftpc->pp.pending_resp = TRUE; /* expect server response */
+  ftpc->data_shutdown = FALSE;
   ftp_state(data, ftpc, FTP_STOP);
   return CURLE_OK;
 }
@@ -4337,22 +4336,121 @@ static CURLcode cf_ftp_connect(struct Curl_cfilter *cf,
 }
 
 static CURLcode cf_ftp_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            const uint8_t *buf, size_t len, bool eos,
+                            const uint8_t *buf, size_t blen, bool eos,
                             size_t *pnwritten)
 {
-  if(cf->next)
-    return cf->next->cft->do_send(cf->next, data, buf, len, eos, pnwritten);
+  struct connectdata *conn = CF_CONN(cf);
+  struct cf_ftp_ctx *ftpc = cf->ctx;
+  struct Curl_cfilter *cf_data;
+  CURLcode result;
+
+  if(!cf->connected) {
+    result = cf->next ?
+      cf->next->cft->do_send(cf->next, data, buf, blen, eos, pnwritten) :
+      CURLE_SEND_ERROR;
+    goto out;
+  }
+
+  cf_data = conn->chain_alt.cf;
+  if(!cf_data) {
+    result = ftpc->data_shutdown ? CURLE_SEND_ERROR : CURLE_AGAIN;
+    goto out;
+  }
+
+data_shutdown:
   *pnwritten = 0;
-  return CURLE_RECV_ERROR;
+  if(ftpc->data_shutdown) {
+    bool done = FALSE;
+    result = Curl_cshutdn_cfchain_try_once(data, &conn->chain_alt, &done);
+    if(!result && !done) {
+      result = CURLE_AGAIN;
+      goto out;
+    }
+    /* ignore shutdown errors on send, server will tell us */
+    Curl_conn_cf_discard_chain(&conn->chain_alt.cf, data);
+    *pnwritten = blen;
+    result = CURLE_OK;
+    goto out;
+  }
+  else if(!cf_data->connected) {
+    bool connected;
+    result = Curl_conn_cf_connect(cf_data, data, &connected);
+    if(result)
+      goto out;
+    if(!connected) {
+      result = CURLE_AGAIN;
+      goto out;
+    }
+  }
+
+  result = cf_data->cft->do_send(cf_data, data, buf, blen, eos, pnwritten);
+  if(result)
+    return result;
+  else if(eos) {
+    ftpc->data_shutdown = TRUE;
+    goto data_shutdown;
+  }
+
+out:
+  CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, %zu",
+              blen, (int)result, *pnwritten);
+  return result;
 }
 
 static CURLcode cf_ftp_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            char *buf, size_t len, size_t *pnread)
+                            char *buf, size_t blen, size_t *pnread)
 {
-  if(cf->next)
-    return cf->next->cft->do_recv(cf->next, data, buf, len, pnread);
+  struct connectdata *conn = CF_CONN(cf);
+  struct cf_ftp_ctx *ftpc = cf->ctx;
+  struct Curl_cfilter *cf_data;
+  CURLcode result;
+
   *pnread = 0;
-  return CURLE_SEND_ERROR;
+  if(!cf->connected) {
+    result = cf->next ?
+             cf->next->cft->do_recv(cf->next, data, buf, blen, pnread) :
+             CURLE_RECV_ERROR;
+    goto out;
+  }
+
+  cf_data = conn->chain_alt.cf;
+  if(!cf_data) {
+    result = ftpc->data_shutdown ? CURLE_RECV_ERROR : CURLE_AGAIN;
+    goto out;
+  }
+
+data_shutdown:
+  if(ftpc->data_shutdown) {
+    bool done = FALSE;
+    result = Curl_cshutdn_cfchain_try_once(data, &conn->chain_alt, &done);
+    if(!result && !done)
+      result = CURLE_AGAIN;
+    else {
+      Curl_conn_cf_discard_chain(&conn->chain_alt.cf, data);
+    }
+    goto out;
+  }
+  else if(!cf_data->connected) {
+    bool connected;
+    result = Curl_conn_cf_connect(cf_data, data, &connected);
+    if(result)
+      goto out;
+    if(!connected) {
+      result = CURLE_AGAIN;
+      goto out;
+    }
+  }
+
+  result = cf_data->cft->do_recv(cf_data, data, buf, blen, pnread);
+  if(!result && !*pnread) {
+    ftpc->data_shutdown = TRUE;
+    goto data_shutdown;
+  }
+
+out:
+  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu",
+              blen, (int)result, *pnread);
+  return result;
 }
 
 static CURLcode cf_ftp_shutdown(struct Curl_cfilter *cf,
@@ -4377,8 +4475,12 @@ static CURLcode cf_ftp_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct easy_pollset *ps)
 {
+  struct connectdata *conn = CF_CONN(cf);
   struct cf_ftp_ctx *ftpc = cf->ctx;
-  curl_socket_t sock;
+  struct Curl_cfilter *cf_data = conn->chain_alt.cf;
+  CURLcode result = CURLE_OK;
+  curl_socket_t sock, sock_data;
+  bool want_recv, want_send;
 
   if(!ftpc || !cf->next)
     return CURLE_OK;
@@ -4386,7 +4488,21 @@ static CURLcode cf_ftp_adjust_pollset(struct Curl_cfilter *cf,
   sock = Curl_conn_cf_get_socket(cf->next, data);
   if(sock == CURL_SOCKET_BAD)
     return CURLE_OK;
-  else if(ftpc->pp.sendleft)
+
+  if(cf_data) {
+    Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
+    sock_data = Curl_conn_cf_get_socket(cf_data, data);
+    if(sock_data != CURL_SOCKET_BAD) {
+      if(want_send)
+        result = Curl_pollset_add_out(data, ps, sock_data);
+      if(!result && want_recv)
+        result = Curl_pollset_add_in(data, ps, sock_data);
+      if(result)
+        return result;
+    }
+  }
+
+  if(ftpc->pp.sendleft)
     return Curl_pollset_change(data, ps, sock,
       CURL_POLL_IN | CURL_POLL_OUT, 0);
   else
@@ -4395,7 +4511,7 @@ static CURLcode cf_ftp_adjust_pollset(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_ftp = {
   "FTP",
-  0,
+  CF_TYPE_SAFE_EOS,
   0,
   cf_ftp_destroy,
   cf_ftp_connect,

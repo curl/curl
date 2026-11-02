@@ -207,6 +207,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  * CF_TYPE_DNS         filter managing DNS resolve operations
  * CF_TYPE_MAINTENANCE filter wants "maintenance" calls when transfers
  *                     are blocked/ratelimited.
+ * CF_TYPE_SAFE_EOS    filter handles End-Of-Stream safely
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
@@ -216,6 +217,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 #define CF_TYPE_SETUP       (1 << 5)
 #define CF_TYPE_DNS         (1 << 6)
 #define CF_TYPE_MAINTENANCE (1 << 7)
+#define CF_TYPE_SAFE_EOS    (1 << 8)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -428,6 +430,9 @@ bool Curl_conn_is_multiplex(struct connectdata *conn);
 
 /* TRUE if any filters are of type CF_TYPE_MAINTENANCE */
 bool Curl_cfchain_wants_maintenance(struct Curl_cfchain *chain);
+
+/* Connection handles EOS safely, no over-read possible. */
+bool Curl_conn_has_safe_eos(struct connectdata *conn);
 
 /**
  * Return the HTTP version used on the FIRSTSOCKET connection filters

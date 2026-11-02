@@ -619,6 +619,19 @@ bool Curl_cfchain_wants_maintenance(struct Curl_cfchain *chain)
   return FALSE;
 }
 
+bool Curl_conn_has_safe_eos(struct connectdata *conn)
+{
+  struct Curl_cfilter *cf;
+
+  for(cf = conn->chain.cf; cf; cf = cf->next) {
+    if(cf->cft->flags & CF_TYPE_SAFE_EOS)
+      return TRUE;
+    if(cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_SSL))
+      return FALSE;
+  }
+  return FALSE;
+}
+
 unsigned char Curl_conn_get_transport(struct Curl_easy *data,
                                       struct connectdata *conn)
 {

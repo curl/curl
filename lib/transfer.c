@@ -188,7 +188,8 @@ static CURLcode xfer_recv_resp(struct Curl_easy *data,
   *pnread = 0;
   /* If we are reading BODY data and the connection does NOT handle EOF
    * and we know the size of the BODY data, limit the read amount */
-  if(!eos_reliable && !data->req.header && data->req.size != -1) {
+  if((!eos_reliable || data->state.use_range) &&
+     !data->req.header && data->req.size != -1) {
     blen = curlx_sotouz_range(data->req.size - data->req.bytecount, 0, blen);
   }
   else if(xfer_recv_shutdown_started(data)) {
@@ -230,7 +231,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   char *buf, *xfer_buf;
   size_t blen, xfer_blen;
   int maxloops = 10;
-  bool is_multiplex = FALSE;
+  bool safe_eos = FALSE;
   bool rcvd_eagain = FALSE;
   bool is_eos = FALSE, rate_limited = FALSE;
 
@@ -243,11 +244,11 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   do {
     size_t bytestoread;
 
-    if(!is_multiplex) {
-      /* Multiplexed connection have inherent handling of EOF and we do not
-       * have to carefully restrict the amount we try to read.
-       * Multiplexed changes only in one direction. */
-      is_multiplex = Curl_conn_is_multiplex(conn);
+    if(!safe_eos) {
+      /* When the connection handles End-Of-Stream (EOS) safely,
+       * we do not have to watch the amount we try to receive.
+       * This changes only in one direction. */
+      safe_eos = Curl_conn_has_safe_eos(conn);
     }
 
     buf = xfer_buf;
@@ -271,7 +272,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     }
 
     rcvd_eagain = FALSE;
-    result = xfer_recv_resp(data, buf, bytestoread, is_multiplex, &blen);
+    result = xfer_recv_resp(data, buf, bytestoread, safe_eos, &blen);
     if(result) {
       if(result != CURLE_AGAIN)
         goto out; /* real error */
@@ -306,7 +307,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     /* if we are done, we stop receiving. On multiplexed connections,
      * we should read the EOS. Which may arrive as meta data after
      * the bytes. Not taking it in might lead to RST of streams. */
-    if((!is_multiplex && data->req.download_done) || is_eos) {
+    if((!safe_eos && data->req.download_done) || is_eos) {
       CURL_REQ_CLEAR_RECV(data);
     }
     /* if we stopped receiving, leave the loop */
@@ -324,7 +325,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   }
 
   if(!CURL_REQ_WANT_RECV(data) && CURL_REQ_WANT_SEND(data) &&
-     (conn->bits.close || is_multiplex)) {
+     (conn->bits.close || safe_eos)) {
     /* When we have read the entire thing and the close bit is set, the server
        may now close the connection. If there is now any kind of sending going
        on from our side, we need to stop that immediately. */

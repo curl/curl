@@ -2808,7 +2808,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_nghttp2 = {
   "HTTP/2",
-  CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
+  CF_TYPE_MULTIPLEX | CF_TYPE_HTTP | CF_TYPE_SAFE_EOS,
   CURL_LOG_LVL_NONE,
   cf_h2_destroy,
   cf_h2_connect,
