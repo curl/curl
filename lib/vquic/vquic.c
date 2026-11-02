@@ -552,7 +552,8 @@ static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 #if defined(__clang__) && !defined(__GLIBC__)
 #pragma clang diagnostic pop
 #endif
-    if(cmsg->cmsg_level == SOL_UDP && cmsg->cmsg_type == UDP_GRO) {
+    if(cmsg->cmsg_level == SOL_UDP && cmsg->cmsg_type == UDP_GRO &&
+       cmsg->cmsg_len >= CMSG_LEN(sizeof(gso_size))) {
       memcpy(&gso_size, CMSG_DATA(cmsg), sizeof(gso_size));
 
       break;
@@ -592,7 +593,7 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 #else
           cmsg->cmsg_type == IP_TOS
 #endif
-          && cmsg->cmsg_len) {
+          && cmsg->cmsg_len >= CMSG_LEN(sizeof(uint8_t))) {
         return *(uint8_t *)(CMSG_DATA(cmsg)) & IPTOS_ECN_MASK;
       }
     }
@@ -609,7 +610,7 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 #pragma clang diagnostic pop
 #endif
       if(cmsg->cmsg_level == IPPROTO_IPV6 && cmsg->cmsg_type == IPV6_TCLASS &&
-         cmsg->cmsg_len) {
+         cmsg->cmsg_len >= CMSG_LEN(sizeof(int))) {
         unsigned int tos;
 
         memcpy(&tos, CMSG_DATA(cmsg), sizeof(int));
