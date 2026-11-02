@@ -1130,7 +1130,6 @@ jobs:
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
             false
           fi
-          tasklist | sort || true
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
@@ -1154,7 +1153,6 @@ jobs:
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          tasklist | sort || true
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | sort -z | xargs -0 file --
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | sort -z | xargs -0 stat -c '%10s bytes: %n' --
           if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
