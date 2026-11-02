@@ -1101,6 +1101,7 @@ jobs:
               export CMAKE_GENERATOR='Ninja Multi-Config'  # pass it via env to avoid space issues
               echo "Using MSVC: ${MSVC_ROOTW}"
               echo "Using Windows SDK: ${MSDK_VER}"
+              rm -f "$MSVC_BINU/vctip.exe"  # delete telemetry tool
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then

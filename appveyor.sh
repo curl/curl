@@ -64,7 +64,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
         root="$(printenv 'ProgramFiles(x86)')"
         hosts='Hostx86'
       else
-        root="${PROGRAMFILES}"
+        root="$PROGRAMFILES"
       fi
       root="$(/usr/bin/find \
         "$(cygpath --unix "${root}/Microsoft Visual Studio/${vcver}/Community/VC/Tools/MSVC")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
