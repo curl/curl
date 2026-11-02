@@ -77,13 +77,6 @@ void Curl_xfer_setup_recv(struct Curl_easy *data,
                           int8_t sockindex,
                           curl_off_t recv_size);
 
-/* *After* Curl_xfer_setup_xxx(), tell the transfer to shutdown the
- * connection at the end. Let the transfer either fail or ignore any
- * errors during shutdown. */
-void Curl_xfer_set_shutdown(struct Curl_easy *data,
-                            bool shutdown,
-                            bool ignore_errors);
-
 /**
  * The transfer will use socket 1 to send/recv. `recv_size` is
  * the amount to receive or -1 if unknown.
@@ -133,7 +126,6 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         size_t *pnrcvd);
 
 CURLcode Curl_xfer_send_close(struct Curl_easy *data);
-CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done);
 
 /* Return TRUE if the transfer is not done, but further progress
  * is blocked. For example when it is only receiving and its writer

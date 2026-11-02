@@ -143,30 +143,12 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
   return TRUE;
 }
 
-static CURLcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
-{
-  struct Curl_cfchain *chain;
-  if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
-  chain = data->conn->recv_idx ? &data->conn->chain_alt : &data->conn->chain;
-  return Curl_cshutdn_cfchain_try_once(data, chain, done);
-}
-
 static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
   if(!data || !data->conn)
     return FALSE;
   return CURL_CFCHAIN_IN_SHUTDOWN(
     data->conn->recv_idx ? &data->conn->chain_alt : &data->conn->chain);
-}
-
-CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
-{
-  struct Curl_cfchain *chain;
-  if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
-  chain = data->conn->send_idx ? &data->conn->chain_alt : &data->conn->chain;
-  return Curl_cshutdn_cfchain_try_once(data, chain, done);
 }
 
 /**
@@ -203,18 +185,8 @@ static CURLcode xfer_recv_resp(struct Curl_easy *data,
       return result;
   }
 
-  if(*pnread == 0) {
-    if(data->req.shutdown) {
-      bool done;
-      result = xfer_recv_shutdown(data, &done);
-      if(result)
-        return result;
-      if(!done) {
-        return CURLE_AGAIN;
-      }
-    }
+  if(*pnread == 0)
     DEBUGF(infof(data, "sendrecv_dl: we are done"));
-  }
   return CURLE_OK;
 }
 
@@ -697,9 +669,6 @@ static void xfer_setup(
   DEBUGASSERT((conn->recv_idx >= 0) || (recv_size == -1));
   k->size = recv_size;
   k->header = !!conn->scheme->run->write_resp_hd;
-  /* by default, we do not shutdown at the end of the transfer */
-  k->shutdown = FALSE;
-  k->shutdown_err_ignore = FALSE;
 
   /* The code sequence below is placed in this function because all necessary
      input is not always known in do_complete() as this function may be called
@@ -741,17 +710,6 @@ void Curl_xfer_setup_recv(struct Curl_easy *data,
                           curl_off_t recv_size)
 {
   xfer_setup(data, -1, sockindex, recv_size);
-}
-
-void Curl_xfer_set_shutdown(struct Curl_easy *data,
-                            bool shutdown,
-                            bool ignore_errors)
-{
-  /* Shutdown should only be set when the transfer only sends or receives. */
-  DEBUGASSERT(!shutdown ||
-              (data->conn->send_idx < 0) || (data->conn->recv_idx < 0));
-  data->req.shutdown = shutdown;
-  data->req.shutdown_err_ignore = ignore_errors;
 }
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
