@@ -927,19 +927,20 @@ static CURLcode auth_digest(struct Curl_easy *data,
     infof(data, "Ignoring duplicate digest auth header.");
   }
   else if(Curl_auth_is_digest_supported()) {
-    CURLcode result;
-
-    *availp |= CURLAUTH_DIGEST;
-    authp->avail |= CURLAUTH_DIGEST;
-
     /* We call this function on input Digest headers even if Digest
      * authentication is not activated yet, as we need to store the
      * incoming data from this header in case we are going to use
      * Digest */
-    result = Curl_input_digest(data, proxy, auth);
+    CURLcode result = Curl_input_digest(data, proxy, auth);
+    if(result == CURLE_OUT_OF_MEMORY)
+      return result;
+    if(result == CURLE_NOT_BUILT_IN) {
+      infof(data, "Ignoring unusable Digest algorithm.");
+      return CURLE_OK;
+    }
+    *availp |= CURLAUTH_DIGEST;
+    authp->avail |= CURLAUTH_DIGEST;
     if(result) {
-      if(result == CURLE_OUT_OF_MEMORY)
-        return result;
       infof(data, "Digest authentication problem, ignoring.");
       data->state.authproblem = TRUE;
     }
