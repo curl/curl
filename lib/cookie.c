@@ -1296,9 +1296,10 @@ static int cookie_sort_ct(const void *p1, const void *p2)
 bool Curl_secure_context(struct Curl_easy *data, const char *host)
 {
   return Curl_xfer_is_secure(data) ||
-    curl_strequal("localhost", host) ||
-    !strcmp(host, "127.0.0.1") ||
-    !strcmp(host, "::1");
+    (!CURL_EASY_STR(data, STRING_PROXY) &&
+     (curl_strequal("localhost", host) ||
+      !strcmp(host, "127.0.0.1") ||
+      !strcmp(host, "::1")));
 }
 
 /*
