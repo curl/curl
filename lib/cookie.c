@@ -1293,10 +1293,16 @@ static int cookie_sort_ct(const void *p1, const void *p2)
   return (c2->creationtime > c1->creationtime) ? 1 : -1;
 }
 
+#ifdef CURL_DISABLE_PROXY
+#define IS_PROXIED(d) 0
+#else
+#define IS_PROXIED(d) !!CURL_EASY_STR(d, STRING_PROXY)
+#endif
+
 bool Curl_secure_context(struct Curl_easy *data, const char *host)
 {
   return Curl_xfer_is_secure(data) ||
-    (!CURL_EASY_STR(data, STRING_PROXY) &&
+    (!IS_PROXIED(data) &&
      (curl_strequal("localhost", host) ||
       !strcmp(host, "127.0.0.1") ||
       !strcmp(host, "::1")));
