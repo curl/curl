@@ -3189,11 +3189,12 @@ static unsigned char ftp_use_ssl(struct connectdata *conn,
 static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
                                     struct connectdata *conn)
 {
-  CURLcode result;
-  int ftpcode;
-  struct cf_ftp_ctx *ftpc = ftp_get_cf_ctx(data->conn);
+  struct Curl_cfilter *cf = Curl_conn_get_first_cf(conn, &Curl_cft_ftp);
+  struct cf_ftp_ctx *ftpc = cf ? cf->ctx : NULL;
   struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
   struct pingpong *pp;
+  CURLcode result;
+  int ftpcode;
   size_t nread = 0;
 
   if(!ftpc || !ftp)
@@ -3227,21 +3228,17 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
     if((ftpcode == 234) || (ftpcode == 334)) {
       /* this was BLOCKING, keep it so for now */
-      bool done;
       if(!Curl_conn_is_ssl(conn)) {
-        result = Curl_ssl_cfilter_add(data, Curl_conn_get_origin(conn),
-                                      &conn->chain);
+        result = Curl_cf_ssl_insert_after(cf, data,
+          Curl_conn_get_origin(conn),
+          Curl_conn_get_destination(conn));
         if(result) {
           /* we failed and bail out */
           return CURLE_USE_SSL_FAILED;
         }
       }
-      /* BLOCKING */
-      result = Curl_conn_connect(data, TRUE, &done);
-      if(!result) {
-        conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
-        result = ftp_state_user(data, ftpc, conn);
-      }
+      conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
+      result = ftp_state_user(data, ftpc, conn);
     }
     else if(ftpc->count3 < 1) {
       ftpc->count3++;
@@ -3513,37 +3510,6 @@ static CURLcode ftp_multi_statemach(struct Curl_easy *data,
 {
   struct cf_ftp_ctx *ftpc = ftp_get_cf_ctx(data->conn);
   return ftpc ? ftp_statemach(data, ftpc, done) : CURLE_FAILED_INIT;
-}
-
-/*
- * ftp_connect() should do everything that is to be considered a part of
- * the connection phase.
- *
- * The variable 'done' points to will be TRUE if the protocol-layer connect
- * phase is done when this function returns, or FALSE if not.
- *
- */
-static CURLcode ftp_connect(struct Curl_easy *data,
-                            bool *done) /* see description above */
-{
-  CURLcode result;
-  struct connectdata *conn = data->conn;
-  struct cf_ftp_ctx *ftpc = ftp_get_cf_ctx(data->conn);
-
-  *done = FALSE; /* default to not done yet */
-  if(!ftpc)
-    return CURLE_FAILED_INIT;
-
-  if(Curl_conn_is_ssl(conn)) {
-    /* BLOCKING */
-    result = Curl_conn_connect(data, TRUE, done);
-    if(result)
-      return result;
-  }
-
-  result = ftp_statemach(data, ftpc, done);
-
-  return result;
 }
 
 /***********************************************************************
@@ -4395,8 +4361,11 @@ static CURLcode cf_ftp_connect(struct Curl_cfilter *cf,
   if(result || !*done)
     return result;
 
-  *done = (!result);
-  cf->connected = *done;
+  result = ftp_statemach(data, ctx, done);
+  if(!result && *done) {
+    CURL_TRC_CF(data, cf, "connected");
+    cf->connected = TRUE;
+  }
   return result;
 }
 
@@ -4460,6 +4429,69 @@ static struct cf_ftp_ctx *ftp_get_cf_ctx(struct connectdata *conn)
   return cf ? cf->ctx : NULL;
 }
 
+static CURLcode cf_ftp_ctl_send(struct Curl_easy *data, void *io_user_data,
+                                char *buf, size_t blen, bool eos,
+                                size_t *pnwritten)
+{
+  struct Curl_cfilter *cf = io_user_data;
+  if(cf->next) {
+    if(!cf->next->connected) {
+      bool connected;
+      CURLcode result = Curl_conn_cf_connect(cf->next, data, &connected);
+      if(result)
+        return result;
+      if(!connected)
+        return CURLE_AGAIN;
+    }
+    return cf->next->cft->do_send(cf->next, data,
+                                  (uint8_t *)buf, blen, eos, pnwritten);
+  }
+  *pnwritten = 0;
+  return CURLE_RECV_ERROR;
+}
+
+static CURLcode cf_ftp_ctl_recv(struct Curl_easy *data, void *io_user_data,
+                                 char *buf, size_t blen,
+                                 size_t *pnread)
+{
+  struct Curl_cfilter *cf = io_user_data;
+  if(cf->next) {
+    if(!cf->next->connected) {
+      bool connected;
+      CURLcode result = Curl_conn_cf_connect(cf->next, data, &connected);
+      if(result)
+        return result;
+      if(!connected)
+        return CURLE_AGAIN;
+    }
+    return cf->next->cft->do_recv(cf->next, data, buf, blen, pnread);
+  }
+  *pnread = 0;
+  return CURLE_SEND_ERROR;
+}
+
+static CURLcode cf_ftp_ctl_poll(struct Curl_easy *data, void *io_user_data,
+                                 bool want_send, bool want_recv,
+                                 timediff_t timeout_ms)
+{
+  struct Curl_cfilter *cf = io_user_data;
+  if(!cf->next)
+    return CURLE_FAILED_INIT;
+  if(cf->next->cft->has_data_pending(cf->next, data))
+    return CURLE_OK;
+  else {
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+    int rc = Curl_socket_check(want_send ? sock : CURL_SOCKET_BAD,
+                               want_recv ? sock : CURL_SOCKET_BAD,
+                               timeout_ms);
+    if(rc == -1) {
+      failf(data, "select/poll error");
+      return want_send ? CURLE_SEND_ERROR : CURLE_RECV_ERROR;
+    }
+    return rc ? CURLE_OK : CURLE_AGAIN;
+  }
+}
+
 static CURLcode cf_ftp_create(struct Curl_cfilter **pcf,
                               struct Curl_easy *data)
 {
@@ -4477,6 +4509,9 @@ static CURLcode cf_ftp_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_ftp, ctx);
   if(result)
     goto out;
+  /* Setup pingpong I/O to go via control filter chain */
+  Curl_pp_set_io(&ctx->pp, cf_ftp_ctl_send,
+                 cf_ftp_ctl_recv, cf_ftp_ctl_poll, cf);
   ctx = NULL;
 
 out:
@@ -4563,7 +4598,7 @@ const struct Curl_protocol Curl_protocol_ftp = {
   ftp_do,                          /* do_it */
   ftp_done,                        /* done */
   ftp_do_more,                     /* do_more */
-  ftp_connect,                     /* connect_it */
+  ZERO_NULL,                       /* connect_it */
   ftp_multi_statemach,             /* connecting */
   ftp_doing,                       /* doing */
   ftp_pollset,                     /* proto_pollset */
