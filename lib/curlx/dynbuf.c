@@ -69,7 +69,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
 {
   size_t idx = s->leng;
   size_t a = s->allc;
-  size_t fit = len + idx + 1; /* new string + old string + zero byte */
+  size_t fit;
 
   /* try to detect if there is rubbish in the struct */
   DEBUGASSERT(s->init == DYNINIT);
@@ -79,11 +79,14 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   DEBUGASSERT(a <= s->toobig);
   DEBUGASSERT(!len || mem);
 
-  if(fit > s->toobig) {
+  /* Check before adding to avoid an integer overflow. */
+  if(len >= s->toobig || idx > s->toobig - len - 1) {
     curlx_dyn_free(s);
     return CURLE_TOO_LARGE;
   }
-  else if(!a) {
+  fit = len + idx + 1; /* new string + old string + zero byte */
+
+  if(!a) {
     DEBUGASSERT(!idx);
     /* first invoke */
     if(MIN_FIRST_ALLOC > s->toobig)

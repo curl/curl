@@ -127,6 +127,10 @@ static CURLcode test_unit2602(const char *arg)
   Curl_dynhds_free(&hds);
 
   curlx_dyn_init(&dbuf, 32 * 1024);
+  fail_unless(curlx_dyn_addn(&dbuf, "", SIZE_MAX) == CURLE_TOO_LARGE,
+              "dynbuf should reject overflowing length");
+
+  curlx_dyn_init(&dbuf, 32 * 1024);
   fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");
   if(curlx_dyn_ptr(&dbuf)) {
     curl_mfprintf(stderr, "indent concat: %s\n", curlx_dyn_ptr(&dbuf));
