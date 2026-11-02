@@ -673,6 +673,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256;
 #else
+          Curl_auth_digest_cleanup(digest);
           return CURLE_NOT_BUILT_IN;
 #endif
         }
@@ -680,6 +681,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256SESS;
 #else
+          Curl_auth_digest_cleanup(digest);
           return CURLE_NOT_BUILT_IN;
 #endif
         }
@@ -718,6 +720,18 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   /* "<algo>-sess" protocol versions require "auth" or "auth-int" qop */
   if(!digest->qop && (digest->algo & SESSION_ALGO))
     return CURLE_BAD_CONTENT_ENCODING;
+
+  /* MD5 can be disabled at runtime (FIPS) */
+  if(digest->algo == ALGO_MD5 || digest->algo == ALGO_MD5SESS) {
+    uint8_t md5[CURL_MD5_DIGEST_LEN];
+    CURLcode result = Curl_md5it(md5, "", 0);
+    if(result == CURLE_FAILED_INIT) {
+      Curl_auth_digest_cleanup(digest); /* forget this challenge */
+      return CURLE_NOT_BUILT_IN;
+    }
+    if(result)
+      return result;
+  }
 
   return CURLE_OK;
 }
