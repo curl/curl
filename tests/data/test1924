@@ -14,7 +14,7 @@ unittest
 cookies
 </features>
 <name>
-cookie same-site check for CURLOPT_COOKIE_SITE
+cookie same-site check for CURLOPT_COOKIESITE
 </name>
 </client>
 </testcase>

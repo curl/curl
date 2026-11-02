@@ -1,13 +1,13 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Title: CURLOPT_COOKIE_SITE
+Title: CURLOPT_COOKIESITE
 Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_COOKIEFILE (3)
   - CURLOPT_COOKIEJAR (3)
-  - CURLOPT_COOKIE_CONTEXT (3)
+  - CURLOPT_COOKIECONTEXT (3)
 Protocol:
   - HTTP
 Added-in: 8.24.0
@@ -15,14 +15,14 @@ Added-in: 8.24.0
 
 # NAME
 
-CURLOPT_COOKIE_SITE - site the request is made for
+CURLOPT_COOKIESITE - site the request is made for
 
 # SYNOPSIS
 
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIE_SITE, char *site);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIESITE, char *site);
 ~~~
 
 # DESCRIPTION
@@ -44,7 +44,7 @@ request is *cross-site*, like a request to `http://example.com/`,
 since `example.com` does not end with `.www.example.com`.
 
 A request is a *navigation* when the application sets the
-CURLCOOKIE_NAVIGATION bit with CURLOPT_COOKIE_CONTEXT(3). Any other request is
+CURLCOOKIE_NAVIGATION bit with CURLOPT_COOKIECONTEXT(3). Any other request is
 made for a part of a page, like an image, a script or a frame.
 
 With a site set, libcurl uses the `SameSite` and `Partitioned` attributes of
@@ -105,7 +105,7 @@ int main(void)
     /* an image on a page on https://www.example.com/ */
     curl_easy_setopt(curl, CURLOPT_URL, "https://cdn.example.net/logo.png");
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
-    curl_easy_setopt(curl, CURLOPT_COOKIE_SITE, "https://example.com");
+    curl_easy_setopt(curl, CURLOPT_COOKIESITE, "https://example.com");
 
     result = curl_easy_perform(curl);
 

@@ -23,8 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
-/* SameSite and Partitioned cookies evaluated with CURLOPT_COOKIE_SITE and
-   CURLOPT_COOKIE_CONTEXT. The request sequence is checked by the test server
+/* SameSite and Partitioned cookies evaluated with CURLOPT_COOKIESITE and
+   CURLOPT_COOKIECONTEXT. The request sequence is checked by the test server
    and the resulting cookie jar by the test harness. The last requests go to
    "localhost", a secure context, resolved to the test server: a Partitioned
    cookie received in a cross-site navigation is keyed by the scheme and host
@@ -41,8 +41,8 @@
 
 struct t1923_req {
   int num;           /* number of the request, selects the test data */
-  const char *site;  /* CURLOPT_COOKIE_SITE, NULL for none */
-  long context;      /* CURLOPT_COOKIE_CONTEXT */
+  const char *site;  /* CURLOPT_COOKIESITE, NULL for none */
+  long context;      /* CURLOPT_COOKIECONTEXT */
   int method;        /* T1923_* */
   int local;         /* request "localhost" instead of the URL host */
 };
@@ -149,8 +149,8 @@ static CURLcode test_lib1923(const char *URL)
       site = site_host_dot;
     easy_setopt(curl, CURLOPT_URL, url);
     curlx_safefree(url);
-    easy_setopt(curl, CURLOPT_COOKIE_SITE, site);
-    easy_setopt(curl, CURLOPT_COOKIE_CONTEXT, reqs[i].context);
+    easy_setopt(curl, CURLOPT_COOKIESITE, site);
+    easy_setopt(curl, CURLOPT_COOKIECONTEXT, reqs[i].context);
     easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
     switch(reqs[i].method) {
     case T1923_CUSTOM_POST:
@@ -183,7 +183,7 @@ static CURLcode test_lib1923(const char *URL)
 
   /* a site is a scheme and a hostname, nothing else */
   for(i = 0; i < CURL_ARRAYSIZE(badsites); i++) {
-    if(curl_easy_setopt(curl, CURLOPT_COOKIE_SITE, badsites[i]) !=
+    if(curl_easy_setopt(curl, CURLOPT_COOKIESITE, badsites[i]) !=
        CURLE_BAD_FUNCTION_ARGUMENT) {
       curl_mfprintf(stderr, "site '%s' was accepted\n", badsites[i]);
       result = TEST_ERR_MAJOR_BAD;

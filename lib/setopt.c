@@ -428,7 +428,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->http09_allowed = enabled;
     break;
 #ifndef CURL_DISABLE_COOKIES
-  case CURLOPT_COOKIE_CONTEXT:
+  case CURLOPT_COOKIECONTEXT:
     s->cookie_navigation = !!(arg & CURLCOOKIE_NAVIGATION);
     break;
 
@@ -2105,14 +2105,14 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      */
     return Curl_setstropt(data, STRING_COOKIE, ptr);
 
-  case CURLOPT_COOKIE_SITE:
+  case CURLOPT_COOKIESITE:
     /*
      * The site this request is made for, used to evaluate SameSite and
      * Partitioned cookies: "http://host" or "https://host"
      */
     if(ptr && !Curl_cookie_site_ok(ptr))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    return Curl_setstropt(data, STRING_COOKIE_SITE, ptr);
+    return Curl_setstropt(data, STRING_COOKIESITE, ptr);
 
   case CURLOPT_COOKIEFILE:
     return cookiefile(data, ptr);

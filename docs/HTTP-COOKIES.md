@@ -41,8 +41,8 @@ curl parses and stores the `SameSite` attribute (`Strict`, `Lax` or `None`)
 and the `Partitioned` attribute of cookies.
 
 These attributes are only used if the application tells libcurl which *site*
-a request is made for, with CURLOPT_COOKIE_SITE(3), and whether the request
-is a navigation to a new page, with CURLOPT_COOKIE_CONTEXT(3). A cookie with
+a request is made for, with CURLOPT_COOKIESITE(3), and whether the request
+is a navigation to a new page, with CURLOPT_COOKIECONTEXT(3). A cookie with
 `SameSite=Strict` is then only sent in requests to the same site, a cookie
 with `SameSite=Lax` (or without a `SameSite` attribute) also in a cross-site
 navigation using a safe method and a cookie with `SameSite=None` in all
@@ -114,7 +114,7 @@ site the cookie was received under. Readers that do not know the line treat
 it as a comment and still load the cookie, without the attributes. A `#curl:`
 line only applies to the cookie line immediately following it. The lines are
 only written once the attributes are in use, that is when a site was given
-with CURLOPT_COOKIE_SITE(3) or such a line was read; otherwise the file is
+with CURLOPT_COOKIESITE(3) or such a line was read; otherwise the file is
 identical to what earlier curl versions write.
 
 Each line that specifies a single cookie consists of seven text fields

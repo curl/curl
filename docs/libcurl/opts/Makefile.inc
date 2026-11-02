@@ -156,12 +156,12 @@ man_MANS =                                      \
   CURLOPT_CONV_FROM_UTF8_FUNCTION.3             \
   CURLOPT_CONV_TO_NETWORK_FUNCTION.3            \
   CURLOPT_COOKIE.3                              \
+  CURLOPT_COOKIECONTEXT.3                       \
   CURLOPT_COOKIEFILE.3                          \
   CURLOPT_COOKIEJAR.3                           \
   CURLOPT_COOKIELIST.3                          \
   CURLOPT_COOKIESESSION.3                       \
-  CURLOPT_COOKIE_CONTEXT.3                      \
-  CURLOPT_COOKIE_SITE.3                         \
+  CURLOPT_COOKIESITE.3                          \
   CURLOPT_COPYPOSTFIELDS.3                      \
   CURLOPT_CRLF.3                                \
   CURLOPT_CRLFILE.3                             \

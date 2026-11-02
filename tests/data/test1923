@@ -6,8 +6,8 @@ HTTP
 cookies
 SameSite
 Partitioned
-CURLOPT_COOKIE_SITE
-CURLOPT_COOKIE_CONTEXT
+CURLOPT_COOKIESITE
+CURLOPT_COOKIECONTEXT
 libtest
 </keywords>
 </info>
@@ -41,6 +41,7 @@ Server: test-server/fake
 Content-Length: 4
 Set-Cookie: h=8; SameSite=Strict
 Set-Cookie: i=9
+Set-Cookie: ss=11; SameSite=Strict; SameSite
 
 boo
 </data2>
@@ -166,7 +167,7 @@ http
 cookies
 </features>
 <name>
-SameSite and Partitioned cookies with CURLOPT_COOKIE_SITE
+SameSite and Partitioned cookies with CURLOPT_COOKIESITE
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/jar%TESTNUMBER
@@ -207,7 +208,7 @@ Cookie: jd=nopending; jx=default; jn=none; c=3
 GET /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: jd=nopending; jx=default; jn=none; js=strict; i=9; h=8; c=3
+Cookie: ss=11; jd=nopending; jx=default; jn=none; js=strict; i=9; h=8; c=3
 
 POST /%TESTNUMBER0004 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
@@ -224,7 +225,7 @@ Content-Type: application/x-www-form-urlencoded
 GET /%TESTNUMBER0006 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: jd=nopending; jx=default; jn=none; i=9; c=3
+Cookie: ss=11; jd=nopending; jx=default; jn=none; i=9; c=3
 
 POST /%TESTNUMBER0007 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
@@ -234,12 +235,12 @@ Cookie: jn=none; c=3
 GET /%TESTNUMBER0008 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: jd=nopending; jx=default; jn=none; i=9; c=3
+Cookie: ss=11; jd=nopending; jx=default; jn=none; i=9; c=3
 
 GET /%TESTNUMBER0009 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: jd=nopending; jx=default; jp=other; jp=part; jn=none; js=strict; i=9; h=8; e=5; c=3
+Cookie: ss=11; jd=nopending; jx=default; jp=other; jp=part; jn=none; js=strict; i=9; h=8; e=5; c=3
 
 GET /%TESTNUMBER0010 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
@@ -249,7 +250,7 @@ Cookie: jp=part; jn=none; e=5; c=3
 GET /%TESTNUMBER0011 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Cookie: jd=nopending; jx=default; jn=none; js=strict; k=10; i=9; h=8; c=3
+Cookie: ss=11; jd=nopending; jx=default; jn=none; js=strict; k=10; i=9; h=8; c=3
 
 GET /%TESTNUMBER0012 HTTP/1.1
 Host: localhost:%HTTPPORT
@@ -282,6 +283,7 @@ Allocations: 2000
 localhost	FALSE	/	TRUE	0	p	1
 #curl: SameSite=None; Partitioned=http://%HOSTIP
 %HOSTIP	FALSE	/	TRUE	0	k	10
+%HOSTIP	FALSE	/	FALSE	0	ss	11
 %HOSTIP	FALSE	/	FALSE	0	i	9
 #curl: SameSite=Strict
 %HOSTIP	FALSE	/	FALSE	0	h	8

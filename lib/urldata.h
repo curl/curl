@@ -699,7 +699,7 @@ enum dupstring {
 #endif
 #ifndef CURL_DISABLE_COOKIES
   STRING_COOKIE,          /* HTTP cookie string to send */
-  STRING_COOKIE_SITE,     /* site the request is made for, for SameSite */
+  STRING_COOKIESITE,      /* site the request is made for, for SameSite */
   STRING_COOKIEJAR,       /* dump all cookies to this file */
 #endif
   STRING_CUSTOMREQUEST,   /* HTTP/FTP/RTSP request/method to use */

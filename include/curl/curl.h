@@ -1083,7 +1083,7 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 #define CURLHSTS_ENABLE       (1L << 0)
 #define CURLHSTS_READONLYFILE (1L << 1)
 
-/* CURLOPT_COOKIE_CONTEXT bits */
+/* CURLOPT_COOKIECONTEXT bits */
 #define CURLCOOKIE_NAVIGATION (1L << 0) /* top-level navigation request */
 
 /* The CURLPROTO_ defines below are for the **deprecated** CURLOPT_*PROTOCOLS
@@ -2293,10 +2293,10 @@ typedef enum {
 
   /* The site the request is made for, used for SameSite and Partitioned
      cookies */
-  CURLOPT(CURLOPT_COOKIE_SITE, CURLOPTTYPE_STRINGPOINT, 333),
+  CURLOPT(CURLOPT_COOKIESITE, CURLOPTTYPE_STRINGPOINT, 333),
 
   /* Bitmask of CURLCOOKIE_* bits describing the request context */
-  CURLOPT(CURLOPT_COOKIE_CONTEXT, CURLOPTTYPE_LONG, 334),
+  CURLOPT(CURLOPT_COOKIECONTEXT, CURLOPTTYPE_LONG, 334),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

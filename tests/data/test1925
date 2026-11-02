@@ -10,7 +10,7 @@ Partitioned
 </info>
 
 <reply>
-# Without CURLOPT_COOKIE_SITE the attributes are stored but change nothing:
+# Without CURLOPT_COOKIESITE the attributes are stored but change nothing:
 # SameSite=None and Partitioned without Secure are kept and sent, and the
 # cookie jar is written as before
 <data1>
@@ -43,7 +43,7 @@ http
 cookies
 </features>
 <name>
-SameSite and Partitioned cookies without CURLOPT_COOKIE_SITE
+SameSite and Partitioned cookies without CURLOPT_COOKIESITE
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 -b "" -c %LOGDIR/jar%TESTNUMBER

@@ -74,13 +74,13 @@ static void freecookie(struct Cookie *co, bool maintoo)
 }
 
 /*
- * The site the request is made for, as set with CURLOPT_COOKIE_SITE.
+ * The site the request is made for, as set with CURLOPT_COOKIESITE.
  * Returns NULL when the application did not provide one, in which case
  * SameSite and Partitioned are not evaluated at all.
  */
 static const char *cookie_site(struct Curl_easy *data)
 {
-  const char *site = CURL_EASY_STR(data, STRING_COOKIE_SITE);
+  const char *site = CURL_EASY_STR(data, STRING_COOKIESITE);
   return (site && *site) ? site : NULL;
 }
 
@@ -107,7 +107,7 @@ static const char *cookie_site_host(const char *site, bool *secure)
 }
 
 /*
- * Check a string given to CURLOPT_COOKIE_SITE: "http://" or "https://"
+ * Check a string given to CURLOPT_COOKIESITE: "http://" or "https://"
  * followed by a hostname and nothing else, no port number or path. The string
  * is written to the cookie jar as partition key, another reason to only
  * accept hostname characters.
@@ -870,21 +870,21 @@ parse_cookie_header(struct Curl_easy *data,
         co->httponly = TRUE;
       else if(curlx_str_casecompare(&name, "partitioned"))
         *partitioned = TRUE;
+      else if(curlx_str_casecompare(&name, "samesite")) {
+        /* unknown or missing values are treated as "Default" */
+        if(curlx_str_casecompare(&val, "strict"))
+          co->samesite = COOKIE_SAMESITE_STRICT;
+        else if(curlx_str_casecompare(&val, "lax"))
+          co->samesite = COOKIE_SAMESITE_LAX;
+        else if(curlx_str_casecompare(&val, "none"))
+          co->samesite = COOKIE_SAMESITE_NONE;
+        else
+          co->samesite = COOKIE_SAMESITE_DEFAULT;
+      }
       else if(sep) {
         /* only if a separating equals sign is present */
         if(curlx_str_casecompare(&name, "path"))
           cookie[COOKIE_PATH] = val;
-        else if(curlx_str_casecompare(&name, "samesite")) {
-          /* RFC 6265bis 5.4.7: unknown values are treated as "Default" */
-          if(curlx_str_casecompare(&val, "strict"))
-            co->samesite = COOKIE_SAMESITE_STRICT;
-          else if(curlx_str_casecompare(&val, "lax"))
-            co->samesite = COOKIE_SAMESITE_LAX;
-          else if(curlx_str_casecompare(&val, "none"))
-            co->samesite = COOKIE_SAMESITE_NONE;
-          else
-            co->samesite = COOKIE_SAMESITE_DEFAULT;
-        }
         else if(curlx_str_casecompare(&name, "domain")) {
           if(curlx_strlen(&val) &&
              !parse_domain(data, co, &cookie[COOKIE_DOMAIN], &val, &domain))

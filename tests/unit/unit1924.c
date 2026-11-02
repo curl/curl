@@ -26,7 +26,7 @@
 #include "cookie.h"
 
 /* Test cookie_same_site(): the same-site check between the site a request
- * is made for (CURLOPT_COOKIE_SITE) and the request host, and
+ * is made for (CURLOPT_COOKIESITE) and the request host, and
  * Curl_cookie_site_ok(): the check of the site string itself. */
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)

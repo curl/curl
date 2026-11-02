@@ -195,6 +195,10 @@ See CURLOPT_CONV_TO_NETWORK_FUNCTION(3)
 
 Cookie(s) to send. See CURLOPT_COOKIE(3)
 
+## CURLOPT_COOKIECONTEXT
+
+Context of the request for cookies. See CURLOPT_COOKIECONTEXT(3)
+
 ## CURLOPT_COOKIEFILE
 
 File to read cookies from. See CURLOPT_COOKIEFILE(3)
@@ -211,13 +215,9 @@ Add or control cookies. See CURLOPT_COOKIELIST(3)
 
 Start a new cookie session. See CURLOPT_COOKIESESSION(3)
 
-## CURLOPT_COOKIE_CONTEXT
+## CURLOPT_COOKIESITE
 
-Context of the request for cookies. See CURLOPT_COOKIE_CONTEXT(3)
-
-## CURLOPT_COOKIE_SITE
-
-Site the request is made for. See CURLOPT_COOKIE_SITE(3)
+Site the request is made for. See CURLOPT_COOKIESITE(3)
 
 ## CURLOPT_COPYPOSTFIELDS
 
