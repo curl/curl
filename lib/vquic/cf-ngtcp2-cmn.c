@@ -1851,9 +1851,9 @@ CURLcode Curl_cf_ngtcp2_cmn_set_expiry(struct Curl_cfilter *cf,
       if(timeout % NGTCP2_MILLISECONDS) {
         timeout += NGTCP2_MILLISECONDS;
       }
-      Curl_expire_set(data, EXPIRE_QUIC,
-                      (timediff_t)(timeout / NGTCP2_MILLISECONDS),
-                      &pktx->now);
+      Curl_expire_latest(data, EXPIRE_QUIC,
+                         (timediff_t)(timeout / NGTCP2_MILLISECONDS),
+                         &pktx->now);
     }
   }
   return CURLE_OK;

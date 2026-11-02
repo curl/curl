@@ -989,7 +989,7 @@ static CURLcode multi_adjust_pollset(struct Curl_easy *data,
 
     /* Not blocked and wanting to receive. If there is data pending
      * in the connection filters, make transfer run again. */
-    if(!recv_blocked &&
+    if(!recv_blocked && (data->mstate != MSTATE_RATELIMITING) &&
        ((Curl_pollset_want_recv(data, ps, data->conn->sock[FIRSTSOCKET]) &&
          Curl_conn_data_pending(data, FIRSTSOCKET)) ||
         (Curl_pollset_want_recv(data, ps, data->conn->sock[SECONDARYSOCKET]) &&
@@ -1120,6 +1120,12 @@ static CURLcode mstate_ratelimit_pollset(struct Curl_easy *data,
    * but if any filter wants maintenance, add the socket for input. */
   if(conn && Curl_conn_wants_maintenance(conn, FIRSTSOCKET)) {
     curl_socket_t sock = data->conn->sock[FIRSTSOCKET];
+    if(sock != CURL_SOCKET_BAD) {
+      result = Curl_pollset_add_in(data, ps, sock);
+    }
+  }
+  if(conn && Curl_conn_wants_maintenance(conn, SECONDARYSOCKET)) {
+    curl_socket_t sock = data->conn->sock[SECONDARYSOCKET];
     if(sock != CURL_SOCKET_BAD) {
       result = Curl_pollset_add_in(data, ps, sock);
     }
@@ -2332,8 +2338,12 @@ static CURLMcode multistate_ratelimiting(struct Curl_easy *data,
       mresult = CURLM_CALL_MULTI_PERFORM;
 
     if(data->mstate == MSTATE_RATELIMITING) {
-      result = Curl_conn_do_maintenance(data, FIRSTSOCKET);
+      result = Curl_conn_do_maintenance(data);
       if(result) {
+        if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
+           result != CURLE_HTTP2_STREAM)
+          streamclose(data->conn);
+
         multi_posttransfer(data);
         multi_done(data, result, TRUE);
       }
@@ -3764,7 +3774,6 @@ static CURLMcode multi_set_timeout(struct Curl_easy *data,
     anchor = &timeouts->next[*anchor];
   }
   timeouts->next[eid] = *anchor;
-  timeouts->next[eid] = *anchor;
   *anchor = id;
   DEBUGASSERT(multi_timeouts_check(data));
   CURL_TRC_TIMER(data, eid, "set for %" FMT_TIMEDIFF_T "us",
@@ -3828,6 +3837,33 @@ void Curl_expire_set(struct Curl_easy *data,
   /* Insert the new timer expiry since it is our local minimum. */
   Curl_timeouts_add(&multi->timeouts, data,
                     timeouts->offset_us[timeouts->first]);
+}
+
+/* Set the timer expiry if not an earlier one is already set */
+void Curl_expire_latest(struct Curl_easy *data,
+                        expire_id eid, timediff_t ms,
+                        const struct curltime *pnow)
+{
+  struct expire_timers *timeouts = &data->state.timeouts;
+  uint8_t id, nid = (uint8_t)eid;
+
+  if(!data->multi)
+    return;
+
+  for(id = timeouts->first; id < EXPIRE_LAST; id = timeouts->next[id]) {
+    if(id == nid) { /* expire timer is set */
+      struct curltime newset = *pnow;
+      timediff_t now_us =
+        Curl_timeouts_offset_us(&data->multi->timeouts, &newset);
+
+      if(now_us >= timeouts->offset_us[nid]) /* already expired, set again */
+        break;
+      if(((timeouts->offset_us[nid] - now_us) / 1000) < ms)
+        return; /* existing timeout is earlier */
+      break;
+    }
+  }
+  Curl_expire_set(data, eid, ms, pnow);
 }
 
 void Curl_expire(struct Curl_easy *data,
