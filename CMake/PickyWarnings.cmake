@@ -392,23 +392,26 @@ if(PICKY_COMPILER)
         list(APPEND _picky "-Wno-conversion")  # Avoid false positives
       endif()
     endif()
-  elseif(MSVC AND MSVC_VERSION LESS_EQUAL 1951)  # Enable for tested versions only
-    list(APPEND _picky "-Wall")
-    list(APPEND _picky "-wd4061")  # enumerator 'A' in switch of enum 'B' is not explicitly handled by a case label
-    list(APPEND _picky "-wd4191")  # 'type cast': unsafe conversion from 'FARPROC' to 'void (__cdecl *)(void)'
-    list(APPEND _picky "-wd4255")  # no function prototype given: converting '()' to '(void)' (in winuser.h)
-    list(APPEND _picky "-wd4464")  # relative include path contains '..'
-    list(APPEND _picky "-wd4548")  # expression before comma has no effect; expected expression with side-effect (in FD_SET())
-    list(APPEND _picky "-wd4574")  # 'M' is defined to be '0': did you mean to use '#if M'? (in ws2tcpip.h)
-    list(APPEND _picky "-wd4668")  # 'M' is not defined as a preprocessor macro, replacing with '0' for '#if/#elif' (in winbase.h)
-    list(APPEND _picky "-wd4710")  # 'fprintf'/'printf'/'sscanf': function not inlined (in tests, with VS2022+ Release)
-    list(APPEND _picky "-wd4711")  # function 'A' selected for automatic inline expansion
-    # volatile access of '<expression>' is subject to /volatile:<iso|ms> setting;
-    #   consider using __iso_volatile_load/store intrinsic functions (ARM64)
-    list(APPEND _picky "-wd4746")
-    list(APPEND _picky "-wd4820")  # 'A': 'N' bytes padding added after data member 'B'
-    if(MSVC_VERSION GREATER_EQUAL 1900)
-      list(APPEND _picky "-wd5045")  # Compiler inserts Spectre mitigation for memory load if /Qspectre switch specified
+  elseif(MSVC)
+    list(APPEND _picky "-sdl")
+    if(MSVC_VERSION LESS_EQUAL 1951)  # Enable for tested versions only
+      list(APPEND _picky "-Wall")
+      list(APPEND _picky "-wd4061")  # enumerator 'A' in switch of enum 'B' is not explicitly handled by a case label
+      list(APPEND _picky "-wd4191")  # 'type cast': unsafe conversion from 'FARPROC' to 'void (__cdecl *)(void)'
+      list(APPEND _picky "-wd4255")  # no function prototype given: converting '()' to '(void)' (in winuser.h)
+      list(APPEND _picky "-wd4464")  # relative include path contains '..'
+      list(APPEND _picky "-wd4548")  # expression before comma has no effect; expected expression with side-effect (in FD_SET())
+      list(APPEND _picky "-wd4574")  # 'M' is defined to be '0': did you mean to use '#if M'? (in ws2tcpip.h)
+      list(APPEND _picky "-wd4668")  # 'M' is not defined as a preprocessor macro, replacing with '0' for '#if/#elif' (in winbase.h)
+      list(APPEND _picky "-wd4710")  # 'fprintf'/'printf'/'sscanf': function not inlined (in tests, with VS2022+ Release)
+      list(APPEND _picky "-wd4711")  # function 'A' selected for automatic inline expansion
+      # volatile access of '<expression>' is subject to /volatile:<iso|ms> setting;
+      #   consider using __iso_volatile_load/store intrinsic functions (ARM64)
+      list(APPEND _picky "-wd4746")
+      list(APPEND _picky "-wd4820")  # 'A': 'N' bytes padding added after data member 'B'
+      if(MSVC_VERSION GREATER_EQUAL 1900)
+        list(APPEND _picky "-wd5045")  # Compiler inserts Spectre mitigation for memory load if /Qspectre switch specified
+      endif()
     endif()
   endif()
 endif()
