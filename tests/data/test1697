@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--write-out
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 6
+Connection: close
+
+-foo-
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+-w transfer timers are set after a successful transfer
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/out%TESTNUMBER -w 'pre=%{time_pretransfer}\npost=%{time_posttransfer}\nstart=%{time_starttransfer}\n'
+</command>
+</client>
+
+<verify>
+<stripfile>
+s/^(pre|post|start)=(?!0\.0+\b)\d+\.\d+/$1=[non-zero]/
+</stripfile>
+<stdout mode="text">
+pre=[non-zero]
+post=[non-zero]
+start=[non-zero]
+</stdout>
+</verify>
+</testcase>
