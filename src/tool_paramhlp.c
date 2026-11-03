@@ -411,13 +411,38 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
 
   curlx_dyn_init(&obuf, MAX_PROTOSTRING);
 
-  /* Preset protocol set with default values. */
+  /* Repeated --proto options act like one comma-separated list. Start with
+     the previous result when there is one, otherwise use the defaults. */
   protoset[0] = NULL;
-  for(; *val; val++) {
-    const char *p = proto_token(*val);
+  if(*ostr) {
+    const char *p = *ostr;
+    while(*p) {
+      const char *end = strchr(p, ',');
+      size_t len = end ? (size_t)(end - p) : strlen(p);
+      char name[32];
+      const char *token;
 
-    if(p)
-      protoset_set(protoset, p);
+      if(len >= sizeof(name)) {
+        curlx_dyn_free(&obuf);
+        return PARAM_BAD_USE;
+      }
+      memcpy(name, p, len);
+      name[len] = '\0';
+      token = proto_token(name);
+      if(token)
+        protoset_set(protoset, token);
+      if(!end)
+        break;
+      p = end + 1;
+    }
+  }
+  else {
+    for(; *val; val++) {
+      const char *p = proto_token(*val);
+
+      if(p)
+        protoset_set(protoset, p);
+    }
   }
 
   while(*str) {

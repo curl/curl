@@ -2,7 +2,7 @@
 <testcase>
 <info>
 <keywords>
-HTTPS
+HTTP
 HTTP GET
 --proto-redir
 </keywords>
@@ -29,24 +29,21 @@ Location: http://somewhere/%TESTNUMBER
 </reply>
 
 <client>
-<features>
-SSL
-</features>
 <server>
-https
+http
 </server>
 <name>
-HTTPS with attempted redirect to denied HTTP
+Repeated --proto-redir options deny an HTTP redirect
 </name>
 <command>
---insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER --proto-redir -http --location
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proto-redir =https --proto-redir -ftp --location
 </command>
 </client>
 
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPSPORT
+Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
