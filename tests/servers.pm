@@ -328,7 +328,7 @@ sub serverfortest {
 sub startnew {
     my ($cmd, $pidfile, $timeout, $fakepidfile) = @_;
 
-    logmsg "startnew: $cmd\n" if($verbose);
+    logmsg "startnew: $cmd\n";
 
     my $child = fork();
 
