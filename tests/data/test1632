@@ -96,7 +96,6 @@ RETR %TESTNUMBER
 EPSV
 SIZE %TESTNUMBER0002
 RETR %TESTNUMBER0002
-QUIT
 </protocol>
 </verify>
 </testcase>

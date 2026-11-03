@@ -44,7 +44,6 @@ SIZE %TESTNUMBER
 REST 52
 RETR %TESTNUMBER
 ABOR
-QUIT
 </protocol>
 </verify>
 </testcase>

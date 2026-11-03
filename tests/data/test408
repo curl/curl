@@ -50,7 +50,6 @@ CWD RETR
 PORT 127,0,0,1,5,109
 TYPE I
 STOR %TESTNUMBER
-QUIT
 </protocol>
 <upload>
 Moooooooooooo

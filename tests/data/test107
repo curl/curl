@@ -44,7 +44,6 @@ PWD
 EPSV
 TYPE I
 STOR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

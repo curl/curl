@@ -34,7 +34,6 @@ USER anonymous
 PASS ftp@example.com
 PWD
 EPSV
-QUIT
 </protocol>
 </verify>
 </testcase>

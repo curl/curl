@@ -51,7 +51,6 @@ LIST
 CWD /
 EPSV
 LIST list/this/path/%TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

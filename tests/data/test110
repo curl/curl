@@ -44,7 +44,6 @@ TYPE I
 SIZE %TESTNUMBER
 REST 20
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

@@ -37,7 +37,6 @@ TYPE I
 STOR upload.%TESTNUMBER
 EPSV
 STOR ..anotherup.%TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

@@ -48,7 +48,6 @@ TYPE I
 SIZE %TESTNUMBER
 REST 20
 RETR %TESTNUMBER
-QUIT
 </protocol>
 <file name="%LOGDIR/curl%TESTNUMBER.out">
 This is the start!!

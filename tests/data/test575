@@ -69,7 +69,6 @@ EPSV
 RETR file.txt
 EPSV
 RETR someothertext.txt
-QUIT
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -91,7 +90,6 @@ EPSV
 RETR file.txt
 EPSV
 RETR someothertext.txt
-QUIT
 </protocol>
 <stdout>
 This file should have permissions 444
