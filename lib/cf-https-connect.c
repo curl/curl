@@ -271,6 +271,27 @@ static bool cf_hc_may_h3(struct Curl_cfilter *cf,
   return !ctx->check_h3_result;
 }
 
+static bool cf_hc_may_choose_alpn(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   enum alpnid maybe,
+                                   enum alpnid already_using)
+{
+  http_majors allowed = data->state.http_neg.allowed;
+
+  if(maybe == already_using)
+    return FALSE;
+  switch(maybe) {
+  case ALPN_h1:
+    return (allowed & CURL_HTTP_V1x) != 0;
+  case ALPN_h2:
+    return (allowed & CURL_HTTP_V2x) != 0;
+  case ALPN_h3:
+    return (allowed & CURL_HTTP_V3x) && cf_hc_may_h3(cf, data);
+  default:
+    return FALSE;
+  }
+}
+
 static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
                                           enum alpnid not_this_one)
@@ -435,6 +456,14 @@ static void cf_hc_set_baller2(struct Curl_cfilter *cf,
 
   if(ctx->ballers_complete)
     return; /* already done */
+  /* HTTPS-RR can select h1 and h2 as separate attempts. Only finish
+   * selection early when no other allowed ALPN can be used. */
+  if(!cf_hc_may_choose_alpn(cf, data, ALPN_h1, alpn1) &&
+     !cf_hc_may_choose_alpn(cf, data, ALPN_h2, alpn1) &&
+     !cf_hc_may_choose_alpn(cf, data, ALPN_h3, alpn1)) {
+    ctx->ballers_complete = TRUE;
+    return;
+  }
   if(!ctx->httpsrr_resolved)
     return; /* HTTPS-RR pending */
 
