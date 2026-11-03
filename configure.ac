@@ -5583,6 +5583,10 @@ if test -n "$experimental"; then
   done
 fi
 
+if test -e "${srcdir}/tests/libtest/.deps/"'$'*.Po; then
+  AC_MSG_WARN([Your automake has broken dependency tracking. If curl or tests fail to build then you can try to run configure again with --disable-dependency-tracking as a workaround.])
+fi
+
 CURL_PREPARE_BUILDINFO
 echo "[@%:@] This is a generated file.  Do not edit.${curl_buildinfo}" > ./buildinfo.txt
 if test -n "$CURL_BUILDINFO$CURL_CI$CI"; then
