@@ -221,7 +221,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
     DEBUGF(infof(data, "sending last upload chunk of %zu bytes", blen));
     eos = TRUE;
   }
-  result = Curl_xfer_send(data, buf, blen, eos, pnwritten);
+  result = Curl_xfer_try_send(data, buf, blen, eos, pnwritten);
   if(!result) {
     if(eos && (blen == *pnwritten))
       data->req.eos_sent = TRUE;
@@ -400,7 +400,11 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
      (blen <= data->req.sendbuf.chunk_size)) {
     data->req.eos_read = TRUE;
     result = xfer_send(data, buf, blen, blen, &nwritten);
-    if(result)
+    if(result == CURLE_AGAIN) {
+      nwritten = 0;
+      result = CURLE_OK;
+    }
+    else if(result)
       return result;
     buf += nwritten;
     blen -= nwritten;

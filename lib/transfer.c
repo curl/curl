@@ -814,6 +814,25 @@ CURLcode Curl_xfer_flush(struct Curl_easy *data)
   return Curl_conn_flush(data, data->conn->send_idx);
 }
 
+CURLcode Curl_xfer_try_send(struct Curl_easy *data,
+                            const void *buf, size_t blen, bool eos,
+                            size_t *pnwritten)
+{
+  CURLcode result;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+
+  result = Curl_conn_send(data, data->conn->send_idx,
+                          buf, blen, eos, pnwritten);
+  if(!result && *pnwritten)
+    data->info.request_size += *pnwritten;
+
+  DEBUGF(infof(data, "Curl_xfer_send(len=%zu, eos=%d) -> %d, %zu",
+               blen, eos, (int)result, *pnwritten));
+  return result;
+}
+
 CURLcode Curl_xfer_send(struct Curl_easy *data,
                         const void *buf, size_t blen, bool eos,
                         size_t *pnwritten)
@@ -823,17 +842,11 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
 
-  result = Curl_conn_send(data, data->conn->send_idx,
-                          buf, blen, eos, pnwritten);
+  result = Curl_xfer_try_send(data, buf, blen, eos, pnwritten);
   if(result == CURLE_AGAIN) {
     result = CURLE_OK;
     *pnwritten = 0;
   }
-  else if(!result && *pnwritten)
-    data->info.request_size += *pnwritten;
-
-  DEBUGF(infof(data, "Curl_xfer_send(len=%zu, eos=%d) -> %d, %zu",
-               blen, eos, (int)result, *pnwritten));
   return result;
 }
 
