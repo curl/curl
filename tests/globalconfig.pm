@@ -55,6 +55,7 @@ BEGIN {
         $MEMDUMP
         $perlcmd
         $perl
+        $python
         $PIDDIR
         $proxy_address
         $PROXYIN
@@ -110,6 +111,7 @@ our $pwd = getcwd();  # current working directory
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
 our $perlcmd = shell_quote($^X);
 our $perl = "$perlcmd -I. " . shell_quote("-I$srcdir"); # invoke perl like this
+our $python = 'python3'; # invoke python like this
 our $LOGDIR = "log";  # root of the log directory; this is different for
                       # each runner in multiprocess mode
 our $LIBDIR = dirsepadd("./libtest/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
