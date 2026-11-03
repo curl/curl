@@ -54,6 +54,7 @@ static const char *resp_cookies[] = {
   "Set-Cookie: whatabout=content; path=/path; secur3\r\n",
   "Set-Cookie: curious=content;\tpath=/path;\tdomain=www.example\r\n",
   "Set-COOKIE:\tbare=something;\texpires=\"2044 Nov 6 08:49:37\"\r\n",
+  "Set-Cookie: name=overwritten\r\n",
   "\r\n"
 };
 
