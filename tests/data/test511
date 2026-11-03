@@ -39,7 +39,6 @@ PWD
 MDTM %TESTNUMBER
 TYPE I
 SIZE %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

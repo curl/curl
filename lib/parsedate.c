@@ -103,42 +103,7 @@ const char * const Curl_month[] = {
 #define PARSEDATE_SOONER 2
 #endif
 
-struct tzinfo {
-  uint32_t tz;
-  int16_t offset; /* +/- in minutes */
-};
-
 #define DST (-60)     /* offset for daylight savings time */
-
-/* alpha-sorted list of single-letter time zones, A - Z */
-static const int16_t tzone[] = {
-  -1 * 60,            /* Alpha */
-  -2 * 60,            /* Bravo */
-  -3 * 60,            /* Charlie */
-  -4 * 60,            /* Delta */
-  -5 * 60,            /* Echo */
-  -6 * 60,            /* Foxtrot */
-  -7 * 60,            /* Golf */
-  -8 * 60,            /* Hotel */
-  -9 * 60,            /* India */
-  -1,                 /* J - not a timezone */
-  -10 * 60,           /* Kilo */
-  -11 * 60,           /* Lima */
-  -12 * 60,           /* Mike */
-  60,                 /* November */
-   2 * 60,            /* Oscar */
-   3 * 60,            /* Papa */
-   4 * 60,            /* Quebec */
-   5 * 60,            /* Romeo */
-   6 * 60,            /* Sierra */
-   7 * 60,            /* Tango */
-   8 * 60,            /* Uniform */
-   9 * 60,            /* Victor */
-  10 * 60,            /* Whiskey */
-  11 * 60,            /* X-ray */
-  12 * 60,            /* Yankee */
-  0                   /* Zulu, zero meridian, a.k.a. UTC */
-};
 
 /* two-letter time zones
 
@@ -149,58 +114,12 @@ static const int16_t tzone[] = {
 
 #define MKTZ(a,b,c,d) (((a)<<24) | ((b)<<16) | ((c)<<8) | (d))
 
-/* three-letter time zones */
-static const struct tzinfo tzthree[] = {
-  { MKTZ('A', 'D', 'T', '\0'),   240 + DST }, /* Atlantic Daylight */
-  { MKTZ('A', 'S', 'T', '\0'),   240 },       /* Atlantic Standard */
-  { MKTZ('B', 'S', 'T', '\0'),     0 + DST }, /* British Summer */
-  { MKTZ('C', 'A', 'T', '\0'),   600 },       /* Central Alaska */
-  { MKTZ('C', 'C', 'T', '\0'),  -480 },       /* China Coast, USSR Zone 7 */
-  { MKTZ('C', 'D', 'T', '\0'),   360 + DST }, /* Central Daylight */
-  { MKTZ('C', 'E', 'T', '\0'),   -60 },       /* Central European */
-  { MKTZ('C', 'S', 'T', '\0'),   360 },       /* Central Standard */
-  { MKTZ('E', 'D', 'T', '\0'),   300 + DST }, /* Eastern Daylight */
-  { MKTZ('E', 'E', 'T', '\0'),  -120 },       /* Eastern Europe, USSR Zone 1 */
-  { MKTZ('E', 'S', 'T', '\0'),   300 },       /* Eastern Standard */
-  { MKTZ('F', 'S', 'T', '\0'),   -60 + DST }, /* French Summer */
-  { MKTZ('F', 'W', 'T', '\0'),   -60 },       /* French Winter */
-  { MKTZ('G', 'M', 'T', '\0'),     0 },       /* Greenwich Mean */
-  { MKTZ('G', 'S', 'T', '\0'),  -600 },       /* Guam Standard, USSR Zone 9 */
-  { MKTZ('H', 'D', 'T', '\0'),   600 + DST }, /* Hawaii Daylight */
-  { MKTZ('H', 'S', 'T', '\0'),   600 },       /* Hawaii Standard */
-  { MKTZ('J', 'S', 'T', '\0'),  -540 },       /* Japan Standard, USSR Zone 8 */
-  { MKTZ('M', 'D', 'T', '\0'),   420 + DST }, /* Mountain Daylight */
-  { MKTZ('M', 'E', 'T', '\0'),   -60 },       /* Middle European */
-  { MKTZ('M', 'S', 'T', '\0'),   420 },       /* Mountain Standard */
-  { MKTZ('N', 'Z', 'T', '\0'),  -720 },       /* New Zealand */
-  { MKTZ('P', 'D', 'T', '\0'),   480 + DST }, /* Pacific Daylight */
-  { MKTZ('P', 'S', 'T', '\0'),   480 },       /* Pacific Standard */
-  { MKTZ('U', 'T', 'C', '\0'),     0 },       /* Universal (Coordinated) */
-  { MKTZ('W', 'A', 'T', '\0'),    60 },       /* West Africa */
-  { MKTZ('W', 'E', 'T', '\0'),     0 },       /* Western European */
-  { MKTZ('Y', 'D', 'T', '\0'),   540 + DST }, /* Yukon Daylight */
-  { MKTZ('Y', 'S', 'T', '\0'),   540 },       /* Yukon Standard */
-};
-
-/* four-letter time zones */
-static const struct tzinfo tzfoura[] = {
-  { MKTZ('A', 'H', 'S', 'T'),  600 },       /* Alaska-Hawaii Standard */
-  { MKTZ('C', 'E', 'S', 'T'),  -60 + DST }, /* Central European Summer */
-  { MKTZ('E', 'A', 'D', 'T'), -600 + DST }, /* Eastern Australian Daylight */
-  { MKTZ('E', 'A', 'S', 'T'), -600 },       /* Eastern Australian Standard */
-  { MKTZ('I', 'D', 'L', 'E'), -720 },       /* International Date Line East */
-  { MKTZ('I', 'D', 'L', 'W'),  720 },       /* International Date Line West */
-  { MKTZ('M', 'E', 'S', 'T'),  -60 + DST }, /* Middle European Summer */
-  { MKTZ('M', 'E', 'S', 'Z'),  -60 + DST }, /* Middle European Summer */
-  { MKTZ('M', 'E', 'W', 'T'),  -60 },       /* Middle European Winter */
-  { MKTZ('N', 'Z', 'D', 'T'), -720 + DST }, /* New Zealand Daylight */
-  { MKTZ('N', 'Z', 'S', 'T'), -720 },       /* New Zealand Standard */
-  { MKTZ('W', 'A', 'D', 'T'), -420 + DST }, /* West Australian Daylight */
-  { MKTZ('W', 'A', 'S', 'T'), -420 }, /* spellchecker:disable-line */
-                               /* West Australian Standard */
-};
-
 #define LOWERCASE(x) ((x) | 0x20)
+
+/* Pack three lowercase characters into a uint32_t for O(1) name lookups */
+#define MKNAME3(a,b,c) \
+  ((uint32_t)(LOWERCASE(a) << 16) | (uint32_t)(LOWERCASE(b) << 8) | \
+   (uint32_t)LOWERCASE(c))
 
 /* returns:
    -1 no day
@@ -211,50 +130,60 @@ static const struct tzinfo tzfoura[] = {
 UNITTEST int checkday(const char *check, size_t len);
 UNITTEST int checkday(const char *check, size_t len)
 {
-  int day = -1;
+  int day;
   if(len < 3)
     return -1; /* too short */
 
-  switch(LOWERCASE(check[1])) {
-  case 'o': /* monday */
-    if((LOWERCASE(check[0]) == 'm') && LOWERCASE(check[2]) == 'n')
-      day = 0;
+  switch(MKNAME3(check[0], check[1], check[2])) {
+  case MKNAME3('m','o','n'):
+    day = 0;
     break;
-  case 'u': /* tuesday or sunday */
-    if((LOWERCASE(check[0]) == 't') && LOWERCASE(check[2]) == 'e')
-      day = 1;
-    else if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[2]) == 'n')
-      day = 6;
+  case MKNAME3('t','u','e'):
+    day = 1;
     break;
-  case 'e': /* wednesday */
-    if((LOWERCASE(check[0]) == 'w') && LOWERCASE(check[2]) == 'd')
-      day = 2;
+  case MKNAME3('w','e','d'):
+    day = 2;
     break;
-  case 'h': /* thursday */
-    if((LOWERCASE(check[0]) == 't') && LOWERCASE(check[2]) == 'u')
-      day = 3;
+  case MKNAME3('t','h','u'):
+    day = 3;
     break;
-  case 'r': /* friday */
-    if((LOWERCASE(check[0]) == 'f') && LOWERCASE(check[2]) == 'i')
-      day = 4;
+  case MKNAME3('f','r','i'):
+    day = 4;
     break;
-  case 'a': /* saturday */
-    if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[2]) == 't')
-      day = 5;
+  case MKNAME3('s','a','t'):
+    day = 5;
     break;
+  case MKNAME3('s','u','n'):
+    day = 6;
+    break;
+  default:
+    return -1;
   }
-  if((len > 3) && (day != -1)) {
-    /* when more than three letters are provided, verify the tail name case
-       insensitively */
-    static const char * const daysuffix[] = {
-      /* without the leading three letters */
-      "day", "sday", "nesday", "rsday", "day", "urday", "day"
-    };
 
-    size_t wlen = strlen(daysuffix[day]);
-    if(((len - 3) != wlen) ||
-       !curl_strnequal(&check[3], daysuffix[day], wlen))
+  if(len > 3) {
+    /* when more than three letters are provided, verify the full name
+       case-insensitively */
+    static const struct {
+      const char *suffix; /* chars minus the first three */
+      size_t      slen;
+    } daysuffix[] = {
+      /* 0 Mon */ { "day",    3 },
+      /* 1 Tue */ { "sday",   4 },
+      /* 2 Wed */ { "nesday", 6 },
+      /* 3 Thu */ { "rsday",  5 },
+      /* 4 Fri */ { "day",    3 },
+      /* 5 Sat */ { "urday",  5 },
+      /* 6 Sun */ { "day",    3 },
+    };
+    size_t slen = daysuffix[day].slen;
+    const char *suffix = daysuffix[day].suffix;
+    size_t i;
+    if((len - 3) != slen)
       return -1;
+    for(i = 0; i < slen; i++) {
+      if(LOWERCASE(check[3 + i]) != suffix[i])
+        return -1;
+    }
   }
   return day;
 }
@@ -267,65 +196,33 @@ UNITTEST int checkmonth(const char *check, size_t len)
   if(len != 3)
     return -1; /* not a month */
 
-  switch(LOWERCASE(check[2])) {
-  case 'n': /* jan, jun */
-    if(LOWERCASE(check[0]) == 'j') {
-      uint8_t c2 = LOWERCASE(check[1]);
-      if(c2 == 'a')
-        return 0;
-      else if(c2 == 'u')
-        return 5;
-    }
-    break;
-  case 'b': /* feb */
-    if((LOWERCASE(check[0]) == 'f') && LOWERCASE(check[1]) == 'e')
-      return 1;
-    break;
-  case 'r': /* mar, apr */
-    if(LOWERCASE(check[0]) == 'm') {
-      if(LOWERCASE(check[1]) == 'a')
-        return 2;
-    }
-    else if((LOWERCASE(check[0]) == 'a') && LOWERCASE(check[1]) == 'p')
-      return 3;
-    break;
-  case 'y': /* may */
-    if((LOWERCASE(check[0]) == 'm') && LOWERCASE(check[1]) == 'a')
-      return 4;
-    break;
-  case 'l': /* jul */
-    if((LOWERCASE(check[0]) == 'j') && LOWERCASE(check[1]) == 'u')
-      return 6;
-    break;
-  case 'g': /* aug */
-    if((LOWERCASE(check[0]) == 'a') && LOWERCASE(check[1]) == 'u')
-      return 7;
-    break;
-  case 'p': /* sep */
-    if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[1]) == 'e')
-      return 8;
-    break;
-  case 't': /* oct */
-    if((LOWERCASE(check[0]) == 'o') && LOWERCASE(check[1]) == 'c')
-      return 9;
-    break;
-  case 'v': /* nov */
-    if((LOWERCASE(check[0]) == 'n') && LOWERCASE(check[1]) == 'o')
-      return 10;
-    break;
-  case 'c': /* dec */
-    if((LOWERCASE(check[0]) == 'd') && LOWERCASE(check[1]) == 'e')
-      return 11;
-    break;
+  switch(MKNAME3(check[0], check[1], check[2])) {
+  case MKNAME3('j','a','n'):
+    return 0;
+  case MKNAME3('f','e','b'):
+    return 1;
+  case MKNAME3('m','a','r'):
+    return 2;
+  case MKNAME3('a','p','r'):
+    return 3;
+  case MKNAME3('m','a','y'):
+    return 4;
+  case MKNAME3('j','u','n'):
+    return 5;
+  case MKNAME3('j','u','l'):
+    return 6;
+  case MKNAME3('a','u','g'):
+    return 7;
+  case MKNAME3('s','e','p'):
+    return 8;
+  case MKNAME3('o','c','t'):
+    return 9;
+  case MKNAME3('n','o','v'):
+    return 10;
+  case MKNAME3('d','e','c'):
+    return 11;
   }
   return -1; /* return the offset or -1, no real offset is -1 */
-}
-
-static int tzcompare(const void *m1, const void *m2)
-{
-  const struct tzinfo *tz1 = m1;
-  const struct tzinfo *tz2 = m2;
-  return tz1->tz - tz2->tz;
 }
 
 /* return the time zone offset between GMT and the input one, in number of
@@ -336,6 +233,35 @@ static int tzcompare(const void *m1, const void *m2)
 UNITTEST int checktz(const char *check, size_t len);
 UNITTEST int checktz(const char *check, size_t len)
 {
+  /* alpha-sorted list of single-letter time zones, A - Z */
+  static const int16_t tzone[] = {
+    -1 * 60,            /* Alpha */
+    -2 * 60,            /* Bravo */
+    -3 * 60,            /* Charlie */
+    -4 * 60,            /* Delta */
+    -5 * 60,            /* Echo */
+    -6 * 60,            /* Foxtrot */
+    -7 * 60,            /* Golf */
+    -8 * 60,            /* Hotel */
+    -9 * 60,            /* India */
+    -1,                 /* J - not a timezone */
+    -10 * 60,           /* Kilo */
+    -11 * 60,           /* Lima */
+    -12 * 60,           /* Mike */
+    60,                 /* November */
+    2 * 60,             /* Oscar */
+    3 * 60,             /* Papa */
+    4 * 60,             /* Quebec */
+    5 * 60,             /* Romeo */
+    6 * 60,             /* Sierra */
+    7 * 60,             /* Tango */
+    8 * 60,             /* Uniform */
+    9 * 60,             /* Victor */
+    10 * 60,            /* Whiskey */
+    11 * 60,            /* X-ray */
+    12 * 60,            /* Yankee */
+    0                   /* Zulu, zero meridian, a.k.a. UTC */
+  };
   char first;
   if(len > 4)
     return -1;
@@ -359,37 +285,106 @@ UNITTEST int checktz(const char *check, size_t len)
     return -1; /* nope */
   }
   else if(len == 3) {
-    /* three-letter name */
-    const struct tzinfo *what;
-    struct tzinfo find;
+    uint32_t key;
     if(first > 'Y')
       return -1;
-    find.tz = MKTZ(first, check[1], check[2], 0);
-    what = bsearch(&find, tzthree, CURL_ARRAYSIZE(tzthree),
-                   sizeof(tzthree[0]), tzcompare);
-    if(what)
-      return what->offset * 60;
+    key = MKTZ(first, check[1], check[2], 0);
+    switch(key) {
+    case MKTZ('A','D','T','\0'):
+      return (240 + DST) * 60; /* Atlantic Daylight */
+    case MKTZ('A','S','T','\0'):
+      return 240 * 60; /* Atlantic Standard */
+    case MKTZ('B','S','T','\0'):
+      return (0 + DST) * 60; /* British Summer */
+    case MKTZ('C','A','T','\0'):
+      return 600 * 60; /* Central Alaska */
+    case MKTZ('C','C','T','\0'):
+      return -480 * 60; /* China Coast, USSR Zone 7 */
+    case MKTZ('C','D','T','\0'):
+      return (360 + DST) * 60; /* Central Daylight */
+    case MKTZ('C','E','T','\0'):
+      return -60 * 60; /* Central European */
+    case MKTZ('C','S','T','\0'):
+      return 360 * 60; /* Central Standard */
+    case MKTZ('E','D','T','\0'):
+      return (300 + DST) * 60; /* Eastern Daylight */
+    case MKTZ('E','E','T','\0'):
+      return -120 * 60; /* Eastern Europe, USSR Zone 1 */
+    case MKTZ('E','S','T','\0'):
+      return 300 * 60; /* Eastern Standard */
+    case MKTZ('F','S','T','\0'):
+      return (-60 + DST) * 60; /* French Summer */
+    case MKTZ('F','W','T','\0'):
+      return -60 * 60; /* French Winter */
+    case MKTZ('G','M','T','\0'):
+      return 0; /* Greenwich Mean */
+    case MKTZ('G','S','T','\0'):
+      return -600 * 60; /* Guam Standard, USSR Zone 9 */
+    case MKTZ('H','D','T','\0'):
+      return (600 + DST) * 60; /* Hawaii Daylight */
+    case MKTZ('H','S','T','\0'):
+      return 600 * 60; /* Hawaii Standard */
+    case MKTZ('J','S','T','\0'):
+      return -540 * 60; /* Japan Standard, USSR Zone 8 */
+    case MKTZ('M','D','T','\0'):
+      return (420 + DST) * 60; /* Mountain Daylight */
+    case MKTZ('M','E','T','\0'):
+      return -60 * 60; /* Middle European */
+    case MKTZ('M','S','T','\0'):
+      return 420 * 60; /* Mountain Standard */
+    case MKTZ('N','Z','T','\0'):
+      return -720 * 60; /* New Zealand */
+    case MKTZ('P','D','T','\0'):
+      return (480 + DST) * 60; /* Pacific Daylight */
+    case MKTZ('P','S','T','\0'):
+      return 480 * 60; /* Pacific Standard */
+    case MKTZ('U','T','C','\0'):
+      return 0; /* Universal (Coordinated) */
+    case MKTZ('W','A','T','\0'):
+      return 60 * 60; /* West Africa */
+    case MKTZ('W','E','T','\0'):
+      return 0; /* Western European */
+    case MKTZ('Y','D','T','\0'):
+      return (540 + DST) * 60; /* Yukon Daylight */
+    case MKTZ('Y','S','T','\0'):
+      return 540 * 60; /* Yukon Standard */
+    }
   }
   else {
-    /* four-letter name */
-    const struct tzinfo *what;
-    struct tzinfo find;
+    uint32_t key;
     if(first > 'W')
       return -1;
-    find.tz = MKTZ(first, check[1], check[2], check[3]);
-    what = bsearch(&find, tzfoura, CURL_ARRAYSIZE(tzfoura),
-                   sizeof(tzfoura[0]), tzcompare);
-    if(what)
-      return what->offset * 60;
+    key = MKTZ(first, check[1], check[2], check[3]);
+    switch(key) {
+    case MKTZ('A','H','S','T'):
+      return 600 * 60; /* Alaska-Hawaii Standard */
+    case MKTZ('C','E','S','T'):
+      return (-60 + DST) * 60; /* Central European Summer */
+    case MKTZ('E','A','D','T'):
+      return (-600 + DST) * 60; /* Eastern Australian Daylight */
+    case MKTZ('E','A','S','T'):
+      return -600 * 60; /* Eastern Australian Standard */
+    case MKTZ('I','D','L','E'):
+      return -720 * 60; /* International Date Line East */
+    case MKTZ('I','D','L','W'):
+      return 720 * 60; /* International Date Line West */
+    case MKTZ('M','E','S','T'):
+      return (-60 + DST) * 60; /* Middle European Summer */
+    case MKTZ('M','E','S','Z'):
+      return (-60 + DST) * 60; /* Middle European Summer */
+    case MKTZ('M','E','W','T'):
+      return -60 * 60; /* Middle European Winter */
+    case MKTZ('N','Z','D','T'):
+      return (-720 + DST) * 60; /* New Zealand Daylight */
+    case MKTZ('N','Z','S','T'):
+      return -720 * 60; /* New Zealand Standard */
+    case MKTZ('W','A','D','T'):
+      return (-420 + DST) * 60; /* West Australian Daylight */
+    case MKTZ('W','A','S','T'): /* spellchecker:disable-line */
+      return -420 * 60; /* West Australian Standard */
+    }
   }
   return -1;
-}
-
-static void skip(const char **date)
-{
-  /* skip everything that are not letters or digits */
-  while(**date && !ISALNUM(**date))
-    (*date)++;
 }
 
 /* each field is exactly -1 when unknown */
@@ -423,44 +418,42 @@ static curl_off_t time2epoch(struct when *w)
   return (days * SECONDS_PER_DAY) + w->dsecs;
 }
 
-/* Returns the value of a single-digit or two-digit decimal number, return
-   then pointer to after the number. The 'date' pointer is known to point to a
-   digit. */
-static int oneortwodigit(const char *date, const char **endp)
-{
-  int num = date[0] - '0';
-  if(ISDIGIT(date[1])) {
-    *endp = &date[2];
-    return (num * 10) + (date[1] - '0');
-  }
-  *endp = &date[1];
-  return num;
-}
-
 /* HH:MM:SS or HH:MM and accept single-digits too */
 static bool match_time(const char *date, struct when *w, char **endp)
 {
-  const char *p;
-  int hh, mm, ss = 0;
-  hh = oneortwodigit(date, &p);
-  if((hh < 24) && (*p == ':') && ISDIGIT(p[1])) {
-    mm = oneortwodigit(&p[1], &p);
-    if(mm < 60) {
-      if((*p == ':') && ISDIGIT(p[1])) {
-        ss = oneortwodigit(&p[1], &p);
-        if(ss <= 60) {
-          /* valid HH:MM:SS */
-          goto match;
-        }
-      }
-      else {
-        /* valid HH:MM */
-        goto match;
-      }
-    }
+  const unsigned char *p = (const unsigned char *)date;
+  unsigned int hh, mm, ss = 0;
+
+  if(!ISDIGIT(*p))
+    return FALSE;
+
+  hh = *p++ - '0';
+  if(ISDIGIT(*p))
+    hh = hh * 10 + (*p++ - '0');
+
+  if((hh >= 24) || (*p++ != ':') || !ISDIGIT(*p))
+    return FALSE;
+
+  mm = *p++ - '0';
+  if(ISDIGIT(*p))
+    mm = mm * 10 + (*p++ - '0');
+
+  if(mm >= 60)
+    return FALSE;
+
+  if(*p == ':') {
+    p++;
+    if(!ISDIGIT(*p))
+      return FALSE;
+
+    ss = *p++ - '0';
+    if(ISDIGIT(*p))
+      ss = ss * 10 + (*p++ - '0');
+
+    if(ss > 60)
+      return FALSE;
   }
-  return FALSE; /* not a time string */
-match:
+
   w->dsecs = (hh * 3600) + (mm * 60) + ss;
   *endp = (char *)CURL_UNCONST(p);
   return TRUE;
@@ -529,31 +522,27 @@ static int datenum(const char *indate, const char **datep, struct when *w)
     date = end;
   }
   else {
-    bool found = FALSE;
-    curl_off_t lval;
-    int num_digits = 0;
-    const char *p = *datep;
-    if(curlx_str_number(&p, &lval, 99999999))
+    /* Parse up to 8 decimal digits inline - we know *date is a digit.
+       Avoid the overhead of curlx_str_number(). */
+    const char *p = date;
+    unsigned int n = (unsigned int)(*p++ - '0');
+    int num_digits;
+    while(ISDIGIT(*p) && (p - date) < 8)
+      n = n * 10 + (unsigned int)(*p++ - '0');
+    /* reject a 9th digit */
+    if(ISDIGIT(*p))
       return PARSEDATE_FAIL;
+    num_digits = (int)(p - date);
+    val = n;
 
-    /* we know num_digits cannot be larger than 8 */
-    num_digits = (int)(p - *datep);
-    val = (unsigned int)lval;
-
-    if((w->tzoff == -1) &&
-       (num_digits == 4) &&
-       (val <= 1400) &&
-       (indate < date) &&
-       (date[-1] == '+' || date[-1] == '-')) {
+    if((num_digits == 4) && (indate < date) &&
+       (date[-1] == '+' || date[-1] == '-') &&
+       (w->tzoff == -1) && (val <= 1400)) {
       /* four digits and a value less than or equal to 1400 (to take into
-         account all sorts of funny time zone diffs) and it is preceded
-         with a plus or minus. This is a time zone indication. 1400 is
-         picked since +1300 is frequently used and +1400 is mentioned as
-         an edge number in the document "ISO C 200X Proposal: Timezone
-         Functions" at http://david.tribble.com/text/c0xtimezone.html If
-         anyone has a more authoritative source for the exact maximum time
-         zone offsets, please speak up! */
-      found = TRUE;
+         account all sorts of funny time zone diffs) and it is preceded with a
+         plus or minus. This is a time zone indication. 1400 is picked since
+         +1300 is frequently used and +1400 is mentioned as an edge number in
+         the document "ISO C 200X Proposal: Timezone Functions" */
       w->tzoff = ((val / 100 * 60) + (val % 100)) * 60;
 
       /* the + and - prefix indicates the local time compared to GMT,
@@ -561,27 +550,25 @@ static int datenum(const char *indate, const char **datep, struct when *w)
       w->tzoff = date[-1] == '+' ? -w->tzoff : w->tzoff;
     }
 
-    else if((num_digits == 8) && (w->year == -1) &&
-            (w->mon == -1) && (w->mday == -1)) {
-      /* 8 digits, no year, month or day yet. This is YYYYMMDD */
-      found = TRUE;
-      w->year = val / 10000;
-      w->mon = ((val % 10000) / 100) - 1; /* month is 0 - 11 */
-      if(w->mon > 11)
-        return PARSEDATE_FAIL;
-      w->mday = val % 100;
-    }
-
-    if(!found && (w->mday == -1)) {
-      if((val > 0) && (val < 32)) {
-        w->mday = val;
-        found = TRUE;
+    else if(num_digits == 8) {
+      /* 8 digits, this is YYYYMMDD */
+      if((w->year == -1) && (w->mon == -1) && (w->mday == -1)) {
+        w->year = val / 10000;
+        w->mon = ((val % 10000) / 100) - 1; /* month is 0 - 11 */
+        if(w->mon > 11)
+          return PARSEDATE_FAIL;
+        w->mday = val % 100;
       }
+      else
+        return PARSEDATE_FAIL;
     }
 
-    if(!found && (w->year == -1)) {
+    else if(w->mday == -1 && val > 0 && val < 32) {
+      w->mday = val;
+    }
+
+    else if(w->year == -1) {
       w->year = val;
-      found = TRUE;
       if(w->year < 100) {
         if(w->year > 70)
           w->year += 1900;
@@ -590,7 +577,7 @@ static int datenum(const char *indate, const char **datep, struct when *w)
       }
     }
 
-    if(!found)
+    else
       return PARSEDATE_FAIL;
 
     date = p;
@@ -616,15 +603,13 @@ static bool datecheck(struct when *w)
 
 static void tzadjust(curl_off_t *tp, struct when *w)
 {
-  if(w->tzoff == -1) /* unknown tz means no offset */
-    w->tzoff = 0;
-
-  /* Add the time zone diff between local time zone and GMT. */
-  if((w->tzoff > 0) && (*tp > (curl_off_t)(CURL_OFF_T_MAX - w->tzoff)))
-    *tp = CURL_OFF_T_MAX;
-  else
-    *tp += w->tzoff;
-  /* this needs no minimum check since we require a year > 1582 */
+  if(w->tzoff != -1) { /* unknown tz means no offset */
+    /* Add the time zone diff between local time zone and GMT. */
+    if((w->tzoff > 0) && (*tp > (curl_off_t)(CURL_OFF_T_MAX - w->tzoff)))
+      *tp = CURL_OFF_T_MAX;
+    else
+      *tp += w->tzoff;
+  }
 }
 
 static int mktimet(curl_off_t seconds, time_t *output)
@@ -658,7 +643,9 @@ static int parsedate(const char *date, time_t *output)
   initwhen(&w);
 
   while(*date && (part < 6)) {
-    skip(&date);
+    /* skip everything that are not letters or digits */
+    while(*date && !ISALNUM(*date))
+      date++;
 
     if(ISALPHA(*date))
       rc = datestring(&date, &w);

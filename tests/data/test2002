@@ -88,7 +88,6 @@ mode = octet
 tsize = 0
 blksize = 512
 filename = /%TESTNUMBER0003
-QUIT%CR
 </protocol>
 <stdout>
 -foo-

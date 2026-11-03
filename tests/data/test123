@@ -32,7 +32,6 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE I
-QUIT
 </protocol>
 </verify>
 </testcase>

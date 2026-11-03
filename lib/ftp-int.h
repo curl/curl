@@ -69,9 +69,7 @@ enum {
   FTP_PASV, /* generic state for PASV and EPSV, check count1 */
   FTP_LIST, /* generic state for LIST, NLST or a custom list command */
   FTP_RETR,
-  FTP_STOR, /* generic state for STOR and APPE */
-  FTP_QUIT,
-  FTP_LAST  /* never used */
+  FTP_STOR  /* generic state for STOR and APPE */
 };
 typedef unsigned char ftpstate; /* use the enum values */
 

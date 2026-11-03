@@ -35,7 +35,6 @@ MDTM %TESTNUMBER
 TYPE I
 SIZE %TESTNUMBER
 REST 0
-QUIT
 </protocol>
 </verify>
 </testcase>
