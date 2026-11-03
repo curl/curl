@@ -26,6 +26,8 @@
 
 #if defined(HAVE_SOCKETPAIR) && defined(AF_UNIX)
 
+#define NON_COOKIE_LINES 3
+
 /* A response much like what a large web site sends, in pieces since C89
    compilers need not support string literals longer than 509 bytes */
 static const char *resp_cookies[] = {
@@ -71,6 +73,7 @@ static int rh_prereq(void *clientp, char *conn_primary_ip,
                      int conn_local_port);
 
 static int run_cookies(const char * const resp, size_t resplen,
+                       unsigned int num_cookies,
                        curl_off_t loops)
 {
   struct respctx ctx;
@@ -139,11 +142,13 @@ static int run_cookies(const char * const resp, size_t resplen,
   }
   end = curlx_now();
   us = curlx_timediff_us(end, start); /* how many microseconds */
-  hn = loop ? us * 100000 / loop : 0; /* 100 times too big */
+  hn = loop ? us * 100000 / (loop * num_cookies) : 0; /* 100 times too big */
   curl_mprintf("%" CURL_FORMAT_CURL_OFF_T " loops, %lld usecs, "
-               "%lld.%02lld ns/loop\n",
+               "%lld.%02lld ns/cookie\n"
+               "%u cookies per response\n",
                loop, (long long)us,
-               (long long)hn / 100, (long long)hn % 100);
+               (long long)hn / 100, (long long)hn % 100,
+               num_cookies);
   curl_easy_cleanup(curl);
   curl_slist_free_all(list);
 out:
@@ -172,7 +177,7 @@ static int test_cookierecv(int argc, const char **argv)
                                    "%s", resp_cookies[i]);
 
   curl_global_init(CURL_GLOBAL_ALL);
-  rc |= run_cookies(typical, tlen, loops);
+  rc |= run_cookies(typical, tlen, i - NON_COOKIE_LINES, loops);
   curl_global_cleanup();
   return rc;
 }
