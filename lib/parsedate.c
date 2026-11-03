@@ -266,8 +266,6 @@ UNITTEST int checktz(const char *check, size_t len)
   if(len > 4)
     return -1;
   first = check[0];
-  if(first < 'A')
-    return -1;
   if(len == 1) {
     /* short-cut single letter names */
     if((first > 'Z') || (first == 'J'))
