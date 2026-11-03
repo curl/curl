@@ -386,6 +386,7 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
     if(result == CURLE_AGAIN) {
       nwritten = 0;
       result = CURLE_OK;
+      goto out;
     }
     else if(result)
       goto out;
