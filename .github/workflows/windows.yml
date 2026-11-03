@@ -1048,20 +1048,6 @@ jobs:
               ldflags+=' -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
-
-            [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
-            MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
-            echo 'Installed MSVC versions:'
-            /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD")" -mindepth 2 -maxdepth 2 -type d -name '*' || true
-            MSVC_EDITION='18/Enterprise/vc/tools/msvc'
-            echo 'Installed MSVC roots:'
-            /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*'
-            MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
-            MSVC_ROOTW="$(cygpath --mixed "$MSVC_ROOTU")"
-            MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
-            MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
-            rm -f "$MSVC_BINU/vctip.exe"  # delete telemetry tool
-
             if [ "${TFLAGS}" = 'skiprun' ]; then
               [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
               [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
@@ -1078,6 +1064,17 @@ jobs:
               # The option to disable the MSBuild heuristics is likely called:
               # IgnoreStandardErrorWarningFormat=true, but there seems to be no
               # facility to pass it via CMake or CLI.
+              [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
+              MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
+              echo 'Installed MSVC versions:'
+              /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD")" -mindepth 2 -maxdepth 2 -type d -name '*' || true
+              MSVC_EDITION='18/Enterprise/vc/tools/msvc'
+              echo 'Installed MSVC roots:'
+              /usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*'
+              MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/$MSVC_EDITION")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
+              MSVC_ROOTW="$(cygpath --mixed "$MSVC_ROOTU")"
+              MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
+              MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
               MSDK_ROOTW="$(cygpath --mixed --short-name "$(printenv 'ProgramFiles(x86)')/Windows Kits")/10"
               MSDK_ROOTU="$(cygpath --unix "$MSDK_ROOTW")"
               echo 'Installed Windows Kits:'
