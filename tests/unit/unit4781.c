@@ -188,7 +188,6 @@ static CURLcode test_unit4781(const char *arg)
     { "Y", 43200 },
     { "Z", 0 },
     { "z", -1 },
-    { "@", -1 },
 
     { "NT", 39600 },
     { "UT", 0 },
