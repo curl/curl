@@ -131,23 +131,6 @@ build_script:
 
 init:
   - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
-  - ps: |
-      # Prevent running browser updates during the CI job
-      $ErrorActionPreference = 'SilentlyContinue'
-      Rename-Item -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak'
-      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
-        Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse |
-        Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse |
-        Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }
-      $null = New-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe" -ItemType Directory  # not let it re-create it
-      Rename-Item -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak'
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse |
-        Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse |
-        Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }  # Older versions
-      taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe
 
 on_finish:
   - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
