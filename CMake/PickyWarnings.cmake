@@ -393,7 +393,9 @@ if(PICKY_COMPILER)
       endif()
     endif()
   elseif(MSVC)
-    list(APPEND _picky "-sdl")
+    if(MSVC_VERSION GREATER_EQUAL 1700)
+      list(APPEND _picky "-sdl")
+    endif()
     if(MSVC_VERSION LESS_EQUAL 1951)  # Enable for tested versions only
       list(APPEND _picky "-Wall")
       list(APPEND _picky "-wd4061")  # enumerator 'A' in switch of enum 'B' is not explicitly handled by a case label
