@@ -47,7 +47,6 @@ CWD /
 EPSV
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

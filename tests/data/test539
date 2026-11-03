@@ -50,7 +50,6 @@ CWD /
 EPSV
 SIZE path/to/the/file/%TESTNUMBER0001
 RETR path/to/the/file/%TESTNUMBER0001
-QUIT
 </protocol>
 </verify>
 </testcase>

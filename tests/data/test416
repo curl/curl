@@ -43,7 +43,6 @@ PWD
 EPSV
 TYPE I
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

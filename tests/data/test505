@@ -56,7 +56,6 @@ TYPE I
 STOR %TESTNUMBER
 RNFR %TESTNUMBER
 RNTO %TESTNUMBER-forreal
-QUIT
 </protocol>
 </verify>
 </testcase>

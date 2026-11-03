@@ -39,7 +39,6 @@ EPSV
 TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
-QUIT
 </protocol>
 # Verify the mtime of the file. The mtime is specifically chosen to be an even
 # number so that it can be represented exactly on a FAT file system.

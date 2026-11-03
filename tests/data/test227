@@ -49,7 +49,6 @@ FAIL HARD
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
 NOOP 3
-QUIT
 </protocol>
 </verify>
 </testcase>

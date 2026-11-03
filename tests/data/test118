@@ -40,7 +40,6 @@ PASV
 TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

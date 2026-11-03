@@ -56,7 +56,6 @@ RETR %TESTNUMBER
 PORT%SP
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

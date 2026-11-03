@@ -45,7 +45,6 @@ EPSV
 TYPE I
 SIZE file%TESTNUMBER
 RETR file%TESTNUMBER
-QUIT
 </protocol>
 
 <file1 name="%LOGDIR/download%TESTNUMBER" crlf="headers">

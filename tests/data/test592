@@ -59,7 +59,6 @@ EPRT |1|
 PORT
 TYPE I
 STOR %TESTNUMBER
-QUIT
 </protocol>
 # CURLE_FTP_ACCEPT_FAILED = 10
 <errorcode>

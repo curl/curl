@@ -53,7 +53,6 @@ NOOP 2
 FAIL HARD
 LIST
 NOOP 3
-QUIT
 </protocol>
 </verify>
 </testcase>

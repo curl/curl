@@ -36,7 +36,6 @@ PWD
 EPSV
 TYPE I
 SIZE %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

@@ -40,7 +40,6 @@ PWD
 EPSV
 TYPE I
 STOR %TESTNUMBER
-QUIT
 </protocol>
 <upload crlf="yes">
 file

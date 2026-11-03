@@ -46,7 +46,6 @@ TYPE A
 LIST /list/this/path/%TESTNUMBER
 EPSV
 LIST /list/this/path/%TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

@@ -60,7 +60,6 @@ EPSV
 TYPE I
 SIZE %TESTNUMBER0002
 RETR %TESTNUMBER0002
-QUIT
 </protocol>
 <stdout crlf="headers">
 HTTP/1.1 302 OK

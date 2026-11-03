@@ -50,7 +50,6 @@ PWD
 EPSV
 TYPE I
 STOR %TESTNUMBER
-QUIT
 </protocol>
 # 70 - CURLE_REMOTE_DISK_FULL
 <errorcode>

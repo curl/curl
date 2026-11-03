@@ -43,7 +43,6 @@ CWD and things2
 EPSV
 TYPE A
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

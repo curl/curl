@@ -123,12 +123,17 @@ static const char * const ftp_state_names[] = {
   "PASV",
   "LIST",
   "RETR",
-  "STOR",
-  "QUIT"
+  "STOR"
 };
 #define FTP_CSTATE(ftpc)   ((ftpc) ? ftp_state_names[(ftpc)->state] : "???")
 
 #endif /* CURLVERBOSE */
+
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
+/* GCC sometimes gets confused about the ftp_state_names[] access */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 
 /* This is the ONLY way to change FTP state! */
 static void ftp_state_low(struct Curl_easy *data,
@@ -151,6 +156,10 @@ static void ftp_state_low(struct Curl_easy *data,
   }
   ftpc->state = newstate;
 }
+
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 /* Local API functions */
 #ifndef DEBUGBUILD
@@ -3490,8 +3499,8 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     result = ftp_state_stor_resp(data, ftpc, ftpcode);
     break;
 
-  case FTP_QUIT:
   default:
+    DEBUGASSERT(0);
     /* internal error */
     ftp_state(data, ftpc, FTP_STOP);
     break;
@@ -3506,23 +3515,6 @@ static CURLcode ftp_multi_statemach(struct Curl_easy *data,
 {
   struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
   return ftpc ? ftp_statemach(data, ftpc, done) : CURLE_FAILED_INIT;
-}
-
-static CURLcode ftp_block_statemach(struct Curl_easy *data,
-                                    struct ftp_conn *ftpc)
-{
-  struct pingpong *pp = &ftpc->pp;
-  CURLcode result = CURLE_OK;
-
-  while(ftpc->state != FTP_STOP) {
-    if(ftpc->shutdown)
-      CURL_TRC_FTP(data, "in shutdown, waiting for server response");
-    result = Curl_pp_statemach(data, pp, TRUE, TRUE /* disconnecting */);
-    if(result)
-      break;
-  }
-
-  return result;
 }
 
 /*
@@ -4282,45 +4274,10 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
 
 /***********************************************************************
  *
- * ftp_quit()
- *
- * This should be called before calling sclose() on an ftp control connection
- * (not data connections). We should then wait for the response from the
- * server before returning. The calling code should then try to close the
- * connection.
- *
- */
-static CURLcode ftp_quit(struct Curl_easy *data,
-                         struct ftp_conn *ftpc)
-{
-  CURLcode result = CURLE_OK;
-
-  if(ftpc->ctl_valid) {
-    CURL_TRC_FTP(data, "sending QUIT to close session");
-    result = Curl_pp_sendf(data, &ftpc->pp, "%s", "QUIT");
-    if(result) {
-      failf(data, "Failure sending QUIT command: %s",
-            curl_easy_strerror(result));
-      ftpc->ctl_valid = FALSE; /* mark control connection as bad */
-      connclose(data->conn); /* mark for closure */
-      ftp_state(data, ftpc, FTP_STOP);
-      return result;
-    }
-
-    ftp_state(data, ftpc, FTP_QUIT);
-
-    result = ftp_block_statemach(data, ftpc);
-  }
-
-  return result;
-}
-
-/***********************************************************************
- *
  * ftp_disconnect()
  *
  * Disconnect from an FTP server. Cleanup protocol-specific per-connection
- * resources. BLOCKING.
+ * resources.
  */
 static CURLcode ftp_disconnect(struct Curl_easy *data,
                                struct connectdata *conn,
@@ -4330,18 +4287,11 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
 
   if(!ftpc)
     return CURLE_FAILED_INIT;
-  /* We cannot send quit unconditionally. If this connection is stale or
-     bad in any way, sending quit and waiting around here will make the
-     disconnect wait in vain and cause more problems than we need to.
 
-     ftp_quit() will check the state of ftp->ctl_valid. If it is ok it
-     will try to send the QUIT command, otherwise it will return. */
   ftpc->shutdown = TRUE;
   if(dead_connection || Curl_pp_needs_flush(data, &ftpc->pp))
     ftpc->ctl_valid = FALSE;
 
-  /* The FTP session may or may not have been allocated/setup at this point! */
-  (void)ftp_quit(data, ftpc); /* ignore errors on the QUIT */
   return CURLE_OK;
 }
 

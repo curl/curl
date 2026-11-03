@@ -45,7 +45,6 @@ TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
 DELE file
-QUIT
 </protocol>
 </verify>
 </testcase>

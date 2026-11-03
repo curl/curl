@@ -32,7 +32,6 @@ USER anonymous
 PASS ftp@example.com
 PWD
 CWD path
-QUIT
 </protocol>
 </verify>
 </testcase>
