@@ -14,7 +14,7 @@ runs:
       shell: bash
       run: |
         # https://emudhra.we-have-a-problem.com/#macos-curl
-        ls -lA /etc/ssl/cert.pem
+        ls -l /etc/ssl/cert.pem
         sudo cp -p /etc/ssl/cert.pem /etc/ssl/cert.pem.bak
         t="$(mktemp)" && \
           awk -v s='=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3' \
@@ -26,6 +26,6 @@ runs:
           awk -v s='=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services' \
             '/^(===|###) /{skip=0} $0==s{skip=1} !skip' > "$t" && \
           [ -s "$t" ] && sudo install -m 0644 -o root -g wheel "$t" /etc/ssl/cert.pem; rm -f "$t"
-        ls -lA /etc/ssl/cert.pem
+        ls -l /etc/ssl/cert.pem
         diff -u /etc/ssl/cert.pem.bak /etc/ssl/cert.pem || true
         sudo rm -f /etc/ssl/cert.pem.bak
