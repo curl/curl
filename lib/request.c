@@ -380,7 +380,7 @@ static CURLcode req_send_buffer_add(struct Curl_easy *data,
 CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
                        unsigned char httpversion)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   const char *buf;
   size_t blen, nwritten;
 
@@ -403,15 +403,16 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
     if(result == CURLE_AGAIN) {
       nwritten = 0;
       result = CURLE_OK;
+      goto out;
     }
     else if(result)
-      return result;
+      goto out;
     buf += nwritten;
     blen -= nwritten;
     if(!blen) {
       result = req_set_upload_done(data);
       if(result)
-        return result;
+        goto out;
     }
   }
 
@@ -420,12 +421,12 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
      * request in one go. Buffer the remainder and try to add as much
      * body bytes as room is left in the buffer. Then flush. */
     result = req_send_buffer_add(data, buf, blen, blen);
-    if(result)
-      return result;
-
-    return Curl_req_send_more(data);
+    if(!result)
+      result = Curl_req_send_more(data);
   }
-  return CURLE_OK;
+
+out:
+  return result;
 }
 
 bool Curl_req_sendbuf_empty(struct Curl_easy *data)
