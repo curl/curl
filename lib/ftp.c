@@ -4252,9 +4252,12 @@ static void type_url_check(struct Curl_easy *data, struct FTP *ftp)
   }
 }
 
-static void cf_ftp_ctx_free(struct cf_ftp_ctx *ctx)
+static void cf_ftp_ctx_free(struct cf_ftp_ctx *ctx,
+                            struct Curl_easy *data)
 {
   if(ctx) {
+    if(ctx->cf_data)
+      Curl_conn_cf_discard_chain(&ctx->cf_data, data);
     freedirs(ctx);
     curlx_free(ctx->account);
     curlx_free(ctx->alternative_to_user);
@@ -4276,7 +4279,7 @@ static struct cf_ftp_ctx *cf_ftp_ctx_create(struct Curl_easy *data)
   if(CURL_EASY_STR(data, STRING_FTP_ACCOUNT)) {
     ftpc->account = curlx_strdup(CURL_EASY_STR(data, STRING_FTP_ACCOUNT));
     if(!ftpc->account) {
-      cf_ftp_ctx_free(ftpc);
+      cf_ftp_ctx_free(ftpc, data);
       return NULL;
     }
   }
@@ -4284,7 +4287,7 @@ static struct cf_ftp_ctx *cf_ftp_ctx_create(struct Curl_easy *data)
     ftpc->alternative_to_user =
       curlx_strdup(CURL_EASY_STR(data, STRING_FTP_ALTERNATIVE_TO_USER));
     if(!ftpc->alternative_to_user) {
-      cf_ftp_ctx_free(ftpc);
+      cf_ftp_ctx_free(ftpc, data);
       return NULL;
     }
   }
@@ -4307,7 +4310,7 @@ static void cf_ftp_destroy(struct Curl_cfilter *cf,
                            struct Curl_easy *data)
 {
   CURL_TRC_CF(data, cf, "destroy");
-  cf_ftp_ctx_free(cf->ctx);
+  cf_ftp_ctx_free(cf->ctx, data);
 }
 
 static CURLcode cf_ftp_connect(struct Curl_cfilter *cf,
@@ -4618,7 +4621,7 @@ static CURLcode cf_ftp_create(struct Curl_cfilter **pcf,
   ctx = NULL;
 
 out:
-  cf_ftp_ctx_free(ctx);
+  cf_ftp_ctx_free(ctx, data);
   *pcf = result ? NULL : cf;
   return result;
 }

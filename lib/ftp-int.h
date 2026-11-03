@@ -102,6 +102,7 @@ struct pathcomp {
 /* cf_ftp_ctx is the FTP filter contect struct */
 struct cf_ftp_ctx {
   struct pingpong pp;
+  struct Curl_cfilter *cf_data; /* DATA connection filter chain */
   char *account;
   char *alternative_to_user;
   char *entrypath; /* the PWD reply when we logged on */
