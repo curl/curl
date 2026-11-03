@@ -29,31 +29,31 @@
 /* A response much like what a large web site sends, in pieces since C89
    compilers need not support string literals longer than 509 bytes */
 static const char *resp_cookies[] = {
-  "HTTP/1.1 200 OK\r\n"
-  "Content-Length: 0\r\n"
-  "Set-Cookie: name=content\r\n"
-  "Set-Cookie: heyyou=content; path=/path\r\n"
-  "Set-Cookie: heyyou2=content; path=/path/first\r\n"
-  "Set-Cookie: sameagain=content; path=/path/first\r\n"
-  "Set-Cookie: heymiss=content; path=/path/firstfail\r\n"
-  "Set-Cookie: another=content; path=/path; domain=www.example\r\n"
-  "Set-Cookie: nomatch=content; path=/path; domain=www.mismatch\r\n"
+  "HTTP/1.1 200 OK\r\n",
+  "Content-Length: 0\r\n",
+  "Set-Cookie: name=content\r\n",
+  "Set-Cookie: heyyou=content; path=/path\r\n",
+  "Set-Cookie: heyyou2=content; path=/path/first\r\n",
+  "Set-Cookie: sameagain=content; path=/path/first\r\n",
+  "Set-Cookie: heymiss=content; path=/path/firstfail\r\n",
+  "Set-Cookie: another=content; path=/path; domain=www.example\r\n",
+  "Set-Cookie: nomatch=content; path=/path; domain=www.mismatch\r\n",
   "Set-Cookie: timeout=content; path=/path; domain=www.example; "
-  "expires=\"Fri Feb 13 11:56:27 GMT 2125\"; httponly\r\n"
+  "expires=\"Fri Feb 13 11:56:27 GMT 2125\"; httponly\r\n",
   "Set-Cookie: notimeleft=content; path=/path; domain=www.example; "
-  "expires=\"Tue Nov  3 04:55:04 PM UTC 2026\"; httponly\r\n"
+  "expires=\"Tue Nov  3 04:55:04 PM UTC 2026\"; httponly\r\n",
   "Set-Cookie: session=content; path=/path; domain=www.example; "
-  "expires=\"Sun Jun  7 04:57:56 PM UTC 2026\"; httponly\r\n"
+  "expires=\"Sun Jun  7 04:57:56 PM UTC 2026\"; httponly\r\n",
   "Set-Cookie: identifier=content; path=/path; domain=www.example; "
-  "expires=\"Tue Dec  9 04:55:54 PM UTC 2025\"; httponly\r\n"
+  "expires=\"Tue Dec  9 04:55:54 PM UTC 2025\"; httponly\r\n",
   "Set-Cookie: whatifthis=content; path=/path; domain=www.example; "
-  "expires=\"Wed Sep 15 04:58:54 PM UTC 2032\"; httponly\r\n"
+  "expires=\"Wed Sep 15 04:58:54 PM UTC 2032\"; httponly\r\n",
   "Set-Cookie: timer=content; path=/path; domain=www.example; "
-  "max-age=2764800; httponly\r\n"
-  "Set-Cookie: more=content; path=/path; secure\r\n"
-  "Set-Cookie: whatabout=content; path=/path; secur3\r\n"
-  "Set-Cookie: curious=content;\tpath=/path;\tdomain=www.example\r\n"
-  "Set-COOKIE:\tbare=something;\texpires=\"2044 Nov 6 08:49:37\"\r\n"
+  "max-age=2764800; httponly\r\n",
+  "Set-Cookie: more=content; path=/path; secure\r\n",
+  "Set-Cookie: whatabout=content; path=/path; secur3\r\n",
+  "Set-Cookie: curious=content;\tpath=/path;\tdomain=www.example\r\n",
+  "Set-COOKIE:\tbare=something;\texpires=\"2044 Nov 6 08:49:37\"\r\n",
   "\r\n"
 };
 
