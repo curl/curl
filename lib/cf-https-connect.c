@@ -431,10 +431,20 @@ static void cf_hc_set_baller2(struct Curl_cfilter *cf,
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   enum alpnid alpn2 = ALPN_none, alpn1 = ctx->ballers[0].alpn_id;
+  http_majors allowed = data->state.http_neg.allowed;
   VERBOSE(const char *source = "HTTPS-RR");
 
   if(ctx->ballers_complete)
     return; /* already done */
+  /* HTTPS-RR can select h1 and h2 as separate attempts. Only finish
+   * selection early when no other allowed ALPN can be used. */
+  if(((alpn1 == ALPN_h1) || !(allowed & CURL_HTTP_V1x)) &&
+     ((alpn1 == ALPN_h2) || !(allowed & CURL_HTTP_V2x)) &&
+     ((alpn1 == ALPN_h3) || !(allowed & CURL_HTTP_V3x) ||
+      !cf_hc_may_h3(cf, data))) {
+    ctx->ballers_complete = TRUE;
+    return;
+  }
   if(!ctx->httpsrr_resolved)
     return; /* HTTPS-RR pending */
 
