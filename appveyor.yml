@@ -43,6 +43,7 @@ environment:
       CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
       TFLAGS: '!with-server'
       RUN_TESTS_VIA_CMAKE: 'yes'
+      RDP: 'true'
 
     - job_name: 'CM VS2026, Release, arm64, Schannel, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
