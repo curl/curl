@@ -1925,7 +1925,7 @@ static CURLcode schannel_recv_renegotiate(
                     ((writefd != CURL_SOCKET_BAD) ? " writable" : ""),
                     timeout_ms));
 
-      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd, timeout_ms);
+      what = Curl_socket_check(readfd, writefd, timeout_ms);
 
       if(what > 0 && (what & (CURL_CSELECT_IN | CURL_CSELECT_OUT))) {
         SCH_DEV(infof(data, "schannel: renegotiation socket %s%s",
