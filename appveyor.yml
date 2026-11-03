@@ -132,7 +132,7 @@ build_script:
 init:
   - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
   - ps: |
-      Start-Job -ScriptBlock {
+      $time = Measure-Command {
         # Prevent running browser updates during the CI job
         $ErrorActionPreference = 'SilentlyContinue'
         Rename-Item -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak'
@@ -150,6 +150,7 @@ init:
           Rename-Item -NewName { $_.Name -replace '.exe','.exe.bak' }  # Older versions
         taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe
       }
+      $time.TotalSeconds
 
 on_finish:
   - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
