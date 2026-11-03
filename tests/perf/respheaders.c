@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "first.h"
+#include "respctx.h"
 
 #if defined(HAVE_SOCKETPAIR) && defined(AF_UNIX)
 
@@ -85,13 +86,6 @@ static const char resp_small[] =
   "ok";
 
 #define MANY_HEADERS 200
-
-struct respctx {
-  curl_socket_t sock[2]; /* [0] is curl's end, [1] is the "server" end */
-  const char *resp;
-  size_t resplen;
-  bool handed_out;
-};
 
 static curl_socket_t rh_opensocket(void *clientp, curlsocktype purpose,
                                    struct curl_sockaddr *address)

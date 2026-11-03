@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "first.h"
+#include "respctx.h"
 
 #if defined(HAVE_SOCKETPAIR) && defined(AF_UNIX)
 
@@ -55,14 +56,6 @@ static const char *resp_cookies[] = {
   "Set-COOKIE:\tbare=something;\texpires=\"2044 Nov 6 08:49:37\"\r\n"
   "\r\n"
 };
-
-struct respctx {
-  curl_socket_t sock[2]; /* [0] is curl's end, [1] is the "server" end */
-  const char *resp;
-  size_t resplen;
-  bool handed_out;
-};
-
 
 /* from respheaders.c */
 static curl_socket_t rh_opensocket(void *clientp, curlsocktype purpose,
