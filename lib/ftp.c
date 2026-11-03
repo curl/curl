@@ -4392,8 +4392,8 @@ data_shutdown:
   }
 
 out:
-  CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, %zu",
-              blen, (int)result, *pnwritten);
+  CURL_TRC_CF(data, cf, "send(len=%zu, eos=%d) -> %d, %zu",
+              blen, eos, (int)result, *pnwritten);
   return result;
 }
 
