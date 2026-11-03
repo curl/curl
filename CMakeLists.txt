@@ -1714,7 +1714,6 @@ else()
   # Apple SDK <27 do not offer pipe2(), but the iPhone Simulator-specific
   # /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
   # detection, omit this feature check for Apple targets.
-  # For 27+, detection is done in-source.
   check_function_exists("pipe2"         HAVE_PIPE2)
 endif()
 
