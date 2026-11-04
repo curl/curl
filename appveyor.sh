@@ -106,17 +106,18 @@ verbose=''
         } | sort -u | while read -r f; do
           if [ -d "${f}" ]; then
             if grep -q -a -E "${bad}" -R -- "${f}"; then
-              >&2 printf 'bad: %s\n' "${f}"
-            else
-              >&2 printf 'maybe good: %s\n' "${f}"
+              >&2 printf 'bad dir: %s\n' "${f}"
+            elif [ -s "${f}" ]; then
+              >&2 printf 'maybe good dir: %s\n' "${f}"
             fi
           elif [ -f "${f}" ]; then
             if grep -q -a -E "${bad}" -- "${f}"; then
               >&2 printf 'bad: %s\n' "${f}"
-            else
+              ls -l "${f}"
+            elif [ -s "${f}" ]; then
               >&2 printf 'maybe good: %s\n' "${f}"
+              ls -l "${f}"
             fi
-            ls -l "${f}"
           fi
         done
         echo '::endgroup::'
