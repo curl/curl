@@ -118,6 +118,11 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
                         const void *buf, size_t blen, bool eos,
                         size_t *pnwritten);
 
+/* Same as above, but return CURLE_AGAIN on block. */
+CURLcode Curl_xfer_try_send(struct Curl_easy *data,
+                            const void *buf, size_t blen, bool eos,
+                            size_t *pnwritten);
+
 /**
  * Receive data on the socket/connection filter designated
  * for transfer's incoming data.

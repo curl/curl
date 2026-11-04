@@ -87,6 +87,10 @@ static CURLcode cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
     result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
+  else {
+    /* We always want to process server packets */
+    result = Curl_pollset_add_in(data, ps, sock);
+  }
   return result;
 }
 
@@ -1052,7 +1056,8 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_http3 = {
   "HTTP/3",
-  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
+  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX | CF_TYPE_HTTP |
+  CF_TYPE_MAINTENANCE,
   0,
   cf_ngtcp2_destroy,
   cf_ngtcp2_connect,
