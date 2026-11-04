@@ -61,7 +61,9 @@ verbose=''
           done
 
           printf '%s\n' "$PATH" | tr ':' '\n' | while read -r dir; do
-            find "${dir}" -maxdepth 1 \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
+            if [ -d "${dir}" ]; then
+              find "${dir}" -maxdepth 1 \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
+            fi
           done
 
           {
