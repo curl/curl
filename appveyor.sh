@@ -107,11 +107,16 @@ verbose=''
           if [ -d "${f}" ]; then
             if grep -q -a -E "${bad}" -R -- "${f}"; then
               >&2 printf 'bad: %s\n' "${f}"
+            else
+              >&2 printf 'maybe good: %s\n' "${f}"
             fi
           elif [ -f "${f}" ]; then
             if grep -q -a -E "${bad}" -- "${f}"; then
               >&2 printf 'bad: %s\n' "${f}"
+            else
+              >&2 printf 'maybe good: %s\n' "${f}"
             fi
+            ls -l "${f}"
           fi
         done
         echo '::endgroup::'
