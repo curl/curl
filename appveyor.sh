@@ -106,11 +106,11 @@ verbose=''
         } | sort -u | while read -r f; do
           if [ -d "${f}" ]; then
             if grep -q -a -E "${bad}" -R -- "${f}"; then
-              >&2 printf "bad: %s" "${f}"
+              >&2 printf 'bad: %s\n' "${f}"
             fi
           elif [ -f "${f}" ]; then
             if grep -q -a -E "${bad}" -- "${f}"; then
-              >&2 printf "bad: %s" "${f}"
+              >&2 printf 'bad: %s\n' "${f}"
             fi
           fi
         done
