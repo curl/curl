@@ -329,7 +329,6 @@ jobs:
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
-          path-type: inherit
           # Packages that are used by most jobs. They each inflate cache size and come with a per-job install overhead.
           # Add individual package requirements to the matrix `install:` entry instead.
           install: >-
@@ -498,7 +497,7 @@ jobs:
         timeout-minutes: 2
         run: |
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
-            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+            pkgs='openssh'
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
             if [[ "${MATRIX_IMAGE}" = *'windows-2025'* ]]; then
@@ -517,6 +516,7 @@ jobs:
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
           fi
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed python3 ${pkgs}
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
