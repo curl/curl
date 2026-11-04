@@ -29,4 +29,16 @@ struct respctx {
   size_t resplen;
   bool handed_out;
 };
+
+curl_socket_t rh_opensocket(void *clientp, curlsocktype purpose,
+                            struct curl_sockaddr *address);
+int rh_sockopt(void *clientp, curl_socket_t curlfd,
+               curlsocktype purpose);
+size_t rh_write(char *ptr, size_t size, size_t nmemb, void *userdata);
+bool rh_fits(struct respctx *ctx);
+int rh_closesocket(void *clientp, curl_socket_t item);
+int rh_prereq(void *clientp, char *conn_primary_ip,
+              char *conn_local_ip, int conn_primary_port,
+              int conn_local_port);
+
 #endif /* HEADER_PERF_RESPCTX_H */

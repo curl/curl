@@ -30,8 +30,8 @@ FIRST_C = first.c
 FIRST_H = first.h
 
 # Common files used by the performance test programs
-UTILS_C =
-UTILS_H = respctx.h
+UTILS_C = rh.c
+UTILS_H = rh.h
 
 CURLX_C = \
   ../../lib/curlx/base64.c \
