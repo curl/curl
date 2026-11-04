@@ -175,7 +175,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
       (
         cd _bld/tests
         echo '----------'
-        env | grep -i srcdir
+        env | grep -i srcdir || true
         echo '----------'
         # This command must use the same Perl as detected in the CMake configuration step.
         # shellcheck disable=SC2086
