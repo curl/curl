@@ -60,8 +60,13 @@ verbose=''
             >&2 printf '\n'
           done
 
+          printf '%s\n' "$PATH" | tr ':' '\n' | while IFS= read -r dir; do
+            find "${dir}" \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
+          done
+
           {
-            find /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
+            find /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
+            #find /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 -name 'cacerts' || true  # java
             pf="$(cygpath --mixed --short "$PROGRAMFILES/Git")"
             pf="$(cygpath --unix "${pf}")"
             find "${pf}" \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
@@ -91,13 +96,15 @@ verbose=''
             find ~/venv -name cacert.pem || true
           fi
         } | sort -u | while read -r f; do
-          echo "::group::${f}"
           if [ -d "${f}" ]; then
-            grep -a -E "${bad}" -R -- "${f}" || true
+            if grep -a -E "${bad}" -R -- "${f}"; then
+              >&2 printf "bad: ${f}"
+            fi
           elif [ -f "${f}" ]; then
-            grep -a -E "${bad}" -- "${f}" || true
+            if grep -a -E "${bad}" -- "${f}"; then
+              >&2 printf "bad: ${f}"
+            fi
           fi
-          echo '::endgroup::'
         done
         echo '::endgroup::'
         set -x
