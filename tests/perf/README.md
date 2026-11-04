@@ -30,6 +30,15 @@ provided number of times:
 
     ./perf base64dec [loops]
 
+## `cookierecv`
+
+This test runs many HTTP/1.1 transfers that each receive a response over a
+local socket pair, with no server involved. It reuses the connection and times
+the responses that each sends a set of 18 different cookies using a set of
+different properties.
+
+    ./perf cookierecv [loops]
+
 ## `dateparser`
 
 Runs through 180+ date strings and parses them (converts them to epoch time)
