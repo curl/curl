@@ -263,7 +263,9 @@ class TestHTTPSRR:
                 r.check_exit_code(0)
                 r.check_stats(count=1, http_status=200, exitcode=0)
                 assert r.stats[0]['http_version'] == '1.1', r.dump_logs()
-                assert any('1st attempt uses h2' in line for line in r.trace_lines), r.dump_logs()
+                if env.curl_is_verbose():
+                    assert any('1st attempt uses h2' in line
+                               for line in r.trace_lines), r.dump_logs()
                 assert len(attempts) == 2, r.dump_logs()
                 assert requests == ['http/1.1'], r.dump_logs()
             finally:
