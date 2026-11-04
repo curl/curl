@@ -61,7 +61,7 @@ verbose=''
           done
 
           {
-            find etc usr mingw32 mingw64 ucrt64 clang32 clang64 clangarm64 \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
+            find /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
             pf="$(cygpath --mixed --short "$PROGRAMFILES/Git")"
             pf="$(cygpath --unix "${pf}")"
             find "${pf}" \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
