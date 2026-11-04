@@ -29,6 +29,80 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 export CURL_CI=appveyor
 verbose=''
 
+        echo '::group::check for bad certs'
+        bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
+        bad+='|MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
+        bad+='|MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
+        bad+='|MIIDczCCAlugAwIBAgILAK7PALrEzzL4Q7IwDQYJKoZIhvcNAQELBQAwVjELMAkG'  # emSign Root CA - C1
+        bad+='|MIICKzCCAbGgAwIBAgIKe3G2gla4EnycqDAKBggqhkjOPQQDAzBaMQswCQYDVQQG'  # emSign ECC Root CA - C3
+        bad+=')'
+        # https://pip.pypa.io/en/stable/topics/https-certificates/
+        {
+          for e in PIP_CERT REQUESTS_CA_BUNDLE CURL_CA_BUNDLE SSL_CERT_DIR SSL_CERT_FILE GIT_SSL_CAINFO NODE_EXTRA_CA_CERTS; do
+            >&2 printf 'env: %s' "${e}"
+            f="$(printenv "${e}" || true)"
+            if [ -n "${f}" ]; then
+              >&2 printf ': %s' "${f}"
+              if [ -d "${f}" ]; then
+                >&2 printf ' (directory exists)'
+                echo "${f}"
+              elif [ -r "${f}" ]; then
+                >&2 printf ' (file exists and readable)'
+                if [ -w "${f}" ]; then
+                  >&2 printf ' (WARNING: also writable)'
+                fi
+                echo "${f}"
+              fi
+            else
+              >&2 printf ' (not set)'
+            fi
+            >&2 printf '\n'
+          done
+
+          {
+            find etc usr mingw32 mingw64 ucrt64 clang32 clang64 clangarm64 \( -name '*.crt' -o '*.pem' -o 'cacerts' \)
+            pf1="$(printenv 'ProgramFiles(x86)')"
+            pf1="$(cygpath --mixed --short "${pf1}/Git for Windows")"
+            pf1="$(cygpath --unix "${pf1}")"
+            pf2="$(cygpath --mixed --short "$PROGRAMFILES/Git for Windows")"
+            pf2="$(cygpath --unix "${pf2}")"
+            find "${pf1}" "${pf2}" etc usr mingw32 mingw64 ucrt64 clang32 clang64 clangarm64 \( -name '*.crt' -o '*.pem' -o 'cacerts' \)
+            echo /etc/ssl/certs/ca-certificates.crt
+            echo /etc/ssl/cert.pem
+            echo /opt/homebrew/etc/ca-certificates/cert.pem
+            echo /usr/local/etc/ca-certificates/cert.pem
+            if command -v brew >/dev/null 2>&1; then
+              echo "$(brew --prefix)"/etc/ca-certificates/cert.pem
+            fi
+          } | sort -u | while read -r f; do
+            if [ -d "${f}" ]; then
+              >&2 printf '%s (directory exists)' "${f}"
+              echo "${f}"
+              >&2 printf '\n'
+            elif [ -r "${f}" ]; then
+              >&2 printf '%s (file exists and readable)' "${f}"
+              if [ -w "${f}" ]; then
+                >&2 printf ' (WARNING: also writable)'
+              fi
+              >&2 printf '\n'
+              echo "${f}"
+            fi
+          done
+
+          if [ -d ~/venv ]; then
+            find ~/venv -name cacert.pem || true
+          fi
+         } | sort -u | while read -r f; do
+          echo "::group::${f}"
+          if [ -d "${f}" ]; then
+            grep -a -E "${bad}" -R -- "${f}" || true
+          elif [ -f "${f}" ]; then
+            grep -a -E "${bad}" -- "${f}" || true
+          fi
+          echo '::endgroup::'
+        done
+        echo '::endgroup::'
+
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
