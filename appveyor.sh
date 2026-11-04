@@ -29,6 +29,7 @@ set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 export CURL_CI=appveyor
 verbose=''
 
+        set +x
         echo '::group::check for bad certs'
         bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
         bad+='|MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
@@ -99,6 +100,7 @@ verbose=''
           echo '::endgroup::'
         done
         echo '::endgroup::'
+        set -x
 
 # build
 
