@@ -34,7 +34,7 @@ provided number of times:
 
 This test runs many HTTP/1.1 transfers that each receive a response over a
 local socket pair, with no server involved. It reuses the connection and times
-the responses that each sends a set of 18 different cookies using a set of
+the responses that each send a set of 18 different cookies using a set of
 different properties.
 
     ./perf cookierecv [loops]
