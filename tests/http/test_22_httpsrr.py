@@ -165,7 +165,10 @@ class TestHTTPSRR:
         r = curl.http_download(urls=[url], extra_args=xargs)
         r.check_exit_code(60)
         r.check_stats(count=1, http_status=0, exitcode=60)
-        assert r.stats[0]['ssl_verify_result'] != 0, r.dump_logs()
+        # Only OpenSSL-compatible backends and GnuTLS report this value.
+        if env.curl_uses_any_libs(['openssl', 'quictls', 'libressl',
+                                  'boringssl', 'aws-lc', 'gnutls']):
+            assert r.stats[0]['ssl_verify_result'] != 0, r.dump_logs()
 
     @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
     @pytest.mark.parametrize("http_version", ["--http1.1", "--http2-prior-knowledge"])
@@ -193,6 +196,7 @@ class TestHTTPSRR:
         contexts = []
         for name, alpn in [(env.domain2, 'h2'), (env.domain1, 'http/1.1')]:
             credentials = env.get_credentials(name)
+            assert credentials is not None, f'missing credentials for {name}'
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             context.load_cert_chain(credentials.cert_file, credentials.pkey_file)
             context.set_alpn_protocols([alpn])
