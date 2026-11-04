@@ -1908,7 +1908,7 @@ sub rundictserver {
     $flags .= "--host $HOSTIP";
 
     my $port = getfreeport($ipvnum, 1);
-    my $cmd = "$python " . shell_quote(build_sys_abs_path("$srcdir/dictserver.py")) . " --port \"$port\" $flags";
+    my $cmd = shell_quote(build_sys_abs_path("$srcdir/dictserver.py")) . " --port \"$port\" $flags";
     my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($dictpid <= 0 || !pidexists($dictpid)) {
@@ -1967,7 +1967,7 @@ sub runnegtelnetserver {
     $flags .= "--srcdir \"$srcdir\"";
 
     my $port = getfreeport($ipvnum, 1);
-    my $cmd = "$python " . shell_quote(build_sys_abs_path("$srcdir/negtelnetserver.py")) . " --port \"$port\" $flags";
+    my $cmd = shell_quote(build_sys_abs_path("$srcdir/negtelnetserver.py")) . " --port \"$port\" $flags";
     my ($ntelpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($ntelpid <= 0 || !pidexists($ntelpid)) {
