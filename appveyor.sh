@@ -239,7 +239,6 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
     if [ -n "${RUN_TESTS_VIA_CMAKE:-}" ]; then  # just to document the differences
-      #export CURL_TEST_NO_PYTHON=1  # does not work: e.g. "python3: can't open file '/c/projects/curl/_bld/tests/C:/projects/curl/tests/dictserver.py': [Errno 2] No such file or directory"
       export TFLAGS="-j10 ${TFLAGS:-}"
       time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
     else
