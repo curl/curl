@@ -500,7 +500,7 @@ jobs:
         run: |
           pkgs=''
           if [[ "${MATRIX_NAME}" = *'py'* ]]; then
-            pkgs+=' python3'  # ~200 MB install to unlock 3 tests requiring it
+            pkgs+=' python3'  # ~200 MB install for 3 dict and telnet tests
           fi
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
             pkgs+=' openssh'
