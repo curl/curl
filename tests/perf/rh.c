@@ -118,4 +118,3 @@ size_t rh_write(char *ptr, size_t size, size_t nmemb, void *userdata)
   (void)userdata;
   return size * nmemb;
 }
-
