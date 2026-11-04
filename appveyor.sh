@@ -61,14 +61,9 @@ verbose=''
 
           {
             find etc usr mingw32 mingw64 ucrt64 clang32 clang64 clangarm64 \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
-            pf1="$(printenv 'ProgramFiles(x86)')"
-            pf1="$(cygpath --mixed --short "${pf1}")"
-            pf1="$(cygpath --unix "${pf1}")"
-              >&2 ls -l "${pf1}"
-            pf2="$(cygpath --mixed --short "$PROGRAMFILES")"
-            pf2="$(cygpath --unix "${pf2}")"
-              >&2 ls -l "${pf2}"
-            #find "${pf2}" \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
+            pf="$(cygpath --mixed --short "$PROGRAMFILES/Git")"
+            pf="$(cygpath --unix "${pf}")"
+            find "${pf}" \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
             echo /etc/ssl/certs/ca-certificates.crt
             echo /etc/ssl/cert.pem
             echo /opt/homebrew/etc/ca-certificates/cert.pem
