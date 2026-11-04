@@ -60,8 +60,8 @@ verbose=''
             >&2 printf '\n'
           done
 
-          printf '%s\n' "$PATH" | tr ':' '\n' | while IFS= read -r dir; do
-            find "${dir}" \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
+          printf '%s\n' "$PATH" | tr ':' '\n' | while read -r dir; do
+            find "${dir}" -maxdepth 1 \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
           done
 
           {
