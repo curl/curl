@@ -64,10 +64,10 @@ verbose=''
             pf1="$(printenv 'ProgramFiles(x86)')"
             pf1="$(cygpath --mixed --short "${pf1}")"
             pf1="$(cygpath --unix "${pf1}")"
-              >&2 ls -l $"{pf1}"
+              >&2 ls -l "${pf1}"
             pf2="$(cygpath --mixed --short "$PROGRAMFILES")"
             pf2="$(cygpath --unix "${pf2}")"
-              >&2 ls -l $"{pf2}"
+              >&2 ls -l "${pf2}"
             #find "${pf2}" \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
             echo /etc/ssl/certs/ca-certificates.crt
             echo /etc/ssl/cert.pem
