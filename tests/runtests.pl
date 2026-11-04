@@ -2807,6 +2807,7 @@ sub disabledtests {
             if($t =~ /(\d+)/) {
                 my ($n) = $1;
                 $disabled{$n} = $n; # disable this test number
+                print STDERR "TRC-1 |$srcdir/data/test$n|\n";
                 if(! -f "$srcdir/data/test$n") {
                     print STDERR "WARNING! Non-existing test $n in $file!\n";
                     # fail hard to make user notice
