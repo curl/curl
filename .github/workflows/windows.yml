@@ -250,6 +250,7 @@ jobs:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
       MATRIX_ENV: '${{ matrix.env }}'
+      MATRIX_NAME: '${{ matrix.name }}'
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_SYS: '${{ matrix.sys }}'
       MATRIX_TEST: '${{ matrix.test }}'
@@ -495,8 +496,6 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 2
-        env:
-          MATRIX_NAME: '${{ matrix.name }}'
         run: |
           pkgs=''
           if [[ "${MATRIX_NAME}" = *'py'* ]]; then
@@ -560,6 +559,9 @@ jobs:
             else
               PATH="/c/OpenSSH-Win64:$PATH"
             fi
+          fi
+          if [[ "${MATRIX_NAME}" != *'py'* ]]; then
+            export CURL_TEST_NO_PYTHON=1  # we have no Python here, skip tests needing it
           fi
           PATH="$PATH:/c/my-stunnel/bin"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
