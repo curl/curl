@@ -872,7 +872,7 @@ sub checksystemfeatures {
         logmsg "* Min tests: $mintotal\n";
     }
     if($hostos eq 'MSWin32' || $hostos eq 'cygwin' || $hostos eq 'msys') {
-        logmsg "* srcdir: '$ENV{'srcdir'}' | '$srcdir'\n";
+        logmsg "* srcdir: '$srcdir'\n";
     }
 }
 
