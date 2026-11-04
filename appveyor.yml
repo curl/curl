@@ -56,7 +56,7 @@ environment:
       CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DUSE_WIN32_IDN=ON'
       TFLAGS: '!with-server'
 
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
@@ -64,7 +64,7 @@ environment:
       CMAKE_VERSION: 3.21.7  # manually bumped
       CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
-      CMAKE_GENERATE: '-A Win32'
+      CMAKE_GENERATE: '-A Win32 -DUSE_WIN32_IDN=ON'
       TFLAGS: '--min=1600'
 
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
@@ -79,7 +79,7 @@ environment:
       CMAKE_VERSION: 3.19.8  # manually bumped
       CMAKE_SHA256: 2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380
       CMAKE_GENERATOR: 'Visual Studio 14 2015'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DUSE_WIN32_IDN=ON'
 
     - job_name: 'CM VS2017, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
