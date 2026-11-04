@@ -72,10 +72,10 @@ verbose=''
               pf="$(cygpath --mixed --short "${pf}/Git")"
               pf="$(cygpath --unix "${pf}")"
             fi
-            for dir in mingw32 mingw64 ucrt64 clang32 clang64 clangarm64 "${pf}"; do
+            for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 "${pf}"; do
               if [ -d "${dir}" ]; then
-                #find /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 -name 'cacerts' || true  # java
-                find "/${dir}" \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
+                # for java: -name 'cacerts'
+                find "${dir}" \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
               fi
             done
             echo /etc/ssl/certs/ca-certificates.crt
