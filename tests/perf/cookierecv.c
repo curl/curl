@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 #include "first.h"
-#include "respctx.h"
+#include "rh.h"
 
 #if defined(HAVE_SOCKETPAIR) && defined(AF_UNIX)
 
@@ -59,18 +59,6 @@ static const char *resp_cookies[] = {
   "Set-Cookie: name=overwritten\r\n",
   "\r\n"
 };
-
-/* from respheaders.c */
-static curl_socket_t rh_opensocket(void *clientp, curlsocktype purpose,
-                                   struct curl_sockaddr *address);
-static int rh_sockopt(void *clientp, curl_socket_t curlfd,
-                      curlsocktype purpose);
-static size_t rh_write(char *ptr, size_t size, size_t nmemb, void *userdata);
-static bool rh_fits(struct respctx *ctx);
-static int rh_closesocket(void *clientp, curl_socket_t item);
-static int rh_prereq(void *clientp, char *conn_primary_ip,
-                     char *conn_local_ip, int conn_primary_port,
-                     int conn_local_port);
 
 static int run_cookies(const char * const resp, size_t resplen,
                        unsigned int num_cookies,
