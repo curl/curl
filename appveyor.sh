@@ -67,11 +67,17 @@ verbose=''
           done
 
           {
-            find /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
-            #find /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 -name 'cacerts' || true  # java
-            pf="$(cygpath --mixed --short "$PROGRAMFILES/Git")"
-            pf="$(cygpath --unix "${pf}")"
-            find "${pf}" \( -name '*.crt' -o -name '*.pem' -o -name 'cacerts' \) || true
+            pf="$PROGRAMFILES"
+            if [ -n "${pf}" ]; then
+              pf="$(cygpath --mixed --short "${pf}/Git")"
+              pf="$(cygpath --unix "${pf}")"
+            fi
+            for dir in mingw32 mingw64 ucrt64 clang32 clang64 clangarm64 "${pf}"; do
+              if [ -d "${dir}" ]; then
+                #find /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 -name 'cacerts' || true  # java
+                find /${root} \( -name '*.crt' -o -name '*.pem' \) || true | grep -v -F '/test/'
+              fi
+            done
             echo /etc/ssl/certs/ca-certificates.crt
             echo /etc/ssl/cert.pem
             echo /opt/homebrew/etc/ca-certificates/cert.pem
@@ -100,11 +106,11 @@ verbose=''
         } | sort -u | while read -r f; do
           if [ -d "${f}" ]; then
             if grep -a -E "${bad}" -R -- "${f}"; then
-              >&2 printf "bad: ${f}"
+              >&2 printf "bad: %s" "${f}"
             fi
           elif [ -f "${f}" ]; then
             if grep -a -E "${bad}" -- "${f}"; then
-              >&2 printf "bad: ${f}"
+              >&2 printf "bad: %s" "${f}"
             fi
           fi
         done
