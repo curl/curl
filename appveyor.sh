@@ -26,49 +26,6 @@
 # shellcheck disable=SC3040,SC2039
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
-if [ "${1:-}" = 'fixup-ca' ]; then
-  rm -f /c/PROGRA~1/Git/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
-  rm -f /c/PROGRA~1/Git/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem
-  rm -f /c/PROGRA~1/Git/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-  rm -f /c/PROGRA~1/Git/mingw64/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
-  rm -f /c/PROGRA~1/Git/mingw64/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem
-  rm -f /c/PROGRA~1/Git/mingw64/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-  rm -f /c/PROGRA~1/Git/mingw64/etc/ssl/cert.pem                                       # 2019+
-  rm -f /c/PROGRA~1/Git/mingw64/etc/ssl/certs/ca-bundle.crt                            # 2019+
-  rm -f /c/PROGRA~1/Git/mingw64/etc/ssl/certs/ca-bundle.trust.crt                      # 2019+
-  rm -f /c/PROGRA~1/Git/mingw64/share/pki/ca-trust-source/ca-bundle.trust.crt
-  rm -f /c/PROGRA~1/Git/mingw64/ssl/cert.pem                                           # <2019
-  rm -f /c/PROGRA~1/Git/mingw64/ssl/certs/ca-bundle.crt                                # <2019
-  rm -f /c/PROGRA~1/Git/mingw64/ssl/certs/ca-bundle.trust.crt                          # <2019
-  rm -f /c/PROGRA~1/Git/usr/share/pki/ca-trust-source/ca-bundle.trust.crt
-  rm -f /c/PROGRA~1/Git/usr/ssl/cert.pem
-  rm -f /c/PROGRA~1/Git/usr/ssl/certs/ca-bundle.crt
-  rm -f /c/PROGRA~1/Git/usr/ssl/certs/ca-bundle.trust.crt
-  rm -f /c/Tools/curl/bin/curl-ca-bundle.crt                                           # <2019
-  rm -f /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
-  rm -f /etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem
-  rm -f /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-  rm -f /mingw32/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt                # <2019
-  rm -f /mingw32/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem                    # <2019
-  rm -f /mingw32/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem                      # <2019
-  rm -f /mingw32/share/pki/ca-trust-source/ca-bundle.trust.crt                         # <2019
-  rm -f /mingw32/ssl/cert.pem                                                          # <2019
-  rm -f /mingw32/ssl/certs/ca-bundle.crt                                               # <2019
-  rm -f /mingw32/ssl/certs/ca-bundle.trust.crt                                         # <2019
-  rm -f /mingw64/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt                # <2019
-  rm -f /mingw64/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem                    # <2019
-  rm -f /mingw64/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem                      # <2019
-  rm -f /mingw64/share/pki/ca-trust-source/ca-bundle.trust.crt                         # <2019
-  rm -f /mingw64/ssl/cert.pem                                                          # <2019
-  rm -f /mingw64/ssl/certs/ca-bundle.crt                                               # <2019
-  rm -f /mingw64/ssl/certs/ca-bundle.trust.crt                                         # <2019
-  rm -f /usr/share/pki/ca-trust-source/ca-bundle.trust.crt
-  rm -f /usr/ssl/cert.pem
-  rm -f /usr/ssl/certs/ca-bundle.crt
-  rm -f /usr/ssl/certs/ca-bundle.trust.crt
-  exit 0
-fi
-
 export CURL_CI=appveyor
 verbose=''
 
