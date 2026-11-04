@@ -272,7 +272,7 @@ jobs:
               build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '',
               config: '--enable-debug --with-wolfssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native',
               install: 'mingw-w64-ucrt-x86_64-wolfssl' }
-          - { name: 'schannel c-ares U', type: 'Debug',
+          - { name: 'schannel c-ares U py', type: 'Debug',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '--min=1850',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON -DCURL_DROP_UNUSED=ON' }
           # MinGW torture
@@ -495,9 +495,15 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 2
+        env:
+          MATRIX_NAME: '${{ matrix.name }}'
         run: |
+          pkgs=''
+          if [[ "${MATRIX_NAME}" = *'py'* ]]; then
+            pkgs+=' python3'  # ~200 MB install to unlock 3 tests requiring it
+          fi
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
-            pkgs='openssh'
+            pkgs+=' openssh'
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
             if [[ "${MATRIX_IMAGE}" = *'windows-2025'* ]]; then
@@ -516,7 +522,9 @@ jobs:
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
           fi
-          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed python3 ${pkgs}
+          if [ -n "${pkgs}" ]; then
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed ${pkgs}
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
