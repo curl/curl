@@ -62,7 +62,7 @@ verbose=''
 
           printf '%s\n' "$PATH" | tr ':' '\n' | while read -r dir; do
             if [ -d "${dir}" ]; then
-              find "${dir}" -maxdepth 1 \( -name '*.crt' -o -name '*.pem' \) | grep -v -F '/test/' || true
+              find "${dir}" -maxdepth 1 \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/tests?/' || true
             fi
           done
 
@@ -75,7 +75,7 @@ verbose=''
             for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 "${pf}"; do
               if [ -d "${dir}" ]; then
                 # for java: -name 'cacerts'
-                find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -F '/test/' || true
+                find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/tests?/' || true
               fi
             done
             echo /etc/ssl/certs/ca-certificates.crt
