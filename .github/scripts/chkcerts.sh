@@ -7,10 +7,11 @@
 set -eu; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 echo '::group::check for bad certs'
-bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
+#bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
+bad='(emSign ECC Root CA - G3|AAA Certificate Services|Comodo AAA Services root'
 bad+='|MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
-bad+='|MIICKzCCAbGgAwIBAgIKe3G2gla4EnycqDAKBggqhkjOPQQDAzBaMQswCQYDVQQG'  # emSign ECC Root CA - C3
-bad+='|MIIDczCCAlugAwIBAgILAK7PALrEzzL4Q7IwDQYJKoZIhvcNAQELBQAwVjELMAkG'  # emSign Root CA - C1
+#bad+='|MIICKzCCAbGgAwIBAgIKe3G2gla4EnycqDAKBggqhkjOPQQDAzBaMQswCQYDVQQG'  # emSign ECC Root CA - C3
+#bad+='|MIIDczCCAlugAwIBAgILAK7PALrEzzL4Q7IwDQYJKoZIhvcNAQELBQAwVjELMAkG'  # emSign Root CA - C1
 bad+='|MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
 bad+=')'
 # https://pip.pypa.io/en/stable/topics/https-certificates/
