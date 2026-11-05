@@ -46,7 +46,7 @@ env:
 
 jobs:
   check-certs:
-    name: 'Check certificates'
+    name: 'Check certs'
     runs-on: ${{ matrix.image }}
     strategy:
       matrix:

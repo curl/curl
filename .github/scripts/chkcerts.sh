@@ -45,10 +45,10 @@ bad+=')'
   {
     pf="${PROGRAMFILES:-}"
     if [ -n "${pf}" ]; then
-      pf="$(cygpath --mixed --short "${pf}/Git")"
+      pf="$(cygpath --mixed --short "${pf}")"
       pf="$(cygpath --unix "${pf}")"
     fi
-    for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 /c/cygwin /c/cygwin64 "${pf}"; do
+    for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 /c/cygwin /c/cygwin64 "${pf}"/Git; do
       if [ -d "${dir}" ]; then
         # for java: -name 'cacerts'
         find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/(tests?|extracted)/' || true
@@ -80,6 +80,7 @@ bad+=')'
     find ~/venv -name cacert.pem || true
   fi
 } | sort -u | while read -r f; do
+  echo "::group::${f}"
   if [ -d "${f}" ]; then
     if grep -a -E "${bad}" -R -- "${f}"; then
       >&2 printf 'bad dir: %s\n' "${f}"
@@ -90,10 +91,13 @@ bad+=')'
     if grep -a -E "${bad}" -- "${f}"; then
       >&2 printf 'bad: %s\n' "${f}"
       ls -l "${f}"
+      echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
     elif [ "$(wc -l < "${f}")" -gt 200 ]; then
       >&2 printf 'maybe good: %s\n' "${f}"
       ls -l "${f}"
+      echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
     fi
   fi
+  echo '::endgroup::'
 done
 echo '::endgroup::'
