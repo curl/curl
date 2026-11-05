@@ -75,7 +75,7 @@ verbose=''
             for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 "${pf}"; do
               if [ -d "${dir}" ]; then
                 # for java: -name 'cacerts'
-                find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/tests?/' || true
+                find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/(tests?|extracted)/' || true
               fi
             done
             echo /etc/ssl/certs/ca-certificates.crt
@@ -114,6 +114,9 @@ verbose=''
             if grep -a -E "${bad}" -- "${f}"; then
               >&2 printf 'bad: %s\n' "${f}"
               ls -l "${f}"
+              echo '----------------------'
+              cat "${f}"
+              echo '----------------------'
             elif [ "$(wc -l < "${f}")" -gt 200 ]; then
               >&2 printf 'maybe good: %s\n' "${f}"
               ls -l "${f}"
