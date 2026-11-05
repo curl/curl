@@ -134,60 +134,62 @@ init:
   - ps: |
       $ErrorActionPreference = 'SilentlyContinue'
       # 2019+
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\ssl\cert.pem
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\ssl\certs\ca-bundle.crt
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\ssl\certs\ca-bundle.trust.crt
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\etc\ssl\cert.pem'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\etc\ssl\certs\ca-bundle.trust.crt'
       # <2019
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\ssl\cert.pem
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\ssl\certs\ca-bundle.crt
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\ssl\certs\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\Tools\curl\bin\curl-ca-bundle.crt
-      Remove-Item -LiteralPath C:\msys64\mingw32\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\msys64\mingw32\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      Remove-Item -LiteralPath C:\msys64\mingw32\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      Remove-Item -LiteralPath C:\msys64\mingw32\share\pki\ca-trust-source\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\msys64\mingw32\ssl\cert.pem
-      Remove-Item -LiteralPath C:\msys64\mingw32\ssl\certs\ca-bundle.crt
-      Remove-Item -LiteralPath C:\msys64\mingw32\ssl\certs\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\msys64\mingw64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\msys64\mingw64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      Remove-Item -LiteralPath C:\msys64\mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      Remove-Item -LiteralPath C:\msys64\mingw64\share\pki\ca-trust-source\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\msys64\mingw64\ssl\cert.pem
-      Remove-Item -LiteralPath C:\msys64\mingw64\ssl\certs\ca-bundle.crt
-      Remove-Item -LiteralPath C:\msys64\mingw64\ssl\certs\ca-bundle.trust.crt
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\ssl\cert.pem'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\ssl\certs\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\Tools\curl\bin\curl-ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:\msys64\mingw32\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\msys64\mingw32\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\msys64\mingw32\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\msys64\mingw32\share\pki\ca-trust-source\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\msys64\mingw32\ssl\cert.pem'
+      Remove-Item -LiteralPath 'C:\msys64\mingw32\ssl\certs\ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:\msys64\mingw32\ssl\certs\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\msys64\mingw64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\msys64\mingw64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\msys64\mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\msys64\mingw64\share\pki\ca-trust-source\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\msys64\mingw64\ssl\cert.pem'
+      Remove-Item -LiteralPath 'C:\msys64\mingw64\ssl\certs\ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:\msys64\mingw64\ssl\certs\ca-bundle.trust.crt'
       # common
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\share\pki\ca-trust-source\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\usr\share\pki\ca-trust-source\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\usr\ssl\cert.pem
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\usr\ssl\certs\ca-bundle.crt
-      Remove-Item -LiteralPath C:\PROGRA~1\Git\usr\ssl\certs\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\msys64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\msys64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      Remove-Item -LiteralPath C:\msys64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      Remove-Item -LiteralPath C:\msys64\usr\share\pki\ca-trust-source\ca-bundle.trust.crt
-      Remove-Item -LiteralPath C:\msys64\usr\ssl\cert.pem
-      Remove-Item -LiteralPath C:\msys64\usr\ssl\certs\ca-bundle.trust.crt
-      #
+      Remove-Item -LiteralPath 'C:\Program Files\Git\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\share\pki\ca-trust-source\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\usr\share\pki\ca-trust-source\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\usr\ssl\cert.pem'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\usr\ssl\certs\ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:\Program Files\Git\usr\ssl\certs\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\msys64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\msys64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\msys64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:\msys64\usr\share\pki\ca-trust-source\ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:\msys64\usr\ssl\cert.pem'
+      Remove-Item -LiteralPath 'C:\msys64\usr\ssl\certs\ca-bundle.trust.crt'
+      # remove bad certs
       $targets = @(
           '=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3'
           '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign ECC Root CA - C3'
           '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1'
           '=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services'
       )
-      $skip = $false
-      $output = foreach($line in [System.IO.File]::ReadLines('C:\msys64\usr\ssl\certs\ca-bundle.crt')) {
-          if($line -match '^(===|###) ') { $skip = $targets -contains $line }
-          if(-not $skip) { $line }
-      }
-      if($output.Count) {
-          [System.IO.File]::WriteAllLines('C:\msys64\usr\ssl\certs\ca-bundle.crt', [string[]]$output, [System.Text.UTF8Encoding]::new($false))
+      foreach ($file in 'C:\msys64\usr\ssl\certs\ca-bundle.crt',
+                        'C:\Program Files\Git\mingw64\ssl\certs\ca-bundle.crt' /* <2019 */) {
+          $skip = $false
+          $output = foreach($line in [System.IO.File]::ReadLines($file)) {
+              if($line -match '^(===|###) ') { $skip = $targets -contains $line }
+              if(-not $skip) { $line }
+          }
+          if($output.Count) {
+              [System.IO.File]::WriteAllLines($file, [string[]]$output, [System.Text.UTF8Encoding]::new($false))
+          }
       }
 
   - ps: |
