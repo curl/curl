@@ -94,7 +94,9 @@ bad+=')'
     if grep -a -E "${bad}" -- "${f}"; then
       >&2 printf 'bad: %s\n' "${f}"
       ls -l "${f}"
-      echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
+      if [ -z "${APPVEYOR:-}" ]; then
+        echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
+      fi
     elif [ "$(wc -l < "${f}")" -gt 200 ]; then
       >&2 printf 'maybe good: %s\n' "${f}"
       ls -l "${f}"
