@@ -48,7 +48,7 @@ bad+=')'
       pf="$(cygpath --mixed --short "${pf}/Git")"
       pf="$(cygpath --unix "${pf}")"
     fi
-    for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 "${pf}"; do
+    for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 /c/cygwin /c/cygwin64 "${pf}"; do
       if [ -d "${dir}" ]; then
         # for java: -name 'cacerts'
         find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/(tests?|extracted)/' || true

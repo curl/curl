@@ -27,8 +27,9 @@
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # check for bad certs in certain known locations (slow)
-if true; then
+if [ "${CHKCERTS:-}" = 'true' ]; then
   .github/scripts/chkcerts.sh
+  exit 0
 fi
 
 export CURL_CI=appveyor
