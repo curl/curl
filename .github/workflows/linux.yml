@@ -48,7 +48,7 @@ env:
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls extractVersion=^v?(?<version>3\..+)$
   MBEDTLS_PREV_VERSION: 3.6.7
   # renovate: datasource=github-tags depName=nghttp2/nghttp2
-  NGHTTP2_VERSION: 1.70.0
+  NGHTTP2_VERSION: 1.71.0
   # renovate: datasource=github-tags depName=openldap/openldap versioning=regex:^(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)$ extractVersion=^OPENLDAP_REL_ENG_(?<version>.+)$
   OPENLDAP_VERSION: 2_7_2
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
