@@ -7,11 +7,11 @@
 set -eu; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 if [ -n "${GITHUB_WORKSPACE:-}" ]; then
-  groupbeg='::group::%s\n'
-  groupend='::groupend::\n'
+  readonly groupbeg='::group::%s\n'
+  readonly groupend='::groupend::\n'
 else
-  groupbeg=''
-  groupend=''
+  readonly groupbeg=''
+  readonly groupend=''
 fi
 
 echo '::group::check for bad certs'
@@ -89,6 +89,7 @@ bad+=')'
     /usr/bin/find ~/venv -name cacert.pem || true
   fi
 } | sort -u | while read -r f; do
+  # shellcheck disable=SC2059
   printf "${groupbeg}" "${f}"
   if [ -d "${f}" ]; then
     if grep -a -E "${bad}" -R -- "${f}"; then
@@ -101,13 +102,19 @@ bad+=')'
       >&2 printf 'bad: %s\n' "${f}"
       ls -l "${f}"
       if [ -n "${GITHUB_WORKSPACE:-}" ]; then
-        printf "${groupbeg}" "${f} (full dump)"; cat "${f}"; printf "${groupend}"
+        # shellcheck disable=SC2059
+        printf "${groupbeg}" "${f} (full dump)"
+        cat "${f}"
+        # shellcheck disable=SC2059
+        printf "${groupend}"
       fi
     elif [ "$(wc -l < "${f}")" -gt 200 ]; then
       >&2 printf 'maybe good: %s\n' "${f}"
       ls -l "${f}"
     fi
   fi
+  # shellcheck disable=SC2059
   printf "${groupend}"
 done
+# shellcheck disable=SC2059
 printf "${groupend}"
