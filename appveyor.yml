@@ -173,7 +173,6 @@ init:
       Remove-Item -LiteralPath C:\msys64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
       Remove-Item -LiteralPath C:\msys64\usr\share\pki\ca-trust-source\ca-bundle.trust.crt
       Remove-Item -LiteralPath C:\msys64\usr\ssl\cert.pem
-      Remove-Item -LiteralPath C:\msys64\usr\ssl\certs\ca-bundle.crt             # live
       Remove-Item -LiteralPath C:\msys64\usr\ssl\certs\ca-bundle.trust.crt
       #
       $targets = @(
