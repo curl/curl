@@ -83,6 +83,7 @@ bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
         if(starts_with_quote) {
           /* the start of an escaped quote */
           escape = TRUE;
+          c++; /* do not count the escape prefix */
           continue;
         }
         break;
@@ -107,6 +108,7 @@ bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
       case '\"':
         if(starts_with_quote) {
           /* end of string */
+          starts_with_quote = FALSE;
           c = 0;
           continue;
         }
@@ -125,8 +127,8 @@ bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
     content_length++;
   }
 
-  if(escape)
-    return FALSE; /* No character after backslash */
+  if(starts_with_quote || escape)
+    return FALSE; /* No closing quote or character after backslash */
 
   *content = 0;
   *endptr = str;
@@ -643,6 +645,10 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
       else {
         /* Unknown specifier, ignore it! */
       }
+    }
+    else if(*chlg) {
+      Curl_auth_digest_cleanup(digest);
+      return CURLE_BAD_CONTENT_ENCODING;
     }
     else
       break; /* We are done here */
