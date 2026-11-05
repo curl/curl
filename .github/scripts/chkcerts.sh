@@ -24,11 +24,11 @@ bad+=')'
       if [ -d "${f}" ]; then
         >&2 printf ' (directory exists)'
         echo "${f}"
+      elif [ -w "${f}" ]; then
+        >&2 printf ' (file exists and WRITABLE)'
+        echo "${f}"
       elif [ -r "${f}" ]; then
         >&2 printf ' (file exists and readable)'
-        if [ -w "${f}" ]; then
-          >&2 printf ' (WARNING: also writable)'
-        fi
         echo "${f}"
       fi
     else
