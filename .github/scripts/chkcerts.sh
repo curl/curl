@@ -39,7 +39,7 @@ bad+=')'
 
   printf '%s\n' "${PATH:-}" | tr ':' '\n' | while read -r dir; do
     if [ -d "${dir}" ]; then
-      find "${dir}" -maxdepth 1 \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/tests?/' || true
+      /usr/bin/find "${dir}" -maxdepth 1 \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/tests?/' || true
     fi
   done
 
@@ -50,9 +50,11 @@ bad+=')'
       pf="$(cygpath --unix "${pf}")"
     fi
     for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 /c/cygwin /c/cygwin64 "${pf}"/Git; do
+      >&2 printf 'considering dir: %s' "${f}"
       if [ -d "${dir}" ]; then
+        >&2 printf 'looking into dir: %s' "${f}"
         # for java: -name 'cacerts'
-        find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/(tests?|extracted)/' || true
+        /usr/bin/find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/(tests?|extracted)/' || true
       fi
     done
     echo /etc/ssl/certs/ca-certificates.crt
@@ -78,7 +80,7 @@ bad+=')'
   done
 
   if [ -d ~/venv ]; then
-    find ~/venv -name cacert.pem || true
+    /usr/bin/find ~/venv -name cacert.pem || true
   fi
 } | sort -u | while read -r f; do
   echo "::group::${f}"
