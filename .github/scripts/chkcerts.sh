@@ -36,14 +36,14 @@ bad+=')'
     >&2 printf '\n'
   done
 
-  printf '%s\n' "$PATH" | tr ':' '\n' | while read -r dir; do
+  printf '%s\n' "${PATH:-}" | tr ':' '\n' | while read -r dir; do
     if [ -d "${dir}" ]; then
       find "${dir}" -maxdepth 1 \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/tests?/' || true
     fi
   done
 
   {
-    pf="$PROGRAMFILES"
+    pf="${PROGRAMFILES:-}"
     if [ -n "${pf}" ]; then
       pf="$(cygpath --mixed --short "${pf}/Git")"
       pf="$(cygpath --unix "${pf}")"

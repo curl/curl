@@ -39,18 +39,18 @@ environment:
 
     - job_name: 'CM VS2017, check certs'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      CHKCERTS: 'yes'
+      CHKCERTS: '1'
 
     - job_name: 'CM VS2026, check certs'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
-      CHKCERTS: 'yes'
+      CHKCERTS: '1'
 
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
       TFLAGS: '!with-server'
-      RUN_TESTS_VIA_CMAKE: 'yes'
+      RUN_TESTS_VIA_CMAKE: '1'
 
     - job_name: 'CM VS2026, Release, arm64, Schannel, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
@@ -108,7 +108,7 @@ environment:
       CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
       CMAKE_GENERATE: '-A x64 -T ClangCl -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
-      CREATE_ARTIFACT: 'true'
+      CREATE_ARTIFACT: '1'
       TFLAGS: '!with-server'
 
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, Build-tests'
@@ -138,7 +138,7 @@ build_script:
   - cmd: sh -c ./appveyor.sh
 
 init:
-  - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
+  - ps: if($env:RDP) { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
   - ps: |
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
@@ -231,7 +231,7 @@ init:
       }
 
 on_finish:
-  - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
+  - ps: if($env:RDP) { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
 
 clone_depth: 10
 

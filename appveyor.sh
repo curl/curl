@@ -27,7 +27,7 @@
 set -eux; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 # check for bad certs in certain known locations (slow)
-if [ "${CHKCERTS:-}" = 'true' ]; then
+if [ -n "${CHKCERTS:-}" ]; then
   .github/scripts/chkcerts.sh
   exit 0
 fi
@@ -127,7 +127,7 @@ fi
 
 # create artifact
 
-if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
+if [ -n "${CREATE_ARTIFACT:-}" ]; then
   cp -p /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
   echo 'Checking that https works'
   "${curl}" --disable --verbose --fail --silent --show-error --retry 6 --retry-all-errors --cacert curl-ca-bundle.crt --out-null https://curl.se/
