@@ -6,16 +6,7 @@
 # shellcheck disable=SC3040,SC2039
 set -eu; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
-if [ -n "${GITHUB_WORKSPACE:-}" ]; then
-  readonly groupbeg='::group::%s\n'
-  readonly groupend='::endgroup::\n'
-else
-  readonly groupbeg=''
-  readonly groupend=''
-fi
-
-# shellcheck disable=SC2059
-printf "${groupbeg}" 'check for bad certs'
+echo '::group::check for bad certs'
 
 bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
 #bad='(emSign ECC Root CA - G3|AAA Certificate Services|Comodo AAA Services root'
@@ -93,36 +84,30 @@ bad+=')'
 } | sort -u | while read -r f; do
   if [ -d "${f}" ]; then
     if grep -q -a -E "${bad}" -R -- "${f}"; then
-      # shellcheck disable=SC2059
-      printf "${groupbeg}" "bad dir: ${f}"
-      printf 'bad dir: %s\n' "${f}"
-      grep -q -a -E "${bad}" -R -- "${f}"
-      # shellcheck disable=SC2059
-      printf "${groupend}"
+      if [ -n "${GITHUB_WORKSPACE:-}" ]; then
+        echo "::group::bad dir: ${f}"
+      else
+        echo "bad dir: ${f}"
+      fi
+      grep -a -E "${bad}" -R -- "${f}"
+      [ -n "${GITHUB_WORKSPACE:-}" ] && echo '::endgroup::'
     elif [ -s "${f}" ]; then
       printf 'maybe good dir: %s\n' "${f}"
     fi
   elif [ -f "${f}" ]; then
     if grep -q -a -E "${bad}" -- "${f}"; then
-      # shellcheck disable=SC2059
-      printf "${groupbeg}" "bad: ${f}"
-      printf 'bad: %s\n' "${f}"
-      ls -l "${f}"
-      grep -q -a -E "${bad}" -- "${f}"
-      if [ -n "${GITHUB_WORKSPACE:-}" ] && false; then  # too many lines for the log
-        # shellcheck disable=SC2059
-        printf "${groupbeg}" "${f} (full dump)"
-        cat "${f}"
-        # shellcheck disable=SC2059
-        printf "${groupend}"
+      if [ -n "${GITHUB_WORKSPACE:-}" ]; then
+        echo "::group::bad: ${f}"
+      else
+        echo "bad: ${f}"
       fi
-      # shellcheck disable=SC2059
-      printf "${groupend}"
+      ls -l "${f}"
+      grep -a -E "${bad}" -- "${f}"
+      [ -n "${GITHUB_WORKSPACE:-}" ] && echo '::endgroup::'
     elif [ "$(wc -l < "${f}")" -gt 200 ]; then
       printf 'maybe good: %s\n' "${f}"
       ls -l "${f}"
     fi
   fi
 done
-# shellcheck disable=SC2059
-printf "${groupend}"
+echo '::endgroup::'
