@@ -954,6 +954,9 @@ static CURLcode cf_ngtcp2_prio_changed(struct Curl_cfilter *cf,
     }
     CURL_TRC_CF(data, cf, "[%" PRId64 "] PRIORITY_UPDATE '%.*s'",
                 stream->id, (int)len, buf);
+    Curl_multi_mark_dirty(data);
+    if(data->multi && Curl_update_timer(data->multi))
+      return CURLE_ABORTED_BY_CALLBACK;
   }
   return CURLE_OK;
 }

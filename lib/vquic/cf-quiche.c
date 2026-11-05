@@ -1245,6 +1245,9 @@ static CURLcode cf_quiche_prio_changed(struct Curl_cfilter *cf,
     }
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] PRIORITY_UPDATE urgency=%u, inc=%d",
                 stream->id, pri.urgency, pri.incremental);
+    Curl_multi_mark_dirty(data);
+    if(data->multi && Curl_update_timer(data->multi))
+      return CURLE_ABORTED_BY_CALLBACK;
   }
   return CURLE_OK;
 }

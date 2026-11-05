@@ -2051,6 +2051,7 @@ static CURLcode cf_h2_prio_changed(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
   int rv = 0;
+  bool changed = FALSE;
 
   if(!Curl_ngh2_valid(&ctx->ngh2) || !stream || (stream->id <= 0))
     /* Someone may change the priority of a stream we no longer have or
@@ -2060,6 +2061,7 @@ static CURLcode cf_h2_prio_changed(struct Curl_cfilter *cf,
   if(data->set.priority.rfc7540 != stream->prio.rfc7540) {
     nghttp2_priority_spec pri_spec;
 
+    changed = TRUE;
     stream->prio.rfc7540 = data->set.priority.rfc7540;
     nghttp2_priority_spec_init(&pri_spec, 0, stream->prio.rfc7540, FALSE);
 
@@ -2079,6 +2081,7 @@ static CURLcode cf_h2_prio_changed(struct Curl_cfilter *cf,
     char buf[128];
     size_t len;
 
+    changed = TRUE;
     stream->prio.rfc9218 = data->set.priority.rfc9218;
     len = Curl_http_prio_hd_val(&stream->prio, buf, sizeof(buf));
     rv = Curl_ngh2_submit_priority_update(&ctx->ngh2, NGHTTP2_FLAG_NONE,
@@ -2093,6 +2096,11 @@ static CURLcode cf_h2_prio_changed(struct Curl_cfilter *cf,
                 stream->id, (int)len, buf);
   }
 #endif
+  if(changed) {
+    Curl_multi_mark_dirty(data);
+    if(data->multi && Curl_update_timer(data->multi))
+      return CURLE_ABORTED_BY_CALLBACK;
+  }
   return CURLE_OK;
 }
 

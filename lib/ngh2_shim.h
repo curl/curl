@@ -35,6 +35,8 @@
 
 #if NGHTTP2_VERSION_NUM >= 0x012f00 /* with 1.47.0 */
 #define NGHTTP2_HAS_PRIORITY_UPDATE 1
+#else
+#define NGHTTP2_HAS_PRIORITY_UPDATE 0
 #endif
 
 /* From the nghttp2 documentation:
