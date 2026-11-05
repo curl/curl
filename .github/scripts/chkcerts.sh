@@ -8,7 +8,7 @@ set -eu; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 if [ -n "${GITHUB_WORKSPACE:-}" ]; then
   readonly groupbeg='::group::%s\n'
-  readonly groupend='::groupend::\n'
+  readonly groupend='::endgroup::\n'
 else
   readonly groupbeg=''
   readonly groupend=''
