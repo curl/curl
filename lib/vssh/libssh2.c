@@ -3219,6 +3219,8 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
       left_ms = Curl_timeleft_ms(data);
       if(left_ms < 0) {
         failf(data, "Operation timed out");
+        /* prevent this from being reused */
+        connclose(data->conn);
         return CURLE_OPERATION_TIMEDOUT;
       }
     }
