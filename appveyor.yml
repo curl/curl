@@ -40,12 +40,10 @@ environment:
     - job_name: 'CM VS2017, check certs'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       CHKCERTS: '1'
-      RDP: '1'
 
     - job_name: 'CM VS2026, check certs'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
       CHKCERTS: '1'
-      RDP: '1'
 
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
