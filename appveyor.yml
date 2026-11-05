@@ -150,6 +150,7 @@ init:
       taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe
       $LASTEXITCODE = 0
 
+  # remove surplus CA bundles, fix the ones known to be used
   - ps: |
       $ErrorActionPreference = 'SilentlyContinue'
       # 2019+
