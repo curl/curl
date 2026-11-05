@@ -45,6 +45,21 @@ env:
   STUNNEL_VERSION: 5.82
 
 jobs:
+  check-certs:
+    name: 'Check certificates'
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        image: [windows-11-arm, windows-2022, windows-2025]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 'check'
+        shell: bash
+        run: .github/scripts/chkcerts.sh
+
   build-cache:
     name: 'Build caches'
     runs-on: ${{ matrix.image }}
