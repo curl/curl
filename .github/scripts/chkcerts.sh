@@ -6,6 +6,14 @@
 # shellcheck disable=SC3040,SC2039
 set -eu; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
+if [ -n "${GITHUB_WORKSPACE:-}" ]; then
+  beggroup='::group::%s\n'
+  groupend='::groupend::\n'
+else
+  groupbeg=''
+  groupend=''
+fi
+
 echo '::group::check for bad certs'
 #bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
 bad='(emSign ECC Root CA - G3|AAA Certificate Services|Comodo AAA Services root'
@@ -50,10 +58,10 @@ bad+=')'
       pf="$(cygpath --unix "${pf}")"
     fi
     for dir in /etc /usr /mingw32 /mingw64 /ucrt64 /clang32 /clang64 /clangarm64 /c/cygwin /c/cygwin64 "${pf}"/Git; do
-      >&2 printf 'considering dir: %s' "${f}"
+      # >&2 printf 'considering dir: %s\n' "${f}"
       if [ -d "${dir}" ]; then
-        >&2 printf 'looking into dir: %s' "${f}"
-        # for java: -name 'cacerts'
+        # >&2 printf 'looking into dir: %s\n' "${f}"
+        # for java, extend with: -o -name cacerts
         /usr/bin/find "${dir}" \( -name '*.crt' -o -name '*.pem' \) | grep -v -E '/(tests?|extracted)/' || true
       fi
     done
@@ -83,7 +91,7 @@ bad+=')'
     /usr/bin/find ~/venv -name cacert.pem || true
   fi
 } | sort -u | while read -r f; do
-  echo "::group::${f}"
+  printf "${groupbeg}" "${f}"
   if [ -d "${f}" ]; then
     if grep -a -E "${bad}" -R -- "${f}"; then
       >&2 printf 'bad dir: %s\n' "${f}"
@@ -94,14 +102,14 @@ bad+=')'
     if grep -a -E "${bad}" -- "${f}"; then
       >&2 printf 'bad: %s\n' "${f}"
       ls -l "${f}"
-      if [ -z "${APPVEYOR:-}" ]; then
-        echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
+      if [ -n "${GITHUB_WORKSPACE:-}" ]; then
+        printf "${groupbeg}" "${f} (full dump)"; cat "${f}"; printf "${groupend}"
       fi
     elif [ "$(wc -l < "${f}")" -gt 200 ]; then
       >&2 printf 'maybe good: %s\n' "${f}"
       ls -l "${f}"
     fi
   fi
-  echo '::endgroup::'
+  printf "${groupend}"
 done
-echo '::endgroup::'
+printf "${groupend}"
