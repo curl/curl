@@ -199,13 +199,20 @@ init:
         'emSign Root CA - C1'
         'Comodo AAA Services root'
       )
-      $issuerPattern = ($issuers | ForEach-Object { [regex]::Escape($_) }) -join '|'
-      $pattern = '(?ms)^[^\r\n]*(?:' + $issuerPattern + ')[^\r\n]*\r?\n.*?^-----END CERTIFICATE-----[^\r\n]*(?:\r?\n|$)'
+      $prefixes = @(
+        'MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
+        'MIICKzCCAbGgAwIBAgIKe3G2gla4EnycqDAKBggqhkjOPQQDAzBaMQswCQYDVQQG'  # emSign ECC Root CA - C3
+        'MIIDczCCAlugAwIBAgILAK7PALrEzzL4Q7IwDQYJKoZIhvcNAQELBQAwVjELMAkG'  # emSign Root CA - C1
+        'MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
+      )
+      $pattern1 = '(?ms)^[^\r\n]*(?:' + ($issuers | ForEach-Object { [regex]::Escape($_) }) -join '|' + ')[^\r\n]*\r?\n.*?^-----END CERTIFICATE-----[^\r\n]*(?:\r?\n|$)'
+      $pattern2 = '(?ms)^-----BEGIN CERTIFICATE-----\r?\n(?:' + ($prefixes | ForEach-Object { [regex]::Escape($_) }) -join '|' + ')[^\r\n]*\r?\n.*?^-----END CERTIFICATE-----[^\r\n]*(?:\r?\n|$)'
       foreach($f in 'C:/msys64/usr/ssl/certs/ca-bundle.crt',
                     'C:/Program Files/Git/mingw64/ssl/certs/ca-bundle.crt') {  # <2019
         if(Test-Path -LiteralPath $f -PathType Leaf) {
           $old = [IO.File]::ReadAllText($f)
-          $new = [regex]::Replace($old, $pattern, '')
+          $new = [regex]::Replace($old, $pattern1, '')
+          $new = [regex]::Replace($new, $pattern2, '')
           if($old -cne $new) {
             [IO.File]::WriteAllText($f, $new)
           }
