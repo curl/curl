@@ -114,7 +114,7 @@ verbose=''
             if grep -q -a -E "${bad}" -- "${f}"; then
               >&2 printf 'bad: %s\n' "${f}"
               ls -l "${f}"
-            elif [ "$(wc -l -- "${f}" | tr -d ' ')" -gt 200 ]; then
+            elif [ "$(wc -l < "${f}")" -gt 200 ]; then
               >&2 printf 'maybe good: %s\n' "${f}"
               ls -l "${f}"
             fi
