@@ -245,6 +245,7 @@ struct Curl_cfilter {
   BIT(shutdown);                 /* != 0 iff this filter has shut down */
 };
 
+/* A struct holding a filter chain and its properties */
 struct Curl_cfchain {
   struct Curl_cfilter *cf;       /* first filter in chain */
   struct connectdata *conn;      /* connectdata this chain belongs to */
