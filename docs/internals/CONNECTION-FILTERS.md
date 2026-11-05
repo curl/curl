@@ -420,13 +420,13 @@ of the connection. Its job is to provide DNS information like IP addresses.
 These addresses are needed by the `cf-ip-happy` filters to start attempts
 to reach the server.
 
-But `cf-ip-happy` does not find a `cf-dns` filter in its own chain.
-So, it looks at its `parent` chain. That would be, for example, the `h2` chain.
+`cf-ip-happy` does not find a `cf-dns` filter in its own chain.
+So it looks at its `parent` chain. That would be, for example, the `h2` chain.
+There is no `cf-dns` filter in the `h2` chain either.
 
-But there is no `cf-dns` filter in the `h2` chain either. But the `parent`
-chain of `h2` is the connection's primary chain and that one has such
-a filter. `cf-dns` is found, hands out addresses and `cf-ip-happy` can
-start its work.
+It then looks into the `parent` chain of `h2` which is the connection's primary
+chain. That one has such a filter. `cf-dns` is found, hands out addresses
+and `cf-ip-happy` can start its work.
 
 ### Lifetimes
 
