@@ -74,15 +74,13 @@ bad+=')'
     fi
   } | sort -u | while read -r f; do
     if [ -d "${f}" ]; then
-      >&2 printf '%s (directory exists)' "${f}"
+      >&2 printf '%s (directory exists)\n' "${f}"
       echo "${f}"
-      >&2 printf '\n'
+    elif [ -w "${f}" ]; then
+      >&2 printf '%s (file exists and WRITABLE)\n' "${f}"
+      echo "${f}"
     elif [ -r "${f}" ]; then
-      >&2 printf '%s (file exists and readable)' "${f}"
-      if [ -w "${f}" ]; then
-        >&2 printf ' (WARNING: also writable)'
-      fi
-      >&2 printf '\n'
+      >&2 printf '%s (file exists and readable)\n' "${f}"
       echo "${f}"
     fi
   done
