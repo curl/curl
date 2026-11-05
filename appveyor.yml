@@ -132,6 +132,7 @@ build_script:
 init:
   - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
   - ps: |
+      $ErrorActionPreference = 'SilentlyContinue'
       # 2019+
       Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\ssl\cert.pem
       Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\ssl\certs\ca-bundle.crt
