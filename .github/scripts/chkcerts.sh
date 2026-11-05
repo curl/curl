@@ -7,7 +7,7 @@
 set -eu; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 if [ -n "${GITHUB_WORKSPACE:-}" ]; then
-  beggroup='::group::%s\n'
+  groupbeg='::group::%s\n'
   groupend='::groupend::\n'
 else
   groupbeg=''
