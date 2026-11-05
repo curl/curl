@@ -76,42 +76,49 @@ void Curl_conncontrol(struct connectdata *conn, int ctrl);
  */
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
-                         int8_t sockindex,
+                         struct Curl_cfchain *chain,
                          int ssl_mode);
 
-/**
- * Bring the filter chain at `sockindex` for connection `data->conn` into
- * connected state. Which will set `*done` to TRUE.
+/* Bring the filter chain into connected state. Which will set `*done` to TRUE.
  * This can be called on an already connected chain with no side effects.
  * When not `blocking`, calls may return without error and `*done != TRUE`,
- * while the individual filters negotiated the connection.
- */
-CURLcode Curl_conn_connect(struct Curl_easy *data, int8_t sockindex,
-                           bool blocking, bool *done);
+ * while the individual filters negotiated the connection. */
+CURLcode Curl_cfchain_connect(struct Curl_easy *data,
+                              struct Curl_cfchain *chain,
+                              bool blocking,
+                              bool *done);
+
+/* Bring the filter chain at `FIRSTSOCKET` into connected state. */
+CURLcode Curl_conn_connect(struct Curl_easy *data, bool blocking, bool *done);
 
 /**
- * The filter chain at `sockindex` failed to connect, e.g. the TLS handshake
+ * The filter chain failed to connect, e.g. the TLS handshake
  * timed out. Let the filters that did connect, like the TCP socket, report
  * their IP information and stats to the transfer.
  */
-void Curl_conn_report_failed(struct Curl_easy *data, int8_t sockindex);
+void Curl_cfchain_report_failed(struct Curl_easy *data,
+                                struct Curl_cfchain *chain);
 
-/* Set conn to allow multiplexing. */
-void Curl_conn_set_multiplex(struct connectdata *conn);
+/* Set conn to allow multiplexing with http version installed. */
+void Curl_conn_set_multiplex(struct Curl_cfchain *chain, uint8_t http_version);
 
-/* Get the origin peer at sockindex. */
-struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
-                                       int8_t sockindex);
+/* Get the origin peer at FIRSTSOCKET. */
+struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn);
 
 /* Get the peer the connection actually connects to at sockindex.
  * Often the same as "origin", but can be redirected via "connect-to"
  * or "alt-svc". May tunnel through proxies. */
-struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
-                                            int8_t sockindex);
+struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn);
 
 /* Get the peer curl connects its socket to.
  * Can be origin, "connect-to" or the first proxy. */
-struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,
-                                           int8_t sockindex);
+struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn);
+
+struct Curl_peer *Curl_cf_get_origin(struct Curl_cfilter *cf);
+struct Curl_peer *Curl_cf_get_first_peer(struct Curl_cfilter *cf);
+struct Curl_peer *Curl_cf_get_destination(struct Curl_cfilter *cf);
+
+/* Get "via_peer" for chain or NULL if not set */
+struct Curl_peer *Curl_cfchain_get_via_peer(struct Curl_cfchain *chain);
 
 #endif /* HEADER_CURL_CONNECT_H */

@@ -698,9 +698,9 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data,
   bool ssldone = FALSE;
 
   DEBUGASSERT(smtpc->state == SMTP_UPGRADETLS);
-  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  if(!Curl_conn_is_ssl(conn)) {
     result = Curl_ssl_cfilter_add(
-      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
+      data, Curl_conn_get_origin(conn), &conn->chain);
     if(result)
       goto out;
     /* Change the connection handler and SMTP state */
@@ -708,7 +708,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data,
   }
 
   DEBUGASSERT(!smtpc->ssldone);
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+  result = Curl_conn_connect(data, FALSE, &ssldone);
   DEBUGF(infof(data, "smtp_perform_upgrade_tls, connect -> %d, %d",
                (int)result, ssldone));
   if(!result && ssldone) {
@@ -1208,7 +1208,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
 
   if(smtpcode / 100 != 2 && smtpcode != 1) {
     if(data->set.use_ssl <= CURLUSESSL_TRY ||
-       Curl_conn_is_ssl(data->conn, FIRSTSOCKET))
+       Curl_conn_is_ssl(data->conn))
       result = smtp_perform_helo(data, smtpc);
     else {
       failf(data, "Remote access denied: %d", smtpcode);
@@ -1269,7 +1269,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
     }
 
     if(smtpcode != 1) {
-      if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
+      if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn)) {
         /* We do not have an SSL/TLS connection yet, but SSL is requested */
         if(smtpc->tls_supported)
           /* Switch to TLS connection now */
@@ -1539,8 +1539,7 @@ upgrade_tls:
 
   do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(data, FIRSTSOCKET, &smtpc->pp,
-                              &smtpcode, &nread);
+    result = Curl_pp_readresp(data, &smtpc->pp, &smtpcode, &nread);
     if(result)
       return result;
 
@@ -1810,7 +1809,7 @@ static CURLcode smtp_perform(struct Curl_easy *data,
   /* Run the state-machine */
   result = smtp_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn);
 
 out:
   CURL_TRC_SMTP(data, "smtp_perform() -> %d, connected=%d, done=%d",

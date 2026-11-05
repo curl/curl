@@ -95,7 +95,7 @@ static CURLcode sendf(struct Curl_easy *data,
 
 static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
 {
-  curl_socket_t sockfd = data->conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = data->conn->chain.sock;
   size_t bytes_written;
   size_t write_len;
   CURLcode result = CURLE_OK;
