@@ -91,18 +91,24 @@ bad+=')'
     /usr/bin/find ~/venv -name cacert.pem || true
   fi
 } | sort -u | while read -r f; do
-  # shellcheck disable=SC2059
-  printf "${groupbeg}" "${f}"
   if [ -d "${f}" ]; then
-    if grep -a -E "${bad}" -R -- "${f}"; then
+    if grep -q -a -E "${bad}" -R -- "${f}"; then
+      # shellcheck disable=SC2059
+      printf "${groupbeg}" "bad dir: ${f}"
       printf 'bad dir: %s\n' "${f}"
+      grep -q -a -E "${bad}" -R -- "${f}"
+      # shellcheck disable=SC2059
+      printf "${groupend}"
     elif [ -s "${f}" ]; then
       printf 'maybe good dir: %s\n' "${f}"
     fi
   elif [ -f "${f}" ]; then
-    if grep -a -E "${bad}" -- "${f}"; then
+    if grep -q -a -E "${bad}" -- "${f}"; then
+      # shellcheck disable=SC2059
+      printf "${groupbeg}" "bad: ${f}"
       printf 'bad: %s\n' "${f}"
       ls -l "${f}"
+      grep -q -a -E "${bad}" -- "${f}"
       if [ -n "${GITHUB_WORKSPACE:-}" ] && false; then  # too many lines for the log
         # shellcheck disable=SC2059
         printf "${groupbeg}" "${f} (full dump)"
@@ -110,13 +116,13 @@ bad+=')'
         # shellcheck disable=SC2059
         printf "${groupend}"
       fi
+      # shellcheck disable=SC2059
+      printf "${groupend}"
     elif [ "$(wc -l < "${f}")" -gt 200 ]; then
       printf 'maybe good: %s\n' "${f}"
       ls -l "${f}"
     fi
   fi
-  # shellcheck disable=SC2059
-  printf "${groupend}"
 done
 # shellcheck disable=SC2059
 printf "${groupend}"
