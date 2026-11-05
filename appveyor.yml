@@ -191,7 +191,6 @@ init:
               [System.IO.File]::WriteAllLines($file, [string[]]$output, [System.Text.UTF8Encoding]::new($false))
           }
       }
-      [System.Environment]::SetEnvironmentVariable('GIT_CURL_VERBOSE', '1')
 
   - ps: |
       # Prevent running browser updates during the CI job
