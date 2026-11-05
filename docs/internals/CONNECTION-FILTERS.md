@@ -360,7 +360,7 @@ struct Curl_cfchain {
 };
 ```
 
-A connection has one primary filter chain. The is a secodary chain for
+A connection has one primary filter chain. The is a secondary chain for
 the FTP protocol. All other protocols only use the primary.
 
 A chain keeps other properties besides the filters: the main socket it
@@ -402,7 +402,7 @@ connection
 While this is ongoing, the `cf-https-filter` has no `next` filter. The
 primary chain ends there. The "sub" chains for `h2` and `h3` are kept
 by `cf-https-connect` internally. Only when one of these chains "wins"
-and is merged will `cf-https-connect` have a `next`.
+and is merged, does `cf-https-connect` get a `next`.
 
 Having established the connection, the winner chains are merged, the
 "meta" filters are removed and the connection may look like this:
@@ -421,7 +421,7 @@ These addresses are needed by the `cf-ip-happy` filters to start attempts
 to reach the server.
 
 `cf-ip-happy` does not find a `cf-dns` filter in its own chain.
-So it looks at its `parent` chain. That would be, for example, the `h2` chain.
+It looks at its `parent` chain. That would be, for example, the `h2` chain.
 There is no `cf-dns` filter in the `h2` chain either.
 
 It then looks into the `parent` chain of `h2` which is the connection's primary
@@ -433,8 +433,8 @@ and `cf-ip-happy` can start its work.
 Keeping to pointers to chains, their parents and the filters is safe because
 the pointers do not live longer than the objects they point to.
 
-When a connection is dicarded, it destroys its primary chain. The chain
-destroys all its filters first. So `cf-https-connect` is destroyed before
-the primary chain is gone. And `cf-https-connect` destroys the `h2` and
+When a connection is discarded, it destroys its primary chain. The chain
+destroys all its filters first. `cf-https-connect` is destroyed before
+the primary chain is gone. `cf-https-connect` destroys the `h2` and
 `h3` chains first. Which destroys the `cf-ip-happy` filters, which first
 destroy their address chains, etc. etc.
