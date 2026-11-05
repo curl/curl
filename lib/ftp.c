@@ -3501,6 +3501,8 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
   default:
     DEBUGASSERT(0);
+    FALLTHROUGH();
+  case FTP_STOP:
     /* internal error */
     ftp_state(data, ftpc, FTP_STOP);
     break;
