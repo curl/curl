@@ -64,7 +64,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
                            bool disconnecting)
 {
   struct connectdata *conn = data->conn;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t sock = conn->chain.sock;
   int rc;
   timediff_t interval_ms;
   timediff_t timeout_ms = Curl_pp_state_timeleft_ms(data, pp);
@@ -86,12 +86,12 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
   }
 
-  if(Curl_conn_data_pending(data, FIRSTSOCKET))
+  if(Curl_conn_data_pending(data))
     rc = 1;
   else if(pp->overflow)
     /* We are receiving and there is data in the cache so read it */
     rc = 1;
-  else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
+  else if(!pp->sendleft && Curl_conn_data_pending(data))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else {
@@ -212,12 +212,11 @@ CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
 }
 
 static CURLcode pingpong_read(struct Curl_easy *data,
-                              int8_t sockindex,
                               char *buffer,
                               size_t buflen,
                               size_t *nread)
 {
-  return Curl_conn_recv(data, sockindex, buffer, buflen, nread);
+  return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, nread);
 }
 
 /*
@@ -226,7 +225,6 @@ static CURLcode pingpong_read(struct Curl_easy *data,
  * Reads a piece of a server response.
  */
 CURLcode Curl_pp_readresp(struct Curl_easy *data,
-                          int8_t sockindex,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
                           size_t *size) /* size of the response */
@@ -256,8 +254,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       if(!maxloops--) /* don't get stuck */
         return CURLE_OK;
 
-      result = pingpong_read(data, sockindex, buffer, sizeof(buffer),
-                             &gotbytes);
+      result = pingpong_read(data, buffer, sizeof(buffer), &gotbytes);
       if(result == CURLE_AGAIN)
         return CURLE_OK;
 
@@ -345,7 +342,7 @@ CURLcode Curl_pp_pollset(struct Curl_easy *data,
                          struct easy_pollset *ps)
 {
   int flags = pp->sendleft ? CURL_POLL_OUT : CURL_POLL_IN;
-  return Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET],
+  return Curl_pollset_change(data, ps, data->conn->chain.sock,
                              flags, 0);
 }
 

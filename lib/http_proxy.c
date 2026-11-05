@@ -203,6 +203,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
                                           struct Curl_peer *dest,
                                           proxy_http_ver ver)
 {
+  struct connectdata *conn = CF_CONN(cf);
   char *authority = NULL;
   const char *ua;
   int httpversion = proxy_http_ver_major(ver);
@@ -227,14 +228,14 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
     goto out;
 
   /* Setup the proxy-authorization header, if any */
-  result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
+  result = Curl_http_output_auth(data, conn, req->method, HTTPREQ_GET,
                                  req->authority, NULL, TRUE);
   if(result)
     goto out;
 
   /* If user is not overriding Host: header, we add for HTTP/1.x */
   if(ver == PROXY_HTTP_V1 &&
-     !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
+     !Curl_checkProxyheaders(data, conn, STRCONST("Host"))) {
     result = Curl_dynhds_cadd(&req->headers, "Host", authority);
     if(result)
       goto out;
@@ -248,7 +249,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
   }
 
   ua = CURL_EASY_STR(data, STRING_USERAGENT);
-  if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+  if(!Curl_checkProxyheaders(data, conn, STRCONST("User-Agent")) &&
      ua && *ua) {
     result = Curl_dynhds_cadd(&req->headers, "User-Agent", ua);
     if(result)
@@ -256,7 +257,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
   }
 
   if(ver == PROXY_HTTP_V1 &&
-     !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
+     !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-Connection"))) {
     result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
     if(result)
       goto out;
@@ -282,6 +283,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
                                              struct Curl_peer *dest,
                                              proxy_http_ver ver)
 {
+  struct connectdata *conn = CF_CONN(cf);
   const char *proxy_scheme = "http", *ua;
   int httpversion = proxy_http_ver_major(ver);
   char *authority = NULL;
@@ -290,9 +292,9 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
   struct httpreq *req = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  if(cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS ||
-     cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS2 ||
-     cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
+  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS ||
+     conn->http_proxy.proxytype == CURLPROXY_HTTPS2 ||
+     conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
     proxy_scheme = "https";
 
   authority = curl_maprintf("%s%s%s:%d",
@@ -359,11 +361,11 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
   }
   else {
     /* If user is not overriding Host: header, we add for HTTP/1.x */
-    if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
+    if(!Curl_checkProxyheaders(data, conn, STRCONST("Host"))) {
       result = Curl_dynhds_cadd(&req->headers, "Host", authority);
     }
     if(!result &&
-       !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
+       !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-Connection"))) {
       result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection",
                                 "Keep-Alive");
     }
@@ -375,7 +377,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
 
   if(!result)
     /* Setup the proxy-authorization header, if any */
-    result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
+    result = Curl_http_output_auth(data, conn, req->method, HTTPREQ_GET,
                                    req->authority, NULL, TRUE);
   if(!result && data->req.hd_proxy_auth)
     result = Curl_dynhds_h1_cadd_line(&req->headers,
@@ -385,7 +387,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
   if(!result) {
     ua = CURL_EASY_STR(data, STRING_USERAGENT);
     if(ver == PROXY_HTTP_V1 &&
-       !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+       !Curl_checkProxyheaders(data, conn, STRCONST("User-Agent")) &&
        ua && *ua) {
       result = Curl_dynhds_cadd(&req->headers, "User-Agent", ua);
       if(result)

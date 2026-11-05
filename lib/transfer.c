@@ -104,13 +104,13 @@ static int data_pending(struct Curl_easy *data, bool rcvd_eagain)
   struct connectdata *conn = data->conn;
 
   if(conn->scheme->protocol & PROTO_FAMILY_FTP)
-    return Curl_conn_data_pending(data, SECONDARYSOCKET);
+    return Curl_cfchain_data_pending(data, &conn->chain_alt);
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return (!rcvd_eagain &&
           conn->scheme->protocol & (CURLPROTO_SCP | CURLPROTO_SFTP)) ||
-         Curl_conn_data_pending(data, FIRSTSOCKET);
+         Curl_conn_data_pending(data);
 }
 
 /*
@@ -145,23 +145,28 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
 
 static CURLcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
 {
+  struct Curl_cfchain *chain;
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  return Curl_cshutdn_try_once_idx(data, data->conn->recv_idx, done);
+  chain = data->conn->recv_idx ? &data->conn->chain_alt : &data->conn->chain;
+  return Curl_cshutdn_cfchain_try_once(data, chain, done);
 }
 
 static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
   if(!data || !data->conn)
     return FALSE;
-  return CURL_CONN_IN_SHUTDOWN(data->conn, data->conn->recv_idx);
+  return CURL_CFCHAIN_IN_SHUTDOWN(
+    data->conn->recv_idx ? &data->conn->chain_alt : &data->conn->chain);
 }
 
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
 {
+  struct Curl_cfchain *chain;
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  return Curl_cshutdn_try_once_idx(data, data->conn->send_idx, done);
+  chain = data->conn->send_idx ? &data->conn->chain_alt : &data->conn->chain;
+  return Curl_cshutdn_cfchain_try_once(data, chain, done);
 }
 
 /**
@@ -242,7 +247,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
       /* Multiplexed connection have inherent handling of EOF and we do not
        * have to carefully restrict the amount we try to read.
        * Multiplexed changes only in one direction. */
-      is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);
+      is_multiplex = Curl_conn_is_multiplex(conn);
     }
 
     buf = xfer_buf;
@@ -806,12 +811,18 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
 
 bool Curl_xfer_needs_flush(struct Curl_easy *data)
 {
-  return Curl_conn_needs_flush(data, data->conn->send_idx);
+  if(CONN_SOCK_IDX_VALID(data->conn->send_idx))
+    return Curl_cfchain_needs_flush(data, data->conn->send_idx ?
+      &data->conn->chain_alt : &data->conn->chain);
+  return FALSE;
 }
 
 CURLcode Curl_xfer_flush(struct Curl_easy *data)
 {
-  return Curl_conn_flush(data, data->conn->send_idx);
+  if(CONN_SOCK_IDX_VALID(data->conn->send_idx))
+    return Curl_cfchain_flush(data, data->conn->send_idx ?
+      &data->conn->chain_alt : &data->conn->chain);
+  return CURLE_OK;
 }
 
 CURLcode Curl_xfer_try_send(struct Curl_easy *data,

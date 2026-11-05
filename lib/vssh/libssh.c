@@ -1785,15 +1785,15 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
   return SSH_NO_ERROR;
 }
 
-static void conn_forget_socket(struct Curl_easy *data, int8_t sockindex)
+static void conn_forget_socket(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
-  if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
-    struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  if(conn) {
+    struct Curl_cfilter *cf = conn->chain.cf;
     if(cf)
       (void)Curl_conn_cf_cntrl(cf, data, TRUE, CF_CTRL_FORGET_SOCKET, 0, NULL);
-    fake_sclose(conn->sock[sockindex]);
-    conn->sock[sockindex] = CURL_SOCKET_BAD;
+    fake_sclose(conn->chain.sock);
+    conn->chain.sock = CURL_SOCKET_BAD;
   }
 }
 
@@ -1819,10 +1819,10 @@ static void myssh_SESSION_DISCONNECT(struct Curl_easy *data,
 
   ssh_disconnect(sshc->ssh_session);
   if(!ssh_version(SSH_VERSION_INT(0, 10, 0))) {
-    /* conn->sock[FIRSTSOCKET] is closed by ssh_disconnect behind our back,
-       tell the connection to forget about it. This libssh
-       bug is fixed in 0.10.0. */
-    conn_forget_socket(data, FIRSTSOCKET);
+    /* conn->chain.sock is closed by ssh_disconnect
+     * behind our back, tell the connection to forget about it. This libssh
+     * bug is fixed in 0.10.0. */
+    conn_forget_socket(data);
   }
 
   SSH_STRING_FREE_CHAR(sshc->homedir);
@@ -2530,7 +2530,7 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
     }
 
     if(block) {
-      curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
+      curl_socket_t fd_read = conn->chain.sock;
       /* wait for the socket to become ready */
       (void)SOCKET_READABLE(fd_read,
                             (!left_ms || left_ms > 1000) ? 1000 : left_ms);
@@ -2597,7 +2597,7 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *ssh = Curl_meta_get(data, CURL_META_SSH_EASY);
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t sock = conn->chain.sock;
   int rc;
 
   if(!sshc || !ssh)
@@ -2747,7 +2747,7 @@ static CURLcode scp_perform(struct Curl_easy *data,
 
   result = myssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn);
 
   if(*dophase_done) {
     CURL_TRC_SSH(data, "DO phase is complete");
@@ -2951,7 +2951,7 @@ static CURLcode sftp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = myssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn);
 
   if(*dophase_done) {
     CURL_TRC_SSH(data, "DO phase is complete");

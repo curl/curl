@@ -1445,7 +1445,7 @@ static CURLcode ssh_state_startup(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   int rc = libssh2_session_handshake(sshc->ssh_session,
-                                     conn->sock[FIRSTSOCKET]);
+                                     conn->chain.sock);
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
@@ -3249,7 +3249,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
 
     if(block) {
       int dir = libssh2_session_block_directions(sshc->ssh_session);
-      curl_socket_t sock = data->conn->sock[FIRSTSOCKET];
+      curl_socket_t sock = data->conn->chain.sock;
       curl_socket_t fd_read = CURL_SOCKET_BAD;
       curl_socket_t fd_write = CURL_SOCKET_BAD;
       if(LIBSSH2_SESSION_BLOCK_INBOUND & dir)
@@ -3322,22 +3322,22 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
                             size_t length, int flags, void **abstract)
 {
   struct Curl_easy *data = (struct Curl_easy *)*abstract;
-  int8_t sockindex = Curl_conn_sockindex(data, sock);
   size_t nread;
   CURLcode result;
   struct connectdata *conn = data->conn;
-  Curl_recv *backup = conn->recv[sockindex];
+  Curl_recv *backup = conn->recv[FIRSTSOCKET];
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  (void)flags;
 
+  (void)flags;
+  (void)sock;
   if(!sshc)
     return -1;
 
   /* swap in the TLS reader function for this call only, and then swap back
      the SSH one again */
-  conn->recv[sockindex] = sshc->tls_recv;
-  result = Curl_conn_recv(data, sockindex, buffer, length, &nread);
-  conn->recv[sockindex] = backup;
+  conn->recv[FIRSTSOCKET] = sshc->tls_recv;
+  result = Curl_conn_recv(data, FIRSTSOCKET, buffer, length, &nread);
+  conn->recv[FIRSTSOCKET] = backup;
   if(result == CURLE_AGAIN)
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
@@ -3350,22 +3350,22 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
                             size_t length, int flags, void **abstract)
 {
   struct Curl_easy *data = (struct Curl_easy *)*abstract;
-  int8_t sockindex = Curl_conn_sockindex(data, sock);
   size_t nwrite;
   CURLcode result;
   struct connectdata *conn = data->conn;
-  Curl_send *backup = conn->send[sockindex];
+  Curl_send *backup = conn->send[FIRSTSOCKET];
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  (void)flags;
 
+  (void)flags;
+  (void)sock;
   if(!sshc)
     return -1;
 
   /* swap in the TLS writer function for this call only, and then swap back
      the SSH one again */
-  conn->send[sockindex] = sshc->tls_send;
-  result = Curl_conn_send(data, sockindex, buffer, length, FALSE, &nwrite);
-  conn->send[sockindex] = backup;
+  conn->send[FIRSTSOCKET] = sshc->tls_send;
+  result = Curl_conn_send(data, FIRSTSOCKET, buffer, length, FALSE, &nwrite);
+  conn->send[FIRSTSOCKET] = backup;
   if(result == CURLE_AGAIN)
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
@@ -3422,7 +3422,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   infof(data, "SSH: user '%s'", Curl_creds_user(conn->creds));
 #ifdef CURL_LIBSSH2_DEBUG
   infof(data, "SSH: password %s", Curl_creds_passwd(conn->creds));
-  sock = conn->sock[FIRSTSOCKET];
+  sock = conn->chain.sock;
 #endif /* CURL_LIBSSH2_DEBUG */
 
   /* libcurl MUST set custom memory functions so that the kbd_callback
@@ -3577,7 +3577,7 @@ static CURLcode scp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = ssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn);
 
   if(*dophase_done) {
     CURL_TRC_SSH(data, "DO phase is complete");
@@ -3801,7 +3801,7 @@ static CURLcode sftp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = ssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn);
 
   if(*dophase_done) {
     CURL_TRC_SSH(data, "DO phase is complete");

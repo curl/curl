@@ -240,11 +240,24 @@ struct Curl_cfilter {
   const struct Curl_cftype *cft; /* the type providing implementation */
   struct Curl_cfilter *next;     /* next filter in chain */
   void *ctx;                     /* filter type specific settings */
-  struct connectdata *conn;      /* the connection this filter belongs to */
-  int8_t sockindex;                 /* the index the filter is installed at */
+  struct Curl_cfchain *chain;   /* chain filter is part of or NULL */
   BIT(connected);                /* != 0 iff this filter is connected */
   BIT(shutdown);                 /* != 0 iff this filter has shut down */
 };
+
+struct Curl_cfchain {
+  struct Curl_cfilter *cf;       /* first filter in chain */
+  struct connectdata *conn;      /* connectdata this chain belongs to */
+  struct Curl_cfchain *parent;  /* parent chain or NULL */
+  timediff_t shutdown_start_ms; /* when filter shutdown started */
+  timediff_t shutdown_timeout_ms; /* 0 means no timeout */
+  curl_socket_t sock;            /* main socket of this chain */
+  BIT(primary);                  /* primary chain of a connection */
+  BIT(ipv6);                     /* sock is using IPv6 */
+};
+
+#define CF_CONN(cf)             (cf)->chain->conn
+#define CF_IS_PRIMARY(cf)       (bool)(cf)->chain->primary
 
 /* Default implementations for the type functions, implementing nop. */
 void Curl_cf_def_destroy_this(struct Curl_cfilter *cf,
@@ -280,7 +293,7 @@ CURLcode Curl_cf_def_connect(struct Curl_cfilter *cf,
 
 /**
  * Create a new filter instance, unattached to the filter chain.
- * Use Curl_conn_cf_add() to add it to the chain.
+ * Use Curl_cfchain_add() to add it to a filter chain.
  * @param pcf  on success holds the created instance
  * @param cft   the filter type
  * @param ctx  the type specific context to use
@@ -289,22 +302,32 @@ CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
                         const struct Curl_cftype *cft,
                         void *ctx);
 
-/**
- * Add a filter instance to the `sockindex` filter chain at connection
- * `conn`. The filter must not already be attached. It is inserted at
- * the start of the chain (top).
- */
-void Curl_conn_cf_add(struct Curl_easy *data,
-                      struct connectdata *conn,
-                      int8_t sockindex,
+void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
+                               struct Curl_cfilter *cf_new);
+
+void Curl_cfchain_init(struct Curl_cfchain *chain,
+                       struct connectdata *conn,
+                       bool primary);
+
+void Curl_cfchain_init_child(struct Curl_cfchain *chain,
+                             struct Curl_cfchain *parent);
+
+void Curl_cfchain_cleanup(struct Curl_cfchain *chain,
+                          struct Curl_easy *data);
+
+void Curl_cfchain_reset(struct Curl_cfchain *chain,
+                        struct Curl_easy *data);
+
+/* Add the filter to the start of the chain */
+void Curl_cfchain_add(struct Curl_cfchain *chain,
                       struct Curl_cfilter *cf);
 
 /**
- * Insert a filter (chain) after `cf_at`.
- * `cf_new` must not already be attached.
+ * Move the filter chain after `cf_at`, emptying `chain`.
  */
-void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
-                               struct Curl_cfilter *cf_new);
+void Curl_cfchain_merge(struct Curl_cfchain *dest,
+                        struct Curl_cfchain *chain);
+
 
 /**
  * Extract filter `*pcf` from its connection filter chain.
@@ -319,12 +342,6 @@ bool Curl_conn_cf_discard(struct Curl_cfilter **pcf,
  */
 void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
                                 struct Curl_easy *data);
-
-/**
- * Remove and destroy all filters at chain `sockindex` on connection `conn`.
- */
-void Curl_conn_cf_discard_all(struct Curl_easy *data,
-                              struct connectdata *conn, int8_t sockindex);
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -350,9 +367,6 @@ CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   bool *is_ipv6, struct ip_quadruple *ipquad);
 
-bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
-                              struct Curl_easy *data);
-
 bool Curl_conn_cf_is_ip_connected(struct Curl_cfilter *cf,
                                   struct Curl_easy *data);
 
@@ -369,34 +383,29 @@ const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
 #define CURL_CF_SSL_DISABLE  0
 #define CURL_CF_SSL_ENABLE   1
 
-/**
- * Check if a filter chain at `sockindex` for connection `conn` exists.
- */
-bool Curl_conn_is_setup(struct connectdata *conn, int8_t sockindex);
-
-/**
- * Check if the filter chain at `sockindex` for connection `conn` is
- * completely connected.
- */
-bool Curl_conn_is_connected(struct connectdata *conn, int8_t sockindex);
+/* Check if the first connection filter chain is completely connected. */
+bool Curl_conn_is_connected(struct connectdata *conn);
+/* Check if the filter chain is completely connected. */
+bool Curl_cfchain_is_connected(struct Curl_cfchain *chain);
 
 /**
  * Determine if we have reached the remote host on IP level, e.g.
  * have a TCP connection. This turns TRUE before a possible SSL
  * handshake has been started/done.
  */
-bool Curl_conn_is_ip_connected(struct Curl_easy *data, int8_t sockindex);
+bool Curl_cfchain_is_ip_connected(struct Curl_cfchain *chain);
 
 /**
  * Determine if the connection is using SSL to the remote host
  * (or will be once connected). This will return FALSE, if SSL
  * is only used in proxying and not for the tunnel itself.
  */
-bool Curl_conn_is_ssl(struct connectdata *conn, int8_t sockindex);
+bool Curl_conn_is_ssl(struct connectdata *conn);
+bool Curl_cfchain_is_ssl(struct Curl_cfchain *chain);
 
 /* Determine if the connection has one or more proxy filters.
- * e.g. is tunneling. */
-bool Curl_conn_is_tunneling(struct connectdata *conn, int8_t sockindex);
+ * e.g. is tunneling on its primary chain. */
+bool Curl_conn_is_tunneling(struct connectdata *conn);
 
 /*
  * Fill `info` with information about the TLS instance securing the connection
@@ -404,21 +413,20 @@ bool Curl_conn_is_tunneling(struct connectdata *conn, int8_t sockindex);
  * FALSE. 'query' should be CF_QUERY_SSL_INFO or CF_QUERY_SSL_CTX_INFO.
  */
 bool Curl_conn_get_ssl_info(struct Curl_easy *data,
-                            struct connectdata *conn, int8_t sockindex,
+                            struct connectdata *conn,
                             int query,
                             struct curl_tlssessioninfo *info);
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
-                               struct connectdata *conn, int8_t sockindex,
-                               bool *is_ipv6, struct ip_quadruple *ipquad);
+                               struct connectdata *conn,
+                               bool *is_ipv6,
+                               struct ip_quadruple *ipquad);
 
-/**
- * Connection provides multiplexing of easy handles at `socketindex`.
- */
-bool Curl_conn_is_multiplex(struct connectdata *conn, int8_t sockindex);
+/* Connection provides multiplexing on primary chain. */
+bool Curl_conn_is_multiplex(struct connectdata *conn);
 
 /* TRUE if any filters are of type CF_TYPE_MAINTENANCE */
-bool Curl_conn_wants_maintenance(struct connectdata *conn, int8_t sockindex);
+bool Curl_cfchain_wants_maintenance(struct Curl_cfchain *chain);
 
 /**
  * Return the HTTP version used on the FIRSTSOCKET connection filters
@@ -439,30 +447,25 @@ unsigned char Curl_conn_get_transport(struct Curl_easy *data,
 void Curl_conn_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
 
-void Curl_conn_cntrl_report_stats(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int sockindex);
+void Curl_cfchain_cntrl_report_stats(struct Curl_easy *data,
+                                     struct Curl_cfchain *chain);
 
-void Curl_conn_remove_setup_filters(struct Curl_easy *data,
-                                    int8_t sockindex);
+void Curl_cfchain_remove_setup_filters(struct Curl_easy *data,
+                                       struct Curl_cfchain *chain);
 
-/**
- * Return if data is pending in some connection filter at chain
- * `sockindex` for connection `data->conn`.
- */
-bool Curl_conn_data_pending(struct Curl_easy *data,
-                            int8_t sockindex);
+/* Return if data is pending in some connection filter at the
+ * primary chain of `data->conn`.  */
+bool Curl_conn_data_pending(struct Curl_easy *data);
+bool Curl_cfchain_data_pending(struct Curl_easy *data,
+                               struct Curl_cfchain *chain);
 
-/**
- * Return TRUE if any of the connection filters at chain `sockindex`
- * have data still to send.
- */
-bool Curl_conn_needs_flush(struct Curl_easy *data, int8_t sockindex);
+/* TRUE if any of the connection filters at chain have data still to send. */
+bool Curl_cfchain_needs_flush(struct Curl_easy *data,
+                              struct Curl_cfchain *chain);
 
-/**
- * Flush any pending data on the connection filters at chain `sockindex`.
- */
-CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex);
+/* Flush any pending data on the connection filters at chain. */
+CURLcode Curl_cfchain_flush(struct Curl_easy *data,
+                            struct Curl_cfchain *chain);
 
 /* Perform maintenance on the connection filters.
  * Sends CF_CTRL_MAINTENANCE to filters. */
@@ -477,12 +480,7 @@ curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data);
 
 /* Return a pointer to the connected socket address or NULL. */
 const struct Curl_sockaddr_ex *
-Curl_conn_get_remote_addr(struct Curl_easy *data, int8_t sockindex);
-
-/**
- * Tell filters to forget about the socket at sockindex.
- */
-void Curl_conn_forget_socket(struct Curl_easy *data, int8_t sockindex);
+Curl_conn_get_remote_addr(struct Curl_easy *data);
 
 /**
  * Adjust the pollset for the filter chain starting at `cf`.
@@ -589,35 +587,26 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
  * During connect, when tunneling proxies are involved (http or socks),
  * it will be the name and port the proxy currently negotiates with.
  */
-void Curl_conn_get_current_host(struct Curl_easy *data, int8_t sockindex,
+void Curl_conn_get_current_host(struct Curl_easy *data,
                                 const char **phost, int *pport);
 
 /**
  * Get the maximum number of parallel transfers the connection
- * expects to be able to handle at `sockindex`.
+ * expects to be able to handle.
  */
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    int8_t sockindex);
+                                    struct connectdata *conn);
 
 /**
  * Get the underlying error code for a transfer stream or 0 if not known.
  */
 int Curl_conn_get_stream_error(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               int8_t sockindex);
+                               struct connectdata *conn);
 
 #ifdef CURLVERBOSE
-void Curl_conn_trc_filters(struct Curl_easy *data,
-                           int8_t sockindex, const char *info);
+void Curl_cfchain_trc(struct Curl_easy *data,
+                      struct Curl_cfchain *chain, const char *info);
 #endif
-
-/**
- * Get the index of the given socket in the connection's sockets.
- * Useful in calling `Curl_conn_send()/Curl_conn_recv()` with the
- * correct socket index.
- */
-int8_t Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
 
 /*
  * Receive data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
