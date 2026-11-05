@@ -96,7 +96,6 @@ bad+=')'
     elif [ "$(wc -l < "${f}")" -gt 200 ]; then
       >&2 printf 'maybe good: %s\n' "${f}"
       ls -l "${f}"
-      echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
     fi
   fi
   echo '::endgroup::'
