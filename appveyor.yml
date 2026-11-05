@@ -198,6 +198,10 @@ init:
         '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign ECC Root CA - C3'
         '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1'
         '=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services'
+        '# emSign ECC Root CA - G3'
+        '# emSign ECC Root CA - C3'
+        '# emSign Root CA - C1'
+        '# Comodo AAA Services root'
       )
       $prefixes = @(
         'MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
