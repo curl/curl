@@ -183,6 +183,13 @@ init:
       Remove-Item -LiteralPath 'C:/msys64/mingw64/ssl/cert.pem'
       Remove-Item -LiteralPath 'C:/msys64/mingw64/ssl/certs/ca-bundle.crt'
       Remove-Item -LiteralPath 'C:/msys64/mingw64/ssl/certs/ca-bundle.trust.crt'
+      # <VS2026
+      Remove-Item -LiteralPath 'C:/cygwin/etc/pki/tls/cert.pem'
+      Remove-Item -LiteralPath 'C:/cygwin/etc/pki/tls/certs/ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:/cygwin/etc/pki/tls/certs/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/cygwin64/etc/pki/tls/cert.pem'
+      Remove-Item -LiteralPath 'C:/cygwin64/etc/pki/tls/certs/ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:/cygwin64/etc/pki/tls/certs/ca-bundle.trust.crt'
       # common
       Remove-Item -LiteralPath 'C:/Program Files/Git/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
       Remove-Item -LiteralPath 'C:/Program Files/Git/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem'
@@ -201,7 +208,8 @@ init:
       Remove-Item -LiteralPath 'C:/msys64/usr/share/pki/ca-trust-source/ca-bundle.trust.crt'
       Remove-Item -LiteralPath 'C:/msys64/usr/ssl/cert.pem'
       Remove-Item -LiteralPath 'C:/msys64/usr/ssl/certs/ca-bundle.trust.crt'
-      # remove bad certs
+
+      # remove bad certs from bundles we may use
       $issuers = @(
         'emSign ECC Root CA - G3'
         'emSign ECC Root CA - C3'
