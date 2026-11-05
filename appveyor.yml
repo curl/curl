@@ -219,8 +219,6 @@ init:
         }
       }
 
-  - cmd: cat "C:/Program Files/Git/mingw64/ssl/certs/ca-bundle.crt"
-
 on_finish:
   - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
 
