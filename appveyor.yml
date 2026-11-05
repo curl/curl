@@ -193,23 +193,33 @@ init:
       Remove-Item -LiteralPath 'C:\msys64\usr\ssl\cert.pem'
       Remove-Item -LiteralPath 'C:\msys64\usr\ssl\certs\ca-bundle.trust.crt'
       # remove bad certs
-      $targets = @(
+      $issuers = @(
         '=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3'
         '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign ECC Root CA - C3'
         '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1'
         '=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services'
       )
+      $prefixes = @(
+        'MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
+        'MIICKzCCAbGgAwIBAgIKe3G2gla4EnycqDAKBggqhkjOPQQDAzBaMQswCQYDVQQG'  # emSign ECC Root CA - C3
+        'MIIDczCCAlugAwIBAgILAK7PALrEzzL4Q7IwDQYJKoZIhvcNAQELBQAwVjELMAkG'  # emSign Root CA - C1
+        'MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
+      )
       foreach($f in 'C:\msys64\usr\ssl\certs\ca-bundle.crt',
                     'C:\Program Files\Git\mingw64\ssl\certs\ca-bundle.crt') {  # <2019
         if(Test-Path -LiteralPath $f -PathType Leaf) {
           $skip = $false
-          $output = foreach($line in [System.IO.File]::ReadLines($f)) {
-            if($line -match '^(===|###) ') { $skip = $targets -contains $line }
-            if(-not $skip) { $line }
-          }
-          if($output.Count) {
-            [System.IO.File]::WriteAllLines($f, [string[]]$output, [System.Text.UTF8Encoding]::new($false))
-          }
+          $t = (Get-Content -LiteralPath $f | ForEach-Object {
+            if($_ -match '^(===|###) ') { $skip = $issuers -contains $_ }
+            if(-not $skip) { $_ }
+          }) -join "`n"
+
+          $t = [regex]::Replace($t, '(?ms)^-----BEGIN CERTIFICATE-----\n([^\n]+).*?^-----END CERTIFICATE-----\n?', {
+            param($m)
+            if ($prefixes | Where-Object { $m.Groups[1].Value.StartsWith($_) }) { '' }
+            else { $m.Value }
+          })
+          [IO.File]::WriteAllText($f, $t)
         }
       }
 
