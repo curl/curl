@@ -131,49 +131,49 @@ build_script:
 
 init:
   - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
-  - cmd: |
-      rem 2019+
-      del /F C:\PROGRA~1\Git\mingw64\etc\ssl\cert.pem
-      del /F C:\PROGRA~1\Git\mingw64\etc\ssl\certs\ca-bundle.crt
-      del /F C:\PROGRA~1\Git\mingw64\etc\ssl\certs\ca-bundle.trust.crt
-      rem <2019
-      del /F C:\PROGRA~1\Git\mingw64\ssl\cert.pem
-      del /F C:\PROGRA~1\Git\mingw64\ssl\certs\ca-bundle.crt
-      del /F C:\PROGRA~1\Git\mingw64\ssl\certs\ca-bundle.trust.crt
-      del /F C:\Tools\curl\bin\curl-ca-bundle.crt
-      del /F C:\msys64\mingw32\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      del /F C:\msys64\mingw32\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      del /F C:\msys64\mingw32\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      del /F C:\msys64\mingw32\share\pki\ca-trust-source\ca-bundle.trust.crt
-      del /F C:\msys64\mingw32\ssl\cert.pem
-      del /F C:\msys64\mingw32\ssl\certs\ca-bundle.crt
-      del /F C:\msys64\mingw32\ssl\certs\ca-bundle.trust.crt
-      del /F C:\msys64\mingw64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      del /F C:\msys64\mingw64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      del /F C:\msys64\mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      del /F C:\msys64\mingw64\share\pki\ca-trust-source\ca-bundle.trust.crt
-      del /F C:\msys64\mingw64\ssl\cert.pem
-      del /F C:\msys64\mingw64\ssl\certs\ca-bundle.crt
-      del /F C:\msys64\mingw64\ssl\certs\ca-bundle.trust.crt
-      rem common
-      del /F C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      del /F C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      del /F C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      del /F C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      del /F C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      del /F C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      del /F C:\PROGRA~1\Git\mingw64\share\pki\ca-trust-source\ca-bundle.trust.crt
-      del /F C:\PROGRA~1\Git\usr\share\pki\ca-trust-source\ca-bundle.trust.crt
-      del /F C:\PROGRA~1\Git\usr\ssl\cert.pem
-      del /F C:\PROGRA~1\Git\usr\ssl\certs\ca-bundle.crt
-      del /F C:\PROGRA~1\Git\usr\ssl\certs\ca-bundle.trust.crt
-      del /F C:\msys64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
-      del /F C:\msys64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
-      del /F C:\msys64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
-      del /F C:\msys64\usr\share\pki\ca-trust-source\ca-bundle.trust.crt
-      del /F C:\msys64\usr\ssl\cert.pem
-      del /F C:\msys64\usr\ssl\certs\ca-bundle.crt
-      del /F C:\msys64\usr\ssl\certs\ca-bundle.trust.crt
+  - ps: |
+      # 2019+
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\ssl\cert.pem
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\ssl\certs\ca-bundle.crt
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\ssl\certs\ca-bundle.trust.crt
+      # <2019
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\ssl\cert.pem
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\ssl\certs\ca-bundle.crt
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\ssl\certs\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\Tools\curl\bin\curl-ca-bundle.crt
+      Remove-Item -LiteralPath C:\msys64\mingw32\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\msys64\mingw32\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
+      Remove-Item -LiteralPath C:\msys64\mingw32\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
+      Remove-Item -LiteralPath C:\msys64\mingw32\share\pki\ca-trust-source\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\msys64\mingw32\ssl\cert.pem
+      Remove-Item -LiteralPath C:\msys64\mingw32\ssl\certs\ca-bundle.crt
+      Remove-Item -LiteralPath C:\msys64\mingw32\ssl\certs\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\msys64\mingw64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\msys64\mingw64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
+      Remove-Item -LiteralPath C:\msys64\mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
+      Remove-Item -LiteralPath C:\msys64\mingw64\share\pki\ca-trust-source\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\msys64\mingw64\ssl\cert.pem
+      Remove-Item -LiteralPath C:\msys64\mingw64\ssl\certs\ca-bundle.crt
+      Remove-Item -LiteralPath C:\msys64\mingw64\ssl\certs\ca-bundle.trust.crt
+      # common
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\mingw64\share\pki\ca-trust-source\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\usr\share\pki\ca-trust-source\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\usr\ssl\cert.pem
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\usr\ssl\certs\ca-bundle.crt
+      Remove-Item -LiteralPath C:\PROGRA~1\Git\usr\ssl\certs\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\msys64\etc\pki\ca-trust\extracted\openssl\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\msys64\etc\pki\ca-trust\extracted\pem\email-ca-bundle.pem
+      Remove-Item -LiteralPath C:\msys64\etc\pki\ca-trust\extracted\pem\tls-ca-bundle.pem
+      Remove-Item -LiteralPath C:\msys64\usr\share\pki\ca-trust-source\ca-bundle.trust.crt
+      Remove-Item -LiteralPath C:\msys64\usr\ssl\cert.pem
+      Remove-Item -LiteralPath C:\msys64\usr\ssl\certs\ca-bundle.crt
+      Remove-Item -LiteralPath C:\msys64\usr\ssl\certs\ca-bundle.trust.crt
 
   - ps: |
       # Prevent running browser updates during the CI job
