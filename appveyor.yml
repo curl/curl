@@ -175,21 +175,21 @@ init:
       Remove-Item -LiteralPath 'C:\msys64\usr\ssl\certs\ca-bundle.trust.crt'
       # remove bad certs
       $targets = @(
-          '=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3'
-          '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign ECC Root CA - C3'
-          '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1'
-          '=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services'
+        '=== /C=IN/OU=emSign PKI/O=eMudhra Technologies Limited/CN=emSign ECC Root CA - G3'
+        '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign ECC Root CA - C3'
+        '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1'
+        '=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services'
       )
       foreach ($file in 'C:\msys64\usr\ssl\certs\ca-bundle.crt',
-                        'C:\Program Files\Git\mingw64\ssl\certs\ca-bundle.crt') {  # <2019
-          $skip = $false
-          $output = foreach($line in [System.IO.File]::ReadLines($file)) {
-              if($line -match '^(===|###) ') { $skip = $targets -contains $line }
-              if(-not $skip) { $line }
-          }
-          if($output.Count) {
-              [System.IO.File]::WriteAllLines($file, [string[]]$output, [System.Text.UTF8Encoding]::new($false))
-          }
+                      'C:\Program Files\Git\mingw64\ssl\certs\ca-bundle.crt') {  # <2019
+        $skip = $false
+        $output = foreach($line in [System.IO.File]::ReadLines($file)) {
+          if($line -match '^(===|###) ') { $skip = $targets -contains $line }
+          if(-not $skip) { $line }
+        }
+        if($output.Count) {
+          [System.IO.File]::WriteAllLines($file, [string[]]$output, [System.Text.UTF8Encoding]::new($false))
+        }
       }
 
   - ps: |
