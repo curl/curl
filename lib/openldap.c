@@ -449,7 +449,7 @@ static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
   (void)arg;
   if(opt == LBER_SB_OPT_DATA_READY) {
     struct Curl_easy *data = sbiod->sbiod_pvt;
-    return Curl_conn_data_pending(data, FIRSTSOCKET);
+    return Curl_conn_data_pending(data);
   }
   return 0;
 }
@@ -530,7 +530,7 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
 
   if(!li)
     return CURLE_FAILED_INIT;
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+  result = Curl_conn_connect(data, FALSE, &ssldone);
   if(result)
     return result;
   oldap_state(data, li, newstate);
@@ -649,16 +649,16 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 #ifdef _WIN32
     SOCKET dupfd = INVALID_SOCKET;
     WSAPROTOCOL_INFO pi;
-    if(WSADuplicateSocket(conn->sock[FIRSTSOCKET], GetCurrentProcessId(),
-                          &pi))
+    if(WSADuplicateSocket(conn->cfchainFIRSTSOCKET].sock,
+                          GetCurrentProcessId(), &pi))
       ; /* error */
     else
       dupfd = CURL_SOCKET(pi.iAddressFamily, pi.iSocketType, pi.iProtocol);
 #else
 #ifdef F_DUPFD_CLOEXEC
-    int dupfd = fcntl(conn->sock[FIRSTSOCKET], F_DUPFD_CLOEXEC, 0);
+    int dupfd = fcntl(conn->chain.sock, F_DUPFD_CLOEXEC, 0);
 #else
-    int dupfd = dup(conn->sock[FIRSTSOCKET]);
+    int dupfd = dup(conn->chain.sock);
 #ifdef HAVE_FCNTL
     if((dupfd != CURL_SOCKET_BAD) &&
        (fcntl(dupfd, F_SETFD, FD_CLOEXEC) < 0)) {
@@ -720,7 +720,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   }
 
 #ifdef USE_SSL
-  if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  if(Curl_conn_is_ssl(conn)) {
     result = oldap_ssl_connect(data, OLDAP_SSL);
     goto out;
   }
@@ -969,7 +969,7 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
       break;
     }
     result = Curl_ssl_cfilter_add(
-      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
+      data, Curl_conn_get_origin(conn), &conn->chain);
     if(result)
       break;
     FALLTHROUGH();

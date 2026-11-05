@@ -362,7 +362,7 @@ static void close_secondarysocket(struct Curl_easy *data,
 {
   (void)ftpc;
   CURL_TRC_FTP(data, "[%s] closing DATA connection", FTP_CSTATE(ftpc));
-  Curl_conn_cf_discard_all(data, data->conn, SECONDARYSOCKET);
+  Curl_cfchain_reset(&data->conn->chain_alt, data);
 }
 
 #ifdef CURL_PREFER_LF_LINEENDS
@@ -469,7 +469,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
                                             struct ftp_conn *ftpc)
 {
   struct connectdata *conn = data->conn;
-  curl_socket_t ctrl_sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t ctrl_sock = conn->chain.sock;
   struct pingpong *pp = &ftpc->pp;
   size_t nread;
   int ftpcode;
@@ -556,7 +556,8 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
   bool connected;
 
   CURL_TRC_FTP(data, "ftp_initiate_transfer()");
-  result = Curl_conn_connect(data, SECONDARYSOCKET, TRUE, &connected);
+  result = Curl_cfchain_connect(data, &data->conn->chain_alt, TRUE,
+                                &connected);
   if(result || !connected)
     return result;
 
@@ -599,13 +600,12 @@ static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
 
 static CURLcode ftp_readresp(struct Curl_easy *data,
                              struct ftp_conn *ftpc,
-                             int8_t sockindex,
                              struct pingpong *pp,
                              int *ftpcodep, /* return the ftp-code if done */
                              size_t *size) /* size of the response */
 {
   int code;
-  CURLcode result = Curl_pp_readresp(data, sockindex, pp, &code, size);
+  CURLcode result = Curl_pp_readresp(data, pp, &code, size);
   DEBUGASSERT(ftpcodep);
 
   /* store the latest code for later retrieval, except during shutdown */
@@ -650,7 +650,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
    * line in a response or continue reading. */
 
   struct connectdata *conn = data->conn;
-  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = conn->chain.sock;
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
   struct pingpong *pp = &ftpc->pp;
@@ -701,7 +701,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
        * wait for more data anyway.
        */
     }
-    else if(!Curl_conn_data_pending(data, FIRSTSOCKET)) {
+    else if(!Curl_conn_data_pending(data)) {
       curl_socket_t wsock = Curl_pp_needs_flush(data, pp) ?
         sockfd : CURL_SOCKET_BAD;
       int ev = Curl_socket_check(sockfd, CURL_SOCKET_BAD, wsock, interval_ms);
@@ -722,7 +722,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
         break;
     }
 
-    result = ftp_readresp(data, ftpc, FIRSTSOCKET, pp, ftpcodep, &nread);
+    result = ftp_readresp(data, ftpc, pp, ftpcodep, &nread);
     if(result)
       break;
 
@@ -798,14 +798,10 @@ static CURLcode ftp_domore_pollset(struct Curl_easy *data,
   CURL_TRC_FTP(data, "[%s] ftp_domore_pollset()", FTP_CSTATE(ftpc));
 
   if(FTP_STOP == ftpc->state) {
-    /* if stopped and still in this state, then we are also waiting for a
-       connect on the secondary connection */
-    DEBUGASSERT(data->conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD ||
-                (data->conn->cfilter[SECONDARYSOCKET] &&
-                 !Curl_conn_is_connected(data->conn, SECONDARYSOCKET)));
-    /* An unconnected SECONDARY will add its socket by itself
-     * via its adjust_pollset() */
-    return Curl_pollset_add_in(data, ps, data->conn->sock[FIRSTSOCKET]);
+    /* if stopped and still in this state, we listen for server
+     * responses on the control chain */
+    struct Curl_cfchain *chain_alt = &data->conn->chain;
+    return Curl_pollset_add_in(data, ps, chain_alt->sock);
   }
   return Curl_pp_pollset(data, &ftpc->pp, ps);
 }
@@ -976,7 +972,7 @@ static CURLcode ftp_port_parse_string(struct Curl_easy *data,
 
   if(addrlen) {
     const struct Curl_sockaddr_ex *remote_addr =
-      Curl_conn_get_remote_addr(data, FIRSTSOCKET);
+      Curl_conn_get_remote_addr(data);
 
     DEBUGASSERT(remote_addr);
     DEBUGASSERT(addr);
@@ -1034,7 +1030,7 @@ static CURLcode ftp_port_default_host(struct Curl_easy *data,
   CURLcode result;
 
   *sslenp = sizeof(*ss);
-  if(getsockname(conn->sock[FIRSTSOCKET], sa, sslenp)) {
+  if(getsockname(conn->chain.sock, sa, sslenp)) {
     failf(data, "getsockname() failed: %s",
           curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     return CURLE_FTP_PORT_FAILED;
@@ -1161,7 +1157,7 @@ static CURLcode ftp_port_bind_socket(struct Curl_easy *data,
               curlx_strerror(sockerr, buffer, sizeof(buffer)));
 
         *sslen_io = sizeof(*ss);
-        if(getsockname(conn->sock[FIRSTSOCKET], sa, sslen_io)) {
+        if(getsockname(conn->chain.sock, sa, sslen_io)) {
           failf(data, "getsockname() failed: %s",
                 curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
           return CURLE_FTP_PORT_FAILED;
@@ -1244,7 +1240,7 @@ static CURLcode ftp_port_send_command(struct Curl_easy *data,
   Curl_printable_address(ai, myhost, sizeof(myhost));
 
 #ifdef USE_IPV6
-  if(!conn->bits.ftp_use_eprt && conn->bits.ipv6)
+  if(!conn->bits.ftp_use_eprt && conn->chain.ipv6)
     /* EPRT is disabled but we are connected to an IPv6 host, so we ignore the
        request and enable EPRT again! */
     conn->bits.ftp_use_eprt = TRUE;
@@ -1385,7 +1381,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   /* replace any filter on SECONDARY with one listening on this socket */
   if(!result)
-    result = Curl_conn_tcp_listen_set(data, conn, SECONDARYSOCKET, &portsock);
+    result = Curl_conn_tcp_listen_set(data, &conn->chain_alt, &portsock);
 
   if(!result)
     portsock = CURL_SOCKET_BAD; /* now held in filter */
@@ -1401,10 +1397,9 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     /* successfully set up the listen socket filter. SSL needed?
      * Use the control connections origin for cert verification. */
     if(conn->bits.ftp_use_data_ssl && data->set.ftp_use_port &&
-       !Curl_conn_is_ssl(conn, SECONDARYSOCKET)) {
-      result = Curl_ssl_cfilter_add(
-        data, Curl_conn_get_origin(conn, FIRSTSOCKET),
-        conn, SECONDARYSOCKET);
+       !Curl_cfchain_is_ssl(&conn->chain_alt)) {
+      result = Curl_ssl_cfilter_add(data, Curl_conn_get_origin(conn),
+                                    &conn->chain_alt);
     }
     conn->bits.do_more = FALSE;
     Curl_expire(data, (data->set.accepttimeout > 0) ?
@@ -1437,7 +1432,7 @@ static CURLcode ftp_state_use_pasv(struct Curl_easy *data,
   int modeoff;
 
 #ifdef PF_INET6
-  if(!conn->bits.ftp_use_epsv && conn->bits.ipv6)
+  if(!conn->bits.ftp_use_epsv && conn->chain.ipv6)
     /* EPSV is disabled but we are connected to an IPv6 host, so we ignore the
        request and enable EPSV again! */
     conn->bits.ftp_use_epsv = TRUE;
@@ -1986,7 +1981,7 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  if(conn->bits.ipv6 && !Curl_conn_is_tunneling(conn, FIRSTSOCKET)) {
+  if(conn->chain.ipv6 && !Curl_conn_is_tunneling(conn)) {
     /* We cannot disable EPSV when doing IPv6, so this is instead a fail */
     failf(data, "Failed EPSV attempt, exiting");
     return CURLE_WEIRD_SERVER_REPLY;
@@ -2018,11 +2013,11 @@ static CURLcode ftp_control_addr_dup(struct Curl_easy *data, char **newhostp)
      the effective control connection address is the proxy address,
      not the ftp host. */
 #ifndef CURL_DISABLE_PROXY
-  if(Curl_conn_is_tunneling(conn, FIRSTSOCKET))
+  if(Curl_conn_is_tunneling(conn))
     *newhostp = curlx_strdup(conn->origin->hostname);
   else
 #endif
-  if(!Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad) &&
+  if(!Curl_conn_get_ip_info(data, conn, &is_ipv6, &ipquad) &&
      *ipquad.remote_ip)
     *newhostp = curlx_strdup(ipquad.remote_ip);
   else {
@@ -2162,7 +2157,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       goto error;
   }
 
-  result = Curl_conn_setup(data, conn, SECONDARYSOCKET,
+  result = Curl_conn_setup(data, conn, &conn->chain_alt,
                            conn->bits.ftp_use_data_ssl ?
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
@@ -2246,13 +2241,14 @@ static CURLcode ftp_do_more(struct Curl_easy *data, domore *more)
    * - an SSL filter is in place and the server will not start the TLS
    *   handshake until we send more FTP commands
    */
-  if(conn->cfilter[SECONDARYSOCKET]) {
-    bool is_eptr = Curl_conn_is_tcp_listen(data, SECONDARYSOCKET);
-    result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &connected);
+  if(conn->chain_alt.cf) {
+    bool is_eptr = Curl_cfchain_is_tcp_listen(&conn->chain_alt);
+
+    result = Curl_cfchain_connect(data, &conn->chain_alt, FALSE, &connected);
     if(result == CURLE_OUT_OF_MEMORY)
       return result;
     if(result || (!connected && !is_eptr &&
-                  !Curl_conn_is_ip_connected(data, SECONDARYSOCKET))) {
+                  !Curl_cfchain_is_ip_connected(&conn->chain_alt))) {
       if(result && !is_eptr && (ftpc->count1 == 0)) {
         *more = DOMORE_GOBACK; /* go back to DOING please */
         /* this is a EPSV connect failing, try PASV instead */
@@ -2288,7 +2284,8 @@ static CURLcode ftp_do_more(struct Curl_easy *data, domore *more)
     if(ftpc->wait_data_conn) {
       bool serv_conned;
 
-      result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &serv_conned);
+      result = Curl_cfchain_connect(
+        data, &data->conn->chain_alt, FALSE, &serv_conned);
       if(result)
         return result; /* Failed to accept data connection */
 
@@ -2770,7 +2767,8 @@ static CURLcode ftp_state_stor_resp(struct Curl_easy *data,
 
     ftp_state(data, ftpc, FTP_STOP); /* no longer in STOR state */
 
-    result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &connected);
+    result = Curl_cfchain_connect(
+      data, &data->conn->chain_alt, FALSE, &connected);
     if(result)
       return result;
 
@@ -2867,7 +2865,8 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
     if(data->set.ftp_use_port) {
       bool connected;
 
-      result = Curl_conn_connect(data, SECONDARYSOCKET, FALSE, &connected);
+      result = Curl_cfchain_connect(
+        data, &data->conn->chain_alt, FALSE, &connected);
       if(result)
         return result;
 
@@ -2904,7 +2903,7 @@ static CURLcode ftp_state_loggedin(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  if(Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
+  if(Curl_conn_is_ssl(data->conn)) {
     /* PBSZ = PROTECTION BUFFER SIZE.
 
     The 'draft-murray-auth-ftp-ssl' (draft 12, page 7) says:
@@ -3139,8 +3138,7 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   if(ftpcode == 230) {
     /* 230 User logged in - already! Take as 220 if TLS required. */
-    if(ftpc->use_ssl <= CURLUSESSL_TRY ||
-       Curl_conn_is_ssl(conn, FIRSTSOCKET))
+    if(ftpc->use_ssl <= CURLUSESSL_TRY || Curl_conn_is_ssl(conn))
       return ftp_state_user_resp(data, ftpc, ftpcode);
   }
   else if(ftpcode != 220) {
@@ -3149,7 +3147,7 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
     return CURLE_WEIRD_SERVER_REPLY;
   }
 
-  if(ftpc->use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  if(ftpc->use_ssl && !Curl_conn_is_ssl(conn)) {
     /* We do not have an SSL/TLS control connection yet, but FTPS is
        requested. Try an FTPS connection now */
 
@@ -3203,7 +3201,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   if(pp->sendleft)
     return Curl_pp_flushsend(data, pp);
 
-  result = ftp_readresp(data, ftpc, FIRSTSOCKET, pp, &ftpcode, &nread);
+  result = ftp_readresp(data, ftpc, pp, &ftpcode, &nread);
   if(result || !ftpcode)
     return result;
 
@@ -3229,16 +3227,16 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     if((ftpcode == 234) || (ftpcode == 334)) {
       /* this was BLOCKING, keep it so for now */
       bool done;
-      if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-        result = Curl_ssl_cfilter_add(
-          data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
+      if(!Curl_conn_is_ssl(conn)) {
+        result = Curl_ssl_cfilter_add(data, Curl_conn_get_origin(conn),
+                                      &conn->chain);
         if(result) {
           /* we failed and bail out */
           return CURLE_USE_SSL_FAILED;
         }
       }
       /* BLOCKING */
-      result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, &done);
+      result = Curl_conn_connect(data, TRUE, &done);
       if(!result) {
         conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
         result = ftp_state_user(data, ftpc, conn);
@@ -3308,9 +3306,8 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
        * alert in response. Thus we wait for a close notify alert from the
        * server, but we do not send one. Let's hope other servers do
        * the same... */
-      result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET,
-                                       (data->set.ftp_ccc ==
-                                        (unsigned char)CURLFTPSSL_CCC_ACTIVE));
+      result = Curl_ssl_cfilter_remove(
+        data, (data->set.ftp_ccc == (uint8_t)CURLFTPSSL_CCC_ACTIVE));
       if(result)
         failf(data, "Failed to clear the command channel (CCC)");
     }
@@ -3539,9 +3536,9 @@ static CURLcode ftp_connect(struct Curl_easy *data,
   pp = &ftpc->pp;
   PINGPONG_SETUP(pp, ftp_pp_statemachine, ftp_endofresp);
 
-  if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  if(Curl_conn_is_ssl(conn)) {
     /* BLOCKING */
-    result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
+    result = Curl_conn_connect(data, TRUE, done);
     if(result)
       return result;
   }
@@ -3707,7 +3704,7 @@ static CURLcode ftp_done_secondary_socket(struct Curl_easy *data,
                                           CURLcode result)
 {
   struct connectdata *conn = data->conn;
-  if(Curl_conn_is_setup(conn, SECONDARYSOCKET)) {
+  if(conn->chain_alt.cf) {
     if(!result && ftpc->dont_check && data->req.maxdownload > 0) {
       /* partial download completed */
       result = Curl_pp_sendf(data, &ftpc->pp, "%s", "ABOR");
@@ -3925,7 +3922,7 @@ static CURLcode ftp_perform(
   /* run the state-machine */
   result = ftp_statemach(data, ftpc, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn, SECONDARYSOCKET);
+  *connected = Curl_cfchain_is_connected(&data->conn->chain_alt);
 
   if(*connected)
     infof(data, "[FTP] [%s] perform, DATA connection established",

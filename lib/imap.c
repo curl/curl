@@ -549,9 +549,9 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   CURLcode result;
   bool ssldone = FALSE;
 
-  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  if(!Curl_conn_is_ssl(conn)) {
     result = Curl_ssl_cfilter_add(
-      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
+      data, Curl_conn_get_origin(conn), &conn->chain);
     if(result)
       goto out;
     /* Change the connection handler */
@@ -559,7 +559,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   }
 
   DEBUGASSERT(!imapc->ssldone);
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+  result = Curl_conn_connect(data, FALSE, &ssldone);
   DEBUGF(infof(data, "imap_perform_upgrade_tls, connect -> %d, %d",
                (int)result, ssldone));
   if(!result && ssldone) {
@@ -1074,7 +1074,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
       line += wordlen;
     }
   }
-  else if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
+  else if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn)) {
     /* PREAUTH is not compatible with STARTTLS. */
     if(imapcode == IMAP_RESP_OK && imapc->tls_supported && !imapc->preauth) {
       /* Switch to TLS connection now */
@@ -1587,7 +1587,7 @@ upgrade_tls:
 
   do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &imapcode, &nread);
+    result = Curl_pp_readresp(data, pp, &imapcode, &nread);
     if(result)
       return result;
 
@@ -2109,7 +2109,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   /* Run the state-machine */
   result = imap_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(conn);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));

@@ -467,7 +467,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
     if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
       infof(data, "HTTP/3 stream %" PRId64 " refused by server, try again "
             "on a new connection", stream->id);
-      connclose(cf->conn); /* do not use this anymore */
+      connclose(CF_CONN(cf)); /* do not use this anymore */
       data->state.refused_stream = TRUE;
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
@@ -957,10 +957,8 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
     break;
   }
   case CF_CTRL_CONN_INFO_UPDATE:
-    if(!cf->sockindex && cf->connected) {
-      cf->conn->httpversion_seen = 30;
-      Curl_conn_set_multiplex(cf->conn);
-    }
+    if(cf->connected)
+      Curl_conn_set_multiplex(cf->chain, 30);
     break;
   default:
     result = Curl_cf_ngtcp2_cmn_cntrl(cf, data, event, arg1, arg2);
@@ -1015,7 +1013,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     }
     else if(ctx->max_bidi_streams) {
       uint64_t avail_bidi_streams = 0;
-      uint64_t max_streams = cf->conn->attached_xfers;
+      uint64_t max_streams = CF_CONN(cf)->attached_xfers;
       if(ctx->max_bidi_streams > ctx->used_bidi_streams)
         avail_bidi_streams = ctx->max_bidi_streams - ctx->used_bidi_streams;
       max_streams += avail_bidi_streams;
@@ -1027,7 +1025,8 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     }
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%u in use)",
-                cf->conn->connection_id, *pres1, cf->conn->attached_xfers);
+                CF_CONN(cf)->connection_id, *pres1,
+                CF_CONN(cf)->attached_xfers);
     CF_DATA_RESTORE(cf, save);
     return CURLE_OK;
   }
@@ -1072,16 +1071,20 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_query,
 };
 
-CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_ngtcp2_create(struct Curl_cfchain *chain,
                                struct Curl_easy *data,
                                struct Curl_peer *origin,
                                struct Curl_peer *peer,
-                               struct connectdata *conn,
                                struct Curl_sockaddr_ex *addr)
 {
   struct cf_ngtcp2_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
+
+  result = Curl_cf_udp_create(chain, data, origin, peer,
+                              TRNSPRT_QUIC, addr, NULL, TRNSPRT_QUIC);
+  if(result)
+    goto out;
 
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
@@ -1089,29 +1092,21 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     goto out;
   }
   result = Curl_cf_ngtcp2_ctx_init(ctx, origin, peer,
-                                   &conn->ssl_config, init_ngh3_conn);
+                                   &chain->conn->ssl_config, init_ngh3_conn);
   if(!result)
     result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
     goto out;
-  cf->conn = conn;
-
-  result = Curl_cf_udp_create(&cf->next, data, origin, peer, TRNSPRT_QUIC,
-                              conn, addr, NULL, TRNSPRT_QUIC);
-  if(result)
-    goto out;
-  cf->next->conn = cf->conn;
-  cf->next->sockindex = cf->sockindex;
+  Curl_cfchain_add(chain, cf);
+  cf = NULL;
+  ctx = NULL;
 
 out:
-  *pcf = (!result) ? cf : NULL;
-  if(result) {
-    if(cf)
-      Curl_conn_cf_discard_chain(&cf, data);
-    else if(ctx) {
-      Curl_cf_ngtcp2_ctx_cleanup(ctx);
-      curlx_free(ctx);
-    }
+  if(cf)
+    Curl_conn_cf_discard_chain(&chain->cf, data);
+  if(ctx) {
+    Curl_cf_ngtcp2_ctx_cleanup(ctx);
+    curlx_free(ctx);
   }
   return result;
 }
@@ -1131,7 +1126,8 @@ CURLcode Curl_cf_ngtcp2_insert_after(struct Curl_cfilter *cf_at,
     goto out;
   }
   result = Curl_cf_ngtcp2_ctx_init(ctx, origin, peer,
-                                   &cf_at->conn->ssl_config, init_ngh3_conn);
+                                   &CF_CONN(cf_at)->ssl_config,
+                                   init_ngh3_conn);
   if(!result)
     result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)

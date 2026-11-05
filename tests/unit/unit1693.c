@@ -151,10 +151,11 @@ static void t1693_run(const struct t1693_send *sends, size_t nsends,
   abort_unless(data, "easy handle allocation failed");
   conn = curlx_calloc(1, sizeof(*conn));
   abort_unless(conn, "connection allocation failed");
+  Curl_cfchain_init(&conn->chain, conn, TRUE);
+  Curl_cfchain_init(&conn->chain_alt, conn, FALSE);
   Curl_hash_init(&conn->meta_hash, 23, CURL_HASH_TYPE_BYTES, t1693_meta_dtor);
   data->conn = conn;
-  conn->sock[FIRSTSOCKET] = 42;
-  conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
+  conn->chain.sock = 42;
   conn->send[FIRSTSOCKET] = t1693_send;
   conn->recv[FIRSTSOCKET] = t1693_recv;
   data->set.private_data = &ctx;

@@ -772,7 +772,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                     &sc_session);
   /* call took ownership of `sdata` and `qtp_clone` */
   if(!result && psession &&  /* return a duplicate if asked for and FTP */
-     (cf->conn->scheme->family == CURLPROTO_FTP))
+     (CF_CONN(cf)->scheme->family == CURLPROTO_FTP))
     result = Curl_ssl_session_dup(sc_session, &sc_dup);
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -1103,7 +1103,7 @@ static CURLcode gtls_apply_session(
       infof(data, "SSL reusing session with ALPN '%s'",
             scs->alpn ? scs->alpn : "-");
       if(conn_config->earlydata && scs->alpn &&
-         !cf->conn->bits.connect_only) {
+         !CF_CONN(cf)->bits.connect_only) {
         bool do_early_data = FALSE;
         if(sess_reuse_cb) {
           result = sess_reuse_cb(cf, data, alpns, scs, &do_early_data);
@@ -1143,11 +1143,11 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   DEBUGASSERT(gctx);
   Curl_alpn_copy(&alpns, alpns_requested);
 
-  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+  if(!CF_IS_PRIMARY(cf) && !(cf->cft->flags & CF_TYPE_PROXY)) {
     /* FTP is a bitch. On TLS secured transfers, it is a common server
      * option to require the client to use the SAME TLS session as on
      * the control connection or it fails the request. See #22225. */
-    scs = Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    scs = Curl_ssl_get_primary_session(data, cf->cft);
     if(scs) {
       result = gtls_apply_session(gctx, cf, data, peer, &alpns,
                                   sess_reuse_cb, scs, &gtls_session_setup);

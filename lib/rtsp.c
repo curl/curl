@@ -81,7 +81,7 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
                                 struct easy_pollset *ps)
 {
   /* write mode */
-  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
+  return Curl_pollset_add_out(data, ps, data->conn->chain.sock);
 }
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */

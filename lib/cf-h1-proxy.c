@@ -124,8 +124,8 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 {
   struct h1_tunnel_state *ts;
 
-  if(cf->conn->scheme->flags & PROTOPT_NOTCPPROXY) {
-    failf(data, "%s cannot be done over CONNECT", cf->conn->scheme->name);
+  if(CF_CONN(cf)->scheme->flags & PROTOPT_NOTCPPROXY) {
+    failf(data, "%s cannot be done over CONNECT", CF_CONN(cf)->scheme->name);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
@@ -519,7 +519,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
-    result = Curl_conn_recv(data, cf->sockindex, &byte, 1, &nread);
+    result = Curl_conn_cf_recv(cf->next, data, &byte, 1, &nread);
     if(result == CURLE_AGAIN)
       /* socket buffer drained, return */
       return CURLE_OK;
@@ -652,7 +652,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            struct h1_tunnel_state *ts)
 {
-  struct connectdata *conn = cf->conn;
+  struct connectdata *conn = CF_CONN(cf);
   CURLcode result;
   bool done;
 
