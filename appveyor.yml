@@ -40,6 +40,7 @@ environment:
     - job_name: 'CM VS2015, check certs'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CHKCERTS: '1'
+      RDP: '1'
 
     - job_name: 'CM VS2017, check certs'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
