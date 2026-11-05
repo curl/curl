@@ -132,6 +132,25 @@ build_script:
 init:
   - ps: if($env:RDP -eq 'true') { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
   - ps: |
+      # Prevent running browser updates during the CI job
+      $ErrorActionPreference = 'SilentlyContinue'
+      Rename-Item -Verbose -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak'
+      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      $null = New-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe" -ItemType Directory  # not let it re-create it
+      Rename-Item -Verbose -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak'
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }  # Older versions
+      taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe
+      $LASTEXITCODE = 0
+
+  - ps: |
       $ErrorActionPreference = 'SilentlyContinue'
       # 2019+
       Remove-Item -LiteralPath 'C:\Program Files\Git\mingw64\etc\ssl\cert.pem'
@@ -180,36 +199,19 @@ init:
         '=== /C=US/OU=emSign PKI/O=eMudhra Inc/CN=emSign Root CA - C1'
         '=== /C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services'
       )
-      foreach ($file in 'C:\msys64\usr\ssl\certs\ca-bundle.crt',
-                      'C:\Program Files\Git\mingw64\ssl\certs\ca-bundle.crt') {  # <2019
-        $skip = $false
-        $output = foreach($line in [System.IO.File]::ReadLines($file)) {
-          if($line -match '^(===|###) ') { $skip = $targets -contains $line }
-          if(-not $skip) { $line }
-        }
-        if($output.Count) {
-          [System.IO.File]::WriteAllLines($file, [string[]]$output, [System.Text.UTF8Encoding]::new($false))
+      foreach($f in 'C:\msys64\usr\ssl\certs\ca-bundle.crt',
+                    'C:\Program Files\Git\mingw64\ssl\certs\ca-bundle.crt') {  # <2019
+        if(Test-Path -LiteralPath $f -PathType Leaf) {
+          $skip = $false
+          $output = foreach($line in [System.IO.File]::ReadLines($f)) {
+            if($line -match '^(===|###) ') { $skip = $targets -contains $line }
+            if(-not $skip) { $line }
+          }
+          if($output.Count) {
+            [System.IO.File]::WriteAllLines($f, [string[]]$output, [System.Text.UTF8Encoding]::new($false))
+          }
         }
       }
-
-  - ps: |
-      # Prevent running browser updates during the CI job
-      $ErrorActionPreference = 'SilentlyContinue'
-      Rename-Item -Verbose -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak'
-      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
-        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse |
-        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse |
-        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
-      $null = New-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe" -ItemType Directory  # not let it re-create it
-      Rename-Item -Verbose -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak'
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse |
-        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
-      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse |
-        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }  # Older versions
-      taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe
-      $LASTEXITCODE = 0
 
 on_finish:
   - ps: if($env:RDP -eq 'true') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
