@@ -14,7 +14,9 @@ else
   readonly groupend=''
 fi
 
-echo '::group::check for bad certs'
+# shellcheck disable=SC2059
+printf "${groupbeg}" 'check for bad certs'
+
 bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
 #bad='(emSign ECC Root CA - G3|AAA Certificate Services|Comodo AAA Services root'
 bad+='|MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
@@ -93,15 +95,15 @@ bad+=')'
   printf "${groupbeg}" "${f}"
   if [ -d "${f}" ]; then
     if grep -a -E "${bad}" -R -- "${f}"; then
-      >&2 printf 'bad dir: %s\n' "${f}"
+      printf 'bad dir: %s\n' "${f}"
     elif [ -s "${f}" ]; then
-      >&2 printf 'maybe good dir: %s\n' "${f}"
+      printf 'maybe good dir: %s\n' "${f}"
     fi
   elif [ -f "${f}" ]; then
     if grep -a -E "${bad}" -- "${f}"; then
-      >&2 printf 'bad: %s\n' "${f}"
+      printf 'bad: %s\n' "${f}"
       ls -l "${f}"
-      if [ -n "${GITHUB_WORKSPACE:-}" ]; then
+      if [ -n "${GITHUB_WORKSPACE:-}" ] && false; then  # too many lines for the log
         # shellcheck disable=SC2059
         printf "${groupbeg}" "${f} (full dump)"
         cat "${f}"
@@ -109,7 +111,7 @@ bad+=')'
         printf "${groupend}"
       fi
     elif [ "$(wc -l < "${f}")" -gt 200 ]; then
-      >&2 printf 'maybe good: %s\n' "${f}"
+      printf 'maybe good: %s\n' "${f}"
       ls -l "${f}"
     fi
   fi
