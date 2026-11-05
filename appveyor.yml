@@ -37,8 +37,20 @@ environment:
   matrix:
     # CMake Visual Studio builds
 
+    - job_name: 'CM VS2015, check certs'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      CHKCERTS: '1'
+
     - job_name: 'CM VS2017, check certs'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
+      CHKCERTS: '1'
+
+    - job_name: 'CM VS2019, check certs'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
+      CHKCERTS: '1'
+
+    - job_name: 'CM VS2022, check certs'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CHKCERTS: '1'
 
     - job_name: 'CM VS2026, check certs'
