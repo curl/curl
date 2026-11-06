@@ -3708,7 +3708,7 @@ static CURLcode scp_send(struct Curl_easy *data, int8_t sockindex,
     sshc->nsent_already = 0;
   }
   else {
-    /* sent the last uplaod chunk, need to make a clean eos channel
+    /* sent the last upload chunk, need to make a clean eos channel
      * shutdown or the upload has to fail. */
     struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
 

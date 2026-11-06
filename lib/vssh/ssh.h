@@ -164,7 +164,7 @@ struct ssh_conn {
   int waitfor;                  /* REQ_IO_RECV/REQ_IO_SEND bits overriding
                                    pollset given flags */
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
-  size_t nsent_already;         /* send data already commited,
+  size_t nsent_already;         /* send data already committed,
                                  * not reported to caller */
 
 #ifdef USE_LIBSSH
