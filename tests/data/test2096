@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+PEM certificate
+</keywords>
+</info>
+
+<client>
+<features>
+SSL
+local-http
+</features>
+<server>
+https test-client-eku-only.pem
+</server>
+<name>
+HTTPS server certificate with clientAuth as only extended key usage
+</name>
+<command>
+-4 --cacert %CERTDIR/certs/test-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+# mbedTLS, wolfSSL: 35, others: 60
+<errorcode>
+35,60
+</errorcode>
+</verify>
+</testcase>
