@@ -39,6 +39,7 @@ from .env import Env
 from .h2o import H2oProxy, H2oServer
 from .httpd import Httpd
 from .nghttpx import Nghttpx, NghttpxFwd, NghttpxQuic, NghttpxTcp
+from .mitm import MitmServer
 from .sshd import Sshd
 from .vsftpd import VsFTPD
 from .wsserver import WsServer
