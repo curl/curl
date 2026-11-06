@@ -4046,7 +4046,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #ifdef USE_APPLE_SECTRUST
     if(conn_config->native_ca_store) {
       /* We want to verify via SecTrust should OpenSSL's own verify fail.
-       * For this, we want SSL_connect() to succeed inspite of a verify
+       * For this, we want SSL_connect() to succeed in spite of a verify
        * fail. So we install a callback that is always happy. */
       verify_cb = ossl_verify_cb_continue;
     }
