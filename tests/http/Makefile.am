@@ -33,6 +33,7 @@ TESTENV =                               \
   testenv/env.py                        \
   testenv/h2o.py                        \
   testenv/httpd.py                      \
+  testenv/mitm.py                       \
   testenv/mod_curltest/mod_curltest.c   \
   testenv/nghttpx.py                    \
   testenv/ports.py                      \
