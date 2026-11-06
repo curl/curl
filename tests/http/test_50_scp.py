@@ -26,7 +26,6 @@ import difflib
 import filecmp
 import logging
 import os
-from typing import Generator
 
 import pytest
 from testenv import CurlClient, Env, MitmServer, Sshd
@@ -49,7 +48,7 @@ class TestScp:
 
     @pytest.fixture(autouse=True, scope='class')
     @classmethod
-    def sshd_cutoff(cls, env, sshd) -> Generator[MitmServer]:
+    def sshd_cutoff(cls, env, sshd):
         # MitmServer cuts off uploads after 256kb and drops subsequent data into the void
         mitm = MitmServer('mitm', env, sshd.port, 256 * 1024)
         mitm.startup()
@@ -196,7 +195,7 @@ class TestScp:
             self.check_upload(sshd, srcfile, f'{destfile}.{i}')
 
     @pytest.mark.skipif(condition=Env.curl_uses_lib('libssh'), reason="libssh fails this")
-    def test_50_23_ul_cut(self, env: Env, sshd: Sshd, sshd_cutoff: MitmServer):
+    def test_50_23_ul_cut(self, env: Env, sshd: Sshd, sshd_cutoff):
         # upload 1mb through the Mitm server that silently drops data after 256kb
         # curl needs to notice that the upload did not reach the server
         srcfile = os.path.join(env.gen_dir, 'data-1m')
