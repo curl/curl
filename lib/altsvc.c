@@ -454,19 +454,16 @@ static bool hostcompare(const char *host, const char *check)
   return curl_strnequal(host, check, hlen);
 }
 
-/* altsvc_flush() removes all alternatives for this source origin from the
-   list */
+/* Remove all cached alternatives for this origin, regardless of ALPN. */
 static void altsvc_flush(struct altsvcinfo *asi,
-                         struct Curl_peer *origin,
-                         enum alpnid origin_alpnid)
+                         struct Curl_peer *origin)
 {
   struct Curl_llist_node *e;
   struct Curl_llist_node *n;
   for(e = Curl_llist_head(&asi->list); e; e = n) {
     struct altsvc *as = Curl_node_elem(e);
     n = Curl_node_next(e);
-    if((origin_alpnid == as->src.alpnid) &&
-       (origin->port == as->src.port) &&
+    if((origin->port == as->src.port) &&
        hostcompare(origin->hostname, as->src.host)) {
       Curl_node_remove(e);
       altsvc_free(as);
@@ -617,7 +614,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
     /* "clear" is a magic keyword */
     if(curlx_str_casecompare(&alpn, "clear")) {
       /* Flush cached alternatives for this source origin */
-      altsvc_flush(asi, origin, origin_alpnid);
+      altsvc_flush(asi, origin);
       return CURLE_OK;
     }
   }
@@ -665,7 +662,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
       if(!entries++)
         /* Flush cached alternatives for this source origin, if any - when
            this is the first entry of the line. */
-        altsvc_flush(asi, origin, origin_alpnid);
+        altsvc_flush(asi, origin);
 
       as = altsvc_createid(origin->hostname, strlen(origin->hostname),
                            curlx_str(&dsthost),
