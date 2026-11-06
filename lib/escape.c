@@ -204,6 +204,17 @@ char *curl_easy_escape(CURL *curl, const char *string, int length)
   return encoded;
 }
 
+/* Decode two hex digits. The caller must ensure both bytes are available. */
+static bool decode_hex(const char *string, uint8_t *out)
+{
+  uint8_t h1 = hextable[(uint8_t)string[0]];
+  uint8_t h2 = hextable[(uint8_t)string[1]];
+  if((h1 | h2) & 0xf0)
+    return FALSE;
+  *out = (uint8_t)((h1 << 4) | h2);
+  return TRUE;
+}
+
 /*
  * Curl_urldecode() URL decodes the given string.
  *
@@ -247,18 +258,28 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     uint8_t in;
 
     if(*string == '%') {
-      if(alloc > 2) {
-        uint8_t h1 = hextable[(uint8_t)string[1]];
-        uint8_t h2 = hextable[(uint8_t)string[2]];
-        if(!((h1 | h2) & 0xf0)) {
-          in = (uint8_t)((h1 << 4) | h2);
-          string += 3;
-          alloc -= 3;
-          if(in < reject_limit)
+      if((alloc > 2) && decode_hex(string + 1, &in)) {
+        uint8_t in2;
+        if(in < reject_limit)
+          goto error;
+        /* Decode an adjacent escape in the same iteration to share pointer and
+         * length updates and avoid an extra loop-condition check. This reduces
+         * loop overhead for runs of consecutive escapes. */
+        if((alloc > 5) && (string[3] == '%') &&
+           decode_hex(string + 4, &in2)) {
+          if(in2 < reject_limit)
             goto error;
-          *ns++ = (char)in;
+          ns[0] = (char)in;
+          ns[1] = (char)in2;
+          ns += 2;
+          string += 6;
+          alloc -= 6;
           continue;
         }
+        string += 3;
+        alloc -= 3;
+        *ns++ = (char)in;
+        continue;
       }
       in = '%';
       string++;
@@ -284,7 +305,22 @@ CURLcode Curl_urldecode(const char *string, size_t length,
         }
       }
 
-      memcpy(ns, string, n);
+      /* Tiny spans are common between escapes. Constant-sized copies let
+       * the compiler inline them without requiring alignment. */
+      if(n < 4) {
+        if(n < 2)
+          *ns = *string;
+        else {
+          memcpy(ns, string, 2);
+          memcpy(ns + n - 2, string + n - 2, 2);
+        }
+      }
+      else if(n <= 8) {
+        memcpy(ns, string, 4);
+        memcpy(ns + n - 4, string + n - 4, 4);
+      }
+      else
+        memcpy(ns, string, n);
       ns += n;
       string += n;
       alloc -= n;
