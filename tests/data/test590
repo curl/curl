@@ -31,6 +31,10 @@ Content-Type: text/html
 <server>
 http
 </server>
+# the 600 ms pause makes this far too slow for torture runs
+<features>
+!torture
+</features>
 <tool>
 lib%TESTNUMBER
 </tool>
@@ -38,7 +42,7 @@ lib%TESTNUMBER
 multi: connect completes while the app is away, short connect timeout
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER %HOSTIP %HTTPPORT
 </command>
 </client>
 
