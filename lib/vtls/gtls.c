@@ -1539,10 +1539,16 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
   bool verified = FALSE;
   unsigned int verify_status = 0;
   long * const certverifyresult = &ssl_config->certverifyresult;
+  gnutls_typed_vdata_st purpose;
   int rc;
 
   *pocsp_checked = FALSE;
-  rc = gnutls_certificate_verify_peers2(session, &verify_status);
+  /* gnutls_certificate_verify_peers2() ignores the extended key usage, ask
+     for a chain that is valid for TLS server authentication */
+  purpose.type = GNUTLS_DT_KEY_PURPOSE_OID;
+  purpose.data = (unsigned char *)CURL_UNCONST(GNUTLS_KP_TLS_WWW_SERVER);
+  purpose.size = 0;
+  rc = gnutls_certificate_verify_peers(session, &purpose, 1, &verify_status);
   if(rc < 0) {
     failf(data, "server cert verify failed: %d", rc);
     *certverifyresult = rc;
@@ -1595,6 +1601,8 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
       cause = "certificate signer not trusted";
     else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
       cause = "certificate uses insecure algorithm";
+    else if(verify_status & GNUTLS_CERT_PURPOSE_MISMATCH)
+      cause = "certificate is not valid for server authentication";
     else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS) {
       cause = "OCSP status response is invalid";
       result = CURLE_SSL_INVALIDCERTSTATUS;
