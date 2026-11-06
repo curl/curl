@@ -287,7 +287,7 @@ struct connectdata {
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
-  char *proxy_connect_hds; /* custom headers sent with CONNECT, or NULL */
+  struct curl_slist *proxy_connect_hds; /* custom CONNECT headers, or NULL */
 #endif
 
   /* A connection can have one or two sockets and connection filters.

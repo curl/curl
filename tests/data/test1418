@@ -12,7 +12,7 @@ connection reuse
 </info>
 
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
@@ -24,16 +24,6 @@ OK
 HTTP/1.1 200 Connection established
 
 </connect>
-<datacheck>
-HTTP/1.1 200 Connection established%CR
-%CR
-HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
-Content-Length: 3
-Content-Type: text/plain
-
-OK
-</datacheck>
 </reply>
 
 <client>
@@ -42,10 +32,12 @@ http
 http-proxy
 </server>
 <name>
-proxy tunnel not reused with different --proxy-header
+proxy tunnel reuse matches CONNECT headers
 </name>
-<command>
-http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token A" --next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B"
+<command option="no-include">
+http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token A" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B" -H "X-Origin: changed" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
 </command>
 <features>
 proxy
@@ -78,6 +70,15 @@ Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+X-Origin: changed
+
 </protocol>
+<stdout nonewline="yes">
+connects=1/connects=1/connects=0/
+</stdout>
 </verify>
 </testcase>

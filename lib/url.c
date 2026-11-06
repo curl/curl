@@ -509,7 +509,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_peer_unlink(&conn->socks_proxy.peer);
   Curl_creds_unlink(&conn->http_proxy.creds);
   Curl_creds_unlink(&conn->socks_proxy.creds);
-  curlx_safefree(conn->proxy_connect_hds);
+  curl_slist_free_all(conn->proxy_connect_hds);
 #endif
   Curl_creds_unlink(&conn->creds);
   Curl_peer_unlink(&conn->creds_origin);
@@ -748,6 +748,9 @@ static bool url_match_ssl_use(struct connectdata *conn,
 static bool url_match_proxy_use(struct connectdata *conn,
                                 struct url_conn_match *m)
 {
+  const struct curl_slist *needle_hds = m->needle->proxy_connect_hds;
+  const struct curl_slist *conn_hds = conn->proxy_connect_hds;
+
   if(m->needle->bits.origin_is_proxy != conn->bits.origin_is_proxy)
     return FALSE;
 
@@ -759,7 +762,12 @@ static bool url_match_proxy_use(struct connectdata *conn,
 
   /* A tunnel was set up with the custom headers of its CONNECT, which may
    * carry proxy authentication. Only reuse it with the same headers. */
-  if(!Curl_safecmp(m->needle->proxy_connect_hds, conn->proxy_connect_hds))
+  for(; needle_hds && conn_hds;
+      needle_hds = needle_hds->next, conn_hds = conn_hds->next) {
+    if(strcmp(needle_hds->data, conn_hds->data))
+      return FALSE;
+  }
+  if(needle_hds || conn_hds)
     return FALSE;
 
   if(m->data->set.socks5_auth_only && !conn->bits.socks5_authenticated &&
