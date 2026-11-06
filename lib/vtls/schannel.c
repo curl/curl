@@ -893,6 +893,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
       /* increment the reference counter of the credential/session handle */
       updated_refcount = InterlockedIncrement(&backend->cred->refcount);
+      (void)updated_refcount;
       DEBUGF(infof(data,
                    "schannel: incremented credential handle refcount = %ld",
                    updated_refcount));
