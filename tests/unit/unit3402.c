@@ -57,6 +57,7 @@ static CURLcode test_unit3402(const char *arg)
     curlx_close(fd);
   }
   curl_easy_cleanup(easy);
+  curl_global_cleanup();
   remove(path);
 
   UNITTEST_END_SIMPLE
