@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 3
+
+OK
+</data>
+<connect crlf="headers">
+HTTP/1.1 200 Connection established
+
+</connect>
+<datacheck>
+HTTP/1.1 200 Connection established%CR
+%CR
+HTTP/1.1 200 OK
+Content-Length: 3
+
+OK
+</datacheck>
+</reply>
+
+<client>
+<server>
+http
+http-proxy
+</server>
+<name>
+CONNECT header snapshot does not impose a smaller request limit
+</name>
+<command>
+http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header @%LOGDIR/headers%TESTNUMBER
+</command>
+<features>
+proxy
+!torture
+</features>
+# The 10200 100-byte fields fit in DYN_HTTP_REQUEST on the wire, but
+# length-prefixing each field before storing them would exceed that limit.
+<file name="%LOGDIR/headers%TESTNUMBER">
+%repeat[10200 x X: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%0a]%
+</file>
+</client>
+
+<verify>
+<limits>
+Allocations: 60000
+Maximum allocated: 6000000
+</limits>
+<proxy crlf="yes">
+CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+%repeat[10200 x X: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%0d%0a]%
+</proxy>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
