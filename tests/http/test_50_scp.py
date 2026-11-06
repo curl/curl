@@ -26,6 +26,7 @@ import difflib
 import filecmp
 import logging
 import os
+from typing import Generator
 
 import pytest
 from testenv import CurlClient, Env, MitmServer, Sshd
@@ -48,7 +49,7 @@ class TestScp:
 
     @pytest.fixture(autouse=True, scope='class')
     @classmethod
-    def sshd_cutoff(cls, env, sshd) -> MitmServer:
+    def sshd_cutoff(cls, env, sshd) -> Generator[MitmServer]:
         # MitmServer cuts off uploads after 256kb and drops subsequent data into the void
         mitm = MitmServer('mitm', env, sshd.port, 256 * 1024)
         mitm.startup()
