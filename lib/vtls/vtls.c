@@ -1043,7 +1043,11 @@ static CURLcode ssl_cf_connect_deferred(struct Curl_cfilter *cf,
 
   result = ssl_cf_connect(cf, data, done);
 
-  if(!result && *done) {
+  if(result) {
+    /* prevent any futrher connection use after handshake failed */
+    connclose(cf->conn);
+  }
+  else if(*done) {
     if(!connssl->stats_reported && (cf->cft == &Curl_cft_ssl)) {
       Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
       connssl->stats_reported = TRUE;

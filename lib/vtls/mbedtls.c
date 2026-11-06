@@ -1069,23 +1069,11 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
-#if defined(HAVE_PINNED_PUBKEY) || defined(HAS_ALPN_MBEDTLS)
-  CURLcode result;
-#endif
-  int ret;
   struct ssl_connect_data *connssl = cf->ctx;
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-#ifdef HAVE_PINNED_PUBKEY
-#ifndef CURL_DISABLE_PROXY
-  const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#else
-  const char * const pinnedpubkey =
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#endif
-#endif
+  int ret;
 
   DEBUGASSERT(backend);
 
@@ -1124,11 +1112,12 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
   }
 
 #ifdef HAVE_PINNED_PUBKEY
-  if(pinnedpubkey) {
+  if(conn_config->pinned_key) {
     int size;
     const mbedtls_x509_crt *peercert;
     mbedtls_x509_crt *p = NULL;
     unsigned char *pubkey = NULL;
+    CURLcode result;
 
     peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
     if(!peercert || !peercert->raw.p || !peercert->raw.len) {
@@ -1168,8 +1157,7 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
     }
 
     /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
-    result = Curl_pin_peer_pubkey(data,
-                                  pinnedpubkey,
+    result = Curl_pin_peer_pubkey(data, conn_config->pinned_key,
                                   &pubkey[PUB_DER_MAX_BYTES - size], size);
 pinnedpubkey_error:
     mbedtls_x509_crt_free(p);
@@ -1183,10 +1171,9 @@ pinnedpubkey_error:
 #ifdef HAS_ALPN_MBEDTLS
   if(connssl->alpn) {
     const char *proto = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
-
-    result = Curl_alpn_set_negotiated(cf, data, connssl,
-                                      (const unsigned char *)proto,
-                                      proto ? strlen(proto) : 0);
+    CURLcode result = Curl_alpn_set_negotiated(cf, data, connssl,
+                                               (const unsigned char *)proto,
+                                               proto ? strlen(proto) : 0);
     if(result)
       return result;
   }
