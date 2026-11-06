@@ -1404,7 +1404,6 @@ void Curl_cf_ngtcp2_io_ctx_update_time(struct Curl_easy *data,
                ((ngtcp2_tstamp)io_ctx->now.tv_usec * NGTCP2_MICROSECONDS);
 }
 
-#if NGTCP2_VERSION_NUM < 0x011100
 struct cf_ngtcp2_sfind_ctx {
   int64_t stream_id;
   struct h3_stream_ctx *stream;
@@ -1433,13 +1432,6 @@ static struct h3_stream_ctx *cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx,
   Curl_u32_ptrset_visit(&ctx->streams, cf_ngtcp2_sfind, &fctx);
   return fctx.stream;
 }
-#else
-static struct h3_stream_ctx *cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx,
-                                                  int64_t stream_id)
-{
-  return ngtcp2_conn_get_stream_user_data(ctx->qconn, stream_id);
-}
-#endif
 
 /**
  * Read a network packet to send from ngtcp2 into `buf`.
@@ -1458,11 +1450,14 @@ static CURLcode read_pkt_to_send(void *userp,
   int64_t stream_id;
   int fin;
   ssize_t n;
+  bool can_write_stream_data;
 
   *pnread = 0;
   veccnt = 0;
   stream_id = -1;
   fin = 0;
+  can_write_stream_data = ctx->h3conn &&
+    ngtcp2_conn_get_max_data_left(ctx->qconn);
 
   /* ngtcp2 may want to put several frames from different streams into
    * this packet. `NGTCP2_WRITE_STREAM_FLAG_MORE` tells it to do so.
@@ -1473,7 +1468,10 @@ static CURLcode read_pkt_to_send(void *userp,
    * of the assembled packet. This may be 0 if there was nothing to send. */
   for(;;) {
 
-    if(ctx->h3conn && ngtcp2_conn_get_max_data_left(ctx->qconn)) {
+    /* Once MORE starts coalescing a packet, no other ngtcp2 API may be
+     * called until a write completes it. Cache the flow-control state before
+     * entering the loop; ngtcp2 will reject individual streams as needed. */
+    if(can_write_stream_data) {
       veccnt = nghttp3_conn_writev_stream(ctx->h3conn, &stream_id, &fin, vec,
                                           CURL_ARRAYSIZE(vec));
       if(veccnt < 0) {
@@ -1508,6 +1506,7 @@ static CURLcode read_pkt_to_send(void *userp,
         n = 0;
         break;
       }
+      case NGTCP2_ERR_STREAM_NOT_FOUND:
       case NGTCP2_ERR_STREAM_SHUT_WR:
         DEBUGASSERT(ndatalen == -1);
         nghttp3_conn_shutdown_stream_write(ctx->h3conn, stream_id);
