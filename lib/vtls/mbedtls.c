@@ -1070,7 +1070,9 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
+#ifdef HAVE_PINNED_PUBKEY
   struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+#endif
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
   int ret;
