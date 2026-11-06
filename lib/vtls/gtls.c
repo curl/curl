@@ -942,12 +942,11 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(peer->sni) {
-    if(gnutls_server_name_set(gtls->session, GNUTLS_NAME_DNS,
-                              peer->sni, strlen(peer->sni)) < 0) {
-      failf(data, "Failed to set SNI");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+  if(peer->sni &&
+     gnutls_server_name_set(gtls->session, GNUTLS_NAME_DNS,
+                            peer->sni, strlen(peer->sni)) < 0) {
+    failf(data, "Failed to set SNI");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   /* Use default priorities */
@@ -958,11 +957,9 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   /* "In GnuTLS 3.6.5, TLS 1.3 is enabled by default" */
   tls13support = !!gnutls_check_version("3.6.5");
 
-  if(config->version == CURL_SSLVERSION_TLSv1_3) {
-    if(!tls13support) {
-      failf(data, "This GnuTLS installation does not support TLS 1.3");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+  if(config->version == CURL_SSLVERSION_TLSv1_3 && !tls13support) {
+    failf(data, "This GnuTLS installation does not support TLS 1.3");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   /* At this point we know we have a supported TLS version, so set it */
@@ -2210,25 +2207,23 @@ static CURLcode gtls_recv(struct Curl_cfilter *cf,
 
   if(nread >= 0)
     *pnread = (size_t)nread;
+  else if((nread == GNUTLS_E_AGAIN) || (nread == GNUTLS_E_INTERRUPTED)) {
+    result = CURLE_AGAIN;
+    goto out;
+  }
+  else if(nread == GNUTLS_E_REHANDSHAKE) {
+    /* Either TLSv1.2 renegotiate or a TLSv1.3 session key update. */
+    result = cf_gtls_handshake(cf, data);
+    if(!result)
+      result = CURLE_AGAIN; /* make us get called again. */
+    goto out;
+  }
   else {
-    if((nread == GNUTLS_E_AGAIN) || (nread == GNUTLS_E_INTERRUPTED)) {
-      result = CURLE_AGAIN;
-      goto out;
-    }
-    else if(nread == GNUTLS_E_REHANDSHAKE) {
-      /* Either TLSv1.2 renegotiate or a TLSv1.3 session key update. */
-      result = cf_gtls_handshake(cf, data);
-      if(!result)
-        result = CURLE_AGAIN; /* make us get called again. */
-      goto out;
-    }
-    else {
-      failf(data, "GnuTLS recv error (%d): %s",
-            (int)nread, gnutls_strerror((int)nread));
-      result = backend->gtls.io_result ?
-        backend->gtls.io_result : CURLE_RECV_ERROR;
-      goto out;
-    }
+    failf(data, "GnuTLS recv error (%d): %s",
+          (int)nread, gnutls_strerror((int)nread));
+    result = backend->gtls.io_result ?
+      backend->gtls.io_result : CURLE_RECV_ERROR;
+    goto out;
   }
 
 out:
