@@ -403,4 +403,21 @@ bool Curl_pp_moredata(struct pingpong *pp)
   return !pp->sendleft && curlx_dyn_len(&pp->recvbuf) > pp->nfinal;
 }
 
+bool Curl_pp_pipelined(struct Curl_easy *data, struct pingpong *pp)
+{
+  char buf[1];
+  size_t nread = 0;
+
+  /* more data already read after the final response line */
+  if(pp->overflow)
+    return TRUE;
+  /* Try to read one more byte of response data. This goes through the
+     connection filters, so TLS control traffic to a proxy and readiness
+     hints that do not carry any data count as nothing (CURLE_AGAIN). The
+     server is not supposed to send anything more, so any byte received
+     here was pipelined. */
+  return !pingpong_read(data, FIRSTSOCKET, buf, sizeof(buf), &nread) &&
+         nread;
+}
+
 #endif
