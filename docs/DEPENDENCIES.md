@@ -56,7 +56,7 @@ these or later versions:
 - clang-tidy     17.0.0 (2023-09-19), recommended: 19.1.0 (2024-09-17)
 - cmake          3.18 (2020-07-15)
 - GNU autoconf   2.59 (2003-11-06)
-- GNU automake   1.7 (2002-09-25)
+- GNU automake   1.16 (2018-02-25)
 - GNU libtool    1.4.2 (2001-09-11)
 - GNU m4         1.4 (2007-09-21)
 - mingw-w64      3.0 (2013-09-20)
