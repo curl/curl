@@ -38,20 +38,11 @@
    This function returns a pointer to malloc'ed memory.
 
    The input path to this function is expected to have a filename part.
+
+   @unittest 1699
  */
-
-#ifdef _WIN32
-#define PATHSEP   "\\"
-#define IS_SEP(x) (((x) == '/') || ((x) == '\\'))
-#elif defined(MSDOS) || defined(OS2)
-#define PATHSEP   "\\"
-#define IS_SEP(x) ((x) == '\\')
-#else
-#define PATHSEP   "/"
-#define IS_SEP(x) ((x) == '/')
-#endif
-
-static char *dirslash(const char *path)
+UNITTEST char *dirslash(const char *path);
+UNITTEST char *dirslash(const char *path)
 {
   size_t n;
   struct dynbuf out;

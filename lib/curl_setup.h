@@ -1280,6 +1280,17 @@ error:                                                                 \
 #define FOPEN_APPENDTEXT "a"
 #endif
 
+#ifdef _WIN32
+#define PATHSEP   "\\"
+#define IS_SEP(x) (((x) == '/') || ((x) == '\\'))
+#elif defined(MSDOS) || defined(OS2)
+#define PATHSEP   "\\"
+#define IS_SEP(x) ((x) == '\\')
+#else
+#define PATHSEP   "/"
+#define IS_SEP(x) ((x) == '/')
+#endif
+
 /* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
 #  ifdef USE_WINSOCK
