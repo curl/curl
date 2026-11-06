@@ -30,6 +30,7 @@
 #include "protocol.h"
 #include "proxy.h"
 #include "http_proxy.h"
+#include "slist.h"
 #include "strcase.h"
 #include "url.h"
 #include "vauth/vauth.h"
@@ -533,32 +534,6 @@ static bool proxy_do_not_proxy(struct Curl_easy *data)
   return do_not_proxy;
 }
 
-#ifndef CURL_DISABLE_HTTP
-/* Record the custom headers a CONNECT for this transfer sends, so that
- * a tunnel is only reused by transfers that would send the same. */
-static CURLcode proxy_connect_hds(struct Curl_easy *data, char **phds)
-{
-  const struct curl_slist *h = data->set.sep_headers ?
-    data->set.proxyheaders : data->set.headers;
-  struct dynbuf buf;
-  CURLcode result = CURLE_OK;
-
-  *phds = NULL;
-  if(!h)
-    return CURLE_OK;
-
-  curlx_dyn_init(&buf, DYN_HTTP_REQUEST);
-  for(; h && !result; h = h->next)
-    result = curlx_dyn_addf(&buf, "%zu:%s", strlen(h->data), h->data);
-  if(!result) {
-    size_t len;
-    *phds = curlx_dyn_take(&buf, &len);
-  }
-  curlx_dyn_free(&buf);
-  return result;
-}
-#endif
-
 CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
@@ -702,9 +677,17 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
       conn->bits.origin_is_proxy = TRUE;
     }
     else {
-      result = proxy_connect_hds(data, &conn->proxy_connect_hds);
-      if(result)
-        goto out;
+      struct curl_slist *h = data->set.sep_headers ?
+        data->set.proxyheaders : data->set.headers;
+      /* Keep an owned copy for tunnel reuse matching. Encoding the list in
+       * a request-sized buffer could reject headers that fit on the wire. */
+      if(h) {
+        conn->proxy_connect_hds = Curl_slist_duplicate(h);
+        if(!conn->proxy_connect_hds) {
+          result = CURLE_OUT_OF_MEMORY;
+          goto out;
+        }
+      }
     }
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
