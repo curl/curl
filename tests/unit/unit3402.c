@@ -47,6 +47,10 @@ static CURLcode test_unit3402(const char *arg)
   fp = NULL;
 
   easy = curl_easy_init();
+  if(!easy) {
+    curl_global_cleanup();
+    remove(path);
+  }
   abort_unless(easy, "cannot create easy handle");
   if(Curl_qlogdir((struct Curl_easy *)easy, scid, sizeof(scid), &fd)
      != CURLE_OK || fd == -1)
