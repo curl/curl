@@ -90,7 +90,9 @@ file location mechanisms and should be set to the full file path.
 If curl was built with HTTP/3 support, setting this environment variable to a
 local directory makes curl produce **qlogs** in that directory, using file
 names named after the destination connection id (in hex). Do note that these
-files can become rather large. Works with the ngtcp2 and quiche QUIC backends.
+files can become rather large. The ngtcp2 backend supports **qlogs** on Windows
+and other platforms. The quiche backend supports them only on non-Windows builds
+with library support for writing them to files.
 
 ## `SHELL`
 Used on VMS when trying to detect if using a **DCL** or a **Unix** shell.
