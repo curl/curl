@@ -96,6 +96,15 @@
     goto unit_test_abort;                                           \
   } while(0)
 
+#define unittest_skip(msg)                                            \
+  do {                                                                \
+    curl_mfprintf(stderr, "%s:%d test skipped: '%s'\n",               \
+                  __FILE__, __LINE__, msg);                           \
+    if(!unitfail)                                                     \
+      unit_skipped = TRUE;                                            \
+    goto unit_test_abort;                                             \
+  } while(0)
+
 /* begin/end macros */
 
 #define UNITTEST_BEGIN_SIMPLE                   \

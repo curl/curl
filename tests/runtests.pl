@@ -2104,6 +2104,20 @@ sub singletest {
         loadtest("${logdir}/test${testnum}");
         readtestkeywords();
 
+        # Unit tests use the standard exit status 77 to report an unsupported
+        # runtime requirement.
+        if($tool =~ /^units(?:\.exe)?$/i && $cmdres == 77) {
+            my $why = "unit test reported unsupported runtime requirements";
+            $skipped{$why}++;
+            $teststat[$testnum] = $why;
+            logmsg sprintf("test %04d SKIPPED: %s\n", $testnum, $why);
+            timestampskippedevents($testnum);
+            citest_finishtest($testnum, -2);
+            $singletest_state{$runnerid} = ST_INIT;
+            logmsg singletest_dumplogs();
+            return (-2, 0);
+        }
+
         $error = singletest_check($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind);
         if($error == -1) {
             my $err = ignoreresultcode($testnum);
@@ -3380,6 +3394,9 @@ if($executed) {
         logmsg "\nTESTFAIL: These test cases failed: $failedsorted\n\n";
     }
 }
+elsif($numskipped) {
+    logmsg "TESTDONE: no tests were run; $numskipped test(s) were skipped\n";
+}
 else {
     logmsg "\nTESTFAIL: No tests were performed\n\n";
     if(scalar(keys %enabled_keywords)) {
@@ -3401,6 +3418,7 @@ if($mintotal) {
     }
 }
 
-if(($total && (($ok+$ign) != $total)) || !$total || $unexpected) {
+if(($total && (($ok+$ign) != $total)) || (!$total && !$numskipped) ||
+   $unexpected) {
     exit 1;
 }
