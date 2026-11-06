@@ -288,7 +288,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
   char *path = NULL;
   char *encoded_host = NULL;
   struct httpreq *req = NULL;
-  CURLcode result;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
 
   if(cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS ||
      cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS2 ||
@@ -300,10 +300,8 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
                             peer->hostname,
                             peer->ipv6 ? "]" : "",
                             peer->port);
-  if(!authority) {
-    result = CURLE_OUT_OF_MEMORY;
+  if(!authority)
     goto out;
-  }
 
   if(dest->ipv6) {
     /* RFC 9298: colons in IPv6 addresses MUST be percent-encoded
@@ -335,97 +333,67 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
     path = curl_maprintf("/.well-known/masque/udp/%s/%u/",
                          dest->hostname, (unsigned int)dest->port);
   }
-
-  if(!path) {
-    result = CURLE_OUT_OF_MEMORY;
+  if(!path)
     goto out;
-  }
 
   if(ver == PROXY_HTTP_V1) {
     result = Curl_http_req_make(&req, "GET", CURL_CSTRLEN("GET"),
                                 proxy_scheme, strlen(proxy_scheme),
                                 authority, strlen(authority),
                                 path, strlen(path));
-    if(result)
-      goto out;
   }
   else if(ver == PROXY_HTTP_V2 || ver == PROXY_HTTP_V3) {
     result = Curl_http_req_make(&req, STRCONST("CONNECT"),
                                 proxy_scheme, strlen(proxy_scheme),
                                 authority, strlen(authority),
                                 path, strlen(path));
-    if(result)
-      goto out;
   }
-  else {
+  else
     result = CURLE_FAILED_INIT;
-    goto out;
-  }
-
-  /* Setup the proxy-authorization header, if any */
-  result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
-                                 req->authority, NULL, TRUE);
   if(result)
     goto out;
 
-  /* If user is not overriding Host: header, we add for HTTP/1.x */
-  if(ver == PROXY_HTTP_V1 &&
-     !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
-    result = Curl_dynhds_cadd(&req->headers, "Host", authority);
-    if(result)
-      goto out;
-  }
-
-  if(data->req.hd_proxy_auth) {
-    result = Curl_dynhds_h1_cadd_line(&req->headers,
-                                      data->req.hd_proxy_auth);
-    if(result)
-      goto out;
-  }
-
-  ua = CURL_EASY_STR(data, STRING_USERAGENT);
-  if(ver == PROXY_HTTP_V1 &&
-     !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
-     ua && *ua) {
-    result = Curl_dynhds_cadd(&req->headers, "User-Agent", ua);
-    if(result)
-      goto out;
-  }
-
-  if(ver == PROXY_HTTP_V1 &&
-     !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
-    result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
-    if(result)
-      goto out;
-  }
-
-  if(ver == PROXY_HTTP_V1) {
-    result = Curl_dynhds_cadd(&req->headers, "Connection", "Upgrade");
-    if(result)
-      goto out;
-
-    result = Curl_dynhds_cadd(&req->headers, "Upgrade", "connect-udp");
-    if(result)
-      goto out;
-
-    result = Curl_dynhds_cadd(&req->headers, "Capsule-Protocol", "?1");
-    if(result)
-      goto out;
+  if(ver > PROXY_HTTP_V1) {
+    /* Pseudo header must go first */
+    result = Curl_dynhds_cadd(&req->headers, ":Protocol", "connect-udp");
   }
   else {
-    result = Curl_dynhds_cadd(&req->headers, ":Protocol", "connect-udp");
-    if(result)
-      goto out;
+    /* If user is not overriding Host: header, we add for HTTP/1.x */
+    if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
+      result = Curl_dynhds_cadd(&req->headers, "Host", authority);
+    }
+    if(!result &&
+       !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
+      result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection",
+                                "Keep-Alive");
+    }
+    if(!result)
+      result = Curl_dynhds_cadd(&req->headers, "Connection", "Upgrade");
+    if(!result)
+      result = Curl_dynhds_cadd(&req->headers, "Upgrade", "connect-udp");
+  }
 
-    if(ver >= PROXY_HTTP_V2) {
-      result = Curl_dynhds_cadd(&req->headers, "Capsule-Protocol", "?1");
+  if(!result)
+    /* Setup the proxy-authorization header, if any */
+    result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
+                                   req->authority, NULL, TRUE);
+  if(!result && data->req.hd_proxy_auth)
+    result = Curl_dynhds_h1_cadd_line(&req->headers,
+                                      data->req.hd_proxy_auth);
+  if(!result)
+    result = Curl_dynhds_cadd(&req->headers, "Capsule-Protocol", "?1");
+  if(!result) {
+    ua = CURL_EASY_STR(data, STRING_USERAGENT);
+    if(ver == PROXY_HTTP_V1 &&
+       !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+       ua && *ua) {
+      result = Curl_dynhds_cadd(&req->headers, "User-Agent", ua);
       if(result)
         goto out;
     }
   }
-
-  result = dynhds_add_custom(data, TRUE, httpversion,
-                             TRUE, &req->headers);
+  if(!result)
+    result = dynhds_add_custom(data, TRUE, httpversion, TRUE, &req->headers);
 
 out:
   if(result && req) {
