@@ -887,14 +887,15 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     Curl_ssl_scache_lock(data);
     old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key);
     if(old_cred) {
+      LONG updated_refcount;
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
       /* increment the reference counter of the credential/session handle */
-      InterlockedIncrement(&backend->cred->refcount);
+      updated_refcount = InterlockedIncrement(&backend->cred->refcount);
       DEBUGF(infof(data,
                    "schannel: incremented credential handle refcount = %ld",
-                   (long)backend->cred->refcount));
+                   (long)updated_refcount));
     }
     Curl_ssl_scache_unlock(data);
   }
