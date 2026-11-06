@@ -28,7 +28,7 @@ import logging
 import os
 
 import pytest
-from testenv import CurlClient, Env, Sshd
+from testenv import CurlClient, Env, Sshd, MitmServer
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +43,17 @@ class TestScp:
         env.make_data_file(indir=sshd.home_dir, fname="data-10k", fsize=10 * 1024)
         env.make_data_file(indir=sshd.home_dir, fname="data-10m", fsize=10 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="data-10k", fsize=10 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-1m", fsize=1 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10 * 1024 * 1024)
+
+    @pytest.fixture(autouse=True, scope='class')
+    @classmethod
+    def sshd_cutoff(cls, env, sshd) -> MitmServer:
+        # MitmServer cuts off uploads after 256kb and drops subsequent data into the void
+        mitm = MitmServer('mitm', env, sshd.port, 256 * 1024)
+        mitm.startup()
+        yield mitm
+        mitm.shutdown()
 
     def test_50_01_insecure(self, env: Env, sshd: Sshd):
         curl = CurlClient(env=env)
@@ -183,6 +193,21 @@ class TestScp:
         r.check_exit_code(0)
         for i in range(count):
             self.check_upload(sshd, srcfile, f'{destfile}.{i}')
+
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('libssh'), reason="libssh fails this")
+    def test_50_23_ul_cut(self, env: Env, sshd: Sshd, sshd_cutoff: MitmServer):
+        # upload 1mb through the Mitm server that silently drops data after 256kb
+        # curl needs to notice that the upload did not reach the server
+        srcfile = os.path.join(env.gen_dir, 'data-1m')
+        destfile = os.path.join(sshd.home_dir, 'upload_23.data')
+        curl = CurlClient(env=env)
+        url = f'scp://{env.domain1}:{sshd_cutoff.port}/{destfile}'
+        r = curl.ssh_upload(urls=[url], fupload=srcfile, extra_args=[
+            '--insecure',
+            '--key', sshd.user1_privkey_file,
+            '--user', f'{os.environ["USER"]}:',
+        ])
+        r.check_exit_code(79)  # CURLE_SSH
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
