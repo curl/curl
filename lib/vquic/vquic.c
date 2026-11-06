@@ -1068,7 +1068,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 
     if(!result) {
       int qlogfd = curlx_open(curlx_dyn_ptr(&fname),
-                              O_WRONLY | O_CREAT | CURL_O_BINARY,
+                              O_WRONLY | O_CREAT | O_TRUNC | CURL_O_BINARY,
 #ifdef _WIN32
                               data->set.new_file_perms & (_S_IREAD | _S_IWRITE)
 #else
