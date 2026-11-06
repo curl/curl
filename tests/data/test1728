@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+SEARCH
+huge response
+</keywords>
+</info>
+
+<reply>
+# a single ~70000 bytes response line, larger than the 64 KB pingpong
+# receive buffer limit: it is streamed to the body and, as it does not fit
+# the buffer, it is not passed on to the header callback
+<data crlf="yes" nocheck="yes">
+* SEARCH 1%repeat[7000 x %20123456789]%
+</data>
+</reply>
+
+<client>
+<server>
+imap
+</server>
+<name>
+IMAP SEARCH with excessively large response line, header callback
+</name>
+<command>
+imap://%HOSTIP:%IMAPPORT/%TESTNUMBER?ALL -u user:secret -D %LOGDIR/heads%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol crlf="yes">
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT %TESTNUMBER
+A004 SEARCH ALL
+A005 LOGOUT
+</protocol>
+<stdout crlf="yes">
+* SEARCH 1%repeat[7000 x %20123456789]%
+</stdout>
+<file name="%LOGDIR/heads%TESTNUMBER" crlf="yes">
+        _   _ ____  _
+    ___| | | |  _ \| |
+   / __| | | | |_) | |
+  | (__| |_| |  _ {| |___
+   \___|\___/|_| \_\_____|
+* OK curl IMAP server ready to serve
+A001 BAD Command
+A002 OK LOGIN completed
+* 172 EXISTS
+* 1 RECENT
+* OK [UNSEEN 12] Message 12 is first unseen
+* OK [UIDVALIDITY 3857529045] UIDs valid
+* OK [UIDNEXT 4392] Predicted next UID
+* FLAGS (\Answered \Flagged \Deleted \Seen \Draft)
+* OK [PERMANENTFLAGS (\Deleted \Seen \*)] Limited
+A003 OK [READ-WRITE] SELECT completed
+A004 OK SEARCH completed
+</file>
+</verify>
+</testcase>
