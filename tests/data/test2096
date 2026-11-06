@@ -25,7 +25,7 @@ HTTPS server certificate with clientAuth as only extended key usage
 </client>
 
 <verify>
-# mbedTLS: 35, GnuTLS, Schannel: 60
+# mbedTLS, wolfSSL: 35, others: 60
 <errorcode>
 35,60
 </errorcode>
