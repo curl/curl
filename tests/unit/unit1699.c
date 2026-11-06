@@ -32,13 +32,12 @@ static CURLcode test_unit1699(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  int fails = 0;
-  unsigned int i;
-  struct dirslash_test {
+  struct pair {
     const char *in;
     const char *out;
   };
-  static const struct dirslash_test tests[] = {
+
+  static const struct pair tests[] = {
     { "cookies", "" },
     { "/etc/cookies", "/etc" PATHSEP },
     { "/etc/curl/cookies", "/etc/curl" PATHSEP },
@@ -49,16 +48,19 @@ static CURLcode test_unit1699(const char *arg)
 #endif
   };
 
+  int fails = 0;
+  unsigned int i;
+
   for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
     char *dir = dirslash(tests[i].in);
     if(!dir || strcmp(dir, tests[i].out)) {
-      curl_mfprintf(stderr, "dirslash('%s') failed:"
-                    " expected '%s', got '%s'\n",
+      curl_mfprintf(stderr, "dirslash('%s') failed: expected '%s', got '%s'\n",
                     tests[i].in, tests[i].out, dir ? dir : "(null)");
       fails++;
     }
     curlx_free(dir);
   }
+
   abort_if(fails, "dirslash tests failed");
 
   UNITTEST_END_SIMPLE
@@ -67,7 +69,7 @@ static CURLcode test_unit1699(const char *arg)
 static CURLcode test_unit1699(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
-  puts("nothing to do when cookies, alt-svc and HSTS are all disabled");
+  puts("not tested since dirslash() is not built in");
   UNITTEST_END_SIMPLE
 }
 #endif
