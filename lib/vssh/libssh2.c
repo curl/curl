@@ -2842,26 +2842,28 @@ static CURLcode ssh_state_scp_wait_eof(struct Curl_easy *data,
 static CURLcode ssh_state_scp_wait_close(struct Curl_easy *data,
                                          struct ssh_conn *sshc)
 {
+  CURLcode result = CURLE_OK;
   if(sshc->ssh_channel) {
-    int rc =
-      libssh2_channel_wait_closed(sshc->ssh_channel);
+    int rc = libssh2_channel_wait_closed(sshc->ssh_channel);
     if(rc == LIBSSH2_ERROR_EAGAIN)
       return CURLE_AGAIN;
     if(rc) {
       char *err_msg = NULL;
       (void)libssh2_session_last_error(sshc->ssh_session,
                                        &err_msg, NULL, 0);
-      infof(data, "Channel failed to close: %d %s", rc, err_msg);
+      failf(data, "Channel failed to close: %d %s", rc, err_msg);
+      result = libssh2_session_error_to_CURLE(rc);
     }
   }
   myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode ssh_state_scp_channel_free(
   struct Curl_easy *data,
   struct ssh_conn *sshc)
 {
+  CURLcode result = CURLE_OK;
   if(sshc->ssh_channel) {
     int rc = libssh2_channel_free(sshc->ssh_channel);
     if(rc == LIBSSH2_ERROR_EAGAIN)
@@ -2871,12 +2873,14 @@ static CURLcode ssh_state_scp_channel_free(
       (void)libssh2_session_last_error(sshc->ssh_session,
                                        &err_msg, NULL, 0);
       infof(data, "Failed to free libssh2 scp subsystem: %d %s", rc, err_msg);
+      result = libssh2_session_error_to_CURLE(rc);
     }
     sshc->ssh_channel = NULL;
   }
-  CURL_TRC_SSH(data, "SCP DONE phase complete");
+  if(!result)
+    CURL_TRC_SSH(data, "SCP DONE phase complete");
   myssh_to(data, sshc, SSH_STOP);
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode ssh_state_session_free(struct Curl_easy *data,
@@ -3661,7 +3665,8 @@ static CURLcode scp_send(struct Curl_easy *data, int8_t sockindex,
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   CURLcode result = CURLE_OK;
-  ssize_t nwritten;
+  size_t send_len = len;
+  ssize_t rc = 0;
 
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
   (void)eos;
@@ -3670,19 +3675,69 @@ static CURLcode scp_send(struct Curl_easy *data, int8_t sockindex,
   if(!sshc)
     return CURLE_FAILED_INIT;
 
-  /* libssh2_channel_write() returns int! */
-  nwritten = (ssize_t)libssh2_channel_write(sshc->ssh_channel,
-                                            (const char *)mem, len);
+  if(sshc->nsent_already) {
+    CURL_TRC_SSH(data, "scp_send(len=%zu, eos=%d), %zu already sent",
+                 len, eos, sshc->nsent_already);
+    if(sshc->nsent_already > len) {
+      DEBUGASSERT(0); /* should not happen, but we cope with it */
+      *pnwritten = len;
+      sshc->nsent_already -= len;
+      goto out;
+    }
+    send_len -= sshc->nsent_already;
+    mem += sshc->nsent_already;
+  }
 
-  ssh_block2waitfor(data, sshc, (nwritten == LIBSSH2_ERROR_EAGAIN));
+  if(send_len) {
+    rc = libssh2_channel_write(sshc->ssh_channel, (const char *)mem, send_len);
+    ssh_block2waitfor(data, sshc, (rc == LIBSSH2_ERROR_EAGAIN));
+  }
 
-  if(nwritten == LIBSSH2_ERROR_EAGAIN)
+  if(rc == LIBSSH2_ERROR_EAGAIN)
     result = CURLE_AGAIN;
-  else if(nwritten < LIBSSH2_ERROR_NONE)
-    result = libssh2_session_error_to_CURLE((int)nwritten);
-  else
-    *pnwritten = (size_t)nwritten;
+  else if(rc < LIBSSH2_ERROR_NONE) {
+    char *err_msg = NULL;
+    int errlen;
+    libssh2_session_last_error(sshc->ssh_session, &err_msg, &errlen, 0);
+    failf(data, "libssh2_channel_write failed: %s", err_msg);
+    result = libssh2_session_error_to_CURLE((int)rc);
+  }
+  else if(!eos || ((size_t)rc < send_len)) {
+    *pnwritten = (size_t)rc + sshc->nsent_already;
+    sshc->nsent_already = 0;
+  }
+  else {
+    /* sent the last upload chunk, need to make a clean eos channel
+     * shutdown or the upload has to fail. */
+    struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
 
+    if(!sshp) {
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
+    sshc->nsent_already += (size_t)rc;
+    if(sshc->ssh_channel && (sshc->state == SSH_STOP)) {
+      myssh_to(data, sshc, SSH_SCP_SEND_EOF);
+    }
+    while(sshc->state != SSH_STOP) {
+      bool blocked = FALSE;
+      result = ssh_statemachine(data, sshc, sshp, &blocked);
+      if(result)
+        goto out;
+      else if(blocked) {
+        ssh_block2waitfor(data, sshc, TRUE);
+        result = CURLE_AGAIN;
+        goto out;
+      }
+    }
+    DEBUGASSERT(!sshc->ssh_channel); /* should have been freed */
+    *pnwritten = sshc->nsent_already;
+    sshc->nsent_already = 0;
+  }
+
+out:
+  CURL_TRC_SSH(data, "scp_send(len=%zu, eos=%d) -> %d, %zu",
+               len, eos, (int)result, *pnwritten);
   return result;
 }
 
