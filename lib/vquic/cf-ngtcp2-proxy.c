@@ -297,8 +297,9 @@ static void cf_h3_proxy_upd_rx_win(struct Curl_cfilter *cf,
                   " (buffered %zu) by %" PRIu64 " bytes",
                   stream->id, cur_win, rx_buffered, delta);
       stream->rx_offset_max += delta;
-      ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, delta);
-      ngtcp2_conn_extend_max_offset(ctx->qconn, delta);
+      Curl_ngtcp2_conn_extend_max_stream_offset(&ctx->qconn, stream->id,
+                                                 delta);
+      Curl_ngtcp2_conn_extend_max_offset(&ctx->qconn, delta);
     }
   }
 }
@@ -360,8 +361,8 @@ static int cb_h3_proxy_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
 
   /* nghttp3 has consumed bytes on the QUIC stream and we need to
    * tell the QUIC connection to increase its flow control */
-  ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream_id, consumed);
-  ngtcp2_conn_extend_max_offset(ctx->qconn, consumed);
+  Curl_ngtcp2_conn_extend_max_stream_offset(&ctx->qconn, stream_id, consumed);
+  Curl_ngtcp2_conn_extend_max_offset(&ctx->qconn, consumed);
 
   return 0;
 }
@@ -485,8 +486,8 @@ static int cb_h3_proxy_stop_sending(nghttp3_conn *conn, int64_t stream_id,
   (void)stream_user_data;
 
   if(ctx) {
-    int rv = ngtcp2_conn_shutdown_stream_read(ctx->qconn, 0, stream_id,
-                                              app_error_code);
+    int rv = Curl_ngtcp2_conn_shutdown_stream_read(
+      &ctx->qconn, 0, stream_id, app_error_code);
 
     if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
       return NGHTTP3_ERR_CALLBACK_FAILURE;
@@ -515,8 +516,8 @@ static int cb_h3_proxy_reset_stream(nghttp3_conn *conn, int64_t stream_id,
      (stream_id != pctx->tunnel.stream->id))
     return 0;
 
-  rv = ngtcp2_conn_shutdown_stream_write(ctx->qconn, 0, stream_id,
-                                         app_error_code);
+  rv = Curl_ngtcp2_conn_shutdown_stream_write(&ctx->qconn, 0, stream_id,
+                                               app_error_code);
   CURL_TRC_CF(data, cf, "[%" PRId64 "] reset -> %d", stream_id, rv);
   pctx->tunnel.stream = NULL;
   pctx->tunnel.closed = TRUE;
@@ -632,7 +633,7 @@ static CURLcode cf_ngtcp2_proxy_h3_init(struct Curl_cfilter *cf,
 {
   int rc;
 
-  if(ngtcp2_conn_get_streams_uni_left(ctx->qconn) < 3) {
+  if(Curl_ngtcp2_conn_get_streams_uni_left(&ctx->qconn) < 3) {
     failf(data, "QUIC connection lacks 3 uni streams to run HTTP/3");
     return CURLE_QUIC_CONNECT_ERROR;
   }
@@ -724,7 +725,7 @@ static CURLcode cf_h3_proxy_send(struct Curl_cfilter *cf,
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
-  DEBUGASSERT(ctx->qconn);
+  DEBUGASSERT(Curl_ngtcp2_conn(&ctx->qconn));
   DEBUGASSERT(ctx->h3conn);
   Curl_cf_ngtcp2_io_ctx_init(&pktx, cf, data);
   *pnwritten = 0;
@@ -810,7 +811,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
   DEBUGASSERT(ctx);
-  DEBUGASSERT(ctx->qconn);
+  DEBUGASSERT(Curl_ngtcp2_conn(&ctx->qconn));
   DEBUGASSERT(ctx->h3conn);
   *pnread = 0;
 
@@ -931,7 +932,7 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
     DEBUGASSERT(stream->id == -1);
     /* Do NOT set `data` as stream user data. The transfer `data` may
      * get cleaned up long before the tunnel goes down. */
-    rv = ngtcp2_conn_open_bidi_stream(ctx->qconn, &sid, NULL);
+    rv = Curl_ngtcp2_conn_open_bidi_stream(&ctx->qconn, &sid, NULL);
     if(rv) {
       failf(data, "cannot get bidi streams: %s", ngtcp2_strerror(rv));
       result = CURLE_SEND_ERROR;
@@ -989,7 +990,8 @@ static CURLcode cf_h3_proxy_adjust_pollset(struct Curl_cfilter *cf,
   curl_socket_t sock = (ctx->q.sockfd != CURL_SOCKET_BAD) ?
    ctx->q.sockfd : Curl_conn_cf_get_socket(cf, data);
 
-  if(!ctx->qconn || !pctx->tunnel.stream || (sock == CURL_SOCKET_BAD))
+  if(!Curl_ngtcp2_conn(&ctx->qconn) || !pctx->tunnel.stream ||
+     (sock == CURL_SOCKET_BAD))
     return CURLE_OK;
 
   Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
@@ -998,9 +1000,9 @@ static CURLcode cf_h3_proxy_adjust_pollset(struct Curl_cfilter *cf,
     struct h3_stream_ctx *stream = pctx->tunnel.stream;
     bool c_exhaust, s_exhaust;
 
-    c_exhaust = want_send &&
-                (!ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
-                 !ngtcp2_conn_get_max_data_left(ctx->qconn));
+    c_exhaust = want_send && !Curl_ngtcp2_restricted(&ctx->qconn) &&
+      (!Curl_ngtcp2_conn_get_cwnd_left(&ctx->qconn) ||
+       !Curl_ngtcp2_conn_get_max_data_left(&ctx->qconn));
     s_exhaust = want_send && stream && stream->id >= 0 &&
                 stream->quic_flow_blocked;
     want_recv = (want_recv || c_exhaust || s_exhaust);
@@ -1186,7 +1188,7 @@ static void cf_h3_proxy_destroy(struct Curl_cfilter *cf,
   (void)data;
   if(ctx) {
     CURL_TRC_CF(data, cf, "cf_h3_proxy_destroy()");
-    if(ctx->ngtcp2_ctx.qconn) {
+    if(Curl_ngtcp2_conn(&ctx->ngtcp2_ctx.qconn)) {
       struct cf_call_data save;
       CF_DATA_SAVE(save, cf, data);
       Curl_cf_ngtcp2_cmn_conn_close(cf, data);

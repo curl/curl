@@ -58,6 +58,7 @@
 #include <nghttp3/nghttp3.h>
 
 #include "http1.h"
+#include "vquic/ngtcp2_shim.h"
 #include "u32_ptrset.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic_int.h"
@@ -112,7 +113,7 @@ struct cf_ngtcp2_ctx {
   ngtcp2_crypto_ossl_ctx *ossl_ctx;
 #endif
   ngtcp2_path connected_path;
-  ngtcp2_conn *qconn;
+  struct curl_ngtcp2 qconn;
   ngtcp2_cid dcid;
   ngtcp2_cid scid;
   uint32_t version;
