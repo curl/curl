@@ -1842,11 +1842,13 @@ static CURLcode multi_do_more(struct Curl_easy *data, domore *complete)
 static bool multi_handle_timeout(struct Curl_easy *data,
                                  const struct curltime *pnow,
                                  bool *stream_error,
-                                 CURLcode *result)
+                                 CURLcode *result,
+                                 bool connect_timeout)
 {
   timediff_t timeout_ms;
 
-  timeout_ms = Curl_timeleft_now_ms(data, pnow);
+  timeout_ms = connect_timeout ? Curl_timeleft_now_ms(data, pnow) :
+               Curl_timeleft_total_now_ms(data, pnow);
   if(timeout_ms < 0) {
     /* Handle timed out */
     timerid base_timer = Curl_is_connecting(data) ?
@@ -2817,10 +2819,18 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     /* Wait for the connect state as only then is the start time stored, but
-       we must not check already completed handles */
+       we must not check already completed handles.
+
+       Check the overall timeout here but defer the connect timeout to after
+       the state machine ran (below): the connection may have completed in
+       the window since the application last called us, and the state
+       machine must get to see the connected socket before we declare the
+       connect timed out. Otherwise an application that is slow to call
+       curl_multi_perform() gets CURLE_OPERATION_TIMEDOUT on a connection
+       that is already up. */
     if((data->mstate >= MSTATE_CONNECT) && (data->mstate < MSTATE_COMPLETED)) {
       pnow = Curl_pgrs_now(data);
-      if(multi_handle_timeout(data, pnow, &stream_error, &result))
+      if(multi_handle_timeout(data, pnow, &stream_error, &result, FALSE))
         /* Skip the statemachine and go directly to error handling section. */
         goto statemachine_end;
       pnow = NULL;
@@ -2903,7 +2913,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(data->mstate >= MSTATE_CONNECT &&
-       data->mstate < MSTATE_DO &&
+       (data->mstate < MSTATE_DO ||
+        (data->conn && data->conn->connect_start_ms >= 0)) &&
        mresult != CURLM_CALL_MULTI_PERFORM &&
        !multi_ischanged(multi, FALSE)) {
       /* We now handle stream timeouts if and only if this will be the last
@@ -2911,9 +2922,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        * that if we know we have additional work to do immediately
        * (i.e. CURLM_CALL_MULTI_PERFORM == TRUE) then we should do that before
        * declaring the connection timed out as we may almost have a completed
-       * connection. */
+       * connection. This covers the connect of the transfer's connection as
+       * well as a connect of a secondary connection (`connect_start_ms`
+       * set), like the FTP data connection, in a later state. */
       pnow = Curl_pgrs_now(data);
-      multi_handle_timeout(data, pnow, &stream_error, &result);
+      multi_handle_timeout(data, pnow, &stream_error, &result, TRUE);
     }
 
 statemachine_end:
@@ -2994,7 +3007,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
       bool stream_unused;
       CURLcode result_unused;
       if(multi_handle_timeout(data, Curl_pgrs_now(data),
-                              &stream_unused, &result_unused)) {
+                              &stream_unused, &result_unused, TRUE)) {
         infof(data, "PENDING handle timeout");
         move_pending_to_connect(multi, data);
       }
