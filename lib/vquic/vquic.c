@@ -628,7 +628,7 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 
 #if defined(HAVE_SENDMMSG) || \
   (defined(HAVE_SENDMSG) && !defined(HAVE_APPLE_MSG_X))
-#if defined(__linux__)
+#ifdef __linux__
 #ifdef UDP_GRO
 #define VQUIC_CMSG_GRO_SPACE CMSG_SPACE(sizeof(int))
 #else
