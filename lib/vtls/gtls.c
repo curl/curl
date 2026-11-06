@@ -1623,8 +1623,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
                                 gnutls_session_t session,
                                 struct ssl_filter_config *config,
                                 struct ssl_easy_config *ssl_config,
-                                struct ssl_peer *peer,
-                                const char *pinned_key)
+                                struct ssl_peer *peer)
 {
   struct gtls_cert_chain chain;
   gnutls_x509_crt_t x509_cert = NULL, x509_issuer = NULL;
@@ -1816,8 +1815,8 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-  if(pinned_key) {
-    result = pkp_pin_peer_pubkey(data, x509_cert, pinned_key);
+  if(config->pinned_key) {
+    result = pkp_pin_peer_pubkey(data, x509_cert, config->pinned_key);
     if(result != CURLE_OK) {
       failf(data, "SSL: public key does not match pinned public key");
       goto out;
@@ -1841,17 +1840,10 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct ssl_easy_config *ssl_config = Curl_ssl_cf_get_easy_config(cf, data);
-#ifndef CURL_DISABLE_PROXY
-  const char *pinned_key = Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#else
-  const char *pinned_key = CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#endif
   CURLcode result;
 
   result = Curl_gtls_verifyserver(cf, data, session, conn_config, ssl_config,
-                                  &connssl->peer, pinned_key);
+                                  &connssl->peer);
   if(result)
     goto out;
 

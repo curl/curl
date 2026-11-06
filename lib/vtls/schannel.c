@@ -1243,7 +1243,6 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
   bool doread;
-  const char *pubkey_ptr;
 
   DEBUGASSERT(backend);
 
@@ -1463,15 +1462,8 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
     DEBUGF(infof(data, "schannel: SSL/TLS handshake complete"));
   }
 
-#ifndef CURL_DISABLE_PROXY
-  pubkey_ptr = Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#else
-  pubkey_ptr = CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#endif
-  if(pubkey_ptr) {
-    result = schannel_pkp_pin_peer_pubkey(cf, data, pubkey_ptr);
+  if(conn_config->pinned_key) {
+    result = schannel_pkp_pin_peer_pubkey(cf, data, conn_config->pinned_key);
     if(result) {
       failf(data, "SSL: public key does not match pinned public key");
       return result;

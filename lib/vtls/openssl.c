@@ -4684,30 +4684,20 @@ out:
   return result;
 }
 
-static const char *pinned(struct Curl_cfilter *cf,
-                          struct Curl_easy *data)
-{
-  (void)cf;
-  return
-#ifndef CURL_DISABLE_PROXY
-    Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-#endif
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-}
-
 static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       X509 *server_cert)
 {
-  CURLcode result = CURLE_OK;
-  const char *ptr = pinned(cf, data);
-  if(ptr) {
-    result = ossl_pkp_pin_peer_pubkey(data, server_cert, ptr);
-    if(result)
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+  if(conn_config->pinned_key) {
+    CURLcode result = ossl_pkp_pin_peer_pubkey(data, server_cert,
+                                               conn_config->pinned_key);
+    if(result) {
       failf(data, "SSL: public key does not match pinned public key");
+      return result;
+    }
   }
-  return result;
+  return CURLE_OK;
 }
 
 #ifdef CURLVERBOSE
@@ -4886,7 +4876,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   if(!server_cert) {
     /* no verification at all, this maybe acceptable */
     if(!(conn_config->verifypeer || conn_config->verifyhost) &&
-       !pinned(cf, data))
+       !conn_config->pinned_key)
       goto out;
 
     failf(data, "SSL: could not get peer certificate");
