@@ -44,9 +44,9 @@ static CURLcode test_unit1699(const char *arg)
     { "/etc/cookies", "/etc" PATHSEP },
     { "/etc/curl/cookies", "/etc/curl" PATHSEP },
 #ifdef _WIN32
-    { "\\cookies", "\\" },
-    { "C:\\cookies", "C:\\" },
-    { "C:\\curl\\cookies", "C:\\curl\\" },
+    { "\\cookies", PATHSEP },
+    { "C:\\cookies", "C:" PATHSEP },
+    { "C:\\curl\\cookies", "C:\\curl" PATHSEP },
 #endif
   };
 
