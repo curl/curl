@@ -1548,20 +1548,12 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct wssl_ctx *wssl)
 {
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   WOLFSSL_X509 *x509 = NULL;
   unsigned char *pubkey = NULL;
   CURLcode result = CURLE_OK;
-#ifndef CURL_DISABLE_PROXY
-  const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#else
-  const char * const pinnedpubkey =
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-  (void)cf;
-#endif
 
-  if(pinnedpubkey) {
+  if(conn_config->pinned_key) {
 #ifdef KEEP_PEER_CERT
     int pubkey_len = 0;
 
@@ -1591,8 +1583,8 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
       goto end;
     }
 
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
-                                  (size_t)pubkey_len);
+    result = Curl_pin_peer_pubkey(data, conn_config->pinned_key,
+                                  pubkey, (size_t)pubkey_len);
     if(result)
       failf(data, "SSL: public key does not match pinned public key");
 #else
