@@ -265,6 +265,51 @@ static CURLcode test_unit1654(const char *arg)
     }
   }
 
+  /* Both clear and replacement cover all ALPNs for the origin. */
+  {
+    size_t other_entries = Curl_llist_count(&asi->list);
+
+    if(Curl_peer_create(curl, scheme, "cross-alpn.example", 443, &origin))
+      goto fail;
+    result = Curl_altsvc_parse(curl, asi, "h3=\":443\"; ma=120\r\n",
+                               origin, ALPN_h2);
+    fail_if(result, "cross-ALPN alt-svc parse failed");
+    if(result)
+      goto fail;
+    fail_unless(Curl_altsvc_lookup(asi, origin, ALPN_h2, &dstentry,
+                                   CURLALTSVC_H3, &same_destination),
+                "cross-ALPN entry not found");
+
+    result = Curl_altsvc_parse(curl, asi, "clear\r\n", origin, ALPN_h3);
+    fail_if(result, "cross-ALPN clear failed");
+    if(result)
+      goto fail;
+    fail_unless(!Curl_altsvc_lookup(asi, origin, ALPN_h2, &dstentry,
+                                    CURLALTSVC_H3, &same_destination),
+                "cross-ALPN clear kept the old entry");
+    fail_unless(Curl_llist_count(&asi->list) == other_entries,
+                "cross-ALPN clear changed other origins");
+
+    result = Curl_altsvc_parse(curl, asi, "h3=\":443\"; ma=120\r\n",
+                               origin, ALPN_h2);
+    fail_if(result, "cross-ALPN alt-svc parse failed");
+    if(result)
+      goto fail;
+    result = Curl_altsvc_parse(curl, asi, "h2=\":443\"; ma=120\r\n",
+                               origin, ALPN_h3);
+    fail_if(result, "cross-ALPN replacement failed");
+    if(result)
+      goto fail;
+    fail_unless(!Curl_altsvc_lookup(asi, origin, ALPN_h2, &dstentry,
+                                    CURLALTSVC_H3, &same_destination),
+                "cross-ALPN replacement kept the old entry");
+    fail_unless(Curl_altsvc_lookup(asi, origin, ALPN_h3, &dstentry,
+                                   CURLALTSVC_H2, &same_destination),
+                "cross-ALPN replacement lost the new entry");
+    fail_unless(Curl_llist_count(&asi->list) == other_entries + 1,
+                "cross-ALPN replacement changed other origins");
+  }
+
 fail:
   curl_easy_cleanup(curl);
   Curl_altsvc_cleanup(&asi);
