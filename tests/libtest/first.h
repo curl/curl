@@ -43,6 +43,9 @@ struct entry_s {
 extern const struct entry_s s_entries[];
 
 extern int unitfail; /* for unittests */
+extern int unit_skipped; /* for unittests */
+
+#define UNITTEST_SKIP_CODE 77
 
 #include "curlx/base64.h" /* for curlx_base64* */
 #include "curlx/dynbuf.h" /* for curlx_dyn_*() */

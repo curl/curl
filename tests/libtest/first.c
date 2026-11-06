@@ -63,6 +63,7 @@ int testnum;
 struct curltime tv_test_start; /* for test timing */
 
 int unitfail; /* for unittests */
+int unit_skipped; /* for unittests */
 
 int coptind;
 const char *coptarg;
@@ -298,12 +299,21 @@ int main(int argc, const char *argv[])
 #endif
 
   result = entry_func(URL);
-  curl_mfprintf(stderr, "Test ended with result %d\n", (int)result);
+  if(unit_skipped)
+    curl_mfprintf(stderr, "Test ended with result %d\n",
+                  UNITTEST_SKIP_CODE);
+  else
+    curl_mfprintf(stderr, "Test ended with result %d\n", (int)result);
 
 #ifdef _WIN32
   /* flush buffers of all streams regardless of mode */
   _flushall();
 #endif
+
+  if(unit_skipped)
+    return UNITTEST_SKIP_CODE;
+  if(result == UNITTEST_SKIP_CODE)
+    return 1; /* Reserve the skip status for unittest_skip(). */
 
   /* Regular program status codes are limited to 0..127 and 126 and 127 have
    * special meanings by the shell, so limit a normal return code to 125 */

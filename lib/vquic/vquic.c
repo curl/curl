@@ -626,6 +626,16 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 #define vquic_msghdr_get_ecn(a, b)      0
 #endif /* HAVE_SENDMMSG || HAVE_SENDMSG || HAVE_APPLE_MSG_X ... */
 
+#if defined(__linux__) && defined(UDP_GRO)
+/* Room for native or time64 SO_TIMESTAMPNS, UDP_GRO and ECN messages. */
+#define CMSG_PER_MSG_SIZE \
+  (CMSG_SPACE((sizeof(struct timespec) > 16) ? sizeof(struct timespec) : 16) + \
+   CMSG_SPACE(sizeof(int)) + \
+   CMSG_SPACE(sizeof(int)))
+#else
+#define CMSG_PER_MSG_SIZE CMSG_SPACE(sizeof(int))
+#endif
+
 #ifdef HAVE_SENDMMSG
 
 static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
@@ -638,16 +648,17 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 #if defined(__linux__) && defined(UDP_GRO)
 #define MMSG_NUM  16
 #define UDP_GRO_CNT_MAX  64
-#define CMSG_PER_MSG_SIZE    (2 * CMSG_SPACE(sizeof(int)))
 #else
 #define MMSG_NUM  64
 #define UDP_GRO_CNT_MAX  1
-#define CMSG_PER_MSG_SIZE    CMSG_SPACE(sizeof(int))
 #endif
 #define MSG_BUF_SIZE  (UDP_GRO_CNT_MAX * 1500)
   struct iovec msg_iov[MMSG_NUM];
   struct mmsghdr mmsg[MMSG_NUM];
-  uint8_t msg_ctrl[MMSG_NUM * CMSG_PER_MSG_SIZE];
+  union {
+    struct cmsghdr align;
+    uint8_t bytes[MMSG_NUM * CMSG_PER_MSG_SIZE];
+  } msg_ctrl;
   struct sockaddr_storage remote_addr[MMSG_NUM];
   size_t total_nread = 0, pkts = 0;
 #ifdef CURLVERBOSE
@@ -679,7 +690,8 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       mmsg[i].msg_hdr.msg_iovlen = 1;
       mmsg[i].msg_hdr.msg_name = &remote_addr[i];
       mmsg[i].msg_hdr.msg_namelen = sizeof(remote_addr[i]);
-      mmsg[i].msg_hdr.msg_control = &msg_ctrl[i * CMSG_PER_MSG_SIZE];
+      mmsg[i].msg_hdr.msg_control =
+        &msg_ctrl.bytes[i * CMSG_PER_MSG_SIZE];
       mmsg[i].msg_hdr.msg_controllen = CMSG_PER_MSG_SIZE;
     }
 
@@ -715,6 +727,14 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       }
       total_nread += mmsg[i].msg_len;
 
+#ifdef UNITTESTS
+      if(qctx->recvmsg_observer) {
+        qctx->recvmsg_observer(mmsg[i].msg_hdr.msg_control,
+                              mmsg[i].msg_hdr.msg_controllen,
+                              mmsg[i].msg_hdr.msg_flags,
+                              qctx->recvmsg_observer_userp);
+      }
+#endif
       ecn = vquic_msghdr_get_ecn(&mmsg[i].msg_hdr, remote_addr[i].ss_family);
       gso_size = vquic_msghdr_get_udp_gro(&mmsg[i].msg_hdr);
       if(gso_size == 0)
@@ -858,7 +878,6 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp,
                                 size_t *pnread)
 {
-#define CMSG_PER_MSG_SIZE    CMSG_SPACE(sizeof(int))
   struct iovec msg_iov;
   struct msghdr msg;
   uint8_t buf[64 * 1024];
@@ -868,7 +887,10 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   size_t nread;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
-  uint8_t msg_ctrl[CMSG_PER_MSG_SIZE];
+  union {
+    struct cmsghdr align;
+    uint8_t bytes[CMSG_PER_MSG_SIZE];
+  } msg_ctrl;
   size_t gso_size;
   uint8_t ecn = 0;
 
@@ -881,7 +903,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     msg_iov.iov_len = sizeof(buf);
     msg.msg_iov = &msg_iov;
     msg.msg_iovlen = 1;
-    msg.msg_control = msg_ctrl;
+    msg.msg_control = msg_ctrl.bytes;
     msg.msg_name = &remote_addr;
     msg.msg_namelen = sizeof(remote_addr);
     msg.msg_controllen = CMSG_PER_MSG_SIZE;

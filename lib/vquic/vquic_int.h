@@ -76,6 +76,11 @@ struct cf_quic_ctx {
 #endif
   BIT(got_first_byte); /* if first byte was received */
   BIT(no_gso);         /* do not use gso on sending */
+#ifdef UNITTESTS
+  void (*recvmsg_observer)(void *control, size_t controllen, int msg_flags,
+                           void *userp);
+  void *recvmsg_observer_userp;
+#endif
 };
 
 #define H3_STREAM_CTX(ctx, data)                                        \
