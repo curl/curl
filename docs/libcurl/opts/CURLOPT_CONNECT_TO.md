@@ -79,6 +79,14 @@ a transfer before you call curl_slist_free_all(3) on the list.
 Using this option multiple times makes the last set list override the previous
 ones. Set it to NULL to disable its use again.
 
+This option has no effect on ldaps:// requests when libcurl uses the legacy
+LDAP backend. That backend hands the connection to the native LDAP SDK,
+which independently resolves and connects to the original hostname for its
+TLS handshake. Plain-text ldap:// requests connect to the address this
+option selects. When libcurl is built with USE_OPENLDAP, the OpenLDAP
+backend routes the connection through curl's connection layer and this
+option is honored for both schemes.
+
 # DEFAULT
 
 NULL
