@@ -28,7 +28,7 @@ import logging
 import os
 
 import pytest
-from testenv import CurlClient, Env, Sshd, MitmServer
+from testenv import CurlClient, Env, MitmServer, Sshd
 
 log = logging.getLogger(__name__)
 
