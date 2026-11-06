@@ -56,6 +56,7 @@
 #include "api.h"
 #include "cookie.h"
 #include "creds.h"
+#include "cfilters.h"
 #include "psl.h"
 #include "formdata.h"
 #include "http_chunks.h" /* for the structs and enum stuff */
@@ -180,7 +181,6 @@ struct ConnectBits {
   BIT(close); /* if set, we close the connection after this request */
   BIT(reuse); /* if set, this is a reused connection */
   BIT(altused); /* this is an alt-svc "redirect" */
-  BIT(ipv6);    /* we communicate with a site using an IPv6 address */
   BIT(do_more); /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
   BIT(protoconnstart);/* the protocol layer has STARTED its operation after
@@ -291,17 +291,12 @@ struct connectdata {
 
   /* A connection can have one or two sockets and connection filters.
    * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
-  struct Curl_cfilter *cfilter[2]; /* connection filters */
+  struct Curl_cfchain chain; /* primary filter chain */
+  struct Curl_cfchain chain_alt; /* secondary filter chain, used by FTP only */
   Curl_recv *recv[2];
   Curl_send *send[2];
-  curl_socket_t sock[2];
 
 #define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
-
-  struct {
-    timediff_t start_ms[2]; /* when filter shutdown started */
-    timediff_t timeout_ms; /* 0 means no timeout */
-  } shutdown;
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;

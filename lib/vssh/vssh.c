@@ -340,7 +340,7 @@ CURLcode Curl_ssh_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 {
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t sock = conn->chain.sock;
   int waitfor;
 
   if(!sshc || (sock == CURL_SOCKET_BAD))

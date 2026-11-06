@@ -1755,7 +1755,7 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
      * binding to pass the IIS extended protection checks.
      * Available on Windows 7 or later.
      */
-    cf->conn->sslContext = &backend->ctxt->ctxt_handle;
+    CF_CONN(cf)->sslContext = &backend->ctxt->ctxt_handle;
 
     *done = TRUE;
   }
@@ -2577,8 +2577,8 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* free SSPI Schannel API security context handle */
   if(backend->ctxt) {
-    if(cf->conn->sslContext == &backend->ctxt->ctxt_handle)
-      cf->conn->sslContext = NULL;
+    if(CF_CONN(cf)->sslContext == &backend->ctxt->ctxt_handle)
+      CF_CONN(cf)->sslContext = NULL;
 
     DEBUGF(infof(data, "schannel: clear security context handle"));
     Curl_pSecFn->DeleteSecurityContext(&backend->ctxt->ctxt_handle);

@@ -405,7 +405,7 @@ static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
      (sctx->enabledmechs & SASL_MECH_OAUTHBEARER)) {
     const char *hostname;
     int port;
-    Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
+    Curl_conn_get_current_host(data, &hostname, &port);
 
     sctx->mech = SASL_MECH_STRING_OAUTHBEARER;
     sctx->state1 = SASL_OAUTH2;
@@ -550,7 +550,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   int port;
   struct bufref serverdata;
 
-  Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
+  Curl_conn_get_current_host(data, &hostname, &port);
   Curl_bufref_init(&serverdata);
   Curl_bufref_init(&resp);
   *progress = SASL_INPROGRESS;

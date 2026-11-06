@@ -131,8 +131,8 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
   abort_if(!conn, "could not allocate a connection");
 
   conn->created = curlx_now();
-  conn->shutdown.start_ms[FIRSTSOCKET] =
-    conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
+  Curl_cfchain_init(&conn->chain, conn, TRUE);
+  Curl_cfchain_init(&conn->chain_alt, conn, FALSE);
 
   memset(&ctx0, 0, sizeof(ctx0));
   memset(&ctx1, 0, sizeof(ctx1));
@@ -143,20 +143,20 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
   result = Curl_cf_create(&cf0, &t2606_cft, &ctx0);
   fail_unless(!result, "creating filter chain 0 failed");
   if(!result) {
-    Curl_conn_cf_add(data, conn, FIRSTSOCKET, cf0);
+    Curl_cfchain_add(&conn->chain, cf0);
     cf0->connected = tc->c0_connected;
     if(tc->c0_shutdown)
-      conn->shutdown.start_ms[FIRSTSOCKET] = 100;
+      conn->chain.shutdown_start_ms = 100;
   }
 
   if(tc->has_c1) {
     result = Curl_cf_create(&cf1, &t2606_cft, &ctx1);
     fail_unless(!result, "creating filter chain 1 failed");
     if(!result) {
-      Curl_conn_cf_add(data, conn, SECONDARYSOCKET, cf1);
+      Curl_cfchain_add(&conn->chain_alt, cf1);
       cf1->connected = tc->c1_connected;
       if(tc->c1_shutdown)
-        conn->shutdown.start_ms[SECONDARYSOCKET] = 100;
+        conn->chain_alt.shutdown_start_ms = 100;
     }
   }
 
@@ -182,8 +182,8 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
   }
 
   Curl_pollset_cleanup(&ps);
-  Curl_conn_cf_discard_all(data, conn, SECONDARYSOCKET);
-  Curl_conn_cf_discard_all(data, conn, FIRSTSOCKET);
+  Curl_cfchain_cleanup(&conn->chain, data);
+  Curl_cfchain_cleanup(&conn->chain_alt, data);
 unit_test_abort:
   curlx_free(conn);
 }

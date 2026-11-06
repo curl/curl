@@ -541,7 +541,7 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
        GOAWAY frame has been received or when the limit of stream
        identifiers has been reached. */
     CURL_TRC_M(data, "http/2: No new requests allowed");
-    connclose(cf->conn);
+    connclose(CF_CONN(cf));
   }
 
   return CURLE_OK;
@@ -895,7 +895,7 @@ static int push_promise(struct Curl_cfilter *cf,
     /* approved, add to the multi handle for processing. This
      * assigns newhandle->mid. For the new `mid` we assign the
      * h2_stream instance and remember the stream_id already known. */
-    mresult = Curl_multi_add_perform(data->multi, newhandle, cf->conn);
+    mresult = Curl_multi_add_perform(data->multi, newhandle, CF_CONN(cf));
     if(mresult) {
       infof(data, "failed to add handle to multi");
       discard_newhandle(cf, newhandle);
@@ -1724,7 +1724,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
     if(stream->error == NGHTTP2_REFUSED_STREAM) {
       infof(data, "HTTP/2 stream %d refused by server, try again on a new "
                   "connection", stream->id);
-      connclose(cf->conn); /* do not use this anymore */
+      connclose(CF_CONN(cf)); /* do not use this anymore */
       data->state.refused_stream = TRUE;
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
@@ -1861,7 +1861,7 @@ out:
   /* Defer flushing during the connect phase so that the SETTINGS and
    * other initial frames are sent together with the first request.
    * Unless we are 'connect_only' where the request will never come. */
-  if(!cf->connected && !cf->conn->bits.connect_only)
+  if(!cf->connected && !CF_CONN(cf)->bits.connect_only)
     return CURLE_OK;
   return nw_out_flush(cf, data);
 }
@@ -1969,7 +1969,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   if(ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) {
     CURL_TRC_CF(data, cf, "server closed %s",
                 ctx->rcvd_goaway ? "with GOAWAY" : "abruptly");
-    connclose(cf->conn);
+    connclose(CF_CONN(cf));
   }
 
   CURL_TRC_CF(data, cf, "[0] ingress: done");
@@ -2706,10 +2706,8 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
     http2_data_done(cf, data);
     break;
   case CF_CTRL_CONN_INFO_UPDATE:
-    if(!cf->sockindex && cf->connected) {
-      cf->conn->httpversion_seen = 20;
-      Curl_conn_set_multiplex(cf->conn);
-    }
+    if(cf->connected)
+      Curl_conn_set_multiplex(cf->chain, 20);
     break;
   default:
     break;
@@ -2774,7 +2772,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     if(!Curl_ngh2_valid(&ctx->ngh2) ||
        !Curl_ngh2_session_check_request_allowed(&ctx->ngh2)) {
       /* the limit is what we have in use right now */
-      effective_max = cf->conn->attached_xfers;
+      effective_max = CF_CONN(cf)->attached_xfers;
     }
     else {
       effective_max = ctx->max_concurrent_streams;
@@ -2825,16 +2823,13 @@ struct Curl_cftype Curl_cft_nghttp2 = {
 };
 
 static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
-                                  struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int8_t sockindex,
+                                  struct Curl_cfchain *chain,
                                   bool via_h1_upgrade)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_h2_ctx *ctx;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(data->conn);
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
@@ -2845,7 +2840,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
     goto out;
 
   ctx = NULL;
-  Curl_conn_cf_add(data, conn, sockindex, cf);
+  Curl_cfchain_add(chain, cf);
 
 out:
   if(result)
@@ -2904,16 +2899,16 @@ CURLcode Curl_http2_switch_at(struct Curl_easy *data, struct Curl_cfilter *cf)
 }
 
 CURLcode Curl_http2_upgrade(struct Curl_easy *data,
-                            struct connectdata *conn, int8_t sockindex,
                             const char *mem, size_t nread)
 {
+  struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf;
   struct cf_h2_ctx *ctx;
   CURLcode result;
 
   DEBUGASSERT(Curl_conn_http_version(data, conn) < 20);
 
-  result = http2_cfilter_add(&cf, data, conn, sockindex, TRUE);
+  result = http2_cfilter_add(&cf, &conn->chain, TRUE);
   if(result)
     return result;
   CURL_TRC_CF(data, cf, "upgrading connection to HTTP/2");
@@ -2961,7 +2956,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
 bool Curl_h2_http_1_1_error(struct Curl_easy *data)
 {
   if(Curl_conn_http_version(data, data->conn) == 20) {
-    int err = Curl_conn_get_stream_error(data, data->conn, FIRSTSOCKET);
+    int err = Curl_conn_get_stream_error(data, data->conn);
     return err == NGHTTP2_HTTP_1_1_REQUIRED;
   }
   return FALSE;

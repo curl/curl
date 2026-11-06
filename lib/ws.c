@@ -1548,8 +1548,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
      * Since `curl_easy_recv()` is also supposed to work, we need
      * to buffer the data at connection level. See #22107 */
     if(nread) {
-      result = Curl_cf_recvbuf_add(data, data->conn, FIRSTSOCKET,
-                                   (const uint8_t *)mem, nread);
+      result = Curl_cf_recvbuf_add(data, (const uint8_t *)mem, nread);
       if(result)
         goto out;
     }
@@ -1874,7 +1873,7 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
     buffer += nwritten;
     buflen -= nwritten;
     if(buflen) {
-      curl_socket_t sock = data->conn->sock[FIRSTSOCKET];
+      curl_socket_t sock = data->conn->chain.sock;
       timediff_t left_ms;
       int ev;
 

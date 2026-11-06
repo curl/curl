@@ -136,10 +136,9 @@ out:
 }
 
 CURLcode Curl_cf_recvbuf_add(struct Curl_easy *data,
-                             struct connectdata *conn,
-                             int8_t sockindex,
                              const uint8_t *buf, size_t blen)
 {
+  struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
 
@@ -148,8 +147,8 @@ CURLcode Curl_cf_recvbuf_add(struct Curl_easy *data,
   if(result)
     goto out;
 
-  cf->connected = Curl_conn_is_connected(conn, sockindex);
-  Curl_conn_cf_add(data, conn, sockindex, cf);
+  cf->connected = Curl_conn_is_connected(conn);
+  Curl_cfchain_add(&conn->chain, cf);
 out:
   return result;
 }

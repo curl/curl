@@ -938,12 +938,11 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
                                    MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
 #endif
 
-  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+  if(!CF_IS_PRIMARY(cf) && !(cf->cft->flags & CF_TYPE_PROXY)) {
     /* FTP is a bitch. On TLS secured transfers, it is a common server
      * option to require the client to use the SAME TLS session as on
      * the control connection or it fails the request. See #22225. */
-    struct Curl_ssl_session *scs =
-      Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    struct Curl_ssl_session *scs = Curl_ssl_get_primary_session(data, cf->cft);
     if(scs) {
       if(mbed_apply_session(cf, data, scs)) {
         CURL_TRC_CF(data, cf, "applied SSL session from control connection");
@@ -1251,7 +1250,7 @@ static CURLcode mbed_new_session(struct Curl_cfilter *cf,
                                    &sc_session);
   sdata = NULL;  /* call took ownership */
   if(!result && /* return a duplicate if asked for and FTP */
-     (cf->conn->scheme->family == CURLPROTO_FTP)) {
+     (CF_CONN(cf)->scheme->family == CURLPROTO_FTP)) {
     Curl_ssl_session_destroy(connssl->session);
     result = Curl_ssl_session_dup(sc_session, &connssl->session);
   }

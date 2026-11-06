@@ -297,7 +297,7 @@ CURLcode Curl_cf_capsule_insert_after(struct Curl_cfilter *cf_at,
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = cf_capsule_create(&cf, data, cf_at->conn);
+  result = cf_capsule_create(&cf, data, CF_CONN(cf_at));
   if(!result)
     Curl_conn_cf_insert_after(cf_at, cf);
   return result;
