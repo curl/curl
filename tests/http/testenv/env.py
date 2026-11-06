@@ -160,7 +160,7 @@ class EnvConfig:
                         lib.lower() for lib in m.group("libs").split(" ")
                     }
                     self.curl_props["libs"] = {
-                        re.sub(r"/[a-z0-9.-/]*", "", lib)
+                        re.sub(r"/[a-z0-9.-]*", "", lib)
                         for lib in self.curl_props["lib_versions"]
                     }
             if line.startswith("Features: "):
