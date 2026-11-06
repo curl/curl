@@ -895,7 +895,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
       updated_refcount = InterlockedIncrement(&backend->cred->refcount);
       DEBUGF(infof(data,
                    "schannel: incremented credential handle refcount = %ld",
-                   (long)updated_refcount));
+                   updated_refcount));
     }
     Curl_ssl_scache_unlock(data);
   }
