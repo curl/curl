@@ -890,7 +890,6 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   unsigned int init_flags;
   int rc;
   const char *prioritylist;
-  bool tls13support;
   CURLcode result;
 
   if(config->version == CURL_SSLVERSION_SSLv2 ||
@@ -955,19 +954,9 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
 
-  /* "In GnuTLS 3.6.5, TLS 1.3 is enabled by default" */
-  tls13support = !!gnutls_check_version("3.6.5");
-
-  if(config->version == CURL_SSLVERSION_TLSv1_3) {
-    if(!tls13support) {
-      failf(data, "This GnuTLS installation does not support TLS 1.3");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-
   /* At this point we know we have a supported TLS version, so set it */
   result = gnutls_set_ssl_version_min_max(data, peer,
-                                          config, &prioritylist, tls13support);
+                                          config, &prioritylist, TRUE);
   if(result)
     return result;
 
