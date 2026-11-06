@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+--proto
+</keywords>
+</info>
+
+<client>
+<server>
+http
+</server>
+<name>
+Repeated --proto modifiers preserve an earlier protocol restriction
+</name>
+<command>
+--proto =https --proto -ftp http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>
