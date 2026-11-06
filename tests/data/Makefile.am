@@ -1715,6 +1715,7 @@ TESTCASES = \
   test1849 \
   test1851 \
   test1862 \
+  test1871 \
   test1876 \
   test1877 \
   test1900 \
