@@ -2224,8 +2224,10 @@ static int myssh_in_SCP_DONE(struct Curl_easy *data,
 static int myssh_in_SCP_SEND_EOF(struct Curl_easy *data,
                                  struct ssh_conn *sshc)
 {
+  int rc = SSH_NO_ERROR;
   if(sshc->scp_session) {
-    int rc = ssh_scp_close(sshc->scp_session);
+    rc = ssh_scp_close(sshc->scp_session);
+    CURL_TRC_SSH(data, "ssh_scp_close() -> %d", rc);
     if(rc == SSH_AGAIN) {
       /* Currently the ssh_scp_close handles waiting for
        * EOF in blocking way.
@@ -2233,14 +2235,13 @@ static int myssh_in_SCP_SEND_EOF(struct Curl_easy *data,
       return SSH_AGAIN;
     }
     if(rc != SSH_OK) {
-      infof(data,
-            "Failed to close libssh scp channel: %s",
+      failf(data, "Failed to close libssh scp channel: %s",
             ssh_get_error(sshc->ssh_session));
     }
   }
 
   myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
-  return SSH_NO_ERROR;
+  return rc;
 }
 
 static int myssh_in_SCP_CHANNEL_FREE(struct Curl_easy *data,
@@ -2816,34 +2817,75 @@ static CURLcode scp_send(struct Curl_easy *data, int8_t sockindex,
                          const uint8_t *mem, size_t len, bool eos,
                          size_t *pnwritten)
 {
-  int rc;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+  size_t send_len = len;
+  CURLcode result = CURLE_OK;
+  int rc = SSH_OK;
 
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
-  (void)eos;
   *pnwritten = 0;
-
   if(!sshc)
     return CURLE_FAILED_INIT;
 
-  rc = ssh_scp_write(sshc->scp_session, mem, len);
+  if(sshc->nsent_already) {
+    if(sshc->nsent_already > len) {
+      DEBUGASSERT(0); /* should not happen, but we cope with it */
+      *pnwritten = len;
+      sshc->nsent_already -= len;
+      goto out;
+    }
+    send_len -= sshc->nsent_already;
+    mem += sshc->nsent_already;
+  }
 
-#if 0
-  /* The following code is misleading, mostly added as wishful thinking
-   * that libssh at some point would implement non-blocking ssh_scp_write/read.
-   * Currently rc can only be number of bytes read or SSH_ERROR. */
-  myssh_block2waitfor(conn, sshc, (rc == SSH_AGAIN));
+  if(send_len) {
+    rc = ssh_scp_write(sshc->scp_session, mem, send_len);
+  }
 
-  if(rc == SSH_AGAIN)
-    return CURLE_AGAIN;
-  else
-#endif
-  if(rc != SSH_OK)
-    return CURLE_SSH;
+  if(rc != SSH_OK) {
+    result = CURLE_SSH;
+    goto out;
+  }
+  else if(!eos) {
+    *pnwritten = send_len + sshc->nsent_already;
+    sshc->nsent_already = 0;
+  }
+  else {
+    /* sent the last upload chunk, need to make a clean eos channel
+     * shutdown or the upload has to fail. */
+    struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
+    size_t report_len;
 
-  *pnwritten = len;
-  return CURLE_OK;
+    if(!sshp) {
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
+    sshc->nsent_already += send_len;
+    report_len = sshc->nsent_already;
+
+    if(sshc->scp_session && (sshc->state == SSH_STOP)) {
+      myssh_to(data, sshc, SSH_SCP_SEND_EOF);
+    }
+    while(sshc->state != SSH_STOP) {
+      bool blocked = FALSE;
+      result = myssh_statemachine(data, sshc, sshp, &blocked);
+      if(result)
+        goto out;
+      else if(blocked) {
+        result = CURLE_AGAIN;
+        goto out;
+      }
+    }
+    DEBUGASSERT(!sshc->scp_session); /* should have been freed */
+    *pnwritten = report_len;
+    sshc->nsent_already = 0;
+  }
+
+out:
+  CURL_TRC_SSH(data, "scp_send(len=%zu, eos=%d) -> %d, %zu",
+               len, eos, (int)result, *pnwritten);
+  return result;
 }
 
 static CURLcode scp_recv(struct Curl_easy *data, int8_t sockindex,
