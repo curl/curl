@@ -12,7 +12,6 @@ PEM certificate
 <features>
 SSL
 local-http
-!wolfssl
 </features>
 <server>
 https test-client-eku-only.pem
