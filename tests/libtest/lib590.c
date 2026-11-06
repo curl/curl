@@ -28,13 +28,21 @@
  * application was not calling curl_multi_perform(): issue the connect, stay
  * away for longer than CURLOPT_CONNECTTIMEOUT_MS, then drive the transfer
  * to completion.
+ *
+ * The address is put in the DNS cache up front (CURLOPT_RESOLVE) so that no
+ * resolving happens inside the connect budget (macOS resolves even IP
+ * literals, USE_RESOLVE_ON_IPS), and CURLOPT_NOSIGNAL is set so that the
+ * synchronous resolver does not reject the sub-second timeout for its
+ * alarm() based limit before it even looks at the cache.
  */
 static CURLcode test_lib590(const char *URL)
 {
   CURL *curl = NULL;
   CURLM *multi = NULL;
   CURLcode result = CURLE_OK;
+  struct curl_slist *resolve = NULL;
   CURLMsg *msg;
+  char entry[256];
   int running;
   int msgs;
 
@@ -44,8 +52,20 @@ static CURLcode test_lib590(const char *URL)
 
   easy_init(curl);
 
+  /* libtest_arg2 = host, libtest_arg3 = port */
+  curl_msnprintf(entry, sizeof(entry), "%s:%s:%s",
+                 libtest_arg2, libtest_arg3, libtest_arg2);
+  resolve = curl_slist_append(NULL, entry);
+  if(!resolve) {
+    curl_mfprintf(stderr, "curl_slist_append() failed\n");
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+
   easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_RESOLVE, resolve);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
   easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 200L);
   easy_setopt(curl, CURLOPT_TIMEOUT_MS, 10000L);
 
@@ -88,6 +108,7 @@ test_cleanup:
   curl_multi_remove_handle(multi, curl);
   curl_multi_cleanup(multi);
   curl_easy_cleanup(curl);
+  curl_slist_free_all(resolve);
   curl_global_cleanup();
 
   return result;
