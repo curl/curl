@@ -71,25 +71,18 @@ static timediff_t connect_left_ms(struct Curl_easy *data,
   return left_ms ? left_ms : -1; /* 0 is "no limit", fake 1 ms expiry */
 }
 
-/*
- * timeleft_now_ms() returns the amount of milliseconds left allowed for the
- * transfer/connection. If the value is 0, there is no timeout (ie there is
- * infinite time left). If the value is negative, the timeout time has already
- * elapsed.
- *
- * @unittest 1303
- */
-UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
-                                    const struct curltime *pnow);
-UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
-                                    const struct curltime *pnow)
+/* Common code for timeleft_now_ms() and Curl_timeleft_total_now_ms():
+   `with_connect` controls whether the connect timeout is considered. */
+static timediff_t timeleft_now_ms_int(struct Curl_easy *data,
+                                      const struct curltime *pnow,
+                                      bool with_connect)
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
 
   if(data->conn && CURL_CONN_IN_SHUTDOWN(data->conn, FIRSTSOCKET))
     return Curl_cshutdn_timeleft_ms(data, data->conn, FIRSTSOCKET);
-  else if(Curl_is_connecting(data)) {
+  else if(with_connect && Curl_is_connecting(data)) {
     /* transfer has not reached DO phase yet */
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
       data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
@@ -98,7 +91,7 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
     if(!ctimeleft_ms)
       ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   }
-  else if(data->conn && data->conn->connect_start_ms >= 0) {
+  else if(with_connect && data->conn && data->conn->connect_start_ms >= 0) {
     /* ongoing connect of filters, pbly FTP second socket */
     ctimeleft_ms = connect_left_ms(data, pnow);
   }
@@ -120,9 +113,33 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
   return CURLMIN(ctimeleft_ms, timeleft_ms);
 }
 
+/*
+ * timeleft_now_ms() returns the amount of milliseconds left allowed for the
+ * transfer/connection. If the value is 0, there is no timeout (ie there is
+ * infinite time left). If the value is negative, the timeout time has already
+ * elapsed.
+ *
+ * @unittest 1303
+ */
+UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
+                                    const struct curltime *pnow);
+UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
+                                    const struct curltime *pnow)
+{
+  return timeleft_now_ms_int(data, pnow, TRUE);
+}
+
 timediff_t Curl_timeleft_ms(struct Curl_easy *data)
 {
   return timeleft_now_ms(data, Curl_pgrs_now(data));
+}
+
+/* Like Curl_timeleft_now_ms() but without the connect timeout: only the
+   overall timeout is considered. */
+timediff_t Curl_timeleft_total_now_ms(struct Curl_easy *data,
+                                      const struct curltime *pnow)
+{
+  return timeleft_now_ms_int(data, pnow, FALSE);
 }
 
 timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,

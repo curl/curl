@@ -134,6 +134,7 @@ TESTS_C = \
   lib583.c \
   lib586.c \
   lib589.c \
+  lib590.c \
   lib591.c \
   lib597.c \
   lib598.c \
