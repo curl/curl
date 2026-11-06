@@ -887,14 +887,16 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     Curl_ssl_scache_lock(data);
     old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key);
     if(old_cred) {
+      LONG updated_refcount;
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
       /* increment the reference counter of the credential/session handle */
-      backend->cred->refcount++;
+      updated_refcount = InterlockedIncrement(&backend->cred->refcount);
+      (void)updated_refcount;
       DEBUGF(infof(data,
-                   "schannel: incremented credential handle refcount = %d",
-                   backend->cred->refcount));
+                   "schannel: incremented credential handle refcount = %ld",
+                   updated_refcount));
     }
     Curl_ssl_scache_unlock(data);
   }
@@ -1565,12 +1567,14 @@ static bool add_cert_to_certinfo(const CERT_CONTEXT *ccert_context,
 
 static void schannel_session_free(void *sessionid)
 {
-  /* this is expected to be called under sessionid lock */
+  /* The credential is shared between the session cache and all connections
+     using it, possibly from different threads. This is called both under the
+     session cache lock (from the cache) and without it (from a closing
+     connection), so the reference count is atomic. */
   struct Curl_schannel_cred *cred = sessionid;
 
   if(cred) {
-    cred->refcount--;
-    if(cred->refcount == 0) {
+    if(!InterlockedDecrement(&cred->refcount)) {
       Curl_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_free(cred->sni_hostname);
       if(cred->client_cert_store) {
@@ -1654,7 +1658,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   if(Curl_ssl_scache_use(cf, data)) {
     Curl_ssl_scache_lock(data);
     /* Up ref count since call takes ownership */
-    backend->cred->refcount++;
+    InterlockedIncrement(&backend->cred->refcount);
     result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
                                      backend->cred, schannel_session_free);
     Curl_ssl_scache_unlock(data);
@@ -2567,6 +2571,8 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
 
+  (void)data;
+
   DEBUGASSERT(data);
   DEBUGASSERT(backend);
 
@@ -2585,11 +2591,13 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     curlx_safefree(backend->ctxt);
   }
 
-  /* free SSPI Schannel API credential handle */
+  /* free SSPI Schannel API credential handle. `data` may be the multi's
+     admin handle without access to the share this credential is cached in,
+     so the refcount is dropped atomically rather than under the cache lock.
+     The cache holds its own reference, so this cannot free a credential
+     that another thread may still fetch from it. */
   if(backend->cred) {
-    Curl_ssl_scache_lock(data);
     schannel_session_free(backend->cred);
-    Curl_ssl_scache_unlock(data);
     backend->cred = NULL;
   }
 
