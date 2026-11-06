@@ -28,11 +28,12 @@ and the TLS backend is not Schannel, and uses the given path as a path to a CA
 cert bundle. This option overrides that variable.
 
 (Windows) curl automatically looks for a CA certs file named
-'curl-ca-bundle.crt', either in the same directory as curl.exe, or in the
-Current Working Directory, or in any folder along your PATH.
+'curl-ca-bundle.crt' in the same directory as curl.exe (default since 8.23.0),
+and if enabled via a build-time option, also in the Current Working Directory,
+and in any folder along your PATH.
 
-curl 8.11.0 added a build-time option to disable this search behavior, and
-another option to restrict search to the application's directory.
+curl 8.11.0 added the build-time option to control the above search behavior,
+and another option to restrict search to the application's directory.
 
 (Schannel) This option is supported for Schannel in Windows 7 or later (added
 in 7.60.0). This option is supported for backward compatibility with other SSL
