@@ -587,6 +587,7 @@ TESTCASES = \
   test587 \
   test588 \
   test589 \
+  test590 \
   test591 \
   test592 \
   test593 \
