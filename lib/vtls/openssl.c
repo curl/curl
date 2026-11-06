@@ -3793,6 +3793,18 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
   return *pmethod ? CURLE_OK : CURLE_SSL_CONNECT_ERROR;
 }
 
+#ifdef USE_APPLE_SECTRUST
+static int ossl_verify_cb_continue(int preverify_ok, X509_STORE_CTX *ctx)
+{
+  /* This callback only gets installed when SecTrust is enabled.
+   * It declares success unconditionally, so SSL_connect() succeeds
+   * and we can do SecTrust checks afterwards. */
+  (void)preverify_ok;
+  (void)ctx;
+  return 1;
+}
+#endif
+
 CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
@@ -4027,11 +4039,20 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 #endif
 
-  /* OpenSSL always tries to verify the peer. By setting the failure mode
-   * to NONE, we allow the connect to complete, regardless of the outcome.
-   * We then explicitly check the result and may try alternatives like
-   * Apple's SecTrust for verification. */
-  SSL_CTX_set_verify(octx->ssl_ctx, SSL_VERIFY_NONE, NULL);
+  {
+    int (*verify_cb)(int, X509_STORE_CTX *) = NULL;
+    int verify_mode = conn_config->verifypeer ?
+                      SSL_VERIFY_PEER : SSL_VERIFY_NONE;
+#ifdef USE_APPLE_SECTRUST
+    if(conn_config->native_ca_store) {
+      /* We want to verify via SecTrust should OpenSSL's own verify fail.
+       * For this, we want SSL_connect() to succeed in spite of a verify
+       * fail. So we install a callback that is always happy. */
+      verify_cb = ossl_verify_cb_continue;
+    }
+#endif
+    SSL_CTX_set_verify(octx->ssl_ctx, verify_mode, verify_cb);
+  }
 
   /* Enable logging of secrets to the file specified in env SSLKEYLOGFILE. */
 #if !defined(HAVE_KEYLOG_UPSTREAM) && defined(HAVE_KEYLOG_CALLBACK)
