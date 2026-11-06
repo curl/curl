@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+HTTP/3
+qlog
+</keywords>
+</info>
+<client>
+<features>
+unittest
+http/3
+</features>
+<name>
+ngtcp2 qlog writes handle partial writes and interruptions
+</name>
+</client>
+</testcase>
