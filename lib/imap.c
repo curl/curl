@@ -862,16 +862,17 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_MIME
   /* Prepare the mime data if some. */
-  if(IS_MIME_POST(data)) {
+  if(IS_MIME_POST_REQ(data)) {
     curl_mimepart *postp = data->set.mimepostp;
 
     /* Use the whole structure as data. */
     postp->flags &= ~(unsigned int)MIME_BODY_ONLY;
 
     /* Add external headers and mime version. */
-    curl_mime_headers(postp, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(data, postp, NULL,
-                                       NULL, MIMESTRATEGY_MAIL);
+    result = Curl_mime_mail_headers(data, postp);
+    if(!result)
+      result = Curl_mime_prepare_headers(data, postp, NULL,
+                                         NULL, MIMESTRATEGY_MAIL);
 
     if(!result && !Curl_checkheaders(data, STRCONST("Mime-Version")))
       result = Curl_mime_add_header(&postp->curlheaders, "Mime-Version: 1.0");
@@ -2021,12 +2022,12 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
   else if(!data->set.connect_only &&
           ((!imap->custom && (imap->uid || imap->mindex)) ||
            (imap->custom && data->req.maxdownload > 0) ||
-           data->state.upload || IS_MIME_POST(data))) {
+           data->state.upload || IS_MIME_POST_REQ(data))) {
     /* Handle responses after FETCH or APPEND transfer has finished.
        For custom commands, check if we set up a download which indicates
        a FETCH-like command with literal data. */
 
-    if(!data->state.upload && !IS_MIME_POST(data))
+    if(!data->state.upload && !IS_MIME_POST_REQ(data))
       imap_state(data, imapc, IMAP_FETCH_FINAL);
     else {
       /* End the APPEND command first by sending an empty line */
@@ -2083,7 +2084,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
     selected = TRUE;
 
   /* Start the first command in the DO phase */
-  if(data->state.upload || IS_MIME_POST(data))
+  if(data->state.upload || IS_MIME_POST_REQ(data))
     /* APPEND can be executed directly */
     result = imap_perform_append(data, imapc, imap);
   else if(imap->custom && (selected || !imap->mailbox))

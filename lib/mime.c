@@ -42,7 +42,9 @@ struct Curl_easy;
 
 #include "rand.h"
 #include "slist.h"
+#include "vauth/vauth.h"
 #include "curlx/dynbuf.h"
+#include "curlx/strparse.h"
 
 #define MAX_MIME_LEVELS 40 /* avoid deep nesting */
 
@@ -1902,6 +1904,62 @@ static CURLcode mime_prepare_headers(struct Curl_easy *data,
         return result;
     }
   }
+  return result;
+}
+
+/* TRUE if this custom header line sets the named header.
+
+   A field name is a token and carries no surrounding whitespace, so the
+   blanks around it are passed over before matching. Without that,
+   "Authorization :" with a blank before the separator slips past, the same
+   way it used to on the HTTP side. */
+static bool mime_hdr_is(const char *line, const char *name, size_t len)
+{
+  curlx_str_passblanks(&line);
+  if(!curl_strnequal(line, name, len))
+    return FALSE;
+  line += len;
+  curlx_str_passblanks(&line);
+  return Curl_headersep(*line);
+}
+
+/*
+ * Curl_mime_mail_headers() uses the transfer's custom headers as the mail
+ * headers of 'part'.
+ *
+ * "Authorization:" and "Cookie:" are left out when they may not be sent to
+ * the host this transfer ended up on, which is the rule http.c applies to
+ * the same two headers for HTTP. Without this, a cross-protocol redirect to
+ * IMAP or SMTP would mail them to the redirect target.
+ */
+CURLcode Curl_mime_mail_headers(struct Curl_easy *data,
+                                struct curl_mimepart *part)
+{
+  struct curl_slist *h;
+  struct curl_slist *filtered = NULL;
+  CURLcode result;
+
+  if(Curl_auth_allowed_to_host(data))
+    return curl_mime_headers(part, data->set.headers, 0);
+
+  for(h = data->set.headers; h; h = h->next) {
+    struct curl_slist *nh;
+
+    if(mime_hdr_is(h->data, STRCONST("Authorization")) ||
+       mime_hdr_is(h->data, STRCONST("Cookie")))
+      continue;
+
+    nh = curl_slist_append(filtered, h->data);
+    if(!nh) {
+      curl_slist_free_all(filtered);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    filtered = nh;
+  }
+
+  result = curl_mime_headers(part, filtered, 1);
+  if(result)
+    curl_slist_free_all(filtered);
   return result;
 }
 
