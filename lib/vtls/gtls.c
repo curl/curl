@@ -68,7 +68,7 @@ static void tls_log_func(int level, const char *str)
 #endif
 
 #if !defined(GNUTLS_VERSION_NUMBER) || (GNUTLS_VERSION_NUMBER < 0x030605)
-#error "too old GnuTLS version"
+#error "GnuTLS 3.6.5 or greater required"
 #endif
 
 #undef CURL_GNUTLS_EARLY_DATA
