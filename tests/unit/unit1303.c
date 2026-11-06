@@ -155,5 +155,64 @@ static CURLcode test_unit1303(const char *arg)
       fail(run[i].comment);
   }
 
+  {
+    struct timetest2 {
+      int now_s;
+      int now_us;
+      unsigned int timeout_ms;
+      unsigned int connecttimeout_ms;
+      bool connecting;
+      bool connect_only;
+      bool total; /* Curl_timeleft_total_now_ms() instead of timeleft_now_ms */
+      timediff_t result;
+      const char *comment;
+    };
+
+    static const struct timetest2 run2[] = {
+      /* the total variant ignores the connect timeout */
+      {BASE + 4, 0,  10000, 8000, TRUE, FALSE, TRUE, 6000,
+       "total: 6 seconds should be left while connecting"},
+      {BASE + 9, 0,  10000, 8000, TRUE, FALSE, TRUE, 1000,
+       "total: 1 second should be left, connect timeout ignored"},
+      {BASE + 10, 0, 10000, 8000, TRUE, FALSE, TRUE, -1,
+       "total: timeout is -1, expired"},
+      {BASE + 4, 0,  0, 8000, TRUE, FALSE, TRUE, 0,
+       "total: no overall timeout, no limit"},
+      {BASE + 4, 0,  0, 0, TRUE, FALSE, TRUE, 0,
+       "total: no timeout set, no limit"},
+      {BASE + 4, 0,  10000, 0, FALSE, FALSE, TRUE, 6000,
+       "total: 6 seconds should be left, not connecting"},
+
+      /* CONNECT_ONLY: overall timeout applies while connecting ... */
+      {BASE + 4, 0,  10000, 0, TRUE, TRUE, TRUE, 6000,
+       "total connect_only: 6 seconds should be left while connecting"},
+      {BASE + 12, 0, 10000, 0, TRUE, TRUE, TRUE, -2000,
+       "total connect_only: -2000, overdue 2 seconds"},
+      {BASE + 4, 0,  10000, 8000, TRUE, TRUE, FALSE, 4000,
+       "connect_only: 4 seconds should be left while connecting"},
+      {BASE + 12, 0, 10000, 8000, TRUE, TRUE, FALSE, -4000,
+       "connect_only: -4000, overdue 4 seconds"},
+      /* ... but not once the connect is done */
+      {BASE + 12, 0, 10000, 0, FALSE, TRUE, TRUE, 0,
+       "total connect_only: no limit when not connecting"},
+      {BASE + 12, 0, 10000, 8000, FALSE, TRUE, FALSE, 0,
+       "connect_only: no limit when not connecting"},
+    };
+
+    for(i = 0; i < CURL_ARRAYSIZE(run2); i++) {
+      timediff_t timeout;
+      NOW(run2[i].now_s, run2[i].now_us);
+      TIMEOUTS(run2[i].timeout_ms, run2[i].connecttimeout_ms);
+      easy->set.connect_only = run2[i].connect_only;
+      easy->progress.now = now;
+      easy->mstate = run2[i].connecting ? MSTATE_INIT : MSTATE_DO;
+      timeout = run2[i].total ? Curl_timeleft_total_now_ms(easy, &now) :
+                timeleft_now_ms(easy, &now);
+      if(timeout != run2[i].result)
+        fail(run2[i].comment);
+    }
+    easy->set.connect_only = FALSE;
+  }
+
   UNITTEST_END(t1303_stop(easy))
 }

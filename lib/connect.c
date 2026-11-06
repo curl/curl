@@ -95,8 +95,11 @@ static timediff_t timeleft_now_ms_int(struct Curl_easy *data,
     /* ongoing connect of filters, pbly FTP second socket */
     ctimeleft_ms = connect_left_ms(data, pnow);
   }
-  else if(!data->set.timeout || data->set.connect_only) {
-    return 0; /* no timeout in place or checked, return "no limit" */
+  else if(!data->set.timeout ||
+          (data->set.connect_only && !Curl_is_connecting(data))) {
+    /* no timeout in place, or a CONNECT_ONLY transfer that is done
+       connecting: return "no limit" */
+    return 0;
   }
 
   if(data->set.timeout) {

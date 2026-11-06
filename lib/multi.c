@@ -2913,7 +2913,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(data->mstate >= MSTATE_CONNECT &&
-       data->mstate < MSTATE_DO &&
+       (data->mstate < MSTATE_DO ||
+        (data->conn && data->conn->connect_start_ms >= 0)) &&
        mresult != CURLM_CALL_MULTI_PERFORM &&
        !multi_ischanged(multi, FALSE)) {
       /* We now handle stream timeouts if and only if this will be the last
@@ -2921,7 +2922,9 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        * that if we know we have additional work to do immediately
        * (i.e. CURLM_CALL_MULTI_PERFORM == TRUE) then we should do that before
        * declaring the connection timed out as we may almost have a completed
-       * connection. */
+       * connection. This covers the connect of the transfer's connection as
+       * well as a connect of a secondary connection (`connect_start_ms`
+       * set), like the FTP data connection, in a later state. */
       pnow = Curl_pgrs_now(data);
       multi_handle_timeout(data, pnow, &stream_error, &result, TRUE);
     }
