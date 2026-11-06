@@ -12,7 +12,6 @@ PEM certificate
 <features>
 SSL
 local-http
-!mbedtls
 !wolfssl
 </features>
 <server>
@@ -27,8 +26,9 @@ HTTPS server certificate with clientAuth as only extended key usage
 </client>
 
 <verify>
+# mbedTLS: 35, GnuTLS, Schannel: 60
 <errorcode>
-60
+35,60
 </errorcode>
 </verify>
 </testcase>
