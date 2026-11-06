@@ -2569,6 +2569,8 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
 
+  (void)data;
+
   DEBUGASSERT(data);
   DEBUGASSERT(backend);
 
