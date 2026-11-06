@@ -830,7 +830,13 @@ static int push_promise(struct Curl_cfilter *cf,
               frame->promised_stream_id);
 
   /* push is never accepted on internal handles (like DoH) */
-  if(data->multi->push_cb && !data->state.internal) {
+  if(data->state.internal) {
+    struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
+    if(stream)
+      free_push_headers(stream);
+    return CURL_PUSH_DENY;
+  }
+  if(data->multi->push_cb) {
     struct h2_stream_ctx *stream;
     struct h2_stream_ctx *newstream;
     struct curl_pushheaders heads;
