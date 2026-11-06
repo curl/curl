@@ -120,6 +120,7 @@ man_MANS = \
   libcurl-env.3 \
   libcurl-errors.3 \
   libcurl-multi.3 \
+  libcurl-pool.3 \
   libcurl-security.3 \
   libcurl-share.3 \
   libcurl-symbols.3 \
