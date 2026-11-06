@@ -969,6 +969,10 @@ if(CURL_USE_GNUTLS)
   set(_ssl_enabled ON)
   set(USE_GNUTLS ON)
 
+  if(GNUTLS_VERSION VERSION_LESS 3.6.5)
+    message(FATAL_ERROR "GnuTLS 3.6.5 or greater required")
+  endif()
+
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
     set(_valid_default_ssl_backend TRUE)
   endif()
