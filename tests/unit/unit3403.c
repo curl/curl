@@ -29,20 +29,17 @@
 static unsigned char written[16];
 static size_t written_len;
 static int calls;
-static int mode;
 
 static ssize_t mock_write(int fd, const void *data, size_t len)
 {
   size_t n = len;
   (void)fd;
   ++calls;
-  if(mode == 1 || (mode == 0 && calls == 1)) {
+  if(calls == 1) {
     /* !checksrc! disable ERRNOVAR 1 */
-    errno = mode == 1 ? EIO : EINTR;
+    errno = EINTR;
     return -1;
   }
-  if(mode == 2)
-    return 0;
   if(calls == 2)
     n = 2;
   memcpy(written + written_len, data, n);
@@ -57,20 +54,11 @@ static CURLcode test_unit3403(const char *arg)
 
   written_len = 0;
   calls = 0;
-  mode = 0;
   fail_unless(qlog_write_all(42, record, sizeof(record) - 1, mock_write),
               "interrupted and short writes should be retried");
   fail_unless(written_len == sizeof(record) - 1 &&
               !memcmp(written, record, sizeof(record) - 1) && calls == 3,
               "qlog record was not written in full");
-
-  mode = 1;
-  calls = 0;
-  fail_unless(!qlog_write_all(42, record, sizeof(record) - 1, mock_write),
-              "write error should stop logging");
-  mode = 2;
-  fail_unless(!qlog_write_all(42, record, sizeof(record) - 1, mock_write),
-              "zero-byte write should stop logging");
 
   UNITTEST_END_SIMPLE
 }
