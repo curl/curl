@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+connection reuse
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</data>
+<connect crlf="headers">
+HTTP/1.1 200 Connection established
+
+</connect>
+<datacheck>
+HTTP/1.1 200 Connection established%CR
+%CR
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</datacheck>
+</reply>
+
+<client>
+<server>
+http
+http-proxy
+</server>
+<name>
+proxy tunnel not reused with different --proxy-header
+</name>
+<command>
+http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token A" --next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B"
+</command>
+<features>
+proxy
+</features>
+</client>
+
+<verify>
+<proxy crlf="headers">
+CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token A
+
+CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token B
+
+</proxy>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
