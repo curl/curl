@@ -704,8 +704,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       mmsg[i].msg_hdr.msg_iovlen = 1;
       mmsg[i].msg_hdr.msg_name = &remote_addr[i];
       mmsg[i].msg_hdr.msg_namelen = sizeof(remote_addr[i]);
-      mmsg[i].msg_hdr.msg_control =
-        &msg_ctrl.bytes[i * CMSG_PER_MSG_SIZE];
+      mmsg[i].msg_hdr.msg_control = &msg_ctrl.bytes[i * CMSG_PER_MSG_SIZE];
       mmsg[i].msg_hdr.msg_controllen = CMSG_PER_MSG_SIZE;
     }
 
