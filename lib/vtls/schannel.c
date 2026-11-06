@@ -215,6 +215,12 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
       }
     }
   }
+
+  if(!*enabled_protocols) {
+    failf(data, "schannel: no supported TLS version in the requested range");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
   return CURLE_OK;
 }
 
