@@ -1363,10 +1363,18 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
     break;
 #endif
 #ifndef CURL_DISABLE_SMTP
-  case CURLOPT_MAIL_RCPT:
-    /* Set the list of mail recipients */
+  case CURLOPT_MAIL_RCPT: {
+    /* Set the list of mail recipients. A recipient with a CR or LF would end
+       up verbatim in the RCPT TO, VRFY or custom command line, so reject it
+       here, before any command is built from it. */
+    const struct curl_slist *item;
+    for(item = slist; item; item = item->next) {
+      if(item->data && strpbrk(item->data, "\r\n"))
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     s->mail_rcpt = slist;
     break;
+  }
 #endif
   case CURLOPT_CONNECT_TO:
     s->connect_to = slist;
