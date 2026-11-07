@@ -55,8 +55,9 @@ static bool pmatch(const char *hostname, size_t hostlen,
  * We use the matching rule described in RFC6125, section 6.4.3.
  * https://datatracker.ietf.org/doc/html/rfc6125#section-6.4.3
  *
- * In addition: ignore trailing dots in the hostnames and wildcards, so that
- * the names are used normalized. This is what the browsers do.
+ * In addition: ignore a trailing dot in the hostname. A trailing dot in the
+ * certificate name is not ignored, since the TLS library verified the name
+ * constraints of the chain against that name exactly as it is encoded.
  *
  * Do not allow wildcard matching on IP numbers. There are apparently
  * certificates being used with an IP address in the CN field, thus making no
@@ -85,11 +86,12 @@ static bool hostmatch(const char *hostname,
   DEBUGASSERT(hostname);
   DEBUGASSERT(hostlen);
 
-  /* normalize pattern and hostname by stripping off trailing dots */
+  /* normalize the hostname by stripping off a trailing dot. The pattern is
+     the name from the certificate and is used as is: a trailing dot there
+     would escape the issuers' name constraints (which the TLS library checked
+     against the encoded name) while still matching the normalized host */
   if(hostlen > 0 && hostname[hostlen - 1] == '.')
     hostlen--;
-  if(patternlen > 0 && pattern[patternlen - 1] == '.')
-    patternlen--;
 
   if(patternlen > 2 && strncmp(pattern, "*.", 2))
     return pmatch(hostname, hostlen, pattern, patternlen);
