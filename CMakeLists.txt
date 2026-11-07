@@ -1549,7 +1549,11 @@ if(_curl_ca_bundle_supported)
 endif()
 
 if(WIN32)
-  option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" ${_curl_disable_ca_search_default})
+  if(WINDOWS_STORE)
+    set(CURL_DISABLE_CA_SEARCH 1)
+  else()
+    option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" ${_curl_disable_ca_search_default})
+  endif()
   option(CURL_CA_SEARCH_SAFE "Enable safe CA bundle search (within the curl tool directory) on Windows" OFF)
 endif()
 
