@@ -68,7 +68,7 @@ static void tls_log_func(int level, const char *str)
 #endif
 
 #if !defined(GNUTLS_VERSION_NUMBER) || (GNUTLS_VERSION_NUMBER < 0x030605)
-#error "too old GnuTLS version"
+#error "GnuTLS 3.6.5 or greater required"
 #endif
 
 #undef CURL_GNUTLS_EARLY_DATA
@@ -890,7 +890,6 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   unsigned int init_flags;
   int rc;
   const char *prioritylist;
-  bool tls13support;
   CURLcode result;
 
   if(config->version == CURL_SSLVERSION_SSLv2 ||
@@ -942,12 +941,11 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(peer->sni) {
-    if(gnutls_server_name_set(gtls->session, GNUTLS_NAME_DNS,
-                              peer->sni, strlen(peer->sni)) < 0) {
-      failf(data, "Failed to set SNI");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+  if(peer->sni &&
+     gnutls_server_name_set(gtls->session, GNUTLS_NAME_DNS,
+                            peer->sni, strlen(peer->sni)) < 0) {
+    failf(data, "Failed to set SNI");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   /* Use default priorities */
@@ -955,19 +953,9 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   if(rc != GNUTLS_E_SUCCESS)
     return CURLE_SSL_CONNECT_ERROR;
 
-  /* "In GnuTLS 3.6.5, TLS 1.3 is enabled by default" */
-  tls13support = !!gnutls_check_version("3.6.5");
-
-  if(config->version == CURL_SSLVERSION_TLSv1_3) {
-    if(!tls13support) {
-      failf(data, "This GnuTLS installation does not support TLS 1.3");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-
   /* At this point we know we have a supported TLS version, so set it */
   result = gnutls_set_ssl_version_min_max(data, peer,
-                                          config, &prioritylist, tls13support);
+                                          config, &prioritylist, TRUE);
   if(result)
     return result;
 
@@ -1551,10 +1539,16 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
   bool verified = FALSE;
   unsigned int verify_status = 0;
   long * const certverifyresult = &ssl_config->certverifyresult;
+  gnutls_typed_vdata_st purpose;
   int rc;
 
   *pocsp_checked = FALSE;
-  rc = gnutls_certificate_verify_peers2(session, &verify_status);
+  /* gnutls_certificate_verify_peers2() ignores the extended key usage, ask
+     for a chain that is valid for TLS server authentication */
+  purpose.type = GNUTLS_DT_KEY_PURPOSE_OID;
+  purpose.data = (unsigned char *)CURL_UNCONST(GNUTLS_KP_TLS_WWW_SERVER);
+  purpose.size = 0;
+  rc = gnutls_certificate_verify_peers(session, &purpose, 1, &verify_status);
   if(rc < 0) {
     failf(data, "server cert verify failed: %d", rc);
     *certverifyresult = rc;
@@ -1607,6 +1601,8 @@ static CURLcode gtls_verify_cert(struct Curl_easy *data,
       cause = "certificate signer not trusted";
     else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
       cause = "certificate uses insecure algorithm";
+    else if(verify_status & GNUTLS_CERT_PURPOSE_MISMATCH)
+      cause = "certificate is not valid for server authentication";
     else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS) {
       cause = "OCSP status response is invalid";
       result = CURLE_SSL_INVALIDCERTSTATUS;
@@ -2210,25 +2206,23 @@ static CURLcode gtls_recv(struct Curl_cfilter *cf,
 
   if(nread >= 0)
     *pnread = (size_t)nread;
+  else if((nread == GNUTLS_E_AGAIN) || (nread == GNUTLS_E_INTERRUPTED)) {
+    result = CURLE_AGAIN;
+    goto out;
+  }
+  else if(nread == GNUTLS_E_REHANDSHAKE) {
+    /* Either TLSv1.2 renegotiate or a TLSv1.3 session key update. */
+    result = cf_gtls_handshake(cf, data);
+    if(!result)
+      result = CURLE_AGAIN; /* make us get called again. */
+    goto out;
+  }
   else {
-    if((nread == GNUTLS_E_AGAIN) || (nread == GNUTLS_E_INTERRUPTED)) {
-      result = CURLE_AGAIN;
-      goto out;
-    }
-    else if(nread == GNUTLS_E_REHANDSHAKE) {
-      /* Either TLSv1.2 renegotiate or a TLSv1.3 session key update. */
-      result = cf_gtls_handshake(cf, data);
-      if(!result)
-        result = CURLE_AGAIN; /* make us get called again. */
-      goto out;
-    }
-    else {
-      failf(data, "GnuTLS recv error (%d): %s",
-            (int)nread, gnutls_strerror((int)nread));
-      result = backend->gtls.io_result ?
-        backend->gtls.io_result : CURLE_RECV_ERROR;
-      goto out;
-    }
+    failf(data, "GnuTLS recv error (%d): %s",
+          (int)nread, gnutls_strerror((int)nread));
+    result = backend->gtls.io_result ?
+      backend->gtls.io_result : CURLE_RECV_ERROR;
+    goto out;
   }
 
 out:
