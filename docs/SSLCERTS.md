@@ -41,7 +41,7 @@ sections.
 
 ### Skip verification
 
-Tell curl to *not* verify the peer with `-k`/`--insecure`.
+Tell curl to *not* verify the peer with `--insecure` (or `-k` for short).
 
 We **strongly** recommend this is avoided and that even if you end up doing
 this for experimentation or development, **never** skip verification in
