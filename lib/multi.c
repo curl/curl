@@ -493,6 +493,14 @@ CURLMcode Curl_multi_add_handle(struct Curl_multi *multi,
     Curl_uint32_bset_clear(&multi->msgsent);
   }
 
+  /* if the handle has a connection still attached (it is/was a connect-only
+     handle used with curl_easy_send/recv) then disconnect now */
+  if(data->conn) {
+    struct connectdata *conn = data->conn;
+    Curl_detach_connection(data);
+    Curl_conn_close(data, conn, TRUE);
+  }
+
   if(data->multi_easy) {
     /* if this easy handle was previously used for curl_easy_perform(), there
        is a private multi handle here that we can kill */
