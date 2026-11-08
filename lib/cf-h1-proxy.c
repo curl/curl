@@ -67,6 +67,7 @@ struct h1_tunnel_state {
     KEEPON_IGNORE
   } keepon;
   curl_off_t cl; /* size of content to read and ignore */
+  unsigned int loops; /* bytes consumed in the current recv round */
   h1_tunnel_state tunnel_state;
   BIT(chunked_encoding);
   BIT(close_connection);
@@ -516,6 +517,14 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   while(ts->keepon) {
     size_t nread;
     char byte;
+
+    /* a proxy that keeps a 407 body flowing would otherwise hold us in
+       here past every timeout, hand control back to the multi now and
+       then so timeouts and other transfers get their turn */
+    if(++ts->loops > 1024) {
+      ts->loops = 0;
+      return CURLE_OK;
+    }
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
