@@ -161,6 +161,14 @@ static CURLcode test_unit1654(const char *arg)
                              "h2=\"../../admin?x=:443\"\r\n",
                              origin, ALPN_h2);
   fail_if(result, "Curl_altsvc_parse(bad host) failed!");
+  if(Curl_peer_create(curl, scheme, "10.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"..:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(dots host) failed!");
+  if(Curl_peer_create(curl, scheme, "11.example.net", 80, &origin))
+    goto fail;
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"[../a?b=c:d]:443\"\r\n",
                              origin, ALPN_h2);

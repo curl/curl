@@ -170,12 +170,22 @@ static void altsvc_append(struct altsvcinfo *asi, struct altsvc *as)
 /* return TRUE if the destination host is a valid hostname or IPv6 address */
 static bool altsvc_valid_host(const char *host, size_t len)
 {
+  struct Curl_str ip6;
+  char buf[MAX_IPADR_LEN];
+  unsigned char addr[16];
+
   if((len > 2) && (host[0] == '[') && (host[len - 1] == ']')) {
     host++;
     len -= 2;
   }
-  return !Curl_hostname_check(host, len) ||
-         Curl_looks_like_ipv6(host, len, FALSE, NULL, NULL);
+  if(!Curl_hostname_check(host, len))
+    return TRUE;
+  if(!Curl_looks_like_ipv6(host, len, FALSE, &ip6, NULL) ||
+     (curlx_strlen(&ip6) >= sizeof(buf)))
+    return FALSE;
+  memcpy(buf, curlx_str(&ip6), curlx_strlen(&ip6));
+  buf[curlx_strlen(&ip6)] = 0;
+  return curlx_inet_pton(AF_INET6, buf, addr) == 1;
 }
 
 /* only returns SERIOUS errors */
