@@ -154,6 +154,18 @@ static CURLcode test_unit1654(const char *arg)
                              origin, ALPN_h2);
   fail_if(result, "Curl_altsvc_parse(11) failed!");
 
+  /* illegal characters in hostname */
+  if(Curl_peer_create(curl, scheme, "9.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"../../admin?x=:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(bad host) failed!");
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"[../a?b=c:d]:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(bad IPv6 host) failed!");
+
   if(Curl_peer_create(curl, scheme, "test.se", 443, &origin))
     goto fail;
   result = Curl_altsvc_parse(curl, asi,
