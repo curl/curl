@@ -42,6 +42,8 @@ struct Cookie {
   BIT(httponly);                  /* the httponly directive is present */
   BIT(prefix_secure);             /* secure prefix is set */
   BIT(prefix_host);               /* host prefix is set */
+  char buf[1];                    /* storage area for
+                                     name+value+path+domain */
 };
 
 /*
@@ -60,7 +62,6 @@ struct CookieInfo {
   unsigned int numcookies;    /* number of cookies in the "jar" */
   unsigned int lastct;        /* last creation-time used in the jar */
   BIT(running);               /* state info, for cookie adding information */
-  BIT(newsession); /* new session, discard session cookies on load */
 };
 
 /* The maximum sizes we accept for cookies. RFC 6265 section 6.1 says
@@ -104,7 +105,8 @@ struct CookieInfo {
 struct Curl_easy;
 struct connectdata;
 
-bool Curl_secure_context(struct Curl_easy *data, const char *host);
+bool Curl_secure_context(struct Curl_easy *data, const char *host,
+                         const size_t hlen);
 
 /*
  * Add a cookie to the internal list of cookies. The domain and path arguments
@@ -112,7 +114,7 @@ bool Curl_secure_context(struct Curl_easy *data, const char *host);
  */
 
 #define COOKIE_HTTPHEADER (1<<0) /* if HTTP header-style line */
-#define COOKIE_NOEXPIRE   (1<<1) /* skip remove_expired() */
+#define COOKIE_LIVE       (1<<1) /* from a live server */
 #define COOKIE_SECURE     (1<<2) /* connection is over secure origin */
 #define COOKIE_NOPSL      (1<<3) /* skip PSL check */
 #define COOKIE_NOSESSION  (1<<6) /* drop session cookies */
@@ -124,7 +126,7 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
                          const char *path,
                          const int flags) WARN_UNUSED_RESULT;
 CURLcode Curl_cookie_getlist(struct Curl_easy *data,
-                             bool *okay, const char *host,
+                             bool *okay, const char *hostp,
                              struct Curl_llist *list) WARN_UNUSED_RESULT;
 void Curl_cookie_clearall(struct CookieInfo *ci);
 void Curl_cookie_clearsess(struct CookieInfo *ci);
