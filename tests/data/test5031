@@ -44,7 +44,7 @@ A006 LOGOUT
 </protocol>
 
 <stripfile>
-if(/> A005 NOOP/) { s/.*> A005 NOOP.*?/NOOP-SENT/; } elsif(/^< \)/) { s/^< \).*/FETCH-CLOSE/; } elsif(/^< A004 OK FETCH completed/) { s/^< A004 OK FETCH completed.*/FETCH-DONE/; } else { $_ = ""; }
+if(/> A005 NOOP/) { s/.*> A005 NOOP.*?/NOOP-SENT/; s/\r+\n/\r\n/; } elsif(/^< \)/) { s/^< \).*/FETCH-CLOSE/; } elsif(/^< A004 OK FETCH completed/) { s/^< A004 OK FETCH completed.*/FETCH-DONE/; } else { $_ = ""; }
 </stripfile>
 
 <stderr mode="text">
