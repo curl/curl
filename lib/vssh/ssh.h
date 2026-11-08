@@ -130,6 +130,7 @@ struct SSHPROTO {
   struct dynbuf readdir;
   char readdir_filename[CURL_PATH_MAX + 1];
   char readdir_longentry[CURL_PATH_MAX + 1];
+  unsigned int readdir_count; /* entries handled in the current readdir loop */
 
   LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
 
