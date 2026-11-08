@@ -25,7 +25,7 @@ Example:
 Upload the specified local file to the remote URL.
 
 If there is no file part and no query string in the specified URL, curl appends
-the local file name to the end of the URL before the operation starts. You must
+the local filename to the end of the URL before the operation starts. You must
 use a trailing slash (`/`) on the last directory to prove to curl that there is
 no filename or curl thinks that your last directory name is the remote filename
 to use.
