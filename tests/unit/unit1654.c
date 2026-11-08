@@ -154,6 +154,32 @@ static CURLcode test_unit1654(const char *arg)
                              origin, ALPN_h2);
   fail_if(result, "Curl_altsvc_parse(11) failed!");
 
+  /* illegal characters in hostname */
+  if(Curl_peer_create(curl, scheme, "9.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"../../admin?x=:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(bad host) failed!");
+  if(Curl_peer_create(curl, scheme, "10.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"..:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(dots host) failed!");
+  if(Curl_peer_create(curl, scheme, "11.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"[../a?b=c:d]:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(bad IPv6 host) failed!");
+  if(Curl_peer_create(curl, scheme, "12.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"[%eth0]:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(zone only host) failed!");
+
   if(Curl_peer_create(curl, scheme, "test.se", 443, &origin))
     goto fail;
   result = Curl_altsvc_parse(curl, asi,

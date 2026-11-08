@@ -34,10 +34,12 @@
 #include "curl_get_line.h"
 #include "parsedate.h"
 #include "curl_trc.h"
+#include "curl_addrinfo.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "connect.h"
 #include "escape.h"
+#include "urlapi-int.h"
 
 #define MAX_ALTSVC_LINE    4095
 #define MAX_ALTSVC_DATELEN 17
@@ -45,6 +47,15 @@
 #define MAX_ALTSVC_ALPNLEN 10
 
 #define H3VERSION "h3"
+
+/*
+ * If USE_IPV6 is disabled, we still want to parse IPv6 addresses, so make
+ * sure we have _some_ value for AF_INET6 without polluting our fake value
+ * everywhere.
+ */
+#if !defined(USE_IPV6) && !defined(AF_INET6)
+#define AF_INET6 (AF_INET + 1)
+#endif
 
 #if defined(DEBUGBUILD) || defined(UNITTESTS)
 /* to play well with debug builds, we can *set* a fixed time this will
@@ -165,6 +176,28 @@ static void altsvc_append(struct altsvcinfo *asi, struct altsvc *as)
   Curl_llist_append(&asi->list, as, &as->node);
 }
 
+/* return TRUE if the destination host is a valid hostname or IPv6 address */
+static bool altsvc_valid_host(const char *host, size_t len)
+{
+  struct Curl_str ip6;
+  char buf[MAX_IPADR_LEN];
+  unsigned char addr[16];
+
+  if((len > 2) && (host[0] == '[') && (host[len - 1] == ']')) {
+    host++;
+    len -= 2;
+  }
+  if(!Curl_hostname_check(host, len))
+    return TRUE;
+  if(Curl_looks_like_ipv6(host, len, FALSE, &ip6, NULL) &&
+     curlx_strlen(&ip6) && (curlx_strlen(&ip6) < sizeof(buf))) {
+    memcpy(buf, curlx_str(&ip6), curlx_strlen(&ip6));
+    buf[curlx_strlen(&ip6)] = 0;
+    return curlx_inet_pton(AF_INET6, buf, addr) == 1;
+  }
+  return FALSE;
+}
+
 /* only returns SERIOUS errors */
 static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
 {
@@ -198,7 +231,8 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
      curlx_str_number(&line, &persist, 1) ||
      curlx_str_singlespace(&line) ||
      curlx_str_number(&line, &prio, 0) ||
-     curlx_str_newline(&line))
+     curlx_str_newline(&line) ||
+     !altsvc_valid_host(curlx_str(&dsthost), curlx_strlen(&dsthost)))
     ;
   else {
     char dbuf[MAX_ALTSVC_DATELEN + 1];
@@ -564,6 +598,10 @@ static bool altsvc_parse_dest(const char **pp,
     }
     if(curlx_str_single(pp, ':'))
       return FALSE; /* not followed by ':' */
+    if(!altsvc_valid_host(curlx_str(dsthost), curlx_strlen(dsthost))) {
+      infof(data, "Bad alt-svc hostname, ignoring.");
+      return FALSE;
+    }
   }
   else  /* is only :port, hostname is effectively origin */
     curlx_str_assign(dsthost, origin->hostname,
