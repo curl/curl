@@ -306,8 +306,10 @@ int curlx_str_cspn(const char **linep, struct Curl_str *out,
 /* remove ISBLANK()s from both ends of the string */
 void curlx_str_trimblanks(struct Curl_str *out)
 {
-  while(out->len && ISBLANK(*out->str))
-    curlx_str_nudge(out, 1);
+  while(out->len && ISBLANK(*out->str)) {
+    out->str++;
+    out->len--;
+  }
 
   /* trim trailing spaces and tabs */
   while(out->len && ISBLANK(out->str[out->len - 1]))

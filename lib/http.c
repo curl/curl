@@ -3463,8 +3463,8 @@ static CURLcode http_header_s(struct Curl_easy *data,
      * real peer hostname. */
     const char *host = data->req.cookiehost ?
       data->req.cookiehost : data->state.origin->hostname;
-    const unsigned char secure_context = Curl_secure_context(data, host) ?
-      COOKIE_SECURE : 0;
+    const unsigned char secure_context =
+      Curl_secure_context(data, host, strlen(host)) ? COOKIE_SECURE : 0;
     CURLcode result;
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     result = Curl_cookie_add(data, data->cookies, v, host,
