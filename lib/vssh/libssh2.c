@@ -1350,6 +1350,10 @@ static CURLcode sftp_download_stat(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+/* max number of directory entries to handle before leaving the state
+   machine */
+#define SFTP_READDIR_MAX_ENTRIES 1000
+
 static CURLcode sftp_readdir(struct Curl_easy *data,
                              struct ssh_conn *sshc,
                              struct SSHPROTO *sshp,
@@ -1367,6 +1371,15 @@ static CURLcode sftp_readdir(struct Curl_easy *data,
   if(rc > 0) {
     size_t readdir_len = (size_t)rc;
     sshp->readdir_filename[readdir_len] = '\0';
+
+    /* A server can send the entries faster than we handle them, so libssh2
+       might never return EAGAIN. Leave the state machine every now and then
+       to have timeouts checked and other transfers run. */
+    if(++sshp->readdir_count >= SFTP_READDIR_MAX_ENTRIES) {
+      sshp->readdir_count = 0;
+      Curl_multi_mark_dirty(data);
+      *blockp = TRUE;
+    }
 
     if(data->set.list_only) {
       result = Curl_client_write(data, CLIENTWRITE_BODY,
