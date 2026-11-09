@@ -598,7 +598,7 @@ static nghttp3_callbacks ngh3_proxy_callbacks = {
   cb_h3_proxy_recv_header,
   cb_h3_proxy_end_headers,
   NULL, /* begin_trailers */
-  cb_h3_proxy_recv_header,
+  NULL, /* recv_trailer */
   NULL, /* end_trailers */
   cb_h3_proxy_stop_sending,
   NULL, /* end_stream */
