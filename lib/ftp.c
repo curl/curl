@@ -4256,8 +4256,7 @@ static void cf_ftp_ctx_free(struct cf_ftp_ctx *ctx,
                             struct Curl_easy *data)
 {
   if(ctx) {
-    if(ctx->cf_data)
-      Curl_conn_cf_discard_chain(&ctx->cf_data, data);
+    (void)data;
     freedirs(ctx);
     curlx_free(ctx->account);
     curlx_free(ctx->alternative_to_user);
@@ -4370,7 +4369,7 @@ data_shutdown:
       goto out;
     }
     /* ignore shutdown errors on send, server will tell us */
-    Curl_conn_cf_discard_chain(&conn->chain_alt.cf, data);
+    Curl_cfchain_reset(&conn->chain_alt, data);
     *pnwritten = blen;
     result = CURLE_OK;
     goto out;
@@ -4429,7 +4428,8 @@ data_shutdown:
     if(!result && !done)
       result = CURLE_AGAIN;
     else {
-      Curl_conn_cf_discard_chain(&conn->chain_alt.cf, data);
+      Curl_cfchain_reset(&conn->chain_alt, data);
+
     }
     goto out;
   }
@@ -4463,6 +4463,7 @@ static CURLcode cf_ftp_shutdown(struct Curl_cfilter *cf,
   struct cf_ftp_ctx *ctx = cf->ctx;
   CURLcode result;
 
+  (void)data;
   *done = FALSE;
   if(!cf->connected || !ctx || !ctx->ctl_valid || cf->shutdown) {
     *done = TRUE;
