@@ -1120,18 +1120,13 @@ static CURLcode ssl_cf_send(struct Curl_cfilter *cf,
   }
 
   if(connssl->earlydata_skip) {
-    if(connssl->earlydata_skip >= blen) {
-      connssl->earlydata_skip -= blen;
-      result = CURLE_OK;
-      *pnwritten = blen;
-      goto out;
-    }
-    else {
-      *pnwritten = connssl->earlydata_skip;
-      buf = buf + connssl->earlydata_skip;
-      blen -= connssl->earlydata_skip;
-      connssl->earlydata_skip = 0;
-    }
+    /* earlydata_skip bytes were sent as early data, so report only them, so
+     * that a blocked send of the rest does not make the caller send the early
+     * data bytes again. */
+    *pnwritten = CURLMIN(connssl->earlydata_skip, blen);
+    connssl->earlydata_skip -= *pnwritten;
+    result = CURLE_OK;
+    goto out;
   }
 
   /* OpenSSL and maybe other TLS libs do not like 0-length writes. Skip. */
