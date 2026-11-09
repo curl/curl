@@ -173,6 +173,12 @@ static CURLcode test_unit1654(const char *arg)
                              "h2=\"[../a?b=c:d]:443\"\r\n",
                              origin, ALPN_h2);
   fail_if(result, "Curl_altsvc_parse(bad IPv6 host) failed!");
+  if(Curl_peer_create(curl, scheme, "12.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"[%eth0]:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(zone only host) failed!");
 
   if(Curl_peer_create(curl, scheme, "test.se", 443, &origin))
     goto fail;
