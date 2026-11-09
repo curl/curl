@@ -74,10 +74,14 @@ test_cleanup:
 
   pthread_mutex_lock(&lock);
 
-  if(!t1565_test_failure)
+  if(!t1565_test_failure) {
     t1565_test_failure = result;
+  }
 
   pthread_mutex_unlock(&lock);
+
+  curl_mfprintf(stderr, "thread ended with result=%d\n", (int)result);
+  res_multi_wakeup(testmulti);
 
   return NULL;
 }
@@ -114,7 +118,7 @@ static CURLcode test_lib1565(const char *URL)
     goto test_cleanup;
   }
 
-  while(1) {
+  while(!t1565_test_failure) {
     multi_perform(testmulti, &still_running);
 
     abort_on_test_timeout();
@@ -141,7 +145,8 @@ static CURLcode test_lib1565(const char *URL)
     if(CONN_NUM == finished_num)
       break;
 
-    multi_poll(testmulti, NULL, 0, TEST_HANG_TIMEOUT, &num);
+    if(!t1565_test_failure)
+      multi_poll(testmulti, NULL, 0, TEST_HANG_TIMEOUT, &num);
 
     abort_on_test_timeout();
 
