@@ -68,7 +68,11 @@ struct Curl_easy;
 struct cf_ngtcp2_ctx;
 struct cf_quic_ctx;
 
-#define QUIC_MAX_STREAMS       (256 * 1024)
+/* The max number of uni-directional streams the server is allowed
+ * to open to us. For HTTP/3, this is 3 for QPACK) */
+#define QUIC_UNI_STREAM_MAX         3
+#define QUIC_UNI_STREAM_WIN_SIZE   (64 * 1024)
+
 #define QUIC_HANDSHAKE_TIMEOUT (10 * NGTCP2_SECONDS)
 #define QUIC_TUNNEL_INBUF_SIZE (64 * 1024)
 
