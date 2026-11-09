@@ -237,6 +237,7 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   curlx_free(per->uploadfile);
   curlx_free(per->outfile);
   curlx_free(per->url);
+  curlx_free(per->etag);
   curl_easy_cleanup(per->curl);
   curlx_free(per);
 
@@ -738,6 +739,37 @@ static CURLcode post_close_output(struct per_transfer *per,
 }
 
 /*
+ * Write the etag received for --etag-save. Done only for a transfer that
+ * ended without error, so that a failed one leaves the previous validator
+ * alone instead of claiming a body that never arrived in full.
+ */
+static CURLcode post_etag_save(struct per_transfer *per)
+{
+  struct OutStruct *etag_save = &per->etag_save;
+  curlx_struct_stat file;
+  int fd;
+
+  if(!per->etag || !etag_save->stream)
+    return CURLE_OK;
+
+  fd = fileno(etag_save->stream);
+
+  /* Truncate regular files to avoid stale etag content */
+  if((fd != -1) &&
+     etag_save->regular_file &&
+     !curlx_fstat(fd, &file) &&
+     (S_ISREG(file.st_mode) &&
+      toolx_ftruncate(fd, 0)))
+    return CURLE_WRITE_ERROR;
+
+  fputs(per->etag, etag_save->stream);
+  /* terminate with newline */
+  fputc('\n', etag_save->stream);
+  (void)fflush(etag_save->stream);
+  return CURLE_OK;
+}
+
+/*
  * Call this after a transfer has completed.
  */
 static CURLcode post_per_transfer(struct per_transfer *per,
@@ -781,8 +813,11 @@ static CURLcode post_per_transfer(struct per_transfer *per,
         (curlx_timediff_ms(curlx_now(), per->retrystart) <
          config->retry_maxtime_ms))) {
       result = retrycheck(config, per, result, retryp, delay);
-      if(!result && *retryp)
+      if(!result && *retryp) {
+        /* the etag belongs to the response that is now discarded */
+        curlx_safefree(per->etag);
         return CURLE_OK; /* retry! */
+      }
     }
 
     if((global->progressmode == CURL_PROGRESS_BAR) &&
@@ -792,6 +827,10 @@ static CURLcode post_per_transfer(struct per_transfer *per,
       fputs("\n", per->progressbar.out);
 
     result = post_close_output(per, result);
+
+    /* only save the etag of a response that was received in full */
+    if(!result)
+      result = post_etag_save(per);
   }
   /* Write the --write-out data before cleanup but after result is final */
   if(config->writeout)

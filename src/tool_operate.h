@@ -51,6 +51,8 @@ struct per_transfer {
   struct ProgressData progressbar;
   struct OutStruct outs;
   struct OutStruct heads;
+  char *etag; /* received ETag, written to etag_save when the transfer ends
+                 without error. NULL or malloced */
   struct OutStruct etag_save;
   struct HdrCbData hdrcbdata;
   long num_headers;

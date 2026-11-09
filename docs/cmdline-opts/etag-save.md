@@ -21,6 +21,11 @@ usually returned in a response. Use this option with a single URL only.
 
 If no ETag is sent by the server, an empty file is created.
 
+The ETag is written when the transfer has completed successfully. A failed
+transfer leaves the file as it was, so that a later --etag-compare does not
+claim a document that was never received in full. In earlier versions the ETag
+was written as soon as the header arrived.
+
 In many situations you want to use an existing etag in the request to avoid
 downloading the same resource again but also save the new etag if it has
 indeed changed, by using both etag options --etag-save and --etag-compare with
