@@ -3953,6 +3953,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   /* We do retry writes sometimes from another buffer address */
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+  /* Prevent OpenSSL from receiving more records from the BIO when
+   * TLS Meta records (like Session Tickets) are encountered. A server
+   * can stall us with only sending tickets and no data, otherwise. */
+  SSL_CTX_clear_mode(octx->ssl_ctx, SSL_MODE_AUTO_RETRY);
 
   ciphers = conn_config->cipher_list;
   if(!ciphers && (peer->transport != TRNSPRT_QUIC))
