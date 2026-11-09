@@ -47,6 +47,9 @@ numerical IP addresses. If you specify multiple IP addresses they need to be
 separated by comma. If libcurl is built to support IPv6, each of the ADDRESS
 entries can of course be either IPv4 or IPv6 style addressing.
 
+The specified hostname should be provided in its ASCII version, not using IDN
+(the Unicode versions). IDN names need to be converted to punycode first.
+
 Specify the host as a single asterisk (`*`) to match all names. This wildcard
 is resolved last so any resolve with a specific host and port number is given
 priority.

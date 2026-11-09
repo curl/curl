@@ -74,10 +74,14 @@ test_cleanup:
 
   pthread_mutex_lock(&lock);
 
-  if(!t1565_test_failure)
+  if(!t1565_test_failure) {
     t1565_test_failure = result;
+  }
 
   pthread_mutex_unlock(&lock);
+
+  curl_mfprintf(stderr, "thread ended with result=%d\n", (int)result);
+  res_multi_wakeup(testmulti);
 
   return NULL;
 }
@@ -95,6 +99,7 @@ static CURLcode test_lib1565(const char *URL)
   pthread_t tid = 0;
   bool tid_valid = FALSE;
   struct CURLMsg *message;
+  bool do_loop = TRUE;
 
   start_test_timing();
 
@@ -114,7 +119,7 @@ static CURLcode test_lib1565(const char *URL)
     goto test_cleanup;
   }
 
-  while(1) {
+  while(do_loop) {
     multi_perform(testmulti, &still_running);
 
     abort_on_test_timeout();
@@ -141,7 +146,11 @@ static CURLcode test_lib1565(const char *URL)
     if(CONN_NUM == finished_num)
       break;
 
-    multi_poll(testmulti, NULL, 0, TEST_HANG_TIMEOUT, &num);
+    pthread_mutex_lock(&lock);
+    do_loop = !t1565_test_failure;
+    pthread_mutex_unlock(&lock);
+    if(do_loop)
+      multi_poll(testmulti, NULL, 0, TEST_HANG_TIMEOUT, &num);
 
     abort_on_test_timeout();
 
@@ -178,13 +187,14 @@ static CURLcode test_lib1565(const char *URL)
 
 test_cleanup:
 
+  if(tid_valid)
+    pthread_join(tid, NULL);
+
   pthread_mutex_lock(&lock);
+
   if(!t1565_test_failure)
     t1565_test_failure = result;
   pthread_mutex_unlock(&lock);
-
-  if(tid_valid)
-    pthread_join(tid, NULL);
 
   curl_multi_cleanup(testmulti);
   for(i = 0; i < pending_num; i++)

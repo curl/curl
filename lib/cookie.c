@@ -392,11 +392,9 @@ static CURLcode storecookie(struct Cookie *co, const struct Curl_str *cp,
         plen = strlen(path);
     }
 
-    if(path) {
-      co->path = sanitize_cookie_path(path, plen);
-      if(!co->path)
-        result = CURLE_OUT_OF_MEMORY;
-    }
+    co->path = sanitize_cookie_path(path, plen);
+    if(!co->path)
+      result = CURLE_OUT_OF_MEMORY;
   }
   if(!result) {
     if(curlx_strlen(&cp[COOKIE_DOMAIN]))

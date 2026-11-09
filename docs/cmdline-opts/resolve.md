@@ -25,6 +25,9 @@ the number used for the specific protocol the host is used for. It means you
 need several entries if you want to provide addresses for the same host but
 different ports.
 
+The specified hostname should be provided in its ASCII version, not using IDN
+(the Unicode versions). IDN names need to be converted to punycode first.
+
 By specifying `*` as host you can tell curl to resolve any host and specific
 port pair to the specified address. Wildcard is resolved last so any --resolve
 with a specific host and port is used first.
