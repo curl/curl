@@ -1659,10 +1659,10 @@ typedef struct sockaddr_un {
 #endif
 #elif defined(HAVE_MEMSET_S)
 #define curlx_memzero_low(buf, size)  (void)memset_s(buf, size, 0, size)
-#elif defined(HAVE_MEMSET_EXPLICIT)
-#define curlx_memzero_low(buf, size)  (void)memset_explicit(buf, 0, size)
 #elif defined(HAVE_EXPLICIT_BZERO)
 #define curlx_memzero_low(buf, size)  explicit_bzero(buf, size)
+#elif defined(HAVE_MEMSET_EXPLICIT)
+#define curlx_memzero_low(buf, size)  (void)memset_explicit(buf, 0, size)
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* 7.2+ */
 #define curlx_memzero_low(buf, size)  (void)explicit_memset(buf, 0, size)
 #endif
