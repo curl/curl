@@ -520,7 +520,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
     sleeptime = retry_sleep(config, per, reason, retryp);
     if(!*retryp)
       /* no retry */
-      return CURLE_OK;
+      return result;
     per->retry_remaining--;
 
     /* Skip truncation of outfile if auto-resume is enabled for download and
