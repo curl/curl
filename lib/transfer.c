@@ -498,7 +498,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.errorbuf = FALSE; /* no error has occurred */
 #ifndef CURL_DISABLE_HTTP
   Curl_http_neg_init(data, &data->state.http_neg);
-  data->state.leading_unfold = FALSE;
 #endif
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
