@@ -146,6 +146,22 @@ static void oldap_state(struct Curl_easy *data, struct ldapconninfo *li,
   li->state = newstate;
 }
 
+/*
+ * Non-blocking ldap_result() for a single response to 'msgid'.
+ *
+ * OpenLDAP keeps every unsolicited notification (message id 0, RFC 4511
+ * section 4.4) it reads off the socket queued until the application asks
+ * for it. We never do, so a server could otherwise make that queue grow
+ * without bound. Discard them as they arrive.
+ */
+static int oldap_result(struct ldapconninfo *li, int msgid, LDAPMessage **msg)
+{
+  struct timeval tv = { 0, 0 };
+  int rc = ldap_result(li->ld, msgid, LDAP_MSG_ONE, &tv, msg);
+  ldap_msgdelete(li->ld, LDAP_RES_UNSOLICITED);
+  return rc;
+}
+
 /* Map some particular LDAP error codes to CURLcode values. */
 static CURLcode oldap_map_error(int rc, CURLcode result)
 {
@@ -896,7 +912,6 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
   LDAPMessage *msg = NULL;
-  struct timeval tv = { 0, 0 };
   int code = LDAP_SUCCESS;
   int rc;
 
@@ -905,7 +920,7 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
 
   if(li->state != OLDAP_SSL && li->state != OLDAP_TLS) {
     /* Get response to last command. */
-    rc = ldap_result(li->ld, li->msgid, LDAP_MSG_ONE, &tv, &msg);
+    rc = oldap_result(li, li->msgid, &msg);
     switch(rc) {
     case 0:                               /* Timed out. */
       return CURLE_OK;
@@ -1175,7 +1190,6 @@ static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
   int rc;
   LDAPMessage *msg = NULL;
   BerElement *ber = NULL;
-  struct timeval tv = { 0, 0 };
   struct berval bv, *bvals;
   CURLcode result = CURLE_AGAIN;
   int code;
@@ -1188,7 +1202,7 @@ static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
   if(!li || !lr)
     return CURLE_FAILED_INIT;
 
-  rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_ONE, &tv, &msg);
+  rc = oldap_result(li, lr->msgid, &msg);
   if(rc < 0) {
     failf(data, "LDAP local: search ldap_result %s", ldap_err2string(rc));
     result = CURLE_RECV_ERROR;
