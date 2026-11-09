@@ -96,8 +96,9 @@ void *curlx_memdup0(const char *src, size_t length)
 }
 
 #ifdef USE_CURLX_MEMZERO
-static void *(* const volatile p_curlx_memset)(void *buf, int val,
-                                               size_t size) = memset;
+/* not const, to keep it out of .rodata and avoid a text relocation */
+static void *(* volatile p_curlx_memset)(void *buf, int val,
+                                         size_t size) = memset;
 
 /* Local fallback in case there is no system function to securely zero a memory
    buffer. */
