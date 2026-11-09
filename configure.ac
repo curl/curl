@@ -4242,7 +4242,11 @@ if test "$curl_cv_native_windows" != "yes"; then
 
   CURL_CHECK_FUNC_MEMSET_S
   if test "$curl_cv_func_memset_s" = "no"; then
-    AC_CHECK_FUNCS([memset_explicit])
+    dnl Use complex detection to avoid misdetection on old Linux.
+    CURL_CHECK_FUNC_EXPLICIT_BZERO
+    if test "$curl_cv_func_explicit_bzero" = "no"; then
+      AC_CHECK_FUNCS([memset_explicit])
+    fi
   fi
 fi
 

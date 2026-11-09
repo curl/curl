@@ -1638,9 +1638,8 @@ typedef struct sockaddr_un {
 #endif
 
 /* For FreeBSD it is included from curl/curl.h */
-#if defined(__DragonFly__) || defined(__OpenBSD__) || defined(__NetBSD__)
-#include <sys/param.h>  /* for __DragonFly_version, OpenBSD,
-                           __NetBSD_Version__ */
+#ifdef __NetBSD__
+#include <sys/param.h>  /* for __NetBSD_Version__ */
 #endif
 
 /* NetBSD before 6.1 did not set SS_NBIO for SOCK_NONBLOCK. */
@@ -1660,16 +1659,10 @@ typedef struct sockaddr_un {
 #endif
 #elif defined(HAVE_MEMSET_S)
 #define curlx_memzero_low(buf, size)  (void)memset_s(buf, size, 0, size)
+#elif defined(HAVE_EXPLICIT_BZERO)
+#define curlx_memzero_low(buf, size)  explicit_bzero(buf, size)
 #elif defined(HAVE_MEMSET_EXPLICIT)
 #define curlx_memzero_low(buf, size)  (void)memset_explicit(buf, 0, size)
-#elif defined(__CYGWIN__) || \
-  (defined(__NEWLIB__) && !defined(__CLIB2__)) || \
-  (defined(__GLIBC__) && \
-    (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
-  (defined(__DragonFly__) && __DragonFly_version >= 500600 /* 5.6+ */) || \
-  (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* 11.0+ */) || \
-  (defined(__OpenBSD__) && OpenBSD >= 201405 /* 5.5+ */)
-#define curlx_memzero_low(buf, size)  explicit_bzero(buf, size)
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* 7.2+ */
 #define curlx_memzero_low(buf, size)  (void)explicit_memset(buf, 0, size)
 #endif

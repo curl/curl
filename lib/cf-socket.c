@@ -59,6 +59,10 @@
 #include <inet.h>
 #endif
 
+#ifdef __DragonFly__
+#include <sys/param.h>  /* for __DragonFly_version */
+#endif
+
 #include "urldata.h"
 #include "curl_trc.h"
 #include "if2ip.h"
