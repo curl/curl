@@ -2966,6 +2966,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
      previous transfer */
   curlx_dyn_reset(&data->state.headerb);
   data->state.maybe_folded = FALSE;
+  data->state.leading_unfold = FALSE;
 
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse
