@@ -41,6 +41,7 @@
 #include "select.h"
 #include "http.h"
 #include "http1.h"
+#include "sendf.h"
 #include "sockaddr.h"
 #include "vdns/cf-dns.h"
 #include "vquic/vquic.h"
@@ -350,6 +351,30 @@ static void cf_quiche_write_hd(struct Curl_cfilter *cf,
   }
 }
 
+static void cf_quiche_write_trailer(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    struct h3_stream_ctx *stream,
+                                    const char *buf, size_t blen)
+{
+  /* A trailer is passed on to the client as a header, but is never
+   * processed as a response header, e.g. `set-cookie` or `location`
+   * in a trailer must not take effect. Errors are recorded at the
+   * stream, as in cf_quiche_write_hd(). */
+  if(!stream->xfer_result) {
+    Curl_debug(data, CURLINFO_HEADER_IN, buf, blen);
+    stream->xfer_result = Curl_client_write(data,
+                                            CLIENTWRITE_HEADER |
+                                            CLIENTWRITE_TRAILER,
+                                            buf, blen);
+    if(!stream->xfer_result)
+      stream->xfer_result = Curl_bump_headersize(data, blen, FALSE);
+    if(stream->xfer_result)
+      CURL_TRC_CF(data, cf, "[%" PRIu64 "] error %d writing %zu "
+                  "bytes of trailer", stream->id, (int)stream->xfer_result,
+                  blen);
+  }
+}
+
 struct cb_ctx {
   struct Curl_cfilter *cf;
   struct Curl_easy *data;
@@ -404,9 +429,9 @@ static int cb_each_header(uint8_t *name, size_t name_len,
     if(is_valid_h3_header(value, value_len) &&
        is_valid_h3_header(name, name_len)) {
       /* store as an HTTP1-style header */
-      CURL_TRC_CF(data, cf, "[%" PRIu64 "] header: %.*s: %.*s",
-                  stream->id, (int)name_len, name,
-                  (int)value_len, value);
+      CURL_TRC_CF(data, cf, "[%" PRIu64 "] %s: %.*s: %.*s", stream->id,
+                  stream->resp_hds_complete ? "trailer" : "header",
+                  (int)name_len, name, (int)value_len, value);
       curlx_dyn_reset(&ctx->h1hdr);
       result = curlx_dyn_addn(&ctx->h1hdr, (const char *)name, name_len);
       if(!result)
@@ -415,9 +440,16 @@ static int cb_each_header(uint8_t *name, size_t name_len,
         result = curlx_dyn_addn(&ctx->h1hdr, (const char *)value, value_len);
       if(!result)
         result = curlx_dyn_addn(&ctx->h1hdr, STRCONST("\r\n"));
-      if(!result)
-        cf_quiche_write_hd(cf, data, stream, curlx_dyn_ptr(&ctx->h1hdr),
-                           curlx_dyn_len(&ctx->h1hdr), FALSE);
+      if(!result) {
+        if(stream->resp_hds_complete)
+          /* HEADERS after the response body started are trailers */
+          cf_quiche_write_trailer(cf, data, stream,
+                                  curlx_dyn_ptr(&ctx->h1hdr),
+                                  curlx_dyn_len(&ctx->h1hdr));
+        else
+          cf_quiche_write_hd(cf, data, stream, curlx_dyn_ptr(&ctx->h1hdr),
+                             curlx_dyn_len(&ctx->h1hdr), FALSE);
+      }
     }
     else
       CURL_TRC_CF(x->data, x->cf, "[%" PRIu64 "] ignore %zu bytes bad header",

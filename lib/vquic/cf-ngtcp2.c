@@ -37,7 +37,9 @@
 #include "progress.h"
 #include "curlx/win32-fopen.h"
 #include "curlx/dynbuf.h"
+#include "http.h"
 #include "http1.h"
+#include "sendf.h"
 #include "select.h"
 #include "transfer.h"
 #include "bufref.h"
@@ -354,6 +356,62 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
+static int cb_h3_recv_trailer(nghttp3_conn *conn, int64_t stream_id,
+                              int32_t token, nghttp3_rcbuf *name,
+                              nghttp3_rcbuf *value, uint8_t flags,
+                              void *user_data, void *stream_user_data)
+{
+  struct Curl_cfilter *cf = user_data;
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  nghttp3_vec h3name = nghttp3_rcbuf_get_buf(name);
+  nghttp3_vec h3val = nghttp3_rcbuf_get_buf(value);
+  struct h3_stream_ctx *stream;
+  struct Curl_easy *data =
+    Curl_cf_ngtcp2_get_xfer(cf, stream_user_data, &stream);
+  CURLcode result;
+  (void)conn;
+  (void)stream_id;
+  (void)token;
+  (void)flags;
+
+  /* we might have cleaned up this transfer already */
+  if(!stream || !data || stream->xfer_result)
+    return 0;
+
+  /* A trailer is passed on to the client as a header, but is never
+   * processed as a response header, e.g. `set-cookie` or `location`
+   * in a trailer must not take effect. */
+  CURL_TRC_CF(data, cf, "[%" PRId64 "] trailer: %.*s: %.*s",
+              stream_id, (int)h3name.len, h3name.base,
+              (int)h3val.len, h3val.base);
+  curlx_dyn_reset(&ctx->scratch);
+  result = curlx_dyn_addn(&ctx->scratch,
+                          (const char *)h3name.base, h3name.len);
+  if(!result)
+    result = curlx_dyn_addn(&ctx->scratch, STRCONST(": "));
+  if(!result)
+    result = curlx_dyn_addn(&ctx->scratch,
+                            (const char *)h3val.base, h3val.len);
+  if(!result)
+    result = curlx_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
+  if(!result) {
+    Curl_debug(data, CURLINFO_HEADER_IN, curlx_dyn_ptr(&ctx->scratch),
+               curlx_dyn_len(&ctx->scratch));
+    result = Curl_client_write(data, CLIENTWRITE_HEADER | CLIENTWRITE_TRAILER,
+                               curlx_dyn_ptr(&ctx->scratch),
+                               curlx_dyn_len(&ctx->scratch));
+  }
+  if(!result)
+    result = Curl_bump_headersize(data, curlx_dyn_len(&ctx->scratch), FALSE);
+  if(result) {
+    /* as in h3_xfer_write_resp_hd(), the stream is cancelled "higher up" */
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing trailer",
+                stream->id, (int)result);
+    stream->xfer_result = result;
+  }
+  return 0;
+}
+
 static int cb_h3_stop_sending(nghttp3_conn *conn, int64_t stream_id,
                               uint64_t app_error_code, void *user_data,
                               void *stream_user_data)
@@ -407,7 +465,7 @@ static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_recv_header,
   cb_h3_end_headers,
   NULL, /* begin_trailers */
-  cb_h3_recv_header,
+  cb_h3_recv_trailer,
   NULL, /* end_trailers */
   cb_h3_stop_sending,
   NULL, /* end_stream */
