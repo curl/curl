@@ -423,7 +423,6 @@ static CURLcode test_unit2600(const char *arg)
       CNCT_TMOT, 20,  500,  500,    1,  8,      550,  TC_TMOT,  R_FAIL, NULL,
       6 },
     /* 1 v4, 8 v6, MUST meet limit of 6 concurrent attempts */
-
 #endif
   };
 
