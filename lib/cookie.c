@@ -75,11 +75,6 @@ static void cap_expires(time_t now, struct tempcookie *co)
   }
 }
 
-static void freecookie(struct Cookie *co)
-{
-  curlx_free(co);
-}
-
 static bool cookie_tailmatch(const char *cookie_domain,
                              const size_t cookie_domain_len,
                              const char *hostname,
@@ -312,7 +307,7 @@ static void remove_expired(struct CookieInfo *ci)
       if(co->expires) {
         if(co->expires < now) {
           Curl_node_remove(n);
-          freecookie(co);
+          curlx_free(co);
           ci->numcookies--;
         }
         else if(co->expires < ci->next_expiration)
@@ -927,14 +922,14 @@ static bool is_public_suffix(struct Curl_easy *data,
   return FALSE;
 }
 
-/* returns TRUE when replaced, and '*creationtime' is the time the replaced
-   cookie used */
-static bool replace_existing(struct Curl_easy *data,
-                             struct tempcookie *co,
-                             const struct CookieInfo *ci,
-                             size_t myhash,
-                             int flags,
-                             unsigned int *creationtime)
+/* returns TRUE when the cookie is accepted, and sets '*creationtime' to the
+   time the replaced cookie used (or 0 if not replaced) */
+static bool cookie_accept(struct Curl_easy *data,
+                          const struct tempcookie *co,
+                          const struct CookieInfo *ci,
+                          const size_t myhash,
+                          const int flags,
+                          unsigned int *creationtime)
 {
   bool replace_old = FALSE;
   struct Curl_llist_node *replace_n = NULL;
@@ -1037,7 +1032,7 @@ static bool replace_existing(struct Curl_easy *data,
     Curl_node_remove(replace_n);
 
     /* free the old cookie */
-    freecookie(repl);
+    curlx_free(repl);
   }
   else
     *creationtime = 0;
@@ -1112,8 +1107,7 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
                                                  unless set */
                          const int flags)
 {
-  struct tempcookie comem;
-  struct tempcookie *co;
+  struct tempcookie cookie;
   struct Cookie *real;
   size_t myhash;
   CURLcode result;
@@ -1126,42 +1120,45 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   if(data->req.setcookies >= MAX_SET_COOKIE_AMOUNT)
     return CURLE_OK; /* silently ignore */
 
-  co = &comem;
-  memset(co, 0, sizeof(comem));
+  memset(&cookie, 0, sizeof(cookie));
 
   if(flags & COOKIE_HTTPHEADER)
-    result = parse_cookie_header(data, co, &okay,
-                                 lineptr, domain, path, flags & COOKIE_SECURE);
+    result = parse_cookie_header(data, &cookie, &okay,
+                                 lineptr, domain, path,
+                                 flags & COOKIE_SECURE);
   else
-    result = parse_netscape(co, ci, &okay, lineptr, flags & COOKIE_SECURE);
+    result = parse_netscape(&cookie, ci, &okay, lineptr,
+                            flags & COOKIE_SECURE);
 
   if(result || !okay)
     return result;
 
-  if(co->prefix_secure && !co->secure)
+  if(cookie.prefix_secure && !cookie.secure)
     /* The __Secure- prefix only requires that the cookie be set secure */
     return result;
 
-  iponly = curlx_strlen(&co->domain) ? host_is_ipnum(&co->domain) : FALSE;
+  iponly = curlx_strlen(&cookie.domain) ? host_is_ipnum(&cookie.domain) :
+    FALSE;
 
-  if(!iponly && !(flags & COOKIE_NOPSL) && is_public_suffix(data, co, domain))
+  if(!iponly && !(flags & COOKIE_NOPSL) &&
+     is_public_suffix(data, &cookie, domain))
     return result;
 
-  if(co->prefix_host) {
+  if(cookie.prefix_host) {
     /*
      * The __Host- prefix requires the cookie to be secure, have a "/" path
      * and not have a domain set.
      */
-    if(co->secure && curlx_strlen(&co->path) &&
-       curlx_str_cmp(&co->path, "/") && !co->tailmatch)
+    if(cookie.secure && curlx_strlen(&cookie.path) &&
+       curlx_str_cmp(&cookie.path, "/") && !cookie.tailmatch)
       ;
     else
       return result;
   }
 
-  if(!ci->running &&    /* read from a file */
+  if(!ci->running &&                /* read from a file */
      (flags & COOKIE_NOSESSION) &&  /* clean session cookies */
-     !co->expires)      /* this is a session cookie */
+     !cookie.expires)               /* this is a session cookie */
     return result;
 
   /*
@@ -1172,13 +1169,13 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   if(ci->running)
     remove_expired(ci);
 
-  myhash = iponly ? 0 : cookiehash(&co->domain);
-  if(!replace_existing(data, co, ci, myhash, flags |
-                       (ci->running ? COOKIE_LIVE : 0), &replacetime))
+  myhash = iponly ? 0 : cookiehash(&cookie.domain);
+  if(!cookie_accept(data, &cookie, ci, myhash, flags |
+                    (ci->running ? COOKIE_LIVE : 0), &replacetime))
     return result;
 
   /* clone the temp cookie into a real one */
-  real = cookiedup(co);
+  real = cookiedup(&cookie);
   if(!real)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1204,8 +1201,8 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
    * Now that we have added a new cookie to the jar, update the expiration
    * tracker in case it is the next one to expire.
    */
-  if(co->expires && (co->expires < ci->next_expiration))
-    ci->next_expiration = co->expires;
+  if(cookie.expires && (cookie.expires < ci->next_expiration))
+    ci->next_expiration = cookie.expires;
 
   if(flags & COOKIE_HTTPHEADER)
     data->req.setcookies++;
@@ -1573,7 +1570,7 @@ void Curl_cookie_clearall(struct CookieInfo *ci)
         struct Cookie *c = Curl_node_elem(n);
         struct Curl_llist_node *e = Curl_node_next(n);
         Curl_node_remove(n);
-        freecookie(c);
+        curlx_free(c);
         n = e;
       }
     }
@@ -1602,7 +1599,7 @@ void Curl_cookie_clearsess(struct CookieInfo *ci)
       e = Curl_node_next(n); /* in case the node is removed, get it early */
       if(!curr->expires) {
         Curl_node_remove(n);
-        freecookie(curr);
+        curlx_free(curr);
         ci->numcookies--;
       }
     }
