@@ -119,7 +119,6 @@ static CURLcode test_lib1565(const char *URL)
     goto test_cleanup;
   }
 
-
   while(do_loop) {
     multi_perform(testmulti, &still_running);
 
