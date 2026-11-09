@@ -159,6 +159,7 @@ my $nodataconn150; # set if FTP srvr does not establish data ch and replies 150
 my $stalldata;     # set if the data connection should accept and stay silent
 my $storeresp;
 my $postfetch;
+my $imapfetchonew;
 my @capabilities;  # set if server supports capability commands
 my @auth_mechs;    # set if server supports authentication commands
 my %fulltextreply; #
@@ -1257,15 +1258,29 @@ sub FETCH_imap {
             $size += length($_);
         }
 
-        sendcontrol "* $uid FETCH ($how {$size}\r\n";
+        if($imapfetchonew) {
+            my $response = "* $uid FETCH ($how {$size}\r\n";
 
-        for my $d (@data) {
-            sendcontrol $d;
+            for my $d (@data) {
+                $response .= $d;
+            }
+
+            $response .= "$postfetch)\r\n";
+            $response .= "$cmdid OK FETCH completed\r\n";
+
+            sendcontrol $response;
         }
+        else {
+            sendcontrol "* $uid FETCH ($how {$size}\r\n";
 
-        # Set the custom extra header content with POSTFETCH
-        sendcontrol "$postfetch)\r\n";
-        sendcontrol "$cmdid OK FETCH completed\r\n";
+            for my $d (@data) {
+                sendcontrol $d;
+            }
+
+            # Set the custom extra header content with POSTFETCH
+            sendcontrol "$postfetch)\r\n";
+            sendcontrol "$cmdid OK FETCH completed\r\n";
+        }
     }
 
     return 0;
@@ -2828,6 +2843,7 @@ sub customize {
     $stalldata = 0;     # default is to send response data
     $storeresp = "";    # send as ultimate STOR response
     $postfetch = "";    # send as header after a FETCH response
+    $imapfetchonew = 0; # default to separate writes for IMAP FETCH responses
     @capabilities = (); # default is to not support capability commands
     @auth_mechs = ();   # default is to not support authentication commands
     %fulltextreply = ();#
@@ -2873,6 +2889,10 @@ sub customize {
         elsif($_ =~ /POSTFETCH (.*)/) {
             logmsg "FTPD: read POSTFETCH header data\n";
             $postfetch = $1;
+        }
+        elsif($_ =~ /^IMAPFETCHONEWRITE/) {
+            $imapfetchonew = 1;
+            logmsg "FTPD: send IMAP FETCH response in one write\n";
         }
         elsif($_ =~ /SLOWDOWNDATA/) {
             $ctrldelay = 0;

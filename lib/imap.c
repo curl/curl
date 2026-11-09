@@ -1315,14 +1315,15 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
         /* Progress size includes both header line and literal body */
         Curl_pgrsSetDownloadSize(data, size);
 
+        /* maxdownload also indicates that a custom FETCH response needs
+           final response processing in imap_done(), even if all data has
+           already been transferred. */
+        data->req.maxdownload = size;
         if(data->req.bytecount == size)
           /* All data already transferred (header + literal body) */
           Curl_xfer_setup_nop(data);
         else {
-          /* Setup to receive the literal body data.
-             maxdownload and transfer size include both header line and
-             literal body */
-          data->req.maxdownload = size;
+          /* Setup to receive the literal body data. */
           Curl_xfer_setup_recv(data, FIRSTSOCKET, size);
         }
         /* End of DO phase */
