@@ -732,6 +732,7 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
     struct h2_stream_ctx *second_stream;
     http2_data_setup(cf, second, &second_stream);
     second->state.weight = data->state.weight;
+    Curl_peer_link(&second->state.initial_origin, data->state.initial_origin);
     if(data->share)
       (void)Curl_share_easy_link(second, data->share);
     /* copy a range of options from the parent handle */
