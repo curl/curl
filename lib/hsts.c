@@ -139,6 +139,7 @@ CURLcode Curl_hsts_copy(struct hsts *dst, struct hsts *src)
 {
   struct Curl_llist_node *e;
   time_t now = time(NULL);
+  dst->flags = src->flags;
   for(e = Curl_llist_head(&src->list); e; e = Curl_node_next(e)) {
     struct stsentry *sts = Curl_node_elem(e);
     if(sts->expires > now) {

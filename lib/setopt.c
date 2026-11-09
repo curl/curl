@@ -1227,6 +1227,7 @@ static CURLcode setopt_long_misc(struct Curl_easy *data, CURLoption option,
         if(!data->hsts)
           return CURLE_OUT_OF_MEMORY;
       }
+      data->hsts->flags = (unsigned int)arg;
     }
     else if(!data->share || !data->share->hsts) {
       /* throw away the HSTS cache unless shared */

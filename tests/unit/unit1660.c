@@ -169,6 +169,20 @@ static CURLcode test_unit1660(const char *arg)
     deltatime++; /* another second passed */
   }
 
+  /* verify that CURLHSTS_READONLYFILE prevents saving to disk */
+  h->flags |= CURLHSTS_READONLYFILE;
+  curl_msnprintf(savename, sizeof(savename), "%s.save_ro", arg);
+  (void)Curl_hsts_save(easy, h, savename);
+  {
+    FILE *f = fopen(savename, "r");
+    fail_if(f != NULL, "file created despite CURLHSTS_READONLYFILE");
+    if(f) {
+      fclose(f);
+      unlink(savename);
+    }
+  }
+  h->flags &= ~CURLHSTS_READONLYFILE;
+
   curl_msnprintf(savename, sizeof(savename), "%s.save", arg);
   (void)Curl_hsts_save(easy, h, savename);
   Curl_hsts_cleanup(&h);
