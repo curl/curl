@@ -133,4 +133,6 @@ class MitmServer:
 
     def shutdown(self):
         self.abort = True
+        if self.thread:
+            self.thread.join()
         self.cerr.close()

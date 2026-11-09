@@ -2237,6 +2237,7 @@ static int myssh_in_SCP_SEND_EOF(struct Curl_easy *data,
     if(rc != SSH_OK) {
       failf(data, "Failed to close libssh scp channel: %s",
             ssh_get_error(sshc->ssh_session));
+      sshc->actualcode = CURLE_SSH;
     }
   }
 
