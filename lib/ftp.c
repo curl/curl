@@ -4428,7 +4428,6 @@ data_shutdown:
       result = CURLE_AGAIN;
     else {
       Curl_cfchain_reset(&ftpc->chain_data, data);
-
     }
     goto out;
   }
