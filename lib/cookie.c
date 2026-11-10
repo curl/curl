@@ -1454,7 +1454,7 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
   const char *path = data->state.up.path;
   CURLcode result = CURLE_OK;
   struct Curl_str host;
-  curl_off_t now = (curl_off_t)time(NULL);
+  curl_off_t now;
   *okay = FALSE;
 
   Curl_llist_init(list, NULL);
@@ -1468,6 +1468,8 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
 
   if(!ci || !Curl_llist_count(&ci->cookielist[myhash]))
     return CURLE_OK; /* no cookie struct or no cookies in the struct */
+
+  now = (curl_off_t)time(NULL);
 
   for(n = Curl_llist_head(&ci->cookielist[myhash]); n; n = Curl_node_next(n)) {
     struct Cookie *co = Curl_node_elem(n);
