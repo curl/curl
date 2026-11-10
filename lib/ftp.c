@@ -4512,6 +4512,60 @@ static CURLcode cf_ftp_adjust_pollset(struct Curl_cfilter *cf,
     return Curl_pollset_set_in_only(data, ps, cf->chain->sock);
 }
 
+static CURLcode cf_ftp_cntrl(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             int event, int arg1, void *arg2)
+{
+  struct cf_ftp_ctx *ftpc = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  if(ftpc->chain_data.cf) {
+    result = Curl_conn_cf_cntrl(
+      ftpc->chain_data.cf, data, FALSE, event, arg1, arg2);
+    if(result && (result != CURLE_AGAIN))
+      goto out;
+    result = CURLE_OK;
+  }
+out:
+  return result;
+}
+
+static CURLcode cf_ftp_query(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             int query, int *pres1, void *pres2)
+{
+  struct cf_ftp_ctx *ftpc = cf->ctx;
+
+  if(ftpc->chain_data.cf) {
+    switch(query) {
+    case CF_QUERY_NEED_FLUSH:
+      if(Curl_cfchain_needs_flush(data, &ftpc->chain_data)) {
+        *pres1 = TRUE;
+        return CURLE_OK;
+      }
+      break;
+    default:
+      break;
+    }
+  }
+
+  return cf->next ?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
+}
+
+static bool cf_ftp_data_pending(struct Curl_cfilter *cf,
+                                const struct Curl_easy *data)
+{
+  struct cf_ftp_ctx *ftpc = cf->ctx;
+
+  if(ftpc->chain_data.cf &&
+     Curl_cfchain_data_pending(CURL_UNCONST(data), &ftpc->chain_data))
+    return TRUE;
+  return cf->next ?
+    cf->next->cft->has_data_pending(cf->next, data) : FALSE;
+}
+
 struct Curl_cftype Curl_cft_ftp = {
   "FTP",
   CF_TYPE_SAFE_EOS,
@@ -4520,13 +4574,13 @@ struct Curl_cftype Curl_cft_ftp = {
   cf_ftp_connect,
   cf_ftp_shutdown,
   cf_ftp_adjust_pollset,
-  Curl_cf_def_data_pending,
+  cf_ftp_data_pending,
   cf_ftp_send,
   cf_ftp_recv,
-  Curl_cf_def_cntrl,
+  cf_ftp_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  cf_ftp_query,
 };
 
 static struct cf_ftp_ctx *ftp_get_cf_ctx(struct connectdata *conn)
