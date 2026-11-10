@@ -10,6 +10,7 @@ Protocol:
   - IMAP
   - POP3
   - SMTP
+  - FILE
 See-also:
   - CURLOPT_HEADERFUNCTION (3)
   - CURLOPT_HTTPHEADER (3)
@@ -33,11 +34,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADER, long onoff);
 Pass the long value *onoff* set to 1 to ask libcurl to include the headers
 in the write callback (CURLOPT_WRITEFUNCTION(3)). This option is
 relevant for protocols that actually have headers or other meta-data (like
-HTTP and FTP).
+HTTP, FTP and FILE).
 
 When asking to get the headers passed to the same callback as the body, it is
 not possible to accurately separate them again without detailed knowledge
 about the protocol in use.
+
+For FILE, it returns emulated headers that make sense for local files.
 
 Further: the CURLOPT_WRITEFUNCTION(3) callback is limited to only ever
 get a maximum of *CURL_MAX_WRITE_SIZE* bytes passed to it (16KB), while a
