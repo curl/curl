@@ -330,7 +330,7 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   }
 
   if(cf->next && !cf->next->connected) {
-    struct Curl_cfilter *cf_next = cf->next;
+    struct Curl_cfilter *cf_next;
     bool sub_done;
     CURLcode result;
 
