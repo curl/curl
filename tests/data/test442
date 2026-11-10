@@ -203,7 +203,8 @@ Cookie: name150=could-be-large-150; name149=could-be-large-149; name148=could-be
 
 </protocol>
 <limits>
-Allocations: 1100
+Allocations: 280
+Maximum allocated: 160000
 </limits>
 </verify>
 </testcase>
