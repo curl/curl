@@ -159,7 +159,8 @@ static void kbd_callback(const char *name, int name_len,
 static CURLcode sftp_libssh2_error_to_CURLE(unsigned long err)
 {
   switch(err) {
-    /* This mapper handles failed SFTP operations; zero must not mean success. */
+  /* This mapper handles failed SFTP operations.
+   * Zero must not mean success. */
   case LIBSSH2_FX_NO_SUCH_FILE:
   case LIBSSH2_FX_NO_SUCH_PATH:
     return CURLE_REMOTE_FILE_NOT_FOUND;
