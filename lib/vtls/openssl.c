@@ -2366,8 +2366,8 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
    * - 3rd param: how many seconds of clock skew we allow between
    *   our clock and the instance that issued the OCSP response
    * - 4th param: how many seconds in the past `thisupd` may be, with
-   *   -1 meaning there is no limit. */
-  if(!OCSP_check_validity(thisupd, nextupd, 300L, -1L)) {
+   *   -1 meaning there is no limit. 345600 is four days. */
+  if(!OCSP_check_validity(thisupd, nextupd, 300L, 345600)) {
     failf(data, "OCSP response has expired");
     result = CURLE_SSL_INVALIDCERTSTATUS;
     goto end;
