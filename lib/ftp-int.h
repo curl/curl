@@ -99,7 +99,7 @@ struct pathcomp {
   int len;   /* length in bytes */
 };
 
-/* cf_ftp_ctx is the FTP filter contect struct */
+/* cf_ftp_ctx is the FTP filter context struct */
 struct cf_ftp_ctx {
   struct pingpong pp;
   struct Curl_cfchain chain_data; /* DATA connection filter chain */
