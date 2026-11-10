@@ -4,3 +4,4 @@ file: FILE protocol
  -I, --head                     Show document info only
  -l, --list-only                List only mode
  -r, --range <range>            Retrieve only the bytes within RANGE
+ -i, --show-headers             Show response headers in output

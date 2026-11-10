@@ -702,7 +702,7 @@ const struct helptxt helptext[] = {
   { "-i, --show-headers",
     "Show response headers in output",
     CURLHELP_IMPORTANT | CURLHELP_VERBOSE | CURLHELP_OUTPUT | CURLHELP_HTTP |
-    CURLHELP_FTP },
+    CURLHELP_FTP | CURLHELP_FILE },
   { "    --sigalgs <list>",
     "TLS signature algorithms to use",
     CURLHELP_TLS },
