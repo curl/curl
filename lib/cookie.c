@@ -1432,6 +1432,10 @@ bool Curl_secure_context(struct Curl_easy *data, const char *host,
  * For a given host and path, return a linked list of cookies that the client
  * should send to the server if used now.
  *
+ * This MUST be a read-only operation, do NOT update the cookie list in this
+ * function. For example. this function must not expire old cookies, just
+ * avoid them.
+ *
  * It shall only return cookies that have not expired.
  *
  * 'okay' is TRUE when there is a list returned.
@@ -1446,10 +1450,11 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
   size_t myhash = 0;
   struct Curl_llist_node *n;
   bool secure;
-  struct CookieInfo *ci = data->cookies;
+  const struct CookieInfo *ci = data->cookies;
   const char *path = data->state.up.path;
   CURLcode result = CURLE_OK;
   struct Curl_str host;
+  curl_off_t now = (curl_off_t)time(NULL);
   *okay = FALSE;
 
   Curl_llist_init(list, NULL);
@@ -1464,11 +1469,11 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
   if(!ci || !Curl_llist_count(&ci->cookielist[myhash]))
     return CURLE_OK; /* no cookie struct or no cookies in the struct */
 
-  /* at first, remove expired cookies */
-  remove_expired(ci);
-
   for(n = Curl_llist_head(&ci->cookielist[myhash]); n; n = Curl_node_next(n)) {
     struct Cookie *co = Curl_node_elem(n);
+
+    if(co->expires && (co->expires < now))
+      continue;
 
     /* if the cookie requires we are secure we must only continue if we are! */
     if(co->secure ? secure : TRUE) {
