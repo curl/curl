@@ -4157,6 +4157,12 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     struct dynbuf last_header;
     size_t consumed;
 
+    if((hdlen != 1 || hd[0] != '\n') &&
+       (hdlen != 2 || hd[0] != '\r' || hd[1] != '\n')) {
+      failf(data, "Invalid header termination");
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+
     curlx_dyn_init(&last_header, hdlen + 1);
     result = curlx_dyn_addn(&last_header, hd, hdlen);
     if(result)
