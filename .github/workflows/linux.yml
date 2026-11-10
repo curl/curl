@@ -336,16 +336,16 @@ jobs:
               --disable-tftp --disable-ftp --disable-file
 
           - name: 'openssl torture 1'
-            install_packages: libnghttp2-dev libssh2-1-dev
+            install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             tflags: '-t --shallow=25 --subset=0/2'
             torture: true
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_HTTPSIG=OFF
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl torture 2'
-            install_packages: libnghttp2-dev libssh2-1-dev
+            install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             tflags: '-t --shallow=25 --subset=1/2'
             torture: true
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_HTTPSIG=OFF
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl i686'
             image: ubuntu-24.04
