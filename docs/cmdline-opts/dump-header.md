@@ -5,8 +5,8 @@ Long: dump-header
 Short: D
 Arg: <filename>
 Help: Write the received headers to <filename>
-Protocols: HTTP FTP
-Category: http ftp
+Protocols: HTTP FTP FILE
+Category: http ftp file
 Added: 5.7
 Multi: single
 See-also:
@@ -27,6 +27,8 @@ writes the output to stderr.
 
 When used in FTP, the FTP server response lines are considered being "headers"
 and thus are saved there.
+
+With FILE, it emulates headers that make sense for local files.
 
 Starting in curl 8.11.0, using the --create-dirs option can also create
 missing directory components for the path provided in --dump-header.
