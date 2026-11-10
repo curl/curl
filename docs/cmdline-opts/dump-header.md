@@ -11,6 +11,7 @@ Added: 5.7
 Multi: single
 See-also:
   - output
+  - show-headers
 Example:
   - --dump-header store.txt $URL
   - --dump-header - $URL -o save
