@@ -1985,8 +1985,8 @@ static CURLcode url_create_needle(struct Curl_easy *data,
 
   if(network_scheme) {
     /* Setup callbacks for network connections */
-    needle->recv = Curl_cf_recv;
-    needle->send = Curl_cf_send;
+    needle->do_recv = Curl_cf_recv;
+    needle->do_send = Curl_cf_send;
     needle->bits.tcp_fastopen = data->set.tcp_fastopen;
 #ifdef USE_UNIX_SOCKETS
     if(Curl_conn_get_first_peer(needle)->unix_socket)

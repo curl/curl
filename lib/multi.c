@@ -1951,6 +1951,11 @@ static CURLcode protocol_connect(struct Curl_easy *data, bool *protocol_done)
   DEBUGASSERT(protocol_done);
   if(!Curl_conn_is_connected(conn)) {
     Curl_cfchain_trc(data, &conn->chain, "should be connected");
+    if(conn->chain.cf)
+      curl_mfprintf(stderr, "protocol_connect, filter %s connected=%d\n",
+                    conn->chain.cf->cft->name, conn->chain.cf->connected);
+    else
+      curl_mfprintf(stderr, "protocol_connect, chain without filter\n");
     DEBUGASSERT(0);
   }
 #endif

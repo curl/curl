@@ -1039,8 +1039,8 @@ CURLcode Curl_conn_recv(struct Curl_easy *data,
 {
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  if(data && data->conn && data->conn->recv)
-    return data->conn->recv(data, buf, len, pnread);
+  if(data && data->conn && data->conn->do_recv)
+    return data->conn->do_recv(data, buf, len, pnread);
   *pnread = 0;
   return CURLE_FAILED_INIT;
 }
@@ -1067,8 +1067,9 @@ CURLcode Curl_conn_send(struct Curl_easy *data,
     }
   }
 #endif
-  if(data && data->conn && data->conn->send) {
-    CURLcode result = data->conn->send(data, buf, write_len, eos, pnwritten);
+  if(data && data->conn && data->conn->do_send) {
+    CURLcode result =
+      data->conn->do_send(data, buf, write_len, eos, pnwritten);
     if(!result && (*pnwritten > write_len)) {
       DEBUGASSERT(0);
       *pnwritten = 0;

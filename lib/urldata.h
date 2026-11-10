@@ -289,8 +289,8 @@ struct connectdata {
   /* Callbacks for send/recv, can be overwritten by protocol handlers.
    * Default to operations on connection's primary filter chain. */
   struct Curl_cfchain chain; /* primary filter chain */
-  Curl_recv *recv;
-  Curl_send *send;
+  Curl_recv *do_recv;
+  Curl_send *do_send;
 
 #define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
 

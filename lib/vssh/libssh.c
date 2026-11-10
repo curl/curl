@@ -2601,12 +2601,12 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
 
   CURL_TRC_SSH(data, "myssh_connect");
   if(conn->scheme->protocol & CURLPROTO_SCP) {
-    conn->recv = scp_recv;
-    conn->send = scp_send;
+    conn->do_recv = scp_recv;
+    conn->do_send = scp_send;
   }
   else {
-    conn->recv = sftp_recv;
-    conn->send = sftp_send;
+    conn->do_recv = sftp_recv;
+    conn->do_send = sftp_send;
   }
 
   sshc->ssh_session = ssh_new();

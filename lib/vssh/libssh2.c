@@ -3322,7 +3322,7 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
   size_t nread;
   CURLcode result;
   struct connectdata *conn = data->conn;
-  Curl_recv *backup = conn->recv;
+  Curl_recv *backup = conn->do_recv;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
 
   (void)flags;
@@ -3332,9 +3332,9 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
 
   /* swap in the TLS reader function for this call only, and then swap back
      the SSH one again */
-  conn->recv = sshc->tls_recv;
+  conn->do_recv = sshc->tls_recv;
   result = Curl_conn_recv(data, buffer, length, &nread);
-  conn->recv = backup;
+  conn->do_recv = backup;
   if(result == CURLE_AGAIN)
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
@@ -3350,7 +3350,7 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
   size_t nwrite;
   CURLcode result;
   struct connectdata *conn = data->conn;
-  Curl_send *backup = conn->send;
+  Curl_send *backup = conn->do_send;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
 
   (void)flags;
@@ -3360,9 +3360,9 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
 
   /* swap in the TLS writer function for this call only, and then swap back
      the SSH one again */
-  conn->send = sshc->tls_send;
+  conn->do_send = sshc->tls_send;
   result = Curl_conn_send(data, buffer, length, FALSE, &nwrite);
-  conn->send = backup;
+  conn->do_send = backup;
   if(result == CURLE_AGAIN)
     return -EAGAIN; /* magic return code for libssh2 */
   else if(result)
@@ -3497,18 +3497,18 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 
     /* Store the underlying TLS recv/send function pointers to be used when
        reading from the proxy */
-    sshc->tls_recv = conn->recv;
-    sshc->tls_send = conn->send;
+    sshc->tls_recv = conn->do_recv;
+    sshc->tls_send = conn->do_send;
   }
 
 #endif /* CURL_DISABLE_PROXY */
   if(conn->scheme->protocol & CURLPROTO_SCP) {
-    conn->recv = scp_recv;
-    conn->send = scp_send;
+    conn->do_recv = scp_recv;
+    conn->do_send = scp_send;
   }
   else {
-    conn->recv = sftp_recv;
-    conn->send = sftp_send;
+    conn->do_recv = sftp_recv;
+    conn->do_send = sftp_send;
   }
 
   if(data->set.ssh_compression &&

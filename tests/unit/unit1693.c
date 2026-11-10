@@ -153,8 +153,8 @@ static void t1693_run(const struct t1693_send *sends, size_t nsends,
   Curl_hash_init(&conn->meta_hash, 23, CURL_HASH_TYPE_BYTES, t1693_meta_dtor);
   data->conn = conn;
   conn->chain.sock = 42;
-  conn->send = t1693_send;
-  conn->recv = t1693_recv;
+  conn->do_send = t1693_send;
+  conn->do_recv = t1693_recv;
   data->set.private_data = &ctx;
   data->set.postfields = CURL_UNCONST("payload");
   data->state.httpreq = HTTPREQ_POST;

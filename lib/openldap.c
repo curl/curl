@@ -558,8 +558,8 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
     if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS) ||
        ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
       return CURLE_FAILED_INIT;
-    li->recv = conn->recv;
-    li->send = conn->send;
+    li->recv = conn->do_recv;
+    li->send = conn->do_send;
   }
 
   return result;
@@ -1026,7 +1026,7 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
 
   *done = li->state == OLDAP_STOP;
   if(*done)
-    conn->recv = oldap_recv;
+    conn->do_recv = oldap_recv;
 
   if(result && li->msgid) {
     ldap_abandon_ext(li->ld, li->msgid, NULL, NULL);
