@@ -74,7 +74,7 @@ jobs:
         build:
           - name: 'awslc'
             install_steps: awslc pytest test-linter
-            LDFLAGS: -Wl,-rpath,/home/runner/pkg/awslc/lib
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/awslc/lib -lstdc++
             configure: --with-openssl=/home/runner/pkg/awslc --enable-ech
 
           - name: 'awslc'
@@ -776,7 +776,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-boringssl
         env:
-          cache-name: cache1-boringssl
+          cache-name: cache2-boringssl
         with:
           path: ~/pkg/boringssl
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}-${{ runner.arch }}
