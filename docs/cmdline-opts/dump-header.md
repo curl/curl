@@ -26,14 +26,14 @@ filename (a single minus) to have it written to stdout.
 Starting in curl 8.10.0, specify `%` (a single percent sign) as filename
 writes the output to stderr.
 
-Starting in curl 8.11.0, using the --create-dirs option can also create
-missing directory components for the path provided in --dump-header.
-
 When used in FTP, the FTP server response lines are considered being "headers"
 and thus are saved there.
 
 When used on a FILE URL, curl displays the file size and last modification
 time only.
+
+Starting in curl 8.11.0, using the --create-dirs option can also create
+missing directory components for the path provided in --dump-header.
 
 Having multiple transfers in one set of operations (i.e. the URLs in one
 --next clause), appends them to the same file, separated by a blank line.
