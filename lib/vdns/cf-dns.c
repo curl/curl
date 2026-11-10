@@ -330,8 +330,18 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   }
 
   if(cf->next && !cf->next->connected) {
+    struct Curl_cfilter *cf_next = cf->next;
     bool sub_done;
-    CURLcode result = Curl_conn_cf_connect(cf->next, data, &sub_done);
+    CURLcode result;
+
+sub_chain_connect:
+    cf_next = cf->next;
+    sub_done = FALSE;
+    result = Curl_conn_cf_connect(cf_next, data, &sub_done);
+    /* The sub-chain might insert new DNS filters and we cannot
+     * leave here without running them. Do so. */
+    if(!result && (cf_next != cf->next))
+      goto sub_chain_connect;
     if(result || !sub_done)
       return result;
     DEBUGASSERT(sub_done);
@@ -473,15 +483,8 @@ static CURLcode cf_dns_add(struct Curl_easy *data,
 #endif
 
   result = cf_dns_create(&cf, data, peer, dns_queries, transport, for_proxy);
-  if(!result) {
-    struct cf_dns_ctx *ctx = cf->ctx;
+  if(!result)
     Curl_cfchain_add(chain, cf);
-    if(!ctx->started) {
-      ctx->started = TRUE;
-      ctx->resolv_result = cf_dns_start(cf, data, &ctx->dns);
-    }
-  }
-
   return result;
 }
 
@@ -501,15 +504,8 @@ static CURLcode cf_dns_insert_after(struct Curl_cfilter *cf_at,
   CURLcode result;
 
   result = cf_dns_create(&cf, data, peer, dns_queries, transport, FALSE);
-  if(!result) {
-    struct cf_dns_ctx *ctx = cf->ctx;
-
+  if(!result)
     Curl_conn_cf_insert_after(cf_at, cf);
-    if(!ctx->started) {
-      ctx->started = TRUE;
-      ctx->resolv_result = cf_dns_start(cf, data, &ctx->dns);
-    }
-  }
   return result;
 }
 
