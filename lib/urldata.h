@@ -77,7 +77,6 @@
 
 /* On error return, the value of `pnwritten` has no meaning */
 typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
-                             int8_t sockindex,            /* socketindex */
                              const uint8_t *buf,       /* data to write */
                              size_t len,               /* amount to send */
                              bool eos,                 /* last chunk */
@@ -85,7 +84,6 @@ typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
 
 /* On error return, the value of `pnread` has no meaning */
 typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
-                             int8_t sockindex,            /* socketindex */
                              char *buf,                /* store data here */
                              size_t len,               /* max amount to read */
                              size_t *pnread);          /* how much received */
@@ -175,8 +173,10 @@ struct ConnectBits {
   BIT(connect_only);
 #ifndef CURL_DISABLE_PROXY
   BIT(origin_is_proxy);  /* if set, the connection's origin is a proxy */
-  BIT(socks5_authenticated); /* SOCKS5 authenticated on FIRSTSOCKET */
+  BIT(socks5_authenticated); /* SOCKS5 authenticated */
 #endif
+  BIT(want_recv);
+  BIT(want_send);
   /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
   BIT(reuse); /* if set, this is a reused connection */
@@ -219,9 +219,6 @@ struct hostname {
   char *name;     /* name to use internally, might be encoded, might be raw */
   const char *dispname; /* name to display, as 'name' might be encoded */
 };
-
-#define FIRSTSOCKET     0
-#define SECONDARYSOCKET 1
 
 #define TRNSPRT_NONE 0
 #define TRNSPRT_TCP  3
@@ -289,12 +286,11 @@ struct connectdata {
   struct proxy_info http_proxy;
 #endif
 
-  /* A connection can have one or two sockets and connection filters.
-   * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
+  /* Callbacks for send/recv, can be overwritten by protocol handlers.
+   * Default to operations on connection's primary filter chain. */
   struct Curl_cfchain chain; /* primary filter chain */
-  struct Curl_cfchain chain_alt; /* secondary filter chain, used by FTP only */
-  Curl_recv *recv[2];
-  Curl_send *send[2];
+  Curl_recv *recv;
+  Curl_send *send;
 
 #define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
 
@@ -337,8 +333,6 @@ struct connectdata {
 #endif
   uint16_t localportrange;
   uint16_t localport;
-  int8_t recv_idx;  /* on which socket index to receive, default 0 */
-  int8_t send_idx;  /* on which socket index to send, default 0 */
   uint8_t transport_wanted; /* one of the TRNSPRT_* defines. Not necessarily
    the transport the connection ends using due to Alt-Svc and happy
    eyeballing. Use Curl_conn_get_transport() for actual value once the

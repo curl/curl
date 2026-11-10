@@ -88,15 +88,11 @@ static const struct Curl_cftype t2606_cft = {
 
 struct t2606_case {
   int id;
-  bool has_c1;        /* a SECONDARYSOCKET chain exists */
   bool c0_connected;
-  bool c1_connected;
   bool c0_shutdown;   /* shutdown started on the chain */
-  bool c1_shutdown;
   bool xfer_io;       /* the pollset holds a transfer socket already */
   bool c0_adds;       /* chain 0 adds a socket when called */
   int exp_c0_calls;
-  int exp_c1_calls;
 };
 
 static CURLcode t2606_setup(CURL **easy)
@@ -121,8 +117,8 @@ static void t2606_stop(CURL *easy)
 static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
 {
   struct connectdata *conn;
-  struct Curl_cfilter *cf0 = NULL, *cf1 = NULL;
-  struct t2606_ctx ctx0, ctx1;
+  struct Curl_cfilter *cf0 = NULL;
+  struct t2606_ctx ctx0;
   struct easy_pollset ps;
   CURLcode result;
   char msg[128];
@@ -132,13 +128,10 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
 
   conn->created = curlx_now();
   Curl_cfchain_init(&conn->chain, conn, TRUE);
-  Curl_cfchain_init(&conn->chain_alt, conn, FALSE);
 
   memset(&ctx0, 0, sizeof(ctx0));
-  memset(&ctx1, 0, sizeof(ctx1));
   ctx0.sock = 42;
   ctx0.add_socket = tc->c0_adds;
-  ctx1.sock = 43;
 
   result = Curl_cf_create(&cf0, &t2606_cft, &ctx0);
   fail_unless(!result, "creating filter chain 0 failed");
@@ -147,17 +140,6 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
     cf0->connected = tc->c0_connected;
     if(tc->c0_shutdown)
       conn->chain.shutdown_start_ms = 100;
-  }
-
-  if(tc->has_c1) {
-    result = Curl_cf_create(&cf1, &t2606_cft, &ctx1);
-    fail_unless(!result, "creating filter chain 1 failed");
-    if(!result) {
-      Curl_cfchain_add(&conn->chain_alt, cf1);
-      cf1->connected = tc->c1_connected;
-      if(tc->c1_shutdown)
-        conn->chain_alt.shutdown_start_ms = 100;
-    }
   }
 
   Curl_pollset_init(&ps);
@@ -173,9 +155,6 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
   curl_msprintf(msg, "case %d: chain 0 called %d times, expected %d",
                 tc->id, ctx0.calls, tc->exp_c0_calls);
   fail_unless(ctx0.calls == tc->exp_c0_calls, msg);
-  curl_msprintf(msg, "case %d: chain 1 called %d times, expected %d",
-                tc->id, ctx1.calls, tc->exp_c1_calls);
-  fail_unless(ctx1.calls == tc->exp_c1_calls, msg);
   if(tc->c0_adds && tc->exp_c0_calls) {
     curl_msprintf(msg, "case %d: chain 0 did not add its socket", tc->id);
     fail_unless(ps.n > 0, msg);
@@ -183,7 +162,6 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
 
   Curl_pollset_cleanup(&ps);
   Curl_cfchain_cleanup(&conn->chain, data);
-  Curl_cfchain_cleanup(&conn->chain_alt, data);
 unit_test_abort:
   curlx_free(conn);
 }
@@ -195,24 +173,17 @@ static CURLcode test_unit2606(const char *arg)
   UNITTEST_BEGIN(t2606_setup(&easy))
 
   static const struct t2606_case TEST_CASES[] = {
-    /* both chains connected and quiet, transfer idle: nothing runs */
-    { 1, TRUE,  TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE, 0, 0 },
-    /* transfer wants IO: both chains run */
-    { 2, TRUE,  TRUE,  TRUE,  FALSE, FALSE, TRUE,  FALSE, 1, 1 },
-    /* chain 0 connecting, chain 1 connected and quiet: only chain 0 */
-    { 3, TRUE,  FALSE, TRUE,  FALSE, FALSE, FALSE, FALSE, 1, 0 },
-    /* chain 1 connecting, chain 0 connected and quiet: only chain 1 */
-    { 4, TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE, 0, 1 },
+    /* id, connected, shutdown, io, adds, calls */
+    /* chain connected and quiet, transfer idle: nothing runs */
+    { 1, TRUE,  FALSE, FALSE, FALSE, 0 },
+    /* transfer wants IO: chain runs */
+    { 2, TRUE,  FALSE, TRUE,  FALSE, 1 },
     /* chain 0 shutting down, chain 1 connected and quiet: only chain 0 */
-    { 5, TRUE,  TRUE,  TRUE,  TRUE,  FALSE, FALSE, FALSE, 1, 0 },
-    /* chain 1 shutting down, chain 0 connected and quiet: only chain 1 */
-    { 6, TRUE,  TRUE,  TRUE,  FALSE, TRUE,  FALSE, FALSE, 0, 1 },
-    /* single connected quiet chain, transfer idle: nothing runs */
-    { 7, FALSE, TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE, 0, 0 },
-    /* single chain shutting down: runs */
-    { 8, FALSE, TRUE,  FALSE, TRUE,  FALSE, FALSE, FALSE, 1, 0 },
-    /* a socket added by connecting chain 0 must not run quiet chain 1 */
-    { 9, TRUE,  FALSE, TRUE,  FALSE, FALSE, FALSE, TRUE,  1, 0 },
+    { 3, TRUE,  TRUE,  FALSE, FALSE, 1 },
+    /* chain connecting */
+    { 4, FALSE, FALSE, FALSE, FALSE, 1 },
+    /* a socket added by connecting chain */
+    { 5, FALSE, FALSE, FALSE, TRUE,  1 },
   };
 
   size_t i;

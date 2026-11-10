@@ -1323,7 +1323,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
              maxdownload and transfer size include both header line and
              literal body */
           data->req.maxdownload = size;
-          Curl_xfer_setup_recv(data, FIRSTSOCKET, size);
+          Curl_xfer_setup_recv(data, size);
         }
         /* End of DO phase */
         imap_state(data, imapc, IMAP_STOP);
@@ -1481,7 +1481,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
     else {
       /* IMAP download */
       data->req.maxdownload = size;
-      Curl_xfer_setup_recv(data, FIRSTSOCKET, size);
+      Curl_xfer_setup_recv(data, size);
     }
   }
   else {
@@ -1532,7 +1532,7 @@ static CURLcode imap_state_append_resp(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* IMAP upload */
-    Curl_xfer_setup_send(data, FIRSTSOCKET);
+    Curl_xfer_setup_send(data);
 
     /* End of DO phase */
     imap_state(data, imapc, IMAP_STOP);

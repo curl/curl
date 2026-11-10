@@ -103,9 +103,6 @@ static int data_pending(struct Curl_easy *data, bool rcvd_eagain)
 {
   struct connectdata *conn = data->conn;
 
-  if(conn->scheme->protocol & PROTO_FAMILY_FTP)
-    return Curl_cfchain_data_pending(data, &conn->chain_alt);
-
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return (!rcvd_eagain &&
@@ -147,8 +144,7 @@ static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
   if(!data || !data->conn)
     return FALSE;
-  return CURL_CFCHAIN_IN_SHUTDOWN(
-    data->conn->recv_idx ? &data->conn->chain_alt : &data->conn->chain);
+  return CURL_CFCHAIN_IN_SHUTDOWN(&data->conn->chain);
 }
 
 /**
@@ -647,8 +643,8 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 
 static void xfer_setup(
   struct Curl_easy *data,   /* transfer */
-  int8_t send_idx,             /* sockindex to send on or -1 */
-  int8_t recv_idx,             /* sockindex to receive on or -1 */
+  bool want_send,
+  bool want_recv,
   curl_off_t recv_size      /* how much to receive, -1 if unknown */
   )
 {
@@ -656,17 +652,14 @@ static void xfer_setup(
   struct connectdata *conn = data->conn;
 
   DEBUGASSERT(conn);
-  /* indexes are in range */
-  DEBUGASSERT((send_idx <= 1) && (send_idx >= -1));
-  DEBUGASSERT((recv_idx <= 1) && (recv_idx >= -1));
   /* if request wants to send, switching off the send direction is wrong */
-  DEBUGASSERT((send_idx >= 0) || !Curl_req_want_send(data));
+  DEBUGASSERT(want_send || !Curl_req_want_send(data));
 
-  conn->send_idx = send_idx;
-  conn->recv_idx = recv_idx;
+  conn->bits.want_send = want_send;
+  conn->bits.want_recv = want_recv;
 
   /* without receiving, there should be not recv_size */
-  DEBUGASSERT((conn->recv_idx >= 0) || (recv_size == -1));
+  DEBUGASSERT(want_recv || (recv_size == -1));
   k->size = recv_size;
   k->header = !!conn->scheme->run->write_resp_hd;
 
@@ -678,38 +671,35 @@ static void xfer_setup(
 
   /* we want header and/or body, if neither then do not do this! */
   if(conn->scheme->run->write_resp_hd || !data->req.no_body) {
-    if(conn->recv_idx != -1)
+    if(want_recv)
       CURL_REQ_SET_RECV(data);
-    if(conn->send_idx != -1)
+    if(want_send)
       CURL_REQ_SET_SEND(data);
   }
-  CURL_TRC_M(data, "xfer_setup: recv_idx=%d, send_idx=%d",
-             conn->recv_idx, conn->send_idx);
+  CURL_TRC_M(data, "xfer_setup: want_recv=%d, want_send=%d",
+             conn->bits.want_recv, conn->bits.want_send);
 }
 
 void Curl_xfer_setup_nop(struct Curl_easy *data)
 {
-  xfer_setup(data, -1, -1, -1);
+  xfer_setup(data, FALSE, FALSE, -1);
 }
 
 void Curl_xfer_setup_sendrecv(struct Curl_easy *data,
-                              int8_t sockindex,
                               curl_off_t recv_size)
 {
-  xfer_setup(data, sockindex, sockindex, recv_size);
+  xfer_setup(data, TRUE, TRUE, recv_size);
 }
 
-void Curl_xfer_setup_send(struct Curl_easy *data,
-                          int8_t sockindex)
+void Curl_xfer_setup_send(struct Curl_easy *data)
 {
-  xfer_setup(data, sockindex, -1, -1);
+  xfer_setup(data, TRUE, FALSE, -1);
 }
 
 void Curl_xfer_setup_recv(struct Curl_easy *data,
-                          int8_t sockindex,
                           curl_off_t recv_size)
 {
-  xfer_setup(data, -1, sockindex, recv_size);
+  xfer_setup(data, FALSE, TRUE, recv_size);
 }
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
@@ -770,18 +760,12 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
 
 bool Curl_xfer_needs_flush(struct Curl_easy *data)
 {
-  if(CONN_SOCK_IDX_VALID(data->conn->send_idx))
-    return Curl_cfchain_needs_flush(data, data->conn->send_idx ?
-      &data->conn->chain_alt : &data->conn->chain);
-  return FALSE;
+  return Curl_cfchain_needs_flush(data, &data->conn->chain);
 }
 
 CURLcode Curl_xfer_flush(struct Curl_easy *data)
 {
-  if(CONN_SOCK_IDX_VALID(data->conn->send_idx))
-    return Curl_cfchain_flush(data, data->conn->send_idx ?
-      &data->conn->chain_alt : &data->conn->chain);
-  return CURLE_OK;
+  return Curl_cfchain_flush(data, &data->conn->chain);
 }
 
 CURLcode Curl_xfer_try_send(struct Curl_easy *data,
@@ -793,8 +777,7 @@ CURLcode Curl_xfer_try_send(struct Curl_easy *data,
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
 
-  result = Curl_conn_send(data, data->conn->send_idx,
-                          buf, blen, eos, pnwritten);
+  result = Curl_conn_send(data, buf, blen, eos, pnwritten);
   if(!result && *pnwritten)
     data->info.request_size += *pnwritten;
 
@@ -830,7 +813,7 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
 
   if(curlx_uitouz(data->set.buffer_size) < blen)
     blen = curlx_uitouz(data->set.buffer_size);
-  return Curl_conn_recv(data, data->conn->recv_idx, buf, blen, pnrcvd);
+  return Curl_conn_recv(data, buf, blen, pnrcvd);
 }
 
 CURLcode Curl_xfer_send_close(struct Curl_easy *data)

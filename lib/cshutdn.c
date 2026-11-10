@@ -72,19 +72,10 @@ timediff_t Curl_cshutdn_timeleft_ms(struct Curl_easy *data,
 static timediff_t cshutdn_conn_timeleft(struct Curl_easy *data,
                                         struct connectdata *conn)
 {
-  timediff_t left_ms = 0;
-
   if(conn->chain.shutdown_start_ms >= 0 &&
      !conn->chain.shutdown_timeout_ms)
-    left_ms = Curl_cshutdn_timeleft_ms(data, &conn->chain);
-
-  if(conn->chain_alt.shutdown_start_ms >= 0 &&
-     !conn->chain_alt.shutdown_timeout_ms) {
-    timediff_t ms = Curl_cshutdn_timeleft_ms(data, &conn->chain_alt);
-    if(ms && (!left_ms || ms < left_ms))
-      left_ms = ms;
-  }
-  return left_ms;
+    return Curl_cshutdn_timeleft_ms(data, &conn->chain);
+  return 0;
 }
 
 void Curl_cshutdn_clear_timer(struct Curl_cfchain *chain)
@@ -189,12 +180,10 @@ static void cshutdn_run_once(struct Curl_easy *data,
                              struct connectdata *conn,
                              bool *done)
 {
-  CURLcode r0, r1;
-  bool done0, done1;
-
   /* We expect to be attached when called */
   DEBUGASSERT(data->conn == conn);
 
+  *done = FALSE;
   if(!CURL_CFCHAIN_IN_SHUTDOWN(&conn->chain))
     Curl_cshutdn_start_timer(data, &conn->chain, 0);
 
@@ -205,22 +194,11 @@ static void cshutdn_run_once(struct Curl_easy *data,
     return;
   }
 
-  if(!conn->bits.connect_only && Curl_conn_is_connected(conn))
-    r0 = cshutdn_cfchain_try_once(data, &conn->chain, &done0);
-  else {
-    r0 = CURLE_OK;
-    done0 = TRUE;
+  if(!conn->bits.connect_only && Curl_conn_is_connected(conn)) {
+    if(cshutdn_cfchain_try_once(data, &conn->chain, done))
+      *done = TRUE;  /* we are done on errors encountered */
   }
 
-  if(!conn->bits.connect_only && Curl_cfchain_is_connected(&conn->chain_alt))
-    r1 = cshutdn_cfchain_try_once(data, &conn->chain_alt, &done1);
-  else {
-    r1 = CURLE_OK;
-    done1 = TRUE;
-  }
-
-  /* we are done when any failed or both report success */
-  *done = (r0 || r1 || (done0 && done1));
   if(*done)
     conn->bits.shutdown_filters = TRUE;
 }
@@ -262,7 +240,6 @@ void Curl_cshutdn_terminate(struct Curl_easy *admin,
   CURL_TRC_M(admin, "[SHUTDOWN] %sclosing connection #%" FMT_OFF_T,
              conn->bits.shutdown_filters ? "" : "force ",
              conn->connection_id);
-  Curl_cfchain_reset(&conn->chain_alt, admin);
   Curl_cfchain_reset(&conn->chain, admin);
   Curl_detach_connection(admin);
 

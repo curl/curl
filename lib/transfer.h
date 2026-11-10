@@ -67,22 +67,15 @@ CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
 /* The transfer is neither receiving nor sending. */
 void Curl_xfer_setup_nop(struct Curl_easy *data);
 
-/* The transfer sends data on the given socket index */
-void Curl_xfer_setup_send(struct Curl_easy *data,
-                          int8_t sockindex);
+/* The transfer sends data. */
+void Curl_xfer_setup_send(struct Curl_easy *data);
 
-/* The transfer receives data on the given socket index, the
- * amount to receive (or -1 if unknown). */
-void Curl_xfer_setup_recv(struct Curl_easy *data,
-                          int8_t sockindex,
-                          curl_off_t recv_size);
+/* The transfer receives data, the amount to receive (or -1 if unknown). */
+void Curl_xfer_setup_recv(struct Curl_easy *data, curl_off_t recv_size);
 
-/**
- * The transfer will use socket 1 to send/recv. `recv_size` is
- * the amount to receive or -1 if unknown.
- */
+/* The transfer will send and receive.
+ * `recv_size` is the amount to receive or -1 if unknown. */
 void Curl_xfer_setup_sendrecv(struct Curl_easy *data,
-                              int8_t sockindex,
                               curl_off_t recv_size);
 
 /**

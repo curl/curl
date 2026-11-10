@@ -176,15 +176,15 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
   }
 }
 
-CURLcode Curl_cf_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
-                      size_t len, size_t *pnread)
+CURLcode Curl_cf_recv(struct Curl_easy *data,
+                      char *buf, size_t len, size_t *pnread)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
 
-  cf = sockindex ? data->conn->chain_alt.cf : data->conn->chain.cf;
+  cf = data->conn->chain.cf;
   while(cf && !cf->connected)
     cf = cf->next;
   if(cf)
@@ -195,7 +195,7 @@ CURLcode Curl_cf_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
   return CURLE_FAILED_INIT;
 }
 
-CURLcode Curl_cf_send(struct Curl_easy *data, int8_t sockindex,
+CURLcode Curl_cf_send(struct Curl_easy *data,
                       const uint8_t *buf, size_t len, bool eos,
                       size_t *pnwritten)
 {
@@ -203,7 +203,8 @@ CURLcode Curl_cf_send(struct Curl_easy *data, int8_t sockindex,
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  cf = sockindex ? data->conn->chain_alt.cf : data->conn->chain.cf;
+
+  cf = data->conn->chain.cf;
   while(cf && !cf->connected)
     cf = cf->next;
   if(cf) {
@@ -444,13 +445,7 @@ static CURLcode cf_cntrl_all(struct connectdata *conn,
                              bool ignore_result,
                              int event, int arg1, void *arg2)
 {
-  CURLcode result = CURLE_OK;
-
-  result = Curl_conn_cf_cntrl(conn->chain.cf, data, ignore_result,
-                              event, arg1, arg2);
-  if(!ignore_result && result)
-    return result;
-  return Curl_conn_cf_cntrl(conn->chain_alt.cf, data, ignore_result,
+  return Curl_conn_cf_cntrl(conn->chain.cf, data, ignore_result,
                             event, arg1, arg2);
 }
 
@@ -766,21 +761,9 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   struct easy_pollset *ps)
 {
-  CURLcode result = CURLE_OK;
-  const bool want_io = !!ps->n;
-
   DEBUGASSERT(data);
   DEBUGASSERT(conn);
-  result = Curl_cfchain_adjust_pollset(data, &conn->chain, ps);
-  if(result)
-    return result;
-
-  if(conn->chain_alt.cf &&
-     (want_io || !conn->chain_alt.cf->connected ||
-        CURL_CFCHAIN_IN_SHUTDOWN(&conn->chain_alt))) {
-    result = Curl_conn_cf_adjust_pollset(conn->chain_alt.cf, data, ps);
-  }
-  return result;
+  return Curl_cfchain_adjust_pollset(data, &conn->chain, ps);
 }
 
 /*
@@ -978,14 +961,8 @@ CURLcode Curl_cfchain_flush(struct Curl_easy *data,
 
 CURLcode Curl_conn_do_maintenance(struct Curl_easy *data)
 {
-  CURLcode result = CURLE_OK;
-
-  result = Curl_conn_cf_cntrl(data->conn->chain.cf, data, FALSE,
-                              CF_CTRL_MAINTENANCE, 0, NULL);
-  if(!result)
-    result = Curl_conn_cf_cntrl(data->conn->chain_alt.cf, data, FALSE,
-                                CF_CTRL_MAINTENANCE, 0, NULL);
-  return result;
+  return Curl_conn_cf_cntrl(data->conn->chain.cf, data, FALSE,
+                            CF_CTRL_MAINTENANCE, 0, NULL);
 }
 
 /**
@@ -1023,13 +1000,9 @@ bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
                               struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   if(conn->chain.cf)
-    result = conn->chain.cf->cft->keep_alive(conn->chain.cf, data);
-  if(!result && conn->chain_alt.cf)
-    result = conn->chain_alt.cf->cft->keep_alive(conn->chain_alt.cf, data);
-  return result;
+    return conn->chain.cf->cft->keep_alive(conn->chain.cf, data);
+  return CURLE_OK;
 }
 
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
@@ -1061,20 +1034,18 @@ int Curl_conn_get_stream_error(struct Curl_easy *data,
   return (result || n < 0) ? 0 : n;
 }
 
-CURLcode Curl_conn_recv(struct Curl_easy *data, int8_t sockindex,
+CURLcode Curl_conn_recv(struct Curl_easy *data,
                         char *buf, size_t len, size_t *pnread)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(data && data->conn && data->conn->recv[sockindex])
-    return data->conn->recv[sockindex](data, sockindex, buf, len, pnread);
+  if(data && data->conn && data->conn->recv)
+    return data->conn->recv(data, buf, len, pnread);
   *pnread = 0;
   return CURLE_FAILED_INIT;
 }
 
-CURLcode Curl_conn_send(struct Curl_easy *data, int8_t sockindex,
+CURLcode Curl_conn_send(struct Curl_easy *data,
                         const void *buf, size_t len, bool eos,
                         size_t *pnwritten)
 {
@@ -1082,9 +1053,6 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int8_t sockindex,
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  DEBUGASSERT(CONN_SOCK_IDX_VALID(sockindex));
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
 #ifdef DEBUGBUILD
   if(write_len) {
     /* Allow debug builds to override this logic to force short sends */
@@ -1099,9 +1067,8 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int8_t sockindex,
     }
   }
 #endif
-  if(data && data->conn && data->conn->send[sockindex]) {
-    CURLcode result = data->conn->send[sockindex](data, sockindex, buf,
-                                                  write_len, eos, pnwritten);
+  if(data && data->conn && data->conn->send) {
+    CURLcode result = data->conn->send(data, buf, write_len, eos, pnwritten);
     if(!result && (*pnwritten > write_len)) {
       DEBUGASSERT(0);
       *pnwritten = 0;

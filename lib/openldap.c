@@ -486,7 +486,7 @@ static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
-      result = (li->recv)(data, FIRSTSOCKET, buf, len, &nread);
+      result = (li->recv)(data, buf, len, &nread);
       if(result == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
@@ -512,7 +512,7 @@ static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
-      result = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &nwritten);
+      result = (li->send)(data, buf, len, FALSE, &nwritten);
       if(result == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
@@ -558,8 +558,8 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
     if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS) ||
        ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
       return CURLE_FAILED_INIT;
-    li->recv = conn->recv[FIRSTSOCKET];
-    li->send = conn->send[FIRSTSOCKET];
+    li->recv = conn->recv;
+    li->send = conn->send;
   }
 
   return result;
@@ -665,7 +665,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 #ifdef _WIN32
     SOCKET dupfd = INVALID_SOCKET;
     WSAPROTOCOL_INFO pi;
-    if(WSADuplicateSocket(conn->cfchainFIRSTSOCKET].sock,
+    if(WSADuplicateSocket(conn->chain.sock,
                           GetCurrentProcessId(), &pi))
       ; /* error */
     else
@@ -1026,7 +1026,7 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
 
   *done = li->state == OLDAP_STOP;
   if(*done)
-    conn->recv[FIRSTSOCKET] = oldap_recv;
+    conn->recv = oldap_recv;
 
   if(result && li->msgid) {
     ldap_abandon_ext(li->ld, li->msgid, NULL, NULL);
@@ -1110,7 +1110,7 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
   }
 
   lr->msgid = msgid;
-  Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
+  Curl_xfer_setup_recv(data, -1);
   *done = TRUE;
 
 out:
@@ -1181,8 +1181,8 @@ static bool oldap_str_needs_base64(const char *s, size_t len)
   return FALSE;
 }
 
-static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
-                           size_t len, size_t *pnread)
+static CURLcode oldap_recv(struct Curl_easy *data,
+                           char *buf, size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
@@ -1197,7 +1197,6 @@ static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
 
   (void)len;
   (void)buf;
-  (void)sockindex;
   *pnread = 0;
   if(!li || !lr)
     return CURLE_FAILED_INIT;

@@ -499,7 +499,6 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
     conn->scheme->run->disconnect(data, conn, TRUE);
 
   Curl_cfchain_cleanup(&conn->chain, data);
-  Curl_cfchain_cleanup(&conn->chain_alt, data);
 
 #ifndef CURL_DISABLE_PROXY
   Curl_peer_unlink(&conn->http_proxy.peer);
@@ -1083,9 +1082,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   /* and we setup a few fields in case we end up actually using this struct */
   Curl_cfchain_init(&conn->chain, conn, TRUE);
-  Curl_cfchain_init(&conn->chain_alt, conn, FALSE);
-  conn->recv_idx = 0; /* default for receiving transfer data */
-  conn->send_idx = 0; /* default for sending transfer data */
   conn->connection_id = -1;    /* no ID */
   conn->cpid = UINT32_MAX;  /* not in connection pool yet */
   conn->attached_xfers = 0;
@@ -1989,10 +1985,8 @@ static CURLcode url_create_needle(struct Curl_easy *data,
 
   if(network_scheme) {
     /* Setup callbacks for network connections */
-    needle->recv[FIRSTSOCKET] = Curl_cf_recv;
-    needle->send[FIRSTSOCKET] = Curl_cf_send;
-    needle->recv[SECONDARYSOCKET] = Curl_cf_recv;
-    needle->send[SECONDARYSOCKET] = Curl_cf_send;
+    needle->recv = Curl_cf_recv;
+    needle->send = Curl_cf_send;
     needle->bits.tcp_fastopen = data->set.tcp_fastopen;
 #ifdef USE_UNIX_SOCKETS
     if(Curl_conn_get_first_peer(needle)->unix_socket)

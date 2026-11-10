@@ -568,11 +568,11 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
 
     /* FTP upload, shutdown DATA, ignore shutdown errors, as we rely
      * on the server response on the CONTROL connection. */
-    Curl_xfer_setup_send(data, FIRSTSOCKET);
+    Curl_xfer_setup_send(data);
   }
   else {
     /* FTP download, shutdown, do not ignore errors */
-    Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size);
+    Curl_xfer_setup_recv(data, data->req.size);
   }
 
   ftpc->pp.pending_resp = TRUE; /* expect server response */
@@ -2112,7 +2112,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   if(result)
     goto error;
 
-  /* If FIRSTSOCKET goes via another peer, SECONDARY needs as well,
+  /* If connection goes via another peer, DATA chain needs as well,
    * but with its new port. */
   if(conn->via_peer) {
     Curl_peer_unlink(&conn->via_peer2);

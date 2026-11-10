@@ -65,7 +65,7 @@ static CURLcode pp_recv(struct pingpong *pp,
   if(pp->do_recv)
     return pp->do_recv(data, pp->io_user_data, buf, blen, pnread);
   else
-    return Curl_conn_recv(data, FIRSTSOCKET, buf, blen, pnread);
+    return Curl_conn_recv(data, buf, blen, pnread);
 }
 
 static CURLcode pp_send(struct pingpong *pp,
@@ -77,7 +77,7 @@ static CURLcode pp_send(struct pingpong *pp,
   if(pp->do_send)
     return pp->do_send(data, pp->io_user_data, buf, blen, eos, pnwritten);
   else
-    return Curl_conn_send(data, FIRSTSOCKET, buf, blen, eos, pnwritten);
+    return Curl_conn_send(data, buf, blen, eos, pnwritten);
 }
 
 static CURLcode pp_poll(struct pingpong *pp,

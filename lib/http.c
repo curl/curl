@@ -3009,7 +3009,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   /* setup variables for the upcoming transfer and send */
-  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
+  Curl_xfer_setup_sendrecv(data, -1);
   result = Curl_req_send(data, &req, httpversion);
 
   if((httpversion >= 20) && data->req.upload_chunky)

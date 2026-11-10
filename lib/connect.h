@@ -70,7 +70,7 @@ void Curl_conncontrol(struct connectdata *conn, int ctrl);
 #define connkeep(x)    Curl_conncontrol((x), CONNCTRL_CONN_KEEP)
 
 /**
- * Setup the cfilters at `sockindex` in connection `conn`.
+ * Setup the cfilters at primary chain in connection `conn`.
  * If no filter chain is installed yet, inspects the configuration
  * in `data` and `conn` to install a suitable filter chain.
  */
@@ -88,7 +88,7 @@ CURLcode Curl_cfchain_connect(struct Curl_easy *data,
                               bool blocking,
                               bool *done);
 
-/* Bring the filter chain at `FIRSTSOCKET` into connected state. */
+/* Bring the primary filter chain into connected state. */
 CURLcode Curl_conn_connect(struct Curl_easy *data, bool blocking, bool *done);
 
 /**
@@ -102,10 +102,10 @@ void Curl_cfchain_report_failed(struct Curl_easy *data,
 /* Set conn to allow multiplexing with http version installed. */
 void Curl_conn_set_multiplex(struct Curl_cfchain *chain, uint8_t http_version);
 
-/* Get the origin peer at FIRSTSOCKET. */
+/* Get the origin peer of the connection. */
 struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn);
 
-/* Get the peer the connection actually connects to at sockindex.
+/* Get the peer the connection actually connects to.
  * Often the same as "origin", but can be redirected via "connect-to"
  * or "alt-svc". May tunnel through proxies. */
 struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn);

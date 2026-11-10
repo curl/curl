@@ -45,15 +45,15 @@ void Curl_cshutdn_terminate(struct Curl_easy *admin,
                             bool do_shutdown);
 
 /* Start the shutdown timer,
- * marks the connection sockindex as being shut down. */
+ * marks the connection as being shut down. */
 void Curl_cshutdn_start_timer(struct Curl_easy *data,
                               struct Curl_cfchain *chain,
                               int timeout_ms);
 /* Clear the shutdown timer at the chain again. */
 void Curl_cshutdn_clear_timer(struct Curl_cfchain *chain);
 
-/* return how much time there is left to shutdown the connection at
- * sockindex. Returns 0 if there is no limit or shutdown has not started. */
+/* Return how much time there is left to shutdown the connection.
+ * Returns 0 if there is no limit or shutdown has not started. */
 timediff_t Curl_cshutdn_timeleft_ms(struct Curl_easy *data,
                                     struct Curl_cfchain *chain);
 

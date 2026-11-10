@@ -435,7 +435,7 @@ bool Curl_cfchain_wants_maintenance(struct Curl_cfchain *chain);
 bool Curl_conn_has_safe_eos(struct connectdata *conn);
 
 /**
- * Return the HTTP version used on the FIRSTSOCKET connection filters
+ * Return the HTTP version used on the primary connection filter chain
  * or 0 if unknown. Value otherwise is 09, 10, 11, etc.
  */
 uint8_t Curl_conn_http_version(struct Curl_easy *data,
@@ -478,7 +478,7 @@ CURLcode Curl_cfchain_flush(struct Curl_easy *data,
 CURLcode Curl_conn_do_maintenance(struct Curl_easy *data);
 
 /**
- * Return the socket used on data's connection for FIRSTSOCKET,
+ * Return the socket used on data's connection primary chain,
  * querying filters if the whole chain has not connected yet.
  * Returns CURL_SOCKET_BAD if not available.
  */
@@ -518,19 +518,20 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
                       timediff_t timeout_ms);
 
 /**
- * Receive data through the filter chain at `sockindex` for connection
+ * Receive data through the primary filter chain for connection
  * `data->conn`. Copy at most `len` bytes into `buf`. Return the
  * actual number of bytes copied in `*pnread`or an error.
  */
-CURLcode Curl_cf_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
-                      size_t len, size_t *pnread);
+CURLcode Curl_cf_recv(struct Curl_easy *data,
+                      char *buf, size_t len,
+                      size_t *pnread);
 
 /**
- * Send `len` bytes of data from `buf` through the filter chain `sockindex`
+ * Send `len` bytes of data from `buf` through the primary filter chain
  * at connection `data->conn`. Return the actual number of bytes written
  * in `*pnwritten` or on error.
  */
-CURLcode Curl_cf_send(struct Curl_easy *data, int8_t sockindex,
+CURLcode Curl_cf_send(struct Curl_easy *data,
                       const uint8_t *buf, size_t len, bool eos,
                       size_t *pnwritten);
 
@@ -580,7 +581,7 @@ void Curl_conn_ev_data_done(struct Curl_easy *data, bool premature);
 CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause);
 
 /**
- * Check if FIRSTSOCKET's cfilter chain deems connection alive.
+ * Check if primary cfilter chain deems connection alive.
  */
 bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
                         bool *input_pending);
@@ -621,17 +622,18 @@ void Curl_cfchain_trc(struct Curl_easy *data,
 #endif
 
 /*
- * Receive data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
+ * Receive data on the connection.
  * Return CURLE_AGAIN iff blocked on receiving.
  */
-CURLcode Curl_conn_recv(struct Curl_easy *data, int8_t sockindex,
-                        char *buf, size_t len, size_t *pnread);
+CURLcode Curl_conn_recv(struct Curl_easy *data,
+                        char *buf, size_t len,
+                        size_t *pnread);
 
 /*
- * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
+ * Send data on the connection.
  * Return CURLE_AGAIN iff blocked on sending.
  */
-CURLcode Curl_conn_send(struct Curl_easy *data, int8_t sockindex,
+CURLcode Curl_conn_send(struct Curl_easy *data,
                         const void *buf, size_t len, bool eos,
                         size_t *pnwritten);
 

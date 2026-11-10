@@ -1004,18 +1004,13 @@ static CURLcode multi_adjust_pollset(struct Curl_easy *data,
   if(send_blocked || recv_blocked) {
     result = multi_cfchain_adjust_ps(
       data, &conn->chain, recv_blocked, send_blocked, ps);
-    if(!result)
-      result = multi_cfchain_adjust_ps(
-        data, &conn->chain_alt, recv_blocked, send_blocked, ps);
   }
 
   /* Not blocked and wanting to receive. If there is data pending
    * in the connection filters, make transfer run again. */
   if(!recv_blocked && (data->mstate != MSTATE_RATELIMITING) &&
-     ((Curl_pollset_want_recv(data, ps, conn->chain.sock) &&
-       Curl_conn_data_pending(data)) ||
-      (Curl_pollset_want_recv(data, ps, conn->chain_alt.sock) &&
-       Curl_cfchain_data_pending(data, &conn->chain_alt)))) {
+     Curl_pollset_want_recv(data, ps, conn->chain.sock) &&
+     Curl_conn_data_pending(data)) {
     CURL_TRC_M(data, "pollset[] has POLLIN, but there is still "
                "buffered input -> mark as dirty");
     Curl_multi_mark_dirty(data);
@@ -1076,10 +1071,9 @@ static CURLcode mstate_do_pollset(struct Curl_easy *data,
 
   if(conn->scheme->run->doing_pollset)
     result = conn->scheme->run->doing_pollset(data, ps);
-  else if(CONN_SOCK_IDX_VALID(conn->send_idx)) {
+  else if(conn->bits.want_send) {
     /* Default is that we want to send something to the server */
-    result = Curl_pollset_add_out(
-      data, ps, conn->send_idx ? conn->chain_alt.sock : conn->chain.sock);
+    result = Curl_pollset_add_out(data, ps, conn->chain.sock);
   }
   if(!result)
     result = multi_adjust_pollset(data, ps);
@@ -1096,10 +1090,9 @@ static CURLcode mstate_domore_pollset(struct Curl_easy *data,
 
   if(conn->scheme->run->domore_pollset)
     result = conn->scheme->run->domore_pollset(data, ps);
-  else if(CONN_SOCK_IDX_VALID(conn->send_idx)) {
+  else if(conn->bits.want_send) {
     /* Default is that we want to send something to the server */
-    result = Curl_pollset_add_out(
-      data, ps, conn->send_idx ? conn->chain_alt.sock : conn->chain.sock);
+    result = Curl_pollset_add_out(data, ps, conn->chain.sock);
   }
   if(!result)
     result = multi_adjust_pollset(data, ps);
@@ -1118,14 +1111,11 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
     result = conn->scheme->run->perform_pollset(data, ps);
   else {
     /* Default is to obey the request flags for send/recv */
-    if(Curl_req_want_recv(data) && CONN_SOCK_IDX_VALID(conn->recv_idx)) {
-      result = Curl_pollset_add_in(
-        data, ps, conn->recv_idx ? conn->chain_alt.sock : conn->chain.sock);
+    if(Curl_req_want_recv(data) && conn->bits.want_recv) {
+      result = Curl_pollset_add_in(data, ps, conn->chain.sock);
     }
-    if(!result && Curl_req_want_send(data) &&
-       CONN_SOCK_IDX_VALID(conn->send_idx)) {
-      result = Curl_pollset_add_out(
-        data, ps, conn->send_idx ? conn->chain_alt.sock : conn->chain.sock);
+    if(!result && Curl_req_want_send(data) && conn->bits.want_send) {
+      result = Curl_pollset_add_out(data, ps, conn->chain.sock);
     }
   }
   if(!result)
@@ -1146,10 +1136,6 @@ static CURLcode mstate_ratelimit_pollset(struct Curl_easy *data,
   if(conn && Curl_cfchain_wants_maintenance(&conn->chain)) {
     if(conn->chain.sock != CURL_SOCKET_BAD)
       result = Curl_pollset_add_in(data, ps, conn->chain.sock);
-  }
-  if(conn && Curl_cfchain_wants_maintenance(&conn->chain_alt)) {
-    if(conn->chain_alt.sock != CURL_SOCKET_BAD)
-      result = Curl_pollset_add_in(data, ps, conn->chain_alt.sock);
   }
   if(!result)
     result = multi_adjust_pollset(data, ps);
@@ -2723,8 +2709,7 @@ static CURLMcode multistate_did(struct Curl_multi *multi,
 
   /* Only perform the transfer if there is a good socket to work with.
      Having both BAD is a signal to skip immediately to DONE */
-  if(CONN_SOCK_IDX_VALID(data->conn->recv_idx) ||
-     CONN_SOCK_IDX_VALID(data->conn->send_idx)) {
+  if(data->conn->bits.want_recv || data->conn->bits.want_send) {
     multistate(data, MSTATE_PERFORMING);
     /* Do not return CURLM_CALL_MULTI_PERFORM to give other transfers
      * a chance to send off their requests.
