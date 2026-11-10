@@ -68,6 +68,7 @@ struct h1_tunnel_state {
   } keepon;
   curl_off_t cl; /* size of content to read and ignore */
   h1_tunnel_state tunnel_state;
+  BIT(has_transfer_encoding);
   BIT(chunked_encoding);
   BIT(close_connection);
   BIT(maybe_folded);
@@ -112,6 +113,7 @@ static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
   ts->close_connection = FALSE;
   ts->maybe_folded = FALSE;
   ts->leading_unfold = FALSE;
+  ts->has_transfer_encoding = FALSE;
   ts->chunked_encoding = FALSE;
   ts->nsent = 0;
   ts->headerlines = 0;
@@ -365,7 +367,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
       infof(data, "Ignoring Content-Length in CONNECT%s %03d response",
             is_udp ? "-UDP" : "", k->httpcode);
     }
-    else {
+    else if(!ts->has_transfer_encoding) {
       const char *p = header + CURL_CSTRLEN("Content-Length:");
       if(curlx_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
@@ -392,13 +394,25 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
       infof(data, "Ignoring Transfer-Encoding in "
             "CONNECT%s %03d response", is_udp ? "-UDP" : "", k->httpcode);
     }
-    else if(Curl_compareheader(header,
-                               STRCONST("Transfer-Encoding:"),
-                               STRCONST("chunked"))) {
-      CURL_TRC_CF(data, cf, "CONNECT%s response chunked",
-                  is_udp ? "-UDP" : "");
-      ts->chunked_encoding = TRUE;
-      Curl_httpchunk_reset(data, &ts->ch, TRUE);
+    else {
+      /* Do not use Content-Length to frame a Transfer-Encoding response. */
+      ts->has_transfer_encoding = TRUE;
+      ts->cl = 0;
+      ts->chunked_encoding = Curl_compareheader(header,
+                                                STRCONST("Transfer-Encoding:"),
+                                                STRCONST("chunked"));
+      if(ts->chunked_encoding) {
+        CURL_TRC_CF(data, cf, "CONNECT%s response chunked",
+                    is_udp ? "-UDP" : "");
+        Curl_httpchunk_reset(data, &ts->ch, TRUE);
+      }
+      else {
+        /* With no chunked framing, the response body ends at connection
+           close. Do not reuse this connection for an auth retry. */
+        CURL_TRC_CF(data, cf, "CONNECT%s response close-delimited",
+                    is_udp ? "-UDP" : "");
+        ts->close_connection = TRUE;
+      }
     }
   }
   else if(is_udp && checkprefix("Capsule-protocol:", header)) {
