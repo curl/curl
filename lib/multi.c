@@ -1946,10 +1946,14 @@ static CURLcode protocol_connect(struct Curl_easy *data, bool *protocol_done)
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
 
+#ifdef DEBUGBUILD
   DEBUGASSERT(conn);
   DEBUGASSERT(protocol_done);
-  DEBUGASSERT(Curl_conn_is_connected(conn));
-
+  if(!Curl_conn_is_connected(conn)) {
+    Curl_cfchain_trc(data, &conn->chain, "should be connected");
+    DEBUGASSERT(0);
+  }
+#endif
   *protocol_done = FALSE;
   if(!conn->bits.protoconnstart) {
     if(conn->scheme->run->connect_it) {
