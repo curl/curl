@@ -358,8 +358,8 @@ static int ftp_need_type(struct cf_ftp_ctx *ftpc,
   return ftpc->transfertype != (ascii_wanted ? 'A' : 'I');
 }
 
-static void close_secondarysocket(struct Curl_easy *data,
-                                  struct cf_ftp_ctx *ftpc)
+static void ftp_close_chain_data(struct Curl_easy *data,
+                                 struct cf_ftp_ctx *ftpc)
 {
   CURL_TRC_FTP(data, "[%s] closing DATA connection", FTP_CSTATE(ftpc));
   Curl_cfchain_reset(&ftpc->chain_data, data);
@@ -1956,7 +1956,7 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
   infof(data, "Failed EPSV attempt. Disabling EPSV");
   /* disable it for next transfer */
   conn->bits.ftp_use_epsv = FALSE;
-  close_secondarysocket(data, ftpc);
+  ftp_close_chain_data(data, ftpc);
   data->state.errorbuf = FALSE; /* allow error message to get
                                          rewritten */
   result = Curl_pp_sendf(data, &ftpc->pp, "%s", "PASV");
@@ -2361,7 +2361,7 @@ static CURLcode ftp_dophase_done(struct Curl_easy *data,
     CURLcode result = ftp_do_more(data, &completed);
 
     if(result) {
-      close_secondarysocket(data, ftpc);
+      ftp_close_chain_data(data, ftpc);
       return result;
     }
   }
@@ -3642,7 +3642,7 @@ static CURLcode ftp_done_secondary_socket(struct Curl_easy *data,
       }
     }
 
-    close_secondarysocket(data, ftpc);
+    ftp_close_chain_data(data, ftpc);
   }
   return result;
 }
@@ -4460,17 +4460,19 @@ static CURLcode cf_ftp_shutdown(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 bool *done)
 {
-  struct cf_ftp_ctx *ctx = cf->ctx;
+  struct cf_ftp_ctx *ftpc = cf->ctx;
   CURLcode result;
 
   (void)data;
   *done = FALSE;
-  if(!cf->connected || !ctx || !ctx->ctl_valid || cf->shutdown) {
+  if(ftpc && ftpc->chain_data.cf)
+    ftp_close_chain_data(data, ftpc);
+  if(!cf->connected || !ftpc || !ftpc->ctl_valid || cf->shutdown) {
     *done = TRUE;
     return CURLE_OK;
   }
 
-  result = ftp_statemach(data, ctx, done);
+  result = ftp_statemach(data, ftpc, done);
   cf->shutdown = (result || *done);
   return result;
 }
