@@ -51,6 +51,7 @@
 #include "vtls/vtls_scache.h"
 #include "vquic/vquic.h"
 #include "url.h"
+#include "peer.h"
 #include "getinfo.h"
 #include "curlx/strdup.h"
 #include "easyif.h"
@@ -1104,6 +1105,12 @@ CURL *curl_easy_duphandle(CURL *curl)
       if(Curl_hsts_copy(outcurl->hsts, data->hsts))
         goto fail;
     }
+#endif
+
+#ifndef CURL_DISABLE_RTSP
+    /* The copied RTSP session ID keeps the origin it was learned from. */
+    Curl_peer_link(&outcurl->state.rtsp_session_origin,
+                   data->state.rtsp_session_origin);
 #endif
 
     /* we reach this point and thus we are OK */
