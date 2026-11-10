@@ -756,7 +756,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-awslc
         env:
-          cache-name: cache2-awslc
+          cache-name: cache1-awslc
         with:
           path: ~/pkg/awslc
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}-${{ runner.arch }}
@@ -777,7 +777,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache1-boringssl
         env:
-          cache-name: cache2-boringssl
+          cache-name: cache1-boringssl
         with:
           path: ~/pkg/boringssl
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}-${{ runner.arch }}
