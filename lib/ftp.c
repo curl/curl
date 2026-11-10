@@ -361,9 +361,8 @@ static int ftp_need_type(struct cf_ftp_ctx *ftpc,
 static void close_secondarysocket(struct Curl_easy *data,
                                   struct cf_ftp_ctx *ftpc)
 {
-  (void)ftpc;
   CURL_TRC_FTP(data, "[%s] closing DATA connection", FTP_CSTATE(ftpc));
-  Curl_cfchain_reset(&data->conn->chain_alt, data);
+  Curl_cfchain_reset(&ftpc->chain_data, data);
 }
 
 #ifdef CURL_PREFER_LF_LINEENDS
@@ -557,7 +556,7 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
   bool connected;
 
   CURL_TRC_FTP(data, "ftp_initiate_transfer()");
-  result = Curl_cfchain_connect(data, &data->conn->chain_alt, TRUE,
+  result = Curl_cfchain_connect(data, &ftpc->chain_data, TRUE,
                                 &connected);
   if(result || !connected)
     return result;
@@ -1348,7 +1347,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   /* replace any filter on SECONDARY with one listening on this socket */
   if(!result)
-    result = Curl_conn_tcp_listen_set(data, &conn->chain_alt, &portsock);
+    result = Curl_conn_tcp_listen_set(data, &ftpc->chain_data, &portsock);
 
   if(!result)
     portsock = CURL_SOCKET_BAD; /* now held in filter */
@@ -1364,9 +1363,9 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     /* successfully set up the listen socket filter. SSL needed?
      * Use the control connections origin for cert verification. */
     if(conn->bits.ftp_use_data_ssl && data->set.ftp_use_port &&
-       !Curl_cfchain_is_ssl(&conn->chain_alt)) {
+       !Curl_cfchain_is_ssl(&ftpc->chain_data)) {
       result = Curl_ssl_cfilter_add(data, Curl_conn_get_origin(conn),
-                                    &conn->chain_alt);
+                                    &ftpc->chain_data);
     }
     conn->bits.do_more = FALSE;
     Curl_expire(data, (data->set.accepttimeout > 0) ?
@@ -2124,7 +2123,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       goto error;
   }
 
-  result = Curl_conn_setup(data, conn, &conn->chain_alt,
+  result = Curl_conn_setup(data, conn, &ftpc->chain_data,
                            conn->bits.ftp_use_data_ssl ?
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
@@ -2150,7 +2149,10 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
           conn->origin2->hostname, conn->origin2->port);
   }
 #endif
-
+  if(FALSE) {
+    bool done;
+    result = Curl_cfchain_connect(data, &ftpc->chain_data, FALSE, &done);
+  }
   conn->bits.do_more = TRUE;
   ftp_state(data, ftpc, FTP_STOP); /* this phase is completed */
 
@@ -2208,14 +2210,14 @@ static CURLcode ftp_do_more(struct Curl_easy *data, domore *more)
    * - an SSL filter is in place and the server will not start the TLS
    *   handshake until we send more FTP commands
    */
-  if(conn->chain_alt.cf) {
-    bool is_eptr = Curl_cfchain_is_tcp_listen(&conn->chain_alt);
+  if(ftpc->chain_data.cf) {
+    bool is_eptr = Curl_cfchain_is_tcp_listen(&ftpc->chain_data);
 
-    result = Curl_cfchain_connect(data, &conn->chain_alt, FALSE, &connected);
+    result = Curl_cfchain_connect(data, &ftpc->chain_data, FALSE, &connected);
     if(result == CURLE_OUT_OF_MEMORY)
       return result;
     if(result || (!connected && !is_eptr &&
-                  !Curl_cfchain_is_ip_connected(&conn->chain_alt))) {
+                  !Curl_cfchain_is_ip_connected(&ftpc->chain_data))) {
       if(result && !is_eptr && (ftpc->count1 == 0)) {
         *more = DOMORE_GOBACK; /* go back to DOING please */
         /* this is a EPSV connect failing, try PASV instead */
@@ -2252,7 +2254,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, domore *more)
       bool serv_conned;
 
       result = Curl_cfchain_connect(
-        data, &data->conn->chain_alt, FALSE, &serv_conned);
+        data, &ftpc->chain_data, FALSE, &serv_conned);
       if(result)
         return result; /* Failed to accept data connection */
 
@@ -2735,7 +2737,7 @@ static CURLcode ftp_state_stor_resp(struct Curl_easy *data,
     ftp_state(data, ftpc, FTP_STOP); /* no longer in STOR state */
 
     result = Curl_cfchain_connect(
-      data, &data->conn->chain_alt, FALSE, &connected);
+      data, &ftpc->chain_data, FALSE, &connected);
     if(result)
       return result;
 
@@ -2833,7 +2835,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
       bool connected;
 
       result = Curl_cfchain_connect(
-        data, &data->conn->chain_alt, FALSE, &connected);
+        data, &ftpc->chain_data, FALSE, &connected);
       if(result)
         return result;
 
@@ -3628,7 +3630,7 @@ static CURLcode ftp_done_secondary_socket(struct Curl_easy *data,
                                           CURLcode result)
 {
   struct connectdata *conn = data->conn;
-  if(conn->chain_alt.cf) {
+  if(ftpc->chain_data.cf) {
     if(!result && ftpc->dont_check && data->req.maxdownload > 0) {
       /* partial download completed */
       result = Curl_pp_sendf(data, &ftpc->pp, "%s", "ABOR");
@@ -3846,7 +3848,7 @@ static CURLcode ftp_perform(
   /* run the state-machine */
   result = ftp_statemach(data, ftpc, dophase_done);
 
-  *connected = Curl_cfchain_is_connected(&data->conn->chain_alt);
+  *connected = Curl_cfchain_is_connected(&ftpc->chain_data);
 
   if(*connected)
     infof(data, "[FTP] [%s] perform, DATA connection established",
@@ -4256,7 +4258,7 @@ static void cf_ftp_ctx_free(struct cf_ftp_ctx *ctx,
                             struct Curl_easy *data)
 {
   if(ctx) {
-    (void)data;
+    Curl_cfchain_cleanup(&ctx->chain_data, data);
     freedirs(ctx);
     curlx_free(ctx->account);
     curlx_free(ctx->alternative_to_user);
@@ -4268,7 +4270,8 @@ static void cf_ftp_ctx_free(struct cf_ftp_ctx *ctx,
   }
 }
 
-static struct cf_ftp_ctx *cf_ftp_ctx_create(struct Curl_easy *data)
+static struct cf_ftp_ctx *cf_ftp_ctx_create(struct Curl_easy *data,
+                                            struct connectdata *conn)
 {
   struct cf_ftp_ctx *ftpc = curlx_calloc(1, sizeof(*ftpc));
   if(!ftpc)
@@ -4291,6 +4294,7 @@ static struct cf_ftp_ctx *cf_ftp_ctx_create(struct Curl_easy *data)
     }
   }
 
+  Curl_cfchain_init(&ftpc->chain_data, conn, FALSE);
   ftpc->ctl_valid = TRUE;
   ftpc->known_filesize = -1; /* unknown size for now */
   ftpc->use_ssl = data->set.use_ssl;
@@ -4341,9 +4345,7 @@ static CURLcode cf_ftp_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                             const uint8_t *buf, size_t blen, bool eos,
                             size_t *pnwritten)
 {
-  struct connectdata *conn = CF_CONN(cf);
   struct cf_ftp_ctx *ftpc = cf->ctx;
-  struct Curl_cfilter *cf_data;
   CURLcode result;
 
   if(!cf->connected) {
@@ -4353,8 +4355,7 @@ static CURLcode cf_ftp_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
-  cf_data = conn->chain_alt.cf;
-  if(!cf_data) {
+  if(!ftpc->chain_data.cf) {
     result = ftpc->data_shutdown ? CURLE_SEND_ERROR : CURLE_AGAIN;
     goto out;
   }
@@ -4363,20 +4364,20 @@ data_shutdown:
   *pnwritten = 0;
   if(ftpc->data_shutdown) {
     bool done = FALSE;
-    result = Curl_cshutdn_cfchain_try_once(data, &conn->chain_alt, &done);
+    result = Curl_cshutdn_cfchain_try_once(data, &ftpc->chain_data, &done);
     if(!result && !done) {
       result = CURLE_AGAIN;
       goto out;
     }
     /* ignore shutdown errors on send, server will tell us */
-    Curl_cfchain_reset(&conn->chain_alt, data);
+    Curl_cfchain_reset(&ftpc->chain_data, data);
     *pnwritten = blen;
     result = CURLE_OK;
     goto out;
   }
-  else if(!cf_data->connected) {
+  else if(!ftpc->chain_data.cf->connected) {
     bool connected;
-    result = Curl_conn_cf_connect(cf_data, data, &connected);
+    result = Curl_cfchain_connect(data, &ftpc->chain_data, FALSE, &connected);
     if(result)
       goto out;
     if(!connected) {
@@ -4385,7 +4386,8 @@ data_shutdown:
     }
   }
 
-  result = cf_data->cft->do_send(cf_data, data, buf, blen, eos, pnwritten);
+  result = ftpc->chain_data.cf->cft->do_send(
+    ftpc->chain_data.cf, data, buf, blen, eos, pnwritten);
   if(result)
     return result;
   else if(eos) {
@@ -4402,9 +4404,7 @@ out:
 static CURLcode cf_ftp_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                             char *buf, size_t blen, size_t *pnread)
 {
-  struct connectdata *conn = CF_CONN(cf);
   struct cf_ftp_ctx *ftpc = cf->ctx;
-  struct Curl_cfilter *cf_data;
   CURLcode result;
 
   *pnread = 0;
@@ -4415,8 +4415,7 @@ static CURLcode cf_ftp_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
-  cf_data = conn->chain_alt.cf;
-  if(!cf_data) {
+  if(!ftpc->chain_data.cf) {
     result = ftpc->data_shutdown ? CURLE_RECV_ERROR : CURLE_AGAIN;
     goto out;
   }
@@ -4424,18 +4423,18 @@ static CURLcode cf_ftp_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 data_shutdown:
   if(ftpc->data_shutdown) {
     bool done = FALSE;
-    result = Curl_cshutdn_cfchain_try_once(data, &conn->chain_alt, &done);
+    result = Curl_cshutdn_cfchain_try_once(data, &ftpc->chain_data, &done);
     if(!result && !done)
       result = CURLE_AGAIN;
     else {
-      Curl_cfchain_reset(&conn->chain_alt, data);
+      Curl_cfchain_reset(&ftpc->chain_data, data);
 
     }
     goto out;
   }
-  else if(!cf_data->connected) {
+  else if(!ftpc->chain_data.cf->connected) {
     bool connected;
-    result = Curl_conn_cf_connect(cf_data, data, &connected);
+    result = Curl_cfchain_connect(data, &ftpc->chain_data, FALSE, &connected);
     if(result)
       goto out;
     if(!connected) {
@@ -4444,7 +4443,8 @@ data_shutdown:
     }
   }
 
-  result = cf_data->cft->do_recv(cf_data, data, buf, blen, pnread);
+  result = ftpc->chain_data.cf->cft->do_recv(
+    ftpc->chain_data.cf, data, buf, blen, pnread);
   if(!result && !*pnread) {
     ftpc->data_shutdown = TRUE;
     goto data_shutdown;
@@ -4479,38 +4479,37 @@ static CURLcode cf_ftp_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct easy_pollset *ps)
 {
-  struct connectdata *conn = CF_CONN(cf);
   struct cf_ftp_ctx *ftpc = cf->ctx;
-  struct Curl_cfilter *cf_data = conn->chain_alt.cf;
   CURLcode result = CURLE_OK;
-  curl_socket_t sock, sock_data;
   bool want_recv, want_send;
 
-  if(!ftpc || !cf->next)
+  if(!ftpc)
     return CURLE_OK;
 
-  sock = Curl_conn_cf_get_socket(cf->next, data);
-  if(sock == CURL_SOCKET_BAD)
-    return CURLE_OK;
-
-  if(cf_data) {
-    Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
-    sock_data = Curl_conn_cf_get_socket(cf_data, data);
-    if(sock_data != CURL_SOCKET_BAD) {
-      if(want_send)
-        result = Curl_pollset_add_out(data, ps, sock_data);
-      if(!result && want_recv)
-        result = Curl_pollset_add_in(data, ps, sock_data);
-      if(result)
-        return result;
+  if(ftpc->chain_data.cf) {
+    if(ftpc->chain_data.cf->connected) {
+      Curl_pollset_check(data, ps, cf->chain->sock, &want_recv, &want_send);
+      if(ftpc->chain_data.sock != CURL_SOCKET_BAD) {
+        if(want_send)
+          result = Curl_pollset_add_out(data, ps, ftpc->chain_data.sock);
+        if(!result && want_recv)
+          result = Curl_pollset_add_in(data, ps, ftpc->chain_data.sock);
+        if(result)
+          return result;
+      }
     }
+    result = Curl_cfchain_adjust_pollset(data, &ftpc->chain_data, ps);
+    if(result)
+      return result;
   }
 
-  if(ftpc->pp.sendleft)
-    return Curl_pollset_change(data, ps, sock,
+  if(cf->chain->sock == CURL_SOCKET_BAD)
+    return CURLE_OK;
+  else if(ftpc->pp.sendleft)
+    return Curl_pollset_change(data, ps, cf->chain->sock,
       CURL_POLL_IN | CURL_POLL_OUT, 0);
   else
-    return Curl_pollset_set_in_only(data, ps, sock);
+    return Curl_pollset_set_in_only(data, ps, cf->chain->sock);
 }
 
 struct Curl_cftype Curl_cft_ftp = {
@@ -4607,7 +4606,7 @@ static CURLcode cf_ftp_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
-  ctx = cf_ftp_ctx_create(data);
+  ctx = cf_ftp_ctx_create(data, data->conn);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

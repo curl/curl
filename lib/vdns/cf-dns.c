@@ -473,10 +473,15 @@ static CURLcode cf_dns_add(struct Curl_easy *data,
 #endif
 
   result = cf_dns_create(&cf, data, peer, dns_queries, transport, for_proxy);
-  if(result)
-    goto out;
-  Curl_cfchain_add(chain, cf);
-out:
+  if(!result) {
+    struct cf_dns_ctx *ctx = cf->ctx;
+    Curl_cfchain_add(chain, cf);
+    if(!ctx->started) {
+      ctx->started = TRUE;
+      ctx->resolv_result = cf_dns_start(cf, data, &ctx->dns);
+    }
+  }
+
   return result;
 }
 
@@ -496,11 +501,16 @@ static CURLcode cf_dns_insert_after(struct Curl_cfilter *cf_at,
   CURLcode result;
 
   result = cf_dns_create(&cf, data, peer, dns_queries, transport, FALSE);
-  if(result)
-    return result;
+  if(!result) {
+    struct cf_dns_ctx *ctx = cf->ctx;
 
-  Curl_conn_cf_insert_after(cf_at, cf);
-  return CURLE_OK;
+    Curl_conn_cf_insert_after(cf_at, cf);
+    if(!ctx->started) {
+      ctx->started = TRUE;
+      ctx->resolv_result = cf_dns_start(cf, data, &ctx->dns);
+    }
+  }
+  return result;
 }
 
 static CURLcode cf_dns_add_resolve(struct Curl_easy *data,

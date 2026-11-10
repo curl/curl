@@ -498,7 +498,9 @@ Curl_conn_get_remote_addr(struct Curl_easy *data);
 CURLcode Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
                                      struct easy_pollset *ps);
-
+CURLcode Curl_cfchain_adjust_pollset(struct Curl_easy *data,
+                                     struct Curl_cfchain *chain,
+                                     struct easy_pollset *ps);
 /**
  * Adjust pollset from filters installed at transfer's connection.
  */

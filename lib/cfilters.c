@@ -738,15 +738,10 @@ CURLcode Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
   return result;
 }
 
-CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  struct easy_pollset *ps)
+CURLcode Curl_cfchain_adjust_pollset(struct Curl_easy *data,
+                                     struct Curl_cfchain *chain,
+                                     struct easy_pollset *ps)
 {
-  CURLcode result = CURLE_OK;
-  const bool want_io = !!ps->n;
-
-  DEBUGASSERT(data);
-  DEBUGASSERT(conn);
   /* During connect time, connection filters may add sockets to the pollset
    * even when the transfer neither wants to send nor receive. And those
    * sockets, when having events, are served. The same applies to a
@@ -760,13 +755,26 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
    * connect or shutdown does not add poll events for the other. Check
    * against the transfer's own interest, before any chain added sockets
    * of its own. */
-  if(conn->chain.cf &&
-     (want_io || !conn->chain.cf->connected ||
-        CURL_CFCHAIN_IN_SHUTDOWN(&conn->chain))) {
-    result = Curl_conn_cf_adjust_pollset(conn->chain.cf, data, ps);
-    if(result)
-      return result;
+  if(chain->cf &&
+     (!!ps->n || !chain->cf->connected || CURL_CFCHAIN_IN_SHUTDOWN(chain))) {
+    return Curl_conn_cf_adjust_pollset(chain->cf, data, ps);
   }
+  return CURLE_OK;
+}
+
+CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  struct easy_pollset *ps)
+{
+  CURLcode result = CURLE_OK;
+  const bool want_io = !!ps->n;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(conn);
+  result = Curl_cfchain_adjust_pollset(data, &conn->chain, ps);
+  if(result)
+    return result;
+
   if(conn->chain_alt.cf &&
      (want_io || !conn->chain_alt.cf->connected ||
         CURL_CFCHAIN_IN_SHUTDOWN(&conn->chain_alt))) {
