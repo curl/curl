@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK%CR
+Content-Length: 5%CR
+%CRX-Bad: he%hex[%00]hex%llo%CR
+body
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+HTTP response with a NUL byte in the header terminator
+</name>
+<command>
+-i http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<stdout crlf="yes">
+HTTP/1.1 200 OK
+Content-Length: 5
+</stdout>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>
