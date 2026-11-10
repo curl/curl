@@ -143,7 +143,6 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  *                   this gives the time the first bytes from the server
  *                   were received.
  *                   -1 if not determined yet.
- * - CF_QUERY_SOCKET: the socket used by the filter chain
  * - CF_QUERY_NEED_FLUSH: TRUE iff any of the filters have unsent data
  * - CF_QUERY_IP_INFO: res1 says if connection used IPv6, res2 is the
  *                   ip quadruple
@@ -167,8 +166,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
 #define CF_QUERY_CONNECT_REPLY_MS   2  /* number     -        */
-#define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
-/* unused 4 + 5 */
+/* unused 3 + 4 + 5 */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
@@ -359,13 +357,6 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
                             bool ignore_result,
                             int event, int arg1, void *arg2);
 
-/**
- * Get the socket used by the filter chain starting at `cf`.
- * Returns CURL_SOCKET_BAD if not available.
- */
-curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data);
-
 CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   bool *is_ipv6, struct ip_quadruple *ipquad);
@@ -476,13 +467,6 @@ CURLcode Curl_cfchain_flush(struct Curl_easy *data,
 /* Perform maintenance on the connection filters.
  * Sends CF_CTRL_MAINTENANCE to filters. */
 CURLcode Curl_conn_do_maintenance(struct Curl_easy *data);
-
-/**
- * Return the socket used on data's connection primary chain,
- * querying filters if the whole chain has not connected yet.
- * Returns CURL_SOCKET_BAD if not available.
- */
-curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data);
 
 /* Get first filter instance of given type in the primary chain */
 struct Curl_cfilter *Curl_conn_get_first_cf(struct connectdata *conn,

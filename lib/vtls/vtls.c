@@ -237,7 +237,7 @@ CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
 
   if(connssl->io_need) {
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+    curl_socket_t sock = cf->chain->sock;
     CURLcode result = CURLE_OK;
     if(sock != CURL_SOCKET_BAD) {
       if(connssl->io_need & CURL_SSL_IO_NEED_SEND) {

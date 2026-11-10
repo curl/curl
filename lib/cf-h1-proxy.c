@@ -827,7 +827,7 @@ static CURLcode cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
   if(!cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are tunneling. */
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sock = cf->chain->sock;
     if(ts) {
       /* when we have sent a CONNECT to a proxy, we should rather either
          wait for the socket to become readable to be able to get the

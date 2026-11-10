@@ -4641,7 +4641,7 @@ static CURLcode cf_ftp_ctl_poll(struct Curl_easy *data, void *io_user_data,
   if(cf->next->cft->has_data_pending(cf->next, data))
     return CURLE_OK;
   else {
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+    curl_socket_t sock = cf->chain->sock;
     int rc = Curl_socket_check(want_send ? sock : CURL_SOCKET_BAD,
                                want_recv ? sock : CURL_SOCKET_BAD,
                                timeout_ms);

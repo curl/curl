@@ -216,7 +216,7 @@ static CURLcode cf_capsule_adjust_pollset(struct Curl_cfilter *cf,
   struct cf_capsule_ctx *ctx = cf->ctx;
 
   if(!Curl_bufq_is_empty(&ctx->sendbuf)) {
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sock = cf->chain->sock;
     if(sock != CURL_SOCKET_BAD)
       return Curl_pollset_add_out(data, ps, sock);
   }

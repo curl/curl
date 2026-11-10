@@ -1877,10 +1877,6 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
   switch(query) {
-  case CF_QUERY_SOCKET:
-    DEBUGASSERT(pres2);
-    *((curl_socket_t *)pres2) = ctx->sock;
-    return CURLE_OK;
   case CF_QUERY_TRANSPORT:
     DEBUGASSERT(pres1);
     *pres1 = ctx->transport;

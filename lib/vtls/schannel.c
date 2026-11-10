@@ -1349,7 +1349,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
        InitializeSecurityContext to continue processing the received TLS
        records. This is because that function is not idempotent and we do not
        support partial save/resume sending replies of handshake tokens. */
-    if(!SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), 0)) {
+    if(!SOCKET_WRITABLE(cf->chain->sock, 0)) {
       SCH_DEV(infof(data, "schannel: handshake waiting for writable socket"));
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       curlx_free(inbuf[0].pvBuffer);
@@ -1800,7 +1800,7 @@ static CURLcode schannel_recv_renegotiate(
   else
     SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_send"));
 
-  sockfd = Curl_conn_cf_get_socket(cf, data);
+  sockfd = cf->chain->sock;
 
   if(sockfd == CURL_SOCKET_BAD) {
     failf(data, "schannel: renegotiation missing socket");
@@ -2054,7 +2054,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       else if(!timeout_ms)
         timeout_ms = TIMEDIFF_T_MAX;
-      what = SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), timeout_ms);
+      what = SOCKET_WRITABLE(cf->chain->sock, timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

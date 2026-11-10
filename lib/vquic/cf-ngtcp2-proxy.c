@@ -987,7 +987,7 @@ static CURLcode cf_h3_proxy_adjust_pollset(struct Curl_cfilter *cf,
   bool want_recv, want_send;
   CURLcode result = CURLE_OK;
   curl_socket_t sock = (ctx->q.sockfd != CURL_SOCKET_BAD) ?
-   ctx->q.sockfd : Curl_conn_cf_get_socket(cf, data);
+   ctx->q.sockfd : cf->chain->sock;
 
   if(!ctx->qconn || !pctx->tunnel.stream || (sock == CURL_SOCKET_BAD))
     return CURLE_OK;

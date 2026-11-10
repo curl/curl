@@ -1022,7 +1022,6 @@ static CURLcode mstate_connecting_pollset(struct Curl_easy *data,
                                           struct easy_pollset *ps)
 {
   struct connectdata *conn = data->conn;
-  curl_socket_t sockfd;
   CURLcode result = CURLE_OK;
 
   if(Curl_xfer_recv_is_paused(data))
@@ -1030,9 +1029,8 @@ static CURLcode mstate_connecting_pollset(struct Curl_easy *data,
   /* If a socket is set, receiving is default. If the socket
    * has not been determined yet (eyeballing), always ask the
    * connection filters for what to monitor. */
-  sockfd = Curl_conn_get_first_socket(data);
-  if(sockfd != CURL_SOCKET_BAD) {
-    result = Curl_pollset_change(data, ps, sockfd, CURL_POLL_IN, 0);
+  if(conn->chain.sock != CURL_SOCKET_BAD) {
+    result = Curl_pollset_change(data, ps, conn->chain.sock, CURL_POLL_IN, 0);
     if(!result)
       result = multi_adjust_pollset(data, ps);
   }

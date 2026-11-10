@@ -127,7 +127,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
   *pnread = 0;
   for(;;) {
     timediff_t timeout_ms = Curl_timeleft_ms(data);
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sock = cf->chain->sock;
 
     if(timeout_ms < 0) {
       /* we already got the timeout */
@@ -1256,7 +1256,7 @@ static CURLcode socks_cf_adjust_pollset(struct Curl_cfilter *cf,
   if(!cf->connected && sx) {
     /* If we are not connected, the filter below is and has nothing
      * to wait on, we determine what to wait for. */
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sock = cf->chain->sock;
     switch(sx->state) {
     case SOCKS4_ST_SEND:
     case SOCKS5_ST_REQ0_SEND:

@@ -2384,7 +2384,7 @@ static CURLcode cf_h2_adjust_pollset(struct Curl_cfilter *cf,
   if(!Curl_ngh2_valid(&ctx->ngh2))
     return CURLE_OK;
 
-  sock = Curl_conn_cf_get_socket(cf, data);
+  sock = cf->chain->sock;
   Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
   if(want_recv || want_send) {
     struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);

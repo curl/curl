@@ -396,7 +396,7 @@ CURLcode Curl_cfchain_connect(struct Curl_easy *data,
       /* check allowed time left */
       const struct curltime *pnow = Curl_pgrs_now(data);
       timediff_t timeout_ms = Curl_timeleft_now_ms(data, pnow);
-      curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+      curl_socket_t sockfd = cf->chain->sock;
       int rc;
 
       if(timeout_ms < 0) {

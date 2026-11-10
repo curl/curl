@@ -859,15 +859,6 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
   return result;
 }
 
-curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
-{
-  curl_socket_t sock;
-  if(cf && !cf->cft->query(cf, data, CF_QUERY_SOCKET, NULL, &sock))
-    return sock;
-  return CURL_SOCKET_BAD;
-}
-
 unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
                                          struct Curl_easy *data)
 {
@@ -910,21 +901,6 @@ CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
     *is_ipv6 = !!ipv6;
   }
   return result;
-}
-
-curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data)
-{
-  struct Curl_cfchain *chain;
-
-  if(!data->conn)
-    return CURL_SOCKET_BAD;
-
-  chain = &data->conn->chain;
-  /* if the top filter has not connected, ask it (and its sub-filters)
-   * for the socket. Otherwise chain->sock should have it. */
-  if(chain->cf && !chain->cf->connected)
-    return Curl_conn_cf_get_socket(chain->cf, data);
-  return chain->sock;
 }
 
 struct Curl_cfilter *Curl_conn_get_first_cf(struct connectdata *conn,

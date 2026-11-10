@@ -845,7 +845,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
 
   switch(ctx->state) {
   case SCFST_INIT:
-    DEBUGASSERT(CURL_SOCKET_BAD == Curl_conn_cf_get_socket(cf, data));
+    DEBUGASSERT(CURL_SOCKET_BAD == cf->chain->sock);
     DEBUGASSERT(!cf->connected);
     result = cf_ip_happy_init(cf, data);
     if(result)

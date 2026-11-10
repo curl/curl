@@ -1114,7 +1114,7 @@ static CURLcode cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
-  curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+  curl_socket_t sock = cf->chain->sock;
   bool want_recv, want_send;
   CURLcode result = CURLE_OK;
 

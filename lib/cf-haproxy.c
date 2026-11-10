@@ -173,8 +173,7 @@ static CURLcode cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
   if(cf->next->connected && !cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are sending. */
-    return Curl_pollset_set_out_only(
-      data, ps, Curl_conn_cf_get_socket(cf, data));
+    return Curl_pollset_set_out_only(data, ps, cf->chain->sock);
   }
   return CURLE_OK;
 }
