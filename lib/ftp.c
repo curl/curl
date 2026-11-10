@@ -4390,7 +4390,7 @@ data_shutdown:
     ftpc->chain_data.cf, data, buf, blen, eos, pnwritten);
   if(result)
     return result;
-  else if(eos) {
+  else if(eos && (*pnwritten == blen)) {
     ftpc->data_shutdown = TRUE;
     goto data_shutdown;
   }

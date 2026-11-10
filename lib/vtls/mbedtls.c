@@ -88,6 +88,7 @@ struct mbed_ssl_backend_data {
 #endif
   int *ciphersuites;
   size_t send_blocked_len;
+  CURLcode last_io_result;
   BIT(initialized); /* mbedtls_ssl_context is initialized */
   BIT(sent_shutdown);
   BIT(send_blocked);
@@ -131,6 +132,9 @@ static int mbedtls_bio_cf_write(void *bio,
                                 const unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct mbed_ssl_backend_data *backend =
+    (struct mbed_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   size_t nwritten;
   CURLcode result;
@@ -142,6 +146,7 @@ static int mbedtls_bio_cf_write(void *bio,
   result = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &nwritten);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %d, %zu",
               blen, (int)result, nwritten);
+  backend->last_io_result = result;
   if(result == CURLE_AGAIN)
     return MBEDTLS_ERR_SSL_WANT_WRITE;
   return result ? -1 : (int)nwritten;
@@ -150,6 +155,9 @@ static int mbedtls_bio_cf_write(void *bio,
 static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct mbed_ssl_backend_data *backend =
+    (struct mbed_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   size_t nread = 0;
   CURLcode result;
@@ -164,6 +172,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
   result = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &nread);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %d, %zu",
               blen, (int)result, nread);
+  backend->last_io_result = result;
   if(result == CURLE_AGAIN)
     return MBEDTLS_ERR_SSL_WANT_READ;
   /* nread is never larger than int here */
@@ -1374,7 +1383,8 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
       default:
         CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X",
                     (unsigned int)-ret);
-        result = CURLE_RECV_ERROR;
+        result = backend->last_io_result ?
+                 backend->last_io_result : CURLE_RECV_ERROR;
         goto out;
       }
     }
@@ -1416,7 +1426,15 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
   else {
     CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X",
                 (unsigned int)-ret);
-    result = CURLE_RECV_ERROR;
+    result = backend->last_io_result ?
+             backend->last_io_result : CURLE_RECV_ERROR;
+    if((backend->last_io_result == CURLE_RECV_ERROR) &&
+        Curl_ssl_cf_is_proxy(cf)) {
+      /* The proxy seems to have just closed the connection.
+       * That should be fine. */
+      result = CURLE_OK;
+      *done = TRUE;
+    }
   }
 
 out:
@@ -1475,6 +1493,7 @@ do_read:
       result = mbed_new_session(cf, data);
       /* This is not blocking anything. We can try again until a
        * "real" result comes. */
+      CURL_TRC_CF(data, cf, "mbed_new_session() -> %d", (int)result);
       if(!result)
         goto do_read;
       break;

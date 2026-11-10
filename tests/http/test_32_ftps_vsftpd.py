@@ -230,7 +230,7 @@ class TestFtpsVsFTPD:
         with open(srcfile) as fd:
             newlines = len(fd.readlines())
         assert (srcsize + newlines) == dstsize, \
-            f'expected source with {newlines} lines to be that much larger,'\
+            f'expected source with {newlines} lines to be that much larger, '\
             f'instead srcsize={srcsize}, upload size={dstsize}, diff={dstsize-srcsize}'
 
     def test_32_08_active_download(self, env: Env, vsftpds: VsFTPD):
