@@ -24,6 +24,7 @@
 #include "unitcheck.h"
 #include "urldata.h"
 #include "url.h"
+#include "peer.h"
 
 static CURLcode t1620_setup(void)
 {
@@ -98,10 +99,39 @@ static CURLcode test_unit1620(const char *arg)
   result = curl_easy_setopt((CURL *)empty, CURLOPT_NOBODY, 1L);
   fail_unless(result == CURLE_OK, "curl_easy_setopt(CURLOPT_NOBODY) failed");
 
+#ifndef CURL_DISABLE_RTSP
+  result = Curl_peer_create(empty, &Curl_scheme_rtsp, "[::1%123]", 554,
+                            &empty->state.rtsp_session_origin);
+  if(result) {
+    Curl_close(&empty);
+    unittest_abort("RTSP session origin creation failed");
+  }
+#endif
+
   dupe = (struct Curl_easy *)curl_easy_duphandle((CURL *)empty);
   if(!dupe)
     Curl_close(&empty);
   abort_unless(dupe, "curl_easy_duphandle() failed");
+
+#ifndef CURL_DISABLE_RTSP
+  abort_unless(dupe->state.rtsp_session_origin,
+               "duplicate lost the RTSP session origin");
+  fail_unless(dupe->state.rtsp_session_origin !=
+              empty->state.rtsp_session_origin,
+              "duplicate must own a separate RTSP session origin");
+  fail_unless(Curl_peer_equal(dupe->state.rtsp_session_origin,
+                              empty->state.rtsp_session_origin),
+              "duplicate must preserve the RTSP session origin");
+  fail_unless(dupe->state.rtsp_session_origin->refcount == 1 &&
+              empty->state.rtsp_session_origin->refcount == 1,
+              "RTSP session origins must have independent reference counts");
+  fail_unless(dupe->state.rtsp_session_origin->scopeid ==
+              empty->state.rtsp_session_origin->scopeid &&
+              !strcmp(dupe->state.rtsp_session_origin->zoneid, "123") &&
+              !strcmp(dupe->state.rtsp_session_origin->user_hostname,
+                      "[::1%123]"),
+              "duplicate must preserve the IPv6 zone, scope and user host");
+#endif
 
   result = Curl_init_transfer(dupe, NULL);
   fail_unless(result == CURLE_OK, "Curl_init_transfer() on duplicate failed");
