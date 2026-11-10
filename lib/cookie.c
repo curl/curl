@@ -1764,6 +1764,8 @@ error:
   return result;
 }
 
+/* keep this function read-only, do not modify the source list */
+
 static struct curl_slist *cookie_list(const struct Curl_easy *data)
 {
   struct curl_slist *list = NULL;
@@ -1771,19 +1773,19 @@ static struct curl_slist *cookie_list(const struct Curl_easy *data)
   struct curl_slist **tail = &list;
   unsigned int i;
   struct Curl_llist_node *n;
+  curl_off_t now;
 
   if(!data->cookies || (data->cookies->numcookies == 0))
     return NULL;
 
-  /* at first, remove expired cookies */
-  remove_expired(data->cookies);
+  now = (curl_off_t)time(NULL);
 
   for(i = 0; i < COOKIE_HASH_SIZE; i++) {
     for(n = Curl_llist_head(&data->cookies->cookielist[i]); n;
         n = Curl_node_next(n)) {
       struct Cookie *c = Curl_node_elem(n);
       char *line;
-      if(!c->domain || !c->domain[0])
+      if((c->expires && (c->expires < now)) || !c->domain || !c->domain[0])
         continue;
       line = get_netscape_format(c);
       if(!line) {
