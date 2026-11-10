@@ -22,6 +22,7 @@ HTTP/1.1 407 Authorization Required to proxy me my dear swsbounce
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Proxy-Connection: Keep-Alive
 Content-Length: 0
+Transfer-Encoding: gzip
 Transfer-Encoding: chunked
 
 20
