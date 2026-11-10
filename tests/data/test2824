@@ -21,6 +21,7 @@ connection-monitor
 HTTP/1.1 407 Authorization Required to proxy me my dear swsbounce
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Proxy-Connection: Keep-Alive
+Content-Length: 0
 Transfer-Encoding: chunked
 
 20
@@ -35,7 +36,10 @@ FA0
 <connect1  crlf="yes">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsbounce
 Proxy-Authenticate: Basic
+Transfer-Encoding: identity
 Content-Length: 0
+
+HTTP/1.1 200 Connection established
 
 </connect1>
 
@@ -58,7 +62,7 @@ digest
 !SSPI
 </features>
 <name>
-HTTP proxy CONNECT 2 407s, chunked-encoded and 0-length
+HTTP proxy CONNECT 407s with chunked and close-delimited bodies
 </name>
 <command>
 http://test.remote.example.com.%TESTNUMBER:1024/path/%TESTNUMBER0003 --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-anyauth --proxytunnel --connect-timeout 10
@@ -78,6 +82,7 @@ Proxy-Authorization: Digest username="testuser", realm="weirdorealm", nonce="123
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
+[DISCONNECT]
 CONNECT test.remote.example.com.%TESTNUMBER:1024 HTTP/1.1
 Host: test.remote.example.com.%TESTNUMBER:1024
 Proxy-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
