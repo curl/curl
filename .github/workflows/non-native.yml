@@ -40,7 +40,7 @@ env:
 jobs:
   cross:
     name: "${{ matrix.os }} ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.cc }} ${{ matrix.desc }} ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     defaults:
       run:
@@ -255,7 +255,7 @@ jobs:
 
   amiga:
     name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     cache-mode: write
     env:
@@ -486,7 +486,7 @@ jobs:
 
   msdos:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp !ssl i586"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     cache-mode: write
     env:
