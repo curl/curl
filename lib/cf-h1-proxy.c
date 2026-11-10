@@ -401,18 +401,6 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
       ts->chunked_encoding = Curl_compareheader(header,
                                                 STRCONST("Transfer-Encoding:"),
                                                 STRCONST("chunked"));
-      if(ts->chunked_encoding) {
-        CURL_TRC_CF(data, cf, "CONNECT%s response chunked",
-                    is_udp ? "-UDP" : "");
-        Curl_httpchunk_reset(data, &ts->ch, TRUE);
-      }
-      else {
-        /* With no chunked framing, the response body ends at connection
-           close. Do not reuse this connection for an auth retry. */
-        CURL_TRC_CF(data, cf, "CONNECT%s response close-delimited",
-                    is_udp ? "-UDP" : "");
-        ts->close_connection = TRUE;
-      }
     }
   }
   else if(is_udp && checkprefix("Capsule-protocol:", header)) {
@@ -469,6 +457,18 @@ static CURLcode single_header(struct Curl_cfilter *cf,
 
   if(ISNEWLINE(linep[0])) {
     /* end of response-headers from the proxy */
+    if(ts->has_transfer_encoding) {
+      if(ts->chunked_encoding) {
+        CURL_TRC_CF(data, cf, "CONNECT response chunked");
+        Curl_httpchunk_reset(data, &ts->ch, TRUE);
+      }
+      else {
+        /* The final transfer coding is not chunked, so the response body
+           ends at connection close. Do not reuse it for an auth retry. */
+        CURL_TRC_CF(data, cf, "CONNECT response close-delimited");
+        ts->close_connection = TRUE;
+      }
+    }
     if(ts->headerlines == 1) {
       ts->keepon = KEEPON_DONE;
       result = CURLE_WEIRD_SERVER_REPLY;
