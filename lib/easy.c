@@ -1109,8 +1109,9 @@ CURL *curl_easy_duphandle(CURL *curl)
 
 #ifndef CURL_DISABLE_RTSP
     /* The copied RTSP session ID keeps the origin it was learned from. */
-    Curl_peer_link(&outcurl->state.rtsp_session_origin,
-                   data->state.rtsp_session_origin);
+    if(Curl_peer_dup(data->state.rtsp_session_origin,
+                     &outcurl->state.rtsp_session_origin))
+      goto fail;
 #endif
 
     /* we reach this point and thus we are OK */
@@ -1121,6 +1122,9 @@ CURL *curl_easy_duphandle(CURL *curl)
 
 fail:
   if(outcurl) {
+#ifndef CURL_DISABLE_RTSP
+    Curl_peer_unlink(&outcurl->state.rtsp_session_origin);
+#endif
 #ifndef CURL_DISABLE_COOKIES
     curlx_free(outcurl->cookies);
 #endif

@@ -60,6 +60,10 @@ CURLcode Curl_peer_create(struct Curl_easy *data,
                           uint16_t port,
                           struct Curl_peer **ppeer);
 
+/* Duplicate a peer with its metadata and independent lifetime. */
+CURLcode Curl_peer_dup(const struct Curl_peer *src,
+                       struct Curl_peer **pdest);
+
 #ifdef USE_UNIX_SOCKETS
 CURLcode Curl_peer_uds_create(const struct Curl_scheme *scheme,
                               const char *path,
