@@ -64,7 +64,7 @@ they will cease their involvement in development and maintenance from April
 
 Maintaining and developing a TLS library is a major undertaking, and there are
 many existing and capable alternatives already. We do not expect there to
-appear an new maintainer team for mbedTLS when this time comes, so come April
+appear a new maintainer team for mbedTLS when this time comes, so come April
 2027 anything building with and relying on mbedTLS will start to deteriorate.
 
 Provided there is not a believable maintainer team at that point, we drop
