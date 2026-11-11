@@ -55,7 +55,7 @@ TLS libraries provide their own functions for verification.
 
 Pending PR: https://github.com/curl/curl/pull/22845
 
-## MbedTLS
+## mbedTLS
 
 The mbedTLS team has
 [announced](https://lists.trustedfirmware.org/archives/list/mbed-tls@lists.trustedfirmware.org/thread/YPIGCB7WN6GCHOGEGKOJXUYAP7OK527W/)
@@ -68,7 +68,7 @@ appear a new maintainer team for mbedTLS when this time comes, so come April
 2027 anything building with and relying on mbedTLS starts to deteriorate.
 
 Provided there is not a believable maintainer team at that point, we drop
-support for MbedTLS from curl in May 2027.
+support for mbedTLS from curl in May 2027.
 
 ## Past removals
 
