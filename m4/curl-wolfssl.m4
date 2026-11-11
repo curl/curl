@@ -133,19 +133,11 @@ if test "$OPT_WOLFSSL" != "no"; then
     AC_CHECK_FUNCS([wolfSSL_set_quic_use_legacy_codepoint], [QUIC_ENABLED=yes])
 
     dnl wolfSSL needs configure --enable-opensslextra to have *get_peer*
-    dnl wc_Des_EcbEncrypt is needed for NTLM support.
     dnl if wolfSSL_BIO_set_shutdown is present, we have the full BIO feature set
     AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
                    wolfSSL_UseALPN \
                    wolfSSL_BIO_new \
-                   wolfSSL_BIO_set_shutdown \
-                   wc_Des_EcbEncrypt)
-
-    dnl if this symbol is present, we want the include path to include the
-    dnl OpenSSL API root as well
-    if test "$ac_cv_func_wc_Des_EcbEncrypt" = "yes"; then
-      HAVE_WC_DES_ECBENCRYPT=1
-    fi
+                   wolfSSL_BIO_set_shutdown)
 
     dnl if this symbol is present, we can make use of BIO filter chains
     if test "$ac_cv_func_wolfSSL_BIO_new" = "yes"; then
