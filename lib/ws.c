@@ -700,6 +700,7 @@ static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
   bool auto_pong = !data->set.ws_raw_mode && !data->set.ws_no_auto_pong;
   curl_off_t remain;
   CURLcode result;
+  size_t passlen;
 
   (void)frame_age;
   *pnwritten = 0;
@@ -708,6 +709,7 @@ static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
     DEBUGASSERT(0); /* parameter mismatch */
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
+  passlen = buflen;
 
   if(auto_pong && (frame_flags & CURLWS_PING)) {
     result = ws_auto_pong(data, ws, buf, buflen, payload_offset,
@@ -716,19 +718,21 @@ static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
       return result;
   }
   else if(buflen || !remain) {
+    /* Keep the chunk within one callback so its metadata matches the data. */
+    passlen = CURLMIN(buflen, (size_t)CURL_MAX_WRITE_SIZE);
     /* forward the decoded frame to the next client writer. */
     update_meta(ws, frame_age, frame_flags, payload_offset,
-                payload_len, buflen);
+                payload_len, passlen);
     ctx->cw_ctx->recvframe = ws->recvframe;
 
-    CURL_TRC_WRITE(data, "[WS] pass %zu decoded bytes", buflen);
+    CURL_TRC_WRITE(data, "[WS] pass %zu decoded bytes", passlen);
     result = Curl_cwriter_write(data, ctx->next_writer,
                                 (ctx->cw_type | CLIENTWRITE_0LEN),
-                                (const char *)buf, buflen);
+                                (const char *)buf, passlen);
     if(result)
       return result;
   }
-  *pnwritten = buflen;
+  *pnwritten = passlen;
   return CURLE_OK;
 }
 
