@@ -329,6 +329,7 @@ LIB_HFILES =         \
   curl_memrchr.h     \
   curl_printf.h      \
   curl_range.h       \
+  curl_refcount.h    \
   curl_sasl.h        \
   curl_setup.h       \
   curl_sha256.h      \
