@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-J
+trailer
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK%CR
+Transfer-Encoding: chunked%CR
+Trailer: Digest%CR
+Connection: close%CR
+%CR
+5%CR
+HELLO%CR
+0%CR
+Digest: abc123%CR
+%CR
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+HTTP GET -O -J, unrelated Trailer field must not hang
+</name>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/adv%TESTNUMBER -O -J --output-dir %LOGDIR
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /adv%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file name="%LOGDIR/adv%TESTNUMBER" nonewline="yes">
+HELLO
+</file>
+</verify>
+</testcase>

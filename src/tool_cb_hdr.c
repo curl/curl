@@ -279,6 +279,8 @@ static bool trailer_lists_cd(const char *str, const char *end)
     size_t len;
     while((p < end) && (*p == ' ' || *p == '\t' || *p == ','))
       p++;
+    if((p >= end) || (*p == '\r') || (*p == '\n'))
+      break; /* the end of the header value */
     tok = p;
     while((p < end) && (*p != ',') && (*p != ' ') && (*p != '\t') &&
           (*p != '\r') && (*p != '\n'))
@@ -319,17 +321,27 @@ static void track_cd_trailer(struct HdrCbData *hdrcbdata,
  * arrives, which is after the body, so the transfer must be refused
  * before an existing file is touched. When no file exists, nothing
  * can be clobbered and the transfer is left to proceed as before.
+ *
+ * Informational (1xx) responses and 304 responses carry no body, so
+ * they cannot clobber anything: the refusal only applies to the final
+ * response, whose own header block ends before its body is written.
+ * The protection also only applies to the default clobber mode: with
+ * CLOBBER_NEVER the output file is never truncated, and with
+ * CLOBBER_ALWAYS the user explicitly asked for the overwrite that
+ * --clobber documents as overriding -J.
  */
 static bool cd_trailer_would_clobber(struct per_transfer *per,
-                                     const char *str, size_t cb)
+                                     const char *str, size_t cb,
+                                     long response)
 {
   struct HdrCbData *hdrcbdata = &per->hdrcbdata;
   struct OutStruct *outs = &per->outs;
 
   if((cb <= 2) && (str[0] == '\r' || str[0] == '\n') &&
+     (response / 100 != 1) && (response != 304) &&
      hdrcbdata->honor_cd_filename && hdrcbdata->cd_trailer_announced &&
      !outs->stream && outs->filename && !outs->is_cd_filename &&
-     (per->config->file_clobber_mode != CLOBBER_NEVER)) {
+     (per->config->file_clobber_mode == CLOBBER_DEFAULT)) {
     curlx_struct_stat st;
     if(!curlx_stat(outs->filename, &st) && S_ISREG(st.st_mode)) {
       warnf("Refusing to overwrite '%s': the server announced a "
@@ -553,7 +565,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
     track_cd_trailer(hdrcbdata, str, end);
 
-    if(cd_trailer_would_clobber(per, str, cb))
+    if(cd_trailer_would_clobber(per, str, cb, response))
       /* The end of a header block (or of a trailer block) while a
          Content-Disposition trailer was announced */
       return CURL_WRITEFUNC_ERROR;

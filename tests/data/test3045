@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Content-Disposition
+-J
+--clobber
+trailer
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK%CR
+Transfer-Encoding: chunked%CR
+Trailer: Content-Disposition%CR
+Connection: close%CR
+%CR
+5%CR
+HELLO%CR
+0%CR
+Content-Disposition: attachment; filename="adv%TESTNUMBER"%CR
+%CR
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+HTTP GET -O -J --clobber, trailer Content-Disposition may overwrite
+</name>
+<file name="%LOGDIR/adv%TESTNUMBER">
+ORIGINAL-CONTENT-S2
+</file>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/adv%TESTNUMBER -O -J --clobber --output-dir %LOGDIR
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /adv%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+23
+</errorcode>
+<file name="%LOGDIR/adv%TESTNUMBER" nonewline="yes">
+HELLO
+</file>
+</verify>
+</testcase>
