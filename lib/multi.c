@@ -2085,7 +2085,7 @@ static CURLMcode multistate_performing(struct Curl_easy *data,
     }
   }
 #ifndef CURL_DISABLE_HTTP
-  else if((result == CURLE_HTTP2_STREAM) &&
+  else if((result == CURLE_HTTP2_STREAM) && !data->set.never_retry &&
           Curl_h2_http_1_1_error(data)) {
     CURLcode ret = Curl_retry_request(data, &newurl);
 
