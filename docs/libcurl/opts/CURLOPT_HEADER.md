@@ -40,8 +40,8 @@ When asking to get the headers passed to the same callback as the body, it is
 not possible to accurately separate them again without detailed knowledge
 about the protocol in use.
 
-When used on a FILE URL, it returns the file size and last modification time
-only.
+Since 8.4.0, when used on a FILE URL, it includes the file size and last
+modification time.
 
 Further: the CURLOPT_WRITEFUNCTION(3) callback is limited to only ever
 get a maximum of *CURL_MAX_WRITE_SIZE* bytes passed to it (16KB), while a
