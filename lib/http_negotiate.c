@@ -27,6 +27,7 @@
 
 #include "urldata.h"
 #include "cfilters.h"
+#include "connect.h"
 #include "curl_trc.h"
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
@@ -47,6 +48,23 @@ static void http_auth_nego_reset(struct connectdata *conn,
   }
   if(neg_ctx)
     Curl_auth_cleanup_spnego(neg_ctx);
+}
+
+/* Negotiate failed on a connection in `state`. Once a token has been sent,
+ * the server may regard the connection itself as authenticated, no matter
+ * what it answered. To play it safe, we close such connections. */
+static void http_auth_nego_fail(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                struct negotiatedata *neg_ctx,
+                                bool proxy, uint8_t state)
+{
+  if(state != CURL_NEGO_AUTH_NONE) {
+    infof(data, "Negotiate failed after a token was sent, "
+          "closing connection");
+    conn->bits.no_reuse = TRUE;
+    connclose(conn);
+  }
+  http_auth_nego_reset(conn, neg_ctx, proxy);
 }
 
 CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
@@ -96,7 +114,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
     else if(state != CURL_NEGO_AUTH_NONE) {
       /* The server rejected our authentication and has not supplied any more
       negotiation mechanisms */
-      http_auth_nego_reset(conn, neg_ctx, proxy);
+      http_auth_nego_fail(data, conn, neg_ctx, proxy, state);
       return CURLE_LOGIN_DENIED;
     }
   }
@@ -113,7 +131,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
     result = Curl_ssl_get_channel_binding(
       data, &neg_ctx->channel_binding_data);
     if(result) {
-      http_auth_nego_reset(conn, neg_ctx, proxy);
+      http_auth_nego_fail(data, conn, neg_ctx, proxy, state);
       return result;
     }
   }
@@ -131,7 +149,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #endif
 
   if(result)
-    http_auth_nego_reset(conn, neg_ctx, proxy);
+    http_auth_nego_fail(data, conn, neg_ctx, proxy, state);
 
   if(!result && !proxy) {
     /* Start it up. From this time onwards, the connection is tied
@@ -162,6 +180,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
   size_t len = 0;
   char *userp;
   CURLcode result;
+  bool reauth = FALSE;
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
@@ -199,9 +218,18 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
       infof(data, "Curl_output_negotiate, "
             "no persistent authentication: cleanup existing context");
       http_auth_nego_reset(conn, neg_ctx, proxy);
+      reauth = TRUE;
     }
     if(!neg_ctx->context) {
       result = Curl_input_negotiate(data, conn, proxy, "Negotiate");
+      if(result && reauth) {
+        /* the connection was authenticated before the reset, see
+           http_auth_nego_fail() */
+        infof(data, "Negotiate re-authentication failed, "
+              "closing connection");
+        connclose(conn);
+        return result;
+      }
       if(result == CURLE_AUTH_ERROR) {
         /* negotiate auth failed, let's continue unauthenticated to stay
          * compatible with the behavior before curl-7_64_0-158-g6c6035532 */
