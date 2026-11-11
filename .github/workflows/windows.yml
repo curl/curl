@@ -316,6 +316,7 @@ jobs:
           # Add individual package requirements to the matrix `install:` entry instead.
           install: >-
             gcc perl diffutils
+            cmake ninja autotools
             zlib-devel brotli-devel libzstd-devel libpsl-devel libnghttp2-devel
             openssl-devel libssh2-devel
 
@@ -328,6 +329,8 @@ jobs:
           install: >-
             perl diffutils unzip
             mingw-w64-${{ matrix.env }}-cc
+            mingw-w64-${{ matrix.env }}-cmake
+            mingw-w64-${{ matrix.env }}-autotools
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-c-ares
@@ -337,24 +340,6 @@ jobs:
             mingw-w64-${{ matrix.env }}-wolfssl
             mingw-w64-${{ matrix.env }}-gnutls
             mingw-w64-${{ matrix.env }}-libssh
-
-      - name: 'install prereqs'
-        run: |
-          # Install build tools in a separate step to avoid inflating shared cache size and being installed even if unused.
-          if [ "${MATRIX_SYS}" = 'msys' ]; then
-            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-              pkgs='cmake ninja'
-            else
-              pkgs='autotools'
-            fi
-          else
-            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-              pkgs="mingw-w64-${MATRIX_ENV}-cmake"
-            else
-              pkgs="mingw-w64-${MATRIX_ENV}-autotools"
-            fi
-          fi
-          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed ${pkgs} ${MATRIX_INSTALL}
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
