@@ -262,16 +262,14 @@ jobs:
               config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON' }
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
-              config: '--with-openssl --enable-httpsig',
-              install: 'diffutils' }  # for tests
+              config: '--with-openssl --enable-httpsig' }
           # MinGW
           - { name: 'default',
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
               config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib --enable-ares' }
           - { name: 'wolfssl U',
               build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '',
-              config: '--enable-debug --with-wolfssl --enable-windows-unicode --enable-static --disable-shared --enable-ca-native',
-              install: 'mingw-w64-ucrt-x86_64-wolfssl' }
+              config: '--enable-debug --with-wolfssl --enable-windows-unicode --enable-static --disable-shared --enable-ca-native' }
           - { name: 'schannel U', type: 'Debug',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '--min=1850',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON' }
@@ -287,8 +285,7 @@ jobs:
           # https://github.com/curl/curl-for-win/blob/471a065705a16c61a343b15d3e4ef195e2df2f9e/libssh.sh#L6-L94
           - { name: 'gnutls libssh', type: 'Debug', openssh: 'OpenSSH-Windows',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '',
-              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON',
-              install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-libssh unzip' }
+              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON' }
           - { name: 'schannel R', type: 'Release', image: 'windows-11-arm',
               build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun',
               config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON' }
@@ -303,8 +300,7 @@ jobs:
           #   config: '--without-debug --with-schannel --disable-static' }
           - { name: 'schannel dev debug', type: 'Debug', cppflags: '-DCURL_SCHANNEL_DEV_DEBUG', image: 'windows-2025',
               build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DCURL_USE_WOLFSSL=ON -DENABLE_UNICODE=ON -DCURL_DISABLE_HTTPSIG=OFF',
-              install: 'mingw-w64-ucrt-x86_64-wolfssl' }
+              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DCURL_USE_WOLFSSL=ON -DENABLE_UNICODE=ON -DCURL_DISABLE_HTTPSIG=OFF' }
       fail-fast: false
     steps:
       - name: 'preinstalled tools'
@@ -319,7 +315,7 @@ jobs:
           # Packages that are used by most jobs. They each inflate cache size and come with a per-job install overhead.
           # Add individual package requirements to the matrix `install:` entry instead.
           install: >-
-            gcc perl
+            gcc perl diffutils
             zlib-devel brotli-devel libzstd-devel libpsl-devel libnghttp2-devel
             openssl-devel libssh2-devel
 
@@ -330,7 +326,7 @@ jobs:
           # Packages that are used by most jobs. They each inflate cache size and come with a per-job install overhead.
           # Add individual package requirements to the matrix `install:` entry instead.
           install: >-
-            perl diffutils
+            perl diffutils unzip
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-libssh2
@@ -338,10 +334,11 @@ jobs:
             mingw-w64-${{ matrix.env }}-nghttp3
             mingw-w64-${{ matrix.env }}-ngtcp2
             mingw-w64-${{ matrix.env }}-openssl
+            mingw-w64-${{ matrix.env }}-wolfssl
+            mingw-w64-${{ matrix.env }}-gnutls
+            mingw-w64-${{ matrix.env }}-libssh
 
       - name: 'install prereqs'
-        env:
-          MATRIX_INSTALL: '${{ matrix.install }}'
         run: |
           # Install build tools in a separate step to avoid inflating shared cache size and being installed even if unused.
           if [ "${MATRIX_SYS}" = 'msys' ]; then
