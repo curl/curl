@@ -680,9 +680,6 @@ ${SIZEOF_TIME_T_CODE}
 /* if wolfSSL has the wolfSSL_BIO_set_shutdown function. */
 #cmakedefine HAVE_WOLFSSL_BIO_SET_SHUTDOWN 1
 
-/* if wolfSSL has the wc_Des_EcbEncrypt function. */
-#cmakedefine HAVE_WC_DES_ECBENCRYPT 1
-
 /* if libssh is in use */
 #cmakedefine USE_LIBSSH 1
 
