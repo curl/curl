@@ -138,8 +138,13 @@ init:
   - ps: |
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
-      Rename-Item -Verbose -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak'
+      Get-ChildItem -LiteralPath 'C:\Program Files\Mozilla Firefox' -Filter 'firefox.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Mozilla Firefox' -Filter 'firefox.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
         Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse |
         Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
