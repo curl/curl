@@ -1115,6 +1115,7 @@ struct UserDefined {
 #ifdef USE_OPENSSL
   BIT(engine_default);
 #endif
+  BIT(never_retry);    /* No matter what, never retry this transfer */
 };
 
 #ifndef CURL_DISABLE_MIME

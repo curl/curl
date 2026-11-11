@@ -735,6 +735,8 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
     Curl_peer_link(&second->state.initial_origin, data->state.initial_origin);
     if(data->share)
       (void)Curl_share_easy_link(second, data->share);
+    /* Never retry this request should it fail */
+    second->set.never_retry = TRUE;
     /* copy a range of options from the parent handle */
     second->set.fwrite_func = data->set.fwrite_func;
     second->set.out = data->set.out;
