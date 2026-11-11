@@ -198,6 +198,7 @@ LIB_CFILES =         \
   curl_gssapi.c      \
   curl_memrchr.c     \
   curl_range.c       \
+  curl_refcount.c    \
   curl_sasl.c        \
   curl_sha512_256.c  \
   curl_share.c       \

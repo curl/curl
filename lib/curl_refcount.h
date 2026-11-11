@@ -30,6 +30,8 @@
  * transfer has been removed from its multi handle, the application may use
  * the easy handle in another thread (libcurl-thread(3)) while the multi
  * handle keeps using the connection, so the counter is updated atomically.
+ * Without atomics, curl_refcount.c updates it under a lock from easy_lock.h,
+ * so it is thread-safe whenever libcurl reports CURL_VERSION_THREADSAFE.
  *
  * Curl_refcount_decr() returns the new value of the counter.
  */
@@ -55,14 +57,14 @@ typedef atomic_uint curl_refcount;
 #define Curl_refcount_decr(c) \
   (atomic_fetch_sub_explicit(c, 1U, memory_order_acq_rel) - 1U)
 
-#else /* without atomics, the objects must not be shared between threads */
+#else /* see curl_refcount.c */
 
 typedef uint32_t curl_refcount;
 
 #define Curl_refcount_init(c, v) (*(c) = (v))
-#define Curl_refcount_get(c)     (*(c))
-#define Curl_refcount_incr(c)    ((void)++(*(c)))
-#define Curl_refcount_decr(c)    (--(*(c)))
+uint32_t Curl_refcount_get(curl_refcount *c);
+void Curl_refcount_incr(curl_refcount *c);
+uint32_t Curl_refcount_decr(curl_refcount *c);
 
 #endif
 
