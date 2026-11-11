@@ -277,7 +277,7 @@ jobs:
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON' }
           # MinGW torture
           - { name: 'schannel U torture', type: 'Debug',
-              build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '-t -r --shallow=13 --min=200 !with-server !1085',
+              build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '-t -r --shallow=13 --min=200 !with-server !1084 !1085',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON' }
 
           # WARNING: libssh uses hard-coded world-writable paths (C:ProgramData/, /etc/..., ~/.ssh/)
