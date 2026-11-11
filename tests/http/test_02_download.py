@@ -568,6 +568,7 @@ class TestDownload:
         elif proto == 'h3':
             assert earlydata[1] == 109, f'{earlydata}'
 
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('mbedtls'), reason='mbedtls unreliable here')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     @pytest.mark.parametrize("max_host_conns", [0, 1, 5])
     @pytest.mark.parametrize("share_connect", [False, True])
