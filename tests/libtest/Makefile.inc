@@ -64,6 +64,7 @@ TESTS_C = \
   cli_tls_session_reuse.c \
   cli_upload_pausing.c \
   cli_ws_data.c \
+  cli_ws_meta.c \
   cli_ws_pause.c \
   cli_ws_pingpong.c \
   cli_ws_write_err.c \
