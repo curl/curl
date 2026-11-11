@@ -49,7 +49,7 @@ With special keywords `!with-server` and `!without-server` you can
 exclude tests using a test server or those that are not, respectively.
 
 You can also specify keywords with a leading exclamation point and the keyword
-or phrase, like "!HTTP NTLM auth" to run all tests **except** those using this
+or phrase, like "!HTTP FTP auth" to run all tests **except** those using this
 keyword. Remember that the exclamation marks and spaces need to be quoted
 somehow when entered at many command shells.
 
