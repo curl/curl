@@ -1474,11 +1474,6 @@ static CURLcode read_pkt_to_send(void *userp,
   int fin;
   ssize_t n;
 
-  *pnread = 0;
-  veccnt = 0;
-  stream_id = -1;
-  fin = 0;
-
   /* ngtcp2 may want to put several frames from different streams into
    * this packet. `NGTCP2_WRITE_STREAM_FLAG_MORE` tells it to do so.
    * When `NGTCP2_ERR_WRITE_MORE` is returned, we *need* to make
@@ -1486,7 +1481,11 @@ static CURLcode read_pkt_to_send(void *userp,
    * When ngtcp2 is happy (because it has no other frame that would fit
    * or it has nothing more to send), it returns the total length
    * of the assembled packet. This may be 0 if there was nothing to send. */
+  *pnread = 0;
   for(;;) {
+    veccnt = 0;
+    stream_id = -1;
+    fin = 0;
 
     if(ctx->h3conn && ngtcp2_conn_get_max_data_left(ctx->qconn)) {
       veccnt = nghttp3_conn_writev_stream(ctx->h3conn, &stream_id, &fin, vec,
