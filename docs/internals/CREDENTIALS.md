@@ -63,10 +63,10 @@ Protocols with flag `PROTOPT_CREDSPERREQUEST` leave `conn->creds` empty,
 as connections for such protocols may be reused with different
 credentials.
 
-That being said, there are authentication schemes like `NTLM` and
-`NEGOTIATE` that tie credentials to a connection. Those do set `conn->creds`
-once they start to operate, preventing connection reuse from then on
-for transfers with different credentials.
+That being said, there are authentication schemes like `NEGOTIATE` that tie
+credentials to a connection. Those do set `conn->creds` once they start to
+operate, preventing connection reuse from then on for transfers with different
+credentials.
 
 ### `conn->*_proxy.creds`
 
