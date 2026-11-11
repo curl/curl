@@ -63,7 +63,7 @@ jobs:
           #   options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
           #
           # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skipall',
-          #   install: 'cmake ninja openssl' }
+          #   install: 'cmake ninja' }
 
           # https://ports.freebsd.org/
           - { os: 'freebsd'     , version: '15.1',  build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'openssl',
