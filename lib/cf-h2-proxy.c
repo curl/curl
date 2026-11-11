@@ -169,10 +169,6 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
     if(new_state == H2_TUNNEL_FAILED)
       CURL_TRC_CF(data, cf, "[%d] new tunnel state 'failed'", ts->stream_id);
     ts->state = new_state;
-    /* If a proxy-authorization header was used for the proxy, then we should
-       make sure that it is not accidentally used for the document request
-       after we have connected. Let's thus free and clear it here. */
-    curlx_safefree(data->req.hd_proxy_auth);
     break;
   }
 }

@@ -73,6 +73,7 @@ struct h1_tunnel_state {
   BIT(maybe_folded);
   BIT(leading_unfold);
   BIT(udp_tunnel);
+  BIT(using_proxy_auth);
 };
 
 /* Persistent context for the H1-PROXY filter */
@@ -191,10 +192,6 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     /* restore the protocol pointer */
     data->info.httpcode = 0; /* clear it as it might have been used for the
                                 proxy */
-    /* If a proxy-authorization header was used for the proxy, then we should
-       make sure that it is not accidentally used for the document request
-       after we have connected. Let's thus free and clear it here. */
-    curlx_safefree(data->req.hd_proxy_auth);
     break;
   }
 }
@@ -254,6 +251,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   curlx_dyn_reset(&ts->request_data);
   ts->nsent = 0;
   ts->headerlines = 0;
+  ts->using_proxy_auth =
+    !!Curl_dynhds_get(&req->headers, STRCONST("Proxy-Authorization"));
   http_minor = ts->httpversion % 10;
 
   result = Curl_h1_req_write_head(req, http_minor, &ts->request_data);
@@ -541,7 +540,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         ts->maybe_folded = FALSE;
       }
       if(data->set.proxyauth && data->state.authproxy.avail &&
-         data->req.hd_proxy_auth) {
+         ts->using_proxy_auth) {
         /* proxy auth was requested and there was proxy auth available,
            then deem this as "mere" proxy disconnect */
         ts->close_connection = TRUE;
@@ -801,7 +800,6 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
   result = H1_CONNECT(cf, data, ts);
   if(result)
     goto out;
-  curlx_safefree(data->req.hd_proxy_auth);
 
 out:
   *done = (result == CURLE_OK) && tunnel_is_established(pctx->ts);
