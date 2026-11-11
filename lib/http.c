@@ -2807,6 +2807,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
   !defined(CURL_DISABLE_WEBSOCKETS)
   struct connectdata *conn = data->conn;
 #endif
+  (void)is_connect; /* not all builds use it */
   switch(id) {
   case H1_HD_REQUEST:
     /* add the main request stuff */
