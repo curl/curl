@@ -151,15 +151,10 @@ static void h3_tunnel_go_state(struct Curl_cfilter *cf,
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     ts->state = new_state;
-    curlx_safefree(data->req.hd_proxy_auth);
     break;
   case H3_TUNNEL_FAILED:
     CURL_TRC_CF(data, cf, "[%" PRId64 "] -> [failed]", stream_id);
     ts->state = new_state;
-    /* If a proxy-authorization header was used for the proxy, then we should
-       make sure that it is not accidentally used for the document request
-       after we have connected. So let's free and clear it here. */
-    curlx_safefree(data->req.hd_proxy_auth);
     break;
   }
 }

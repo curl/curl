@@ -810,7 +810,8 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
     authproxy->picked = authproxy->want;
 
 #ifndef CURL_DISABLE_PROXY
-  /* Send proxy authentication header if needed */
+  /* Send proxy authentication header only with a forwarding proxy
+   * or when doing a CONNECT* request. */
   if(conn->bits.origin_is_proxy || is_connect) {
     result = output_auth_headers(data, conn, authproxy, request,
                                  path_and_query, TRUE);
@@ -818,12 +819,12 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
       goto out;
   }
   else
-#else
-  (void)is_connect;
-#endif /* CURL_DISABLE_PROXY */
-    /* we have no proxy so let's pretend we are done authenticating
-       with it */
     authproxy->done = TRUE;
+#else
+  /* no proxy, pretend we are done authenticating with it */
+  (void)is_connect;
+  authproxy->done = TRUE;
+#endif /* CURL_DISABLE_PROXY */
 
   /* Either we have credentials for the origin we talk to or
      performing authentication is allowed here */
@@ -2797,6 +2798,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
                             http_hd_t id,
                             unsigned char httpversion,
                             const char *method,
+                            bool is_connect,
                             Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
@@ -2827,7 +2829,8 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   case H1_HD_PROXY_AUTH:
-    if(data->req.hd_proxy_auth)
+    if(data->req.hd_proxy_auth &&
+       (data->conn->bits.origin_is_proxy || is_connect))
       result = curlx_dyn_add(req, data->req.hd_proxy_auth);
     break;
 #endif
@@ -3003,7 +3006,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* Add request line and all headers to `req` */
   for(hd_id = 0; hd_id <= H1_HD_LAST; ++hd_id) {
     result = http_add_hd(data, &req, (http_hd_t)hd_id,
-                         httpversion, method, httpreq);
+                         httpversion, method, FALSE, httpreq);
     if(result)
       goto out;
   }

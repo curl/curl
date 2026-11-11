@@ -270,6 +270,7 @@ out:
     Curl_http_req_free(req);
     req = NULL;
   }
+  curlx_safefree(data->req.hd_proxy_auth); /* not needed anymore */
   curlx_free(authority);
   *preq = req;
   return result;
@@ -400,6 +401,7 @@ out:
     Curl_http_req_free(req);
     req = NULL;
   }
+  curlx_safefree(data->req.hd_proxy_auth); /* not needed any more */
   curlx_free(authority);
   curlx_free(path);
   curlx_free(encoded_host);
