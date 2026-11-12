@@ -731,10 +731,9 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   struct h3_stream_ctx *stream = NULL;
   int64_t sid;
   struct dynhds h2_headers;
-  size_t nheader;
   nghttp3_nv *nva = NULL;
   int rc = 0;
-  unsigned int i;
+  uint32_t i, nheader;
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
   CURLcode result;
@@ -774,6 +773,8 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
   for(i = 0; i < nheader; ++i) {
     struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
+    if(!e)
+      break;
     nva[i].name = (unsigned char *)e->name;
     nva[i].namelen = e->namelen;
     nva[i].value = (unsigned char *)e->value;
@@ -846,7 +847,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
 out:
   curlx_free(nva);
-  Curl_dynhds_free(&h2_headers);
+  Curl_dynhds_cleanup(&h2_headers);
   return result;
 }
 

@@ -548,7 +548,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       goto out;
   }
 
-  result = Curl_add_custom_headers(data, FALSE, HTTPVERSION, &req_buffer);
+  result = Curl_add_custom_headers(data, HTTPVERSION, &req_buffer);
   if(result)
     goto out;
 

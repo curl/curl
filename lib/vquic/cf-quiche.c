@@ -1024,7 +1024,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  size_t nheader, i;
+  uint32_t nheader, i;
   int64_t rv;
   struct dynhds h2_headers;
   quiche_h3_header *nva = NULL;
@@ -1071,6 +1071,8 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
   for(i = 0; i < nheader; ++i) {
     struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
+    if(!e)
+      break;
     nva[i].name = (unsigned char *)e->name;
     nva[i].name_len = e->namelen;
     nva[i].value = (unsigned char *)e->value;
@@ -1134,7 +1136,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
 out:
   curlx_free(nva);
-  Curl_dynhds_free(&h2_headers);
+  Curl_dynhds_cleanup(&h2_headers);
   return result;
 }
 

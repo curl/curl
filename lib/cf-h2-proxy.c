@@ -758,7 +758,7 @@ static CURLcode proxy_h2_submit(
 
 out:
   curlx_free(nva);
-  Curl_dynhds_free(&h2_headers);
+  Curl_dynhds_cleanup(&h2_headers);
   *pstream_id = stream_id;
   return result;
 }

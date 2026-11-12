@@ -540,9 +540,9 @@ static void altsvc_parse_params(const char **pp,
     }
     curlx_str_trimblanks(&val);
 
-    if(curlx_str_casecompare(&name, "ma"))
+    if(curlx_str_casecompare2(&name, STRCONST("ma")))
       keyword = ALTSVC_MA;
-    else if(curlx_str_casecompare(&name, "persist"))
+    else if(curlx_str_casecompare2(&name, STRCONST("persist")))
       keyword = ALTSVC_PERSIST;
 
     if(keyword) {
@@ -650,7 +650,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   if(!curlx_str_cspn(&p, &alpn, ";\n\r")) {
     curlx_str_trimblanks(&alpn);
     /* "clear" is a magic keyword */
-    if(curlx_str_casecompare(&alpn, "clear")) {
+    if(curlx_str_casecompare2(&alpn, STRCONST("clear"))) {
       /* Flush cached alternatives for this source origin */
       altsvc_flush(asi, origin);
       return CURLE_OK;
