@@ -1808,8 +1808,8 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
   for(i = 0; i < numlists; i++) {
     CURLcode result =
       Curl_dynhds_add_slist(NULL, h[i], http_custom_treat, &custom_ctx);
-      if(result)
-        return result;
+    if(result)
+      return result;
   }
 
   return CURLE_OK;
