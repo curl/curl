@@ -267,10 +267,11 @@ fail:
 }
 
 /*
- * Write etag to file when --etag-save option is given.
+ * Remember the etag for --etag-save. It is written to the file once the
+ * transfer has ended without error, see post_etag_save().
  */
 static size_t save_etag(const char *etag_h, const char *endp,
-                        struct OutStruct *etag_save)
+                        struct per_transfer *per)
 {
   const char *eot = endp - 1;
   if(*eot == '\n') {
@@ -280,22 +281,12 @@ static size_t save_etag(const char *etag_h, const char *endp,
       eot--;
 
     if(eot >= etag_h) {
-      size_t etag_length = eot - etag_h + 1;
-      curlx_struct_stat file;
-      int fd = fileno(etag_save->stream);
-
-      /* Truncate regular files to avoid stale etag content */
-      if((fd != -1) &&
-         etag_save->regular_file &&
-         !curlx_fstat(fd, &file) &&
-         (S_ISREG(file.st_mode) &&
-          toolx_ftruncate(fd, 0)))
+      char *etag = curlx_memdup0(etag_h, (size_t)(eot - etag_h + 1));
+      if(!etag)
         return CURL_WRITEFUNC_ERROR;
-
-      fwrite(etag_h, 1, etag_length, etag_save->stream);
-      /* terminate with newline */
-      fputc('\n', etag_save->stream);
-      (void)fflush(etag_save->stream);
+      /* a redirect chain can deliver several, keep the last one */
+      curlx_free(per->etag);
+      per->etag = etag;
     }
   }
   return 0; /* ok */
@@ -484,7 +475,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     else if(per->config->etag_save_file && etag_save->stream &&
             /* match only header that start with etag (case insensitive) */
             checkprefix("etag:", str)) {
-      size_t rc = save_etag(&str[5], end, etag_save);
+      size_t rc = save_etag(&str[5], end, per);
       if(rc)
         return rc;
     }

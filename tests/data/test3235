@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+ETag
+--etag-save
+--etag-compare
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK swsclose
+ETag: "new%TESTNUMBER"
+Content-Length: 100
+Connection: close
+
+12345678
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+Keep the previous ETag when the transfer fails mid-body
+</name>
+<file name="%LOGDIR/etag%TESTNUMBER">
+"old%TESTNUMBER"
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER --etag-save %LOGDIR/etag%TESTNUMBER -o %LOGDIR/out%TESTNUMBER
+</command>
+</client>
+
+# The response promises 100 bytes and delivers 8 before the connection goes
+# away, so the transfer fails with error 18. The ETag of that response must
+# not replace the one already on file.
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+If-None-Match: "old%TESTNUMBER"
+
+</protocol>
+<errorcode>
+18
+</errorcode>
+<file name="%LOGDIR/etag%TESTNUMBER">
+"old%TESTNUMBER"
+</file>
+</verify>
+</testcase>
