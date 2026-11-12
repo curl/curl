@@ -735,19 +735,6 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   default:
   case RCMD_NORMALREQ:
     break; /* continue with business as usual */
-  case RCMD_STREAM: {
-    static const char streamthis[] = "a string to stream 01234567890\n";
-    for(;;) {
-      written = swrite(sock, streamthis, CURL_CSTRLEN(streamthis));
-      if(got_exit_signal)
-        return -1;
-      if(written != (ssize_t)CURL_CSTRLEN(streamthis)) {
-        logmsg("Stopped streaming");
-        break;
-      }
-    }
-    return -1;
-  }
   case RCMD_IDLE:
     /* Do nothing. Sit idle. Pretend it rains. */
     return 0;
@@ -989,6 +976,35 @@ retry:
 
   sws_prevtestno = req->testno;
   sws_prevpartno = req->partno;
+
+  if(req->rcmd == RCMD_STREAM) {
+    /* Reply is out. Keep the socket full: a short write used to stop
+       the stream, and a client could then leave this read. */
+    static const char streamthis[] = "a string to stream 01234567890\n";
+    size_t off = 0;
+
+    logmsg("streaming after the response");
+    while(!got_exit_signal) {
+      written = swrite(sock, streamthis + off,
+                       CURL_CSTRLEN(streamthis) - off);
+      if(written < 0) {
+        if(SOCK_EAGAIN(SOCKERRNO)) {
+          curlx_wait_ms(1);
+          continue;
+        }
+        logmsg("Stopped streaming");
+        break;
+      }
+      if(!written) {
+        logmsg("Stopped streaming");
+        break;
+      }
+      off += (size_t)written;
+      if(off >= CURL_CSTRLEN(streamthis))
+        off = 0;
+    }
+    return -1;
+  }
 
   return 0;
 }

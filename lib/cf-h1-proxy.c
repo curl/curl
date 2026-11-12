@@ -519,6 +519,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   int error;
+  size_t taken = 0;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -532,6 +533,17 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
+    if(Curl_timeleft_ms(data) < 0) {
+      /* H1_CONNECT checks the clock before this call. A proxy that keeps
+         the socket readable never returns there. */
+      failf(data, "Proxy CONNECT aborted due to timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+
+    /* Bound the read so other transfers on this multi can run. */
+    if(taken >= 16384)
+      return CURLE_OK;
+
     result = Curl_conn_cf_recv(cf->next, data, &byte, 1, &nread);
     if(result == CURLE_AGAIN)
       /* socket buffer drained, return */
@@ -567,6 +579,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       ts->keepon = KEEPON_DONE;
       break;
     }
+
+    taken += nread;
 
     if(ts->keepon == KEEPON_IGNORE) {
       /* This means we are currently ignoring a response-body */
