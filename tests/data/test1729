@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+SEARCH
+ESEARCH
+</keywords>
+</info>
+
+<reply>
+<data crlf="yes" nocheck="yes">
+* ESEARCH (TAG "A004") COUNT 3
+</data>
+</reply>
+
+<client>
+<server>
+imap
+</server>
+<name>
+IMAP SEARCH with RETURN options (ESEARCH response)
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER?RETURN%20(COUNT)%20ALL' -u user:secret
+</command>
+</client>
+
+<verify>
+<protocol crlf="yes">
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 SELECT %TESTNUMBER
+A004 SEARCH RETURN (COUNT) ALL
+A005 LOGOUT
+</protocol>
+<stdout crlf="yes">
+* ESEARCH (TAG "A004") COUNT 3
+</stdout>
+</verify>
+</testcase>
