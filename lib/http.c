@@ -4857,6 +4857,8 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
   nheaders = Curl_dynhds_count(&req->headers);
   for(i = 0; !result && (i < nheaders); ++i) {
     e = Curl_dynhds_getn(&req->headers, i);
+    if(!e)
+      break;
     /* "TE" is special in that it is only permissible when it
      * has only value "trailers". RFC 9113 ch. 8.2.2 */
     if(e->namelen == 2 && curl_strequal("TE", e->name)) {
