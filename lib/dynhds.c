@@ -62,7 +62,6 @@ void Curl_dynhds_init(struct dynhds *dynhds, uint32_t max_entries,
                       uint32_t max_strs_size)
 {
   DEBUGASSERT(dynhds);
-  DEBUGASSERT(max_strs_size);
   dynhds->hds = NULL;
   dynhds->hds_len = dynhds->hds_allc = dynhds->strs_len = 0;
   dynhds->max_entries = max_entries ? max_entries : UINT32_MAX;
@@ -158,10 +157,11 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
     struct dynhds_entry **nhds;
     uint32_t nhds_allc;
 
-    /* start with room for 16 headers, then double, add max 128 new ones
+    /* start with room for 16 headers, then double, add max 512 new ones
      * or what the limit still allows. */
     if(dynhds->hds_allc) {
-      uint32_t max_grow = CURLMIN(dynhds->max_entries - dynhds->hds_allc, 128);
+      uint32_t max_grow =
+        CURLMIN(dynhds->max_entries - dynhds->hds_allc, 512);
       nhds_allc = dynhds->hds_allc + CURLMIN(dynhds->hds_allc, max_grow);
     }
     else
