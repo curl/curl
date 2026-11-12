@@ -268,10 +268,10 @@ jobs:
               build: 'autotools', sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
               config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib --enable-ares' }
           - { name: 'wolfssl U',
-              build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '', openssh: 'msys',
+              build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '', openssh: 'msys', image: 'windows-2025',
               config: '--enable-debug --with-wolfssl --enable-windows-unicode --enable-static --disable-shared --enable-ca-native' }
           - { name: 'schannel U', type: 'Debug',
-              build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '--min=1850', openssh: 'msys',
+              build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '--min=1850', openssh: 'msys', image: 'windows-2025',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON' }
           # MinGW torture
           - { name: 'schannel U torture', type: 'Debug',
@@ -284,7 +284,7 @@ jobs:
           #          Holds true after CVE-2025-14821 mitigations in 0.12.0.
           # https://github.com/curl/curl-for-win/blob/471a065705a16c61a343b15d3e4ef195e2df2f9e/libssh.sh#L6-L94
           - { name: 'gnutls libssh', type: 'Debug',
-              build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '', openssh: 'OpenSSH-Windows',
+              build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '', openssh: 'OpenSSH-Windows', image: 'windows-2025',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON' }
           - { name: 'schannel R', type: 'Release', image: 'windows-11-arm',
               build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun',
