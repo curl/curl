@@ -1994,6 +1994,8 @@ TESTCASES = \
   test2722 \
   test2723 \
   test2724 \
+  test2725 \
+  test2726 \
   test2805 \
   test2824 \
   test2885 \
