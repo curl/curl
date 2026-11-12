@@ -61,6 +61,7 @@ static void http_auth_nego_fail(struct Curl_easy *data,
   if(state != CURL_NEGO_AUTH_NONE) {
     infof(data, "Negotiate failed after a token was sent, "
           "closing connection");
+    conn->bits.no_reuse = TRUE;
     connclose(conn);
   }
   http_auth_nego_reset(conn, neg_ctx, proxy);
@@ -227,6 +228,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
         infof(data, "Negotiate re-authentication failed, "
               "closing connection");
         connclose(conn);
+        return result;
       }
       if(result == CURLE_AUTH_ERROR) {
         /* negotiate auth failed, let's continue unauthenticated to stay
