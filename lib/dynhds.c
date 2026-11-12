@@ -180,7 +180,7 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
   }
   dynhds->hds[dynhds->hds_len++] = entry;
   entry = NULL;
-  dynhds->strs_len += namelen + valuelen;
+  dynhds->strs_len += nlen + vlen;
   result = CURLE_OK;
 
 out:
