@@ -992,7 +992,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  size_t nheader, i;
+  uint32_t nheader, i;
   int64_t rv;
   struct dynhds h2_headers;
   quiche_h3_header *nva = NULL;

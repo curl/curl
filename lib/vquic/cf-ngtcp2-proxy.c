@@ -886,9 +886,8 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
   struct h3_stream_ctx *stream = NULL;
   struct dynhds h2_headers;
   nghttp3_nv *nva = NULL;
-  size_t nheader;
   int rc = 0;
-  unsigned int i;
+  uint32_t i, nheader;
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
   CURLcode result;
