@@ -32,12 +32,13 @@ http
 http-proxy
 </server>
 <name>
-proxy tunnel reuse matches CONNECT headers
+proxy tunnel reuse matches custom Proxy-Authorization
 </name>
 <command option="no-include">
 http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token A" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
 --next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
 --next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B" -H "X-Origin: changed" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B" --proxy-header "X-Proxy: changed" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
 </command>
 <features>
 proxy
@@ -76,9 +77,14 @@ User-Agent: curl/%VERSION
 Accept: */*
 X-Origin: changed
 
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
 </protocol>
 <stdout nonewline="yes">
-connects=1/connects=1/connects=0/
+connects=1/connects=1/connects=0/connects=0/
 </stdout>
 </verify>
 </testcase>

@@ -30,7 +30,6 @@
 #include "protocol.h"
 #include "proxy.h"
 #include "http_proxy.h"
-#include "slist.h"
 #include "strcase.h"
 #include "url.h"
 #include "vauth/vauth.h"
@@ -675,19 +674,6 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
       Curl_peer_link(&conn->origin, conn->http_proxy.peer);
       conn->scheme = conn->http_proxy.peer->scheme;
       conn->bits.origin_is_proxy = TRUE;
-    }
-    else {
-      struct curl_slist *h = data->set.sep_headers ?
-        data->set.proxyheaders : data->set.headers;
-      /* Keep an owned copy for tunnel reuse matching. Encoding the list in
-       * a request-sized buffer could reject headers that fit on the wire. */
-      if(h) {
-        conn->proxy_connect_hds = Curl_slist_duplicate(h);
-        if(!conn->proxy_connect_hds) {
-          result = CURLE_OUT_OF_MEMORY;
-          goto out;
-        }
-      }
     }
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
