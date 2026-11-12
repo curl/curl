@@ -38,138 +38,82 @@
 #include "vquic/vquic.h"
 #include "curlx/strparse.h"
 
+struct proxy_custom_ctx {
+  struct Curl_easy *data;
+  int httpversion;
+};
+
+static CURLcode prox_custom_ignore(void *user_data,
+                                   struct Curl_str *name,
+                                   struct Curl_str *value,
+                                   const char *orig_data)
+{
+  struct proxy_custom_ctx *x = user_data;
+
+  (void)value;
+  (void)orig_data;
+  if(x->data->state.http_host &&
+     /* a Host: header was sent already, do not pass on any custom Host:
+        header as that will produce *two* in the same request! */
+     curlx_str_casecompare2(name, STRCONST("Host")))
+    return CURLE_AGAIN;
+  else if(x->data->state.httpreq == HTTPREQ_POST_FORM &&
+          /* this header (extended by formdata.c) is sent later */
+          curlx_str_casecompare2(name, STRCONST("Content-Type")))
+    return CURLE_AGAIN;
+  else if(x->data->state.httpreq == HTTPREQ_POST_MIME &&
+          /* this header is sent later */
+          curlx_str_casecompare2(name, STRCONST("Content-Type")))
+    return CURLE_AGAIN;
+  else if(x->data->req.authneg &&
+          /* while doing auth neg, do not allow the custom length since
+             we will force length zero then */
+          curlx_str_casecompare2(name, STRCONST("Content-Length")))
+    return CURLE_AGAIN;
+  else if((x->httpversion >= 20) &&
+          curlx_str_casecompare2(name, STRCONST("Transfer-Encoding")))
+    return CURLE_AGAIN;
+  /* HTTP/2 and HTTP/3 do not support chunked requests */
+  else if((curlx_str_casecompare2(name, STRCONST("Authorization")) ||
+           curlx_str_casecompare2(name, STRCONST("Cookie"))) &&
+          /* be careful of sending this potentially sensitive header to
+             other hosts */
+          !Curl_auth_allowed_to_host(x->data))
+    return CURLE_AGAIN;
+  return CURLE_OK;
+}
+
 static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   bool is_connect, int httpversion,
-                                  bool is_udp, struct dynhds *hds)
+                                  struct dynhds *hds)
 {
   struct connectdata *conn = data->conn;
   struct curl_slist *h[2];
-  struct curl_slist *headers;
-  int numlists = 1; /* by default */
+  int numlists = 0; /* by default */
+  struct proxy_custom_ctx ign_ctx;
   int i;
 
-  enum Curl_proxy_use proxy;
-
-  if(is_connect && !is_udp)
-    proxy = HEADER_CONNECT;
-  else if(is_connect && is_udp)
-    proxy = HEADER_CONNECT_UDP;
-  else
-    proxy = conn->bits.origin_is_proxy ? HEADER_PROXY : HEADER_SERVER;
-
-  switch(proxy) {
-  case HEADER_SERVER:
-    h[0] = data->set.headers;
-    break;
-  case HEADER_PROXY:
-    h[0] = data->set.headers;
-    if(data->set.sep_headers) {
-      h[1] = data->set.proxyheaders;
-      numlists++;
-    }
-    break;
-  case HEADER_CONNECT:
+  if(is_connect) {
+    h[numlists++] = data->set.sep_headers ?
+                    data->set.proxyheaders : data->set.headers;
+  }
+  else if(conn->bits.origin_is_proxy) {
+    h[numlists++] = data->set.headers;
     if(data->set.sep_headers)
-      h[0] = data->set.proxyheaders;
-    else
-      h[0] = data->set.headers;
-    break;
-  case HEADER_CONNECT_UDP:
-    if(data->set.sep_headers)
-      h[0] = data->set.proxyheaders;
-    else
-      h[0] = data->set.headers;
-    break;
+      h[numlists++] = data->set.proxyheaders;
+  }
+  else {
+    h[numlists++] = data->set.headers;
   }
 
-  /* loop through one or two lists */
+  /* loop through one or two lists, adding custom headers */
+  ign_ctx.data = data;
+  ign_ctx.httpversion = httpversion;
   for(i = 0; i < numlists; i++) {
-    for(headers = h[i]; headers; headers = headers->next) {
-      struct Curl_str name;
-      const char *value = NULL;
-      size_t valuelen = 0;
-      const char *ptr = headers->data;
-
-      /* There are 2 quirks in place for custom headers:
-       * 1. setting only 'name:' to suppress a header from being sent
-       * 2. setting only 'name;' to send an empty (illegal) header
-       */
-      if(!curlx_str_cspn(&ptr, &name, ";:")) {
-        if(!curlx_str_single(&ptr, ':')) {
-          curlx_str_passblanks(&ptr);
-          if(*ptr) {
-            value = ptr;
-            valuelen = strlen(value);
-          }
-          else {
-            /* quirk #1, suppress this header */
-            continue;
-          }
-        }
-        else if(!curlx_str_single(&ptr, ';')) {
-          curlx_str_passblanks(&ptr);
-          if(!*ptr) {
-            /* quirk #2, send an empty header */
-            value = "";
-            valuelen = 0;
-          }
-          else {
-            /* this may be used for something else in the future,
-             * ignore this for now */
-            continue;
-          }
-        }
-        else
-          /* neither : nor ; in provided header value. We ignore this
-           * silently */
-          continue;
-      }
-      else
-        /* no name, move on */
-        continue;
-
-      DEBUGASSERT(curlx_strlen(&name) && value);
-      /* trim surrounding whitespace so a padded field name (e.g.
-         `Authorization :`) cannot slip past the Authorization/Cookie check */
-      curlx_str_trimblanks(&name);
-      if(!curlx_strlen(&name))
-        continue;
-      if(data->state.http_host &&
-         /* a Host: header was sent already, do not pass on any custom Host:
-            header as that will produce *two* in the same request! */
-         curlx_str_casecompare(&name, "Host"))
-        ;
-      else if(data->state.httpreq == HTTPREQ_POST_FORM &&
-              /* this header (extended by formdata.c) is sent later */
-              curlx_str_casecompare(&name, "Content-Type"))
-        ;
-      else if(data->state.httpreq == HTTPREQ_POST_MIME &&
-              /* this header is sent later */
-              curlx_str_casecompare(&name, "Content-Type"))
-        ;
-      else if(data->req.authneg &&
-              /* while doing auth neg, do not allow the custom length since
-                 we will force length zero then */
-              curlx_str_casecompare(&name, "Content-Length"))
-        ;
-      else if((httpversion >= 20) &&
-              curlx_str_casecompare(&name, "Transfer-Encoding"))
-        ;
-      /* HTTP/2 and HTTP/3 do not support chunked requests */
-      else if((curlx_str_casecompare(&name, "Authorization") ||
-               curlx_str_casecompare(&name, "Cookie")) &&
-              /* be careful of sending this potentially sensitive header to
-                 other hosts */
-              !Curl_auth_allowed_to_host(data))
-        ;
-      else {
-        CURLcode result =
-          Curl_dynhds_add(hds, curlx_str(&name), curlx_strlen(&name),
-                          value, valuelen);
-        if(result)
-          return result;
-      }
-    }
+    CURLcode result =
+      Curl_dynhds_add_slist(hds, h[i], prox_custom_ignore, &ign_ctx);
+      if(result)
+        return result;
   }
 
   return CURLE_OK;
@@ -262,8 +206,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  result = dynhds_add_custom(data, TRUE, httpversion,
-                             FALSE, &req->headers);
+  result = dynhds_add_custom(data, TRUE, httpversion, &req->headers);
 
 out:
   if(result && req) {
@@ -394,7 +337,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
     }
   }
   if(!result)
-    result = dynhds_add_custom(data, TRUE, httpversion, TRUE, &req->headers);
+    result = dynhds_add_custom(data, TRUE, httpversion, &req->headers);
 
 out:
   if(result && req) {
@@ -435,7 +378,7 @@ CURLcode Curl_http_proxy_inspect_tunnel_response(
 {
   struct dynhds_entry *capsule_protocol = NULL;
   struct dynhds_entry *auth_reply = NULL;
-  size_t i, header_count;
+  uint32_t i, header_count;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(resp);
@@ -443,7 +386,7 @@ CURLcode Curl_http_proxy_inspect_tunnel_response(
   header_count = Curl_dynhds_count(&resp->headers);
   infof(data, "CONNECT%s Response Status %d",
         udp_tunnel ? "-UDP" : "", resp->status);
-  infof(data, "Response Headers (%zu total):", header_count);
+  infof(data, "Response Headers (%u total):", header_count);
   for(i = 0; i < header_count; i++) {
     struct dynhds_entry *entry = Curl_dynhds_getn(&resp->headers, i);
     if(entry)

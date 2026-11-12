@@ -788,7 +788,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
 out:
   curlx_free(nva);
-  Curl_dynhds_free(&h2_headers);
+  Curl_dynhds_cleanup(&h2_headers);
   return result;
 }
 

@@ -650,13 +650,13 @@ static CURLcode trc_opt(const char *config)
     else if(*token == '+')
       curlx_str_nudge(&out, 1);
 
-    if(curlx_str_casecompare(&out, "all"))
+    if(curlx_str_casecompare2(&out, STRCONST("all")))
       trc_apply_level_by_category(TRC_CT_NONE, lvl);
-    else if(curlx_str_casecompare(&out, "protocol"))
+    else if(curlx_str_casecompare2(&out, STRCONST("protocol")))
       trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
-    else if(curlx_str_casecompare(&out, "network"))
+    else if(curlx_str_casecompare2(&out, STRCONST("network")))
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
-    else if(curlx_str_casecompare(&out, "proxy"))
+    else if(curlx_str_casecompare2(&out, STRCONST("proxy")))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
     else
       trc_apply_level_by_name(&out, lvl);

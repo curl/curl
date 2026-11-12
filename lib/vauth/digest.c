@@ -547,31 +547,31 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 
     /* Extract a value=content pair */
     if(Curl_auth_digest_get_pair(chlg, &value, content, &chlg)) {
-      if(curlx_str_casecompare(&value, "nonce")) {
+      if(curlx_str_casecompare2(&value, STRCONST("nonce"))) {
         curlx_free(digest->nonce);
         digest->nonce = curlx_strdup(content);
         if(!digest->nonce)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(curlx_str_casecompare(&value, "stale")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("stale"))) {
         if(curl_strequal(content, "true")) {
           digest->stale = TRUE;
           digest->nc = 1; /* we make a new nonce now */
         }
       }
-      else if(curlx_str_casecompare(&value, "realm")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("realm"))) {
         curlx_free(digest->realm);
         digest->realm = curlx_strdup(content);
         if(!digest->realm)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(curlx_str_casecompare(&value, "opaque")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("opaque"))) {
         curlx_free(digest->opaque);
         digest->opaque = curlx_strdup(content);
         if(!digest->opaque)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(curlx_str_casecompare(&value, "qop")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("qop"))) {
         const char *token = content;
         struct Curl_str out;
         bool foundAuth = FALSE;
@@ -604,7 +604,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
             return CURLE_OUT_OF_MEMORY;
         }
       }
-      else if(curlx_str_casecompare(&value, "algorithm")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("algorithm"))) {
         curlx_free(digest->algorithm);
         digest->algorithm = curlx_strdup(content);
         if(!digest->algorithm)
@@ -635,7 +635,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         else
           return CURLE_BAD_CONTENT_ENCODING;
       }
-      else if(curlx_str_casecompare(&value, "userhash")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("userhash"))) {
         if(curl_strequal(content, "true")) {
           digest->userhash = TRUE;
         }

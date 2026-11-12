@@ -79,7 +79,7 @@ static CURLcode test_unit2602(const char *arg)
   /* Check overflow detection */
   fail_unless(Curl_dynhds_add(&hds, "test1", SIZE_MAX / 2,
                               "123", SIZE_MAX / 2), "overflow check failed");
-  Curl_dynhds_free(&hds);
+  Curl_dynhds_cleanup(&hds);
 
   /* add header exceeding max overall length */
   Curl_dynhds_init(&hds, 128, 10);
@@ -87,7 +87,7 @@ static CURLcode test_unit2602(const char *arg)
   fail_unless(Curl_dynhds_add(&hds, "test2", 5, "456", 3), "should fail");
   fail_if(Curl_dynhds_add(&hds, "t", 1, "1", 1), "add failed");
   Curl_dynhds_reset(&hds);
-  Curl_dynhds_free(&hds);
+  Curl_dynhds_cleanup(&hds);
 
   Curl_dynhds_init(&hds, 128, 4 * 1024);
   fail_if(Curl_dynhds_add(&hds, "test1", 5, "123", 3), "add failed");
@@ -124,7 +124,7 @@ static CURLcode test_unit2602(const char *arg)
     curlx_dyn_free(&dbuf);
   }
 
-  Curl_dynhds_free(&hds);
+  Curl_dynhds_cleanup(&hds);
 
   curlx_dyn_init(&dbuf, 32 * 1024);
   fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");
@@ -136,7 +136,7 @@ static CURLcode test_unit2602(const char *arg)
   }
   curlx_dyn_free(&dbuf);
 
-  Curl_dynhds_free(&hds);
+  Curl_dynhds_cleanup(&hds);
 
   UNITTEST_END_SIMPLE
 }
