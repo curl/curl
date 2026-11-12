@@ -54,6 +54,9 @@
 #endif
 
 #ifdef __APPLE__
+#if !defined(__APPLE_USE_RFC_3542) && !defined(__APPLE_USE_RFC_2292)
+#define __APPLE_USE_RFC_3542
+#endif
 #include <sys/types.h>
 #include <TargetConditionals.h>
 /* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
