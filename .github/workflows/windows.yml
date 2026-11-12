@@ -476,7 +476,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 2
         run: |
-          if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
+          if [ "${MATRIX_OPENSSH}" = 'msys' ]; then
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
@@ -519,7 +519,7 @@ jobs:
               export CURL_TEST_SSH_DISABLE_KEX=mlkem768x25519-sha256  # broken with libssh 0.12.0 Windows x64
             fi
           fi
-          if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
+          if [ "${MATRIX_OPENSSH}" != 'msys' ]; then  # OpenSSH-Windows*
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004 ~3022'  # SCP
             if [[ "${MATRIX_CONFIG} " = *'-DCURL_USE_LIBSSH=ON'* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
@@ -931,6 +931,7 @@ jobs:
             type: 'Debug'
             image: 'windows-2025'
             chkprefill: '_chkprefill'
+            openssh: 'msys'
             tflags: '--min=1860'
             config: >-
               -DENABLE_DEBUG=ON
