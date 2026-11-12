@@ -1094,6 +1094,7 @@ CURL *curl_easy_duphandle(CURL *curl)
       outcurl->hsts = Curl_hsts_init();
       if(!outcurl->hsts)
         goto fail;
+      outcurl->hsts->flags = data->hsts->flags;
       str = CURL_EASY_STR(outcurl, STRING_HSTS);
       if(str)
         (void)Curl_hsts_loadfile(outcurl, outcurl->hsts, str);
