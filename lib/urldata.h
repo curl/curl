@@ -284,7 +284,10 @@ struct connectdata {
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
-  struct curl_slist *proxy_connect_hds; /* custom CONNECT headers, or NULL */
+#ifndef CURL_DISABLE_HTTP
+  char *proxy_auth_hd; /* custom Proxy-Authorization header the CONNECT
+                          tunnel was set up with, or NULL */
+#endif
 #endif
 
   /* Callbacks for send/recv, can be overwritten by protocol handlers.
