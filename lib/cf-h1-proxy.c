@@ -519,6 +519,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   int error;
+  size_t taken = 0;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -532,6 +533,14 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
+
+    /* Bound the read so other transfers on this multi can run, and ask the
+       multi to run us again right away instead of waiting for the socket. */
+    if(taken >= 16384) {
+      Curl_multi_mark_dirty(data);
+      return CURLE_OK;
+    }
+
     result = Curl_conn_cf_recv(cf->next, data, &byte, 1, &nread);
     if(result == CURLE_AGAIN)
       /* socket buffer drained, return */
@@ -567,6 +576,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       ts->keepon = KEEPON_DONE;
       break;
     }
+
+    taken += nread;
 
     if(ts->keepon == KEEPON_IGNORE) {
       /* This means we are currently ignoring a response-body */
