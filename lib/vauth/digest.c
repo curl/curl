@@ -701,6 +701,9 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   return CURLE_OK;
 }
 
+#if defined(CURL_HAVE_MD5) || defined(CURL_HAVE_SHA256) || \
+  defined(CURL_HAVE_SHA512_256)
+
 /*
  * auth_create_digest_http_message()
  *
@@ -1007,6 +1010,7 @@ oom:
     curlx_dyn_free(&response);
   return result;
 }
+#endif
 
 /*
  * Curl_auth_create_digest_http_message()
@@ -1035,6 +1039,14 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                               struct digestdata *digest,
                                               char **outptr, size_t *outlen)
 {
+  (void)data;
+  (void)creds;
+  (void)request;
+  (void)uripath;
+  (void)digest;
+  (void)outptr;
+  (void)outlen;
+
 #ifdef CURL_HAVE_MD5
   if(digest->algo <= ALGO_MD5SESS)
     return auth_create_digest_http_message(data, creds,

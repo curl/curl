@@ -54,6 +54,9 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   unsigned char *hkey;
   unsigned char b;
 
+  if(!hashparams->hinit)
+    return NULL;
+
   /* Create HMAC context. */
   i = HMAC_CTXT_OFFSET + (2 * hashparams->ctxtsize) + hashparams->resultlen;
   ctxt = curlx_malloc(i);
@@ -170,4 +173,4 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
   return CURLE_OK;
 }
 
-#endif /* AWS or Digest and TLS */
+#endif /* AWS, httpsig or Digest and TLS */
