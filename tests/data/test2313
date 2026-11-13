@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+ws
+libtest
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<features>
+ws
+</features>
+<command>
+ws://%HOSTIP/%TESTNUMBER
+</command>
+
+<name>
+ws PONG queued while the send buffer is blocked
+</name>
+</client>
+
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+
+</testcase>

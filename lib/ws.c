@@ -1044,6 +1044,11 @@ static CURLcode ws_enc_write_head(struct Curl_easy *data,
    * Any pending control frame we can add now as part of the flush. */
   if(ws->pending.type) {
     CURLcode result = ws_enc_add_pending(data, ws);
+    if((result == CURLE_AGAIN) && !enc->payload_remain) {
+      result = ws_flush(data, ws, Curl_api_is_in_callback(data));
+      if(!result)
+        result = ws_enc_add_pending(data, ws);
+    }
     if(result)
       return result;
   }
@@ -1136,6 +1141,8 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
     return CURLE_OK;
   if(ws->enc.payload_remain) /* in the middle of another frame */
     return CURLE_AGAIN;
+  if(Curl_bufq_is_full(&ws->sendbuf)) /* needs flushing first */
+    return CURLE_AGAIN;
 
   result = ws_enc_add_frame(data, &ws->enc, ws->pending.type,
                             (curl_off_t)ws->pending.payload_len,
@@ -1145,14 +1152,17 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
                 (int)result);
     goto out;
   }
-  result = ws_enc_write_payload(&ws->enc, data, ws->pending.payload,
-                                ws->pending.payload_len,
-                                &ws->sendbuf, &n);
+  /* The head is queued, the payload has to follow it even when sendbuf
+   * is beyond its soft limit. */
+  result = ws_enc_mask_write(ws->enc.mask, &ws->enc.xori,
+                             ws->pending.payload, ws->pending.payload_len,
+                             &ws->sendbuf, &n);
   if(result) {
     CURL_TRC_WS(data, "ws_enc_cntrl(), error adding payload: %d",
                 (int)result);
     goto out;
   }
+  ws->enc.payload_remain -= (curl_off_t)n;
   if(n != ws->pending.payload_len) {
     DEBUGASSERT(0); /* buffer should always be able to take all */
     CURL_TRC_WS(data, "ws_enc_cntrl(), error added only %zu/%zu payload,",
