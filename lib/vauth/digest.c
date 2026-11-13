@@ -621,16 +621,16 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         else if(curl_strequal(content, "SHA-512-256")) {
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256;
-#else /* !CURL_HAVE_SHA512_256 */
+#else
           return CURLE_NOT_BUILT_IN;
-#endif /* CURL_HAVE_SHA512_256 */
+#endif
         }
         else if(curl_strequal(content, "SHA-512-256-SESS")) {
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256SESS;
-#else /* !CURL_HAVE_SHA512_256 */
+#else
           return CURLE_NOT_BUILT_IN;
-#endif /* CURL_HAVE_SHA512_256 */
+#endif
         }
         else
           return CURLE_BAD_CONTENT_ENCODING;
@@ -1025,7 +1025,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,
                                            Curl_sha512_256it);
-#endif /* CURL_HAVE_SHA512_256 */
+#endif
 
   /* Should be unreachable */
   return CURLE_BAD_CONTENT_ENCODING;
