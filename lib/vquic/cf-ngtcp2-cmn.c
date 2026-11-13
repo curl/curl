@@ -210,6 +210,23 @@ static void quic_printf(void *user_data, const char *fmt, ...)
 }
 #endif
 
+static int qlog_write_all(int fd, const void *data, size_t datalen)
+{
+  const unsigned char *p = data;
+  while(datalen) {
+    ssize_t rc = write(fd, p, datalen);
+    /* File writes use errno, not the socket error code. */
+    /* !checksrc! disable ERRNOVAR 1 */
+    if(rc < 0 && errno == EINTR)
+      continue;
+    if(rc <= 0)
+      return FALSE;
+    p += rc;
+    datalen -= (size_t)rc;
+  }
+  return TRUE;
+}
+
 static void qlog_callback(void *user_data, uint32_t flags,
                           const void *data, size_t datalen)
 {
@@ -217,9 +234,8 @@ static void qlog_callback(void *user_data, uint32_t flags,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   (void)flags;
   if(ctx->qlogfd != -1) {
-    ssize_t rc = write(ctx->qlogfd, data, datalen);
-    if(rc == -1) {
-      /* on write error, stop further write attempts */
+    if(!qlog_write_all(ctx->qlogfd, data, datalen)) {
+      /* on write failure, stop further write attempts */
       curlx_close(ctx->qlogfd);
       ctx->qlogfd = -1;
     }
