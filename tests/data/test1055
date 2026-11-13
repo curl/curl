@@ -71,7 +71,6 @@ PWD%CR
 EPSV%CR
 TYPE I%CR
 STOR %TESTNUMBER%CR
-QUIT%CR
 </protocol>
 <upload>
 Weird

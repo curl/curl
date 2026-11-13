@@ -1028,7 +1028,7 @@ err:
             addresses, permanent ? "" : " (non-permanent)");
 
       /* Wildcard hostname */
-      if(curlx_str_casecompare(&source, "*")) {
+      if(curlx_str_casecompare2(&source, STRCONST("*"))) {
         infof(data, "RESOLVE *:%u using wildcard", port);
         data->state.wildcard_resolve = TRUE;
       }

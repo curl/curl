@@ -43,7 +43,6 @@ EPSV
 PASV
 TYPE A
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

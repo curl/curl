@@ -56,7 +56,6 @@ EPRT |1|
 PORT
 TYPE I
 STOR %TESTNUMBER
-QUIT
 </protocol>
 <upload>
 Moooooooooooo

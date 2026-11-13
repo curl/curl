@@ -20,7 +20,7 @@ Content-Type: text/html%CR
 Funny-head: yesyes%CR
 Set-Cookie:
 Set-Cookie: ;
-Set-Cookie: blankdomain=sure; domain=; path=/
+Set-Cookie: blankdomain%TAB=sure; domain=; path=/
 Set-Cookie: foobar=name; domain=anything.com; path=/ ; secure%CR
 Set-Cookie:ismatch=this  ; domain=test31.curl; path=/silly/%CR
 Set-Cookie:ISMATCH=this  ; domain=test31.curl; path=/silly/%CR
@@ -71,6 +71,7 @@ Set-Cookie: withspaces2 =before equals;%CR
 Set-Cookie: prespace=  yes before;%CR
 Set-Cookie: securewithspace=after    ; secure %CR
 Set-Cookie: %hex[%c3%82%c2%b3%c3%83%5c%78%39%32%c3%83%5c%78%39%61%c3%83%5c%78%38%64%c3%83%5c%78%39%37]hex%=%96%A6g%9Ay%B0%A5g%A7tm%7C%95%9A
+Set-Cookie: =content;
 %CR
 boo
 </data>

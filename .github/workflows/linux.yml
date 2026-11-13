@@ -36,19 +36,19 @@ env:
   CURL_TEST_MIN: 1710
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc
-  AWSLC_VERSION: 5.11.0
+  AWSLC_VERSION: 5.13.0
   # renovate: datasource=github-tags depName=google/boringssl
   BORINGSSL_VERSION: 0.20261020.0
   # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced
   FIL_C_VERSION: 0.687
   # renovate: datasource=github-tags depName=libressl/portable
-  LIBRESSL_VERSION: 4.4.0
+  LIBRESSL_VERSION: 4.4.1
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls
   MBEDTLS_VERSION: 4.2.0
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls extractVersion=^v?(?<version>3\..+)$
   MBEDTLS_PREV_VERSION: 3.6.7
   # renovate: datasource=github-tags depName=nghttp2/nghttp2
-  NGHTTP2_VERSION: 1.70.0
+  NGHTTP2_VERSION: 1.71.0
   # renovate: datasource=github-tags depName=openldap/openldap versioning=regex:^(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)$ extractVersion=^OPENLDAP_REL_ENG_(?<version>.+)$
   OPENLDAP_VERSION: 2_7_2
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
@@ -61,7 +61,7 @@ env:
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    runs-on: ${{ matrix.build.image || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.build.image || 'ubuntu-26.04' }}
     container: ${{ matrix.build.container }}
     timeout-minutes: 15
     env:
@@ -75,12 +75,13 @@ jobs:
           - name: 'awslc'
             install_steps: awslc pytest test-linter
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/awslc/lib
+            LIBS: -lstdc++
             configure: --with-openssl=/home/runner/pkg/awslc --enable-ech
 
           - name: 'awslc'
             install_packages: libidn2-dev
             install_steps: awslc clean
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/awslc -DOPENSSL_USE_STATIC_LIBS=ON -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch
 
           - name: 'boringssl'
             install_steps: boringssl pytest
@@ -336,13 +337,13 @@ jobs:
 
           - name: 'openssl torture 1'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            tflags: '-t --shallow=25 --subset=0/2'
+            tflags: '-t -r --shallow=25 --subset=0/2'
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl torture 2'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            tflags: '-t --shallow=25 --subset=1/2'
+            tflags: '-t -r --shallow=25 --subset=1/2'
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_DISABLE_HTTPSIG=OFF
 
@@ -846,7 +847,7 @@ jobs:
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
-          [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
+          [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* || "${MATRIX_INSTALL_STEPS}" = *'boringssl'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \

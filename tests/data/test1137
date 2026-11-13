@@ -44,7 +44,6 @@ EPSV
 PASV
 TYPE I
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

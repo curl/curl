@@ -69,6 +69,84 @@ runs:
       shell: bash
       env:
         PACKAGES: ${{ inputs.pip }}
+        RUNNER_OS: ${{ runner.os }}
       run: |
         [ -d ~/venv ] || python3 -m venv ~/venv
-        ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}
+
+        echo '::group::check for bad certs'
+        bad='(emSign (Root CA - C1|ECC Root CA - (C3|G3))|AAA Certificate Services|Comodo AAA Services root'
+        bad+='|MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
+        bad+='|MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
+        bad+='|MIIDczCCAlugAwIBAgILAK7PALrEzzL4Q7IwDQYJKoZIhvcNAQELBQAwVjELMAkG'  # emSign Root CA - C1
+        bad+='|MIICKzCCAbGgAwIBAgIKe3G2gla4EnycqDAKBggqhkjOPQQDAzBaMQswCQYDVQQG'  # emSign ECC Root CA - C3
+        bad+=')'
+        # https://pip.pypa.io/en/stable/topics/https-certificates/
+        {
+          for e in PIP_CERT REQUESTS_CA_BUNDLE CURL_CA_BUNDLE SSL_CERT_DIR SSL_CERT_FILE GIT_SSL_CAINFO NODE_EXTRA_CA_CERTS; do
+            >&2 printf 'env: %s' "${e}"
+            f="$(printenv "${e}" || true)"
+            if [ -n "${f}" ]; then
+              >&2 printf ': %s' "${f}"
+              if [ -d "${f}" ]; then
+                >&2 printf ' (directory exists)'
+                echo "${f}"
+              elif [ -w "${f}" ]; then
+                >&2 printf ' (file exists and WRITABLE)'
+                echo "${f}"
+              elif [ -r "${f}" ]; then
+                >&2 printf ' (file exists and readable)'
+                echo "${f}"
+              fi
+            else
+              >&2 printf ' (not set)'
+            fi
+            >&2 printf '\n'
+          done
+
+          {
+            echo /etc/ssl/certs/ca-certificates.crt
+            echo /etc/ssl/cert.pem
+            echo /opt/homebrew/etc/ca-certificates/cert.pem
+            echo /usr/local/etc/ca-certificates/cert.pem
+            if command -v brew >/dev/null 2>&1; then
+              echo "$(brew --prefix)"/etc/ca-certificates/cert.pem
+            fi
+          } | sort -u | while read -r f; do
+            if [ -d "${f}" ]; then
+              >&2 printf '%s (directory exists)\n' "${f}"
+              echo "${f}"
+            elif [ -w "${f}" ]; then
+              >&2 printf '%s (file exists and WRITABLE)\n' "${f}"
+              echo "${f}"
+            elif [ -r "${f}" ]; then
+              >&2 printf '%s (file exists and readable)\n' "${f}"
+              echo "${f}"
+            fi
+          done
+
+          if [ -d ~/venv ]; then
+            find ~/venv -name cacert.pem || true
+          fi
+        } | sort -u | while read -r f; do
+          echo "::group::${f}"
+          if [ -d "${f}" ]; then
+            if grep -a -E "${bad}" -R -- "${f}"; then
+              echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
+            fi
+          elif [ -f "${f}" ]; then
+            if grep -a -E "${bad}" -- "${f}"; then
+              echo "::group::${f} (full dump)"; cat "${f}"; echo '::endgroup::'
+            fi
+          fi
+          echo '::endgroup::'
+        done
+        echo '::endgroup::'
+
+        options=''
+        # Debian/Ubuntu ships with bad certs, but patches pip to use /etc/ssl/certs/ca-certificates.crt
+        if [ "${RUNNER_OS}" = 'macOS' ]; then
+          options='--cert /opt/homebrew/etc/ca-certificates/cert.pem'
+        fi
+        echo "options: |${options}|"
+
+        ~/venv/bin/pip ${options} --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}

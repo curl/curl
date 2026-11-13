@@ -42,7 +42,6 @@ CWD /
 CWD dir2
 EPSV
 STOR %TESTNUMBER
-QUIT
 </protocol>
 <file name="%LOGDIR/upload%TESTNUMBER">
 send away this contents

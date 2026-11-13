@@ -154,6 +154,32 @@ static CURLcode test_unit1654(const char *arg)
                              origin, ALPN_h2);
   fail_if(result, "Curl_altsvc_parse(11) failed!");
 
+  /* illegal characters in hostname */
+  if(Curl_peer_create(curl, scheme, "9.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"../../admin?x=:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(bad host) failed!");
+  if(Curl_peer_create(curl, scheme, "10.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"..:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(dots host) failed!");
+  if(Curl_peer_create(curl, scheme, "11.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"[../a?b=c:d]:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(bad IPv6 host) failed!");
+  if(Curl_peer_create(curl, scheme, "12.example.net", 80, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\"[%eth0]:443\"\r\n",
+                             origin, ALPN_h2);
+  fail_if(result, "Curl_altsvc_parse(zone only host) failed!");
+
   if(Curl_peer_create(curl, scheme, "test.se", 443, &origin))
     goto fail;
   result = Curl_altsvc_parse(curl, asi,
@@ -237,6 +263,51 @@ static CURLcode test_unit1654(const char *arg)
         fail_unless(dstentry->dst.port == 8080, cases[i].header);
       }
     }
+  }
+
+  /* Both clear and replacement cover all ALPNs for the origin. */
+  {
+    size_t other_entries = Curl_llist_count(&asi->list);
+
+    if(Curl_peer_create(curl, scheme, "cross-alpn.example", 443, &origin))
+      goto fail;
+    result = Curl_altsvc_parse(curl, asi, "h3=\":443\"; ma=120\r\n",
+                               origin, ALPN_h2);
+    fail_if(result, "cross-ALPN alt-svc parse failed");
+    if(result)
+      goto fail;
+    fail_unless(Curl_altsvc_lookup(asi, origin, ALPN_h2, &dstentry,
+                                   CURLALTSVC_H3, &same_destination),
+                "cross-ALPN entry not found");
+
+    result = Curl_altsvc_parse(curl, asi, "clear\r\n", origin, ALPN_h3);
+    fail_if(result, "cross-ALPN clear failed");
+    if(result)
+      goto fail;
+    fail_unless(!Curl_altsvc_lookup(asi, origin, ALPN_h2, &dstentry,
+                                    CURLALTSVC_H3, &same_destination),
+                "cross-ALPN clear kept the old entry");
+    fail_unless(Curl_llist_count(&asi->list) == other_entries,
+                "cross-ALPN clear changed other origins");
+
+    result = Curl_altsvc_parse(curl, asi, "h3=\":443\"; ma=120\r\n",
+                               origin, ALPN_h2);
+    fail_if(result, "cross-ALPN alt-svc parse failed");
+    if(result)
+      goto fail;
+    result = Curl_altsvc_parse(curl, asi, "h2=\":443\"; ma=120\r\n",
+                               origin, ALPN_h3);
+    fail_if(result, "cross-ALPN replacement failed");
+    if(result)
+      goto fail;
+    fail_unless(!Curl_altsvc_lookup(asi, origin, ALPN_h2, &dstentry,
+                                    CURLALTSVC_H3, &same_destination),
+                "cross-ALPN replacement kept the old entry");
+    fail_unless(Curl_altsvc_lookup(asi, origin, ALPN_h3, &dstentry,
+                                   CURLALTSVC_H2, &same_destination),
+                "cross-ALPN replacement lost the new entry");
+    fail_unless(Curl_llist_count(&asi->list) == other_entries + 1,
+                "cross-ALPN replacement changed other origins");
   }
 
 fail:

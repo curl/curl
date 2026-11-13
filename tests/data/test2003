@@ -108,7 +108,6 @@ Host: %HOSTIP:%HTTPPORT%CR
 User-Agent: curl/%VERSION%CR
 Accept: */*%CR
 %CR
-QUIT%CR
 </protocol>
 <stdout>
 -foo-

@@ -2211,7 +2211,8 @@ dnl ----------------------
 dnl check unsafe CA search
 dnl ----------------------
 
-if test "$curl_cv_native_windows" = "yes"; then
+dnl Only used when safe CA search is disabled
+if test "$curl_cv_native_windows" = "yes" && test "$curl_cv_winuwp" != "yes"; then
   ca_search=1
   AC_MSG_CHECKING([whether to enable unsafe CA bundle search in PATH on Windows])
   AC_ARG_ENABLE(ca-search,
@@ -4222,7 +4223,6 @@ if test "$curl_cv_apple" != "yes"; then
   dnl Apple SDK <27 do not offer pipe2(), but the iPhone Simulator-specific
   dnl /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
   dnl detection, omit this feature check for Apple targets.
-  dnl For 27+, detection is done in-source.
   AC_CHECK_FUNCS([\
     pipe2 \
   ])
@@ -4242,7 +4242,11 @@ if test "$curl_cv_native_windows" != "yes"; then
 
   CURL_CHECK_FUNC_MEMSET_S
   if test "$curl_cv_func_memset_s" = "no"; then
-    AC_CHECK_FUNCS([memset_explicit])
+    dnl Use complex detection to avoid misdetection on old Linux.
+    CURL_CHECK_FUNC_EXPLICIT_BZERO
+    if test "$curl_cv_func_explicit_bzero" = "no"; then
+      AC_CHECK_FUNCS([memset_explicit])
+    fi
   fi
 fi
 

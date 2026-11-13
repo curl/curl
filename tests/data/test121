@@ -43,7 +43,6 @@ TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
 DELE after_transfer
-QUIT
 </protocol>
 </verify>
 </testcase>

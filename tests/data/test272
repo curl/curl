@@ -32,7 +32,6 @@ USER anonymous
 PASS ftp@example.com
 PWD
 MDTM %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

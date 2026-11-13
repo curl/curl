@@ -289,6 +289,8 @@ static CURLcode test_cli_ev_download(const char *URL)
       if(ev_dl_roundtrip(&ctx)) {
         curl_mfprintf(stderr, "[t-%zu] multi failure\n", i);
         result = (CURLcode)1;
+        curl_multi_remove_handle(multi, easy);
+        curl_easy_cleanup(easy);
         goto cleanup;
       }
       m = curl_multi_info_read(multi, &msgq);

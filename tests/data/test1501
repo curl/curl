@@ -46,8 +46,10 @@ CWD %TESTNUMBER
 EPSV
 TYPE A
 LIST
-QUIT
 </protocol>
+<strip>
+QUIT
+</strip>
 
 </verify>
 </testcase>

@@ -34,10 +34,12 @@
 #include "curl_get_line.h"
 #include "parsedate.h"
 #include "curl_trc.h"
+#include "curl_addrinfo.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "connect.h"
 #include "escape.h"
+#include "urlapi-int.h"
 
 #define MAX_ALTSVC_LINE    4095
 #define MAX_ALTSVC_DATELEN 17
@@ -45,6 +47,15 @@
 #define MAX_ALTSVC_ALPNLEN 10
 
 #define H3VERSION "h3"
+
+/*
+ * If USE_IPV6 is disabled, we still want to parse IPv6 addresses, so make
+ * sure we have _some_ value for AF_INET6 without polluting our fake value
+ * everywhere.
+ */
+#if !defined(USE_IPV6) && !defined(AF_INET6)
+#define AF_INET6 (AF_INET + 1)
+#endif
 
 #if defined(DEBUGBUILD) || defined(UNITTESTS)
 /* to play well with debug builds, we can *set* a fixed time this will
@@ -165,6 +176,28 @@ static void altsvc_append(struct altsvcinfo *asi, struct altsvc *as)
   Curl_llist_append(&asi->list, as, &as->node);
 }
 
+/* return TRUE if the destination host is a valid hostname or IPv6 address */
+static bool altsvc_valid_host(const char *host, size_t len)
+{
+  struct Curl_str ip6;
+  char buf[MAX_IPADR_LEN];
+  unsigned char addr[16];
+
+  if((len > 2) && (host[0] == '[') && (host[len - 1] == ']')) {
+    host++;
+    len -= 2;
+  }
+  if(!Curl_hostname_check(host, len))
+    return TRUE;
+  if(Curl_looks_like_ipv6(host, len, FALSE, &ip6, NULL) &&
+     curlx_strlen(&ip6) && (curlx_strlen(&ip6) < sizeof(buf))) {
+    memcpy(buf, curlx_str(&ip6), curlx_strlen(&ip6));
+    buf[curlx_strlen(&ip6)] = 0;
+    return curlx_inet_pton(AF_INET6, buf, addr) == 1;
+  }
+  return FALSE;
+}
+
 /* only returns SERIOUS errors */
 static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
 {
@@ -198,7 +231,8 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
      curlx_str_number(&line, &persist, 1) ||
      curlx_str_singlespace(&line) ||
      curlx_str_number(&line, &prio, 0) ||
-     curlx_str_newline(&line))
+     curlx_str_newline(&line) ||
+     !altsvc_valid_host(curlx_str(&dsthost), curlx_strlen(&dsthost)))
     ;
   else {
     char dbuf[MAX_ALTSVC_DATELEN + 1];
@@ -454,19 +488,16 @@ static bool hostcompare(const char *host, const char *check)
   return curl_strnequal(host, check, hlen);
 }
 
-/* altsvc_flush() removes all alternatives for this source origin from the
-   list */
+/* Remove all cached alternatives for this origin, regardless of ALPN. */
 static void altsvc_flush(struct altsvcinfo *asi,
-                         struct Curl_peer *origin,
-                         enum alpnid origin_alpnid)
+                         struct Curl_peer *origin)
 {
   struct Curl_llist_node *e;
   struct Curl_llist_node *n;
   for(e = Curl_llist_head(&asi->list); e; e = n) {
     struct altsvc *as = Curl_node_elem(e);
     n = Curl_node_next(e);
-    if((origin_alpnid == as->src.alpnid) &&
-       (origin->port == as->src.port) &&
+    if((origin->port == as->src.port) &&
        hostcompare(origin->hostname, as->src.host)) {
       Curl_node_remove(e);
       altsvc_free(as);
@@ -509,9 +540,9 @@ static void altsvc_parse_params(const char **pp,
     }
     curlx_str_trimblanks(&val);
 
-    if(curlx_str_casecompare(&name, "ma"))
+    if(curlx_str_casecompare2(&name, STRCONST("ma")))
       keyword = ALTSVC_MA;
-    else if(curlx_str_casecompare(&name, "persist"))
+    else if(curlx_str_casecompare2(&name, STRCONST("persist")))
       keyword = ALTSVC_PERSIST;
 
     if(keyword) {
@@ -564,6 +595,10 @@ static bool altsvc_parse_dest(const char **pp,
     }
     if(curlx_str_single(pp, ':'))
       return FALSE; /* not followed by ':' */
+    if(!altsvc_valid_host(curlx_str(dsthost), curlx_strlen(dsthost))) {
+      infof(data, "Bad alt-svc hostname, ignoring.");
+      return FALSE;
+    }
   }
   else  /* is only :port, hostname is effectively origin */
     curlx_str_assign(dsthost, origin->hostname,
@@ -615,9 +650,9 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   if(!curlx_str_cspn(&p, &alpn, ";\n\r")) {
     curlx_str_trimblanks(&alpn);
     /* "clear" is a magic keyword */
-    if(curlx_str_casecompare(&alpn, "clear")) {
+    if(curlx_str_casecompare2(&alpn, STRCONST("clear"))) {
       /* Flush cached alternatives for this source origin */
-      altsvc_flush(asi, origin, origin_alpnid);
+      altsvc_flush(asi, origin);
       return CURLE_OK;
     }
   }
@@ -665,7 +700,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
       if(!entries++)
         /* Flush cached alternatives for this source origin, if any - when
            this is the first entry of the line. */
-        altsvc_flush(asi, origin, origin_alpnid);
+        altsvc_flush(asi, origin);
 
       as = altsvc_createid(origin->hostname, strlen(origin->hostname),
                            curlx_str(&dsthost),

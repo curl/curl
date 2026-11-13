@@ -10,6 +10,7 @@ threads
 <client>
 <features>
 unittest
+!torture
 </features>
 <name>
 thrdpool unit tests

@@ -109,21 +109,18 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
  *    [bitmask] = action as described below
  *
  * CURL_CSELECT_IN - first socket is readable
- * CURL_CSELECT_IN2 - second socket is readable
  * CURL_CSELECT_OUT - write socket is writable
  * CURL_CSELECT_ERR - an error condition occurred
  */
-int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
-                      curl_socket_t readfd1,
+int Curl_socket_check(curl_socket_t readfd, /* socket to read from */
                       curl_socket_t writefd, /* socket to write to */
                       timediff_t timeout_ms) /* milliseconds to wait */
 {
-  struct pollfd pfd[3];
+  struct pollfd pfd[2];
   int num;
   int r;
 
-  if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
-     (writefd == CURL_SOCKET_BAD)) {
+  if((readfd == CURL_SOCKET_BAD) && (writefd == CURL_SOCKET_BAD)) {
     /* no sockets, wait */
     return curlx_wait_ms(timeout_ms);
   }
@@ -134,14 +131,8 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
      value indicating a blocking call should be performed. */
 
   num = 0;
-  if(readfd0 != CURL_SOCKET_BAD) {
-    pfd[num].fd = readfd0;
-    pfd[num].events = POLLRDNORM | POLLIN | POLLRDBAND | POLLPRI;
-    pfd[num].revents = 0;
-    num++;
-  }
-  if(readfd1 != CURL_SOCKET_BAD) {
-    pfd[num].fd = readfd1;
+  if(readfd != CURL_SOCKET_BAD) {
+    pfd[num].fd = readfd;
     pfd[num].events = POLLRDNORM | POLLIN | POLLRDBAND | POLLPRI;
     pfd[num].revents = 0;
     num++;
@@ -159,16 +150,9 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 
   r = 0;
   num = 0;
-  if(readfd0 != CURL_SOCKET_BAD) {
+  if(readfd != CURL_SOCKET_BAD) {
     if(pfd[num].revents & (POLLRDNORM | POLLIN | POLLERR | POLLHUP))
       r |= CURL_CSELECT_IN;
-    if(pfd[num].revents & (POLLPRI | POLLNVAL))
-      r |= CURL_CSELECT_ERR;
-    num++;
-  }
-  if(readfd1 != CURL_SOCKET_BAD) {
-    if(pfd[num].revents & (POLLRDNORM | POLLIN | POLLERR | POLLHUP))
-      r |= CURL_CSELECT_IN2;
     if(pfd[num].revents & (POLLPRI | POLLNVAL))
       r |= CURL_CSELECT_ERR;
     num++;

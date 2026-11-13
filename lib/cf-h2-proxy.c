@@ -169,10 +169,6 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
     if(new_state == H2_TUNNEL_FAILED)
       CURL_TRC_CF(data, cf, "[%d] new tunnel state 'failed'", ts->stream_id);
     ts->state = new_state;
-    /* If a proxy-authorization header was used for the proxy, then we should
-       make sure that it is not accidentally used for the document request
-       after we have connected. Let's thus free and clear it here. */
-    curlx_safefree(data->req.hd_proxy_auth);
     break;
   }
 }
@@ -352,7 +348,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
-  size_t nread;
+  size_t nread, loop_read = 0;
 
   /* Process network input buffer first */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
@@ -386,9 +382,17 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
 
+    loop_read += nread;
     result = proxy_h2_process_pending_input(cf, data);
     if(result)
       return result;
+
+    if((!cf->connected && (loop_read >= (16 * 1024))) ||
+       (cf->connected && (loop_read >= H2_TUNNEL_WINDOW_SIZE))) {
+      /* Give other transfers a chance to run. */
+      Curl_multi_mark_dirty(data);
+      break;
+    }
   }
 
   return CURLE_OK;
@@ -762,7 +766,7 @@ static CURLcode proxy_h2_submit(
 
 out:
   curlx_free(nva);
-  Curl_dynhds_free(&h2_headers);
+  Curl_dynhds_cleanup(&h2_headers);
   *pstream_id = stream_id;
   return result;
 }
@@ -1114,7 +1118,7 @@ static CURLcode cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
-  curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+  curl_socket_t sock = cf->chain->sock;
   bool want_recv, want_send;
   CURLcode result = CURLE_OK;
 

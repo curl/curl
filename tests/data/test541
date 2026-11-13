@@ -47,7 +47,6 @@ TYPE I
 STOR %TESTNUMBER
 EPSV
 STOR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

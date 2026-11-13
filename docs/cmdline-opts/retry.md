@@ -34,3 +34,10 @@ curl complies with the Retry-After: response header if one was present to know
 when to issue the next retry (added in 7.66.0). That means the server can
 override the retry delay. To handle server retry delays that may be longer
 than expected, you can use --retry-max-time to limit the total retry time.
+
+Before retrying, curl removes data that the failed attempt wrote to an output
+file set with --output or --remote-name. It cannot do that for data written to
+stdout, a pipe or a shell redirect, so a retry after a partially received
+transfer, such as a timeout in the middle of the body, may produce duplicate
+data there. Write to an output file instead, or avoid --retry when the output
+is redirected.

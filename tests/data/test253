@@ -50,7 +50,6 @@ PWD
 EPRT |2|::1|
 TYPE A
 LIST
-QUIT
 </protocol>
 </verify>
 </testcase>

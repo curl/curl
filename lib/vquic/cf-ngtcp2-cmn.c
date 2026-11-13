@@ -249,12 +249,15 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   s->glitch_ratelim_burst = 1000 * 10;
   s->glitch_ratelim_rate = 33 * 10;
 #endif
+  /* We do not allow the server to open bidi streams to us */
+  t->initial_max_streams_bidi = 0;
+  t->initial_max_stream_data_bidi_remote = 0;
+  /* remote uni streams have a limit which is 3 for HTTP/3 */
+  t->initial_max_streams_uni = QUIC_UNI_STREAM_MAX;
+  t->initial_max_stream_data_uni = QUIC_UNI_STREAM_WIN_SIZE;
+  /* Initial windows sizes for stream we open */
   t->initial_max_data = s->max_window;
   t->initial_max_stream_data_bidi_local = H3_STREAM_WINDOW_SIZE_INITIAL;
-  t->initial_max_stream_data_bidi_remote = H3_STREAM_WINDOW_SIZE_INITIAL;
-  t->initial_max_stream_data_uni = t->initial_max_data;
-  t->initial_max_streams_bidi = QUIC_MAX_STREAMS;
-  t->initial_max_streams_uni = QUIC_MAX_STREAMS;
   t->max_idle_timeout = 0; /* no idle timeout from our side */
   if(ctx->qlogfd != -1) {
     s->qlog_write = qlog_callback;
@@ -438,6 +441,12 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
+  /* We start with 3 uni streams the server might open to us. If
+   * it closes one, we give it credit for a new one. */
+  if(!ngtcp2_is_bidi_stream(stream_id) &&
+     !ngtcp2_conn_is_local_stream(tconn, stream_id))
+    ngtcp2_conn_extend_max_streams_uni(tconn, 1);
+
   return 0;
 }
 
@@ -472,6 +481,12 @@ static int cb_stream_close2(ngtcp2_conn *tconn, uint32_t flags,
     Curl_cf_ngtcp2_h3_err_set(cf, data, rv);
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
+
+  /* We start with 3 uni streams the server might open to us. If
+   * it closes one, we give it credit for a new one. */
+  if(!ngtcp2_is_bidi_stream(stream_id) &&
+     !ngtcp2_conn_is_local_stream(tconn, stream_id))
+    ngtcp2_conn_extend_max_streams_uni(tconn, 1);
 
   return 0;
 }
@@ -1149,7 +1164,7 @@ CURLcode Curl_cf_ngtcp2_cmn_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(Curl_ssl_need_httpsrr(cf) &&
-     !Curl_conn_dns_resolved_https(data, cf->sockindex, ctx->ssl_peer.peer)) {
+     !Curl_dns_cf_resolved_https(data, cf, ctx->ssl_peer.peer)) {
     CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
     return CURLE_OK;
   }
@@ -1453,10 +1468,6 @@ static CURLcode read_pkt_to_send(void *userp,
   ssize_t n;
   bool can_write_stream_data;
 
-  *pnread = 0;
-  veccnt = 0;
-  stream_id = -1;
-  fin = 0;
   can_write_stream_data = ctx->h3conn &&
     Curl_ngtcp2_conn_get_max_data_left(&ctx->qconn);
 
@@ -1467,7 +1478,11 @@ static CURLcode read_pkt_to_send(void *userp,
    * When ngtcp2 is happy (because it has no other frame that would fit
    * or it has nothing more to send), it returns the total length
    * of the assembled packet. This may be 0 if there was nothing to send. */
+  *pnread = 0;
   for(;;) {
+    veccnt = 0;
+    stream_id = -1;
+    fin = 0;
 
     /* Once MORE starts coalescing a packet, no other ngtcp2 API may be
      * called until a write completes it. Cache the flow-control state before
@@ -1850,9 +1865,9 @@ CURLcode Curl_cf_ngtcp2_cmn_set_expiry(struct Curl_cfilter *cf,
       if(timeout % NGTCP2_MILLISECONDS) {
         timeout += NGTCP2_MILLISECONDS;
       }
-      Curl_expire_set(data, EXPIRE_QUIC,
-                      (timediff_t)(timeout / NGTCP2_MILLISECONDS),
-                      &pktx->now);
+      Curl_expire_latest(data, EXPIRE_QUIC,
+                         (timediff_t)(timeout / NGTCP2_MILLISECONDS),
+                         &pktx->now);
     }
   }
   return CURLE_OK;
@@ -2096,6 +2111,29 @@ CURLcode Curl_cf_ngtcp2_cmn_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+static CURLcode cf_ngtcp2_cmn_maintenance(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data)
+{
+  CURLcode result = CURLE_OK;
+
+  if(cf->connected && !cf->shutdown) {
+    struct cf_call_data save;
+    struct cf_ngtcp2_io_ctx pktx;
+
+    CF_DATA_SAVE(save, cf, data);
+    Curl_cf_ngtcp2_io_ctx_init(&pktx, cf, data);
+
+    result = Curl_cf_ngtcp2_progress_ingress(cf, data, &pktx);
+    if(!result)
+      result = Curl_cf_ngtcp2_progress_egress(cf, data, &pktx);
+    if(!result)
+      result = Curl_cf_ngtcp2_cmn_set_expiry(cf, data, &pktx);
+    CURL_TRC_CF(data, cf, "maintenance() -> %d", (int)result);
+    CF_DATA_RESTORE(cf, save);
+  }
+  return result;
+}
+
 CURLcode Curl_cf_ngtcp2_cmn_cntrl(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   int event, int arg1, void *arg2)
@@ -2120,6 +2158,9 @@ CURLcode Curl_cf_ngtcp2_cmn_cntrl(struct Curl_cfilter *cf,
         ctx->stats_reported = TRUE;
       }
     }
+    break;
+  case CF_CTRL_MAINTENANCE:
+    result = cf_ngtcp2_cmn_maintenance(cf, data);
     break;
   default:
     break;

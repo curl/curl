@@ -525,15 +525,16 @@ sub checksystemfeatures {
     $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
     $DATE = strftime "%Y-%m-%d", gmtime($current_time);
 
-    open(my $disabledh, "-|", exerunner() . shell_quote($CURLINFO));
-    while(<$disabledh>) {
-        if($_ =~ /([^:]*): ([ONF]*)/) {
-            my ($val, $toggle) = ($1, $2);
-            push @disabled, $val if($toggle eq "OFF");
-            $feature{$val} = 1 if($toggle eq "ON");
+    if(open(my $disabledh, "-|", exerunner() . shell_quote($CURLINFO))) {
+        while(<$disabledh>) {
+            if($_ =~ /([^:]*): ([ONF]*)/) {
+                my ($val, $toggle) = ($1, $2);
+                push @disabled, $val if($toggle eq "OFF");
+                $feature{$val} = 1 if($toggle eq "ON");
+            }
         }
+        close($disabledh);
     }
-    close($disabledh);
 
     if($disabled[0]) {
         s/[\r\n]//g for @disabled;
@@ -597,6 +598,9 @@ sub checksystemfeatures {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
+                if($libcurl =~ /\slibressl\/4\.4\.0\b/i) {
+                    $feature{"libressl-4.4.0"} = 1;
+                }
             }
             elsif($libcurl =~ /\squictls\b/i) {
                 # OpenSSL compatible API
@@ -764,7 +768,7 @@ sub checksystemfeatures {
         # check if the HTTP server has it!
         my $cmd = server_exe('sws') . " --logfile $dev_null --version";
         my @sws = qx($cmd);
-        if($sws[0] =~ /IPv6/) {
+        if(@sws && $sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
             $http_ipv6 = 1;
         }
@@ -772,7 +776,7 @@ sub checksystemfeatures {
         # check if the FTP server has it!
         $cmd = server_exe('sockfilt') . " --logfile $dev_null --version";
         @sws = qx($cmd);
-        if($sws[0] =~ /IPv6/) {
+        if(@sws && $sws[0] =~ /IPv6/) {
             # FTP server has IPv6 support!
             $ftp_ipv6 = 1;
         }
@@ -782,7 +786,7 @@ sub checksystemfeatures {
         # client has Unix sockets support, check whether the HTTP server has it
         my $cmd = server_exe('sws') . " --logfile $dev_null --version";
         my @sws = qx($cmd);
-        $http_unix = 1 if($sws[0] =~ /unix/);
+        $http_unix = 1 if(@sws && $sws[0] =~ /unix/);
     }
 
     # strip line from stderr and file output to not confuse tests
@@ -792,16 +796,17 @@ sub checksystemfeatures {
         push @global_strip_file, $strip_cacert;
     }
 
-    open(my $manh, "-|", shell_quote($CURL) . " --disable --manual 2>&1");
-    while(my $s = <$manh>) {
-        if($s =~ /built-in manual was disabled at build-time/) {
-            $feature{"manual"} = 0;
+    if(open(my $manh, "-|", shell_quote($CURL) . " --disable --manual 2>&1")) {
+        while(my $s = <$manh>) {
+            if($s =~ /built-in manual was disabled at build-time/) {
+                $feature{"manual"} = 0;
+                last;
+            }
+            $feature{"manual"} = 1;
             last;
         }
-        $feature{"manual"} = 1;
-        last;
+        close($manh);
     }
-    close($manh);
 
     $feature{"python"} = !$ENV{'CURL_TEST_NO_PYTHON'};
     $feature{"unittest"} = 1;
@@ -865,6 +870,9 @@ sub checksystemfeatures {
     }
     if($mintotal) {
         logmsg "* Min tests: $mintotal\n";
+    }
+    if($hostos eq 'MSWin32' || $hostos eq 'cygwin' || $hostos eq 'msys') {
+        logmsg "* srcdir: '$srcdir'\n";
     }
 }
 

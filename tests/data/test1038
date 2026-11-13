@@ -40,7 +40,6 @@ EPSV
 TYPE I
 SIZE %TESTNUMBER
 APPE %TESTNUMBER
-QUIT
 </protocol>
 <upload>
 cr@p******** that we are gonna upload

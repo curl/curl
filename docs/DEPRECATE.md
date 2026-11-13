@@ -55,6 +55,21 @@ TLS libraries provide their own functions for verification.
 
 Pending PR: https://github.com/curl/curl/pull/22845
 
+## mbedTLS
+
+The mbedTLS team has
+[announced](https://lists.trustedfirmware.org/archives/list/mbed-tls@lists.trustedfirmware.org/thread/YPIGCB7WN6GCHOGEGKOJXUYAP7OK527W/)
+they plan to cease their involvement in development and maintenance from April
+2027.
+
+Maintaining and developing a TLS library is a major undertaking, and there are
+many existing and capable alternatives already. We do not expect there to
+appear a new maintainer team for mbedTLS when this time comes, so come April
+2027 anything building with and relying on mbedTLS starts to deteriorate.
+
+Provided there is not a believable maintainer team at that point, we drop
+support for mbedTLS from curl in May 2027.
+
 ## Past removals
 
 - axTLS (removed in 7.63.0)

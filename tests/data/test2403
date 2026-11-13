@@ -27,6 +27,7 @@ Funny-head: yesyes
 <client>
 <features>
 http/2
+nghttpx
 SSL
 headers-api
 </features>

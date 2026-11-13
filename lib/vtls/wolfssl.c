@@ -442,7 +442,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                     &sc_session);
   sdata = NULL;  /* took ownership of sdata */
   if(!result && pscs &&  /* return a duplicate if asked for and FTP */
-     (cf->conn->scheme->family == CURLPROTO_FTP))
+     (CF_CONN(cf)->scheme->family == CURLPROTO_FTP))
     result = Curl_ssl_session_dup(sc_session, &sc_dup);
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -538,7 +538,7 @@ static bool wssl_apply_session(
               scs->alpn ? scs->alpn : "-");
         success = TRUE;
         if(conn_config->earlydata &&
-           !cf->conn->bits.connect_only &&
+           !CF_CONN(cf)->bits.connect_only &&
            !strcmp("TLSv1.3", wolfSSL_get_version(wss->ssl))) {
           bool do_early_data = FALSE;
           if(sess_reuse_cb) {
@@ -1177,11 +1177,11 @@ static CURLcode wssl_init_ssl_handle(
   (void)transport;
 #endif
 
-  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+  if(!CF_IS_PRIMARY(cf) && !(cf->cft->flags & CF_TYPE_PROXY)) {
     /* FTP is a bitch. On TLS secured transfers, it is a common server
      * option to require the client to use the SAME TLS session as on
      * the control connection or it fails the request. See #22225. */
-    scs = Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    scs = Curl_ssl_get_primary_session(data, cf->cft);
     if(scs) {
       session_applied = wssl_apply_session(cf, data, wctx, alpns,
                                            sess_reuse_cb, scs);
@@ -1274,7 +1274,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
   }
   else {
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex, peer->origin);
+      Curl_dns_cf_get_https(data, cf, peer->origin);
 
     if(Curl_httpsrr_is_for_peer(peer->origin, rinfo) && rinfo->echconfiglist) {
       const unsigned char *ecl = rinfo->echconfiglist;
@@ -1513,7 +1513,7 @@ static CURLcode wssl_connect_step1(struct Curl_cfilter *cf,
   }
 #else /* !USE_BIO_CHAIN */
   {
-    curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sockfd = cf->chain->sock;
     if(sockfd > INT_MAX) {
       failf(data, "SSL: socket value too large");
       return CURLE_SSL_CONNECT_ERROR;
@@ -1548,20 +1548,12 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct wssl_ctx *wssl)
 {
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   WOLFSSL_X509 *x509 = NULL;
   unsigned char *pubkey = NULL;
   CURLcode result = CURLE_OK;
-#ifndef CURL_DISABLE_PROXY
-  const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#else
-  const char * const pinnedpubkey =
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-  (void)cf;
-#endif
 
-  if(pinnedpubkey) {
+  if(conn_config->pinned_key) {
 #ifdef KEEP_PEER_CERT
     int pubkey_len = 0;
 
@@ -1591,8 +1583,8 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
       goto end;
     }
 
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
-                                  (size_t)pubkey_len);
+    result = Curl_pin_peer_pubkey(data, conn_config->pinned_key,
+                                  pubkey, (size_t)pubkey_len);
     if(result)
       failf(data, "SSL: public key does not match pinned public key");
 #else
@@ -2137,8 +2129,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
     if(Curl_ssl_need_httpsrr(cf) &&
-       !Curl_conn_dns_resolved_https(data, cf->sockindex,
-                                     connssl->peer.peer)) {
+       !Curl_dns_cf_resolved_https(data, cf, connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
       return CURLE_OK;
     }

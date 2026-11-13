@@ -49,7 +49,6 @@ CWD get/file/again
 EPSV
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

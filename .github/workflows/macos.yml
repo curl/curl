@@ -42,7 +42,6 @@ cache-mode: none
 # - 10.11  El Capitan (2015)    - connectx() (runtime)
 # - 10.12  Sierra (2016)        - clock_gettime() (build-time, runtime)
 # - 10.14  Mojave (2018)        - SecTrustEvaluateWithError() (runtime), GSS Framework
-# - 27.0   Golden Gate (2026)   - pipe2() (build-time, runtime)
 
 env:
   CURL_CI: github
@@ -64,7 +63,7 @@ jobs:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_OPTIONS: ${{ matrix.build.options }}
       # renovate: datasource=github-tags depName=libressl/portable
-      LIBRESSL_VERSION: 4.4.0
+      LIBRESSL_VERSION: 4.4.1
     strategy:
       fail-fast: false
       matrix:
@@ -280,7 +279,7 @@ jobs:
               -DCMAKE_C_STANDARD=90 -DUSE_PROXY_HTTP3=ON
 
           - name: 'OpenSSL SecTrust krb5'
-            image: xcode-27  # for pipe2()
+            image: xcode-27
             macos-version-min: '10.15'
             compiler: clang
             install: libnghttp3 libngtcp2
@@ -383,21 +382,21 @@ jobs:
             install: openssl@4
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON
-            tflags: '-t --shallow=25 --subset=0/3'
+            tflags: '-t -r --shallow=25 --subset=0/3'
 
           - name: 'OpenSSL torture 2'
             compiler: clang
             install: openssl@4
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON
-            tflags: '-t --shallow=25 --subset=1/3'
+            tflags: '-t -r --shallow=25 --subset=1/3'
 
           - name: 'OpenSSL torture 3'
             compiler: clang
             install: openssl@4
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON
-            tflags: '-t --shallow=25 --subset=2/3'
+            tflags: '-t -r --shallow=25 --subset=2/3'
 
     steps:
       - uses: $/.github/actions/macos-fix-certs
@@ -549,10 +548,14 @@ jobs:
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_steps, 'torture') && 20 || 10 }}
         env:
+          MATRIX_INSTALL: '${{ matrix.build.install }}'
           TEST_TARGET: ${{ contains(matrix.build.install_steps, 'torture') && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           TFLAGS="-j20 ${TFLAGS}"
+          if [[ "${MATRIX_INSTALL}" != *'libssh'* ]]; then
+            TFLAGS+=' !664 !665'  # MD5 support is disabled in Homebrew since libssh2 1.11.1_6
+          fi
           if [ "${TEST_TARGET}" != 'test-ci' ]; then
             TFLAGS+=' --buildinfo'  # only test-ci sets this by default, set it manually for test-torture
           fi

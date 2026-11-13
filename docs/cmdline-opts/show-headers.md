@@ -4,8 +4,8 @@ SPDX-License-Identifier: curl
 Long: show-headers
 Short: i
 Help: Show response headers in output
-Protocols: HTTP FTP
-Category: important verbose output http ftp
+Protocols: HTTP FTP FILE
+Category: important verbose output http ftp file
 Added: 4.8
 Multi: boolean
 See-also:
@@ -29,6 +29,9 @@ header field names appear in bold and URLs in `Location:` headers be
 especially marked as such. Disable the use of terminal escape codes with
 --no-styled-output. (This means using the --styled-output option with a
 `--no-` prefix to disable it.)
+
+When used on a FILE URL, curl includes the file size and last modification
+time.
 
 To view the request headers, consider the --verbose option.
 

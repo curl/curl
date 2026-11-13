@@ -125,6 +125,7 @@ struct websocket {
   struct bufq sendbuf;    /* raw data to be sent to the server */
   struct curl_ws_frame recvframe;  /* the current WS FRAME received */
   struct ws_cntrl_frame pending; /* a control frame pending to be sent */
+  uint8_t ping[WS_MAX_CNTRL_LEN]; /* received PING payload for auto PONG */
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
   BIT(using_reader);      /* sending WS data is handled via a client reader */
 };
@@ -599,6 +600,8 @@ static void update_meta(struct websocket *ws,
 struct ws_cw_ctx {
   struct Curl_cwriter super;
   struct bufq buf;
+  /* the frame being passed on, for curl_ws_meta() in the write callback */
+  struct curl_ws_frame recvframe;
 };
 
 static CURLcode ws_cw_init(struct Curl_easy *data,
@@ -620,6 +623,7 @@ static void ws_cw_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 struct ws_cw_dec_ctx {
   struct Curl_easy *data;
   struct websocket *ws;
+  struct ws_cw_ctx *cw_ctx;
   struct Curl_cwriter *next_writer;
   int cw_type;
 };
@@ -661,6 +665,28 @@ static curl_off_t ws_payload_remain(curl_off_t payload_total,
   return remain - buffered;
 }
 
+/* Collect the payload of a received PING, which may arrive in several
+ * pieces, and answer with a PONG carrying the same payload once complete. */
+static CURLcode ws_auto_pong(struct Curl_easy *data, struct websocket *ws,
+                             const uint8_t *buf, size_t buflen,
+                             curl_off_t payload_offset,
+                             curl_off_t payload_len, curl_off_t remain)
+{
+  /* the decoder rejects PING frames larger than WS_MAX_CNTRL_LEN */
+  if((payload_len > WS_MAX_CNTRL_LEN) ||
+     (buflen > (size_t)(payload_len - payload_offset)))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(buflen)
+    memcpy(ws->ping + (size_t)payload_offset, buf, buflen);
+  if(remain)
+    return CURLE_OK;
+  CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T "]",
+              payload_len);
+  /* send back the exact same content as a PONG */
+  return ws_enc_add_cntrl(data, ws, ws->ping, (size_t)payload_len,
+                          CURLWS_PONG);
+}
+
 static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
                                int frame_age, int frame_flags,
                                curl_off_t payload_offset,
@@ -674,6 +700,7 @@ static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
   bool auto_pong = !data->set.ws_raw_mode && !data->set.ws_no_auto_pong;
   curl_off_t remain;
   CURLcode result;
+  size_t passlen;
 
   (void)frame_age;
   *pnwritten = 0;
@@ -682,29 +709,30 @@ static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
     DEBUGASSERT(0); /* parameter mismatch */
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
+  passlen = buflen;
 
-  if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
-    /* auto-respond to PINGs, only works for single-frame payloads atm */
-    CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T
-                "/%" FMT_OFF_T "]", payload_offset, payload_len);
-    /* send back the exact same content as a PONG */
-    result = ws_enc_add_cntrl(data, ws, buf, buflen, CURLWS_PONG);
+  if(auto_pong && (frame_flags & CURLWS_PING)) {
+    result = ws_auto_pong(data, ws, buf, buflen, payload_offset,
+                          payload_len, remain);
     if(result)
       return result;
   }
   else if(buflen || !remain) {
+    /* Keep the chunk within one callback so its metadata matches the data. */
+    passlen = CURLMIN(buflen, (size_t)CURL_MAX_WRITE_SIZE);
     /* forward the decoded frame to the next client writer. */
     update_meta(ws, frame_age, frame_flags, payload_offset,
-                payload_len, buflen);
+                payload_len, passlen);
+    ctx->cw_ctx->recvframe = ws->recvframe;
 
-    CURL_TRC_WRITE(data, "[WS] pass %zu decoded bytes", buflen);
+    CURL_TRC_WRITE(data, "[WS] pass %zu decoded bytes", passlen);
     result = Curl_cwriter_write(data, ctx->next_writer,
                                 (ctx->cw_type | CLIENTWRITE_0LEN),
-                                (const char *)buf, buflen);
+                                (const char *)buf, passlen);
     if(result)
       return result;
   }
-  *pnwritten = buflen;
+  *pnwritten = passlen;
   return CURLE_OK;
 }
 
@@ -744,6 +772,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     struct ws_cw_dec_ctx pass_ctx;
     pass_ctx.data = data;
     pass_ctx.ws = ws;
+    pass_ctx.cw_ctx = ctx;
     pass_ctx.next_writer = writer->next;
     pass_ctx.cw_type = type;
     result = ws_dec_pass(&ws->dec, data, &ctx->buf,
@@ -810,6 +839,7 @@ static CURLcode ws_cw_flush(struct Curl_easy *data,
       struct ws_cw_dec_ctx pass_ctx;
       pass_ctx.data = data;
       pass_ctx.ws = ws;
+      pass_ctx.cw_ctx = ctx;
       pass_ctx.next_writer = writer->next;
       pass_ctx.cw_type = CLIENTWRITE_BODY;
       result = ws_dec_pass(&ws->dec, data, &ctx->buf,
@@ -1522,8 +1552,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
      * Since `curl_easy_recv()` is also supposed to work, we need
      * to buffer the data at connection level. See #22107 */
     if(nread) {
-      result = Curl_cf_recvbuf_add(data, data->conn, FIRSTSOCKET,
-                                   (const uint8_t *)mem, nread);
+      result = Curl_cf_recvbuf_add(data, (const uint8_t *)mem, nread);
       if(result)
         goto out;
     }
@@ -1620,12 +1649,9 @@ static CURLcode ws_client_collect(const uint8_t *buf, size_t buflen,
     ctx->payload_len = payload_len;
   }
 
-  if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
-    /* auto-respond to PINGs, only works for single-frame payloads atm */
-    CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T
-                "/%" FMT_OFF_T "]", payload_offset, payload_len);
-    /* send back the exact same content as a PONG */
-    result = ws_enc_add_cntrl(ctx->data, ctx->ws, buf, buflen, CURLWS_PONG);
+  if(auto_pong && (frame_flags & CURLWS_PING)) {
+    result = ws_auto_pong(data, ctx->ws, buf, buflen, payload_offset,
+                          payload_len, remain);
     if(result)
       return result;
     *pnwritten = buflen;
@@ -1851,7 +1877,7 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
     buffer += nwritten;
     buflen -= nwritten;
     if(buflen) {
-      curl_socket_t sock = data->conn->sock[FIRSTSOCKET];
+      curl_socket_t sock = data->conn->chain.sock;
       timediff_t left_ms;
       int ev;
 
@@ -2016,7 +2042,14 @@ const struct curl_ws_frame *curl_ws_meta(CURL *curl)
   struct Curl_easy *data = curl;
   if(GOOD_EASY_HANDLE(data) && Curl_api_is_in_callback(data) &&
      data->conn && !data->set.ws_raw_mode) {
+    /* called for every frame: take it from our writer, which is quicker
+       than looking up the connection's websocket. With CONNECT_ONLY,
+       curl_ws_recv() updates the websocket's frame and not ours. */
+    struct Curl_cwriter *writer = data->set.connect_only ? NULL :
+      Curl_cwriter_get_by_type(data, &ws_cw_decode);
     struct websocket *ws;
+    if(writer)
+      return &((struct ws_cw_ctx *)writer->ctx)->recvframe;
     ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
     if(ws)
       return &ws->recvframe;

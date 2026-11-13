@@ -64,6 +64,7 @@ TESTS_C = \
   cli_tls_session_reuse.c \
   cli_upload_pausing.c \
   cli_ws_data.c \
+  cli_ws_meta.c \
   cli_ws_pause.c \
   cli_ws_pingpong.c \
   cli_ws_write_err.c \
@@ -266,6 +267,7 @@ TESTS_C = \
   lib1920.c \
   lib1921.c \
   lib1922.c \
+  lib1923.c \
   lib1933.c \
   lib1934.c \
   lib1935.c \
@@ -343,5 +345,6 @@ TESTS_C = \
   lib3234.c \
   lib3595.c \
   lib3596.c \
+  lib3598.c \
   lib5000.c \
   lib5004.c
