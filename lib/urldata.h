@@ -470,13 +470,6 @@ struct auth {
                      auth multipass negotiation */
 };
 
-#ifdef USE_NGHTTP2
-struct Curl_data_prio_node {
-  struct Curl_data_prio_node *next;
-  struct Curl_easy *data;
-};
-#endif
-
 /* Timers */
 typedef enum {
   EXPIRE_100_TIMEOUT,
@@ -973,6 +966,9 @@ struct UserDefined {
 #endif
 #ifndef CURL_DISABLE_TFTP
   uint16_t tftp_blksize;    /* in bytes, 0 means use default */
+#endif
+#ifndef CURL_DISABLE_HTTP
+  struct http_priority priority;
 #endif
 #ifndef CURL_DISABLE_RTSP
   uint8_t rtspreq; /* RTSP request type */

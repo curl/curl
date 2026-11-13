@@ -1911,6 +1911,8 @@ TESTCASES = \
   test2271 \
   test2272 \
   \
+  test2287 \
+  \
   test2300 \
   test2301 \
   test2302 \

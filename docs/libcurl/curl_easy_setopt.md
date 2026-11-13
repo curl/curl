@@ -494,6 +494,10 @@ Key identifier for HTTP Message Signatures. See CURLOPT_HTTPSIG_KEYID(3)
 
 Disable Content decoding. See CURLOPT_HTTP_CONTENT_DECODING(3)
 
+## CURLOPT_HTTP_PRIO
+
+Signal HTTP request priority. CURLOPT_HTTP_PRIO(3)
+
 ## CURLOPT_HTTP_TRANSFER_DECODING
 
 Disable Transfer decoding. See CURLOPT_HTTP_TRANSFER_DECODING(3)

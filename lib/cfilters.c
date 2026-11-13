@@ -955,6 +955,12 @@ CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause)
                       CF_CTRL_DATA_PAUSE, do_pause, NULL);
 }
 
+void Curl_conn_ev_prio_changed(struct Curl_easy *data)
+{
+  if(data->conn)
+    cf_cntrl_all(data->conn, data, TRUE, CF_CTRL_DATA_PRIO_CHANGED, 0, NULL);
+}
+
 bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
                         bool *input_pending)
 {
