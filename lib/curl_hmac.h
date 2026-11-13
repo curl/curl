@@ -28,8 +28,6 @@
   !defined(CURL_DISABLE_DIGEST_AUTH) ||                             \
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
-#define HMAC_MD5_LENGTH 16
-
 typedef CURLcode (*HMAC_hinit)(void *context);
 typedef void (*HMAC_hupdate)(void *context,
                              const unsigned char *data,
