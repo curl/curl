@@ -50,8 +50,11 @@
 #endif
 
 #if !defined(CURL_HAVE_SHA256) && defined(USE_WOLFSSL)
+#include <wolfssl/options.h>
+#ifndef NO_SHA256
 #define USE_WOLFSSL_SHA256
 #define CURL_HAVE_SHA256
+#endif
 #endif
 
 #if !defined(CURL_HAVE_SHA256) && defined(USE_GNUTLS)
