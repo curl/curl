@@ -94,7 +94,9 @@
  * Size of the SHA-512/256 resulting digest in bytes.
  * This is the final digest size, not intermediate hash.
  */
+#if defined(DEBUGBUILD) || defined(NEED_NETBSD_SHA512_256_WORKAROUND)
 #define CURL_SHA512_256_DIGEST_SIZE CURL_SHA512_256_DIGEST_LENGTH
+#endif
 
 /**
  * Context type used for SHA-512/256 calculations
@@ -187,7 +189,6 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 #elif defined(USE_WOLFSSL_SHA512_256)
 #include <wolfssl/wolfcrypt/sha512.h>
 
-#define CURL_SHA512_256_DIGEST_SIZE WC_SHA512_256_DIGEST_SIZE
 #define CURL_SHA512_256_BLOCK_SIZE  WC_SHA512_256_BLOCK_SIZE
 
 typedef struct wc_Sha512 Curl_sha512_256_ctx;
@@ -223,7 +224,9 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 #elif defined(USE_GNUTLS_SHA512_256)
 
 #define CURL_SHA512_256_BLOCK_SIZE  SHA512_256_BLOCK_SIZE
+#if defined(DEBUGBUILD) || NETTLE_VERSION_MAJOR < 4
 #define CURL_SHA512_256_DIGEST_SIZE SHA512_256_DIGEST_SIZE
+#endif
 
 /**
  * Context type used for SHA-512/256 calculations
@@ -382,8 +385,10 @@ static CURL_FORCEINLINE uint64_t Curl_rotr64(uint64_t value, unsigned int bits)
  * Size of the SHA-512/256 resulting digest in bytes
  * This is the final digest size, not intermediate hash.
  */
+#ifdef DEBUGBUILD
 #define CURL_SHA512_256_DIGEST_SIZE \
   (SHA512_256_DIGEST_SIZE_WORDS * SHA512_256_BYTES_IN_WORD)
+#endif
 
 /**
  * Size of the SHA-512/256 single processing block in bits.
@@ -444,7 +449,8 @@ static CURLcode Curl_sha512_256_init(void *context)
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
 
   /* Check whether the header and this file use the same numbers */
-  DEBUGASSERT(CURL_SHA512_256_DIGEST_LENGTH == CURL_SHA512_256_DIGEST_SIZE);
+  DEBUGASSERT(CURL_SHA512_256_DIGEST_LENGTH ==
+              (SHA512_256_DIGEST_SIZE_WORDS * SHA512_256_BYTES_IN_WORD));
 
   DEBUGASSERT(sizeof(uint64_t) == 8);
 
