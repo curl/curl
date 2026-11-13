@@ -88,14 +88,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - { name: 'openssl R',
-              build: 'autotools', platform: 'x86_64', tflags: 'skiprun',
-              config: '--with-openssl',
-              install: 'libssl-devel libssh2-devel' }
           - { name: 'openssl',
               build: 'cmake', platform: 'x86_64', tflags: '',
               config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_HTTPSIG=OFF',
               install: 'libssl-devel libssh2-devel python3' }
+
       fail-fast: false
     steps:
       - uses: cygwin/cygwin-install-action@5a1b0cd107181fa6bb6bf3f90d500f4fb3132f18 # v7.0.0
@@ -257,9 +254,6 @@ jobs:
       matrix:
         include:
           # MSYS
-          - { name: '!proxy',
-              build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_DISABLE_PROXY=ON' }
           - { name: 'default R',
               build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '', openssh: 'msys',
               config: '--with-openssl --enable-httpsig' }
@@ -329,7 +323,7 @@ jobs:
           install: >-
             perl diffutils unzip
             mingw-w64-${{ matrix.env }}-cc
-            mingw-w64-${{ matrix.env }}-cmake
+            ${{ matrix.sys != 'msys' && format('mingw-w64-{0}-cmake', matrix.env) || '' }}
             ${{ matrix.sys != 'clangarm64' && format('mingw-w64-{0}-autotools', matrix.env) || '' }}
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-libssh2
@@ -591,7 +585,7 @@ jobs:
             ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'  # manually bumped
             SHA256: 41637132ea7dc36a7f86a1961eaa334c380b5a3423d36aecb481cabcd006e3fe
-            config: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
+            config: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON -DCURL_DISABLE_PROXY=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel mbedtls U'  # mingw-w64 6.0
