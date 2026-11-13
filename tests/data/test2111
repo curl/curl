@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+<reply>
+</reply>
+<client>
+<server>
+smtp
+</server>
+<name>
+SMTP rejects recipient with CR or LF when the option is set
+</name>
+<file1 name="%LOGDIR/test%TESTNUMBER.config">
+mail-rcpt = "Friends\r\n"
+</file1>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X EXPN -K %LOGDIR/test%TESTNUMBER.config --max-time 5
+</command>
+</client>
+<verify>
+<errorcode>
+43
+</errorcode>
+</verify>
+</testcase>

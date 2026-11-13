@@ -1122,7 +1122,9 @@ static CURLcode mail_and_sasl_setopts(struct OperationConfig *config,
   CURLcode result = CURLE_OK;
 
   MY_SETOPT_STR(curl, CURLOPT_MAIL_FROM, config->mail_from);
-  my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
+  result = my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
+  if(setopt_bad(result))
+    return result;
   my_setopt_long(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS,
                  config->mail_rcpt_allowfails);
   MY_SETOPT_STR(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
