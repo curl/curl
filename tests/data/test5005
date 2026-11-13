@@ -29,6 +29,7 @@ http
 <features>
 Debug
 httpsig
+sha256
 </features>
 <name>
 httpsig: sign with a regular HTTP header

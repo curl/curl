@@ -26,6 +26,7 @@ http
 <features>
 Debug
 httpsig
+sha256
 </features>
 <name>
 httpsig: error - missing --httpsig-key

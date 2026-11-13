@@ -29,6 +29,7 @@ http
 <features>
 Debug
 httpsig
+sha256
 </features>
 <name>
 httpsig: @query explicitly requested, no query in URL
