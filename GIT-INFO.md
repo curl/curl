@@ -26,6 +26,14 @@ Daniel uses a configure line similar to this for easier development:
 
     ./configure --disable-shared --enable-debug --enable-maintainer-mode
 
+## Tests may fail to build due to old autotools
+
+Automake 1.15 and possibly older versions has a bug that causes it to create
+bad dependency tracking files for the tests and as a result `make test` fails.
+To remedy that either set the environment to use a more recent version of
+automake before running autoreconf, or configure with option
+`--disable-dependency-tracking`.
+
 ## REQUIREMENTS
 
 See [docs/DEPENDENCIES.md][0] for requirement details.
