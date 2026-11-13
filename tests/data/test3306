@@ -7,11 +7,11 @@ threads
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest
 Debug
+!torture
 </features>
 <setenv>
 CURL_DBG_THRDPOOL_FAIL_STARTS=5

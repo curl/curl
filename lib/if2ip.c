@@ -110,7 +110,7 @@ if2ip_result_t Curl_if2ip(int af,
     for(iface = head; iface; iface = iface->ifa_next) {
       if(iface->ifa_addr) {
         if(iface->ifa_addr->sa_family == af) {
-          if(curl_strequal(iface->ifa_name, interf)) {
+          if(!strcmp(iface->ifa_name, interf)) {
             void *addr;
             char scope[12] = "";
             char ipstr[64];
@@ -161,7 +161,7 @@ if2ip_result_t Curl_if2ip(int af,
           }
         }
         else if((res == IF2IP_NOT_FOUND) &&
-                curl_strequal(iface->ifa_name, interf)) {
+                !strcmp(iface->ifa_name, interf)) {
           res = IF2IP_AF_NOT_SUPPORTED;
         }
       }

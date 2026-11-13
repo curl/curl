@@ -105,7 +105,11 @@ Building statically is not for the faint of heart.
 
 # Testing
 
-(The test suite does not yet work with the cmake build)
+For example:
+
+    $ cmake --build ../curl-build --target tests
+
+You can customize it by setting the `TFLAGS` environment variable.
 
 # Installing
 
@@ -217,7 +221,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_LINT`:                              Run lint checks while building. Default: `OFF`
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
 - `CURL_PATCHSTAMP`:                        Set security patch string for `curl -V`/`curl --version` output.
-- `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires UCRT, static libcurl or no curl executable). Default: `OFF`
+- `CURL_STATIC_CRT`:                        Build curl with static CRT with MSVC (`/MT`) (requires static libcurl and static executables). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string, e.g. `0x0a00` for Windows 10.
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
@@ -245,7 +249,6 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 ## Enabling features
 
 - `CURL_ENABLE_APPLE_FAST_UDP`:             Use Apple fast UDP (experimental). Default: `OFF`
-- `CURL_ENABLE_NTLM`:                       Enable NTLM support. Default: `OFF`
 - `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
 - `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
 - `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON` if target supports IPv6.
@@ -537,7 +540,6 @@ Available variables:
 - `HAVE_WOLFSSL_SET_QUIC_USE_LEGACY_CODEPOINT`:
                                             `wolfSSL_set_quic_use_legacy_codepoint` present in wolfSSL.
 - `HAVE_WOLFSSL_USEALPN`:                   `wolfSSL_UseALPN` present in wolfSSL.
-- `HAVE_WC_DES_ECBENCRYPT`:                 `wc_Des_EcbEncrypt` present in wolfSSL.
 
 For each of the above variables, if the variable is *defined* (either to `ON`
 or `OFF`), the symbol detection is skipped. If the variable is *not defined*,

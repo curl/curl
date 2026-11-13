@@ -7,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -25,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Debug
@@ -48,7 +46,6 @@ http://%HOSTIP:%HTTPPORT/%repeat[30 x 012345679]%/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 GET /%repeat[30 x 012345679]%/%TESTNUMBER HTTP/1.1

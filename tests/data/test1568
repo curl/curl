@@ -50,7 +50,6 @@ This IS the real page!
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -63,15 +62,11 @@ digest
 <name>
 HTTP with Digest authorization on custom CURLOPT_PORT
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP/%TESTNUMBER %HTTPPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

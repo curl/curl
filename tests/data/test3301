@@ -7,10 +7,10 @@ threads
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest
+!torture
 </features>
 <name>
 thrdqueue unit tests

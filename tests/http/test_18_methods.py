@@ -33,7 +33,8 @@ log = logging.getLogger(__name__)
 class TestMethods:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
+    @classmethod
+    def _class_scope(cls, env, httpd, nghttpx):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-10k", fsize=10 * 1024)
         env.make_data_file(indir=indir, fname="data-100k", fsize=100 * 1024)

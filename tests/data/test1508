@@ -8,17 +8,12 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Close a multi handle without using it
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/stdout%TESTNUMBER">
 We are done

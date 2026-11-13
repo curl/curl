@@ -7,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 # This particular response is an exact excerpt from an actual Apache
 # server when asked for a 0-10,12-15 range (except gt/lt changed to {}
 # to avoid XML escaping problems).
@@ -40,7 +39,6 @@ Content-range: bytes 12-15/3781%CR
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -53,7 +51,6 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r 0-10,12-15
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1

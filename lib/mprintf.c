@@ -127,7 +127,7 @@ struct nsprintf {
 };
 
 /* Output bytes are staged here and appended to the dynbuf in chunks: the
-   dynbuf append overhead (bounds checks, growth, memcpy, null termination)
+   dynbuf append overhead (bounds checks, growth, memcpy, null-termination)
    once per byte dominates formatting. 512 bytes of stack holds a typical
    request line or header in a single flush. */
 #define ASPRINTF_STAGE_SIZE 512
@@ -137,6 +137,11 @@ struct asprintf {
   char merr;
   size_t nstage;
   unsigned char stage[ASPRINTF_STAGE_SIZE];
+};
+
+struct ioprintf {
+  FILE *fd;
+  bool error;
 };
 
 /* the provided input number is 1-based but this returns the number 0-based.
@@ -711,7 +716,7 @@ static bool stream_pad(void *userp,
   return stream_run(userp, stream, streamn, src, (size_t)num, donep);
 }
 
-/* emit the leading NUL-terminated part of a run of at most 'len' bytes.
+/* emit the leading null-terminated part of a run of at most 'len' bytes.
    Returns TRUE to abort formatting.
 
    A byte loop and not memchr(): 'len' is the requested precision, which
@@ -807,7 +812,7 @@ static bool out_double(void *userp,
 #ifdef _WIN32
   curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
 #else
-  /* !checksrc! disable BANNEDFUNC 2 */
+  /* !checksrc! disable BANNEDFUNC 1 */
   snprintf(work, BUFFSIZE, fmt, dnum);
 #endif
 #ifdef CURL_HAVE_DIAG
@@ -1008,7 +1013,7 @@ static bool out_string(void *userp,
 
   /* With no precision, len is already the exact length; emit it without
      scanning again. With precision, scan up to len but stop at NUL, since
-     the string may be shorter or the buffer may not be NUL-terminated. */
+     the string may be shorter or the buffer may not be null-terminated. */
   if(prec == -1) {
     if(stream_run(userp, stream, streamn,
                   (const unsigned char *)str, len, donep))
@@ -1251,12 +1256,12 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
 
   retcode = formatf(&info, addbyter, addrun, NULL, format, args);
   if(info.max) {
-    /* we terminate this with a zero byte */
+    /* we null-terminate this */
     if(info.max == info.length) {
       /* we are at maximum, scrap the last letter */
       info.buffer[-1] = 0;
       DEBUGASSERT(retcode);
-      retcode--; /* do not count the nul byte */
+      retcode--; /* do not count the NUL byte */
     }
     else
       info.buffer[0] = 0;
@@ -1443,58 +1448,71 @@ int curl_msprintf(char *buffer, const char *format, ...)
   va_start(args, format);
   retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
   va_end(args);
-  *buffer = 0; /* we terminate this with a zero byte */
+  *buffer = 0; /* we null-terminate this */
   return retcode;
 }
 
 static int fputc_wrapper(unsigned char outc, void *f)
 {
+  struct ioprintf *i = f;
   int out = outc;
-  FILE *s = f;
+  FILE *s = i->fd;
   int rc = fputc(out, s);
-  return rc == EOF;
+  i->error = (rc == EOF);
+  return (rc == EOF);
 }
 
 /* block variant of fputc_wrapper */
 static size_t fwrite_wrapper(const unsigned char *buf, size_t len, void *f)
 {
-  FILE *s = f;
-  return fwrite(buf, 1, len, s);
+  struct ioprintf *i = f;
+  size_t n;
+  FILE *s = i->fd;
+  n = fwrite(buf, 1, len, s);
+  i->error = (n != len);
+  return n;
 }
 
-int curl_mprintf(const char *format, ...)
+int curl_mvfprintf(FILE *fd, const char *format, va_list args)
 {
-  int retcode;
-  va_list args; /* argument pointer */
-  va_start(args, format);
-  retcode = formatf(stdout, fputc_wrapper, fwrite_wrapper, NULL, format, args);
-  va_end(args);
-  return retcode;
+  struct ioprintf info;
+  int n;
+  info.fd = fd;
+  info.error = FALSE;
+  n = formatf(&info, fputc_wrapper, fwrite_wrapper, NULL, format, args);
+  if(info.error)
+    return -1;
+  return n;
 }
 
 int curl_mfprintf(FILE *fd, const char *format, ...)
 {
-  int retcode;
   va_list args; /* argument pointer */
+  int n;
   va_start(args, format);
-  retcode = formatf(fd, fputc_wrapper, fwrite_wrapper, NULL, format, args);
+  n = curl_mvfprintf(fd, format, args);
   va_end(args);
-  return retcode;
+  return n;
+}
+
+int curl_mprintf(const char *format, ...)
+{
+  va_list args; /* argument pointer */
+  int n;
+  va_start(args, format);
+  n = curl_mvfprintf(stdout, format, args);
+  va_end(args);
+  return n;
 }
 
 int curl_mvsprintf(char *buffer, const char *format, va_list args)
 {
   int retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
-  *buffer = 0; /* we terminate this with a zero byte */
+  *buffer = 0; /* we null-terminate this */
   return retcode;
 }
 
 int curl_mvprintf(const char *format, va_list args)
 {
-  return formatf(stdout, fputc_wrapper, fwrite_wrapper, NULL, format, args);
-}
-
-int curl_mvfprintf(FILE *fd, const char *format, va_list args)
-{
-  return formatf(fd, fputc_wrapper, fwrite_wrapper, NULL, format, args);
+  return curl_mvfprintf(stdout, format, args);
 }

@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -23,7 +22,6 @@ Set-Cookie: secondcookie=present;
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -31,9 +29,6 @@ http
 <name>
 CURLOPT_COOKIELIST set to "FLUSH" of a shared cookie object
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER
 </command>
@@ -42,7 +37,6 @@ cookies
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1

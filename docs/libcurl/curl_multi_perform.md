@@ -5,6 +5,7 @@ Title: curl_multi_perform
 Section: 3
 Source: libcurl
 See-also:
+  - CURLMOPT_NOTIFYFUNCTION (3)
   - curl_multi_add_handle (3)
   - curl_multi_cleanup (3)
   - curl_multi_fdset (3)
@@ -53,8 +54,12 @@ added handle fails quickly, it may never be counted as a running_handle. You
 could use curl_multi_info_read(3) to track actual status of the added
 handles in that case.
 
+CURLMOPT_NOTIFYFUNCTION(3) is an alternative to tracking *running_handles*
+where you register a callback to be notified when transfers are done and
+curl_multi_info_read(3) should be called.
+
 When *running_handles* is set to zero (0) on the return of this function,
-there is no longer any transfers in progress.
+there are no longer any transfers in progress.
 
 When this function returns error, the state of all transfers are uncertain and
 they cannot be continued. curl_multi_perform(3) should not be called

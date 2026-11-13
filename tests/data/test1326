@@ -7,7 +7,6 @@ UPLOAD
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 swsclose
@@ -16,7 +15,6 @@ moo
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -36,7 +34,6 @@ telnet://%HOSTIP:%HTTPPORT --upload-file -
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.0

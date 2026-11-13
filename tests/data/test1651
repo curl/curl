@@ -7,7 +7,6 @@ x509
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

@@ -2,11 +2,10 @@
 <testcase>
 <info>
 <keywords>
-unittest
+tunittest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest
@@ -14,8 +13,5 @@ unittest
 <name>
 Test Windows/MS-DOS filename sanitization
 </name>
-<tool>
-tool%TESTNUMBER
-</tool>
 </client>
 </testcase>

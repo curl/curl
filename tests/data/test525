@@ -10,20 +10,15 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP PORT upload using multi interface
 </name>
@@ -36,7 +31,6 @@ Moooooooooooo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Strip all valid kinds of PORT and EPRT that curl can send
 <strip>
@@ -51,7 +45,6 @@ CWD path
 PORT 127,0,0,1,5,109
 TYPE I
 STOR %TESTNUMBER
-QUIT
 </protocol>
 <upload>
 Moooooooooooo

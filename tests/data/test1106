@@ -8,7 +8,6 @@ HTTP proxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
@@ -21,7 +20,6 @@ hello
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 ftp
@@ -43,7 +41,6 @@ ftp://%HOSTIP:23456/%TESTNUMBER
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET ftp://%HOSTIP:23456/%TESTNUMBER HTTP/1.1

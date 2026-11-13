@@ -1,4 +1,4 @@
-# ***************************************************************************
+#***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -331,7 +331,7 @@ class TestH3Proxy:
         curl = CurlClient(env=env, run_env={"CURL_DEBUG": "all"})
         url = f"https://localhost:{h2o_server.port}/data.json"
         proxy_args = curl.get_proxy_args(proto="h3", tunnel=True)
-        proxy_args.extend(["--cacert", env.ca.cert_file, "--insecure"])
+        proxy_args.extend(["--cacert", env.ca.cert_file, "--insecure", '--parallel'])
 
         r = curl.http_download(
             urls=[url], alpn_proto="h3", with_stats=True, extra_args=proxy_args
@@ -428,6 +428,7 @@ class TestH3Proxy:
 
     @MARK_NEEDS_PROXY_HTTP3
     @MARK_NEEDS_H2O
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_60_09_parallel_downloads(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         env.make_data_file(indir=h2o_server.docs_dir, fname="download-1m", fsize=1 * 1024 * 1024)
@@ -437,7 +438,7 @@ class TestH3Proxy:
         proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True)
         proxy_args.extend(["--parallel", "--parallel-max", f"{count}"])
         r = curl.http_download(
-            urls=[urln], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
+            urls=[urln], alpn_proto="h2", with_stats=True, extra_args=proxy_args
         )
         r.check_response(count=count, http_status=200)
 
@@ -493,7 +494,7 @@ class TestH3Proxy:
             urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=xargs
         )
         r2.check_response(count=1, http_status=200)
-        reuses = [line for line in r2.trace_lines if '[SSLS] took session for proxy.http.curl.se' in line]
+        reuses = [line for line in r2.trace_lines if '[SSLS] took session for https:proxy.http.curl.se' in line]
         assert len(reuses), f'{r2.dump_logs()}'
 
     # CONNECT-UDP tunnel payload size and capsule-protocol tests.

@@ -639,7 +639,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
     /* Make sure socket is writable to avoid EWOULDBLOCK condition */
     struct pollfd pfd[1];
     timediff_t timeout_ms = Curl_timeleft_ms(data);
-    pfd[0].fd = conn->sock[FIRSTSOCKET];
+    pfd[0].fd = conn->chain.sock;
     pfd[0].events = POLLOUT;
     if(timeout_ms < 0)
       return CURLE_OPERATION_TIMEDOUT;
@@ -1221,7 +1221,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
   struct connectdata *conn = data->conn;
-  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = conn->chain.sock;
 #ifdef USE_WINSOCK
   WSAEVENT event_handle;
   WSANETWORKEVENTS events;
@@ -1307,8 +1307,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           /* read from user-supplied method */
           n = data->state.fread_func(buffer, 1, buf_size, data->state.in);
           if(n == CURL_READFUNC_ABORT) {
+            failf(data, "operation aborted by callback");
             keepon = FALSE;
-            result = CURLE_READ_ERROR;
+            result = CURLE_ABORTED_BY_CALLBACK;
             break;
           }
 
@@ -1451,6 +1452,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     DEBUGF(infof(data, "telnet_do, poll %d fds", poll_cnt));
     switch(Curl_poll(pfd, (unsigned int)poll_cnt, interval_ms)) {
     case -1:                    /* error, stop reading */
+      result = CURLE_RECV_ERROR;
       keepon = FALSE;
       continue;
     case 0:                     /* timeout */
@@ -1510,6 +1512,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         snread = (int)data->state.fread_func(buffer, 1, sizeof(buffer),
                                              data->state.in);
         if(snread == CURL_READFUNC_ABORT) {
+          failf(data, "operation aborted by callback");
+          result = CURLE_ABORTED_BY_CALLBACK;
           keepon = FALSE;
           break;
         }
@@ -1525,8 +1529,11 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
         Curl_pgrs_upload_inc(data, (size_t)snread);
       }
-      else if(snread < 0)
+      else if(snread < 0) {
+        failf(data, "Failed to read input");
+        result = CURLE_READ_ERROR;
         keepon = FALSE;
+      }
 
       break;
     } /* poll switch statement */
@@ -1555,6 +1562,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
  */
 const struct Curl_protocol Curl_protocol_telnet = {
   ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   telnet_do,                            /* do_it */
   telnet_done,                          /* done */
   ZERO_NULL,                            /* do_more */

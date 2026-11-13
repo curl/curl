@@ -24,8 +24,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "ptrarray.h"
+
 struct connectdata;
 struct Curl_easy;
+struct Curl_cfchain;
 struct curl_pollfds;
 struct Curl_waitfds;
 struct Curl_multi;
@@ -42,26 +45,26 @@ void Curl_cshutdn_terminate(struct Curl_easy *admin,
                             bool do_shutdown);
 
 /* Start the shutdown timer,
- * marks the connection sockindex as being shut down. */
-void Curl_cshutdn_start_timer(struct Curl_easy *data, int8_t sockindex,
+ * marks the connection as being shut down. */
+void Curl_cshutdn_start_timer(struct Curl_easy *data,
+                              struct Curl_cfchain *chain,
                               int timeout_ms);
-/* Clear the shutdown timer at sockindex again. */
-void Curl_cshutdn_clear_timer(struct Curl_easy *data, int8_t sockindex);
+/* Clear the shutdown timer at the chain again. */
+void Curl_cshutdn_clear_timer(struct Curl_cfchain *chain);
 
-/* return how much time there is left to shutdown the connection at
- * sockindex. Returns 0 if there is no limit or shutdown has not started. */
+/* Return how much time there is left to shutdown the connection.
+ * Returns 0 if there is no limit or shutdown has not started. */
 timediff_t Curl_cshutdn_timeleft_ms(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    int8_t sockindex);
+                                    struct Curl_cfchain *chain);
 
-/* TRUE iff shutdown at sockindex has been started */
-bool Curl_cshutdn_has_started(struct connectdata *conn, int8_t sockindex);
+#define CURL_CFCHAIN_IN_SHUTDOWN(c)  ((c)->shutdown_start_ms >= 0)
 
-/* Shutdown the connection at `sockindex` non-blocking.
+/* Shutdown the connection filter chain non-blocking.
  * Will start the shutdown timer if not already set.
  * Return CURLE_OK and *done == FALSE if not finished. */
-CURLcode Curl_cshutdn_try_once_idx(struct Curl_easy *data,
-                                   int8_t sockindex, bool *done);
+CURLcode Curl_cshutdn_cfchain_try_once(struct Curl_easy *data,
+                                       struct Curl_cfchain *chain,
+                                       bool *done);
 
 /* Run the shutdown of the connection once non-blocking for both
  * socket indices. Will start the shutdown timer if not already set.
@@ -75,7 +78,7 @@ void Curl_cshutdn_try_once(struct Curl_easy *admin,
  * the connections to be shut down. It registers timers and
  * sockets to monitor via the multi handle. */
 struct cshutdn {
-  struct Curl_llist list;    /* connections being shut down */
+  struct ptrarray conns;    /* connections being shut down */
 };
 
 /* Init as part of the given multi handle. */

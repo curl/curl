@@ -150,7 +150,7 @@ static struct async_thrdd_item *async_thrdd_item_create(
   if(!item)
     return NULL;
 
-  if(hostlen) /* NUL byte of name already in struct size */
+  if(hostlen) /* null-terminator of name already in struct size */
     memcpy(item->hostname, hostname, hostlen);
   item->mid = data->mid;
   item->resolv_id = resolv_id;
@@ -212,15 +212,40 @@ static void async_thrdd_rr_done(void *user_data, ares_status_t status,
     async->result = Curl_httpsrr_from_ares(dnsrec, &async->httpsrr);
 }
 
+/* Initialize the c-ares channel used for the HTTPS RR side-query, without
+ * submitting any query on it yet. */
+static CURLcode async_rr_init(struct Curl_easy *data,
+                              struct Curl_resolv_async *async)
+{
+  struct async_thrdd_ctx *thrdd = &async->thrdd;
+  int status;
+
+  (void)data;
+  DEBUGASSERT(!thrdd->rr.channel);
+  status = ares_init_options(&thrdd->rr.channel, NULL, 0);
+  if(status != ARES_SUCCESS) {
+    thrdd->rr.channel = NULL;
+    return CURLE_FAILED_INIT;
+  }
+#ifdef DEBUGBUILD
+  if(getenv("CURL_DNS_SERVER")) {
+    const char *servers = getenv("CURL_DNS_SERVER");
+    status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
+    if(status)
+      return CURLE_FAILED_INIT;
+  }
+#endif
+  return CURLE_OK;
+}
+
+/* Submit the HTTPS RR query on the already initialized channel. */
 static CURLcode async_rr_start(struct Curl_easy *data,
                                struct Curl_resolv_async *async)
 {
   struct async_thrdd_ctx *thrdd = &async->thrdd;
   char *https_name = NULL;
-  int status;
   CURLcode result = CURLE_OK;
 
-  DEBUGASSERT(!thrdd->rr.channel);
   if(async->peer->port != 443) {
     https_name = curl_maprintf("_%u._https.%s",
                                async->peer->port, async->peer->hostname);
@@ -229,22 +254,6 @@ static CURLcode async_rr_start(struct Curl_easy *data,
       goto out;
     }
   }
-  status = ares_init_options(&thrdd->rr.channel, NULL, 0);
-  if(status != ARES_SUCCESS) {
-    thrdd->rr.channel = NULL;
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
-#ifdef DEBUGBUILD
-  if(getenv("CURL_DNS_SERVER")) {
-    const char *servers = getenv("CURL_DNS_SERVER");
-    status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
-    if(status) {
-      result = CURLE_FAILED_INIT;
-      goto out;
-    }
-  }
-#endif
 
   async->queries_ongoing++;
   ares_query_dnsrec(thrdd->rr.channel,
@@ -504,7 +513,7 @@ void Curl_async_thrdd_multi_destroy(struct Curl_multi *multi, bool join)
   if(multi->resolv_thrdq) {
 #ifdef CURLVERBOSE
     CURL_TRC_DNS(multi->admin, "destroy thread queue+pool, join=%d", join);
-    Curl_thrdq_trace(multi->resolv_thrdq, multi->admin);
+    CURL_THRDQ_TRACE(multi->resolv_thrdq, multi->admin);
 #endif
     Curl_thrdq_destroy(multi->resolv_thrdq, join);
     multi->resolv_thrdq = NULL;
@@ -587,7 +596,7 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
     }
     async_thrdd_item_free(item);
   }
-  VERBOSE(Curl_thrdq_trace(multi->resolv_thrdq, multi->admin));
+  CURL_THRDQ_TRACE(multi->resolv_thrdq, multi->admin);
 }
 
 CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
@@ -639,7 +648,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 #ifdef USE_HTTPSRR_ARES
   DEBUGASSERT(!async->thrdd.rr.channel);
   if((async->dns_queries & CURL_DNSQ_HTTPS) && !async->is_ipaddr) {
-    result = async_rr_start(data, async);
+    result = async_rr_init(data, async);
     if(result)
       goto out;
     resolver = async->thrdd.rr.channel;
@@ -649,6 +658,14 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
   result = Curl_resolv_announce_start(data, resolver);
   if(result)
     return result;
+
+#ifdef USE_HTTPSRR_ARES
+  if(resolver) {
+    result = async_rr_start(data, async);
+    if(result)
+      goto out;
+  }
+#endif
 
 #ifdef CURLRES_IPV6
   /* Do not start an AAAA query for an IPv4 address when
@@ -666,9 +683,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
       goto out;
   }
 
-#ifdef CURLVERBOSE
-  Curl_thrdq_trace(data->multi->resolv_thrdq, data);
-#endif
+  CURL_THRDQ_TRACE(data->multi->resolv_thrdq, data);
 
 out:
   if(!async->queries_ongoing)
@@ -911,9 +926,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     *pdns = dns;
     dns = NULL;
   }
-#ifdef CURLVERBOSE
-  Curl_thrdq_trace(data->multi->resolv_thrdq, data);
-#endif
+  CURL_THRDQ_TRACE(data->multi->resolv_thrdq, data);
 
 out:
   Curl_dns_entry_unlink(data, &dns);

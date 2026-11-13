@@ -38,6 +38,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
+#include "ftp.h"
 #include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
@@ -92,7 +93,7 @@ static struct curl_trc_feat Curl_trc_feat_ids = {
 
 static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 {
-  curl_off_t cid = data->state.lastconnect_id;
+  curl_off_t cid = data->state.last_conn_id;
   if(data->id >= 0) {
     if(cid >= 0)
       return curl_msnprintf(buf, maxlen, CURL_TRC_FMT_IDSDC, data->id, cid);
@@ -109,7 +110,7 @@ static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 static size_t trc_end_buf(char *buf, size_t len, size_t maxlen, bool addnl)
 {
   /* make sure we end the trace line in `buf` properly. It needs
-   * to end with a terminating '\0' or '\n\0' */
+   * to end with a null-terminator '\0' or '\n\0' */
   if(len >= (maxlen - (addnl ? 2 : 1))) {
     len = maxlen - 5;
     buf[len++] = '.';
@@ -285,7 +286,8 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
   if(Curl_trc_cf_is_verbose(cf, data)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, data->state.feat, cf->cft->name, cf->sockindex, fmt, ap);
+    trc_infof(data, data->state.feat, cf->cft->name,
+              CF_IS_PRIMARY(cf) ? 0 : 1, fmt, ap);
     va_end(ap);
   }
 }
@@ -316,6 +318,7 @@ static const char * const Curl_trc_timer_names[] = {
   "FTP_ACCEPT",
   "ALPN_EYEBALLS",
   "SHUTDOWN",
+  "SERVER_RESPONSE",
 };
 
 static const char *trc_timer_name(int tid)
@@ -601,6 +604,9 @@ static struct trc_cft_def trc_cfts[] = {
 #ifndef CURL_DISABLE_HTTP
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
 #endif
+#ifndef CURL_DISABLE_FTP
+  { &Curl_cft_ftp,            TRC_CT_PROTOCOL },
+#endif
 };
 
 static void trc_apply_level_by_name(struct Curl_str *token, int lvl)
@@ -649,13 +655,13 @@ static CURLcode trc_opt(const char *config)
     else if(*token == '+')
       curlx_str_nudge(&out, 1);
 
-    if(curlx_str_casecompare(&out, "all"))
+    if(curlx_str_casecompare2(&out, STRCONST("all")))
       trc_apply_level_by_category(TRC_CT_NONE, lvl);
-    else if(curlx_str_casecompare(&out, "protocol"))
+    else if(curlx_str_casecompare2(&out, STRCONST("protocol")))
       trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
-    else if(curlx_str_casecompare(&out, "network"))
+    else if(curlx_str_casecompare2(&out, STRCONST("network")))
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
-    else if(curlx_str_casecompare(&out, "proxy"))
+    else if(curlx_str_casecompare2(&out, STRCONST("proxy")))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
     else
       trc_apply_level_by_name(&out, lvl);

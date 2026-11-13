@@ -713,6 +713,12 @@ static ParameterError data_urlencode(const char *nextarg,
       return PARAM_NO_MEM;
     size = 0;
   }
+  if(size > INT_MAX) {
+    /* curl_easy_escape() takes an int length */
+    errorf("too much data to URL encode");
+    curlx_free(postdata);
+    return PARAM_BAD_USE;
+  }
   else {
     char *enc = curl_easy_escape(NULL, postdata, (int)size);
     curlx_safefree(postdata); /* no matter if it worked or not */
@@ -1150,7 +1156,7 @@ static ParameterError parse_url(struct OperationConfig *config,
       f = curlx_fopen(&nextarg[1], FOPEN_READTEXT);
     if(f) {
       curlx_dyn_init(&line, 8092);
-      while(my_get_line(f, &line, &error)) {
+      while(my_get_line(f, &line, &error, NULL)) {
         const char *ptr = curlx_dyn_ptr(&line);
         err = add_url(config, ptr, TRUE);
         if(err)
@@ -1309,7 +1315,7 @@ static ParameterError parse_header(struct OperationConfig *config,
       struct dynbuf line;
       bool error = FALSE;
       curlx_dyn_init(&line, 1024 * 100);
-      while(my_get_line(file, &line, &error)) {
+      while(my_get_line(file, &line, &error, NULL)) {
         const char *ptr = curlx_dyn_ptr(&line);
         err = add2list(cmd == C_PROXY_HEADER ? /* --proxy-header? */
                        &config->proxyheaders :
@@ -2692,6 +2698,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = getstr(&config->sasl_authzid, nextarg, DENY_BLANK);
     break;
   case C_PROXY_SERVICE_NAME: /* --proxy-service-name */
+  case C_SOCKS5_GSSAPI_SERVICE: /* --socks5-gssapi-service */
     err = getstr(&config->proxy_service_name, nextarg, DENY_BLANK);
     break;
   case C_SERVICE_NAME: /* --service-name */

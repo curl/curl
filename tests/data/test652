@@ -8,11 +8,9 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -20,9 +18,6 @@ Mime
 <server>
 smtp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 SMTP with encoded huge mime data contents
@@ -32,7 +27,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/------------------------------/

@@ -8,7 +8,6 @@ globbing
 {} list
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 swsbounce
@@ -33,7 +32,6 @@ hoo
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -46,7 +44,6 @@ multiple requests using named [] globs in URL
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /hello7 HTTP/1.1

@@ -7,11 +7,9 @@ VRFY
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -31,7 +29,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Anv%hex[%c3%a4]hex%ndaren
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 8 - CURLE_WEIRD_SERVER_REPLY
 <errorcode>

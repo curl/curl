@@ -8,7 +8,6 @@ SELECT
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 body
@@ -18,7 +17,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -27,11 +25,11 @@ imap
 IMAP selects a mailbox when its case changes
 </name>
 <command>
-'imap://%HOSTIP:%IMAPPORT/Private/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/private/;MAILINDEX=456/;SECTION=2.3' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/Private/;MAILINDEX=123/;SECTION=1'
+'imap://%HOSTIP:%IMAPPORT/private/;MAILINDEX=456/;SECTION=2.3' -u user:secret
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

@@ -8,7 +8,6 @@ FETCH
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 From: me@somewhere
@@ -21,7 +20,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -34,7 +32,6 @@ IMAP FETCH message with UID
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

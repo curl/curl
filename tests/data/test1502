@@ -27,14 +27,10 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP multi with CURLOPT_RESOLVE, cleanup sequence UA
 </name>
@@ -43,7 +39,6 @@ http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

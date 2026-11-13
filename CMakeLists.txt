@@ -332,6 +332,15 @@ if(CURL_DROP_UNUSED)
   elseif(MSVC)  # Options below are toolchain defaults in Release configurations.
     # This option does not seem to have an effect with VS2010:
     set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "-OPT:REF")
+    # To silence:
+    #   "LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:REF' specification" (cl)
+    #   "lld-link : warning : ignoring '/incremental' because REF is enabled; use '/opt:noref' to disable" (clang-cl)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:Debug,RelWithDebInfo>:-INCREMENTAL:NO>")
+    else()
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:Debug>:-INCREMENTAL:NO>")
+      set_property(DIRECTORY APPEND PROPERTY LINK_OPTIONS "$<$<CONFIG:RelWithDebInfo>:-INCREMENTAL:NO>")
+    endif()
     # Optional, but reduces binary size further, with the cost of larger objects/static libraries:
     list(APPEND CURL_CFLAGS "-Gy")
   elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -379,14 +388,18 @@ endif()
 if(WIN32)
   option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
   if(CURL_STATIC_CRT AND MSVC)
-    if(MSVC_VERSION GREATER_EQUAL 1900 OR BUILD_STATIC_CURL OR NOT BUILD_CURL_EXE)
+    if(NOT BUILD_SHARED_LIBS)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Release>:-MT>")
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Debug>:-MTd>")
     else()
-      message(WARNING "Static CRT requires UCRT, static libcurl or no curl executable.")
+      message(WARNING "Static CRT requires static libcurl and static executable.")
     endif()
   endif()
+endif()
+
+if(MSVC AND NOT "$ENV{CURL_CI}" STREQUAL "")
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURL_DEBUG_MSVC_CRTDBG")
 endif()
 
 # Override to force-disable or force-enable the use of CMake Configs.
@@ -480,8 +493,6 @@ option(CURL_DISABLE_BINDLOCAL "Disable local binding support" OFF)
 mark_as_advanced(CURL_DISABLE_BINDLOCAL)
 option(CURL_DISABLE_NETRC "Disable netrc parser" OFF)
 mark_as_advanced(CURL_DISABLE_NETRC)
-option(CURL_ENABLE_NTLM "Enable NTLM support" OFF)
-mark_as_advanced(CURL_ENABLE_NTLM)
 option(CURL_DISABLE_PARSEDATE "Disable date parsing" OFF)
 mark_as_advanced(CURL_DISABLE_PARSEDATE)
 option(CURL_DISABLE_POP3 "Disable POP3" OFF)
@@ -615,12 +626,12 @@ elseif(APPLE)
   set(HAVE_WRITABLE_ARGV 1)
   set(HAVE_SENDMMSG 0)
 endif()
+if(DOS OR AMIGA)
+  set(HAVE_TIME_T_UNSIGNED 1)  # Pre-fill
+endif()
 
 if(AMIGA)
   set(HAVE_GETADDRINFO 0)  # Breaks the build when detected and used.
-endif()
-if(DOS OR AMIGA)
-  set(HAVE_TIME_T_UNSIGNED 1)
 endif()
 
 if(NOT WIN32)
@@ -808,6 +819,10 @@ if(_use_core_foundation_and_core_services)
   list(APPEND CURL_LIBS "-framework CoreServices")
 endif()
 
+if(NOT DEFINED _curl_stdlib_cxx)
+  set(_curl_stdlib_cxx "stdc++")
+endif()
+
 if(CURL_USE_OPENSSL)
   find_package(OpenSSL REQUIRED)
   set(_ssl_enabled ON)
@@ -835,8 +850,37 @@ if(CURL_USE_OPENSSL)
   endif()
   cmake_pop_check_state()
 
+  unset(AWSLC_VERSION CACHE)
+  unset(LIBRESSL_VERSION CACHE)
+
+  if(HAVE_AWSLC)
+    get_target_property(_awslc_include_dir OpenSSL::Crypto INTERFACE_INCLUDE_DIRECTORIES)
+    if(_awslc_include_dir AND EXISTS "${_awslc_include_dir}/openssl/base.h")
+      set(_version_regex "#[\t ]*define[\t ]+AWSLC_VERSION_NUMBER_STRING[\t ]+\"([0-9.]+)\"")
+      file(STRINGS "${_awslc_include_dir}/openssl/base.h" _version_str REGEX "${_version_regex}")
+      string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+      set(AWSLC_VERSION "${_version_str}")
+      unset(_version_regex)
+      unset(_version_str)
+    endif()
+    message(STATUS "Found AWS-LC version \"${AWSLC_VERSION}\"")
+  elseif(HAVE_LIBRESSL)
+    get_target_property(_libressl_include_dir OpenSSL::Crypto INTERFACE_INCLUDE_DIRECTORIES)
+    if(_libressl_include_dir AND EXISTS "${_libressl_include_dir}/openssl/opensslv.h")
+      set(_version_regex "#[\t ]*define[\t ]+LIBRESSL_VERSION_TEXT[\t ]+\"LibreSSL ([0-9.]+)\"")
+      file(STRINGS "${_libressl_include_dir}/openssl/opensslv.h" _version_str REGEX "${_version_regex}")
+      string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+      set(LIBRESSL_VERSION "${_version_str}")
+      unset(_version_regex)
+      unset(_version_str)
+    endif()
+    message(STATUS "Found LibreSSL version \"${LIBRESSL_VERSION}\"")
+  endif()
+
   if(HAVE_AWSLC OR HAVE_BORINGSSL)
-    if(NOT MSVC AND NOT ANDROID)  # AWS-LC/BoringSSL MSVC builds use native Windows threads
+    # AWS-LC/BoringSSL MSVC and AWS-LC 5.6.0+ clang builds use native Windows threads
+    if(NOT MSVC AND NOT (MINGW AND CMAKE_C_COMPILER_ID STREQUAL "Clang" AND AWSLC_VERSION VERSION_GREATER_EQUAL 5.6.0) AND
+       NOT ANDROID)
       find_package(Threads)
       if(CMAKE_USE_PTHREADS_INIT)
         set(HAVE_THREADS_POSIX_BORINGSSL 1)
@@ -846,9 +890,9 @@ if(CURL_USE_OPENSSL)
         message(WARNING "AWS-LC/BoringSSL requires POSIX Threads.")
       endif()
     endif()
-    if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang")
-      list(APPEND CURL_LIBS "stdc++")
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
+    if(OPENSSL_USE_STATIC_LIBS AND
+       (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
+      list(APPEND CURL_LIBS "${_curl_stdlib_cxx}")
     endif()
   endif()
 
@@ -863,8 +907,14 @@ if(CURL_USE_OPENSSL)
     set(_openssl "BoringSSL")
   elseif(HAVE_LIBRESSL)
     set(_openssl "LibreSSL")
+    if(LIBRESSL_VERSION AND LIBRESSL_VERSION VERSION_LESS 3.4.1)
+      message(FATAL_ERROR "LibreSSL 3.4.1 or greater required")
+    endif()
   else()
     set(_openssl "OpenSSL")
+    if(OPENSSL_VERSION VERSION_LESS 3.0.0)
+      message(FATAL_ERROR "OpenSSL 3.0.0 or greater required")
+    endif()
   endif()
 endif()
 
@@ -918,6 +968,10 @@ if(CURL_USE_GNUTLS)
   list(APPEND CURL_LIBS CURL::nettle)
   set(_ssl_enabled ON)
   set(USE_GNUTLS ON)
+
+  if(GNUTLS_VERSION VERSION_LESS 3.6.5)
+    message(FATAL_ERROR "GnuTLS 3.6.5 or greater required")
+  endif()
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
     set(_valid_default_ssl_backend TRUE)
@@ -996,6 +1050,10 @@ macro(curl_openssl_check_exists)
     if(WIN32)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL BCryptGenRandom()
     endif()
+    if((HAVE_AWSLC OR HAVE_BORINGSSL) AND OPENSSL_USE_STATIC_LIBS AND
+       (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang"))
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${_curl_stdlib_cxx}")
+    endif()
   endif()
   if(USE_WOLFSSL)
     list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::wolfssl)
@@ -1044,7 +1102,6 @@ if(USE_WOLFSSL)
   curl_openssl_check_exists("wolfSSL_UseALPN" HAVE_WOLFSSL_USEALPN)
   curl_openssl_check_exists("wolfSSL_BIO_new" HAVE_WOLFSSL_BIO_NEW)
   curl_openssl_check_exists("wolfSSL_BIO_set_shutdown" HAVE_WOLFSSL_BIO_SET_SHUTDOWN)
-  curl_openssl_check_exists("wc_Des_EcbEncrypt" HAVE_WC_DES_ECBENCRYPT)
 endif()
 
 if(USE_OPENSSL)
@@ -1491,7 +1548,9 @@ if(_curl_ca_bundle_supported)
 endif()
 
 if(WIN32)
-  option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" ${_curl_disable_ca_search_default})
+  if(NOT WINDOWS_STORE)
+    option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" ${_curl_disable_ca_search_default})
+  endif()
   option(CURL_CA_SEARCH_SAFE "Enable safe CA bundle search (within the curl tool directory) on Windows" OFF)
 endif()
 
@@ -1537,13 +1596,12 @@ check_include_file("fcntl.h"          HAVE_FCNTL_H)
 check_include_file_concat_curl("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file("io.h"             HAVE_IO_H)
 check_include_file_concat_curl("libgen.h"         HAVE_LIBGEN_H)
-check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 check_include_file("locale.h"         HAVE_LOCALE_H)
 check_include_file_concat_curl("net/if.h"         HAVE_NET_IF_H)  # sys/select.h (e.g. MS-DOS/Watt-32)
 check_include_file_concat_curl("netdb.h"          HAVE_NETDB_H)
 check_include_file_concat_curl("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file("netinet/in6.h"    HAVE_NETINET_IN6_H)
-check_include_file("netinet/ip.h"     HAVE_NETINET_IP_H)
+check_include_file_concat_curl("netinet/ip.h"     HAVE_NETINET_IP_H)   # sys/types.h (FreeBSD <14.3, OpenBSD)
 check_include_file_concat_curl("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
 check_include_file_concat_curl("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
 check_include_file("poll.h"           HAVE_POLL_H)
@@ -1658,7 +1716,7 @@ check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 else()
-  # Apple platforms do not offer pipe2(), but the iPhone Simulator-specific
+  # Apple SDK <27 do not offer pipe2(), but the iPhone Simulator-specific
   # /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
   # detection, omit this feature check for Apple targets.
   check_function_exists("pipe2"         HAVE_PIPE2)
@@ -1680,7 +1738,10 @@ if(NOT WIN32)
 
   check_symbol_exists("memset_s" "string.h" HAVE_MEMSET_S)
   if(NOT HAVE_MEMSET_S)
-    check_function_exists("memset_explicit" HAVE_MEMSET_EXPLICIT)
+    check_symbol_exists("explicit_bzero" "string.h" HAVE_EXPLICIT_BZERO)
+    if(NOT HAVE_EXPLICIT_BZERO)
+      check_function_exists("memset_explicit" HAVE_MEMSET_EXPLICIT)
+    endif()
   endif()
 endif()
 
@@ -1958,17 +2019,6 @@ macro(curl_add_if _label)
   endif()
 endmacro()
 
-# NTLM support requires crypto functions from various SSL libs.
-# These conditions must match those in lib/curl_setup.h.
-if(CURL_ENABLE_NTLM AND
-   ((USE_OPENSSL AND HAVE_DES_ECB_ENCRYPT) OR
-    (USE_MBEDTLS AND HAVE_MBEDTLS_DES_CRYPT_ECB) OR
-    USE_GNUTLS OR
-    USE_WIN32_CRYPTO OR
-    (USE_WOLFSSL AND HAVE_WC_DES_ECBENCRYPT)))
-  set(_use_curl_ntlm_core ON)
-endif()
-
 # Clear list and try to detect available protocols
 set(_items "")
 curl_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
@@ -2033,8 +2083,6 @@ curl_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 curl_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-curl_add_if("NTLM"          CURL_ENABLE_NTLM AND
-                            (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 curl_add_if("HTTP2"         USE_NGHTTP2)
 curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 curl_add_if("proxy-HTTP3"   USE_PROXY_HTTP3)
@@ -2228,8 +2276,6 @@ if(NOT CURL_DISABLE_INSTALL)
       list(APPEND _ldflags "-L${_libdir}")
     endif()
   endforeach()
-
-  list(REMOVE_DUPLICATES _ldflags)
 
   if(LIBCURL_PC_REQUIRES_PRIVATE)
     list(REMOVE_DUPLICATES LIBCURL_PC_REQUIRES_PRIVATE)

@@ -8,7 +8,6 @@ RETR
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 data
@@ -24,14 +23,10 @@ Accept-ranges: bytes
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP a file with NOBODY yes and HEADER no
 </name>
@@ -41,7 +36,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 
 </client>
 
-# Verify data after the test has been "shot"
 # There is no MTDM in the protocol here since this code does not ask for the
 # time/date of the file
 <verify>
@@ -52,7 +46,6 @@ PWD
 TYPE I
 SIZE %TESTNUMBER
 REST 0
-QUIT
 </protocol>
 </verify>
 </testcase>

@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK
@@ -42,7 +41,6 @@ Content-Length: 0
 </data3>
 </reply>
 
-# Client-side
 <client>
 <features>
 headers-api
@@ -54,16 +52,12 @@ http
 <name>
 curl_easy_nextheader on second request after first did redirects
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 count = 2

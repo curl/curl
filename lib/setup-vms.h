@@ -243,9 +243,6 @@ static int CONF_modules_load_file(const char *filename,
 #define EVP_cleanup                 EVP_CLEANUP
 #define GENERAL_NAMES_free          GENERAL_NAMES_FREE
 #define i2d_X509_PUBKEY             I2D_X509_PUBKEY
-#define MD4_Final                   MD4_FINAL
-#define MD4_Init                    MD4_INIT
-#define MD4_Update                  MD4_UPDATE
 #define MD5_Final                   MD5_FINAL
 #define MD5_Init                    MD5_INIT
 #define MD5_Update                  MD5_UPDATE

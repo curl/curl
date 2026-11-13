@@ -245,7 +245,7 @@ March: security vulnerability: libcurl Arbitrary File Access
 
 April: added CMake support
 
-August: security vulnerability: libcurl embedded zero in cert name
+August: security vulnerability: libcurl embedded zero byte in cert name
 
 December: Added support for IMAP, POP3 and SMTP
 
@@ -504,4 +504,4 @@ December 15: the website served 78 TB over the last month.
 
 April: removed support for RTMP
 
-September: removed support for SMB
+September: removed support for SMB and NTLM

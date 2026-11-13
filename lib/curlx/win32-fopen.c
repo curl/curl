@@ -40,6 +40,7 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 
 #ifdef _WIN32
 
+#include <direct.h>  /* for _mkdir(), _wmkdir() */
 #include <share.h>  /* for _SH_DENYNO */
 
 #include "curlx/multibyte.h"
@@ -461,6 +462,37 @@ int curlx_win32_stat(const char *path, curlx_struct_stat *buffer)
   else
     target = path;
   res = _stati64(target, buffer);
+#endif
+
+  CURLX_FREE(fixed);
+  return res;
+}
+
+int curlx_win32_mkdir(const char *path)
+{
+  int res = -1;
+  TCHAR *fixed = NULL;
+  const TCHAR *target = NULL;
+
+#ifdef _UNICODE
+  wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
+  if(path_w) {
+    if(fix_excessive_path(path_w, &fixed))
+      target = fixed;
+    else
+      target = path_w;
+    res = _wmkdir(target);
+    curlx_free(path_w);
+  }
+  else
+    /* !checksrc! disable ERRNOVAR 1 */
+    errno = EINVAL;
+#else
+  if(fix_excessive_path(path, &fixed))
+    target = fixed;
+  else
+    target = path;
+  res = _mkdir(target);
 #endif
 
   CURLX_FREE(fixed);

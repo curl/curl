@@ -7,13 +7,12 @@ variables
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 http
 </server>
 <name>
-Variable output starting with null byte
+Variable output starting with NUL byte
 </name>
 <file name="%LOGDIR/junk">
 %hex[%00]hex%hello
@@ -23,7 +22,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable what@%LOGDIR/junk --expand-data 
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 2

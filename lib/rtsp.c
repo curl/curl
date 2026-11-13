@@ -81,7 +81,7 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
                                 struct easy_pollset *ps)
 {
   /* write mode */
-  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
+  return Curl_pollset_add_out(data, ps, data->conn->chain.sock);
 }
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
@@ -108,6 +108,17 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
 {
   struct rtsp_conn *rtspc;
   struct RTSP *rtsp;
+
+  if(!(data->state.http_neg.wanted & CURL_HTTP_V1x) ||
+     !(data->state.http_neg.allowed & CURL_HTTP_V1x)) {
+    failf(data, "RTSP is only supported over HTTP/1.x");
+    return CURLE_FAILED_INIT;
+  }
+  /* zap any other http version */
+  data->state.http_neg.accept_09 = FALSE;
+  data->state.http_neg.only_10 = FALSE;
+  data->state.http_neg.wanted = CURL_HTTP_V1x;
+  data->state.http_neg.allowed = CURL_HTTP_V1x;
 
   rtspc = curlx_calloc(1, sizeof(*rtspc));
   if(!rtspc)
@@ -232,6 +243,10 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
     }
 
     if(req_clen > 0) {
+      if(data->set.crlf) {
+        failf(data, "Cannot do CRLF conversions on upload");
+        return CURLE_UPLOAD_FAILED;
+      }
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(data, STRCONST("Content-Length"))) {
@@ -451,7 +466,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     goto out;
 
   if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
+    Curl_xfer_setup_recv(data, -1);
     goto out;
   }
 
@@ -533,7 +548,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       goto out;
   }
 
-  result = Curl_add_custom_headers(data, FALSE, HTTPVERSION, &req_buffer);
+  result = Curl_add_custom_headers(data, HTTPVERSION, &req_buffer);
   if(result)
     goto out;
 
@@ -546,7 +561,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
+  Curl_xfer_setup_sendrecv(data, -1);
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer, HTTPVERSION);
@@ -1038,6 +1053,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
  */
 const struct Curl_protocol Curl_protocol_rtsp = {
   rtsp_setup_connection,                /* setup_connection */
+  Curl_http_setup_filters,              /* setup_filters */
   rtsp_do,                              /* do_it */
   rtsp_done,                            /* done */
   ZERO_NULL,                            /* do_more */

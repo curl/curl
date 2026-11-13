@@ -10,7 +10,6 @@ HTTP Digest auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
@@ -38,7 +37,6 @@ Nice auth sir!
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -57,7 +55,6 @@ http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1

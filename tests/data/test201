@@ -6,13 +6,11 @@ FILE
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 file
@@ -25,7 +23,6 @@ file://localhost/%FILE_PWD/%LOGDIR/non-existent-file.txt
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 37

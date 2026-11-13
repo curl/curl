@@ -55,7 +55,7 @@ test-duphandle
 <verify>
 # we let it CONNECT to the server to confirm HSTS but deny from there
 <protocol crlf="headers">
-GET /1862 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: this.hsts.example:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

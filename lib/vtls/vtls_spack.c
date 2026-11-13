@@ -247,6 +247,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
   size_t dlen;
   CURLcode result;
 
+  DEBUGASSERT(ps);
   DEBUGASSERT(buf);
   DEBUGASSERT(buflen);
   *ps = NULL;

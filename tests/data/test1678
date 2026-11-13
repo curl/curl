@@ -7,14 +7,10 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 SSLS-EXPORT
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 SSL session import tests
 </name>

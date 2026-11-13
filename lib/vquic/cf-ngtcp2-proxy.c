@@ -46,7 +46,9 @@
  * each active transfer. We use HTTP/3 flow control and only ACK
  * when we take things out of the buffer.
  * Chunk size is large enough to take a full DATA frame */
-#define PROXY_H3_STREAM_RECV_CHUNKS ((512 * 1024) / H3_STREAM_CHUNK_SIZE)
+#define PROXY_H3_TUNNEL_RX_WIN      (512 * 1024)
+#define PROXY_H3_TUNNEL_RECV_CHUNKS \
+                               (PROXY_H3_TUNNEL_RX_WIN / H3_STREAM_CHUNK_SIZE)
 
 typedef enum {
   H3_TUNNEL_INIT,     /* init/default/no tunnel state */
@@ -75,7 +77,7 @@ static CURLcode h3_tunnel_stream_init(struct h3_tunnel_stream *ts,
   ts->state = H3_TUNNEL_INIT;
   Curl_peer_link(&ts->dest, dest);
   Curl_bufq_init2(&ts->recvbuf, H3_STREAM_CHUNK_SIZE,
-                  PROXY_H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
+                  PROXY_H3_TUNNEL_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   ts->udp = udp;
   /* host:port with IPv6 support */
   ts->authority = curl_maprintf("%s%s%s:%u", dest->ipv6 ? "[" : "",
@@ -149,15 +151,10 @@ static void h3_tunnel_go_state(struct Curl_cfilter *cf,
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     ts->state = new_state;
-    curlx_safefree(data->req.hd_proxy_auth);
     break;
   case H3_TUNNEL_FAILED:
     CURL_TRC_CF(data, cf, "[%" PRId64 "] -> [failed]", stream_id);
     ts->state = new_state;
-    /* If a proxy-authorization header was used for the proxy, then we should
-       make sure that it is not accidentally used for the document request
-       after we have connected. So let's free and clear it here. */
-    curlx_safefree(data->req.hd_proxy_auth);
     break;
   }
 }
@@ -271,47 +268,33 @@ static void cf_h3_proxy_upd_rx_win(struct Curl_cfilter *cf,
 {
   struct cf_h3_proxy_ctx *pctx = cf->ctx;
   struct cf_ngtcp2_ctx *ctx = &pctx->ngtcp2_ctx;
-  uint64_t cur_win, wanted_win = H3_STREAM_WINDOW_SIZE_MAX;
+  uint64_t cur_win, wanted_win = 0;
+  size_t rx_buffered;
 
-  /* how much does rate limiting allow us to acknowledge? */
-  if(Curl_rlimit_active(&data->progress.dl.rlimit)) {
-    int64_t avail;
-
-    /* start rate limit updates only after first bytes arrived */
-    if(!stream->rx_offset)
-      return;
-
-    avail = Curl_rlimit_avail(&data->progress.dl.rlimit, NULL);
-    if(avail <= 0) {
-      /* nothing available, do not extend the rx offset */
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] dl rate limit exhausted (%" PRId64
-                  " tokens)", stream->id, avail);
-      return;
-    }
-    wanted_win = CURLMIN((uint64_t)avail, H3_STREAM_WINDOW_SIZE_MAX);
-  }
-
+  if(!stream) /* already closed */
+    return;
   if(stream->rx_offset_max < stream->rx_offset) {
     DEBUGASSERT(0);
     return;
   }
-  cur_win = stream->rx_offset_max - stream->rx_offset;
-  if(cur_win < wanted_win) {
-    /* We have exhausted the credit we gave the QUIC peer for DATA.
-     * We extend it with the amount we can give (rate limit) */
-    uint64_t ext = wanted_win - cur_win;
 
-    ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, ext);
-    ngtcp2_conn_extend_max_offset(ctx->qconn, ext);
-    stream->rx_offset_max += ext;
-    if(stream->rx_offset_max > stream->window_size_max) {
-      stream->window_size_max = stream->rx_offset_max;
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] max window now -> %" PRIu64,
-                  stream->id, stream->window_size_max);
+  rx_buffered = Curl_bufq_len(&pctx->tunnel.recvbuf);
+  wanted_win = (rx_buffered < PROXY_H3_TUNNEL_RX_WIN) ?
+               (PROXY_H3_TUNNEL_RX_WIN - rx_buffered) : 0;
+  cur_win = stream->rx_offset_max - stream->rx_offset;
+  if(wanted_win > cur_win) {
+    uint64_t delta = wanted_win - cur_win;
+
+    if(UINT64_MAX - delta < stream->rx_offset_max)
+      delta = UINT64_MAX - stream->rx_offset_max;
+    if(delta) {
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] rx window, extend %" PRIu64
+                  " (buffered %zu) by %" PRIu64 " bytes",
+                  stream->id, cur_win, rx_buffered, delta);
+      stream->rx_offset_max += delta;
+      ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, delta);
+      ngtcp2_conn_extend_max_offset(ctx->qconn, delta);
     }
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] rx_offset_max -> %" PRIu64
-                " (ext %" PRIu64 ", win %" PRIu64 ")",
-                stream->id, stream->rx_offset_max, ext, wanted_win);
   }
 }
 
@@ -344,9 +327,7 @@ static int cb_h3_proxy_recv_data(nghttp3_conn *conn, int64_t stream3_id,
     return NGHTTP3_ERR_CALLBACK_FAILURE;
   }
 
-  /* DATA has been moved into our local recv buffer. Update stream offsets
-   * and give QUIC read credit back so long transfers over proxy tunnels
-   * do not stall on stream/connection flow-control limits. */
+  /* DATA has been moved into our local recv buffer. Update stream offsets. */
   stream->rx_offset += buflen;
   if(stream->rx_offset_max < stream->rx_offset)
     stream->rx_offset_max = stream->rx_offset;
@@ -617,7 +598,7 @@ static nghttp3_callbacks ngh3_proxy_callbacks = {
   cb_h3_proxy_recv_header,
   cb_h3_proxy_end_headers,
   NULL, /* begin_trailers */
-  cb_h3_proxy_recv_header,
+  NULL, /* recv_trailer */
   NULL, /* end_trailers */
   cb_h3_proxy_stop_sending,
   NULL, /* end_stream */
@@ -678,7 +659,7 @@ static ssize_t cf_h3_proxy_recv_closed_stream(struct Curl_cfilter *cf,
     if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
       infof(data, "HTTP/3 stream %" PRId64 " refused by server, try again "
             "on a new connection", stream->id);
-      connclose(cf->conn);
+      connclose(CF_CONN(cf));
       data->state.refused_stream = TRUE;
       *err = CURLE_RECV_ERROR;
       goto out;
@@ -845,6 +826,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
     result = Curl_bufq_cread(&pctx->tunnel.recvbuf, buf, len, pnread);
     if(result)
       goto out;
+    cf_h3_proxy_upd_rx_win(cf, data, pctx->tunnel.stream);
   }
 
   result = Curl_cf_ngtcp2_progress_ingress(cf, data, &pktx);
@@ -859,6 +841,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
                   stream->id, len, *pnread, (int)result);
       goto out;
     }
+    cf_h3_proxy_upd_rx_win(cf, data, pctx->tunnel.stream);
   }
 
   if(*pnread) {
@@ -903,9 +886,8 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
   struct h3_stream_ctx *stream = NULL;
   struct dynhds h2_headers;
   nghttp3_nv *nva = NULL;
-  size_t nheader;
   int rc = 0;
-  unsigned int i;
+  uint32_t i, nheader;
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
   CURLcode result;
@@ -915,15 +897,9 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-  result = Curl_cf_ngtcp2_h3_stream_setup(cf, data);
+  result = Curl_cf_ngtcp2_h3_stream_setup(cf, data, &stream);
   if(result)
     goto out;
-  stream = H3_STREAM_CTX(ctx, data);
-  DEBUGASSERT(stream);
-  if(!stream) {
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
 
   nheader = Curl_dynhds_count(&h2_headers);
   nva = curlx_malloc(sizeof(nghttp3_nv) * nheader);
@@ -934,6 +910,8 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
 
   for(i = 0; i < nheader; ++i) {
     struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
+    if(!e)
+      break;
     nva[i].name = (unsigned char *)e->name;
     nva[i].namelen = e->namelen;
     nva[i].value = (unsigned char *)e->value;
@@ -967,7 +945,7 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
   preader = &reader;
 
   rc = nghttp3_conn_submit_request(ctx->h3conn, stream->id,
-                                   nva, nheader, preader, data);
+                                   nva, nheader, preader, stream);
 
   if(rc) {
     switch(rc) {
@@ -992,7 +970,7 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
 
 out:
   curlx_free(nva);
-  Curl_dynhds_free(&h2_headers);
+  Curl_dynhds_cleanup(&h2_headers);
   return result;
 }
 
@@ -1005,7 +983,7 @@ static CURLcode cf_h3_proxy_adjust_pollset(struct Curl_cfilter *cf,
   bool want_recv, want_send;
   CURLcode result = CURLE_OK;
   curl_socket_t sock = (ctx->q.sockfd != CURL_SOCKET_BAD) ?
-   ctx->q.sockfd : Curl_conn_cf_get_socket(cf, data);
+   ctx->q.sockfd : cf->chain->sock;
 
   if(!ctx->qconn || !pctx->tunnel.stream || (sock == CURL_SOCKET_BAD))
     return CURLE_OK;
@@ -1204,6 +1182,12 @@ static void cf_h3_proxy_destroy(struct Curl_cfilter *cf,
   (void)data;
   if(ctx) {
     CURL_TRC_CF(data, cf, "cf_h3_proxy_destroy()");
+    if(ctx->ngtcp2_ctx.qconn) {
+      struct cf_call_data save;
+      CF_DATA_SAVE(save, cf, data);
+      Curl_cf_ngtcp2_cmn_conn_close(cf, data);
+      CF_DATA_RESTORE(cf, save);
+    }
     cf_h3_proxy_ctx_free(ctx);
     cf->ctx = NULL;
   }
@@ -1217,7 +1201,7 @@ static CURLcode cf_h3_proxy_shutdown(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_h3_proxy = {
   "H3-PROXY",
-  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY | CF_TYPE_SSL,
+  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY | CF_TYPE_SSL | CF_TYPE_MAINTENANCE,
   CURL_LOG_LVL_NONE,
   cf_h3_proxy_destroy,
   cf_h3_proxy_connect,
@@ -1226,37 +1210,42 @@ struct Curl_cftype Curl_cft_h3_proxy = {
   cf_h3_proxy_data_pending,
   cf_h3_proxy_send,
   cf_h3_proxy_recv,
-  Curl_cf_def_cntrl,
+  Curl_cf_ngtcp2_cmn_cntrl,
   Curl_cf_ngtcp2_cmn_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_ngtcp2_cmn_query,
 };
 
-CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfchain *chain,
                                      struct Curl_easy *data,
                                      struct Curl_peer *origin,
                                      struct Curl_peer *peer,
                                      uint8_t transport_peer,
-                                     struct connectdata *conn,
                                      struct Curl_sockaddr_ex *addr,
                                      struct Curl_peer *tunnel_peer,
                                      uint8_t tunnel_transport)
 {
   struct Curl_cfilter *cf = NULL;
-  struct cf_h3_proxy_ctx *ctx;
+  struct cf_h3_proxy_ctx *ctx = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   if(!tunnel_peer)
     return CURLE_FAILED_INIT;
-  if((transport_peer != TRNSPRT_QUIC) || (!conn->http_proxy.peer))
+  if((transport_peer != TRNSPRT_QUIC) || (!chain->conn->http_proxy.peer))
     return CURLE_FAILED_INIT;
+
+  result = Curl_cf_udp_create(chain, data, origin, peer, TRNSPRT_QUIC,
+                              addr, NULL, TRNSPRT_QUIC);
+  if(result)
+    goto out;
 
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  result = cf_h3_proxy_ctx_init(ctx, origin, peer, &conn->proxy_ssl_config,
+  result = cf_h3_proxy_ctx_init(ctx, origin, peer,
+                                &chain->conn->proxy_ssl_config,
                                 tunnel_peer, tunnel_transport);
   if(result)
     goto out;
@@ -1264,25 +1253,15 @@ CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_h3_proxy, ctx);
   if(result)
     goto out;
-  cf->conn = conn;
-
-  result = Curl_cf_udp_create(&cf->next, data, origin, peer, TRNSPRT_QUIC,
-                              conn, addr, NULL, TRNSPRT_QUIC);
-  if(result)
-    goto out;
-  cf->next->conn = cf->conn;
-  cf->next->sockindex = cf->sockindex;
+  Curl_cfchain_add(chain, cf);
+  cf = NULL;
+  ctx = NULL;
 
 out:
-  *pcf = (!result) ? cf : NULL;
-  if(result) {
-    if(cf)
-      Curl_conn_cf_discard_chain(&cf, data);
-    else if(ctx)
-      cf_h3_proxy_ctx_free(ctx);
-  }
-  else
-    CURL_TRC_CF(data, cf, "created, udp_tunnel=%d", ctx->tunnel.udp);
+  if(cf)
+    Curl_conn_cf_discard_chain(&cf, data);
+  if(ctx)
+    cf_h3_proxy_ctx_free(ctx);
   return result;
 }
 
@@ -1302,7 +1281,7 @@ CURLcode Curl_cf_ngtcp2_proxy_insert_after(struct Curl_cfilter *cf_at,
   if(!ctx)
     goto out;
   result = cf_h3_proxy_ctx_init(ctx, origin, peer,
-                                &cf_at->conn->proxy_ssl_config,
+                                &CF_CONN(cf_at)->proxy_ssl_config,
                                 tunnel_peer, tunnel_transport);
   if(result)
     goto out;

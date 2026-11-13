@@ -6,7 +6,6 @@ WebSockets
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 101 Switching to WebSockets swsclose
@@ -22,7 +21,6 @@ upgrade
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 # require Debug for the forced CURL_ENTROPY
 <features>
@@ -43,7 +41,6 @@ WebSockets upgrade only
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers" nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1

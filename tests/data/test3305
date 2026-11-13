@@ -8,7 +8,6 @@ cookies
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 301 OK
@@ -45,7 +44,6 @@ Content-Length: 6
 </data3>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -59,7 +57,6 @@ https://www.example.com:%HTTPSPORT/ http://www.example.com:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET / HTTP/1.1

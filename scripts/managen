@@ -54,7 +54,8 @@ use POSIX qw(strftime);
 my @ts;
 if(defined($ENV{SOURCE_DATE_EPOCH})) {
     @ts = gmtime($ENV{SOURCE_DATE_EPOCH});
-} else {
+}
+else {
     @ts = localtime;
 }
 my $date = strftime "%Y-%m-%d", @ts;
@@ -527,7 +528,7 @@ sub render {
         $blankline = 0;
         push @desc, $d if($manpage);
         my $qstr = $quote ? "q" : "";
-        push @desc, "[".(1 + $level)."$qstr]$d" if(!$manpage);
+        push @desc, "[" . (1 + $level) . "$qstr]$d" if(!$manpage);
         $header = 0;
     }
     if($finalblank) {
@@ -781,7 +782,7 @@ sub single {
     my @extra;
     if($multi eq "single") {
         push @extra,
-            sprintf("${pre}If %s is provided several times, the last set ".
+            sprintf("${pre}If %s is provided several times, the last set " .
                     "value is used.\n",
                     manpageify($long, $manpage));
     }
@@ -800,7 +801,7 @@ sub single {
         }
         my $dashes = $manpage ? "\\-\\-" : "--";
         push @extra,
-            sprintf("${pre}Providing %s multiple times has no extra effect.\n".
+            sprintf("${pre}Providing %s multiple times has no extra effect.\n" .
                     "Disable it again with $dashes$rev.\n",
                     manpageify($long, $manpage));
     }
@@ -814,7 +815,7 @@ sub single {
     }
     elsif($multi eq "per-URL") {
         push @extra,
-            sprintf("${pre}%s is associated with a single URL. Use it once per URL ".
+            sprintf("${pre}%s is associated with a single URL. Use it once per URL " .
                     "when you use several URLs in a command line.\n",
                     manpageify($long, $manpage));
     }
@@ -851,7 +852,7 @@ sub single {
 
     if($requires) {
         my $l = manpageify($long, $manpage);
-        push @foot, "For $l to work, it requires that the underlying libcurl".
+        push @foot, "For $l to work, it requires that the underlying libcurl" .
             " is built to support $requires.\n";
     }
     if($mutexed) {
@@ -884,7 +885,7 @@ sub single {
                 if($e =~ /^-([^- ])/) {
                     my $opt = $1;
                     if(!$optshort{$opt}) {
-                        print STDERR "$f:$line:1:ERROR: unknown option in ".
+                        print STDERR "$f:$line:1:ERROR: unknown option in " .
                             "example: -$opt\n";
                         return 2;
                     }
@@ -893,7 +894,7 @@ sub single {
                     my $opt = $1;
                     $opt =~ s/^expand-//g;
                     if(!$helplong{$opt}) {
-                        print STDERR "$f:$line:1:ERROR: unknown option in ".
+                        print STDERR "$f:$line:1:ERROR: unknown option in " .
                             "example: '--$opt'\n";
                         return 2;
                     }
@@ -926,7 +927,7 @@ sub single {
                     # a long example, shorten it
                     my $p = substr($e, 0, $maxwidth);
                     $p = maybespace($p);
-                    push @ex, "[0q] curl ".$p."\\";
+                    push @ex, "[0q] curl " . $p . "\\";
                     $e = substr($e, length($p));
                     do {
                         my $r = substr($e, 0, $maxwidth);
@@ -1104,7 +1105,7 @@ HEAD
     foreach my $f (sort keys %helplong) {
         my $long = $f;
         my $short = $optlong{$long};
-        my @categories = split ' ', $catlong{$long};
+        my @categories = split(' ', $catlong{$long});
         my $bitmask = ' ';
         my $opt;
 
@@ -1162,7 +1163,7 @@ FOOT
 sub listcats {
     my %allcats;
     foreach my $f (sort keys %helplong) {
-        my @categories = split ' ', $catlong{$f};
+        my @categories = split(' ', $catlong{$f});
         foreach (@categories) {
             $allcats{$_} = undef;
         }
@@ -1334,7 +1335,7 @@ sub getargs {
         return;
     }
 
-    print "Usage: managen ".
+    print "Usage: managen " .
         "[-d dir] <mainpage/ascii/listhelp/single FILE/protos/listcats> [files]\n";
 }
 

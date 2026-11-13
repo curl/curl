@@ -33,13 +33,16 @@ TESTENV =                               \
   testenv/env.py                        \
   testenv/h2o.py                        \
   testenv/httpd.py                      \
+  testenv/mitm.py                       \
   testenv/mod_curltest/mod_curltest.c   \
   testenv/nghttpx.py                    \
   testenv/ports.py                      \
   testenv/sshd.py                       \
   testenv/vsftpd.py                     \
-  testenv/ws_echo_server.py             \
-  testenv/ws_4frames_server.py
+  testenv/wsserver.py                   \
+  testenv/ws_4frames_server.py          \
+  testenv/ws_dl_server.py               \
+  testenv/ws_echo_server.py
 
 EXTRA_DIST =             \
   CMakeLists.txt         \
@@ -68,6 +71,8 @@ EXTRA_DIST =             \
   test_20_websockets.py  \
   test_21_resolve.py     \
   test_22_httpsrr.py     \
+  test_23_ech.py         \
+  test_24_ocsp.py        \
   test_30_vsftpd.py      \
   test_31_vsftpds.py     \
   test_32_ftps_vsftpd.py \

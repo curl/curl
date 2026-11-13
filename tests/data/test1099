@@ -13,7 +13,6 @@ data for %TESTNUMBER
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 tftp
@@ -26,7 +25,6 @@ tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 </command>
 </client>
 
-# Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>
 ^timeout = [5-6]$

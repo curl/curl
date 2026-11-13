@@ -98,7 +98,7 @@ my $idnum = 1;                # default ssh daemon instance number
 my $proto = 'ssh';            # protocol the ssh daemon speaks
 my $keyalgo = 'rsa';          # key algorithm
 my $path = getcwd();          # current working directory
-my $logdir = $path .'/log';   # directory for log files
+my $logdir = $path . '/log';  # directory for log files
 my $piddir;                   # directory for server config files
 my $username = $ENV{USER};    # default user
 my $pidfile;                  # ssh daemon pid file
@@ -173,13 +173,13 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq '--pidfile') {
         if($ARGV[1]) {
-            $pidfile = "$path/". $ARGV[1];
+            $pidfile = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }
     elsif($ARGV[0] eq '--logdir') {
         if($ARGV[1]) {
-            $logdir = "$path/". $ARGV[1];
+            $logdir = "$path/" . $ARGV[1];
             shift @ARGV;
         }
     }
@@ -549,6 +549,7 @@ else {
 #  PermitRootLogin                  : OpenSSH 1.2.1 and later
 #  PermitTunnel                     : OpenSSH 4.3.0 and later
 #  PermitUserEnvironment            : OpenSSH 3.5.0 and later
+#  PerSourcePenalties               : OpenSSH 9.8.0 and later
 #  PidFile                          : OpenSSH 2.1.0 and later
 #  Port                             : OpenSSH 1.2.1 and later
 #  PrintLastLog                     : OpenSSH 2.9.0 and later
@@ -597,7 +598,8 @@ if($sshdid =~ /OpenSSH-Windows/) {
         $username_lc = "$userdomain_lc\\$username_lc";
         push @cfgarr, "AllowUsers " . ($username_lc =~ s/ /\?/gr);  # replace space with '?'
     }
-} else {
+}
+else {
     push @cfgarr, "AllowUsers $username";
 }
 
@@ -641,6 +643,9 @@ push @cfgarr, 'MaxStartups 5';
 push @cfgarr, 'PasswordAuthentication no';
 push @cfgarr, 'PermitEmptyPasswords no';
 push @cfgarr, 'PermitRootLogin no';
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 980)) {
+    push @cfgarr, 'PerSourcePenalties no';
+}
 push @cfgarr, 'PrintLastLog no';
 push @cfgarr, 'PrintMotd no';
 push @cfgarr, 'PubkeyAuthentication yes';

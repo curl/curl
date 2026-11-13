@@ -18,7 +18,6 @@ hello
 </data>
 </reply>
 
-# Client-side
 <client>
 # require Debug for the forced CURL_ENTROPY
 <features>

@@ -7,7 +7,6 @@ FTPS
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -26,7 +25,6 @@ made up content
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 77,60

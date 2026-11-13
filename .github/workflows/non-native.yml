@@ -12,7 +12,6 @@ name: 'non-native'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'projects/**'
@@ -22,7 +21,6 @@ name: 'non-native'
       - 'curl-*'
     paths-ignore:
       - '**/*.md'
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'projects/**'
@@ -36,13 +34,13 @@ cache-mode: none
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1820
+  CURL_TEST_MIN: 1800
   DO_NOT_TRACK: '1'
 
 jobs:
   cross:
     name: "${{ matrix.os }} ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.cc }} ${{ matrix.desc }} ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     defaults:
       run:
@@ -60,12 +58,12 @@ jobs:
       matrix:
         include:
           # https://github.com/DragonFlyBSD/DPorts
-          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skiprun',
-              install: 'autoconf automake libtool openldap26-client libidn2',
-              options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
-
-          - { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skipall',
-              install: 'cmake ninja' }
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skiprun',
+          #   install: 'autoconf automake libtool openldap26-client libidn2',
+          #   options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
+          #
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skipall',
+          #   install: 'cmake ninja' }
 
           # https://ports.freebsd.org/
           - { os: 'freebsd'     , version: '15.1',  build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'openssl',
@@ -99,7 +97,7 @@ jobs:
               options: '-DCURL_USE_GNUTLS=ON' }
 
           # https://pkgsrc.se/
-          - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl !examples', tflags: 'skipall',
+          - { os: 'netbsd'      , version: '10.2' , build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl !examples', tflags: 'skipall',
               install: 'autoconf automake libtool mit-krb5',
               options: '--with-openssl --with-gssapi' }
 
@@ -115,7 +113,7 @@ jobs:
               options: '--with-openssl' }
 
           # Skip test 2707 'ws: Peculiar frame sizes' on suspicion of hangs
-          - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
+          - { os: 'openbsd'     , version: '8.0'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
               install: 'cmake ninja openldap-client-- libidn2' }
 
       fail-fast: false
@@ -125,7 +123,7 @@ jobs:
           persist-credentials: false
 
       - name: 'setup VM'
-        uses: cross-platform-actions/action@e0b9770014ba65d5e0815f15b74031c3a635f641 # v1.6.0
+        uses: cross-platform-actions/action@82668f1fbd89d9c99487604f822cbf6716f124d3 # v1.7.0
         with:
           environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS MATRIX_VERSION TFLAGS'
           operating_system: '${{ matrix.os }}'
@@ -145,6 +143,7 @@ jobs:
               sudo mport upgrade | grep -v -E '(Downloading.+%|^/usr/local)'
             fi
             sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} | grep -v -E '(Downloading.+%|^/usr/local)' || true
+            command -v pkg-config >/dev/null 2>&1
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
@@ -171,7 +170,7 @@ jobs:
             cmake -B bld -G Ninja -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER="${CC}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
-              -DCURL_ENABLE_NTLM=ON ${MATRIX_OPTIONS}
+              ${MATRIX_OPTIONS}
           else
             if [ "${MATRIX_ARCH}" != 'x86_64' ]; then
               options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
@@ -212,8 +211,8 @@ jobs:
 
       - name: 'curl -V'
         run: |
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 stat -f '%10z bytes: %N' --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -f '%10z bytes: %N' --
           bld/src/curl --disable --version
 
       - name: 'curl install'
@@ -256,15 +255,16 @@ jobs:
 
   amiga:
     name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     cache-mode: write
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
-      AMISSL_VERSION: '5.27'
+      # renovate: datasource=github-releases depName=jens-maus/amissl versioning=semver-coerced
+      AMISSL_VERSION: 5.27
       AMISSL_SHA256: 5003bef8c5930354d16b0ce7196d71b2811891c42fad38a9238c5ce4098ad42a
-      TOOLCHAIN_VERSION: 6.5.0
+      TOOLCHAIN_VERSION: 6.5.0  # manually bumped
       TOOLCHAIN_SHA256: 381e227c9ef552f073771d6f851cfdf873b574f3cf5db7c1c0107ea5d7146edc
     strategy:
       matrix:
@@ -353,8 +353,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . -type f \( -name curl -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          find . -type f \( -name curl -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
@@ -375,8 +375,8 @@ jobs:
           fi
 
   android:
-    name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
-    runs-on: ubuntu-latest
+    name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} ${{ matrix.arch }}"
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     env:
       LDFLAGS: -s
@@ -385,16 +385,19 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', platform: '21', name: "!ssl !zstd",
+          - { build: 'autotools', platform: '21', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '--without-ssl --without-libpsl --without-zstd' }
 
-          - { build: 'cmake'    , platform: '21', name: "!ssl !zstd",
+          - { build: 'cmake'    , platform: '21', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
 
-          - { build: 'autotools', platform: '35', name: "!ssl !zstd",
+          - { build: 'cmake'    , platform: '21', arch: 'armeabi-v7a', name: "!ssl !zstd",
+              options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
+
+          - { build: 'autotools', platform: '35', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '--without-ssl --without-libpsl --without-zstd' }
 
-          - { build: 'cmake'    , platform: '35', name: "!ssl !zstd",
+          - { build: 'cmake'    , platform: '35', arch: 'arm64-v8a'  , name: "!ssl !zstd",
               options: '-DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCURL_ZSTD=OFF' }
 
       fail-fast: false
@@ -409,25 +412,31 @@ jobs:
 
       - name: 'configure'
         env:
+          MATRIX_ARCH: '${{ matrix.arch }}'
           MATRIX_OPTIONS: '${{ matrix.options }}'
           MATRIX_PLATFORM: '${{ matrix.platform }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
             cmake -B bld -G Ninja \
-              -DANDROID_ABI=arm64-v8a \
+              -DANDROID_ABI="${MATRIX_ARCH}" \
               -DANDROID_PLATFORM="android-${MATRIX_PLATFORM}" \
-              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -DCMAKE_WARN_DEPRECATED=OFF \
+              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -Wno-deprecated \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               ${MATRIX_OPTIONS}
           else
+            if [ "${MATRIX_ARCH}" = 'armeabi-v7a' ]; then
+              triplet='armv7a-linux-androideabi'
+            else
+              triplet='aarch64-linux-android'
+            fi
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --disable-shared \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
+              CC="$TOOLCHAIN/bin/${triplet}${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
-              --host="aarch64-linux-android${MATRIX_PLATFORM}" \
+              --host="${triplet}${MATRIX_PLATFORM}" \
               ${MATRIX_OPTIONS}
           fi
 
@@ -456,8 +465,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         run: |
@@ -477,14 +486,14 @@ jobs:
 
   msdos:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp !ssl i586"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     cache-mode: write
     env:
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
-      # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced registryUrl=https://github.com
+      # renovate: datasource=github-releases depName=andrewwutw/build-djgpp versioning=semver-coerced
       TOOLCHAIN_VERSION: '3.4'
       TOOLCHAIN_SHA256: 8464f17017d6ab1b2bb2df4ed82357b5bf692e6e2b7fee37e315638f3d505f00
     strategy:
@@ -576,8 +585,8 @@ jobs:
 
       - name: 'curl info'
         run: |
-          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time

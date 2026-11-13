@@ -88,6 +88,7 @@ struct mbed_ssl_backend_data {
 #endif
   int *ciphersuites;
   size_t send_blocked_len;
+  CURLcode last_io_result;
   BIT(initialized); /* mbedtls_ssl_context is initialized */
   BIT(sent_shutdown);
   BIT(send_blocked);
@@ -131,6 +132,9 @@ static int mbedtls_bio_cf_write(void *bio,
                                 const unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct mbed_ssl_backend_data *backend =
+    (struct mbed_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   size_t nwritten;
   CURLcode result;
@@ -142,6 +146,7 @@ static int mbedtls_bio_cf_write(void *bio,
   result = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &nwritten);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %d, %zu",
               blen, (int)result, nwritten);
+  backend->last_io_result = result;
   if(result == CURLE_AGAIN)
     return MBEDTLS_ERR_SSL_WANT_WRITE;
   return result ? -1 : (int)nwritten;
@@ -150,6 +155,9 @@ static int mbedtls_bio_cf_write(void *bio,
 static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct mbed_ssl_backend_data *backend =
+    (struct mbed_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   size_t nread = 0;
   CURLcode result;
@@ -164,6 +172,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
   result = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &nread);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %d, %zu",
               blen, (int)result, nread);
+  backend->last_io_result = result;
   if(result == CURLE_AGAIN)
     return MBEDTLS_ERR_SSL_WANT_READ;
   /* nread is never larger than int here */
@@ -701,16 +710,23 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
     else {
       const struct curl_blob *ssl_key_blob = conn_config->key_blob;
       const char *passwd = conn_config->key_passwd;
+      const bool is_der = conn_config->key_type &&
+                          curl_strequal(conn_config->key_type, "DER");
       /* Unfortunately, mbedtls_pk_parse_key() requires the data to be
          null-terminated if the data is PEM encoded (even when provided the
          exact length). */
       unsigned char *newblob = curlx_memdup0(ssl_key_blob->data,
                                              ssl_key_blob->len);
+      /* mbedtls_pk_parse_key() requires the terminator to be counted in the
+         length for PEM input, while the DER parsers require the exact
+         length: a DER key with the terminator counted in is rejected with
+         MBEDTLS_ERR_ASN1_LENGTH_MISMATCH. */
+      size_t keylen = is_der ? ssl_key_blob->len : ssl_key_blob->len + 1;
       if(!newblob)
         return CURLE_OUT_OF_MEMORY;
 
 #if MBEDTLS_VERSION_NUMBER >= 0x04000000
-      ret = mbedtls_pk_parse_key(&backend->pk, newblob, ssl_key_blob->len,
+      ret = mbedtls_pk_parse_key(&backend->pk, newblob, keylen,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0);
       if(ret == 0 &&
@@ -722,7 +738,7 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
                                  PSA_KEY_USAGE_SIGN_HASH)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #else
-      ret = mbedtls_pk_parse_key(&backend->pk, newblob, ssl_key_blob->len,
+      ret = mbedtls_pk_parse_key(&backend->pk, newblob, keylen,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0,
                                  mbedtls_ctr_drbg_random,
@@ -931,12 +947,11 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
                                    MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
 #endif
 
-  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+  if(!CF_IS_PRIMARY(cf) && !(cf->cft->flags & CF_TYPE_PROXY)) {
     /* FTP is a bitch. On TLS secured transfers, it is a common server
      * option to require the client to use the SAME TLS session as on
      * the control connection or it fails the request. See #22225. */
-    struct Curl_ssl_session *scs =
-      Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    struct Curl_ssl_session *scs = Curl_ssl_get_primary_session(data, cf->cft);
     if(scs) {
       if(mbed_apply_session(cf, data, scs)) {
         CURL_TRC_CF(data, cf, "applied SSL session from control connection");
@@ -1062,23 +1077,13 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
-#if defined(HAVE_PINNED_PUBKEY) || defined(HAS_ALPN_MBEDTLS)
-  CURLcode result;
-#endif
-  int ret;
   struct ssl_connect_data *connssl = cf->ctx;
+#ifdef HAVE_PINNED_PUBKEY
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+#endif
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-#ifdef HAVE_PINNED_PUBKEY
-#ifndef CURL_DISABLE_PROXY
-  const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#else
-  const char * const pinnedpubkey =
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#endif
-#endif
+  int ret;
 
   DEBUGASSERT(backend);
 
@@ -1117,11 +1122,12 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
   }
 
 #ifdef HAVE_PINNED_PUBKEY
-  if(pinnedpubkey) {
+  if(conn_config->pinned_key) {
     int size;
     const mbedtls_x509_crt *peercert;
     mbedtls_x509_crt *p = NULL;
     unsigned char *pubkey = NULL;
+    CURLcode result;
 
     peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
     if(!peercert || !peercert->raw.p || !peercert->raw.len) {
@@ -1161,8 +1167,7 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
     }
 
     /* mbedtls_pk_write_pubkey_der writes data at the end of the buffer. */
-    result = Curl_pin_peer_pubkey(data,
-                                  pinnedpubkey,
+    result = Curl_pin_peer_pubkey(data, conn_config->pinned_key,
                                   &pubkey[PUB_DER_MAX_BYTES - size], size);
 pinnedpubkey_error:
     mbedtls_x509_crt_free(p);
@@ -1176,10 +1181,9 @@ pinnedpubkey_error:
 #ifdef HAS_ALPN_MBEDTLS
   if(connssl->alpn) {
     const char *proto = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
-
-    result = Curl_alpn_set_negotiated(cf, data, connssl,
-                                      (const unsigned char *)proto,
-                                      proto ? strlen(proto) : 0);
+    CURLcode result = Curl_alpn_set_negotiated(cf, data, connssl,
+                                               (const unsigned char *)proto,
+                                               proto ? strlen(proto) : 0);
     if(result)
       return result;
   }
@@ -1244,7 +1248,7 @@ static CURLcode mbed_new_session(struct Curl_cfilter *cf,
                                    &sc_session);
   sdata = NULL;  /* call took ownership */
   if(!result && /* return a duplicate if asked for and FTP */
-     (cf->conn->scheme->family == CURLPROTO_FTP)) {
+     (CF_CONN(cf)->scheme->family == CURLPROTO_FTP)) {
     Curl_ssl_session_destroy(connssl->session);
     result = Curl_ssl_session_dup(sc_session, &connssl->session);
   }
@@ -1283,7 +1287,12 @@ do_send:
    * loses bytes, e.g. reporting all was sent but they were not.
    * Remember the blocked length and use that when set. */
   if(backend->send_blocked) {
-    DEBUGASSERT(backend->send_blocked_len <= len);
+    if(backend->send_blocked_len > len) {
+      DEBUGASSERT(0);
+      failf(data, "re-send data shorter than previously");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> previously blocked "
                 "on %zu bytes", len, backend->send_blocked_len);
     len = backend->send_blocked_len;
@@ -1326,6 +1335,7 @@ do_send:
     }
   }
 
+out:
   CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> %d, %zu",
               len, (int)result, *pnwritten);
   return result;
@@ -1373,7 +1383,8 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
       default:
         CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X",
                     (unsigned int)-ret);
-        result = CURLE_RECV_ERROR;
+        result = backend->last_io_result ?
+                 backend->last_io_result : CURLE_RECV_ERROR;
         goto out;
       }
     }
@@ -1415,7 +1426,15 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
   else {
     CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X",
                 (unsigned int)-ret);
-    result = CURLE_RECV_ERROR;
+    result = backend->last_io_result ?
+             backend->last_io_result : CURLE_RECV_ERROR;
+    if((backend->last_io_result == CURLE_RECV_ERROR) &&
+        Curl_ssl_cf_is_proxy(cf)) {
+      /* The proxy seems to have just closed the connection.
+       * That should be fine. */
+      result = CURLE_OK;
+      *done = TRUE;
+    }
   }
 
 out:
@@ -1474,6 +1493,7 @@ do_read:
       result = mbed_new_session(cf, data);
       /* This is not blocking anything. We can try again until a
        * "real" result comes. */
+      CURL_TRC_CF(data, cf, "mbed_new_session() -> %d", (int)result);
       if(!result)
         goto do_read;
       break;
@@ -1698,8 +1718,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_get_internals,            /* get_internals */
   mbedtls_close,                    /* close_one */
   NULL,                             /* close_all */
-  NULL,                             /* set_engine */
-  NULL,                             /* set_engine_default */
   NULL,                             /* engines_list */
   mbedtls_sha256sum,                /* sha256sum */
   mbed_recv,                        /* recv decrypted data */

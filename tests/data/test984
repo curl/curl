@@ -7,14 +7,12 @@ STARTTLS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY CAPABILITY A001 BAD Not implemented
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -41,7 +39,6 @@ Hello Joe, do you think we can meet at 3:30 tomorrow?
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 64 is CURLE_USE_SSL_FAILED
 <errorcode>

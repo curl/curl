@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK
@@ -30,7 +29,6 @@ Content-Length: 0
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -46,16 +44,12 @@ aws
 <name>
 HTTP AWS_SIGV4 with X-Xxx-Content-Sha256 of arbitrary payload
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^Content-Type:.*

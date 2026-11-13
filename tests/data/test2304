@@ -24,7 +24,6 @@ upgrade
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 # require Debug for the forced CURL_ENTROPY
 <features>
@@ -40,9 +39,6 @@ http
 <name>
 WebSockets curl_ws_recv() with closed connection
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

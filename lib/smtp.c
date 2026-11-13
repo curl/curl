@@ -370,6 +370,9 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
       for(i = start = 0; i < nread; ++i) {
         if(ctx->n_eob >= SMTP_EOB_FIND_LEN) {
           /* matched the EOB prefix and seeing additional char, add '.' */
+          /* The additional byte cannot be represented in the upload size. */
+          if(data->state.infilesize == CURL_OFF_T_MAX)
+            return CURLE_TOO_LARGE;
           result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
           if(result)
             return result;
@@ -695,9 +698,9 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data,
   bool ssldone = FALSE;
 
   DEBUGASSERT(smtpc->state == SMTP_UPGRADETLS);
-  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  if(!Curl_conn_is_ssl(conn)) {
     result = Curl_ssl_cfilter_add(
-      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
+      data, Curl_conn_get_origin(conn), &conn->chain);
     if(result)
       goto out;
     /* Change the connection handler and SMTP state */
@@ -705,7 +708,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data,
   }
 
   DEBUGASSERT(!smtpc->ssldone);
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+  result = Curl_conn_connect(data, FALSE, &ssldone);
   DEBUGF(infof(data, "smtp_perform_upgrade_tls, connect -> %d, %d",
                (int)result, ssldone));
   if(!result && ssldone) {
@@ -1205,7 +1208,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
 
   if(smtpcode / 100 != 2 && smtpcode != 1) {
     if(data->set.use_ssl <= CURLUSESSL_TRY ||
-       Curl_conn_is_ssl(data->conn, FIRSTSOCKET))
+       Curl_conn_is_ssl(data->conn))
       result = smtp_perform_helo(data, smtpc);
     else {
       failf(data, "Remote access denied: %d", smtpcode);
@@ -1266,7 +1269,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
     }
 
     if(smtpcode != 1) {
-      if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
+      if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn)) {
         /* We do not have an SSL/TLS connection yet, but SSL is requested */
         if(smtpc->tls_supported)
           /* Switch to TLS connection now */
@@ -1481,7 +1484,7 @@ static CURLcode smtp_state_data_resp(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* SMTP upload */
-    Curl_xfer_setup_send(data, FIRSTSOCKET);
+    Curl_xfer_setup_send(data);
 
     /* End of DO phase */
     smtp_state(data, smtpc, SMTP_STOP);
@@ -1536,8 +1539,7 @@ upgrade_tls:
 
   do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(data, FIRSTSOCKET, &smtpc->pp,
-                              &smtpcode, &nread);
+    result = Curl_pp_readresp(data, &smtpc->pp, &smtpcode, &nread);
     if(result)
       return result;
 
@@ -1619,19 +1621,18 @@ static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
   if(!smtpc)
     return CURLE_FAILED_INIT;
 
-  result = Curl_pp_statemach(data, &smtpc->pp, FALSE, FALSE);
+  result = Curl_pp_statemach(data, &smtpc->pp, FALSE);
   *done = (smtpc->state == SMTP_STOP);
   return result;
 }
 
 static CURLcode smtp_block_statemach(struct Curl_easy *data,
-                                     struct smtp_conn *smtpc,
-                                     bool disconnecting)
+                                     struct smtp_conn *smtpc)
 {
   CURLcode result = CURLE_OK;
 
   while(smtpc->state != SMTP_STOP && !result)
-    result = Curl_pp_statemach(data, &smtpc->pp, TRUE, disconnecting);
+    result = Curl_pp_statemach(data, &smtpc->pp, TRUE);
 
   return result;
 }
@@ -1744,7 +1745,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
     smtp_state(data, smtpc, SMTP_POSTDATA);
 
     /* Run the state-machine */
-    result = smtp_block_statemach(data, smtpc, FALSE);
+    result = smtp_block_statemach(data, smtpc);
   }
 
   /* Clear the transfer mode for the next request */
@@ -1807,7 +1808,7 @@ static CURLcode smtp_perform(struct Curl_easy *data,
   /* Run the state-machine */
   result = smtp_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
+  *connected = Curl_conn_is_connected(data->conn);
 
 out:
   CURL_TRC_SMTP(data, "smtp_perform() -> %d, connected=%d, done=%d",
@@ -1919,7 +1920,7 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
   if(!dead_connection && conn->bits.protoconnstart &&
      !Curl_pp_needs_flush(data, &smtpc->pp) &&
      !smtp_perform_quit(data, smtpc))
-    (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
+    (void)smtp_block_statemach(data, smtpc); /* ignore on QUIT */
 
   CURL_TRC_SMTP(data, "smtp_disconnect(), finished");
   return CURLE_OK;
@@ -1994,6 +1995,7 @@ out:
  */
 const struct Curl_protocol Curl_protocol_smtp = {
   smtp_setup_connection,            /* setup_connection */
+  ZERO_NULL,                        /* setup_filters */
   smtp_do,                          /* do_it */
   smtp_done,                        /* done */
   ZERO_NULL,                        /* do_more */

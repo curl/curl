@@ -11,7 +11,6 @@ name: 'Linux'
       - 'curl-*'
       - '*/ci'
     paths-ignore:
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'projects/**'
@@ -20,7 +19,6 @@ name: 'Linux'
       - master
       - 'curl-*'
     paths-ignore:
-      - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'projects/**'
@@ -35,36 +33,35 @@ cache-mode: write
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 1660
+  CURL_TEST_MIN: 1710
   DO_NOT_TRACK: '1'
-  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 5.8.0
-  # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260903.0
-  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
-  FIL_C_VERSION: 0.685
-  # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-  LIBRESSL_VERSION: 4.3.2
-  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=awslabs/aws-lc
+  AWSLC_VERSION: 5.13.0
+  # renovate: datasource=github-tags depName=google/boringssl
+  BORINGSSL_VERSION: 0.20261020.0
+  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced
+  FIL_C_VERSION: 0.687
+  # renovate: datasource=github-tags depName=libressl/portable
+  LIBRESSL_VERSION: 4.4.1
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls
   MBEDTLS_VERSION: 4.2.0
-  # manually bumped
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls extractVersion=^v?(?<version>3\..+)$
   MBEDTLS_PREV_VERSION: 3.6.7
-  MBEDTLS_PREV_SHA256: a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6
-  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
-  NGHTTP2_VERSION: 1.70.0
-  # handled in renovate.json
-  OPENLDAP_VERSION: 2.6.10
-  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
-  OPENSSL_VERSION: 4.0.2
-  # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
-  RUSTLS_VERSION: 0.15.3
-  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  WOLFSSL_VERSION: 5.9.2
+  # renovate: datasource=github-tags depName=nghttp2/nghttp2
+  NGHTTP2_VERSION: 1.71.0
+  # renovate: datasource=github-tags depName=openldap/openldap versioning=regex:^(?<major>\d+)_(?<minor>\d+)_(?<patch>\d+)$ extractVersion=^OPENLDAP_REL_ENG_(?<version>.+)$
+  OPENLDAP_VERSION: 2_7_2
+  # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
+  OPENSSL_VERSION: 4.1.0
+  # renovate: datasource=github-tags depName=rustls/rustls-ffi
+  RUSTLS_VERSION: 0.15.7
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssl extractVersion=^v?(?<version>.+)-stable$
+  WOLFSSL_VERSION: 5.9.4
 
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    runs-on: ${{ matrix.build.image || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.build.image || 'ubuntu-26.04' }}
     container: ${{ matrix.build.container }}
     timeout-minutes: 15
     env:
@@ -76,162 +73,201 @@ jobs:
       matrix:
         build:
           - name: 'awslc'
-            install_steps: awslc pytest
-            LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
-            configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
+            install_steps: awslc pytest test-linter
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/awslc/lib
+            LIBS: -lstdc++
+            configure: --with-openssl=/home/runner/pkg/awslc --enable-ech
 
           - name: 'awslc'
             install_packages: libidn2-dev
             install_steps: awslc clean
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/awslc -DOPENSSL_USE_STATIC_LIBS=ON -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch
 
           - name: 'boringssl'
             install_steps: boringssl pytest
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/boringssl -DOPENSSL_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DUSE_ECH=ON
 
           - name: 'libressl krb5'
             image: ubuntu-24.04-arm
             install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
-            install_steps: libressl-c-arm pytest codeset-test1
-            LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
-            configure: --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
+            install_steps: libressl-c pytest codeset-test1
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/libressl/lib
+            configure: --with-openssl=/home/runner/pkg/libressl --with-gssapi --enable-debug
 
           - name: 'libressl krb5 valgrind 1'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
-            install_steps: libressl-c-arm
+            install_steps: libressl-c
             tflags: '--subset=0/2'
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl krb5 valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
-            install_steps: libressl-c-arm
+            install_steps: libressl-c
             tflags: '--subset=1/2'
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl clang'
             image: ubuntu-24.04-arm
             install_packages: clang
-            install_steps: libressl-c-arm
+            install_steps: libressl-c
             CC: clang
-            LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
-            configure: --with-openssl=/home/runner/libressl --enable-debug
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/libressl/lib
+            configure: --with-openssl=/home/runner/pkg/libressl --enable-debug
 
           - name: 'libressl Fil-C'
             install_steps: filc libressl-filc nghttp2-filc pytest
-            tflags: '!776'  # adds 1-9 minutes to the test run step, and fails consistently
             CC: /home/runner/filc/build/bin/filcc
-            PKG_CONFIG_PATH: /home/runner/nghttp2/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/pkg/nghttp2/lib/pkgconfig
             generate: >-
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
-              -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_LIBPSL=OFF
+              -DOPENSSL_ROOT_DIR=/home/runner/pkg/libressl -DCURL_USE_LIBPSL=OFF
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
               -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCURL_ENABLE_NTLM=ON
 
           - name: 'mbedtls gss valgrind 1'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls-latest-arm
+            install_steps: mbedtls-latest
             tflags: '--subset=0/2'
-            LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
-            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/mbedtls/lib
+            PKG_CONFIG_PATH: /home/runner/pkg/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON -DCURL_DROP_UNUSED=ON
 
           - name: 'mbedtls gss valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
-            install_steps: mbedtls-latest-arm
+            install_steps: mbedtls-latest
             tflags: '--subset=1/2'
-            LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
-            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/mbedtls/lib
+            PKG_CONFIG_PATH: /home/runner/pkg/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
-            install_steps: mbedtls-latest-intel pytest
+            install_steps: mbedtls-latest pytest
             CC: clang
-            LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
-            configure: --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/mbedtls/lib
+            configure: --with-mbedtls=/home/runner/pkg/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
             install_packages: libssh2-1-dev libnghttp2-dev libuv1-dev
             install_steps: mbedtls-prev pytest
-            PKG_CONFIG_PATH: /home/runner/mbedtls-prev/lib/pkgconfig  # Requires v3.6.0
+            PKG_CONFIG_PATH: /home/runner/pkg/mbedtls-prev/lib/pkgconfig  # Requires v3.6.0
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_USE_LIBUV=ON -DENABLE_DEBUG=ON
 
           - name: 'mbedtls-pkg MultiSSL !pc'
             install_packages: libnghttp2-dev libmbedtls-dev
-            install_steps: mbedtls-latest-intel skipall
+            install_steps: mbedtls-latest skipall
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls
-              -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
-              -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
-              -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
-              -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
+              -DMBEDTLS_INCLUDE_DIR=/home/runner/pkg/mbedtls/include
+              -DMBEDTLS_LIBRARY=/home/runner/pkg/mbedtls/lib/libmbedtls.a
+              -DMBEDX509_LIBRARY=/home/runner/pkg/mbedtls/lib/libmbedx509.a
+              -DMBEDCRYPTO_LIBRARY=/home/runner/pkg/mbedtls/lib/libmbedcrypto.a
               -DCURL_USE_PKGCONFIG=OFF -DCURL_USE_OPENSSL=ON
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'rustls valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=0/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             tflags: '--subset=1/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
             install_packages: libnghttp2-dev libldap-dev
             install_steps: rust rustls skiprun pytest
+            LDFLAGS: -Wl,-rpath,/home/runner/rustls/lib
+            PKG_CONFIG_PATH: /home/runner/rustls/lib/pkgconfig
             configure: --with-rustls --enable-ech --enable-debug
 
           - name: 'wolfssl-all'
             image: ubuntu-26.04-arm
-            install_steps: wolfssl-all-arm
-            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-all/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
+            install_steps: wolfssl-all
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/wolfssl-all/lib
+            configure: --with-wolfssl=/home/runner/pkg/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 1'
             image: ubuntu-26.04-arm
             install_packages: valgrind
-            install_steps: wolfssl-opensslextra-arm
+            install_steps: wolfssl-opensslextra
             tflags: '--subset=0/2'
-            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/wolfssl-opensslextra/lib
+            configure: --with-wolfssl=/home/runner/pkg/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'wolfssl-opensslextra valgrind 2'
             image: ubuntu-26.04-arm
             install_packages: valgrind
-            install_steps: wolfssl-opensslextra-arm
+            install_steps: wolfssl-opensslextra
             tflags: '--subset=1/2'
-            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
+            LDFLAGS: -Wl,-rpath,/home/runner/pkg/wolfssl-opensslextra/lib
+            configure: --with-wolfssl=/home/runner/pkg/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
+
+          - name: 'openssl ubuntu-22.04'
+            image: ubuntu-22.04
+            configure: --disable-unity --enable-static --with-openssl
+            tflags: '--min=1700'
+
+          - name: 'openssl ubuntu-22.04-arm'
+            image: ubuntu-22.04-arm
+            configure: --disable-unity --enable-static --with-openssl
+            tflags: '--min=1700'
+
+          - name: 'openssl !proxy !examples'
+            image: ubuntu-22.04
+            configure: --with-openssl --disable-proxy
+            tflags: '--min=1500'
+
+          - name: 'openssl libssh !examples'
+            image: ubuntu-22.04
+            install_packages: libssh-dev
+            configure: --with-openssl --with-libssh
+
+          - name: 'openssl c-ares !examples'
+            image: ubuntu-22.04
+            install_packages: libc-ares-dev
+            configure: --with-openssl --enable-ares
+            tflags: '--min=1700'
+
+          - name: 'openssl c-ares debug'
+            image: ubuntu-22.04-arm
+            install_packages: libc-ares-dev
+            configure: --disable-unity --enable-static --with-openssl --enable-ares --enable-debug
+            tflags: '--min=1700'
 
           - name: 'openssl default'
+            image: ubuntu-24.04
             install_steps: pytest
-            configure: --with-openssl --enable-debug --disable-unity
+            configure: --with-openssl --enable-debug --disable-unity --enable-static
 
-          - name: 'openssl libssh2 sync-resolver valgrind 1 +analyzer'
+          - name: 'openssl libssh2 sync-resolver valgrind 1'
             image: ubuntu-26.04-arm
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
             tflags: '--subset=0/2'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON -DCURL_GCC_ANALYZER=ON
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
-          - name: 'openssl libssh2 sync-resolver valgrind 2'
+          - name: 'openssl libssh2 sync-resolver valgrind 2 +analyzer'
             image: ubuntu-26.04-arm
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
             tflags: '--subset=1/2'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON
 
           - name: 'openssl intel C89'
+            image: ubuntu-24.04
             install_packages: libssh-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
@@ -243,24 +279,27 @@ jobs:
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh2 --enable-debug --disable-verbose
 
           - name: 'openssl -O3 libssh valgrind 1'
+            image: ubuntu-24.04-arm
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--subset=0/2'
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl -O3 libssh valgrind 2'
+            image: ubuntu-24.04-arm
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
             tflags: '--subset=1/2'
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl clang krb5 openldap static'
+            image: ubuntu-24.04
             install_steps: openldap-static
             install_packages: libidn2-dev libkrb5-dev clang libssl-dev
             CC: clang
             configure: >-
               --enable-static --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs
-              --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
+              --disable-manual --with-ldap=/home/runner/pkg/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
             image: ubuntu-24.04-arm
@@ -271,20 +310,23 @@ jobs:
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
             image: ubuntu-24.04-arm
-            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth --enable-ntlm
+            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth
 
-          - name: 'curl_global_init_mem debug valgrind'
+          - name: 'curl_global_init_mem debug valgrind 1'
             image: ubuntu-24.04-arm
             install_packages: valgrind
-            tflags: '--min=1700'
-            configure: >-
-              --enable-init-mem-debug
-              --with-openssl --disable-debug --enable-unity
-              --enable-ntlm
+            tflags: '--subset=0/2'
+            configure: --enable-init-mem-debug --with-openssl --disable-debug
+
+          - name: 'curl_global_init_mem debug valgrind 2'
+            image: ubuntu-24.04-arm
+            install_packages: valgrind
+            tflags: '--subset=1/2'
+            configure: --enable-init-mem-debug --with-openssl --disable-debug
 
           - name: 'openssl https-only'
             image: ubuntu-24.04-arm
-            tflags: '--min=1260'
+            tflags: '--min=1270'
             configure: >-
               --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
@@ -292,21 +334,21 @@ jobs:
               --disable-rtsp
               --without-libssh2 --without-libssh
               --disable-tftp --disable-ftp --disable-file
-              --enable-ntlm
 
           - name: 'openssl torture 1'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            tflags: '-t --shallow=25 --subset=0/2'
+            tflags: '-t -r --shallow=25 --subset=0/2'
             torture: true
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl torture 2'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            tflags: '-t --shallow=25 --subset=1/2'
+            tflags: '-t -r --shallow=25 --subset=1/2'
             torture: true
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl i686'
+            image: ubuntu-24.04
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
             CC: i686-linux-gnu-gcc-14
             LDFLAGS: -L/usr/lib/i386-linux-gnu
@@ -318,26 +360,26 @@ jobs:
 
           - name: '!ssl !http !smtp !imap'
             image: ubuntu-26.04-arm
-            tflags: '--min=500'
+            tflags: '--min=520'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity --enable-httpsig
 
           - name: 'clang-tidy'
-            image: ubuntu-26.04
+            image: ubuntu-26.04-arm
             install_packages: clang-22 clang-tidy-22 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev
-            install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
+            install_steps: skiprun mbedtls-latest rustls wolfssl-opensslextra
             install_steps_brew: openssl@4 gsasl
             CC: clang-22
             CFLAGS: -Wunused-macros
             LDFLAGS: >-
-              -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-              -Wl,-rpath,/home/runner/mbedtls/lib
+              -Wl,-rpath,/home/runner/pkg/wolfssl-opensslextra/lib
+              -Wl,-rpath,/home/runner/pkg/mbedtls/lib
               -Wl,-rpath,/home/runner/rustls/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl@4/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib
 
             PKG_CONFIG_PATH: "\
-              /home/runner/wolfssl-opensslextra/lib/pkgconfig:\
-              /home/runner/mbedtls/lib/pkgconfig:\
+              /home/runner/pkg/wolfssl-opensslextra/lib/pkgconfig:\
+              /home/runner/pkg/mbedtls/lib/pkgconfig:\
               /home/runner/rustls/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/gsasl/lib/pkgconfig"
             generate: >-
@@ -348,7 +390,7 @@ jobs:
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-22
 
           - name: 'clang-tidy H3 c-ares !examples'
-            image: ubuntu-26.04
+            image: ubuntu-26.04-arm
             install_packages: clang-22 clang-tidy-22 libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skiprun
             install_steps_brew: libngtcp2 libnghttp3 c-ares
@@ -392,6 +434,7 @@ jobs:
             install_packages: clang-22 libubsan1 libasan8 libtsan2
             install_steps: pytest
             install_steps_brew: openssl libssh2 libngtcp2 libnghttp3 c-ares
+            tflags: '!664 !665'  # MD5 support is disabled in Homebrew since libssh2 1.11.1_6
             CC: clang-22
             CFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
@@ -418,7 +461,7 @@ jobs:
             CC: clang-22
             CFLAGS: -fsanitize=thread
             LDFLAGS: -fsanitize=thread
-            generate: -DCMAKE_BUILD_TYPE=Debug -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/home/runner/openssl -DUSE_ECH=ON
+            generate: -DCMAKE_BUILD_TYPE=Debug -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/home/runner/pkg/openssl -DUSE_ECH=ON
 
           - name: 'memory-sanitizer'
             image: ubuntu-26.04
@@ -429,12 +472,13 @@ jobs:
             LDFLAGS: -fsanitize=memory
             LIBS: -ldl
             configure: --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
-            tflags: '--min=1540'
+            tflags: '--min=1640'
 
           - name: 'event-based'
-            install_packages: libssh-dev
-            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm
-            tflags: '-n --test-event --min=1420'
+            image: ubuntu-24.04
+            install_packages: libssh-dev libuv1-dev
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --with-libuv
+            tflags: '-n --test-event --min=1430'
 
           - name: 'duphandle'
             image: ubuntu-26.04-arm
@@ -443,25 +487,26 @@ jobs:
             tflags: '-n --test-duphandle'
 
           - name: 'IntelC openssl'
-            install_packages: libssl-dev
+            install_packages: libssl-dev libssh2-1-dev libnghttp2-dev libidn2-dev libldap-dev libkrb5-dev
             install_steps: intelc
             CC: icc
-            configure: --enable-debug --with-openssl
+            configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi --enable-httpsig
 
-          - name: 'Slackware !ssl gssapi gcc'
-            # Flags used to build the curl Slackware package, except OpenSSL 1.1.0:
+          - name: 'Slackware GnuTLS gssapi gcc'
+            # Flags used to build the curl Slackware package:
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
-            configure: --enable-debug --without-ssl --with-libssh2 --with-gssapi --enable-ares --without-ca-bundle --with-ca-path=/etc/ssl/certs
+            # Current curl no longer supports OpenSSL 1.1.0, thus build with GnuTLS instead:
+            configure: --enable-debug --with-gnutls --with-libssh2 --with-gssapi --enable-ares --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
-            container: andy5995/slackware-build-essential:15.0@sha256:f4f2242999038a2c2deb4e5727187caaae92502a7daf8353068932621e1ec92f
+            container: andy5995/slackware-build-essential:15.0@sha256:c5aeede463b4a52b5f4650078418718f2447bdb23f9a4cac0d5fb262e7b8dc84  # manually bumped
 
           - name: 'Alpine MUSL https-rr'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --enable-threaded-resolver
-            container: alpine:3.23@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 # 3.23.4
+            container: alpine:3.24@sha256:b3413572228e34bd1c9245f5565e6cd127005655e8a7899aef33d8e83255c9e6 # 3.24.3 (manually bumped)
 
           - name: 'Alpine MUSL https-rr c-ares'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --disable-threaded-resolver
-            container: alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc # 3.20.10
+            container: alpine:3.23@sha256:eaa20f3de212fa5cda0c64dc715b55ce28619928536d0d2a97ec1a922c1edce8 # 3.23.7 (manually bumped, a previous minor version)
 
     steps:
       - name: 'install prereqs'
@@ -499,51 +544,52 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'filc') }}
         run: |
           cd /home/runner
+          arch="$(uname -m)"
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" --output pkg.bin
-          sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin && mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
+            --location --proto-redir =https "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-${arch}.tar.xz" --output pkg.bin
+          sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin && mv "filc-${FIL_C_VERSION}-linux-${arch}" filc
           cd filc
           ./setup.sh
 
-      - name: 'cache libressl (c-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') }}
+      - name: 'cache libressl (c)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-c') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-libressl-c-arm
+        id: cache1-libressl-c
         env:
-          cache-name: cache-libressl-c-arm
+          cache-name: cache1-libressl-c
         with:
-          path: ~/libressl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+          path: ~/pkg/libressl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ runner.arch }}
 
-      - name: 'build libressl (c-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') && !steps.cache-libressl-c-arm.outputs.cache-hit }}
+      - name: 'build libressl (c)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-c') && !steps.cache1-libressl-c.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
-          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl -DCURL_ENABLE_NTLM=ON
+          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/libressl
           cmake --build .
           cmake --install .
 
       - name: 'cache libressl (filc)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-filc') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-libressl-filc
+        id: cache1-libressl-filc
         env:
-          cache-name: cache-libressl-filc
+          cache-name: cache1-libressl-filc
         with:
-          path: ~/libressl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ env.FIL_C_VERSION }}
+          path: ~/pkg/libressl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ env.FIL_C_VERSION }}-${{ runner.arch }}
 
       - name: 'build libressl (filc)'
-        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && !steps.cache-libressl-filc.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && !steps.cache1-libressl-filc.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
-          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl \
+          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/libressl \
             -DCMAKE_C_COMPILER=/home/runner/filc/build/bin/filcc -DENABLE_ASM=OFF
           cmake --build .
           cmake --install .
@@ -551,107 +597,84 @@ jobs:
       - name: 'cache nghttp2 (filc)'
         if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-nghttp2-filc
+        id: cache1-nghttp2-filc
         env:
-          cache-name: cache-nghttp2-filc
+          cache-name: cache1-nghttp2-filc
         with:
-          path: ~/nghttp2
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.FIL_C_VERSION }}
+          path: ~/pkg/nghttp2
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.FIL_C_VERSION }}-${{ runner.arch }}
 
       - name: 'build nghttp2 (filc)'
-        if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') && !steps.cache-nghttp2-filc.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') && !steps.cache1-nghttp2-filc.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.xz" --output pkg.bin
           sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin
           cd "nghttp2-${NGHTTP2_VERSION}"
-          cmake -B . -G Ninja -DENABLE_LIB_ONLY=ON -DBUILD_TESTING=OFF -DENABLE_DOC=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/nghttp2 \
+          cmake -B . -G Ninja -DENABLE_LIB_ONLY=ON -DBUILD_TESTING=OFF -DENABLE_DOC=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/nghttp2 \
             -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_C_COMPILER=/home/runner/filc/build/bin/filcc
           cmake --build .
           cmake --install .
 
-      - name: 'cache wolfssl (all-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') }}
+      - name: 'cache wolfssl (all)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-wolfssl-all-arm
+        id: cache1-wolfssl-all
         env:
-          cache-name: cache-wolfssl-all-arm
+          cache-name: cache1-wolfssl-all
         with:
-          path: ~/wolfssl-all
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          path: ~/pkg/wolfssl-all
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}-${{ runner.arch }}
 
-      - name: 'build wolfssl (all-arm)'  # does not support `OPENSSL_COEXIST`
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') && !steps.cache-wolfssl-all-arm.outputs.cache-hit }}
+      - name: 'build wolfssl (all)'  # does not support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') && !steps.cache1-wolfssl-all.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-all \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/wolfssl-all \
             --enable-tls13 --enable-harden --enable-all \
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 
-      - name: 'cache wolfssl (opensslextra-intel)'  # does support `OPENSSL_COEXIST`
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') }}
+      - name: 'cache wolfssl (opensslextra)'  # does support `OPENSSL_COEXIST`
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-wolfssl-opensslextra-intel
+        id: cache1-wolfssl-opensslextra
         env:
-          cache-name: cache-wolfssl-opensslextra-intel
+          cache-name: cache1-wolfssl-opensslextra
         with:
-          path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          path: ~/pkg/wolfssl-opensslextra
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}-${{ runner.arch }}
 
-      - name: 'build wolfssl (opensslextra-intel)'
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') && !steps.cache-wolfssl-opensslextra-intel.outputs.cache-hit }}
+      - name: 'build wolfssl (opensslextra)'
+        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') && !steps.cache1-wolfssl-opensslextra.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/wolfssl-opensslextra \
             --enable-tls13 --enable-harden --enable-ech --enable-ed25519 --enable-opensslextra \
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 
-      - name: 'cache wolfssl (opensslextra-arm)'  # does support `OPENSSL_COEXIST`
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') }}
+      - name: 'cache mbedtls (latest)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-wolfssl-opensslextra-arm
+        id: cache1-mbedtls-latest
         env:
-          cache-name: cache-wolfssl-opensslextra-arm
+          cache-name: cache1-mbedtls-latest
         with:
-          path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          path: ~/pkg/mbedtls
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}-${{ runner.arch }}
 
-      - name: 'build wolfssl (opensslextra-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') && !steps.cache-wolfssl-opensslextra-arm.outputs.cache-hit }}
-        run: |
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
-          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
-          cd "wolfssl-${WOLFSSL_VERSION}-stable"
-          ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra \
-            --enable-tls13 --enable-harden --enable-ech --enable-ed25519 --enable-opensslextra \
-            --disable-benchmark --disable-crypttests --disable-examples
-          make install
-
-      - name: 'cache mbedtls (latest-intel)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-intel') }}
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-mbedtls-latest-intel
-        env:
-          cache-name: cache-mbedtls-latest-intel
-        with:
-          path: ~/mbedtls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
-
-      - name: 'build mbedtls (latest-intel)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-intel') && !steps.cache-mbedtls-latest-intel.outputs.cache-hit }}
+      - name: 'build mbedtls (latest)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest') && !steps.cache1-mbedtls-latest.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
@@ -659,31 +682,7 @@ jobs:
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
-          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/home/runner/mbedtls \
-            -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
-          cmake --build .
-          cmake --install .
-
-      - name: 'cache mbedtls (latest-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') }}
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-mbedtls-latest-arm
-        env:
-          cache-name: cache-mbedtls-latest-arm
-        with:
-          path: ~/mbedtls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
-
-      - name: 'build mbedtls (latest-arm)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') && !steps.cache-mbedtls-latest-arm.outputs.cache-hit }}
-        run: |
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
-          sha256sum pkg.bin && tar -xjf pkg.bin && rm -f pkg.bin
-          cd "mbedtls-${MBEDTLS_VERSION}"
-          ./scripts/config.py set MBEDTLS_THREADING_C
-          ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
-          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/home/runner/mbedtls \
+          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/mbedtls \
             -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
           cmake --build .
           cmake --install .
@@ -691,23 +690,23 @@ jobs:
       - name: 'cache mbedtls (prev)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-mbedtls-prev
+        id: cache1-mbedtls-prev
         env:
-          cache-name: cache-mbedtls-prev
+          cache-name: cache1-mbedtls-prev
         with:
-          path: ~/mbedtls-prev
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_PREV_VERSION }}
+          path: ~/pkg/mbedtls-prev
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_PREV_VERSION }}-${{ runner.arch }}
 
       - name: 'build mbedtls (prev)'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && !steps.cache-mbedtls-prev.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && !steps.cache1-mbedtls-prev.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_PREV_VERSION}/mbedtls-${MBEDTLS_PREV_VERSION}.tar.bz2" --output pkg.bin
-          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${MBEDTLS_PREV_SHA256}" && tar -xjf pkg.bin && rm -f pkg.bin
+          sha256sum pkg.bin && tar -xjf pkg.bin && rm -f pkg.bin
           cd "mbedtls-${MBEDTLS_PREV_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
-          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/home/runner/mbedtls-prev \
+          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/mbedtls-prev \
             -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
           cmake --build .
           cmake --install .
@@ -715,108 +714,108 @@ jobs:
       - name: 'cache openldap (static)'
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-openldap-static
+        id: cache1-openldap-static
         env:
-          cache-name: cache-openldap-static
+          cache-name: cache1-openldap-static
         with:
-          path: ~/openldap-static
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENLDAP_VERSION }}
+          path: ~/pkg/openldap-static
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENLDAP_VERSION }}-${{ runner.arch }}
 
       - name: 'build openldap (static)'
-        if: ${{ contains(matrix.build.install_steps, 'openldap-static') && !steps.cache-openldap-static.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.install_steps, 'openldap-static') && !steps.cache1-openldap-static.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
+            "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION//_/.}.tgz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
-          cd "openldap-${OPENLDAP_VERSION}"
+          cd "openldap-${OPENLDAP_VERSION//_/.}"
           autoreconf -fi
-          ./configure --prefix=/home/runner/openldap-static --enable-static --disable-shared --disable-slapd
+          ./configure --prefix=/home/runner/pkg/openldap-static --enable-static --disable-shared --disable-slapd
           make install
 
       - name: 'cache openssl (thread sanitizer)'
         if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-openssl-tsan
+        id: cache1-openssl-tsan
         env:
-          cache-name: cache-openssl-tsan
+          cache-name: cache1-openssl-tsan
         with:
-          path: ~/openssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          path: ~/pkg/openssl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-${{ runner.arch }}
 
       - name: 'build openssl (thread sanitizer)'
-        if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') && !steps.cache-openssl-tsan.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') && !steps.cache1-openssl-tsan.outputs.cache-hit }}
         run: |
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          CC=clang CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
+          CC=clang CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix=/home/runner/pkg/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
       - name: 'cache awslc'
         if: ${{ contains(matrix.build.install_steps, 'awslc') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-awslc
+        id: cache1-awslc
         env:
-          cache-name: cache-awslc
+          cache-name: cache1-awslc
         with:
-          path: ~/awslc
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
+          path: ~/pkg/awslc
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}-${{ runner.arch }}
 
       - name: 'build awslc'
-        if: ${{ contains(matrix.build.install_steps, 'awslc') && !steps.cache-awslc.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.install_steps, 'awslc') && !steps.cache1-awslc.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "aws-lc-${AWSLC_VERSION}"
-          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
+          cmake -B . -G Ninja -DBUILD_TESTING=OFF -DBUILD_TOOL=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/awslc
           cmake --build .
           cmake --install .
 
       - name: 'cache boringssl'
         if: ${{ contains(matrix.build.install_steps, 'boringssl') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-boringssl
+        id: cache1-boringssl
         env:
-          cache-name: cache-boringssl
+          cache-name: cache1-boringssl
         with:
-          path: ~/boringssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+          path: ~/pkg/boringssl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}-${{ runner.arch }}
 
       - name: 'build boringssl'
-        if: ${{ contains(matrix.build.install_steps, 'boringssl') && !steps.cache-boringssl.outputs.cache-hit }}
+        if: ${{ contains(matrix.build.install_steps, 'boringssl') && !steps.cache1-boringssl.outputs.cache-hit }}
         run: |
-          mkdir boringssl-src
-          cd boringssl-src
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            "https://boringssl.googlesource.com/boringssl/+archive/${BORINGSSL_VERSION}.tar.gz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/google/boringssl/releases/download/${BORINGSSL_VERSION}/boringssl-${BORINGSSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
-          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON
+          cd "boringssl-${BORINGSSL_VERSION}"
+          cmake -B . -G Ninja -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/pkg/boringssl
           cmake --build .
           cmake --install .
 
       - name: 'cache rustls'
         if: ${{ contains(matrix.build.install_steps, 'rustls') }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: cache-rustls
+        id: cache1-rustls
         env:
-          cache-name: cache-rustls
+          cache-name: cache1-rustls
         with:
           path: ~/rustls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}-${{ runner.arch }}
 
-      - name: 'fetch rustls deb'
-        if: ${{ contains(matrix.build.install_steps, 'rustls') && !steps.cache-rustls.outputs.cache-hit }}
+      - name: 'install rustls'
+        if: ${{ contains(matrix.build.install_steps, 'rustls') && !steps.cache1-rustls.outputs.cache-hit }}
         run: |
           cd ~
+          if [ "$(uname -m)" = 'aarch64' ]; then
+            arch='arm64'
+          else
+            arch='x86_64'
+          fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output pkg.bin
+            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/rustls-ffi-${arch}-linux-gnu.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
-
-      - name: 'build rustls'
-        # Note: we do not check cache-hit here. If the cache is hit, we need to dpkg install the deb.
-        if: ${{ contains(matrix.build.install_steps, 'rustls') }}
-        run: sudo dpkg -i ~/rustls/"librustls_${RUSTLS_VERSION}_amd64.deb"
+          sed -i.bak 's|prefix=dist|prefix=/home/runner/rustls|g' rustls/lib/pkgconfig/rustls.pc; cat rustls/lib/pkgconfig/rustls.pc
 
       - name: 'install Intel compilers'
         if: ${{ contains(matrix.build.install_steps, 'intelc') }}
@@ -848,7 +847,7 @@ jobs:
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
-          [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
+          [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* || "${MATRIX_INSTALL_STEPS}" = *'boringssl'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
@@ -890,7 +889,9 @@ jobs:
           fi
 
       - name: 'single-use function check'
-        if: ${{ (contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc') }}
+        if: "${{ ((contains(matrix.build.configure, '--disable-unity') && contains(matrix.build.configure, '--enable-static')) || \
+                   contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc') }}"
+        background: true
         run: |
           git config --global --add safe.directory "*"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -902,8 +903,8 @@ jobs:
 
       - name: 'curl -V'
         run: |
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 file --
-          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | sort -z | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.so.*' -o -name '*.a' \) -print0 | sort -z | xargs -0 stat -c '%10s bytes: %n' --
           bld/src/curl --disable -V
 
       - name: 'curl install'
@@ -917,6 +918,14 @@ jobs:
             make -C bld V=1 install
           fi
 
+      - name: 'randcurl'
+        if: ${{ contains(matrix.build.install_steps, 'randcurl') }}
+        background: true
+        run: |
+          mkdir run
+          cd run
+          ../.github/scripts/randcurl.pl 60 ../bld/src/curl
+
       - name: 'build tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
         run: |
@@ -926,16 +935,21 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
+      - name: 'test-linter'
+        if: ${{ contains(matrix.build.install_steps, 'test-linter') }}
+        background: true
+        run: cd tests && ./test-linter.pl ../bld
+
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 20 || 10 }}
+        timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 15 || 10 }}
         env:
           TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           if [ "${TEST_TARGET}" = 'test-ci' ] && [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
             TFLAGS+=' -j6'
-            TFLAGS+=' !776'  # skip long-running flaky test
+            TFLAGS+=' !1674'  # skip long-running test
             if [[ "${MATRIX_INSTALL_PACKAGES}" = *'libgss-dev'* ]]; then
               TFLAGS+=' ~2077 ~2078'  # memory leaks from Curl_auth_decode_spnego_message() -> gss_init_sec_context()
             fi
@@ -976,13 +990,6 @@ jobs:
           else
             make -C bld V=1 pytest-ci
           fi
-
-      - name: 'randcurl'
-        if: ${{ contains(matrix.build.install_steps, 'randcurl') }}
-        run: |
-          mkdir run
-          cd run
-          ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'
         if: ${{ !contains(matrix.build.install_packages, 'valgrind') && !contains(matrix.build.name, '!examples') }}

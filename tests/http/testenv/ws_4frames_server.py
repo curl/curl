@@ -43,11 +43,18 @@ MESSAGES_LARGE = [
     b"x" * 65536,
 ]
 
+META_PAYLOAD = bytes(i % 251 for i in range(200000))
+
 
 async def handler(websocket):
     peer = websocket.remote_address
     print(f"client from {peer[0]}:{peer[1]}", flush=True)
     print("handshake complete", flush=True)
+
+    if websocket.request.path == '/meta':
+        await websocket.send(META_PAYLOAD)
+        print(f"sent metadata frame: {len(META_PAYLOAD)} bytes", flush=True)
+        return
 
     msgs = MESSAGES_LARGE if websocket.request.path == '/large' else MESSAGES_SMALL
 
@@ -62,7 +69,7 @@ async def handler(websocket):
 
 
 async def main():
-    parser = argparse.ArgumentParser(prog='scorecard', description="""
+    parser = argparse.ArgumentParser(prog='ws_4frames_server', description="""
         Run a websocket 4frames server.
         """)
     parser.add_argument("--port", type=int,

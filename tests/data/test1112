@@ -12,7 +12,6 @@ timing-dependent
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 SLOWDOWNDATA
@@ -27,7 +26,6 @@ REPLY TYPE 200 OK
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -46,7 +44,6 @@ FTPS download with strict timeout and slow data transfer
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 28 is CURLE_OPERATION_TIMEDOUT
 <errorcode>

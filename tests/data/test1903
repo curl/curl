@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -23,7 +22,6 @@ Set-Cookie: secondcookie=present;
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -31,9 +29,6 @@ http
 <name>
 CURLOPT_COOKIEFILE then reset then set again
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER %LOGDIR/cookiesout%TESTNUMBER
 </command>
@@ -50,7 +45,6 @@ cookies
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/cookiesout%TESTNUMBER" mode="text">
 # Netscape HTTP Cookie File

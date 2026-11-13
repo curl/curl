@@ -39,13 +39,13 @@
 /* Variable-length string, with 16-bit length. */
 struct vary2 {
   short len;
-  char  string[5000];
+  char string[5000];
 };
 
 /* Arguments from CL command. */
 struct arguments {
-  char         *pgm;            /* Program name. */
-  struct vary2 *cmdargs;        /* Command line arguments. */
+  char *pgm;              /* Program name. */
+  struct vary2 *cmdargs;  /* Command line arguments. */
 };
 
 static int is_ifs(char c)

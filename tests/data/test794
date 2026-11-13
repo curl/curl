@@ -6,7 +6,6 @@
 --location
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 302 OK
@@ -53,7 +52,6 @@ Content-Type: text/html
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -70,7 +68,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter -X IGLOO -d moo --locat
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 IGLOO /%TESTNUMBER HTTP/1.1

@@ -6,13 +6,11 @@ TELNET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -32,7 +30,6 @@ GET /we/want/%TESTNUMBER HTTP/1.0
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 28

@@ -6,7 +6,6 @@ source analysis
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Verify deprecation statuses and versions

@@ -9,7 +9,6 @@ HTTP proxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 <connect crlf="headers" nocheck="yes">
@@ -20,7 +19,6 @@ And you should ignore this data.
 
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -37,7 +35,6 @@ HTTPS GET over HTTP proxy fails
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 7

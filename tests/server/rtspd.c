@@ -67,7 +67,6 @@ struct rtspd_httprequest {
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
-  bool ntlm;      /* Authorization NTLM header found */
   int pipe;       /* if non-zero, expect this many requests to do a "piped"
                      request/response */
   int skip;       /* if non-zero, the server is instructed to not read this
@@ -358,8 +357,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
                     logmsg("failed resizing buffer.");
                   free(rtp_scratch);
                 }
-                logmsg("rtp_buffersize is %zu, rtp_size is %d.",
-                       req->rtp_buffersize, rtp_size);
+                logmsg("rtp_buffersize is %lu, rtp_size is %d.",
+                       (unsigned long)req->rtp_buffersize, rtp_size);
               }
             }
             else {
@@ -458,9 +457,10 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       }
       req->cl = (size_t)clen - req->skip;
 
-      logmsg("Found Content-Length: %zu in the request", (size_t)clen);
+      logmsg("Found Content-Length: %lu in the request", (unsigned long)clen);
       if(req->skip)
-        logmsg("... but going to abort after %zu bytes", req->cl);
+        logmsg("... but going to abort after %lu bytes",
+               (unsigned long)req->cl);
       break;
     }
     else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
@@ -496,23 +496,6 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     req->partno += 1000;
     req->digest = TRUE; /* header found */
     logmsg("Received Digest request, sending back data %ld", req->partno);
-  }
-  else if(!req->ntlm &&
-          strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
-    /* If the client is passing this type-3 NTLM header */
-    req->partno += 1002;
-    req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-3, sending back data %ld", req->partno);
-    if(req->cl) {
-      logmsg("  Expecting %zu POSTed bytes", req->cl);
-    }
-  }
-  else if(!req->ntlm &&
-          strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
-    /* If the client is passing this type-1 NTLM header */
-    req->partno += 1001;
-    req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-1, sending back data %ld", req->partno);
   }
   else if((req->partno >= 1000) &&
           strstr(req->reqbuf, "Authorization: Basic")) {
@@ -557,8 +540,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     return 1; /* done */
 
   if(req->cl > 0) {
-    if(req->cl <= req->offset - (end - req->reqbuf) -
-                  CURL_CSTRLEN(END_OF_HEADERS))
+    if(end && (req->cl <= req->offset - (end - req->reqbuf) -
+               CURL_CSTRLEN(END_OF_HEADERS)))
       return 1; /* done */
     else
       return 0; /* not complete yet */
@@ -596,7 +579,6 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
   req->auth = FALSE;
   req->cl = 0;
   req->digest = FALSE;
-  req->ntlm = FALSE;
   req->pipe = 0;
   req->skip = 0;
   req->rcmd = RCMD_NORMALREQ;
@@ -643,7 +625,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
       return 1;
     }
 
-    logmsg("Read %zd bytes", got);
+    logmsg("Read %ld bytes", (long)got);
 
     req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
@@ -868,7 +850,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       break;
     }
     else {
-      logmsg("Sent off %zd bytes", written);
+      logmsg("Sent off %ld bytes", (long)written);
     }
     /* write to file as well */
     fwrite(buffer, 1, (size_t)written, dump);
@@ -881,7 +863,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
 
   /* Send out any RTP data */
   if(req->rtp_buffer) {
-    logmsg("About to write %zu RTP bytes", req->rtp_buffersize);
+    logmsg("About to write %lu RTP bytes", (unsigned long)req->rtp_buffersize);
     count = req->rtp_buffersize;
     do {
       size_t num = count;
@@ -911,16 +893,17 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   }
 
   if(sendfailure) {
-    logmsg("Sending response failed. Only (%zu bytes) of "
-           "(%zu bytes) were sent",
-           responsesize - count, responsesize);
+    logmsg("Sending response failed. Only (%lu bytes) of "
+           "(%lu bytes) were sent",
+           (unsigned long)(responsesize - count),
+           (unsigned long)responsesize);
     free(ptr);
     free(cmd);
     return -1;
   }
 
-  logmsg("Response sent (%zu bytes) and written to %s",
-         responsesize, responsedump);
+  logmsg("Response sent (%lu bytes) and written to %s",
+         (unsigned long)responsesize, responsedump);
   free(ptr);
 
   if(cmdsize > 0) {

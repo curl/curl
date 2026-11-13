@@ -43,9 +43,6 @@ hello
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 caching of manual libcurl DNS entries after DNS cache timeout
 </name>

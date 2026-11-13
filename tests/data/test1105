@@ -9,7 +9,6 @@ cookiejar
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -27,7 +26,6 @@ Set-Cookie: bar=foo%TABbar
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -44,7 +42,6 @@ local-http
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /we/want/%TESTNUMBER?parm1=this*that/other/thing%AMPparm2=foobar/%TESTNUMBER HTTP/1.1

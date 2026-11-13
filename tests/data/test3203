@@ -6,7 +6,6 @@ FILE
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 file
@@ -28,7 +27,6 @@ Contents of file are irrelevant
 %endif
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

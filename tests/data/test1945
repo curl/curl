@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -31,7 +30,6 @@ Silly-thing: yes yes
 </connect>
 </reply>
 
-# Client-side
 <client>
 <features>
 proxy
@@ -46,16 +44,12 @@ http-proxy
 <name>
 curl_easy_nextheader with server + CONNECT
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://hello:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT hello:%HTTPPORT HTTP/1.1
@@ -74,7 +68,7 @@ Proxy-Connection: Keep-Alive
  Set-Cookie == secondcookie=2data; (1/4)
  Set-Cookie == cookie3=data3; (2/4)
  set-cookie == lowercase=data4; (3/4)
- Location == /19450002 (0/1)
+ Location == /%TESTNUMBER0002 (0/1)
 </stdout>
 </verify>
 </testcase>

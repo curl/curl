@@ -6,7 +6,6 @@ IPFS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes" crlf="headers">
 HTTP/1.1 200 OK
@@ -24,7 +23,6 @@ Hello curl from IPFS
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 ipfs
@@ -41,7 +39,6 @@ IPFS gateway using default port number
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://somewhere.anywhere/ipfs/r4nd0m HTTP/1.1

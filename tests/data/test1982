@@ -10,7 +10,6 @@ options
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY "LOGIN user.one secret" A002 OK LOGIN completed
@@ -26,7 +25,6 @@ body
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -39,7 +37,6 @@ IMAP two requests, change options for the second
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

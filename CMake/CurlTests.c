@@ -331,7 +331,7 @@ int main(void)
 #ifdef HAVE_BUILTIN_AVAILABLE
 int main(void)
 {
-  if(__builtin_available(macOS 10.12, iOS 5.0, *)) {}
+  if(__builtin_available(macOS 10.12, iOS 5, *)) {}
   return 0;
 }
 #endif

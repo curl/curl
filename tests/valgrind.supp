@@ -139,3 +139,12 @@
    fun:display_gss_error
    fun:Curl_gss_log_error
 }
+
+{
+   rustls-hashbrown-rustc-1.99-aarch64
+   Memcheck:Cond
+   fun:*rustc_entry*
+   fun:*get_or_insert_default_and_edit*
+   fun:*insert_tls13_ticket*
+   fun:*handle_new_ticket_impl*
+}

@@ -12,7 +12,6 @@ followlocation
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -24,7 +23,6 @@ And you should ignore this data.
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -40,7 +38,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1

@@ -57,7 +57,7 @@ fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
   rm -rf curl
-  if ! ln -s "${src}" curl; then
+  if ! ln -s "${src}" curl 2>/dev/null; then
     rm -rf curl; mkdir curl; (cd "${src}"; git archive --format=tar HEAD) | tar -x --directory=curl  # for MSYS2/Cygwin
   fi
   bldc='bld-add_subdirectory'

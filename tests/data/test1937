@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 302 OK
@@ -31,7 +30,6 @@ Content-Length: 0
 </data2>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -47,16 +45,12 @@ aws
 <name>
 HTTP POST with AWS_SIGV4
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^Content-Type:.*

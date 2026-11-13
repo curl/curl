@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
@@ -25,7 +24,6 @@ hello
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -34,9 +32,6 @@ http
 ftp
 proxy
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE
 </name>
@@ -46,7 +41,6 @@ ftp://www.example.com/moo/%TESTNUMBER http://%HOSTIP:%HTTPPORT
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET ftp://www.example.com/moo/%TESTNUMBER;type=i HTTP/1.1

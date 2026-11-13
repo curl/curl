@@ -14,9 +14,6 @@ http
 <features>
 http
 </features>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 CURLOPT_POSTFIELDS with binary data set after multi_add_handle
 </name>

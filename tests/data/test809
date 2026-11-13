@@ -9,14 +9,12 @@ CUSTOMREQUEST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 * STATUS %TESTNUMBER (MESSAGES 231 UIDNEXT 44292)
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -29,7 +27,6 @@ imap://%HOSTIP:%IMAPPORT -u user:secret -X 'STATUS %TESTNUMBER (UIDNEXT MESSAGES
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

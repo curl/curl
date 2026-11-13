@@ -71,8 +71,12 @@ static CURLcode test_unit1397(const char *arg)
       "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
       ".e.llo.", "*.e.llo", TRUE },
     { "\xfe\xfe.e.llo.", "*.e.llo", TRUE },
-    { "h.e.llo.", "*.e.llo.", TRUE },
-    { "h.e.llo", "*.e.llo.", TRUE },
+    { "h.e.llo.", "*.e.llo.", FALSE },
+    { "h.e.llo", "*.e.llo.", FALSE },
+    { "h.e.llo", "h.e.llo.", FALSE },
+    { "h.e.llo.", "h.e.llo.", FALSE },
+    { "h.e.llo.", "h.e.llo", TRUE },
+    { ".", ".", FALSE },
     { ".h.e.llo", "*.e.llo.", FALSE },
     { "h.e.llo", "*.*.llo.", FALSE },
     { "h.e.llo", "h.*.llo", FALSE },
@@ -112,10 +116,10 @@ static CURLcode test_unit1397(const char *arg)
       unitfail++;
     }
 
-    /* Curl_cert_hostcheck() should not rely on trailing NULs in the pattern.
-     * The underlying TLS library might not make a NUL-terminated copy of the
-     * pattern. Copy it to a new buffer so ASan and valgrind can flag invalid
-     * accesses. */
+    /* Curl_cert_hostcheck() should not rely on null-terminators in the
+     * pattern. The underlying TLS library might not make a null-terminated
+     * copy of the pattern. Copy it to a new buffer so ASan and valgrind can
+     * flag invalid accesses. */
     pattern_len = strlen(tests[i].pattern);
     pattern = pattern_len ? curlx_memdup(tests[i].pattern, pattern_len) : NULL;
     abort_unless(pattern_len == 0 || pattern, "Out of memory");
@@ -135,7 +139,7 @@ static CURLcode test_unit1397(const char *arg)
     curlx_free(pattern);
   }
 
-  /* Embedded NULs in the pattern should not be misinterpreted. */
+  /* Embedded NUL bytes in the pattern should not be misinterpreted. */
   if(Curl_cert_hostcheck("foo\0bar", 7, "foo", 3)) {
     curl_mfprintf(stderr, "foo\\0bar incorrectly matched foo\n");
     unitfail++;

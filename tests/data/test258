@@ -11,7 +11,6 @@ HTTP proxy Digest auth
 </keywords>
 
 </info>
-# Server-side
 <reply>
 # The stupid test server does not response anything at all until the full
 # request has been sent, and then of course the full POST has already been
@@ -51,7 +50,6 @@ ok
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -77,7 +75,6 @@ bar
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^(Content-Type: multipart/form-data;|------).*

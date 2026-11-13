@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 401 OK
@@ -21,7 +20,6 @@ nomnom
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -34,9 +32,6 @@ https
 <name>
 CURLINFO_TLS_SESSION and CURLINFO_TLS_SSL_PTR with OpenSSL
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 https://%HOSTIP:%HTTPSPORT/
 </command>

@@ -6,7 +6,6 @@ header_json
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -36,7 +35,6 @@ feature-policy: accelerometer 'none'; camera 'none'; geolocation 'none'; gyrosco
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -49,7 +47,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{stderr}%{header_json}\n' -s
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

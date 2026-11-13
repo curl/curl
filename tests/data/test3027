@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 REPLY MDTM 550 Permission denied
@@ -21,7 +20,6 @@ data blobb
 # data is sent to stdout
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -29,9 +27,6 @@ ftp
 <name>
 Get a file via FTP but 550 after MDTM command
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command option="no-include">
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
@@ -40,7 +35,6 @@ data blobb
 </stdout>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous
@@ -51,7 +45,6 @@ EPSV
 TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

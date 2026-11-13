@@ -138,7 +138,7 @@ sub memanalyze {
                 elsif(!exists $sizeataddr{$addr}) {
                     push @res, "FREE ERROR: No memory allocated: $line\n";
                 }
-                elsif(-1 == $sizeataddr{$addr}) {
+                elsif($sizeataddr{$addr} == -1) {
                     push @res, "FREE ERROR: Memory freed twice: $line\n";
                     push @res, "FREE ERROR: Previously freed at: $getmem{$addr}\n";
                 }
@@ -434,8 +434,8 @@ sub memanalyze {
             "Wcsdups: $wcsdups\n",
             "Frees: $frees\n",
             "Sockets: $sockets\n",
-            "Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n",
-            "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sockets)."\n",
+            "Allocations: " . ($mallocs + $callocs + $reallocs + $strdups + $wcsdups) . "\n",
+            "Operations: " . ($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sockets) . "\n",
             "Maximum allocated: $maxmem\n",
             "Total allocated: $memsum\n";
     }

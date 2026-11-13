@@ -8,7 +8,6 @@ UPLOAD
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH OAUTHBEARER XOAUTH2
@@ -17,7 +16,6 @@ REPLY %b64[user=user%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64% 235 Authenticated
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -33,7 +31,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER

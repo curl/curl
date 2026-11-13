@@ -9,7 +9,6 @@ Resume
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 416 Invalid range
@@ -39,7 +38,6 @@ Content-Length: 0%CR
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -64,7 +62,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C -
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

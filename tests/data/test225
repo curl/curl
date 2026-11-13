@@ -5,7 +5,6 @@
 FTP
 </keywords>
 </info>
-# Client-side
 <client>
 <server>
 ftp
@@ -18,7 +17,6 @@ ftp://bad%0auser:passwd@%HOSTIP:%FTPPORT/%TESTNUMBER%0a
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 3 == CURLE_URL_MALFORMAT
 <errorcode>

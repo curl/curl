@@ -8,7 +8,6 @@ cookies
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 <data crlf="headers">
@@ -20,7 +19,6 @@ Set-Cookie: %repeat[4000 x n]%=%repeat[4096 x v]%
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -36,7 +34,6 @@ cookies
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

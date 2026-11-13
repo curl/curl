@@ -7,11 +7,9 @@ curlx_tvdiff
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 unittest
@@ -21,7 +19,6 @@ curlx_tvdiff
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

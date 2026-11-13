@@ -244,8 +244,9 @@ for users to skip certain classes of tests, if desired, but a few are treated
 specially by the test harness or build system.
 
 When running a unit test and the keywords include `unittest`, the `<tool>`
-section can be left empty to use the standard unit test tool name `unitN` where
-`N` is the test number.
+section can be left empty to use the standard unit test tool name `unitN`
+where `N` is the test number. Unit tests means *libcurl* unit tests. The
+command line tool's unit tests are marked as `tunittest`.
 
 The `test-ci` make target automatically skips test with the `flaky` keyword.
 
@@ -302,8 +303,6 @@ Send back this contents instead of the `<data>` one. The `NUM` is set by:
 - The test number in the request line is >10000 and this is the remainder of
   [test case number]%10000.
 - The request was HTTP and included digest details, which adds 1000 to `NUM`
-- If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
-- If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
 - If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
 - If an HTTP request is Negotiate, `NUM` gets incremented by one for each
   request with Negotiate authorization header on the same test case.
@@ -517,8 +516,6 @@ Features testable here are:
 - `netrc`
 - `nghttpx`
 - `nghttpx-h3`
-- `NTLM`
-- `NTLM_WB`
 - `OpenSSL`
 - `override-dns` - this build can use a "fake" DNS server
 - `parsedate`
@@ -540,7 +537,7 @@ Features testable here are:
 - `typecheck`
 - `threadsafe`
 - `Unicode`
-- `unittest`
+- `unittest` - that feature needs to be enabled also for the tool unit tests marked as `tunittest`
 - `UnixSockets`
 - `verbose-strings`
 - `wakeup`
@@ -567,9 +564,19 @@ is skipped and the (single-line) output is displayed as reason for not running
 the test.
 
 ### `<tool>`
+
 Name of tool to invoke instead of "curl". This tool must be built and exist
 either in the `libtest/` directory (if the tool name starts with `lib`) or in
 the `unit/` directory (if the tool name starts with `unit`).
+
+If the keyword `unittest` is set in the test case, the default name for the
+tool is `unit%TESTNUMBER`.
+
+If the keyword `tunittest` is set in the test case, the default name for the
+tool is `tool%TESTNUMBER`.
+
+If the keyword `libtest` is set in the test case, the default name for the
+tool is `lib%TESTNUMBER`.
 
 ### `<name>`
 Brief test case description, shown when the test runs.

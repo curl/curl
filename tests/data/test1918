@@ -9,22 +9,16 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <name>
 curl_easy_option_by_name() and curl_easy_option_by_id()
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 </stdout>

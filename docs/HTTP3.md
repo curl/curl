@@ -40,7 +40,7 @@ Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3`
 and a QUIC supporting TLS library. The supported TLS libraries are covered
 below.
 
-While any version of `ngtcp2` and `nghttp3` from v1.0.0 on are expected to
+While any version of `ngtcp2` and `nghttp3` from 1.0.0 on are expected to
 work, using the latest versions often brings functional and performance
 improvements.
 
@@ -49,11 +49,11 @@ placeholders for the version you build.
 
 ## Build with OpenSSL or fork
 
-OpenSSL v3.5.0+ requires *ngtcp2* v1.12.0+. Earlier versions do not work.
+OpenSSL 3.5.0+ requires *ngtcp2* 1.12.0+. Earlier versions do not work.
 
-Build OpenSSL (v3.5.0+) or fork AWS-LC, BoringSSL, LibreSSL or quictls:
+Build OpenSSL (3.5.0+) or fork AWS-LC, BoringSSL, LibreSSL or quictls:
 
-     # Instructions for OpenSSL v3.5.0+
+     # Instructions for OpenSSL 3.5.0+
      % git clone --depth 1 --branch openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
      % ./config --prefix=/path/to/openssl --libdir=lib
@@ -215,28 +215,36 @@ but in case of problems, we recommend their latest release tag.
 
 ## Build
 
-Build quiche and BoringSSL (described here for quiche v0.29.1, the locations
+Build quiche and BoringSSL (described here for quiche 0.30.0, the locations
 where BoringSSL is to be found vary with version):
 
-     % git clone --depth 1 --branch 0.29.1 --recursive https://github.com/cloudflare/quiche
+     % git clone --depth 1 --branch 0.30.0 --recursive https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
      % ln -s libquiche.so target/release/libquiche.so.0
      % mkdir -p boringssl/lib
      % find target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' boringssl/lib \;
-     % find target/release/build/boring-sys-*/out/boringssl/src -maxdepth 1 \( -name include \) -exec ln -vsf -- '../{}' boringssl \;
+     % find target/release/build/boring-sys-*/out/boringssl -maxdepth 1 \( -name include \) -exec ln -vsf -- '../{}' boringssl \;
 
-Build curl:
+Build curl (with autotools):
 
      % cd ..
      % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure --with-openssl=$PWD/../quiche/boringssl --with-quiche=$PWD/../quiche/target/release
+     % CC=clang ./configure --with-openssl=$PWD/../quiche/boringssl --with-quiche=$PWD/../quiche/target/release CFLAGS=-fPIC LDFLAGS=-lstdc++
      % make
      % make install
 
-If `make install` results in `Permission denied` error, you need to prepend
+Build curl (with CMake):
+
+     % cd ..
+     % git clone --depth 1 https://github.com/curl/curl
+     % cd curl
+     % PKG_CONFIG_PATH=$PWD/../quiche/target/release CC=clang cmake -B bld -DOPENSSL_ROOT_DIR=$PWD/../quiche/boringssl -DOPENSSL_USE_STATIC_LIBS=ON -DUSE_QUICHE=ON
+     % cmake --build bld
+
+If the install step results in `Permission denied` error, you need to prepend
 it with `sudo`.
 
 # `--http3`

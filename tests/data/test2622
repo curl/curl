@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+RTSP
+ANNOUNCE
+CRLF
+libtest
+</keywords>
+</info>
+
+<reply>
+
+</reply>
+
+<client>
+<server>
+rtsp
+</server>
+
+<name>
+RTSP upload with requested CRLF conversion fails
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/file%TESTNUMBER.txt crlf
+</command>
+
+<file name="%LOGDIR/file%TESTNUMBER.txt">
+content
+</file>
+<tool>
+lib568
+</tool>
+</client>
+
+<verify>
+
+# CURLE_UPLOAD_FAILED
+<errorcode>
+25
+</errorcode>
+</verify>
+
+</testcase>

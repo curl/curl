@@ -111,26 +111,45 @@ int toolx_ftruncate_djgpp(int fd, curl_off_t where)
 FILE *tool_execpath(const char *filename, char **pathp)
 {
   static char filebuffer[512];
+#ifdef UNICODE
+  TCHAR filebuffer_t[sizeof(filebuffer)];
+#else
+  TCHAR *filebuffer_t = filebuffer;
+#endif
   unsigned long len;
   /* Get the filename of our executable. GetModuleFileName is already declared
-   * via inclusions done in setup header file. We assume that we are using
-   * the ASCII version here.
-   */
-  len = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
+     via inclusions done in setup header file. */
+  len = GetModuleFileName(0, filebuffer_t, sizeof(filebuffer));
   if(len > 0 && len < sizeof(filebuffer)) {
-    /* We got a valid filename - get the directory part */
-    char *lastdirchar = strrchr(filebuffer, DIR_CHAR[0]);
-    if(lastdirchar) {
-      size_t remaining;
-      *lastdirchar = 0;
-      /* If we have enough space, build the RC filename */
-      remaining = sizeof(filebuffer) - strlen(filebuffer);
-      if(strlen(filename) < remaining - 1) {
-        curl_msnprintf(lastdirchar, remaining, "%s%s", DIR_CHAR, filename);
-        *pathp = filebuffer;
-        return curlx_fopen(filebuffer, FOPEN_READTEXT);
+#ifdef UNICODE
+    char *fn = curlx_convert_tchar_to_UTF8(filebuffer_t);
+    if(fn) {
+      size_t fn_len = strlen(fn);
+      if(fn_len >= sizeof(filebuffer)) {
+        curlx_free(fn);
+        return NULL;
       }
+      curlx_strcopy(filebuffer, sizeof(filebuffer), fn, fn_len);
+      curlx_free(fn);
+#endif
+      {
+        /* We got a valid filename - get the directory part */
+        char *lastdirchar = strrchr(filebuffer, DIR_CHAR[0]);
+        if(lastdirchar) {
+          size_t remaining;
+          *lastdirchar = 0;
+          /* If we have enough space, build the RC filename */
+          remaining = sizeof(filebuffer) - strlen(filebuffer);
+          if(strlen(filename) < remaining - 1) {
+            curl_msnprintf(lastdirchar, remaining, "%s%s", DIR_CHAR, filename);
+            *pathp = filebuffer;
+            return curlx_fopen(filebuffer, FOPEN_READTEXT);
+          }
+        }
+      }
+#ifdef UNICODE
     }
+#endif
   }
 
   return NULL;

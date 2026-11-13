@@ -8,7 +8,6 @@ HTTP Digest auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 auth_required
@@ -51,7 +50,6 @@ This IS the real page!
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -75,7 +73,6 @@ four is the number of lines
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1

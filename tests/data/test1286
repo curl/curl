@@ -9,7 +9,6 @@ followlocation
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 401 authentication please
@@ -57,7 +56,6 @@ Content-Length: 0
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -76,7 +74,6 @@ HTTP GET --digest increasing nonce-count
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 # Reorder the fields in 'Authorization: Digest' header.

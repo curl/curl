@@ -16,7 +16,6 @@ moo
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 file
@@ -36,7 +35,6 @@ moo
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

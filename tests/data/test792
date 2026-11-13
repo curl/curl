@@ -6,14 +6,12 @@ netrc
 FTP
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 content
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -22,7 +20,7 @@ ftp
 proxy
 </features>
 <name>
-.netrc with embedded NULL byte
+.netrc with embedded NUL byte
 </name>
 <command>
 --netrc --netrc-file %LOGDIR/netrc%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
@@ -41,7 +39,6 @@ EPSV
 TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

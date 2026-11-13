@@ -6,11 +6,9 @@ TrackMemory
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 TrackMemory
@@ -24,7 +22,6 @@ curl memory tracking operational
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/memdump">
 MEM tool_cfgable.c

@@ -560,7 +560,9 @@ static CURLFORMcode formadd(struct curl_httppost **httppost,
     case CURLFORM_FILENAME:
     case CURLFORM_BUFFER:
       avalue = form_ptr_arg(char *);
-      if(Curl_bufref_ptr(&curr->showfilename))
+      if(!avalue)
+        retval = CURL_FORMADD_NULL;
+      else if(Curl_bufref_ptr(&curr->showfilename))
         retval = CURL_FORMADD_OPTION_TWICE;
       else if(Curl_bufref_memdup0(&curr->showfilename, avalue, strlen(avalue)))
         retval = CURL_FORMADD_MEMORY;

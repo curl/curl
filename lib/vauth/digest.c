@@ -155,7 +155,8 @@ static void auth_digest_sha256_to_ascii(
     curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
 }
 
-/* Perform quoted-string escaping as described in RFC2616 and its errata */
+/* Perform quoted-string escaping as described in RFC 9110, ch. 5.6.4,
+ * esp. passing %80-FF unencoded as defined for 'obs-text'. */
 static char *auth_digest_string_quoted(const char *s)
 {
   struct dynbuf out;
@@ -169,7 +170,7 @@ static char *auth_digest_string_quoted(const char *s)
       if(!result)
         result = curlx_dyn_addn(&out, s, 1);
     }
-    else if((*s < ' ') || (*s > 0x7e)) {
+    else if(((unsigned char)*s < 0x20) || (*s == 0x7f)) {
       unsigned char buf[3] = { '%' };
       Curl_hexbyte(&buf[1], (unsigned char)*s);
       result = curlx_dyn_addn(&out, buf, 3);
@@ -546,31 +547,31 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 
     /* Extract a value=content pair */
     if(Curl_auth_digest_get_pair(chlg, &value, content, &chlg)) {
-      if(curlx_str_casecompare(&value, "nonce")) {
+      if(curlx_str_casecompare2(&value, STRCONST("nonce"))) {
         curlx_free(digest->nonce);
         digest->nonce = curlx_strdup(content);
         if(!digest->nonce)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(curlx_str_casecompare(&value, "stale")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("stale"))) {
         if(curl_strequal(content, "true")) {
           digest->stale = TRUE;
           digest->nc = 1; /* we make a new nonce now */
         }
       }
-      else if(curlx_str_casecompare(&value, "realm")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("realm"))) {
         curlx_free(digest->realm);
         digest->realm = curlx_strdup(content);
         if(!digest->realm)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(curlx_str_casecompare(&value, "opaque")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("opaque"))) {
         curlx_free(digest->opaque);
         digest->opaque = curlx_strdup(content);
         if(!digest->opaque)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(curlx_str_casecompare(&value, "qop")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("qop"))) {
         const char *token = content;
         struct Curl_str out;
         bool foundAuth = FALSE;
@@ -603,7 +604,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
             return CURLE_OUT_OF_MEMORY;
         }
       }
-      else if(curlx_str_casecompare(&value, "algorithm")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("algorithm"))) {
         curlx_free(digest->algorithm);
         digest->algorithm = curlx_strdup(content);
         if(!digest->algorithm)
@@ -620,21 +621,21 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         else if(curl_strequal(content, "SHA-512-256")) {
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256;
-#else /* !CURL_HAVE_SHA512_256 */
+#else
           return CURLE_NOT_BUILT_IN;
-#endif /* CURL_HAVE_SHA512_256 */
+#endif
         }
         else if(curl_strequal(content, "SHA-512-256-SESS")) {
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256SESS;
-#else /* !CURL_HAVE_SHA512_256 */
+#else
           return CURLE_NOT_BUILT_IN;
-#endif /* CURL_HAVE_SHA512_256 */
+#endif
         }
         else
           return CURLE_BAD_CONTENT_ENCODING;
       }
-      else if(curlx_str_casecompare(&value, "userhash")) {
+      else if(curlx_str_casecompare2(&value, STRCONST("userhash"))) {
         if(curl_strequal(content, "true")) {
           digest->userhash = TRUE;
         }
@@ -1024,7 +1025,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,
                                            Curl_sha512_256it);
-#endif /* CURL_HAVE_SHA512_256 */
+#endif
 
   /* Should be unreachable */
   return CURLE_BAD_CONTENT_ENCODING;

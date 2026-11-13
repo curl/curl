@@ -1,4 +1,4 @@
-# ***************************************************************************
+#***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -86,8 +86,8 @@ class H2o:
                       "-------------------------------------------"])
         self._dump_file(self._stderr, lines)
         lines.extend(["",
-                     f"errorlog of {self._name}",
-                     "-------------------------------------------"])
+                      f"errorlog of {self._name}",
+                      "-------------------------------------------"])
         self._dump_file(self._error_log, lines)
         lines.append("")
         return lines
@@ -220,13 +220,13 @@ class H2o:
             url = f"https://{self._domain}:{self._port}/"
         while datetime.now(timezone.utc) < try_until:
             if live:
-                r = curl.http_get(
-                    url=url, extra_args=["--trace", "curl.trace", "--trace-time"]
-                )
+                r = curl.http_get(url=url, extra_args=[
+                    '--trace', 'curl.trace', '--trace-time', '--insecure'
+                ])
                 if r.exit_code == 0:
                     return True
             else:
-                r = curl.http_get(url=url)
+                r = curl.http_get(url=url, extra_args=['--insecure'])
                 if r.exit_code != 0:
                     return True
             time.sleep(0.1)

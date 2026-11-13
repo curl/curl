@@ -8,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.0 200 OK
@@ -20,7 +19,6 @@ foo
 </data>
 </reply>
 
-# Client-side
 <client>
 <name>
 HTTP GET without clobber when 100 files already exist
@@ -46,7 +44,6 @@ to stay the same
 </precheck>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 23

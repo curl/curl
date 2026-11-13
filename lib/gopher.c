@@ -49,7 +49,7 @@ static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   CURLcode result;
 
-  result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
+  result = Curl_conn_connect(data, TRUE, done);
   if(result)
     connclose(conn);
   *done = TRUE;
@@ -65,7 +65,7 @@ static CURLcode send_buf(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
-  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = conn->chain.sock;
   size_t nwritten;
   timediff_t timeout_ms;
   int what;
@@ -187,7 +187,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
+  Curl_xfer_setup_recv(data, -1);
   return CURLE_OK;
 }
 
@@ -199,6 +199,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
 const struct Curl_protocol Curl_protocol_gopher = {
   ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   gopher_do,                            /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */
@@ -220,6 +221,7 @@ const struct Curl_protocol Curl_protocol_gopher = {
 #ifdef USE_SSL
 const struct Curl_protocol Curl_protocol_gophers = {
   ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   gopher_do,                            /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */

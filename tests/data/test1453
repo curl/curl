@@ -5,11 +5,9 @@
 Too long tftp filename
 </keywords>
 </info>
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 tftp
@@ -22,7 +20,6 @@ tftp://%HOSTIP:%NOLISTENPORT/%repeat[503 x a]%z
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # TFTP filename too long
 <errorcode>

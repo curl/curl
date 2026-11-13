@@ -166,9 +166,9 @@ static void logprotocol(mqttdir dir,
     optr += 2;
     left -= 2;
   }
-  fprintf(output, "%s %s %x %s\n",
+  fprintf(output, "%s %s %lx %s\n",
           dir == FROM_CLIENT ? "client" : "server",
-          prefix, (unsigned int)remlen, data);
+          prefix, (unsigned long)remlen, data);
 }
 
 /* return 0 on success */
@@ -196,7 +196,7 @@ static int connack(FILE *dump, curl_socket_t fd)
 
   rc = swrite(fd, packet, sizeof(packet));
   if(rc > 0) {
-    logmsg("WROTE %zd bytes [%s]", rc, label);
+    logmsg("WROTE %ld bytes [%s]", (long)rc, label);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, label, packet[1], dump,
                 packet, rc);
@@ -221,7 +221,7 @@ static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 
   rc = swrite(fd, packet, sizeof(packet));
   if(rc == sizeof(packet)) {
-    logmsg("WROTE %zd bytes [SUBACK]", rc);
+    logmsg("WROTE %ld bytes [SUBACK]", (long)rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "SUBACK", 3, dump, packet, rc);
     return 0;
@@ -243,7 +243,7 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 
   rc = swrite(fd, packet, sizeof(packet));
   if(rc == sizeof(packet)) {
-    logmsg("WROTE %zd bytes [PUBACK]", rc);
+    logmsg("WROTE %ld bytes [PUBACK]", (long)rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBACK", 0, dump, packet, rc);
     return 0;
@@ -274,7 +274,7 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 
   rc = swrite(fd, packet, pktlen);
   if(rc > 0) {
-    logmsg("WROTE %zd bytes [%s]", rc, label);
+    logmsg("WROTE %ld bytes [%s]", (long)rc, label);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, label, packet[1], dump, packet, rc);
   }
@@ -398,7 +398,7 @@ static int publish(FILE *dump,
 
   rc = swrite(fd, packet, sendamount);
   if(rc > 0) {
-    logmsg("WROTE %zd bytes [PUBLISH]", rc);
+    logmsg("WROTE %ld bytes [PUBLISH]", (long)rc);
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBLISH", remaininglength, dump, packet, rc);
   }
@@ -422,10 +422,10 @@ static bool readall(curl_socket_t fd, unsigned char *buffer, size_t len)
     if(rc <= 0) {
       if(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal)
         continue;
-      logmsg("READ %zd bytes [SHORT!]", rc);
+      logmsg("READ %ld bytes [SHORT!]", (long)rc);
       return FALSE;
     }
-    logmsg("READ %zd bytes", rc);
+    logmsg("READ %ld bytes", (long)rc);
     loghex(buffer + nread, rc);
     nread += (size_t)rc;
   }
@@ -457,8 +457,9 @@ static bool fixedheader(curl_socket_t fd,
     }
   }
   *remaining_lengthp = decode_length(&buffer[1], i, remaining_length_bytesp);
-  logmsg("Remaining Length: %zu [%zu bytes]", *remaining_lengthp,
-         *remaining_length_bytesp);
+  logmsg("Remaining Length: %lu [%lu bytes]",
+         (unsigned long)*remaining_lengthp,
+         (unsigned long)*remaining_length_bytesp);
   return TRUE;
 }
 
@@ -521,7 +522,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       buff_size = remaining_length;
       newbuffer = realloc(buffer, buff_size);
       if(!newbuffer) {
-        logmsg("Failed realloc of size %zu", buff_size);
+        logmsg("Failed realloc of size %lu", (unsigned long)buff_size);
         goto end;
       }
       buffer = newbuffer;
@@ -565,8 +566,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       /* check the length of the payload */
       if((ssize_t)payload_len != (rc - 12)) {
-        logmsg("Payload length mismatch, expected %zd got %zd",
-               rc - 12, (ssize_t)payload_len);
+        logmsg("Payload length mismatch, expected %ld got %ld",
+               (long)rc - 12, (long)payload_len);
         goto end;
       }
       /* check the length of the client ID */
@@ -606,8 +607,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
       /* two bytes topic length */
       topic_len = (size_t)(buffer[2] << 8) | buffer[3];
       if(topic_len != (remaining_length - 5)) {
-        logmsg("Wrong topic length, got %zu expected %zu",
-               topic_len, remaining_length - 5);
+        logmsg("Wrong topic length, got %lu expected %lu",
+               (unsigned long)topic_len, (unsigned long)remaining_length - 5);
         goto end;
       }
       memcpy(topic, &buffer[4], topic_len);
@@ -660,7 +661,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       logprotocol(FROM_CLIENT, "PUBLISH", remaining_length, dump, buffer, rc);
 
       topiclen = (size_t)(buffer[1 + bytes] << 8) | buffer[2 + bytes];
-      logmsg("Got %zu bytes topic", topiclen);
+      logmsg("Got %lu bytes topic", (unsigned long)topiclen);
 
 #ifdef QOS
       /* Handle packetid if there is one. Send puback if QoS > 0 */

@@ -36,7 +36,6 @@ mechanisms:
 * Login
 * Plain
 * GSSAPI
-* NTLM
 * OAuth 2.0
 
 Note: Whilst IMAP supports this option there is no need to explicitly set it,

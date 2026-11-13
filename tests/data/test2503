@@ -11,7 +11,6 @@ HTTPS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -25,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 http/3
@@ -46,7 +44,6 @@ HTTP/3 header-api
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">
 HTTP/3 200%SP

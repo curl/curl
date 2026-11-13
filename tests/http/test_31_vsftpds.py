@@ -44,7 +44,8 @@ class TestVsFTPD:
     SUPPORTS_SSL = True
 
     @pytest.fixture(autouse=True, scope='class')
-    def vsftpds(self, env):
+    @classmethod
+    def vsftpds(cls, env):
         if not TestVsFTPD.SUPPORTS_SSL:
             pytest.skip('vsftpd does not seem to support SSL')
         vsftpds = VsFTPD(env=env, with_ssl=True)
@@ -55,7 +56,8 @@ class TestVsFTPD:
         yield vsftpds
         vsftpds.stop()
 
-    def _make_docs_file(self, docs_dir: str, fname: str, fsize: int):
+    @classmethod
+    def _make_docs_file(cls, docs_dir: str, fname: str, fsize: int):
         fpath = os.path.join(docs_dir, fname)
         data1k = 1024*'x'
         flen = 0
@@ -66,15 +68,16 @@ class TestVsFTPD:
         return flen
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, vsftpds):
+    @classmethod
+    def _class_scope(cls, env, vsftpds):
         if os.path.exists(vsftpds.docs_dir):
             shutil.rmtree(vsftpds.docs_dir)
         if not os.path.exists(vsftpds.docs_dir):
             os.makedirs(vsftpds.docs_dir)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1k', fsize=1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10k', fsize=10 * 1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1m', fsize=1024 * 1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10m', fsize=10 * 1024 * 1024)
+        cls._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1k', fsize=1024)
+        cls._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10k', fsize=10 * 1024)
+        cls._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1m', fsize=1024 * 1024)
+        cls._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10m', fsize=10 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-1k", fsize=1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-100k", fsize=100 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-1m", fsize=1024 * 1024)
@@ -262,7 +265,7 @@ class TestVsFTPD:
         assert os.path.exists(dstfile)
         with open(dstfile) as fd:
             destdata = fd.readlines()
-        expdata = [indata] if len(indata) else []
+        expdata = [indata] if indata else []
         assert expdata == destdata, f'expected: {expdata}, got: {destdata}'
 
     def test_31_11_download_non_existing(self, env: Env, vsftpds: VsFTPD):
@@ -274,13 +277,14 @@ class TestVsFTPD:
 
     def test_31_12_upload_eprt(self, env: Env, vsftpds: VsFTPD):
         docname = 'test_31_12'
+        dstfile = os.path.join(vsftpds.docs_dir, docname)
+        self._rmf(dstfile)
         client = LocalClient(name='cli_ftp_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
         r = client.run(args=['-r', f'{env.ftp_domain}:{vsftpds.port}:127.0.0.1', url])
         r.check_exit_code(0)
-        dstfile = os.path.join(vsftpds.docs_dir, docname)
         assert os.path.exists(dstfile), f'{r.dump_logs()}'
 
     # connection reuse with STARTTLS required

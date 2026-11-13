@@ -508,12 +508,12 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 
   if(feature_ech) {
     /* only if enabled in libcurl */
-    if(config->ech) /* only if set (optional) */
-      MY_SETOPT_STR(curl, CURLOPT_ECH, config->ech);
     if(config->ech_public) /* only if set (optional) */
       MY_SETOPT_STR(curl, CURLOPT_ECH, config->ech_public);
     if(config->ech_config) /* only if set (optional) */
       MY_SETOPT_STR(curl, CURLOPT_ECH, config->ech_config);
+    if(config->ech) /* only if set (optional) */
+      MY_SETOPT_STR(curl, CURLOPT_ECH, config->ech);
   }
 
   if(config->engine)
@@ -541,9 +541,10 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
     struct dynbuf cookies;
     struct curl_slist *cl;
 
-    /* The maximum size needs to match MAX_NAME in cookie.h */
-#define MAX_COOKIE_LINE 8200
-    curlx_dyn_init(&cookies, MAX_COOKIE_LINE);
+    /* cap the size of the generated cookie header to avoid servers from going
+       sour on us */
+#define MAX_REQUEST_COOKIE 8200
+    curlx_dyn_init(&cookies, MAX_REQUEST_COOKIE);
     for(cl = config->cookies; cl; cl = cl->next) {
       if(cl == config->cookies)
         result = curlx_dyn_add(&cookies, cl->data);
@@ -552,7 +553,7 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
                                 ISBLANK(cl->data[0]) ? "" : " ", cl->data);
       if(result) {
         warnf("skipped provided cookie, the cookie header "
-              "would go over %d bytes", MAX_COOKIE_LINE);
+              "would go over %d bytes", MAX_REQUEST_COOKIE);
         return result;
       }
     }
@@ -668,6 +669,9 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
   CURLcode result = CURLE_OK;
   long postRedir = 0;
 
+  if(config->hsts)
+    MY_SETOPT_STR(curl, CURLOPT_HSTS, config->hsts);
+
   if(use_proto != proto_http && use_proto != proto_https)
     return CURLE_OK;
 
@@ -708,9 +712,6 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
 
   if(config->altsvc)
     MY_SETOPT_STR(curl, CURLOPT_ALTSVC, config->altsvc);
-
-  if(config->hsts)
-    MY_SETOPT_STR(curl, CURLOPT_HSTS, config->hsts);
 
   if(config->expect100timeout_ms > 0)
     my_setopt_long(curl, CURLOPT_EXPECT_100_TIMEOUT_MS,
@@ -1250,5 +1251,9 @@ CURLcode config2setopts(struct OperationConfig *config,
     result = mail_and_sasl_setopts(config, curl);
   if(!setopt_bad(result))
     result = misc_setopts(config, curl);
+
+  if(!result && config->synthetic_error)
+    result = CURLE_FAILED_INIT;
+
   return result;
 }

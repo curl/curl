@@ -520,7 +520,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
     sleeptime = retry_sleep(config, per, reason, retryp);
     if(!*retryp)
       /* no retry */
-      return CURLE_OK;
+      return result;
     per->retry_remaining--;
 
     /* Skip truncation of outfile if auto-resume is enabled for download and
@@ -560,6 +560,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         }
         truncate = FALSE;
         outs->init += outs->bytes;
+        per->dlretry += outs->bytes;
         outs->bytes = 0;
         config->resume_from = outs->init;
         curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, config->resume_from);
@@ -675,6 +676,10 @@ static CURLcode post_output_handling(struct per_transfer *per,
        data because of unmet condition */
     curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
     if(!cond_unmet && !tool_create_output_file(outs, config))
+      return CURLE_WRITE_ERROR;
+    /* write headers buffered while waiting for a -J filename */
+    if(outs->stream && per->hdrcbdata.headlist &&
+       tool_write_headers(&per->hdrcbdata, outs->stream))
       return CURLE_WRITE_ERROR;
   }
 
@@ -807,7 +812,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
 
   if(outs->alloc_filename)
     curlx_safefree(outs->filename);
-  curl_slist_free_all(per->hdrcbdata.headlist);
+  slist_wc_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
   return result;
 }
@@ -1431,6 +1436,7 @@ static CURLcode create_single(struct OperationConfig *config,
     per->config = config;
     per->curl = curl;
     per->urlnum = u->num;
+    per->out_scheme = NULL;
 
     /* default headers output stream is stdout */
     heads = &per->heads;
@@ -1888,6 +1894,7 @@ static CURLcode parallel_event(struct parastate *s)
 
   /* We need to cleanup the multi here, since the uv context lives on the
    * stack and about to be gone. multi_cleanup can trigger events! */
+  (void)progress_meter(s->multi, &s->start, TRUE);
   curl_multi_cleanup(s->multi);
 
 #if DEBUG_UV
@@ -1923,15 +1930,16 @@ static CURLcode check_finished(struct parastate *s)
                        "in another transfer");
       }
       tres = post_per_transfer(ended, tres, &retry, &delay);
-      progress_finalize(ended); /* before it goes away */
       all_added--; /* one fewer added */
       checkmore = TRUE;
       if(retry) {
+        progress_reset_retry(ended);
         ended->added = FALSE; /* add it again */
         /* we delay retries in full integer seconds only */
         ended->startat = delay ? time(NULL) + (delay / 1000) : 0;
       }
       else {
+        progress_finalize(ended); /* before it goes away */
         /* result receives this transfer's error unless the transfer was
            marked for abort due to a critical error in another transfer */
         if(tres && (!ended->abort || !result))
@@ -2372,7 +2380,10 @@ static CURLcode run_all_transfers(CURLSH *share,
   for(per = transfers; per;) {
     bool retry;
     uint32_t delay;
-    CURLcode result2 = post_per_transfer(per, result, &retry, &delay);
+    CURLcode result2;
+    /* No further retries can be performed during final cleanup. */
+    per->retry_remaining = 0;
+    result2 = post_per_transfer(per, result, &retry, &delay);
     if(!result)
       /* do not overwrite the original error */
       result = result2;

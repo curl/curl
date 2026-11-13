@@ -9,7 +9,6 @@ haproxy
 </keywords>
 </info>
 
-# Server-side
 <reply name="%TESTNUMBER">
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -27,7 +26,6 @@ Funny-head: barkbark
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -43,7 +41,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^PROXY TCP4 192.168.1.1 192.168.1.1 (\d*) %HTTPPORT/proxy-line/

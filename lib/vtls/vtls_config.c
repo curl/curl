@@ -129,6 +129,10 @@ void Curl_ssl_config_cleanup(struct ssl_filter_config *sslc)
     curlx_safefree(sslc->key);
     curlx_safefree(sslc->key_type);
     curlx_safefree(sslc->key_passwd);
+#ifdef USE_ECH
+    curlx_safefree(sslc->ech_config);
+    curlx_safefree(sslc->ech_public);
+#endif
     sslc->deep_copy = FALSE;
   }
 }
@@ -146,6 +150,11 @@ static bool match_ssl_primary_config(struct Curl_easy *data,
      (c1->verifyhost == c2->verifyhost) &&
      (c1->verifystatus == c2->verifystatus) &&
      (c1->auto_client_cert == c2->auto_client_cert) &&
+#ifdef USE_ECH
+     (c1->ech == c2->ech) &&
+     Curl_safecmp(c1->ech_config, c2->ech_config) &&
+     Curl_safecmp(c1->ech_public, c2->ech_public) &&
+#endif
      blobcmp(c1->cert_blob, c2->cert_blob) &&
      blobcmp(c1->ca_info_blob, c2->ca_info_blob) &&
      blobcmp(c1->issuercert_blob, c2->issuercert_blob) &&
@@ -224,6 +233,11 @@ static bool clone_ssl_primary_config(struct ssl_filter_config *source,
   CLONE_STRING(key_type);
   CLONE_STRING(key_passwd);
   CLONE_BLOB(key_blob);
+#ifdef USE_ECH
+  dest->ech = source->ech;
+  CLONE_STRING(ech_config);
+  CLONE_STRING(ech_public);
+#endif
   return TRUE;
 }
 
@@ -320,6 +334,11 @@ CURLcode Curl_ssl_filter_config_tmp_init(
     ssl_origin->key_passwd = ssl_easy_steal(data, STRING_KEY_PASSWD);
     ssl_origin->clientcert = ssl_easy_steal(data, STRING_CERT);
     ssl_origin->key_blob = data->set.blobs[BLOB_KEY];
+#ifdef USE_ECH
+    ssl_origin->ech = data->set.ssl.ech;
+    ssl_origin->ech_config = ssl_easy_steal(data, STRING_ECH_CONFIG);
+    ssl_origin->ech_public = ssl_easy_steal(data, STRING_ECH_PUBLIC);
+#endif
   }
   else {
     ssl_origin->pinned_key = NULL;
@@ -330,6 +349,11 @@ CURLcode Curl_ssl_filter_config_tmp_init(
     ssl_origin->key_passwd = NULL;
     ssl_origin->clientcert = NULL;
     ssl_origin->key_blob = NULL;
+#ifdef USE_ECH
+    ssl_origin->ech = 0;
+    ssl_origin->ech_config = NULL;
+    ssl_origin->ech_public = NULL;
+#endif
   }
 
 #ifndef CURL_DISABLE_PROXY
@@ -386,6 +410,12 @@ CURLcode Curl_ssl_filter_config_tmp_init(
   ssl_proxy->key_passwd = ssl_easy_steal(data, STRING_KEY_PASSWD_PROXY);
   ssl_proxy->clientcert = ssl_easy_steal(data, STRING_CERT_PROXY);
   ssl_proxy->key_blob = data->set.blobs[BLOB_KEY_PROXY];
+#ifdef USE_ECH
+  /* Not configurable via a CURLOPT_* */
+  ssl_proxy->ech = 0;
+  ssl_proxy->ech_config = NULL;
+  ssl_proxy->ech_public = NULL;
+#endif
 #else
   (void)ssl_proxy;
 #endif /* CURL_DISABLE_PROXY */
@@ -437,5 +467,8 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy)
     dest->verifyhost = src->verifyhost;
     dest->verifypeer = src->verifypeer;
     dest->verifystatus = src->verifystatus;
+#ifdef USE_ECH
+    dest->ech = src->ech;
+#endif
   }
 }

@@ -6,11 +6,9 @@ SMTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 smtp
@@ -34,7 +32,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com -K %LOGDI
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 43 - CURLE_BAD_FUNCTION_ARGUMENT
 <errorcode>

@@ -100,7 +100,7 @@ static void cw_pause_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 }
 
 static CURLcode cw_pause_flush(struct Curl_easy *data,
-                               struct Curl_cwriter *cw_pause)
+                               struct Curl_cwriter *cw_pause, bool eos)
 {
   struct cw_pause_ctx *ctx = (struct cw_pause_ctx *)cw_pause;
   CURLcode result = CURLE_OK;
@@ -112,12 +112,16 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
     const unsigned char *buf = NULL;
 
     if(Curl_bufq_peek(&first->b, &buf, &blen)) {
+      int wtype = first->type;
       wlen = (first->type & CLIENTWRITE_BODY) ?
              CURLMIN(blen, CW_PAUSE_DEC_WRITE_CHUNK) : blen;
-      result = Curl_cwriter_write(data, cw_pause->next, first->type,
+      /* EOS only goes with the very last piece, same as in cw_pause_write */
+      if((wlen < Curl_bufq_len(&first->b)) || first->next)
+        wtype &= ~CLIENTWRITE_EOS;
+      result = Curl_cwriter_write(data, cw_pause->next, wtype,
                                   (const char *)buf, wlen);
       CURL_TRC_WRITE(data, "[PAUSE] flushed %zu/%zu bytes, type=%x -> %d",
-                     wlen, ctx->buf_total, (unsigned int)first->type,
+                     wlen, ctx->buf_total, (unsigned int)wtype,
                      (int)result);
       Curl_bufq_skip(&first->b, wlen);
       DEBUGASSERT(ctx->buf_total >= wlen);
@@ -142,7 +146,7 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
   }
 
   if(!result)
-    result = Curl_cwriter_flush(data, cw_pause->next);
+    result = Curl_cwriter_flush(data, cw_pause->next, eos && !ctx->buf);
   return result;
 }
 
@@ -155,7 +159,7 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
   size_t wlen = 0;
 
   if(ctx->buf && !Curl_cwriter_is_paused(data)) {
-    result = cw_pause_flush(data, writer);
+    result = cw_pause_flush(data, writer, FALSE);
     if(result)
       return result;
   }

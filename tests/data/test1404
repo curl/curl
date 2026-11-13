@@ -10,7 +10,6 @@ HTTP file upload
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -22,7 +21,6 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -49,7 +47,6 @@ dummy data
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 -----+\w+

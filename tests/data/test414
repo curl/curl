@@ -8,7 +8,6 @@ cookies
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 301 OK
@@ -16,7 +15,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Set-Cookie: SESSIONID=originaltoken; secure
-Set-Cookie: second=originaltoken; secure; path=/a
+Set-Cookie: second=originaltoken; secure = 1; path=/a
 Location: http://attack.invalid:%HTTPPORT/a/b/%TESTNUMBER0002
 
 -foo-
@@ -44,7 +43,6 @@ Content-Length: 6
 </data3>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -58,7 +56,6 @@ https://attack.invalid:%HTTPSPORT/a/b/%TESTNUMBER --insecure -c %LOGDIR/cookie%T
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /a/b/%TESTNUMBER HTTP/1.1

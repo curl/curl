@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1 crlf="headers">
 RTSP/1.0 200 OK
@@ -45,14 +44,10 @@ Informational: Empty Options Response
 </data4>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP Announce (PUT and POST style) test

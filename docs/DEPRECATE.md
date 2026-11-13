@@ -12,20 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## drop SMB support
-
-The SMB protocol has weak security and is rarely used these days.
-
-SMB support gets removed in September 2026.
-
-## drop NTLM support
-
-The NTLM authentication method has weak security and is rarely used these
-days. It has been deprecated by Microsoft and does not work over HTTP/2 or
-HTTP/3.
-
-NTLM support gets removed in September 2026
-
 ## Local crypto implementations
 
 Since the dawn of time, curl bundles code for a few crypto and hash algorithms
@@ -57,6 +43,33 @@ We estimate that barely any libcurl users still use this feature.
 
 HTTP/2 Server Push gets removed in March 2027.
 
+## Common Name support in TLS certificates for OpenSSL
+
+The Common Name, (`CN`) field is deprecated since RFC 2818. It was downgraded
+to a SHOULD in RFC 6125 and finally removed in RFC 9525. Browsers have not
+supported this field since 2012.
+
+In the release after 8.23.0 curl removes support for this field in code we
+control - which primarily means in the OpenSSL (and forks) backend. The other
+TLS libraries provide their own functions for verification.
+
+Pending PR: https://github.com/curl/curl/pull/22845
+
+## mbedTLS
+
+The mbedTLS team has
+[announced](https://lists.trustedfirmware.org/archives/list/mbed-tls@lists.trustedfirmware.org/thread/YPIGCB7WN6GCHOGEGKOJXUYAP7OK527W/)
+they plan to cease their involvement in development and maintenance from April
+2027.
+
+Maintaining and developing a TLS library is a major undertaking, and there are
+many existing and capable alternatives already. We do not expect there to
+appear a new maintainer team for mbedTLS when this time comes, so come April
+2027 anything building with and relying on mbedTLS starts to deteriorate.
+
+Provided there is not a believable maintainer team at that point, we drop
+support for mbedTLS from curl in May 2027.
+
 ## Past removals
 
 - axTLS (removed in 7.63.0)
@@ -86,3 +99,5 @@ HTTP/2 Server Push gets removed in March 2027.
 - NTLM (became opt-in in 8.20.0)
 - c-ares < 1.16.0 (removed in 8.20.0)
 - TLS-SRP (removed in 8.22.0)
+- SMB support (removed in 8.23.0)
+- NTLM (removed in 8.24.0)

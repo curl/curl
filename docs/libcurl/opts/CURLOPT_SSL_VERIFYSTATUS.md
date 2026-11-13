@@ -38,6 +38,9 @@ using the "Certificate Status Request" TLS extension (aka. OCSP stapling).
 Note that if this option is enabled but the server does not support the TLS
 extension, the verification fails.
 
+For LDAP, this option only has an effect when using the OpenLDAP backend,
+which routes TLS through libcurl. It is not supported by AppleLDAP.
+
 # DEFAULT
 
 0

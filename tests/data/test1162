@@ -12,13 +12,11 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -47,7 +45,6 @@ CWD DOS
 EPSV
 TYPE A
 LIST
-QUIT
 </protocol>
 # 78 == CURLE_REMOTE_FILE_NOT_FOUND
 <errorcode>

@@ -126,7 +126,7 @@ static CURLcode peer_create(struct peer_parse *pp,
     goto out;
   }
 
-  peer->refcount = 1;
+  Curl_refcount_init(&peer->refcount, 1);
   peer->scheme = pp->scheme;
   peer->hostname = peer->user_hostname;
   peer->port = pp->port;
@@ -151,13 +151,13 @@ static CURLcode peer_create(struct peer_parse *pp,
     if(!peer->scopeid) {
       const char *p = peer->zoneid;
       curl_off_t scope;
-      if(!curlx_str_number(&p, &scope, UINT_MAX)) {
+      if(!curlx_str_number(&p, &scope, UINT_MAX) && !*p) {
         /* A plain number, use it directly as a scope id. */
         peer->scopeid = (uint32_t)scope;
       }
 #ifdef HAVE_IF_NAMETOINDEX
       else {
-        /* Zone identifier is not numeric */
+        /* Zone identifier is not fully numeric */
         unsigned int idx = 0;
         idx = if_nametoindex(peer->zoneid);
         if(idx) {
@@ -213,6 +213,11 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
           return CURLE_OUT_OF_MEMORY;
       }
       result = Curl_idn_decode(pp->tmp_host_user, &pp->tmp_host);
+      if(!result &&
+         Curl_hostname_check(pp->tmp_host, strlen(pp->tmp_host))) {
+        failf(data, "Illegal hostname: %s", pp->tmp_host);
+        result = CURLE_URL_MALFORMAT;
+      }
       if(result)
         return result;
       pp->host.str = pp->tmp_host;
@@ -297,8 +302,8 @@ void Curl_peer_link(struct Curl_peer **pdest, struct Curl_peer *src)
     Curl_peer_unlink(pdest);
     *pdest = src;
     if(src) {
-      DEBUGASSERT(src->refcount < UINT32_MAX);
-      src->refcount++;
+      DEBUGASSERT(Curl_refcount_get(&src->refcount) < UINT32_MAX);
+      Curl_refcount_incr(&src->refcount);
     }
   }
 }
@@ -308,13 +313,10 @@ void Curl_peer_unlink(struct Curl_peer **ppeer)
   if(*ppeer) {
     struct Curl_peer *peer = *ppeer;
 
-    DEBUGASSERT(peer->refcount);
+    DEBUGASSERT(Curl_refcount_get(&peer->refcount));
     *ppeer = NULL;
-    if(peer->refcount)
-      peer->refcount--;
-    if(!peer->refcount) {
+    if(!Curl_refcount_decr(&peer->refcount))
       curlx_free(peer);
-    }
   }
 }
 
@@ -341,6 +343,12 @@ static bool peer_same_hostname(struct Curl_peer *p1, struct Curl_peer *p2)
            curl_strequal(p1->hostname, p2->hostname)));
 }
 
+static bool peer_same_zoneid(const char *z1, const char *z2)
+{
+  return (z1 == z2) ||
+         (z1 && z2 && !strcmp(z1, z2));
+}
+
 bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
 {
   return (p1 == p2) ||
@@ -348,7 +356,7 @@ bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
           (p1->port == p2->port) &&
           peer_same_hostname(p1, p2) &&
           (p1->scopeid == p2->scopeid) &&
-          (p1->scopeid || curl_strequal(p1->zoneid, p2->zoneid)));
+          (p1->scopeid || peer_same_zoneid(p1->zoneid, p2->zoneid)));
 }
 
 CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
@@ -464,6 +472,7 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
 {
   struct peer_parse pp;
   const char *portstr = NULL;
+  bool port_switch = FALSE;
   CURLcode result;
 
   Curl_peer_unlink(ppeer);
@@ -494,6 +503,7 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
   }
 
   if(!pp.host_user.len) { /* no hostname found, only port switch */
+    port_switch = TRUE;
     pp.host_user.str = dest->user_hostname;
     pp.host_user.len = strlen(dest->user_hostname);
   }
@@ -501,6 +511,8 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
   result = peer_parse_host(data, &pp, FALSE);
   if(result)
     goto out;
+  /* On a port switch, ipv6 must stay the same */
+  DEBUGASSERT(!port_switch || ((bool)pp.ipv6 == (bool)dest->ipv6));
 
   if(portstr && portstr[1]) {
     const char *p = portstr + 1;
@@ -522,6 +534,13 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
     goto out;
   }
 #endif
+  if(pp.ipv6 && port_switch) {
+    if(dest->zoneid) {
+      pp.zoneid.str = dest->zoneid;
+      pp.zoneid.len = strlen(dest->zoneid);
+    }
+    pp.scopeid = dest->scopeid;
+  }
 
   result = peer_create(&pp, ppeer);
   CURL_TRC_M(data, "connect-to peer_create2 -> %d", (int)result);
@@ -654,7 +673,7 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
     goto out;
   }
 
-  uc = curl_url_get(uh, CURLUPART_PORT, &portptr, CURLU_NO_DEFAULT_PORT);
+  uc = curl_url_get(uh, CURLUPART_PORT, &portptr, 0);
   if(uc == CURLUE_OUT_OF_MEMORY) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -668,11 +687,13 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
     curlx_free(portptr);
   }
   else {
-    /* No port in URL, take the set one or the scheme's default */
+    /* No port in URL, take the set one or the proxy default */
     if(data->set.proxyport)
       pp.port = data->set.proxyport;
+    else if(CURL_PROXY_IS_HTTPS(proxytype))
+      pp.port = CURL_DEFAULT_HTTPS_PROXY_PORT;
     else
-      pp.port = pp.scheme->defport;
+      pp.port = CURL_DEFAULT_PROXY_PORT;
   }
 
   /* now, clone the proxy hostname */

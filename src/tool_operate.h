@@ -46,6 +46,7 @@ struct per_transfer {
   char *url;
   curl_off_t urlnum; /* the index of the given URL */
   char *outfile;
+  const char *out_scheme; /* scheme of current header output */
   int infd;
   struct ProgressData progressbar;
   struct OutStruct outs;
@@ -59,14 +60,13 @@ struct per_transfer {
   /* for parallel progress bar */
   curl_off_t dltotal;
   curl_off_t dlnow;
+  curl_off_t dlretry; /* downloaded bytes kept across resumed retries */
   curl_off_t ultotal;
   curl_off_t ulnow;
   curl_off_t uploadfilesize; /* expected total amount */
   curl_off_t uploadedsofar; /* amount delivered from the callback */
   uint32_t retry_sleep_default;
   uint32_t retry_sleep;
-  BIT(dltotal_added); /* if the total has been added from this */
-  BIT(ultotal_added);
   BIT(infdopen); /* TRUE if infd needs closing */
   BIT(noprogress);
   BIT(was_last_header_empty);

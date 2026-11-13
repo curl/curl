@@ -331,15 +331,13 @@ static CURLcode file_upload(struct Curl_easy *data,
   else
     mode |= O_TRUNC;
 
-#ifdef _WIN32
   fd = curlx_open(file->path, mode,
-                  data->set.new_file_perms & (_S_IREAD | _S_IWRITE));
-#elif (defined(ANDROID) || defined(__ANDROID__)) && \
-  (defined(__i386__) || defined(__arm__))
-  fd = curlx_open(file->path, mode, (mode_t)data->set.new_file_perms);
+#ifdef _WIN32
+                  data->set.new_file_perms & (_S_IREAD | _S_IWRITE)
 #else
-  fd = curlx_open(file->path, mode, data->set.new_file_perms);
+                  (mode_t)data->set.new_file_perms
 #endif
+                  );
   if(fd < 0) {
     failf(data, "cannot open %s for writing", file->path);
     return CURLE_WRITE_ERROR;
@@ -575,6 +573,12 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       failf(data, "cannot get the size of file.");
       return CURLE_READ_ERROR;
     }
+    if((curl_off_t)statbuf.st_size < -data->state.resume_from) {
+      failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
+            FMT_OFF_T ")", data->state.resume_from,
+            (curl_off_t)statbuf.st_size);
+      return CURLE_BAD_DOWNLOAD_RESUME;
+    }
     data->state.resume_from += (curl_off_t)statbuf.st_size;
   }
 
@@ -697,6 +701,7 @@ out:
 
 const struct Curl_protocol Curl_protocol_file = {
   file_setup_connection,                /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   file_do,                              /* do_it */
   file_done,                            /* done */
   ZERO_NULL,                            /* do_more */

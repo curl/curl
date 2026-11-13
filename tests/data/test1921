@@ -7,15 +7,11 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
 
 <name>
 Set a URL without scheme, then redirect with default scheme
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 -

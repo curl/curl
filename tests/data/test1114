@@ -9,13 +9,11 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
@@ -31,7 +29,6 @@ ftp://%HOSTIP:%FTPPORT/fully_simulated/DOS/*
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

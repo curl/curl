@@ -13,16 +13,12 @@ libtest
 <name>
 curl_url_set() a URL without guessing a scheme
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout mode="text">
 URL http://a.b/x

@@ -18,13 +18,12 @@ blablabla
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
 <name>
-HTTP POST binary data with embedded NUL
+HTTP POST binary data with embedded NUL byte
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt
@@ -34,7 +33,6 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUM
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 POST /we/want/%TESTNUMBER HTTP/1.1

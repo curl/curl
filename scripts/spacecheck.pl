@@ -28,6 +28,16 @@ use warnings;
 
 use File::Basename;
 
+my @executable = (
+    '\.(pl|py|sh)$',
+    '^\.github/scripts/',
+    '^scripts/',
+);
+
+my @is_executable = (
+    '\.pl$',
+);
+
 my @tabs = (
     '^m4/zz40-xc-ovr\.m4$',
     'Makefile\.(am|example)$',
@@ -50,15 +60,15 @@ my @double_empty_lines = (
 );
 
 my @longline = (
-    '\.github/workflows/windows\.yml$',
-    '^renovate\.json$',
+    '^\.github/renovate\.json$',
+    '^\.github/workflows/windows\.yml$',
     '^docs/DISTROS\.md$',
     '^projects/Windows/tmpl/.+\.vcxproj$',
     '^tests/data/test',
 );
 
 my @non_ascii_allowed = (
-    '\xC3\xB6',  # UTF-8 for https://codepoints.net/U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
+    '\xC3\xB6',  # UTF-8 for U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
 );
 
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
@@ -115,6 +125,20 @@ while(my $filename = <$git_ls_files>) {
     chomp $filename;
 
     my @err = ();
+
+    if(!fn_match($filename, @executable)) {
+        my $mode = (stat($filename))[2];
+        if($mode & 0111) {
+            push @err, sprintf('file has executable bit(s) set: %o', $mode);
+        }
+    }
+
+    if(fn_match($filename, @is_executable)) {
+        my $mode = (stat($filename))[2];
+        if(($mode & 0100) != 0100) {
+            push @err, sprintf('executable file missing executable bit: %o', $mode);
+        }
+    }
 
     if(length($filename) > $max_path_len) {
         push @err, sprintf('long (%d > %d) path', length($filename), $max_path_len);

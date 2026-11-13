@@ -9,20 +9,15 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP wildcard - skip/parser_correctness/CURLOPT_FNMATCH_FUNCTION (Unix)
 </name>
@@ -31,7 +26,6 @@ ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -29,16 +27,12 @@ http
 <name>
 Chunked HTTP POST from callback with CURLOPT_POSTFIELDSIZE set
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 http://%HOSTIP:%HTTPPORT/boom
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 POST /boom HTTP/1.1

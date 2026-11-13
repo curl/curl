@@ -61,8 +61,10 @@
  */
 #ifdef CURL_SCHANNEL_DEV_DEBUG
 #define SCH_DEV(x) x
-#define SCH_DEV_SHOWBOOL(x)                                   \
-  infof(data, "schannel: " #x " %s", (x) ? "TRUE" : "FALSE");
+#define SCH_DEV_SHOWBOOL(x)                                     \
+  do {                                                          \
+    infof(data, "schannel: " #x " %s", (x) ? "TRUE" : "FALSE"); \
+  } while(0)
 #else
 #define SCH_DEV(x) do {} while(0)
 #define SCH_DEV_SHOWBOOL(x) do {} while(0)
@@ -213,6 +215,12 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
       }
     }
   }
+
+  if(!*enabled_protocols) {
+    failf(data, "schannel: no supported TLS version in the requested range");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
   return CURLE_OK;
 }
 
@@ -885,14 +893,16 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     Curl_ssl_scache_lock(data);
     old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key);
     if(old_cred) {
+      LONG updated_refcount;
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
       /* increment the reference counter of the credential/session handle */
-      backend->cred->refcount++;
+      updated_refcount = InterlockedIncrement(&backend->cred->refcount);
+      (void)updated_refcount;
       DEBUGF(infof(data,
-                   "schannel: incremented credential handle refcount = %d",
-                   backend->cred->refcount));
+                   "schannel: incremented credential handle refcount = %ld",
+                   updated_refcount));
     }
     Curl_ssl_scache_unlock(data);
   }
@@ -924,6 +934,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     int list_start_index = 0;
     unsigned int *extension_len = NULL;
     unsigned short *list_len = NULL;
+    const unsigned int uiALPN = SecApplicationProtocolNegotiationExt_ALPN;
     struct alpn_proto_buf proto;
 
     /* The first four bytes is an unsigned int indicating number
@@ -933,8 +944,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The next four bytes are an indicator that this buffer contains
        ALPN data, as opposed to NPN, for example. */
-    *(unsigned int *)(void *)&alpn_buffer[cur] =
-      SecApplicationProtocolNegotiationExt_ALPN;
+    memcpy(&alpn_buffer[cur], &uiALPN, sizeof(uiALPN));
     cur += (int)sizeof(unsigned int);
 
     /* The next two bytes is an unsigned short indicating the number
@@ -1054,6 +1064,9 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   backend->recv_renegotiating = FALSE;
   backend->renegotiate_state.started = FALSE;
   backend->encdata_is_incomplete = FALSE;
+  backend->shutdown_generated = FALSE;
+  backend->shutdown_offset = 0;
+  memset(&backend->shutdown_token, 0, sizeof(backend->shutdown_token));
 
   /* continue to second handshake step */
   connssl->connecting_state = ssl_connect_2;
@@ -1238,7 +1251,6 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
   bool doread;
-  const char *pubkey_ptr;
 
   DEBUGASSERT(backend);
 
@@ -1318,7 +1330,8 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
 
     /* setup input buffers */
     InitSecBuffer(&inbuf[0], SECBUFFER_TOKEN,
-                  curlx_malloc(backend->encdata.offset),
+                  curlx_memdup0((const char *)backend->encdata.buffer,
+                                backend->encdata.offset),
                   curlx_uztoul(backend->encdata.offset));
     InitSecBuffer(&inbuf[1], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, inbuf, 2);
@@ -1334,15 +1347,11 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     }
 
-    /* copy received handshake data into input buffer */
-    memcpy(inbuf[0].pvBuffer, backend->encdata.buffer,
-           backend->encdata.offset);
-
     /* The socket must be writable (or a poll error occurred) before we call
        InitializeSecurityContext to continue processing the received TLS
        records. This is because that function is not idempotent and we do not
        support partial save/resume sending replies of handshake tokens. */
-    if(!SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), 0)) {
+    if(!SOCKET_WRITABLE(cf->chain->sock, 0)) {
       SCH_DEV(infof(data, "schannel: handshake waiting for writable socket"));
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       curlx_free(inbuf[0].pvBuffer);
@@ -1461,15 +1470,8 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
     DEBUGF(infof(data, "schannel: SSL/TLS handshake complete"));
   }
 
-#ifndef CURL_DISABLE_PROXY
-  pubkey_ptr = Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#else
-  pubkey_ptr = CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-#endif
-  if(pubkey_ptr) {
-    result = schannel_pkp_pin_peer_pubkey(cf, data, pubkey_ptr);
+  if(conn_config->pinned_key) {
+    result = schannel_pkp_pin_peer_pubkey(cf, data, conn_config->pinned_key);
     if(result) {
       failf(data, "SSL: public key does not match pinned public key");
       return result;
@@ -1563,12 +1565,15 @@ static bool add_cert_to_certinfo(const CERT_CONTEXT *ccert_context,
 
 static void schannel_session_free(void *sessionid)
 {
-  /* this is expected to be called under sessionid lock */
+  /* The credential is shared between the session cache and all connections
+     using it, possibly from different threads. This is called both under the
+     session cache lock (from the cache) and without it (from a closing
+     connection by special admin handle which does not have the cache lock),
+     so the reference count is atomic and thread-safe via Interlocked. */
   struct Curl_schannel_cred *cred = sessionid;
 
   if(cred) {
-    cred->refcount--;
-    if(cred->refcount == 0) {
+    if(!InterlockedDecrement(&cred->refcount)) {
       Curl_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_free(cred->sni_hostname);
       if(cred->client_cert_store) {
@@ -1652,7 +1657,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   if(Curl_ssl_scache_use(cf, data)) {
     Curl_ssl_scache_lock(data);
     /* Up ref count since call takes ownership */
-    backend->cred->refcount++;
+    InterlockedIncrement(&backend->cred->refcount);
     result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
                                      backend->cred, schannel_session_free);
     Curl_ssl_scache_unlock(data);
@@ -1753,7 +1758,7 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
      * binding to pass the IIS extended protection checks.
      * Available on Windows 7 or later.
      */
-    cf->conn->sslContext = &backend->ctxt->ctxt_handle;
+    CF_CONN(cf)->sslContext = &backend->ctxt->ctxt_handle;
 
     *done = TRUE;
   }
@@ -1800,7 +1805,7 @@ static CURLcode schannel_recv_renegotiate(
   else
     SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_send"));
 
-  sockfd = Curl_conn_cf_get_socket(cf, data);
+  sockfd = cf->chain->sock;
 
   if(sockfd == CURL_SOCKET_BAD) {
     failf(data, "schannel: renegotiation missing socket");
@@ -1923,7 +1928,7 @@ static CURLcode schannel_recv_renegotiate(
                     ((writefd != CURL_SOCKET_BAD) ? " writable" : ""),
                     timeout_ms));
 
-      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd, timeout_ms);
+      what = Curl_socket_check(readfd, writefd, timeout_ms);
 
       if(what > 0 && (what & (CURL_CSELECT_IN | CURL_CSELECT_OUT))) {
         SCH_DEV(infof(data, "schannel: renegotiation socket %s%s",
@@ -2054,7 +2059,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       else if(!timeout_ms)
         timeout_ms = TIMEDIFF_T_MAX;
-      what = SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), timeout_ms);
+      what = SOCKET_WRITABLE(cf->chain->sock, timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -2432,7 +2437,8 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
     goto out;
   }
 
-  if(backend->cred && backend->ctxt && !backend->sent_shutdown) {
+  if(backend->cred && backend->ctxt && !backend->sent_shutdown &&
+     !backend->shutdown_generated) {
     SecBufferDesc BuffDesc;
     SecBuffer Buffer;
     SECURITY_STATUS sspi_status;
@@ -2472,41 +2478,60 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       &backend->ret_flags, NULL);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
-      /* send close message which is in output buffer */
-      size_t written;
+      backend->shutdown_token = outbuf;
+      backend->shutdown_generated = TRUE;
+    }
+    else {
+      char buffer[STRERROR_LEN];
+      if(outbuf.pvBuffer)
+        Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
+      failf(data, "schannel: generating close msg failed: %s",
+            Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
+  }
 
+  if(backend->shutdown_generated && !backend->sent_shutdown) {
+    size_t written = 0;
+    size_t remaining;
+
+    DEBUGASSERT(backend->shutdown_offset <= backend->shutdown_token.cbBuffer);
+    remaining = backend->shutdown_token.cbBuffer - backend->shutdown_offset;
+
+    if(remaining) {
       result = Curl_conn_cf_send(cf->next, data,
-                                 (const uint8_t *)outbuf.pvBuffer,
-                                 outbuf.cbBuffer,
-                                 FALSE, &written);
-      Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-      if(!result) {
-        if(written < outbuf.cbBuffer) {
-          result = CURLE_SEND_ERROR;
-          failf(data, "schannel: failed to send close msg: %s"
-                " (bytes written: %zu)", curl_easy_strerror(result), written);
-          goto out;
-        }
-        backend->sent_shutdown = TRUE;
-        *done = TRUE;
-      }
-      else if(result == CURLE_AGAIN) {
+                                 ((uint8_t *)backend->shutdown_token.pvBuffer +
+                                  backend->shutdown_offset),
+                                 remaining, FALSE, &written);
+      if(!result)
+        backend->shutdown_offset += written;
+      if(result == CURLE_AGAIN || (!result && written < remaining)) {
         connssl->io_need = CURL_SSL_IO_NEED_SEND;
         result = CURLE_OK;
         goto out;
       }
-      else {
-        if(!backend->recv_connection_closed) {
-          result = CURLE_SEND_ERROR;
-          failf(data, "schannel: error sending close msg: %d", (int)result);
-          goto out;
-        }
-        /* Looks like server already closed the connection.
-         * An error to send our close notify is not a failure. */
+    }
+    else /* no shutdown message to send? */
+      result = CURLE_OK;
+    if(result) {
+      if(backend->recv_connection_closed) {
+        /* The server already closed, so sending close_notify is optional. */
         *done = TRUE;
         result = CURLE_OK;
       }
+      else {
+        failf(data, "schannel: error sending close msg: %d", (int)result);
+        result = CURLE_SEND_ERROR;
+      }
+      goto out;
     }
+    if(backend->shutdown_token.pvBuffer)
+      Curl_pSecFn->FreeContextBuffer(backend->shutdown_token.pvBuffer);
+    memset(&backend->shutdown_token, 0, sizeof(backend->shutdown_token));
+    backend->shutdown_offset = 0;
+    backend->sent_shutdown = TRUE;
+    *done = TRUE;
   }
 
   /* If the connection seems open and we have not seen the close notify
@@ -2545,13 +2570,20 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
 
+  (void)data;
+
   DEBUGASSERT(data);
   DEBUGASSERT(backend);
 
+  if(backend->shutdown_token.pvBuffer)
+    Curl_pSecFn->FreeContextBuffer(backend->shutdown_token.pvBuffer);
+  memset(&backend->shutdown_token, 0, sizeof(backend->shutdown_token));
+  backend->shutdown_offset = 0;
+
   /* free SSPI Schannel API security context handle */
   if(backend->ctxt) {
-    if(cf->conn->sslContext == &backend->ctxt->ctxt_handle)
-      cf->conn->sslContext = NULL;
+    if(CF_CONN(cf)->sslContext == &backend->ctxt->ctxt_handle)
+      CF_CONN(cf)->sslContext = NULL;
 
     DEBUGF(infof(data, "schannel: clear security context handle"));
     Curl_pSecFn->DeleteSecurityContext(&backend->ctxt->ctxt_handle);
@@ -2560,9 +2592,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* free SSPI Schannel API credential handle */
   if(backend->cred) {
-    Curl_ssl_scache_lock(data);
     schannel_session_free(backend->cred);
-    Curl_ssl_scache_unlock(data);
     backend->cred = NULL;
   }
 
@@ -2889,8 +2919,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_get_internals,            /* get_internals */
   schannel_close,                    /* close_one */
   NULL,                              /* close_all */
-  NULL,                              /* set_engine */
-  NULL,                              /* set_engine_default */
   NULL,                              /* engines_list */
   schannel_sha256sum,                /* sha256sum */
   schannel_recv,                     /* recv decrypted data */

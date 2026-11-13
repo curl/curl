@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <connect crlf="headers">
 HTTP/1.1 200 OK
@@ -18,15 +17,11 @@ We-are: good
 </connect>
 
 </reply>
-# Client-side
 <client>
 <server>
 http
 http-proxy
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP request-injection in URL sent over proxy
 </name>

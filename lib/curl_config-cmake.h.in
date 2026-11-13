@@ -121,9 +121,6 @@
 /* disables netrc parser */
 #cmakedefine CURL_DISABLE_NETRC 1
 
-/* enables NTLM support */
-#cmakedefine CURL_ENABLE_NTLM 1
-
 /* disables date parsing */
 #cmakedefine CURL_DISABLE_PARSEDATE 1
 
@@ -236,6 +233,9 @@
 
 /* Define to 1 if you have the `opendir' function. */
 #cmakedefine HAVE_OPENDIR 1
+
+/* Define to 1 if you have the explicit_bzero function. */
+#cmakedefine HAVE_EXPLICIT_BZERO 1
 
 /* Define to 1 if you have the memset_explicit (C23) function. */
 #cmakedefine HAVE_MEMSET_EXPLICIT 1
@@ -426,9 +426,6 @@
 
 /* Define to 1 if you have the <netinet/ip.h> header file. */
 #cmakedefine HAVE_NETINET_IP_H 1
-
-/* Define to 1 if you have the <linux/tcp.h> header file. */
-#cmakedefine HAVE_LINUX_TCP_H 1
 
 /* Define to 1 if you have the <net/if.h> header file. */
 #cmakedefine HAVE_NET_IF_H 1
@@ -683,9 +680,6 @@ ${SIZEOF_TIME_T_CODE}
 /* if wolfSSL has the wolfSSL_BIO_set_shutdown function. */
 #cmakedefine HAVE_WOLFSSL_BIO_SET_SHUTDOWN 1
 
-/* if wolfSSL has the wc_Des_EcbEncrypt function. */
-#cmakedefine HAVE_WC_DES_ECBENCRYPT 1
-
 /* if libssh is in use */
 #cmakedefine USE_LIBSSH 1
 
@@ -695,7 +689,7 @@ ${SIZEOF_TIME_T_CODE}
 /* if libpsl is in use */
 #cmakedefine USE_LIBPSL 1
 
-/* if you want to use OpenLDAP code instead of legacy ldap implementation */
+/* if you want to use OpenLDAP code instead of legacy LDAP implementation */
 #cmakedefine USE_OPENLDAP 1
 
 /* if OpenSSL is in use */

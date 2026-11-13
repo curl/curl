@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+DNS
+HTTPS RR
+libtest
+</keywords>
+</info>
+
+<client>
+<features>
+Debug
+asyn-rr
+</features>
+<command>
+https://localhost:%NOLISTENPORT/%TESTNUMBER
+</command>
+
+<name>
+resolver start callback vetoes the HTTPS RR query before it is sent
+</name>
+</client>
+
+<verify>
+</verify>
+</testcase>

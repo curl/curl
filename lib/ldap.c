@@ -168,12 +168,6 @@ static ULONG ldap_win_bind_auth(LDAP *server, const char *user,
   }
   else
 #endif
-#ifdef USE_NTLM
-  if(authflags & CURLAUTH_NTLM) {
-    method = LDAP_AUTH_NTLM;
-  }
-  else
-#endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
   if(authflags & CURLAUTH_DIGEST) {
     method = LDAP_AUTH_DIGEST;
@@ -363,12 +357,12 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     goto quit;
   }
 
-  result = Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad);
+  result = Curl_conn_get_ip_info(data, conn, &is_ipv6, &ipquad);
   if(result)
     goto quit;
 
   /* Get the URL scheme (either ldap or ldaps) */
-  ldap_ssl = Curl_conn_is_ssl(conn, FIRSTSOCKET);
+  ldap_ssl = Curl_conn_is_ssl(conn);
   infof(data, "LDAP local: trying to establish %s connection",
         ldap_ssl ? "encrypted" : "cleartext");
 
@@ -419,10 +413,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       ldap_set_option(server, LDAP_OPT_SERVER_CERTIFICATE,
                       (void *)(uintptr_t)bypass_cert_verify);
     }
-#else /* !USE_WIN32_LDAP */
+#elif defined(LDAP_OPT_X_TLS) /* !USE_WIN32_LDAP */
     int ldap_option;
     const char *ldap_ca = conn->ssl_config.CAfile;
-#ifdef LDAP_OPT_X_TLS
     if(conn->ssl_config.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
       if(conn->ssl_config.cert_type &&
@@ -464,17 +457,14 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-#else /* !LDAP_OPT_X_TLS */
-    (void)ldap_option;
-    (void)ldap_ca;
+#else /* !USE_WIN32_LDAP && !LDAP_OPT_X_TLS */
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
     failf(data, "LDAP local: SSL/TLS not supported with this version "
           "of the OpenLDAP toolkit");
     result = CURLE_SSL_CERTPROBLEM;
     goto quit;
-#endif /* LDAP_OPT_X_TLS */
-#endif /* USE_WIN32_LDAP */
+#endif
 #endif /* HAVE_LDAP_SSL */
   }
   else if(data->set.use_ssl > CURLUSESSL_TRY) {
@@ -951,12 +941,13 @@ void Curl_ldap_version(char *buf, size_t bufsz)
 {
 #ifdef USE_WIN32_LDAP
   curl_msnprintf(buf, bufsz, "WinLDAP");
-#else
-#ifdef LDAP_OPT_X_TLS_PASSPHRASE
-  static const char flavor[] = "/Apple";
+#elif defined(LDAP_OPT_X_TLS_PASSPHRASE)
+  /* Skip querying version for Apple's OpenLDAP fork. It was reported to make
+     DNS/network requests during the process, which in cases can take a long
+     time. The returned version is 2.4.28 in all known OS releases. */
+  curl_msnprintf(buf, bufsz, "AppleLDAP");
 #else
   static const char flavor[] = "";
-#endif
   LDAPAPIInfo api;
   api.ldapai_info_version = LDAP_API_INFO_VERSION;
 
@@ -989,6 +980,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
  */
 const struct Curl_protocol Curl_protocol_ldap = {
   ZERO_NULL,                            /* setup_connection */
+  ZERO_NULL,                            /* setup_filters */
   ldap_do,                              /* do_it */
   ZERO_NULL,                            /* done */
   ZERO_NULL,                            /* do_more */

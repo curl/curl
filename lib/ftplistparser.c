@@ -25,6 +25,8 @@
 
 #ifndef CURL_DISABLE_FTP
 
+#include "curl_trc.h"
+
 /**
  * Now implemented:
  *
@@ -302,6 +304,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
   struct ftp_parselist_data *parser = ftpwc->parser;
   bool add = TRUE;
   struct curl_fileinfo *finfo = &infop->info;
+  CURLcode result = CURLE_OK;
 
   /* set the finfo pointers */
   char *str = curlx_dyn_ptr(&infop->buf);
@@ -323,7 +326,10 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
     compare = Curl_fnmatch;
 
   /* filter pattern-corresponding filenames */
-  {
+  if(strchr(finfo->filename, '/'))
+    add = FALSE;
+  else {
+    /* a real file name cannot contain a slash */
     struct Curl_mapi_guard guard;
     CURL_CBAPI_START(&guard, data, easy_fnmatch_data);
     if(compare(data->set.fnmatch_data, wc->pattern, finfo->filename) == 0) {
@@ -339,6 +345,13 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
     CURL_CBAPI_END(&guard);
   }
 
+  if(add && (Curl_llist_count(llist) >= MAX_FTP_DIR_ENTRIES)) {
+    infof(data, "Reached maximum number of dir entries (%d)",
+          MAX_FTP_DIR_ENTRIES);
+    add = FALSE;
+    result = CURLE_FTP_BAD_FILE_LIST;
+  }
+
   if(add) {
     Curl_llist_append(llist, finfo, &infop->list);
   }
@@ -347,7 +360,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
   }
 
   ftpwc->parser->file_data = NULL;
-  return CURLE_OK;
+  return result;
 }
 
 #define MAX_FTPLIST_BUFFER 10000 /* arbitrarily set */
@@ -842,6 +855,9 @@ static CURLcode parse_unix(struct Curl_easy *data,
     if(result)
       break;
     if(parser->state.UNIX.main != PL_UNIX_FILETYPE)
+      break;
+    if(c == '\n')
+      /* the "total" line just ended, the newline is not a file type */
       break;
     FALLTHROUGH();
   case PL_UNIX_FILETYPE:

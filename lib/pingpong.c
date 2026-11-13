@@ -42,31 +42,75 @@
 timediff_t Curl_pp_state_timeleft_ms(struct Curl_easy *data,
                                      struct pingpong *pp)
 {
+  const struct curltime *pnow = Curl_pgrs_now(data);
   timediff_t xfer_remain_ms;
   timediff_t remain_ms = data->set.server_response_timeout ?
     data->set.server_response_timeout : PINGPONG_TIMEOUT_MS;
 
   /* If the overall transfer has less time remaining than pingpong
    * has otherwise for the state, return that. */
-  remain_ms -= curlx_ptimediff_ms(Curl_pgrs_now(data), &pp->response);
+  remain_ms -= curlx_ptimediff_ms(pnow, &pp->response);
   /* transfer remaining time is 0, when it has no timeout. */
-  xfer_remain_ms = Curl_timeleft_ms(data);
+  xfer_remain_ms = Curl_timeleft_now_ms(data, pnow);
   if(xfer_remain_ms)
     return CURLMIN(remain_ms, xfer_remain_ms);
   return remain_ms;
+}
+
+static CURLcode pp_recv(struct pingpong *pp,
+                        struct Curl_easy *data,
+                        char *buf, size_t blen,
+                        size_t *pnread)
+{
+  if(pp->do_recv)
+    return pp->do_recv(data, pp->io_user_data, buf, blen, pnread);
+  else
+    return Curl_conn_recv(data, buf, blen, pnread);
+}
+
+static CURLcode pp_send(struct pingpong *pp,
+                        struct Curl_easy *data,
+                        char *buf, size_t blen,
+                        bool eos,
+                        size_t *pnwritten)
+{
+  if(pp->do_send)
+    return pp->do_send(data, pp->io_user_data, buf, blen, eos, pnwritten);
+  else
+    return Curl_conn_send(data, buf, blen, eos, pnwritten);
+}
+
+static CURLcode pp_poll(struct pingpong *pp,
+                        struct Curl_easy *data,
+                        bool want_send, bool want_recv,
+                        timediff_t timeout_ms)
+{
+  if(pp->do_poll)
+    return pp->do_poll(data, pp->io_user_data, want_send, want_recv,
+                       timeout_ms);
+  else {
+    if(Curl_conn_data_pending(data))
+      return CURLE_OK;
+    else {
+      curl_socket_t sock = data->conn->chain.sock;
+      int rc = Curl_socket_check(want_recv ? sock : CURL_SOCKET_BAD,
+                                 want_send ? sock : CURL_SOCKET_BAD,
+                                 timeout_ms);
+      if(rc == -1) {
+        failf(data, "select/poll error");
+        return want_send ? CURLE_SEND_ERROR : CURLE_RECV_ERROR;
+      }
+      return rc ? CURLE_OK : CURLE_AGAIN;
+    }
+  }
 }
 
 /*
  * Curl_pp_statemach()
  */
 CURLcode Curl_pp_statemach(struct Curl_easy *data,
-                           struct pingpong *pp, bool block,
-                           bool disconnecting)
+                           struct pingpong *pp, bool block)
 {
-  struct connectdata *conn = data->conn;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
-  int rc;
-  timediff_t interval_ms;
   timediff_t timeout_ms = Curl_pp_state_timeleft_ms(data, pp);
   CURLcode result = CURLE_OK;
 
@@ -75,44 +119,31 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     return CURLE_OPERATION_TIMEDOUT; /* already too little time */
   }
 
-  if(block) {
-    interval_ms = 1000;  /* use 1 second timeout intervals */
-    if(timeout_ms < interval_ms)
-      interval_ms = timeout_ms;
-  }
-  else
-    interval_ms = 0; /* immediate */
+  if(!pp->overflow) {
+    timediff_t interval_ms = 0;
 
-  if(Curl_conn_data_pending(data, FIRSTSOCKET))
-    rc = 1;
-  else if(pp->overflow)
-    /* We are receiving and there is data in the cache so read it */
-    rc = 1;
-  else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
-    /* We are receiving and there is data ready in the SSL library */
-    rc = 1;
-  else {
-    rc = Curl_socket_check(pp->sendleft ? CURL_SOCKET_BAD : sock, /* reading */
-                           CURL_SOCKET_BAD,
-                           pp->sendleft ? sock : CURL_SOCKET_BAD, /* writing */
-                           interval_ms);
+    if(block) {
+      interval_ms = 1000;  /* use 1 second timeout intervals */
+      if(timeout_ms < interval_ms)
+        interval_ms = timeout_ms;
+    }
+
+    /* Wake the multi socket API even when the server sends no response. */
+    Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
+    result = pp_poll(pp, data, pp->sendleft, !pp->sendleft, interval_ms);
+
+    if(result == CURLE_AGAIN) {
+      if(interval_ms && (Curl_pp_state_timeleft_ms(data, pp) <= 0))
+        return CURLE_OPERATION_TIMEDOUT;
+      result = CURLE_OK;
+    }
   }
 
-  if(block) {
-    /* if we did not wait, we do not have to spend time on this now */
+  if(!result)
     result = Curl_pgrsCheck(data);
-    if(result)
-      return result;
-  }
 
-  if(rc == -1) {
-    failf(data, "select/poll error");
-    result = CURLE_OUT_OF_MEMORY;
-  }
-  else if(rc)
+  if(!result)
     result = pp->statemachine(data, data->conn);
-  else if(disconnecting)
-    return CURLE_OPERATION_TIMEDOUT;
 
   return result;
 }
@@ -129,25 +160,29 @@ void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow)
   pp->initialized = TRUE;
 }
 
-/***********************************************************************
- *
- * Curl_pp_vsendf()
- *
- * Send the formatted string as a command to a pingpong server. Note that
- * the string should not have any CRLF appended, as this function will
- * append the necessary things itself.
- *
- * made to never block
- */
+void Curl_pp_set_io(struct pingpong *pp,
+                    Curl_pp_send_cb *do_send,
+                    Curl_pp_recv_cb *do_recv,
+                    Curl_pp_poll_cb *do_poll,
+                    void *io_user_data)
+{
+  DEBUGASSERT(pp->initialized);
+  pp->do_send = do_send;
+  pp->do_recv = do_recv;
+  pp->do_poll = do_poll;
+  pp->io_user_data = io_user_data;
+}
+
 CURLcode Curl_pp_vsendf(struct Curl_easy *data,
                         struct pingpong *pp,
+                        const char *prefix,
                         const char *fmt,
                         va_list args)
 {
   size_t bytes_written = 0;
   size_t write_len;
   char *s;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
 
   DEBUGASSERT(pp->sendleft == 0);
@@ -159,7 +194,13 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
     return CURLE_SEND_ERROR;
 
   curlx_dyn_reset(&pp->sendbuf);
-  result = curlx_dyn_vaddf(&pp->sendbuf, fmt, args);
+  if(prefix) {
+    result = curlx_dyn_add(&pp->sendbuf, prefix);
+    if(!result)
+      result = curlx_dyn_addn(&pp->sendbuf, " ", 1);
+  }
+  if(!result)
+    result = curlx_dyn_vaddf(&pp->sendbuf, fmt, args);
   if(result)
     return result;
 
@@ -172,8 +213,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   write_len = curlx_dyn_len(&pp->sendbuf);
   s = curlx_dyn_ptr(&pp->sendbuf);
 
-  result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, FALSE,
-                          &bytes_written);
+  result = pp_send(pp, data, s, write_len, FALSE, &bytes_written);
   if(result == CURLE_AGAIN) {
     bytes_written = 0;
   }
@@ -182,7 +222,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 
   Curl_debug(data, CURLINFO_HEADER_OUT, s, bytes_written);
 
-  if(bytes_written != write_len) {
+  if(bytes_written < write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
     pp->sendthis = s;
     pp->sendsize = write_len;
@@ -197,16 +237,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/***********************************************************************
- *
- * Curl_pp_sendf()
- *
- * Send the formatted string as a command to a pingpong server. Note that
- * the string should not have any CRLF appended, as this function will
- * append the necessary things itself.
- *
- * made to never block
- */
 CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
                        const char *fmt, ...)
 {
@@ -214,20 +244,11 @@ CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
   va_list ap;
   va_start(ap, fmt);
 
-  result = Curl_pp_vsendf(data, pp, fmt, ap);
+  result = Curl_pp_vsendf(data, pp, NULL, fmt, ap);
 
   va_end(ap);
 
   return result;
-}
-
-static CURLcode pingpong_read(struct Curl_easy *data,
-                              int8_t sockindex,
-                              char *buffer,
-                              size_t buflen,
-                              size_t *nread)
-{
-  return Curl_conn_recv(data, sockindex, buffer, buflen, nread);
 }
 
 /*
@@ -236,7 +257,6 @@ static CURLcode pingpong_read(struct Curl_easy *data,
  * Reads a piece of a server response.
  */
 CURLcode Curl_pp_readresp(struct Curl_easy *data,
-                          int8_t sockindex,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
                           size_t *size) /* size of the response */
@@ -266,8 +286,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       if(!maxloops--) /* don't get stuck */
         return CURLE_OK;
 
-      result = pingpong_read(data, sockindex, buffer, sizeof(buffer),
-                             &gotbytes);
+      result = pp_recv(pp, data, buffer, sizeof(buffer), &gotbytes);
       if(result == CURLE_AGAIN)
         return CURLE_OK;
 
@@ -298,8 +317,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 
         if(memchr(line, 0, length)) {
           /* The response line is passed on as a "header" below, so reject an
-             embedded nul the same way verify_header() does for HTTP. */
-          failf(data, "Nul byte in server response line");
+             embedded NUL byte the same way verify_header() does for HTTP. */
+          failf(data, "NUL byte in server response line");
           return CURLE_WEIRD_SERVER_REPLY;
         }
 
@@ -355,7 +374,7 @@ CURLcode Curl_pp_pollset(struct Curl_easy *data,
                          struct easy_pollset *ps)
 {
   int flags = pp->sendleft ? CURL_POLL_OUT : CURL_POLL_IN;
-  return Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET],
+  return Curl_pollset_change(data, ps, data->conn->chain.sock,
                              flags, 0);
 }
 
@@ -376,9 +395,9 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   if(!Curl_pp_needs_flush(data, pp))
     return CURLE_OK;
 
-  result = Curl_conn_send(data, FIRSTSOCKET,
-                          pp->sendthis + pp->sendsize - pp->sendleft,
-                          pp->sendleft, FALSE, &written);
+  result = pp_send(pp, data,
+                   pp->sendthis + pp->sendsize - pp->sendleft,
+                   pp->sendleft, FALSE, &written);
   if(result == CURLE_AGAIN) {
     result = CURLE_OK;
     written = 0;
@@ -386,7 +405,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   if(result)
     return result;
 
-  if(written != pp->sendleft) {
+  if(written < pp->sendleft) {
     /* only a fraction was sent */
     pp->sendleft -= written;
   }

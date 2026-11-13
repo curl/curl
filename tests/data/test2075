@@ -7,7 +7,6 @@ HTTP
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 http
@@ -20,7 +19,6 @@ Verify usernames are not allowed in url
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # CURLE_LOGIN_DENIED is code 67
 <errorcode>

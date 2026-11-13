@@ -37,7 +37,7 @@
  * line_length()
  *
  * Counts the number of characters in a line including a new line.
- * Unlike strlen() it does not stop at nul bytes.
+ * Unlike strlen() it does not stop at NUL bytes.
  *
  */
 static size_t line_length(const char *buffer, int bytestocheck)
@@ -122,7 +122,7 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
  * This appends data from a given source buffer to the end of the used part of
  * a destination buffer. Arguments relative to the destination buffer are, the
  * address of a pointer to the destination buffer 'dst_buf', the length of data
- * in destination buffer excluding potential null string termination 'dst_len',
+ * in destination buffer excluding potential string null-terminator 'dst_len',
  * the allocated size of destination buffer 'dst_alloc'. All three destination
  * buffer arguments may be modified by this function. Arguments relative to the
  * source buffer are, a pointer to the source buffer 'src_buf' and indication

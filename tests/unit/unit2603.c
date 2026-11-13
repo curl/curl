@@ -100,7 +100,7 @@ static void parse_success(const struct tcase *t)
     check_eq(p.req->authority, t->authority, "authority");
     check_eq(p.req->path, t->path, "path");
     if(Curl_dynhds_count(&p.req->headers) != t->header_count) {
-      curl_mfprintf(stderr, "expected %zu headers but got %zu\n",
+      curl_mfprintf(stderr, "expected %zu headers but got %u\n",
                     t->header_count, Curl_dynhds_count(&p.req->headers));
       fail("unexpected req header count");
     }

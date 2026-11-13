@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -27,14 +26,10 @@ Long: %repeat[100001 x A]%
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 send long HTTP headers to header callback
 </name>
@@ -43,7 +38,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

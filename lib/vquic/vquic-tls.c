@@ -102,10 +102,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx)
 {
 #ifdef USE_OPENSSL
-  if(ctx->ossl.ssl)
-    SSL_free(ctx->ossl.ssl);
-  if(ctx->ossl.ssl_ctx)
-    SSL_CTX_free(ctx->ossl.ssl_ctx);
+  Curl_osslctx_cleanup(&ctx->ossl);
 #elif defined(USE_GNUTLS)
   if(ctx->gtls.session)
     gnutls_deinit(ctx->gtls.session);
@@ -167,10 +164,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
   result = Curl_ossl_check_peer_cert(cf, data, &ctx->ossl, peer);
 #elif defined(USE_GNUTLS)
   result = Curl_gtls_verifyserver(
-    cf, data, ctx->gtls.session, conn_config, &data->set.ssl, peer,
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY));
-  if(result)
-    return result;
+    cf, data, ctx->gtls.session, conn_config, &data->set.ssl, peer);
 #elif defined(USE_WOLFSSL)
   (void)data;
   if(conn_config->verifyhost) {

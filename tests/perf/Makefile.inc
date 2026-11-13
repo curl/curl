@@ -30,13 +30,14 @@ FIRST_C = first.c
 FIRST_H = first.h
 
 # Common files used by the performance test programs
-UTILS_C =
-UTILS_H =
+UTILS_C = rh.c
+UTILS_H = rh.h
 
 CURLX_C = \
   ../../lib/curlx/base64.c \
   ../../lib/curlx/win32-fopen.c \
   ../../lib/curlx/multibyte.c \
+  ../../lib/curlx/nonblock.c \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timeval.c \
   ../../lib/curlx/warnless.c
@@ -45,11 +46,15 @@ CURLX_C = \
 TESTS_C = \
   base64dec.c \
   base64enc.c \
+  cookierecv.c \
   dateparser.c \
   maprintf.c \
   numparser.c \
+  respheaders.c \
   simpleformat.c \
   snprintf.c \
   urldecode.c \
   urlencode.c \
-  urlparser.c
+  urlparser.c \
+  wsrecv.c \
+  wssend.c

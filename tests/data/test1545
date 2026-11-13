@@ -7,11 +7,9 @@ HTTP GET
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 form-api
@@ -19,10 +17,6 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 use curl_formadd() data twice with unreadable file
@@ -32,7 +26,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

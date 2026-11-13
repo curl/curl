@@ -12,7 +12,6 @@ SOCKS4
 libtest
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 data
@@ -25,15 +24,11 @@ works
 
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
 socks4
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 FTP RETR a file over a SOCKS proxy using the multi interface
 </name>
@@ -45,7 +40,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous
@@ -56,7 +50,6 @@ EPSV
 TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
-QUIT
 </protocol>
 <stdout>
 data

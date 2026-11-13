@@ -117,11 +117,11 @@ class Negotiator:
         self.tcp = tcp
         self.state = self.NO_NEG
 
-    def recv(self, bytes):
+    def recv(self, nbytes):
         """
         Read bytes from TCP, handling negotiation sequences.
 
-        :param bytes: Number of bytes to read
+        :param nbytes: Number of bytes to read
         :return: a buffer of bytes
         """
         buffer = bytearray()
@@ -130,7 +130,7 @@ class Negotiator:
         # Keep looping while we can, and until we have something to give back
         # to the caller.
         while len(buffer) == 0:
-            data = self.tcp.recv(bytes)
+            data = self.tcp.recv(nbytes)
             if not data:
                 # TCP failed to give us any data. Break out.
                 break

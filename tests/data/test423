@@ -7,7 +7,6 @@
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -24,7 +23,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -41,7 +39,6 @@ http
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 %HOSTIP+/%TESTNUMBER+http+uuuu+pppp+%HTTPPORT+qqqq+ffff

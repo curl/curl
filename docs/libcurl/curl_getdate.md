@@ -67,7 +67,10 @@ UTC. Supported formats include: -1200, MST, +0100.
 
 Specifies a day of the week. Days of the week may be spelled out in full
 (using English): 'Sunday', 'Monday', etc or they may be abbreviated to their
-first three letters. This is usually not info that adds anything.
+first three letters. Either way the check is case insensitive. The name of the
+day does not actually add any necessary information and does not have to be
+the correct week day of the date, it is only verified to be a correct weekday
+name.
 
 ## pure numbers
 

@@ -8,7 +8,6 @@ followlocation
 HTTP proxy
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message
@@ -46,7 +45,6 @@ If this is received, the location following worked
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -62,7 +60,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1

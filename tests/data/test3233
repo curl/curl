@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1>
 RTSP/1.0 302 Found
@@ -29,14 +28,10 @@ Curl-private: swsclose
 </data2>
 </reply>
 
-# Client-Side
 <client>
 <server>
 rtsp
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 RTSP session id is not sent to another origin after a redirect

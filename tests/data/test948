@@ -11,7 +11,6 @@ RFC7628
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 AUTH OAUTHBEARER
@@ -22,7 +21,6 @@ REPLY AQ== 535 Username and Password not accepted. Learn more at\r\n535 http://s
 </reply>
 
 #vi
-# Client-side
 <client>
 <server>
 smtp
@@ -38,7 +36,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 67 - CURLE_LOGIN_DENIED
 <errorcode>

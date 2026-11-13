@@ -130,6 +130,32 @@ static CURLcode test_lib1678(const char *URL)
   if(result)
     goto test_cleanup;
 
+  if(curl_easy_ssls_import(NULL, "example.test:443", NULL, 0, packet,
+                           packet_len) != CURLE_BAD_FUNCTION_ARGUMENT) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto test_cleanup;
+  }
+  if(curl_easy_ssls_import(easy, "example.test:443", NULL, 0, NULL,
+                           packet_len) != CURLE_BAD_FUNCTION_ARGUMENT) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto test_cleanup;
+  }
+  if(curl_easy_ssls_import(easy, "example.test:443", NULL, 0, packet, 0) !=
+     CURLE_BAD_FUNCTION_ARGUMENT) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto test_cleanup;
+  }
+  if(curl_easy_ssls_export(NULL, NULL, NULL) !=
+     CURLE_BAD_FUNCTION_ARGUMENT) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto test_cleanup;
+  }
+  if(curl_easy_ssls_export(easy, NULL, NULL) !=
+     CURLE_BAD_FUNCTION_ARGUMENT) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto test_cleanup;
+  }
+
   for(i = 0; i < T1678_IMPORT_COUNT; ++i) {
     result = curl_easy_ssls_import(easy,
                                    "example.test:443",

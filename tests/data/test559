@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -26,15 +25,10 @@ Silly-header: %repeat[511 x Z]%
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 use tiny CURLOPT_BUFFERSIZE
@@ -44,7 +38,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 

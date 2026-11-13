@@ -8,14 +8,12 @@ MQTTS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 hello
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 mqtts
@@ -31,7 +29,6 @@ mqtts://%HOSTIP:%MQTTSPORT/topic --insecure
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # These are hexadecimal protocol dumps from the client
 # Strip out the random part of the client id from the CONNECT message

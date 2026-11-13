@@ -26,3 +26,8 @@ By default, curl uses an exponentially increasing timeout between retries.
 Starting in curl 8.16.0, this option accepts a time as decimal number for parts
 of seconds. The decimal value needs to be provided using a dot (.) as decimal
 separator - not the local version even if it might be using another separator.
+
+curl complies with the Retry-After: response header if one was present to know
+when to issue the next retry (added in 7.66.0). That means the server can
+override the retry delay. To handle server retry delays that may be longer
+than expected, you can use --retry-max-time to limit the total retry time.

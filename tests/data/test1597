@@ -7,17 +7,12 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
-# Client-side
 <client>
 <name>
 CURLOPT_PROTOCOLS_STR
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 </client>
 
 <verify>

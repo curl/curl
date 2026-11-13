@@ -7,7 +7,6 @@ HTTP GET
 HTTP Basic auth
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200
@@ -19,7 +18,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -32,7 +30,6 @@ HTTP GET with user and password
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

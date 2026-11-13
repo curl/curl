@@ -68,7 +68,11 @@ struct Curl_easy;
 struct cf_ngtcp2_ctx;
 struct cf_quic_ctx;
 
-#define QUIC_MAX_STREAMS       (256 * 1024)
+/* The max number of uni-directional streams the server is allowed
+ * to open to us. For HTTP/3, this is 3 for QPACK) */
+#define QUIC_UNI_STREAM_MAX         3
+#define QUIC_UNI_STREAM_WIN_SIZE   (64 * 1024)
+
 #define QUIC_HANDSHAKE_TIMEOUT (10 * NGTCP2_SECONDS)
 #define QUIC_TUNNEL_INBUF_SIZE (64 * 1024)
 
@@ -165,6 +169,7 @@ void Curl_cf_ngtcp2_cmn_err_set(struct Curl_cfilter *cf,
  */
 struct h3_stream_ctx {
   int64_t id;                   /* HTTP/3 stream identifier */
+  curl_off_t xfer_id;           /* `id` of transfer owning this stream */
   struct bufq sendbuf;          /* h3 request body */
   struct h1_req_parser h1;      /* h1 request parsing */
   uint64_t error3;              /* HTTP/3 stream error code */
@@ -172,10 +177,10 @@ struct h3_stream_ctx {
   curl_off_t rx_total;          /* total number of bytes received */
   uint64_t rx_offset;           /* current receive offset */
   uint64_t rx_offset_max;       /* allowed receive offset */
-  uint64_t window_size_max;     /* max flow control window set for stream */
   size_t tx_in_flight_size;     /* sendbuf data "in flight" */
   size_t tx_in_flight_ideal;    /* ideal amount of un-acked send data */
-  int status_code;              /* HTTP status code */
+  uint32_t mid;                 /* `mid` of transfer owning this stream */
+  int32_t status_code;              /* HTTP status code */
   CURLcode xfer_result;         /* result from xfer_resp_write(_hd) */
   BIT(resp_hds_complete);       /* we have a complete, final response */
   BIT(closed);                  /* TRUE on stream close */
@@ -228,7 +233,8 @@ CURLcode Curl_cf_ngtcp2_cmn_set_expiry(struct Curl_cfilter *cf,
                                        struct cf_ngtcp2_io_ctx *pktx);
 
 CURLcode Curl_cf_ngtcp2_h3_stream_setup(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data);
+                                        struct Curl_easy *data,
+                                        struct h3_stream_ctx **pstream);
 void Curl_cf_ngtcp2_h3_stream_close(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct h3_stream_ctx *stream);
@@ -246,6 +252,10 @@ CURLcode Curl_cf_ngtcp2_cmn_query(struct Curl_cfilter *cf,
 CURLcode Curl_cf_ngtcp2_cmn_cntrl(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   int event, int arg1, void *arg2);
+
+struct Curl_easy *Curl_cf_ngtcp2_get_xfer(struct Curl_cfilter *cf,
+                                          void *stream_user_data,
+                                          struct h3_stream_ctx **pstream);
 
 #endif /* !CURL_DISABLE_HTTP && USE_NGTCP2 && USE_NGHTTP3 */
 

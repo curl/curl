@@ -8,7 +8,6 @@ HTTP DELETE
 followlocation
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 303 OK swsclose
@@ -40,7 +39,6 @@ body
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -53,7 +51,6 @@ http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER --follow -X DELETE
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 DELETE /blah/%TESTNUMBER HTTP/1.1

@@ -7,7 +7,6 @@ uint_spbset
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

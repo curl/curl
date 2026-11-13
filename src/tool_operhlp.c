@@ -151,7 +151,8 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
           result = urlerr_cvt(uerr);
           goto out;
         }
-        uerr = curl_url_get(uh, CURLUPART_URL, &newurl, CURLU_DEFAULT_SCHEME);
+        uerr = curl_url_get(uh, CURLUPART_URL, &newurl,
+                            CURLU_DEFAULT_SCHEME | CURLU_NO_GUESS_SCHEME);
         if(uerr) {
           result = urlerr_cvt(uerr);
           goto out;
@@ -201,18 +202,14 @@ CURLcode get_url_file_name(char **filename, const char *url, SANITIZEcode *sc)
     uh = NULL;
     if(!uerr) {
       char *pc = NULL, *pc2 = NULL;
-      do {
-        pc = strrchr(path, '/');
-        pc2 = strrchr(pc ? pc + 1 : path, '\\');
-        if(pc2)
-          pc = pc2;
-        if(pc && !pc[1])
-          /* if the path ends with slash, try removing the trailing one
-             and get the last directory part */
-          *pc = 0;
-        else
-          break;
-      } while(1);
+      char *end = path + strlen(path);
+      /* Remove the entire trailing separator run before searching the path. */
+      while(end > path && (end[-1] == '/' || end[-1] == '\\'))
+        *--end = 0;
+      pc = strrchr(path, '/');
+      pc2 = strrchr(pc ? pc + 1 : path, '\\');
+      if(pc2)
+        pc = pc2;
 
       if(pc) {
         /* duplicate the string beyond the slash */

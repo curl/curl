@@ -8,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.0 401 BAD BOY
@@ -21,7 +20,6 @@ authentication so we should still fail.
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -34,7 +32,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

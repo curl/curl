@@ -174,8 +174,6 @@ struct Curl_ssl {
   void (*close)(struct Curl_cfilter *cf, struct Curl_easy *data);
   void (*close_all)(struct Curl_easy *data);
 
-  CURLcode (*set_engine)(struct Curl_easy *data, const char *engine);
-  CURLcode (*set_engine_default)(struct Curl_easy *data);
   struct curl_slist *(*engines_list)(struct Curl_easy *data);
 
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
@@ -185,7 +183,7 @@ struct Curl_ssl {
   CURLcode (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                          const void *mem, size_t len, size_t *pnwritten);
 
-  CURLcode (*get_channel_binding)(struct Curl_easy *data, int8_t sockindex,
+  CURLcode (*get_channel_binding)(struct Curl_easy *data,
                                   struct dynbuf *binding);
 };
 
@@ -207,10 +205,10 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
                                bool *do_early_data, bool early_data_allowed);
 
 /* Retrieve the SSL session held at the filter of type `cft` at
- * data's connection at `sockindex` or NULL if not found/available. */
-struct Curl_ssl_session *Curl_ssl_get_cf_session(struct Curl_easy *data,
-                                                 const struct Curl_cftype *cft,
-                                                 int8_t sockindex);
+ * data connection's primary filter chain. NULL if not found/available. */
+struct Curl_ssl_session *
+Curl_ssl_get_primary_session(struct Curl_easy *data,
+                             const struct Curl_cftype *cft);
 
 #endif /* USE_SSL */
 

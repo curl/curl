@@ -8,7 +8,6 @@ followlocation
 </keywords>
 
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 301 Redirect swsclose
@@ -48,7 +47,6 @@ If this is received, the location following worked
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -72,7 +70,6 @@ the
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 
 # The primary reason libcurl sends the data part twice in this test is that

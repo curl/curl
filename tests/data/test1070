@@ -6,7 +6,6 @@ HTTP
 HTTP POST
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 403 Go away and swsclose
@@ -22,7 +21,6 @@ skip: 2300
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -44,7 +42,6 @@ Here's 2000 x 'O':
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

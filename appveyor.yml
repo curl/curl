@@ -32,6 +32,7 @@ version: 7.50.0.{build}
 
 environment:
   DO_NOT_TRACK: '1'
+  CURL_TEST_MIN: 200
 
   matrix:
     # CMake Visual Studio builds
@@ -39,79 +40,74 @@ environment:
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
-      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
+      CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
+      TFLAGS: '!with-server'
+      RUN_TESTS_VIA_CMAKE: '1'
 
     - job_name: 'CM VS2026, Release, arm64, Schannel, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
-      CMAKE_VERSION: 4.2.1
+      CMAKE_VERSION: 4.2.1  # manually bumped
       CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
-      CMAKE_GENERATE: '-A ARM64 -DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=OFF'
+      CMAKE_GENERATE: '-A ARM64 -DBUILD_SHARED_LIBS=OFF'
 
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.18.4
+      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 10 2010'
-      CMAKE_GENERATE: '-A x64'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DUSE_WIN32_IDN=ON'
+      TFLAGS: '!with-server'
 
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.21.7
+      CMAKE_VERSION: 3.21.7  # manually bumped
       CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
-      CMAKE_GENERATE: '-A Win32 -DENABLE_DEBUG=OFF'
+      CMAKE_GENERATE: '-A Win32 -DUSE_WIN32_IDN=ON'
+      TFLAGS: '--min=1600'
 
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.18.4
+      CMAKE_VERSION: 3.18.4  # manually bumped (lowest minor version supported by curl)
       CMAKE_SHA256: a932bc0c8ee79f1003204466c525b38a840424d4ae29f9e5fb88959116f2407d
       CMAKE_GENERATOR: 'Visual Studio 12 2013'
-      CMAKE_GENERATE: '-A x64'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
 
     - job_name: 'CM VS2015, Debug, x64, Schannel, Static'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: 3.19.8
+      CMAKE_VERSION: 3.19.8  # manually bumped
       CMAKE_SHA256: 2a30877a3d6b50da305b289f4d1c03befdfaeb2edba02a563c681e883d810380
       CMAKE_GENERATOR: 'Visual Studio 14 2015'
-      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DUSE_WIN32_IDN=ON'
 
     - job_name: 'CM VS2017, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      CMAKE_VERSION: 3.20.6
+      CMAKE_VERSION: 3.20.6  # manually bumped
       CMAKE_SHA256: f240a38c964712aac474644b3ba21bdc2b4e8d5e31179f67bd2e6f45fa349419
       CMAKE_GENERATOR: 'Visual Studio 15 2017'
-      CMAKE_GENERATE: '-A x64'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON'
 
     - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, !verbose, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       CMAKE_GENERATOR: 'Visual Studio 16 2019'
-      CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+      CMAKE_GENERATE: '-A x64 -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+      TFLAGS: '!with-server'
 
     - job_name: 'CM VS2026, Debug, x64, OpenSSL 3.6 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
-      CMAKE_VERSION: 4.2.1
+      CMAKE_VERSION: 4.2.1  # manually bumped (first minor version to support VS2026)
       CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
-      CMAKE_GENERATE: '-A x64 -T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
-      CREATE_ARTIFACT: 'true'
+      CMAKE_GENERATE: '-A x64 -T ClangCl -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
+      CREATE_ARTIFACT: '1'
+      TFLAGS: '!with-server'
 
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
-      CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON -DENABLE_DEBUG=OFF'
-
-    - job_name: 'CM VS2026, Debug, x64, !ssl, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2026'
-      CMAKE_VERSION: 4.2.1
-      CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
-      CMAKE_GENERATOR: 'Visual Studio 18 2026'
-      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
-
-    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, Build-tests'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
-      CMAKE_GENERATOR: 'Visual Studio 17 2022'
-      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
+      CMAKE_GENERATE: '-A x64 -DENABLE_UNICODE=ON'
+      TFLAGS: '!with-server'
 
     # VisualStudioSolution builds
 
@@ -133,6 +129,109 @@ install:
 build_script:
   - cmd: sh -c ./appveyor.sh
 
+init:
+  - ps: if($env:RDP) { iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
+  - ps: |
+      # Prevent running browser updates during the CI job
+      $ErrorActionPreference = 'SilentlyContinue'
+      Get-ChildItem -LiteralPath 'C:\Program Files\Mozilla Firefox' -Filter 'firefox.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Mozilla Firefox' -Filter 'firefox.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\EdgeUpdate' -Filter 'MicrosoftEdgeUpdate.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      $null = New-Item -Path "C:\Program Files (x86)\Microsoft\EdgeUpdate\MicrosoftEdgeUpdate.exe" -ItemType Directory  # not let it re-create it
+      Rename-Item -Verbose -LiteralPath 'C:\Program Files (x86)\Google\Update\GoogleUpdate.exe' -NewName 'GoogleUpdate.exe.bak'
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\GoogleUpdater' -Filter 'updater.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Update' -Filter 'GoogleUpdate*.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }  # Older versions
+      taskkill -f -t -im chrmstp.exe -im setup.exe -im MicrosoftEdgeUpdate.exe -im GoogleUpdate.exe -im updater.exe
+      $LASTEXITCODE = 0
+
+  # remove surplus CA bundles, fix the ones known to be used
+  - ps: |
+      $ErrorActionPreference = 'SilentlyContinue'
+      # 2019+
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/etc/ssl/cert.pem'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/etc/ssl/certs/ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/etc/ssl/certs/ca-bundle.trust.crt'
+      # <2019
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/ssl/cert.pem'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/ssl/certs/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/Tools/curl/bin/curl-ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:/msys64/mingw32/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/msys64/mingw32/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/msys64/mingw32/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/msys64/mingw32/share/pki/ca-trust-source/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/msys64/mingw32/ssl/cert.pem'
+      Remove-Item -LiteralPath 'C:/msys64/mingw32/ssl/certs/ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:/msys64/mingw32/ssl/certs/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/msys64/mingw64/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/msys64/mingw64/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/msys64/mingw64/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/msys64/mingw64/share/pki/ca-trust-source/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/msys64/mingw64/ssl/cert.pem'
+      Remove-Item -LiteralPath 'C:/msys64/mingw64/ssl/certs/ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:/msys64/mingw64/ssl/certs/ca-bundle.trust.crt'
+      # common
+      Remove-Item -LiteralPath 'C:/Program Files/Git/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/mingw64/share/pki/ca-trust-source/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/usr/share/pki/ca-trust-source/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/usr/ssl/cert.pem'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/usr/ssl/certs/ca-bundle.crt'
+      Remove-Item -LiteralPath 'C:/Program Files/Git/usr/ssl/certs/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/msys64/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/msys64/etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/msys64/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem'
+      Remove-Item -LiteralPath 'C:/msys64/usr/share/pki/ca-trust-source/ca-bundle.trust.crt'
+      Remove-Item -LiteralPath 'C:/msys64/usr/ssl/cert.pem'
+      Remove-Item -LiteralPath 'C:/msys64/usr/ssl/certs/ca-bundle.trust.crt'
+
+      # remove bad certs from bundles we may use
+      $issuers = @(
+        'emSign ECC Root CA - G3'
+        'emSign ECC Root CA - C3'
+        'emSign Root CA - C1'
+        'Comodo AAA Services root'
+      )
+      $prefixes = @(
+        'MIICTjCCAdOgAwIBAgIKPPYHqWhwDtqLhDAKBggqhkjOPQQDAzBrMQswCQYDVQQG'  # emSign ECC Root CA - G3
+        'MIICKzCCAbGgAwIBAgIKe3G2gla4EnycqDAKBggqhkjOPQQDAzBaMQswCQYDVQQG'  # emSign ECC Root CA - C3
+        'MIIDczCCAlugAwIBAgILAK7PALrEzzL4Q7IwDQYJKoZIhvcNAQELBQAwVjELMAkG'  # emSign Root CA - C1
+        'MIIEMjCCAxqgAwIBAgIBATANBgkqhkiG9w0BAQUFADB7MQswCQYDVQQGEwJHQjEb'  # AAA Certificate Services
+      )
+      $pattern1 = '(?ms)^[^\r\n]*(?:' + (($issuers | ForEach-Object { [regex]::Escape($_) }) -join '|') +
+        ')[^\r\n]*\r?\n.*?^-----END CERTIFICATE-----[^\r\n]*(?:\r?\n|$)'
+      $pattern2 = '(?ms)^-----BEGIN CERTIFICATE-----\r?\n(?:' + (($prefixes | ForEach-Object { [regex]::Escape($_) }) -join '|') +
+        ')[^\r\n]*\r?\n.*?^-----END CERTIFICATE-----[^\r\n]*(?:\r?\n|$)'
+      foreach($f in 'C:/msys64/usr/ssl/certs/ca-bundle.crt',
+                    'C:/Program Files/Git/mingw64/ssl/certs/ca-bundle.crt') {  # <2019
+        if(Test-Path -LiteralPath $f -PathType Leaf) {
+          $old = [IO.File]::ReadAllText($f)
+          $new = [regex]::Replace($old, $pattern1, '')
+          $new = [regex]::Replace($new, $pattern2, '')
+          if($old -cne $new) {
+            Rename-Item -Verbose -LiteralPath "$f" -NewName "$f.bak"
+            [IO.File]::WriteAllText($f, $new)
+          }
+        }
+      }
+
+on_finish:
+  - ps: if($env:RDP) { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
+
 clone_depth: 10
 
 # select branches to avoid testing feature branches twice (as branch and as pull request)
@@ -143,7 +242,6 @@ branches:
 
 skip_commits:
   files:
-    - '.circleci/*'
     - '.github/**/*'
     - 'Dockerfile'
     - 'projects/OS400/*'

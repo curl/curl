@@ -45,6 +45,7 @@ const char *Curl_ssh_statename(sshstate state)
     "SSH_AUTHLIST",
     "SSH_AUTH_PKEY_INIT",
     "SSH_AUTH_PKEY",
+    "SSH_AUTH_PKEY_AUTO",
     "SSH_AUTH_PASS_INIT",
     "SSH_AUTH_PASS",
     "SSH_AUTH_AGENT_INIT",
@@ -339,7 +340,7 @@ CURLcode Curl_ssh_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 {
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  curl_socket_t sock = conn->chain.sock;
   int waitfor;
 
   if(!sshc || (sock == CURL_SOCKET_BAD))

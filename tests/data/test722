@@ -3,10 +3,11 @@
 <info>
 <keywords>
 IPFS
+HTTP proxy
+HSTS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -22,25 +23,44 @@ Funny-head: yesyes
 
 Hello curl from IPFS
 </data>
+# we use this as response to a CONNECT
+<connect crlf="headers" nocheck="yes">
+HTTP/1.1 403 not OK at all
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Funny-head: yesyes
+
+-foo-
+</connect>
 </reply>
 
-# Client-side
 <client>
 <features>
 ipfs
+HSTS
+proxy
+https
 </features>
 <server>
 http
 </server>
+<file name="%LOGDIR/input%TESTNUMBER">
+this.hsts.example "99991001 04:47:41"
+</file>
 <name>
-IPFS
+IPFS with HTTP and HSTS-upgraded gateways
 </name>
 <command>
 --ipfs-gateway http://%HOSTIP:%HTTPPORT ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
+--next -x http://%HOSTIP:%HTTPPORT --ipfs-gateway http://this.hsts.example ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u --hsts %LOGDIR/input%TESTNUMBER
 </command>
+<disable>
+test-duphandle
+</disable>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /ipfs/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u HTTP/1.1
@@ -48,6 +68,29 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
+CONNECT this.hsts.example:443 HTTP/1.1
+Host: this.hsts.example:443
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
 </protocol>
+<stdout>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 21
+Connection: close
+Content-Type: text/plain
+Funny-head: yesyes
+
+Hello curl from IPFS
+</stdout>
+# Proxy CONNECT aborted
+<errorcode>
+7
+</errorcode>
 </verify>
 </testcase>

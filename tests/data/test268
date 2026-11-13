@@ -7,7 +7,6 @@ variables
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK
@@ -25,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -41,7 +39,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable hello@%LOGDIR/junk --expand-data
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1

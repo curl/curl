@@ -147,6 +147,10 @@ class Credentials:
         return self._cert.subject
 
     @property
+    def serial_number(self):
+        return self._cert.serial_number
+
+    @property
     def key_type(self):
         if isinstance(self._pkey, RSAPrivateKey):
             return f"rsa{self._pkey.key_size}"
@@ -213,7 +217,7 @@ class Credentials:
 
     def get_first(self, name) -> Optional['Credentials']:
         creds = self._store.get_credentials_for_name(name) if self._store else []
-        return creds[0] if len(creds) else None
+        return creds[0] if creds else None
 
     def get_credentials_for_name(self, name) -> List['Credentials']:
         return self._store.get_credentials_for_name(name) if self._store else []
@@ -368,13 +372,13 @@ class TestCA:
         store = CertStore(fpath=store_dir)
         creds = store.load_credentials(name="ca", key_type=key_type, issuer=None)
         if creds is None:
-            creds = TestCA._make_ca_credentials(name=name, key_type=key_type)
+            creds = cls._make_ca_credentials(name=name, key_type=key_type)
             store.save(creds, name="ca")
             creds.set_store(store)
         return creds
 
-    @staticmethod
-    def create_credentials(spec: CertificateSpec, issuer: Credentials, key_type: Any,
+    @classmethod
+    def create_credentials(cls, spec: CertificateSpec, issuer: Credentials, key_type: Any,
                            valid_from: timedelta = timedelta(days=-1),
                            valid_to: timedelta = timedelta(days=89),
                            ) -> Credentials:
@@ -384,17 +388,17 @@ class TestCA:
         :returns: the certificate and private key PEM file paths
         """
         if spec.domains and len(spec.domains):
-            return TestCA._make_server_credentials(name=spec.name, domains=spec.domains,
-                                                   issuer=issuer, valid_from=valid_from,
-                                                   valid_to=valid_to, key_type=key_type)
+            return cls._make_server_credentials(name=spec.name, domains=spec.domains,
+                                                issuer=issuer, valid_from=valid_from,
+                                                valid_to=valid_to, key_type=key_type)
         if spec.client:
-            return TestCA._make_client_credentials(name=spec.name, issuer=issuer,
-                                                   email=spec.email, valid_from=valid_from,
-                                                   valid_to=valid_to, key_type=key_type)
+            return cls._make_client_credentials(name=spec.name, issuer=issuer,
+                                                email=spec.email, valid_from=valid_from,
+                                                valid_to=valid_to, key_type=key_type)
         if spec.name:
-            return TestCA._make_ca_credentials(name=spec.name, issuer=issuer,
-                                               valid_from=valid_from, valid_to=valid_to,
-                                               key_type=key_type)
+            return cls._make_ca_credentials(name=spec.name, issuer=issuer,
+                                            valid_from=valid_from, valid_to=valid_to,
+                                            key_type=key_type)
         raise CertError(f"unrecognized certificate specification: {spec}")
 
     @staticmethod
@@ -521,8 +525,8 @@ class TestCA:
         )
         return cert
 
-    @staticmethod
-    def _make_ca_credentials(name, key_type: Any,
+    @classmethod
+    def _make_ca_credentials(cls, name: str, key_type: Any,
                              issuer: Optional[Credentials] = None,
                              valid_from: timedelta = timedelta(days=-1),
                              valid_to: timedelta = timedelta(days=89),
@@ -534,46 +538,48 @@ class TestCA:
         else:
             issuer_subject = None
             issuer_key = pkey
-        subject = TestCA._make_x509_name(org_name=name, parent=issuer.subject if issuer else None)
-        csr = TestCA._make_csr(subject=subject,
-                               issuer_subject=issuer_subject, pkey=pkey,
-                               valid_from_delta=valid_from, valid_until_delta=valid_to)
-        csr = TestCA._add_ca_usages(csr)
+        subject = cls._make_x509_name(org_name=name, parent=issuer.subject if issuer else None)
+        csr = cls._make_csr(subject=subject,
+                            issuer_subject=issuer_subject, pkey=pkey,
+                            valid_from_delta=valid_from, valid_until_delta=valid_to)
+        csr = cls._add_ca_usages(csr)
         cert = csr.sign(private_key=issuer_key,
                         algorithm=hashes.SHA256(),
                         backend=default_backend())
         return Credentials(name=name, cert=cert, pkey=pkey, issuer=issuer)
 
-    @staticmethod
-    def _make_server_credentials(name: str, domains: List[str], issuer: Credentials,
+    @classmethod
+    def _make_server_credentials(cls,
+                                 name: str, domains: List[str], issuer: Credentials,
                                  key_type: Any,
                                  valid_from: timedelta = timedelta(days=-1),
                                  valid_to: timedelta = timedelta(days=89),
                                  ) -> Credentials:
         pkey = _private_key(key_type=key_type)
-        subject = TestCA._make_x509_name(common_name=name, parent=issuer.subject)
-        csr = TestCA._make_csr(subject=subject,
-                               issuer_subject=issuer.certificate.subject, pkey=pkey,
-                               valid_from_delta=valid_from, valid_until_delta=valid_to)
-        csr = TestCA._add_leaf_usages(csr, domains=domains, issuer=issuer)
+        subject = cls._make_x509_name(common_name=name, parent=issuer.subject)
+        csr = cls._make_csr(subject=subject,
+                            issuer_subject=issuer.certificate.subject, pkey=pkey,
+                            valid_from_delta=valid_from, valid_until_delta=valid_to)
+        csr = cls._add_leaf_usages(csr, domains=domains, issuer=issuer)
         cert = csr.sign(private_key=issuer.private_key,
                         algorithm=hashes.SHA256(),
                         backend=default_backend())
         return Credentials(name=name, cert=cert, pkey=pkey, issuer=issuer)
 
-    @staticmethod
-    def _make_client_credentials(name: str,
+    @classmethod
+    def _make_client_credentials(cls,
+                                 name: str,
                                  issuer: Credentials, email: Optional[str],
                                  key_type: Any,
                                  valid_from: timedelta = timedelta(days=-1),
                                  valid_to: timedelta = timedelta(days=89),
                                  ) -> Credentials:
         pkey = _private_key(key_type=key_type)
-        subject = TestCA._make_x509_name(common_name=name, parent=issuer.subject)
-        csr = TestCA._make_csr(subject=subject,
-                               issuer_subject=issuer.certificate.subject, pkey=pkey,
-                               valid_from_delta=valid_from, valid_until_delta=valid_to)
-        csr = TestCA._add_client_usages(csr, issuer=issuer, rfc82name=email)
+        subject = cls._make_x509_name(common_name=name, parent=issuer.subject)
+        csr = cls._make_csr(subject=subject,
+                            issuer_subject=issuer.certificate.subject, pkey=pkey,
+                            valid_from_delta=valid_from, valid_until_delta=valid_to)
+        csr = cls._add_client_usages(csr, issuer=issuer, rfc82name=email)
         cert = csr.sign(private_key=issuer.private_key,
                         algorithm=hashes.SHA256(),
                         backend=default_backend())

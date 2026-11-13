@@ -34,6 +34,7 @@ static CURLcode test_unit2602(const char *arg)
   struct dynbuf dbuf;
   CURLcode result;
   size_t i;
+  size_t nentries;
 
   /* add 1 more header than allowed */
   Curl_dynhds_init(&hds, 2, 128);
@@ -74,7 +75,11 @@ static CURLcode test_unit2602(const char *arg)
   fail_unless(dynhds_ccount_name(&hds, "TEST2") == 1, "should");
   fail_unless(dynhds_ccontains(&hds, "TesT2"), "should");
   fail_unless(dynhds_contains(&hds, "TeSt2", 5), "should");
-  Curl_dynhds_free(&hds);
+
+  /* Check overflow detection */
+  fail_unless(Curl_dynhds_add(&hds, "test1", SIZE_MAX / 2,
+                              "123", SIZE_MAX / 2), "overflow check failed");
+  Curl_dynhds_cleanup(&hds);
 
   /* add header exceeding max overall length */
   Curl_dynhds_init(&hds, 128, 10);
@@ -82,11 +87,15 @@ static CURLcode test_unit2602(const char *arg)
   fail_unless(Curl_dynhds_add(&hds, "test2", 5, "456", 3), "should fail");
   fail_if(Curl_dynhds_add(&hds, "t", 1, "1", 1), "add failed");
   Curl_dynhds_reset(&hds);
-  Curl_dynhds_free(&hds);
+  Curl_dynhds_cleanup(&hds);
 
   Curl_dynhds_init(&hds, 128, 4 * 1024);
   fail_if(Curl_dynhds_add(&hds, "test1", 5, "123", 3), "add failed");
   fail_if(Curl_dynhds_add(&hds, "test1", 5, "123", 3), "add failed");
+  fail_if(Curl_dynhds_add(&hds, "test2", 5, NULL, 0), "add failed");
+  fail_if(Curl_dynhds_cadd(&hds, "test2", NULL), "add failed");
+  fail_unless(dynhds_ccontains(&hds, "test2"), "should");
+  fail_unless(dynhds_ccount_name(&hds, "test2") == 2, "should");
   fail_if(Curl_dynhds_cadd(&hds, "blablabla", "thingies"), "add failed");
   fail_if(Curl_dynhds_h1_cadd_line(&hds, "blablabla: thingies"), "add failed");
   fail_unless(dynhds_ccount_name(&hds, "blablabla") == 2, "should");
@@ -95,6 +104,12 @@ static CURLcode test_unit2602(const char *arg)
 
   result = Curl_dynhds_h1_cadd_line(&hds, "blablabla thingies");
   fail_unless(result, "add should have failed");
+  nentries = Curl_dynhds_count(&hds);
+  result = Curl_dynhds_h1_cadd_line(&hds, ": thingies");
+  fail_unless(result == CURLE_BAD_FUNCTION_ARGUMENT,
+              "empty name should have failed");
+  fail_unless(Curl_dynhds_count(&hds) == nentries,
+              "empty name should not have been added");
   if(!result) {
     fail_unless(dynhds_ccount_name(&hds, "bLABlaBlA") == 0, "should");
     fail_if(Curl_dynhds_cadd(&hds, "Bla-Bla", "thingies"), "add failed");
@@ -109,7 +124,7 @@ static CURLcode test_unit2602(const char *arg)
     curlx_dyn_free(&dbuf);
   }
 
-  Curl_dynhds_free(&hds);
+  Curl_dynhds_cleanup(&hds);
 
   curlx_dyn_init(&dbuf, 32 * 1024);
   fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");
@@ -121,7 +136,7 @@ static CURLcode test_unit2602(const char *arg)
   }
   curlx_dyn_free(&dbuf);
 
-  Curl_dynhds_free(&hds);
+  Curl_dynhds_cleanup(&hds);
 
   UNITTEST_END_SIMPLE
 }

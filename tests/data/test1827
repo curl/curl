@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+</keywords>
+</info>
+<reply>
+<connect nocheck="yes">
+HTTP/1.1 407 Needs proxy authentication
+HTTP/1.1 200 is not the answer: nonono
+Server: test-server/fake swsclose yesyes
+Proxy-Authenticate: Basic "oh please"
+
+</connect>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+proxy
+</features>
+<name>
+HTTP CONNECT with faked status line header
+</name>
+<command>
+http://test.anything.really.com:%TESTNUMBER --proxy %HOSTIP:%HTTPPORT --proxytunnel
+</command>
+</client>
+
+<verify>
+<errorcode>
+7
+</errorcode>
+<protocol crlf="headers">
+CONNECT test.anything.really.com:%TESTNUMBER HTTP/1.1
+Host: test.anything.really.com:%TESTNUMBER
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

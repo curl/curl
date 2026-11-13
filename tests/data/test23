@@ -5,13 +5,11 @@
 unsupported scheme
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -24,7 +22,6 @@ htfp://%HOSTIP:%HTTPPORT/none.htfml
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 1

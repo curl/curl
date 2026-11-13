@@ -8,9 +8,7 @@ globbing
 {} list
 </keywords>
 </info>
-# Server-side
 
-# Client-side
 <client>
 <server>
 http
@@ -23,7 +21,6 @@ reference a named glob not set
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
 curl: (43) no glob exists with this name in position 16:

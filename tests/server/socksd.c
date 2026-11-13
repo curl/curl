@@ -49,6 +49,8 @@
  *                        0 - no auth
  *                        1 - GSSAPI (not supported)
  *                        2 - user + password
+ * "method2 [number]" - connect method to respond with on the second
+ *                      connection of the test, defaults to the "method" one
  * "response [number]" - the decimal number to respond to a connect
  *                       SOCKS5: 0 is OK, SOCKS4: 90 is ok
  *
@@ -58,6 +60,8 @@
 
 static const char *backendaddr = "127.0.0.1";
 static uint16_t backendport = 0; /* default is use client's */
+static unsigned int connections; /* clients served in the current test */
+static int last_testnum = -1;    /* the test the connections belong to */
 
 struct socksd_configurable {
   unsigned char version; /* initial version byte in the request must match
@@ -66,6 +70,8 @@ struct socksd_configurable {
   unsigned char nmethods_max; /* maximum number of nmethods to expect */
   unsigned char responseversion;
   unsigned char responsemethod;
+  int responsemethod2; /* negative means unset */
+  int testnum;
   unsigned char reqcmd;
   unsigned char connectrep;
   uint16_t port; /* backend port */
@@ -79,6 +85,7 @@ struct socksd_configurable {
 #define CONFIG_NMETHODS_MAX    3
 #define CONFIG_RESPONSEVERSION CONFIG_VERSION
 #define CONFIG_RESPONSEMETHOD  0 /* no auth */
+#define CONFIG_RESPONSEMETHOD2 (-1) /* unset, use CONFIG_RESPONSEMETHOD */
 #define CONFIG_REQCMD          1 /* CONNECT */
 #define CONFIG_PORT            backendport
 #define CONFIG_ADDR            backendaddr
@@ -96,6 +103,8 @@ static void socksd_resetdefaults(void)
   s_config.nmethods_max = CONFIG_NMETHODS_MAX;
   s_config.responseversion = CONFIG_RESPONSEVERSION;
   s_config.responsemethod = CONFIG_RESPONSEMETHOD;
+  s_config.responsemethod2 = CONFIG_RESPONSEMETHOD2;
+  s_config.testnum = 0;
   s_config.reqcmd = CONFIG_REQCMD;
   s_config.connectrep = CONFIG_CONNECTREP;
   s_config.port = CONFIG_PORT;
@@ -175,6 +184,20 @@ static void socksd_getconfig(void)
             logmsg("method [%d] set", s_config.responsemethod);
           }
         }
+        else if(!strcmp(key, "method2")) {
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            s_config.responsemethod2 = (int)num;
+            logmsg("method2 [%d] set", s_config.responsemethod2);
+          }
+        }
+        else if(!strcmp(key, "Testnum")) {
+          pval = value;
+          if(!curlx_str_number(&pval, &num, INT_MAX)) {
+            s_config.testnum = (int)num;
+            logmsg("testnum = %d", s_config.testnum);
+          }
+        }
         else if(!strcmp(key, "response")) {
           pval = value;
           if(!curlx_str_number(&pval, &num, 0xff)) {
@@ -248,7 +271,7 @@ static curl_socket_t socks4(curl_socket_t fd,
     return CURL_SOCKET_BAD;
   }
   if(rc < 9) {
-    logmsg("SOCKS4 connect message too short: %zd", rc);
+    logmsg("SOCKS4 connect message too short: %ld", (long)rc);
     return CURL_SOCKET_BAD;
   }
   if(!s_config.port)
@@ -275,7 +298,7 @@ static curl_socket_t socks4(curl_socket_t fd,
     logmsg("Sending SOCKS4 response failed!");
     return CURL_SOCKET_BAD;
   }
-  logmsg("Sent %zd bytes", rc);
+  logmsg("Sent %ld bytes", (long)rc);
   loghex(response, rc);
 
   if(cd == 90)
@@ -303,20 +326,28 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   socksd_getconfig();
 
+  if(last_testnum != s_config.testnum) {
+    last_testnum = s_config.testnum;
+    connections = 0;
+  }
+
+  if((++connections == 2) && (s_config.responsemethod2 >= 0))
+    s_config.responsemethod = (unsigned char)s_config.responsemethod2;
+
   rc = sread(fd, buffer, sizeof(buffer));
   if(rc <= 0) {
-    logmsg("SOCKS identifier message missing, recv returned %zd", rc);
+    logmsg("SOCKS identifier message missing, recv returned %ld", (long)rc);
     return CURL_SOCKET_BAD;
   }
 
-  logmsg("READ %zd bytes", rc);
+  logmsg("READ %ld bytes", (long)rc);
   loghex(buffer, rc);
 
   if(buffer[SOCKS5_VERSION] == 4)
     return socks4(fd, buffer, rc);
 
   if(rc < 3) {
-    logmsg("SOCKS5 identifier message too short: %zd", rc);
+    logmsg("SOCKS5 identifier message too short: %ld", (long)rc);
     return CURL_SOCKET_BAD;
   }
 
@@ -333,7 +364,8 @@ static curl_socket_t sockit(curl_socket_t fd)
   /* after NMETHODS follows that many bytes listing the methods the client
      says it supports */
   if(rc != (buffer[SOCKS5_NMETHODS] + 2)) {
-    logmsg("Expected %d bytes, got %zd", buffer[SOCKS5_NMETHODS] + 2, rc);
+    logmsg("Expected %d bytes, got %ld",
+           buffer[SOCKS5_NMETHODS] + 2, (long)rc);
     return CURL_SOCKET_BAD;
   }
   logmsg("Incoming request deemed fine!");
@@ -346,17 +378,18 @@ static curl_socket_t sockit(curl_socket_t fd)
     logmsg("Sending response failed!");
     return CURL_SOCKET_BAD;
   }
-  logmsg("Sent %zd bytes", rc);
+  logmsg("Sent %ld bytes", (long)rc);
   loghex(response, rc);
 
   /* expect the request or auth */
   rc = sread(fd, buffer, sizeof(buffer));
   if(rc <= 0) {
-    logmsg("SOCKS5 request or auth message missing, recv returned %zd", rc);
+    logmsg("SOCKS5 request or auth message missing, recv returned %ld",
+           (long)rc);
     return CURL_SOCKET_BAD;
   }
 
-  logmsg("READ %zd bytes", rc);
+  logmsg("READ %ld bytes", (long)rc);
   loghex(buffer, rc);
 
   if(s_config.responsemethod == 2) {
@@ -371,7 +404,7 @@ static curl_socket_t sockit(curl_socket_t fd)
     unsigned char plen;
     bool login = TRUE;
     if(rc < 5) {
-      logmsg("Too short auth input: %zd", rc);
+      logmsg("Too short auth input: %ld", (long)rc);
       return CURL_SOCKET_BAD;
     }
     if(buffer[SOCKS5_VERSION] != 1) {
@@ -380,12 +413,13 @@ static curl_socket_t sockit(curl_socket_t fd)
     }
     ulen = buffer[SOCKS5_ULEN];
     if(rc < 4 + ulen) {
-      logmsg("Too short packet for username: %zd", rc);
+      logmsg("Too short packet for username: %ld", (long)rc);
       return CURL_SOCKET_BAD;
     }
     plen = buffer[SOCKS5_ULEN + ulen + 1];
     if(rc < 3 + ulen + plen) {
-      logmsg("Too short packet for ulen %d plen %d: %zd", ulen, plen, rc);
+      logmsg("Too short packet for ulen %d plen %d: %ld",
+             ulen, plen, (long)rc);
       return CURL_SOCKET_BAD;
     }
     if((ulen != strlen(s_config.user)) ||
@@ -403,7 +437,7 @@ static curl_socket_t sockit(curl_socket_t fd)
       logmsg("Sending auth response failed!");
       return CURL_SOCKET_BAD;
     }
-    logmsg("Sent %zd bytes", rc);
+    logmsg("Sent %ld bytes", (long)rc);
     loghex(response, rc);
     if(!login)
       return CURL_SOCKET_BAD;
@@ -411,15 +445,15 @@ static curl_socket_t sockit(curl_socket_t fd)
     /* expect the request */
     rc = sread(fd, buffer, sizeof(buffer));
     if(rc <= 0) {
-      logmsg("SOCKS5 request message missing, recv returned %zd", rc);
+      logmsg("SOCKS5 request message missing, recv returned %ld", (long)rc);
       return CURL_SOCKET_BAD;
     }
 
-    logmsg("READ %zd bytes", rc);
+    logmsg("READ %ld bytes", (long)rc);
     loghex(buffer, rc);
   }
   if(rc < 6) {
-    logmsg("Too short for request: %zd", rc);
+    logmsg("Too short for request: %ld", (long)rc);
     return CURL_SOCKET_BAD;
   }
 
@@ -464,7 +498,7 @@ static curl_socket_t sockit(curl_socket_t fd)
     return CURL_SOCKET_BAD;
   }
   if(rc < (4 + len + 2)) {
-    logmsg("Request too short: %zd, expected %d", rc, 4 + len + 2);
+    logmsg("Request too short: %ld, expected %d", (long)rc, 4 + len + 2);
     return CURL_SOCKET_BAD;
   }
   logmsg("Received ATYP %d", type);
@@ -548,7 +582,7 @@ static curl_socket_t sockit(curl_socket_t fd)
     logmsg("Sending connect response failed!");
     return CURL_SOCKET_BAD;
   }
-  logmsg("Sent %zd bytes", rc);
+  logmsg("Sent %ld bytes", (long)rc);
   loghex(response, rc);
 
   if(!rep)
@@ -704,8 +738,8 @@ static bool socksd_incoming(curl_socket_t listenfd)
     for(i = 0; i < 2; i++) {
       struct perclient *cp = &c[i];
       if(cp->used && tunnel(cp, &fds_read)) {
-        logmsg("SOCKS transfer completed. Bytes: < %zu > %zu",
-               cp->fromremote, cp->fromclient);
+        logmsg("SOCKS transfer completed. Bytes: < %lu > %lu",
+               (unsigned long)cp->fromremote, (unsigned long)cp->fromclient);
         sclose(cp->clientfd);
         sclose(cp->remotefd);
         cp->used = FALSE;

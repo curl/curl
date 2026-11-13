@@ -7,13 +7,12 @@ SFTP put
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 sftp
 </server>
 <precheck>
-%PERL %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP put remote failure
@@ -27,13 +26,12 @@ for ssh upload test
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 9
 </errorcode>
 <postcheck>
-%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir
 </postcheck>
 </verify>
 </testcase>

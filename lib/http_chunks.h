@@ -33,10 +33,11 @@ struct connectdata;
 
 /*
  * The longest possible hexadecimal number we support in a chunked transfer.
- * Neither RFC2616 nor the later HTTP specs define a maximum chunk size.
- * For 64-bit curl_off_t we support 16 digits. For 32-bit, 8 digits.
+ * Neither RFC2616 nor the later HTTP specs define a maximum chunk size. With
+ * the 64-bit curl_off_t we support 16 digits, excluding leading zeroes. But
+ * why would a sane server prefix with zeroes? Let's accept one.
  */
-#define CHUNK_MAXNUM_LEN (SIZEOF_CURL_OFF_T * 2)
+#define CHUNK_MAXNUM_LEN 17
 
 typedef enum {
   /* await and buffer all hexadecimal digits until we get one that is not a
@@ -88,7 +89,8 @@ typedef enum {
   CHUNKE_BAD_CHUNK,
   CHUNKE_BAD_ENCODING,
   CHUNKE_OUT_OF_MEMORY,
-  CHUNKE_PASSTHRU_ERROR /* Curl_httpchunk_read() returns a CURLcode to use */
+  CHUNKE_PASSTHRU_ERROR, /* Curl_httpchunk_read() returns a CURLcode to use */
+  CHUNKE_TRAILER_LIMIT /* Max header limit exceeded by trailers */
 } CHUNKcode;
 
 struct Curl_chunker {

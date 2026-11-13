@@ -40,13 +40,15 @@ log = logging.getLogger(__name__)
 class TestCaddy:
 
     @pytest.fixture(autouse=True, scope='class')
-    def caddy(self, env):
+    @classmethod
+    def caddy(cls, env):
         caddy = Caddy(env=env)
         assert caddy.initial_start()
         yield caddy
         caddy.stop()
 
-    def _make_docs_file(self, docs_dir: str, fname: str, fsize: int):
+    @classmethod
+    def _make_docs_file(cls, docs_dir: str, fname: str, fsize: int):
         fpath = os.path.join(docs_dir, fname)
         data1k = 1024*'x'
         flen = 0
@@ -57,12 +59,13 @@ class TestCaddy:
         return flen
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, caddy):
-        self._make_docs_file(docs_dir=caddy.docs_dir, fname='data10k.data', fsize=10 * 1024)
-        self._make_docs_file(docs_dir=caddy.docs_dir, fname='data1.data', fsize=1024 * 1024)
-        self._make_docs_file(docs_dir=caddy.docs_dir, fname='data5.data', fsize=5 * 1024 * 1024)
-        self._make_docs_file(docs_dir=caddy.docs_dir, fname='data10.data', fsize=10 * 1024 * 1024)
-        self._make_docs_file(docs_dir=caddy.docs_dir, fname='data100.data', fsize=100 * 1024 * 1024)
+    @classmethod
+    def _class_scope(cls, env, caddy):
+        cls._make_docs_file(docs_dir=caddy.docs_dir, fname='data10k.data', fsize=10 * 1024)
+        cls._make_docs_file(docs_dir=caddy.docs_dir, fname='data1.data', fsize=1024 * 1024)
+        cls._make_docs_file(docs_dir=caddy.docs_dir, fname='data5.data', fsize=5 * 1024 * 1024)
+        cls._make_docs_file(docs_dir=caddy.docs_dir, fname='data10.data', fsize=10 * 1024 * 1024)
+        cls._make_docs_file(docs_dir=caddy.docs_dir, fname='data100.data', fsize=100 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10 * 1024 * 1024)
 
     # download 1 file

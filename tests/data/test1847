@@ -9,7 +9,6 @@ CUSTOMREQUEST
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="yes">
 From: me@somewhere
@@ -32,7 +31,6 @@ body
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 imap
@@ -45,7 +43,6 @@ IMAP FETCH message with custom request
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 A001 CAPABILITY

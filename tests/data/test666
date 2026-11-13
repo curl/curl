@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 200 OK swsclose
@@ -30,7 +29,6 @@ OK
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <features>
 Mime
@@ -38,9 +36,6 @@ Mime
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 HTTP mime post with binary-encoded huge data contents
@@ -50,7 +45,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strippart>
 s/^--------------------------[A-Za-z0-9]*/------------------------------/

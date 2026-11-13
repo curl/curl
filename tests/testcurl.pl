@@ -152,7 +152,7 @@ while($ARGV[0]) {
 # Do the platform-specific stuff here
 $confheader = 'curl_config.h';
 $binext = '';
-$libext = '.la'; # .la since both libcurl and libcares are made with libtool
+$libext = '.la'; # .la since libcurl is made with libtool
 if($^O eq 'MSWin32' || $targetos) {
     if(!$targetos) {
         # If no target defined on Windows, let's assume vc
@@ -320,7 +320,7 @@ my $str1066os = 'o' x 1066;
 
 # Set timestamp to the UTC this script is running. Its value might
 # be changed later in the script to the value present in curlver.h
-$timestamp = scalar(gmtime)." UTC";
+$timestamp = scalar(gmtime) . " UTC";
 
 logit "STARTING HERE"; # first line logged, for scripts to trigger on
 logit 'TRANSFER CONTROL ==== 1120 CHAR LINE' . $str1066os . 'LINE_END';
@@ -354,21 +354,17 @@ $str1066os = undef;
 # off that path from all possible logs and error messages etc.
 $pwd = getcwd();
 
-my $have_embedded_ares = 0;
-
 if(-d $CURLDIR) {
     if($git && -d "$CURLDIR/.git") {
         logit "$CURLDIR is verified to be a fine git source dir";
         # remove the generated sources to force them to be re-generated each
         # time we run this test
         unlink "$CURLDIR/src/tool_hugehelp.c";
-        # find out if curl source directory has an in-tree c-ares repo
-        $have_embedded_ares = 1 if(-f "$CURLDIR/ares/GIT-INFO");
-    } elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
+    }
+    elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
         logit "$CURLDIR is verified to be a fine daily source dir";
-        # find out if curl source directory has an in-tree c-ares extracted tarball
-        $have_embedded_ares = 1 if(-f "$CURLDIR/ares/ares_build.h");
-    } else {
+    }
+    else {
         mydie "$CURLDIR is not a daily source directory or checked out from git!"
     }
 }
@@ -392,7 +388,8 @@ mkdir $build, 0777;
 
 if(-d $build) {
     logit "build directory $build was created fine";
-} else {
+}
+else {
     mydie "failed to create directory $build";
 }
 
@@ -407,14 +404,15 @@ if($git) {
     # update quietly to the latest git
     if($nogitpull) {
         logit "skipping git pull (--nogitpull)";
-    } else {
+    }
+    else {
         logit "run git pull in curl";
         system("git pull 2>&1");
         $gitstat += $?;
         logit "failed to update from curl git ($?), continue anyway" if($?);
 
         # Set timestamp to the UTC the git update took place.
-        $timestamp = scalar(gmtime)." UTC" if(!$gitstat);
+        $timestamp = scalar(gmtime) . " UTC" if(!$gitstat);
     }
 
     # get the last 5 commits for show (even if no pull was made)
@@ -423,32 +421,6 @@ if($git) {
     for(@commits) {
         chomp ($_);
         logit "  $_";
-    }
-
-    if(-d "ares/.git") {
-        chdir "ares";
-
-        if($nogitpull) {
-            logit "skipping git pull (--nogitpull) in ares";
-        } else {
-            logit "run git pull in ares";
-            system("git pull 2>&1");
-            $gitstat += $?;
-            logit "failed to update from ares git ($?), continue anyway" if($?);
-
-            # Set timestamp to the UTC the git update took place.
-            $timestamp = scalar(gmtime)." UTC" if(!$gitstat);
-        }
-
-        # get the last 5 commits for show (even if no pull was made)
-        @commits = qx(git log --pretty=oneline --abbrev-commit -5);
-        logit "The most recent ares git commits:";
-        for(@commits) {
-            chomp ($_);
-            logit "  $_";
-        }
-
-        chdir $CURLDIR;
     }
 
     if($nobuildconf) {
@@ -476,8 +448,8 @@ if($git) {
     else {
         logit "autoreconf -fi was successful (dummy message)";
     }
-
-} else {
+}
+else {
     # Show snapshot git commit when available
     if(open(my $f, '<', "docs/tarball-commit.txt")) {
         my $commit = <$f>;
@@ -497,7 +469,7 @@ if((-f "include/curl/curlver.h") &&
             my $stampstring = $1;
             if($stampstring !~ /DEV/) {
                $stampstring =~ s/\s+UTC//;
-                $timestamp = $stampstring." UTC";
+                $timestamp = $stampstring . " UTC";
             }
             last;
         }
@@ -511,10 +483,12 @@ logit "timestamp = $timestamp";
 if($configurebuild) {
     if(-f "configure") {
         logit "configure created (at least it exists)";
-    } else {
+    }
+    else {
         mydie "no configure created/found";
     }
-} else {
+}
+else {
    logit "configure created (dummy message)"; # dummy message to feign success
 }
 
@@ -551,10 +525,12 @@ if($configurebuild) {
 
     if(-f "lib/Makefile") {
         logit "configure seems to have finished fine";
-    } else {
+    }
+    else {
         mydie "configure did not work";
     }
-} else {
+}
+else {
     logit "copying files to build directory ...";
     if($^O eq 'MSWin32') {
         system('xcopy', ('/s', '/q', $CURLDIR, '.'));
@@ -581,73 +557,6 @@ while(<$f>) {
 }
 close($f);
 
-if(($have_embedded_ares) &&
-    (grepfile("^#define USE_ARES", "lib/$confheader"))) {
-    print "\n";
-    logit "setup to build ares";
-
-    if(-f "./ares/libcares.pc") {
-        logit_spaced  "display ares/libcares.pc";
-        if(open($f, "<", "ares/libcares.pc")) {
-            while(<$f>) {
-                my $ll = $_;
-                print $ll if(($ll !~ /^ *#/) && ($ll !~ /^ *$/));
-            }
-            close($f);
-        }
-    }
-
-    if(-f "./ares/ares_build.h") {
-        logit_spaced "display ares/ares_build.h";
-        if(open($f, "<", "ares/ares_build.h")) {
-            while(<$f>) {
-                my $ll = $_;
-                print $ll if(($ll =~ /^ *# *define *CARES_/) && ($ll !~ /__CARES_BUILD_H/));
-            }
-            close($f);
-        }
-    }
-    else {
-        mydie "no ares_build.h created/found";
-    }
-
-    $confheader =~ s/curl/ares/;
-    logit_spaced "display ares/$confheader";
-    if(open($f, "<", "ares/$confheader")) {
-        while(<$f>) {
-            print if /^ *#/;
-        }
-        close($f);
-    }
-
-    print "\n";
-    logit "build ares";
-    chdir "ares";
-
-    if($targetos && !$configurebuild) {
-        logit "$make -f Makefile.$targetos";
-        open($f, "-|", "$make -f Makefile.$targetos 2>&1") or die;
-    }
-    else {
-        logit $make;
-        open($f, "-|", "$make 2>&1") or die;
-    }
-    while(<$f>) {
-        s/$pwd//g;
-        print;
-    }
-    close($f);
-
-    if(-f "libcares$libext") {
-        logit "ares is now built successfully (libcares$libext)";
-    } else {
-        mydie "ares build failed (libcares$libext)";
-    }
-
-    # cd back to the curl build dir
-    chdir "$pwd/$build";
-}
-
 my $mkcmd = "$make -i" . ($targetos && !$configurebuild ? " $targetos" : "");
 logit $mkcmd;
 open($f, "-|", "$mkcmd 2>&1") or die;
@@ -673,7 +582,7 @@ else {
 
 if(!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
     logit "display curl${binext} --version output";
-    my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
+    my $cmd = ($extvercmd ne '' ? $extvercmd . ' ' : '') . "./src/curl${binext} --version|";
     open($f, "<", $cmd);
     while(<$f>) {
         # strip CR from output on non-Windows platforms (WINE on Linux)
@@ -721,13 +630,15 @@ if($configurebuild && !$crosscompile) {
 
     if(grepfile("^TEST", $buildlog)) {
         logit "tests were run";
-    } else {
+    }
+    else {
         mydie "test suite failure";
     }
 
     if(grepfile("^TESTFAIL:", $buildlog)) {
         logit "the tests were not successful";
-    } else {
+    }
+    else {
         logit "the tests were successful!";
     }
 }
@@ -776,6 +687,6 @@ if(($mktarball ne '') && (-x $mktarball)) {
     system($mktarball);
 }
 
-logit "enddate = ".scalar(gmtime)." UTC";  # When the run ends
+logit "enddate = " . scalar(gmtime) . " UTC";  # When the run ends
 # mydie to cleanup
 mydie "ending nicely";

@@ -8,7 +8,6 @@ HTTP/2
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -25,10 +24,10 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 h2c
+nghttpx
 </features>
 <server>
 http/2
@@ -41,7 +40,6 @@ http://%HOSTIP:%HTTP2PORT/%TESTNUMBER --http2 --head
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <strip>
 ^X-Forwarded-Proto:.*

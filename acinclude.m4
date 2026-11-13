@@ -1518,7 +1518,7 @@ AC_DEFUN([CURL_SUPPORTS_BUILTIN_AVAILABLE], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
     ]],[[
-      if(__builtin_available(macOS 10.12, iOS 5.0, *)) {}
+      if(__builtin_available(macOS 10.12, iOS 5, *)) {}
     ]])
   ],[
     AC_MSG_RESULT([yes])

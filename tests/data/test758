@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -31,14 +30,10 @@ Funny-head: yesyes
 OpenSSL
 </features>
 
-# Client-side
 <client>
 <server>
 https
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTPS multi_socket interface transfer with callbacks returning error
 </name>
@@ -47,7 +42,6 @@ https://localhost:%HTTPSPORT/file%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

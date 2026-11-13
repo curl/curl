@@ -64,10 +64,12 @@ TESTS_C = \
   cli_tls_session_reuse.c \
   cli_upload_pausing.c \
   cli_ws_data.c \
+  cli_ws_meta.c \
   cli_ws_pause.c \
   cli_ws_pingpong.c \
   cli_ws_write_err.c \
   \
+  lib464.c \
   lib500.c \
   lib501.c \
   lib502.c \
@@ -104,12 +106,11 @@ TESTS_C = \
   lib542.c \
   lib543.c \
   lib544.c \
-  lib547.c \
   lib549.c \
+  lib551.c \
   lib552.c \
   lib553.c \
   lib554.c \
-  lib555.c \
   lib556.c \
   lib557.c \
   lib558.c \
@@ -134,7 +135,6 @@ TESTS_C = \
   lib583.c \
   lib586.c \
   lib589.c \
-  lib590.c \
   lib591.c \
   lib597.c \
   lib598.c \
@@ -157,7 +157,6 @@ TESTS_C = \
   lib676.c \
   lib677.c \
   lib678.c \
-  lib694.c \
   lib695.c \
   lib751.c \
   lib753.c \
@@ -247,6 +246,7 @@ TESTS_C = \
   lib1686.c \
   lib1742.c \
   lib1744.c \
+  lib1745.c \
   lib1791.c \
   lib1900.c \
   lib1901.c \
@@ -267,6 +267,7 @@ TESTS_C = \
   lib1920.c \
   lib1921.c \
   lib1922.c \
+  lib1923.c \
   lib1933.c \
   lib1934.c \
   lib1935.c \
@@ -296,9 +297,11 @@ TESTS_C = \
   lib1977.c \
   lib1978.c \
   lib1985.c \
+  lib1989.c \
+  lib1990.c \
   lib2023.c \
-  lib2032.c \
   lib2082.c \
+  lib2095.c \
   lib2118.c \
   lib2270.c \
   lib2301.c \
@@ -307,6 +310,7 @@ TESTS_C = \
   lib2306.c \
   lib2308.c \
   lib2309.c \
+  lib2380.c \
   lib2397.c \
   lib2402.c \
   lib2404.c \
@@ -338,7 +342,9 @@ TESTS_C = \
   lib3208.c \
   lib3231.c \
   lib3233.c \
+  lib3234.c \
   lib3595.c \
   lib3596.c \
+  lib3598.c \
   lib5000.c \
   lib5004.c

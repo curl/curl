@@ -25,9 +25,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifndef CURL_DISABLE_LIBCURL_OPTION
-
-/* linked-list structure with last node cache for easysrc */
 struct slist_wc {
   struct curl_slist *first;
   struct curl_slist *last;
@@ -51,7 +48,5 @@ struct slist_wc *slist_wc_append(struct slist_wc *list, const char *data);
  * free a previously built curl_slist_wc.
  */
 void slist_wc_free_all(struct slist_wc *list);
-
-#endif /* CURL_DISABLE_LIBCURL_OPTION */
 
 #endif /* HEADER_CURL_SLIST_WC_H */

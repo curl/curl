@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 file contents
@@ -23,15 +22,10 @@ contents for file number two
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Two FTP fetches using different CURLOPT_FTP_FILEMETHOD
@@ -41,7 +35,6 @@ ftp://%HOSTIP:%FTPPORT/path/to/the/file/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/path/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
 USER anonymous
@@ -57,7 +50,6 @@ CWD /
 EPSV
 SIZE path/to/the/file/%TESTNUMBER0001
 RETR path/to/the/file/%TESTNUMBER0001
-QUIT
 </protocol>
 </verify>
 </testcase>

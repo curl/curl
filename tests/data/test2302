@@ -25,7 +25,6 @@ upgrade
 </servercmd>
 </reply>
 
-# Client-side
 <client>
 # require Debug for the forced CURL_ENTROPY
 <features>
@@ -41,9 +40,6 @@ http
 <name>
 WebSockets via callback (frame mode) + curl_ws_send()
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

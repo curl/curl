@@ -8,26 +8,20 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 
 <name>
 blank COPYPOSTFIELDS and duphandle
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <command>
 localhost
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

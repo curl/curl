@@ -108,20 +108,19 @@ static void mntfy_chunk_dispatch_all(struct Curl_multi *multi,
   struct mntfy_entry *e;
   struct Curl_easy *data;
 
-  if(multi->ntfy.ntfy_cb) {
-    while((chunk->r_offset < chunk->w_offset) && !multi->ntfy.failure) {
-      e = &chunk->entries[chunk->r_offset];
-      data = e->mid ? Curl_multi_get_easy(multi, e->mid) : multi->admin;
-      /* only when notification has not been disabled in the meantime */
-      if(data && (multi->ntfy.flags & CURL_MNTFY_TYPE_FLAG(e->type))) {
-        /* this may cause new notifications to be added! */
-        CURL_TRC_M(multi->admin, "[NTFY] dispatch %u to xfer %u",
-                   e->type, e->mid);
-        multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
-      }
-      /* once dispatched, safe to increment */
-      chunk->r_offset++;
+  while(multi->ntfy.ntfy_cb &&
+        (chunk->r_offset < chunk->w_offset) && !multi->ntfy.failure) {
+    e = &chunk->entries[chunk->r_offset];
+    data = e->mid ? Curl_multi_get_easy(multi, e->mid) : multi->admin;
+    /* only when notification has not been disabled in the meantime */
+    if(data && (multi->ntfy.flags & CURL_MNTFY_TYPE_FLAG(e->type))) {
+      /* this may cause new notifications to be added! */
+      CURL_TRC_M(multi->admin, "[NTFY] dispatch %u to xfer %u",
+                 e->type, e->mid);
+      multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
     }
+    /* once dispatched, safe to increment */
+    chunk->r_offset++;
   }
   mnfty_chunk_reset(chunk);
 }

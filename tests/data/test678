@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -21,7 +20,6 @@ MooMoo
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 SSL
@@ -32,9 +30,6 @@ https test-localhost.pem
 <name>
 HTTPS GET using CURLOPT_CAINFO_BLOB
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 # provide URL and ca-cert
 <command>
 https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt
@@ -45,7 +40,6 @@ https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt
 </precheck>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

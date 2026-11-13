@@ -17,3 +17,6 @@ allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
 allowfunc vsnprintf
+
+# Required for VS2013 and earlier
+enable PRINTFZ

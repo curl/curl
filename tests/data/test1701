@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+DELAY
+</keywords>
+</info>
+<reply>
+# the first response is exactly 60 bytes so that with writedelay the server
+# sends it in three 20 byte writes and the unsolicited second response only
+# starts arriving after the first transfer is complete and the connection
+# has been returned to the pool
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 6
+
+first
+HTTP/1.1 200 OK
+Content-Length: 6
+
+stray
+</data>
+<data2>
+HTTP/1.1 200 OK
+Content-Length: 7
+
+second
+</data2>
+<servercmd>
+writedelay: 150
+</servercmd>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+HTTP/1.1 idle connection with unsolicited data is not reused
+</name>
+# --rate 1/s starts the second request 1000 ms after the first one started,
+# which is about 700 ms after the first response completed and the
+# connection went back to the pool, inside the one second window where the
+# pool used to skip the alive check. The stray response has fully arrived
+# about 750 ms in.
+<command option="no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 --rate 1/s
+</command>
+</client>
+
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+first
+second
+</stdout>
+</verify>
+</testcase>

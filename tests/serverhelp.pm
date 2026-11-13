@@ -163,7 +163,7 @@ sub servername_canon {
 sub server_pidfilename {
     my ($piddir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.pid';
-    return "${piddir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${piddir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -172,7 +172,7 @@ sub server_pidfilename {
 sub server_portfilename {
     my ($piddir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.port';
-    return "${piddir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${piddir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -182,7 +182,7 @@ sub server_logfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.log';
     $trailer = '_stunnel.log' if(lc($proto) =~ /^(ftp|http|imap|pop3|smtp)s$/);
-    return "${logdir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${logdir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -191,7 +191,7 @@ sub server_logfilename {
 sub server_cmdfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.cmd';
-    return "${logdir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${logdir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -200,7 +200,7 @@ sub server_cmdfilename {
 sub server_inputfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.input';
-    return "${logdir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${logdir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -209,7 +209,7 @@ sub server_inputfilename {
 sub server_outputfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.output';
-    return "${logdir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${logdir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -246,7 +246,7 @@ sub mainsockf_pidfilename {
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid' : '_sockfilt.pid';
-    return "${piddir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${piddir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -257,7 +257,7 @@ sub mainsockf_logfilename {
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^(ftp|imap|pop3|smtp)s?$/));
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.log' : '_sockfilt.log';
-    return "${logdir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${logdir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -268,7 +268,7 @@ sub datasockf_pidfilename {
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^ftps?$/));
     my $trailer = '_sockdata.pid';
-    return "${piddir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${piddir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************
@@ -279,7 +279,7 @@ sub datasockf_logfilename {
     die "unsupported protocol: '$proto'" unless($proto &&
         (lc($proto) =~ /^ftps?$/));
     my $trailer = '_sockdata.log';
-    return "${logdir}/". servername_canon($proto, $ipver, $idnum) . $trailer;
+    return "${logdir}/" . servername_canon($proto, $ipver, $idnum) . $trailer;
 }
 
 #***************************************************************************

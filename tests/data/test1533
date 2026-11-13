@@ -9,7 +9,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <servercmd>
 auth_required
@@ -23,14 +22,10 @@ Content-Length: 15
 Early Response
 </data>
 </reply>
-# Client-side
 <client>
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP with CURLOPT_KEEP_SENDING_ON_ERROR and an early error response
 </name>
@@ -39,7 +34,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 # TEST_ERR_SUCCESS is errorcode 41
 <verify>
 <errorcode>

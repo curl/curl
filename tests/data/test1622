@@ -2,12 +2,11 @@
 <testcase>
 <info>
 <keywords>
-unittest
+tunittest
 tool-progress
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest
@@ -15,9 +14,6 @@ unittest
 <name>
 tool time and size progress output
 </name>
-<tool>
-tool%TESTNUMBER
-</tool>
 </client>
 
 <verify>

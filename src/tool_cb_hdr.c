@@ -184,25 +184,15 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
 
   /* if the filename contains a path, only use filename portion */
   q = strrchr(p, '/');
-  if(q) {
+  if(q)
     p = q + 1;
-    if(!*p) {
-      curlx_safefree(copy);
-      return NULL;
-    }
-  }
 
   /* If the filename contains a backslash, only use filename portion. The idea
      is that even systems that do not handle backslashes as path separators
      probably want the path removed for convenience. */
   q = strrchr(p, '\\');
-  if(q) {
+  if(q)
     p = q + 1;
-    if(!*p) {
-      curlx_safefree(copy);
-      return NULL;
-    }
-  }
 
   /* make sure the filename does not end in \r or \n */
   q = strchr(p, '\r');
@@ -227,12 +217,19 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   }
 #endif /* _WIN32 || MSDOS */
 
+  /* an empty filename, "." or ".." is no filename */
+  if(!*copy || !strcmp(copy, ".") || !strcmp(copy, "..")) {
+    curlx_safefree(copy);
+    return NULL;
+  }
+
   return copy;
 }
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
 {
-  struct curl_slist *h = hdrcbdata->headlist;
+  struct curl_slist *h = hdrcbdata->headlist ?
+    hdrcbdata->headlist->first : NULL;
   int rc = 1;
   while(h) {
     /* not "handled", show it */
@@ -243,7 +240,7 @@ int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
   }
   rc = 0; /* success */
 fail:
-  curl_slist_free_all(hdrcbdata->headlist);
+  slist_wc_free_all(hdrcbdata->headlist);
   hdrcbdata->headlist = NULL;
   return rc;
 }
@@ -254,20 +251,19 @@ static size_t buffer_header(struct HdrCbData *hdrcbdata,
 {
   char *clone = curlx_memdup0(str, cb);
   if(clone) {
-    struct curl_slist *old = hdrcbdata->headlist;
-    hdrcbdata->headlist = curl_slist_append(old, clone);
+    struct slist_wc *entry = slist_wc_append(hdrcbdata->headlist, clone);
     curlx_free(clone);
-    if(!hdrcbdata->headlist) {
-      curl_slist_free_all(old);
-      return CURL_WRITEFUNC_ERROR;
-    }
+    if(!entry)
+      goto fail;
+    hdrcbdata->headlist = entry;
   }
-  else {
-    curl_slist_free_all(hdrcbdata->headlist);
-    hdrcbdata->headlist = NULL;
-    return CURL_WRITEFUNC_ERROR;
-  }
+  else
+    goto fail;
   return cb;
+fail:
+  slist_wc_free_all(hdrcbdata->headlist);
+  hdrcbdata->headlist = NULL;
+  return CURL_WRITEFUNC_ERROR;
 }
 
 /*
@@ -402,10 +398,12 @@ static size_t content_disposition(const char *str, const char *end,
       }
       break;
     }
-    if(!outs->stream && !tool_create_output_file(outs, per->config))
-      return CURL_WRITEFUNC_ERROR;
-    if(tool_write_headers(&per->hdrcbdata, outs->stream))
-      return CURL_WRITEFUNC_ERROR;
+    /* No usable filename in this header. Do not create the output file
+       yet: a later Content-Disposition header may still provide a name, and
+       opening the URL-derived name here would truncate an existing file
+       that -J is meant to leave alone. The file is created once the body
+       arrives (or at the end of the transfer) and any buffered headers are
+       written then. */
   } /* content-disposition handling */
 
   if(hdrcbdata->honor_cd_filename &&
@@ -432,7 +430,6 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = ptr + cb;
-  const char *scheme = NULL;
   bool cd_checked = FALSE;
 
   if(!per->config)
@@ -451,6 +448,16 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
 #endif
 
+  /* If the last header was empty, check scheme again as we follow
+   * protocol switches on redirects */
+  if(!per->out_scheme || per->was_last_header_empty) {
+    char *scheme;
+    curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
+    per->out_scheme = proto_token(scheme);
+    per->num_headers = 0;
+  }
+  per->was_last_header_empty = (ptr[0] == '\r' || ptr[0] == '\n');
+
   /*
    * Write header data when curl option --dump-header (-D) is given.
    */
@@ -466,9 +473,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     }
   }
 
-  curl_easy_getinfo(per->curl, CURLINFO_SCHEME, &scheme);
-  scheme = proto_token(scheme);
-  if((scheme == proto_http || scheme == proto_https)) {
+  if((per->out_scheme == proto_http || per->out_scheme == proto_https)) {
     long response = 0;
     curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
 
@@ -498,20 +503,13 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       cd_checked = TRUE;
     }
   }
-  if(hdrcbdata->config->writeout) {
-    const char *value = memchr(ptr, ':', cb);
-    if(value) {
-      if(per->was_last_header_empty)
-        per->num_headers = 0;
-      per->was_last_header_empty = FALSE;
-      per->num_headers++;
-    }
-    else if(ptr[0] == '\r' || ptr[0] == '\n')
-      per->was_last_header_empty = TRUE;
-  }
+
+  if(hdrcbdata->config->writeout && memchr(ptr, ':', cb))
+    per->num_headers++;
+
   if(hdrcbdata->config->show_headers && !outs->out_null &&
-     (scheme == proto_http || scheme == proto_https ||
-      scheme == proto_rtsp || scheme == proto_file)) {
+     (per->out_scheme == proto_http || per->out_scheme == proto_https ||
+      per->out_scheme == proto_rtsp || per->out_scheme == proto_file)) {
     /* bold headers only for selected protocols */
     const char *value = NULL;
 
@@ -519,7 +517,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
        bypass the content-disposition handling above. Do not open the output
        file until the filename decision is complete. Only for HTTP(S). */
     if(hdrcbdata->honor_cd_filename && !cd_checked &&
-       (scheme == proto_http || scheme == proto_https))
+       (per->out_scheme == proto_http || per->out_scheme == proto_https))
       return buffer_header(hdrcbdata, str, cb);
 
     if(!outs->stream && !tool_create_output_file(outs, per->config))

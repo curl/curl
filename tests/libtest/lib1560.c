@@ -153,6 +153,12 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] = {
+  { "https://@example.com",
+    "https |  | [12] | [13] | example.com | [15] | / | [16] | [17]",
+    0, CURLU_URLENCODE, CURLUE_OK },
+  { "https://@example.com",
+    "https |  | [12] | [13] | example.com | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
   /* backslash mistakes */
   {"http:\\\\hostname", "",
    CURLU_GUESS_SCHEME, 0, CURLUE_BACKSLASH },
@@ -189,6 +195,9 @@ static const struct testcase get_parts_list[] = {
    "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://[%3A%3A13%2e1%2e68%2e3%25eth0]:1234",
    "https | [11] | [12] | [13] | [::13.1.68.3] eth0 | 1234 "
+   "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"https://[%3A%3A13%2e1%2e68%2e3%2525eth0]:1234",
+   "https | [11] | [12] | [13] | [::13.1.68.3] 25eth0 | 1234 "
    "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://[0:0:0:0:0:0:0d01:4403]:1234",
    "https | [11] | [12] | [13] | [::13.1.68.3] | 1234 "
@@ -313,9 +322,9 @@ static const struct testcase get_parts_list[] = {
     0, CURLU_URLDECODE, CURLUE_OK },
 #ifdef USE_IDN
   /* https://sv.wikipedia.org/wiki/R%c3%a4ksm%c3%b6rg%c3%a5s
-     https://codepoints.net/U+00E4 Latin Small Letter A with Diaeresis
-     https://codepoints.net/U+00F6 Latin Small Letter O with Diaeresis
-     https://codepoints.net/U+00E5 Latin Small Letter A with Ring Above
+     U+00E4 Latin Small Letter A with Diaeresis
+     U+00F6 Latin Small Letter O with Diaeresis
+     U+00E5 Latin Small Letter A with Ring Above
    */
   { "https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
     "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
@@ -329,18 +338,23 @@ static const struct testcase get_parts_list[] = {
   { "https://www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
     "https | [11] | [12] | [13] | www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se | "
     "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK },
+  /* U+FF20 FULLWIDTH COMMERCIAL AT, decodes to '@' */
+  { "https://trusted.example\xef\xbc\xa0"
+    "evil.example/x",
+    "https | [11] | [12] | [13] | [21] | "
+    "[15] | /x | [16] | [17]", 0, CURLU_PUNYCODE, CURLUE_OK },
 #else
   { "https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
     "https | [11] | [12] | [13] | [30] | [15] | / | [16] | [17]",
     0, CURLU_PUNYCODE, CURLUE_OK },
 #endif
-  /* https://codepoints.net/U+2102  Double-Struck Capital C
-     https://codepoints.net/U+1d64  Latin Subscript Small Letter U
-     https://codepoints.net/U+24c7  Circled Latin Capital Letter R
-     https://codepoints.net/U+2112  Script Capital L
-     https://codepoints.net/U+3002  Ideographic Full Stop
-     https://codepoints.net/U+1d412 Mathematical Bold Capital S
-     https://codepoints.net/U+1f134 Squared Latin Capital Letter E
+  /* U+2102  Double-Struck Capital C
+     U+1D64  Latin Subscript Small Letter U
+     U+24C7  Circled Latin Capital Letter R
+     U+2112  Script Capital L
+     U+3002  Ideographic Full Stop
+     U+1D412 Mathematical Bold Capital S
+     U+1F134 Squared Latin Capital Letter E
    */
   {"https://"
    "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
@@ -1206,6 +1220,10 @@ static const struct setcase set_parts_list[] = {
    "scheme=https,host=example.com,path=/,url=\"\",", /* redirect to "" */
    "https://example.com/",
    0, 0, CURLUE_OK, CURLUE_OK},
+  {NULL, /* start fresh! */
+   "scheme=file,", /* no path set */
+   "file:///",
+   0, 0, CURLUE_OK, CURLUE_OK},
   {"https://example.com/",
    "path=one\ntwo,",
    "https://example.com/one\ntwo",
@@ -1327,6 +1345,14 @@ static const struct setcase set_parts_list[] = {
   {"https://[::1%25fake]:1234/",
    "zoneid=NULL,",
    "https://[::1]:1234/",
+   0, 0, CURLUE_OK, CURLUE_OK},
+  {"https://example.com/",
+   "host=[fe80::1%25eth0],",
+   "https://[fe80::1%25eth0]/",
+   0, 0, CURLUE_OK, CURLUE_OK},
+  {"https://example.com/",
+   "host=[fe80::1%25eth0],zoneid=NULL,",
+   "https://[fe80::1]/",
    0, 0, CURLUE_OK, CURLUE_OK},
   {"https://host:1234/",
    "port=NULL,",
@@ -1727,6 +1753,85 @@ static const struct redircase set_url_list[] = {
   {"http://host/path", "#frag", "http://host/path#frag", 0, 0, CURLUE_OK},
   {NULL, NULL, NULL, 0, 0, CURLUE_OK}
 };
+
+#ifdef USE_IDN
+
+struct idncase {
+  const char *in;
+  const char *out;
+  CURLUcode ucode;
+};
+
+/* set the URL, extract it punycoded, check the return code */
+static const struct idncase set_idn_url[] = {
+  /* Fullwidth commercial at */
+  { "https://trusted.example\xef\xbc\xa0" "evil.example/",
+    NULL, CURLUE_BAD_HOSTNAME },
+  /* Black question mark ornament (looks like a question mark)*/
+  { "https://bad\xE2\x9D\x93" "host.example/",
+    "https://xn--badhost-458d.example/", CURLUE_OK },
+  /* Division Slash (looks like a slash) */
+  { "https://bad\xE2\x88\x95" "host.example/",
+    "https://xn--badhost-ef0d.example/", CURLUE_OK },
+  /* Fullwidth Solidus (looks like a slash) */
+  { "https://bad\xef\xbc\x8f" "host.example/",
+    NULL, CURLUE_BAD_HOSTNAME},
+  /* Fullwidth Stop (looks like a period) */
+  { "https://bad\xef\xbc\x8e" "host.example/",
+    "https://bad.host.example/", CURLUE_OK},
+};
+
+static int set_idn(void)
+{
+  unsigned int i;
+  int error = 0;
+
+  for(i = 0; i < CURL_ARRAYSIZE(set_idn_url) && !error; i++) {
+    CURLUcode rc;
+    char *url;
+    CURLU *urlp = curl_url();
+    if(!urlp) {
+      error++;
+      break;
+    }
+    rc = curl_url_set(urlp, CURLUPART_URL, set_idn_url[i].in, 0);
+    if(rc) {
+      curl_mfprintf(stderr, "%s:%d Set URL returned %d (%s)\n",
+                    __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
+      error++;
+    }
+
+    rc = curl_url_get(urlp, CURLUPART_URL, &url, CURLU_PUNYCODE);
+    if(rc != set_idn_url[i].ucode) {
+      curl_mfprintf(stderr, "Get IDN URL\nin: %s\nreturned %d (expected %d)\n",
+                    set_idn_url[i].in, (int)rc, (int)set_idn_url[i].ucode);
+      error++;
+    }
+    else if(!url || !set_idn_url[i].out) {
+      if(url) {
+        curl_mfprintf(stderr, "Got IDN URL (%s) when expected none\n",
+                      url);
+        error++;
+      }
+      else if(set_idn_url[i].out) {
+        curl_mfprintf(stderr, "Got no IDN URL when expected %s\n",
+                      set_idn_url[i].out);
+        error++;
+      }
+    }
+    else if(strcmp(url, set_idn_url[i].out)) {
+      curl_mfprintf(stderr, "Got IDN URL: %s\nexpected %s\n",
+                    url, set_idn_url[i].out);
+      error++;
+    }
+    curl_free(url);
+    curl_url_cleanup(urlp);
+  }
+  return error;
+}
+#else
+#define set_idn() 0
+#endif
 
 static int set_url(void)
 {
@@ -2423,6 +2528,9 @@ static int test_api_errors(void)
   if(rc != CURLUE_BAD_HANDLE)
     return 1;
 
+  if(curl_url_dup(NULL))
+    return 4;
+
   /* NULL part pointer */
   rc = curl_url_get(u, CURLUPART_URL, NULL, 0);
   if(rc != CURLUE_BAD_PARTPOINTER)
@@ -2526,6 +2634,8 @@ static CURLcode test_lib1560(const char *URL)
   bool has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
 
   (void)URL;
+  if(has_utf8 && set_idn())
+    return (CURLcode)14;
 
   if(test_scheme_guess())
     return (CURLcode)13;

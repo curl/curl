@@ -38,7 +38,8 @@ log = logging.getLogger(__name__)
 class TestDownload:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd):
+    @classmethod
+    def _class_scope(cls, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-0k", fsize=0)
         env.make_data_file(indir=indir, fname="data-10k", fsize=10 * 1024)
@@ -317,10 +318,7 @@ class TestDownload:
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
         max_parallel = 5
-        if proto in Env.http_mplx_protos():
-            pause_offset = 64 * 1024
-        else:
-            pause_offset = 12 * 1024
+        pause_offset = 1024 * (64 if proto in Env.http_mplx_protos() else 12)
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='cli_hx_download', env=env)
@@ -343,10 +341,7 @@ class TestDownload:
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
         max_parallel = 5
-        if proto in Env.http_mplx_protos():
-            abort_offset = 64 * 1024
-        else:
-            abort_offset = 12 * 1024
+        abort_offset = 1024 * (64 if proto in Env.http_mplx_protos() else 12)
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='cli_hx_download', env=env)
@@ -369,10 +364,7 @@ class TestDownload:
             pytest.skip("fails in CI, but works locally for unknown reasons")
         count = 10
         max_parallel = 5
-        if proto in Env.http_mplx_protos():
-            fail_offset = 64 * 1024
-        else:
-            fail_offset = 12 * 1024
+        fail_offset = 1024 * (64 if proto in Env.http_mplx_protos() else 12)
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='cli_hx_download', env=env)
@@ -576,6 +568,8 @@ class TestDownload:
         elif proto == 'h3':
             assert earlydata[1] == 109, f'{earlydata}'
 
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('mbedtls'), reason='mbedtls unreliable here')
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('rustls-ffi'), reason='rustls unreliable here')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     @pytest.mark.parametrize("max_host_conns", [0, 1, 5])
     @pytest.mark.parametrize("share_connect", [False, True])
@@ -616,6 +610,8 @@ class TestDownload:
                     assert n <= max_host_conns
             assert matched_lines > 0
 
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('mbedtls'), reason='mbedtls unreliable here')
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('rustls-ffi'), reason='rustls unreliable here')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     @pytest.mark.parametrize("max_total_conns", [0, 1, 5])
     @pytest.mark.parametrize("share_connect", [False, True])
@@ -656,8 +652,8 @@ class TestDownload:
                     assert n <= max_total_conns
             assert matched_lines > 0
 
-    # 2 parallel transers, pause and resume. Load a 100 MB zip bomb from
-    # the server with "Content-Encoding: gzip" that gets exloded during
+    # 2 parallel transfers, pause and resume. Load a 100 MB zip bomb from
+    # the server with "Content-Encoding: gzip" that gets exploded during
     # response writing to the client. Client pauses after 1MB unzipped data
     # and causes buffers to fill while the server sends more response
     # data.
@@ -731,11 +727,11 @@ class TestDownload:
             '/curltest/tweak/?&delay=3s'
         url2 = f'https://{env.authority_for(env.domain1, proto)}/data.json'
         r = curl.http_download(urls=[url1, url2], alpn_proto=proto, extra_args=[
-            '--http1.1',  '--parallel'
-       ], url_options={
-            url1: ['--max-time', '10'],
-            url2: ['--max-time', '1']
-       })
+                               '--http1.1',  '--parallel'],
+                               url_options={
+                                    url1: ['--max-time', '10'],
+                                    url2: ['--max-time', '1']
+                               })
         r.check_exit_code(28)
         xfers = {stat['xfer_id']: stat for stat in r.stats}
         assert xfers[0]['http_code'] == 200, f'{r.stats[0]}'  # succeeded
@@ -743,3 +739,29 @@ class TestDownload:
         m = re.search(r'timed out after (\d+) milliseconds', xfers[1]['errormsg'])
         assert m, f'{r.stats[1]}'
         assert int(m.group(1)) < 3000, f'{r.stats[1]}'
+
+    # download a response with trailers: they are delivered as trailers,
+    # but must never be processed as response headers, e.g. a `set-cookie`
+    # or `location` trailer must not take effect
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    @pytest.mark.parametrize("body_size", [100, 0])
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
+    def test_02_38_trailers(self, env: Env, httpd, nghttpx, proto, body_size):
+        if proto == 'http/1.1':
+            pytest.skip('httpd does not send the trailers on http/1.1')
+        if proto == 'h3':
+            pytest.skip('nghttpx does not proxy trailers')
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+            f'/curltest/tweak/?trailers&chunks=1&chunk_size={body_size}'
+        cookiefile = os.path.join(curl.run_dir, 'cookies.txt')
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_headers=True,
+                               extra_args=['-c', cookiefile])
+        r.check_response(http_status=200, count=1)
+        assert 'set-cookie' in r.responses[0]['trailer'], f'{r.responses[0]}'
+        assert 'location' in r.responses[0]['trailer'], f'{r.responses[0]}'
+        assert 'set-cookie' not in r.responses[0]['header'], f'{r.responses[0]}'
+        assert 'location' not in r.responses[0]['header'], f'{r.responses[0]}'
+        assert r.stats[0]['redirect_url'] is None, f'{r.stats[0]}'
+        with open(cookiefile) as fd:
+            assert 'tweak-trailer' not in fd.read(), f'{r.dump_logs()}'

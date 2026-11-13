@@ -43,9 +43,6 @@ http
 <name>
 HTTP Digest to different origins and switching credentials
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 %HOSTIP %HTTPPORT
 </command>

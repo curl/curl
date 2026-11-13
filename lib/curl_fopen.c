@@ -33,27 +33,21 @@
 /* The dirslash() function breaks a null-terminated pathname string into
    directory and filename components then returns the directory component up
    to, *AND INCLUDING*, a final '/'. If there is no directory in the path,
-   this instead returns a "" string.
+   this instead returns a "" string. If the path is root-level (the
+   directory component is only made up of path separators), this returns a
+   single separator rather than "".
 
    This function returns a pointer to malloc'ed memory.
 
    The input path to this function is expected to have a filename part.
+
+   @unittest 1699
  */
-
-#ifdef _WIN32
-#define PATHSEP   "\\"
-#define IS_SEP(x) (((x) == '/') || ((x) == '\\'))
-#elif defined(MSDOS) || defined(OS2)
-#define PATHSEP   "\\"
-#define IS_SEP(x) ((x) == '\\')
-#else
-#define PATHSEP   "/"
-#define IS_SEP(x) ((x) == '/')
-#endif
-
-static char *dirslash(const char *path)
+UNITTEST char *dirslash(const char *path);
+UNITTEST char *dirslash(const char *path)
 {
   size_t n;
+  bool absolute = FALSE;
   struct dynbuf out;
   DEBUGASSERT(path);
   curlx_dyn_init(&out, CURL_MAX_INPUT_LENGTH);
@@ -62,6 +56,9 @@ static char *dirslash(const char *path)
     /* find the rightmost path separator, if any */
     while(n && !IS_SEP(path[n - 1]))
       --n;
+    /* remember if a separator was found at all */
+    if(n)
+      absolute = TRUE;
     /* skip over all the path separators, if any */
     while(n && IS_SEP(path[n - 1]))
       --n;
@@ -69,7 +66,7 @@ static char *dirslash(const char *path)
   if(curlx_dyn_addn(&out, path, n))
     return NULL;
   /* if there was a directory, append a single trailing slash */
-  if(n && curlx_dyn_addn(&out, PATHSEP, 1))
+  if((n || absolute) && curlx_dyn_addn(&out, PATHSEP, 1))
     return NULL;
   return curlx_dyn_ptr(&out);
 }
@@ -126,13 +123,9 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
 #ifdef _WIN32
   fd = curlx_open(tempstore, _O_WRONLY | _O_CREAT | _O_EXCL,
                   _S_IREAD | _S_IWRITE);
-#elif (defined(ANDROID) || defined(__ANDROID__)) && \
-  (defined(__i386__) || defined(__arm__))
-  fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  (mode_t)(S_IRUSR | S_IWUSR | 0600));
 #else
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  S_IRUSR | S_IWUSR | 0600);
+                  (mode_t)(S_IRUSR | S_IWUSR | 0600));
 #endif
   if(fd == -1)
     goto fail;
@@ -143,7 +136,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     if((curlx_fstat(fd, &nsb) != -1) &&
        (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
       /* if the user and group are the same, clone the original mode */
-      if(fchmod(fd, sb.st_mode) == -1)
+      if(fchmod(fd, (mode_t)sb.st_mode) == -1)
         goto fail;
     }
   }

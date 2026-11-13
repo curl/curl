@@ -91,8 +91,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
                                 gnutls_session_t session,
                                 struct ssl_filter_config *config,
                                 struct ssl_easy_config *ssl_config,
-                                struct ssl_peer *peer,
-                                const char *pinned_key);
+                                struct ssl_peer *peer);
 
 /* Extract TLS session and place in cache, if configured. Return
  * a copy of the session if desired. */

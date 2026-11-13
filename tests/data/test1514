@@ -10,7 +10,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -21,14 +20,10 @@ Connection: close
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP POST with read callback and unknown data size
 </name>
@@ -37,7 +32,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # Content-Length header is not present
 # Transfer-Encoding header is added automatically

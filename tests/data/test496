@@ -8,11 +8,9 @@ parallel
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <name>
 parallel upload missing file
@@ -22,7 +20,6 @@ parallel upload missing file
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 26

@@ -7,7 +7,6 @@ HTTP proxy
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <connect>
 HTTP/1.1 503 no just no
@@ -21,7 +20,6 @@ Connection: close
 </connect>
 </reply>
 
-# Client-side
 <client>
 <features>
 gopher
@@ -48,7 +46,6 @@ Refuse tunneling protocols through HTTP proxy
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # refused in the CONNECT
 <errorcode>

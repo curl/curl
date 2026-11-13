@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -17,7 +16,6 @@ Content-Length: 6
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -27,15 +25,11 @@ http
 <name>
 set CURLOPT_XOAUTH2_BEARER and do connection reuse
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

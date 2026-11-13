@@ -1,4 +1,4 @@
-# ***************************************************************************
+#***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -74,6 +74,7 @@ CURLINFO = os.path.join(TOP_PATH, "src", "curlinfo")
 class NghttpxUtil:
     CMD = None
     VERSION_FULL = None
+    CAN_ECH = None
 
     @classmethod
     def version(cls, cmd):
@@ -92,6 +93,20 @@ class NghttpxUtil:
     @staticmethod
     def version_with_h3(version):
         return re.match(r".* ngtcp2/\d+\.\d+\.\d+.*", version) is not None
+
+    @classmethod
+    def can_ech(cls, cmd):
+        if cmd is None:
+            return None
+        if cls.CAN_ECH is None or cmd != cls.CMD:
+            p = subprocess.run(args=[cmd, "-h"], capture_output=True, text=True, check=True)
+            cls.CMD = cmd
+            cls.CAN_ECH = False
+            for line in p.stdout.splitlines(keepends=False):
+                if '--ech-config-file' in line:
+                    cls.CAN_ECH = True
+                    break
+        return cls.CAN_ECH
 
 
 class EnvConfig:
@@ -230,7 +245,11 @@ class EnvConfig:
             ),
         ]
 
-        self.openssl = "openssl"
+        if "OPENSSL" in os.environ:
+            self.openssl = os.environ["OPENSSL"]
+        else:
+            self.openssl = "openssl"
+        self.openssl_ech = False
         p = subprocess.run(
             args=[self.openssl, "version"], capture_output=True, text=True, check=False
         )
@@ -240,15 +259,20 @@ class EnvConfig:
             self.openssl_version = None
         else:
             self.openssl_version = p.stdout.strip()
+            m = re.match(r'OpenSSL (\d+).*', self.openssl_version)
+            if m and int(m.group(1)) >= 4:
+                self.openssl_ech = True
 
         self.nghttpx = self.config["nghttpx"]["nghttpx"]
         if len(self.nghttpx.strip()) == 0:
             self.nghttpx = None
+        self.nghttpx_ech = False
         self._nghttpx_version = None
         self.nghttpx_with_h3 = False
         if self.nghttpx is not None:
             self._nghttpx_version = NghttpxUtil.version(self.nghttpx)
             self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
+            self.nghttpx_ech = NghttpxUtil.can_ech(self.nghttpx)
 
         self.caddy = self.config["caddy"]["caddy"]
         self._caddy_version = None
@@ -352,7 +376,7 @@ class EnvConfig:
             if p.returncode != 0:
                 self.sshd = None
             else:
-                m = re.match(r"^OpenSSH_(\d+\.\d+.*),.*", p.stderr)
+                m = re.match(r"^OpenSSH_(\d+\.\d+).*,.*", p.stderr)
                 assert m, f"version: {p.stderr}"
                 if m:
                     self._sshd_version = m.group(1)
@@ -440,6 +464,10 @@ class EnvConfig:
         return self._h2o_version
 
     @property
+    def sshd_version(self):
+        return self._sshd_version
+
+    @property
     def tcpdump(self) -> Optional[str]:
         return self._tcpdump
 
@@ -454,245 +482,257 @@ class Env:
 
     CONFIG = EnvConfig()
 
-    @staticmethod
-    def setup_incomplete() -> bool:
-        return not Env.CONFIG.is_complete()
+    @classmethod
+    def setup_incomplete(cls) -> bool:
+        return not cls.CONFIG.is_complete()
+
+    @classmethod
+    def incomplete_reason(cls) -> Optional[str]:
+        return cls.CONFIG.get_incomplete_reason()
+
+    @classmethod
+    def have_openssl(cls) -> bool:
+        return cls.CONFIG.openssl is not None
+
+    @classmethod
+    def have_nghttpx(cls) -> bool:
+        return cls.CONFIG.nghttpx is not None
+
+    @classmethod
+    def have_h3_server(cls) -> bool:
+        return cls.CONFIG.nghttpx_with_h3
 
     @staticmethod
-    def incomplete_reason() -> Optional[str]:
-        return Env.CONFIG.get_incomplete_reason()
+    def have_openssl_ech() -> bool:
+        return Env.CONFIG.openssl_ech
 
     @staticmethod
-    def have_openssl() -> bool:
-        return Env.CONFIG.openssl is not None
+    def have_nghttpx_ech() -> bool:
+        return Env.CONFIG.nghttpx_ech
 
-    @staticmethod
-    def have_nghttpx() -> bool:
-        return Env.CONFIG.nghttpx is not None
+    @classmethod
+    def have_h2o(cls) -> bool:
+        return cls.CONFIG.h2o is not None
 
-    @staticmethod
-    def have_h3_server() -> bool:
-        return Env.CONFIG.nghttpx_with_h3
+    @classmethod
+    def have_ssl_curl(cls) -> bool:
+        return cls.curl_has_feature("ssl") or cls.curl_has_feature("multissl")
 
-    @staticmethod
-    def have_h2o() -> bool:
-        return Env.CONFIG.h2o is not None
+    @classmethod
+    def have_h2_curl(cls) -> bool:
+        return "http2" in cls.CONFIG.curl_props["features"]
 
-    @staticmethod
-    def have_ssl_curl() -> bool:
-        return Env.curl_has_feature("ssl") or Env.curl_has_feature("multissl")
+    @classmethod
+    def have_h3_curl(cls) -> bool:
+        return "http3" in cls.CONFIG.curl_props["features"]
 
-    @staticmethod
-    def have_h2_curl() -> bool:
-        return "http2" in Env.CONFIG.curl_props["features"]
-
-    @staticmethod
-    def have_h3_curl() -> bool:
-        return "http3" in Env.CONFIG.curl_props["features"]
-
-    @staticmethod
-    def have_compressed_curl() -> bool:
+    @classmethod
+    def have_compressed_curl(cls) -> bool:
         return (
-            "brotli" in Env.CONFIG.curl_props["libs"]
-            or "zlib" in Env.CONFIG.curl_props["libs"]
-            or "zstd" in Env.CONFIG.curl_props["libs"]
+            "brotli" in cls.CONFIG.curl_props["libs"]
+            or "zlib" in cls.CONFIG.curl_props["libs"]
+            or "zstd" in cls.CONFIG.curl_props["libs"]
         )
 
-    @staticmethod
-    def curl_uses_lib(libname: str) -> bool:
-        return libname.lower() in Env.CONFIG.curl_props["libs"]
+    @classmethod
+    def curl_uses_lib(cls, libname: str) -> bool:
+        return libname.lower() in cls.CONFIG.curl_props["libs"]
 
-    @staticmethod
-    def curl_uses_any_libs(libs: List[str]) -> bool:
-        return any(libname.lower() in Env.CONFIG.curl_props["libs"] for libname in libs)
+    @classmethod
+    def curl_uses_any_libs(cls, libs: List[str]) -> bool:
+        return any(libname.lower() in cls.CONFIG.curl_props["libs"] for libname in libs)
 
-    @staticmethod
-    def curl_uses_ossl_quic() -> bool:
-        if Env.have_h3_curl():
-            return not Env.curl_uses_lib("ngtcp2") and Env.curl_uses_lib("nghttp3")
+    @classmethod
+    def curl_uses_ossl_quic(cls) -> bool:
+        if cls.have_h3_curl():
+            return not cls.curl_uses_lib("ngtcp2") and cls.curl_uses_lib("nghttp3")
         return False
 
-    @staticmethod
-    def curl_version_string() -> str:
-        return Env.CONFIG.curl_props["version_string"]
+    @classmethod
+    def curl_version_string(cls) -> str:
+        return cls.CONFIG.curl_props["version_string"]
 
-    @staticmethod
-    def curl_version_at_least(min_version) -> bool:
-        version = Env.curl_version()
-        return Env.CONFIG.versiontuple(min_version) <= Env.CONFIG.versiontuple(
+    @classmethod
+    def curl_version_at_least(cls, min_version) -> bool:
+        version = cls.curl_version()
+        return cls.CONFIG.versiontuple(min_version) <= cls.CONFIG.versiontuple(
             version
         )
 
-    @staticmethod
-    def curl_features_string() -> str:
-        return Env.CONFIG.curl_props["features_string"]
+    @classmethod
+    def curl_features_string(cls) -> str:
+        return cls.CONFIG.curl_props["features_string"]
 
-    @staticmethod
-    def curl_has_feature(feature: str) -> bool:
-        return feature.lower() in Env.CONFIG.curl_props["features"]
+    @classmethod
+    def curl_has_feature(cls, feature: str) -> bool:
+        return feature.lower() in cls.CONFIG.curl_props["features"]
 
-    @staticmethod
-    def curl_protocols_string() -> str:
-        return Env.CONFIG.curl_props["protocols_string"]
+    @classmethod
+    def curl_protocols_string(cls) -> str:
+        return cls.CONFIG.curl_props["protocols_string"]
 
-    @staticmethod
-    def curl_has_protocol(protocol: str) -> bool:
-        return protocol.lower() in Env.CONFIG.curl_props["protocols"]
+    @classmethod
+    def curl_has_protocol(cls, protocol: str) -> bool:
+        return protocol.lower() in cls.CONFIG.curl_props["protocols"]
 
-    @staticmethod
-    def curl_lib_version(libname: str) -> str:
+    @classmethod
+    def curl_lib_version(cls, libname: str) -> str:
         prefix = f"{libname.lower()}/"
-        for lversion in Env.CONFIG.curl_props["lib_versions"]:
+        for lversion in cls.CONFIG.curl_props["lib_versions"]:
             if lversion.startswith(prefix):
                 return lversion[len(prefix):]
         return "unknown"
 
-    @staticmethod
-    def curl_lib_version_at_least(libname: str, min_version) -> bool:
-        lversion = Env.curl_lib_version(libname)
+    @classmethod
+    def curl_lib_version_at_least(cls, libname: str, min_version) -> bool:
+        lversion = cls.curl_lib_version(libname)
         if lversion != "unknown":
-            return Env.CONFIG.versiontuple(min_version) <= Env.CONFIG.versiontuple(
+            return cls.CONFIG.versiontuple(min_version) <= cls.CONFIG.versiontuple(
                 lversion
             )
         return False
 
-    @staticmethod
-    def curl_lib_version_before(libname: str, lib_version) -> bool:
-        lversion = Env.curl_lib_version(libname)
+    @classmethod
+    def curl_lib_version_before(cls, libname: str, lib_version) -> bool:
+        lversion = cls.curl_lib_version(libname)
         if lversion != "unknown":
             if m := re.match(r"(\d+\.\d+\.\d+).*", lversion):
                 lversion = m.group(1)
-            return Env.CONFIG.versiontuple(lib_version) > Env.CONFIG.versiontuple(
+            return cls.CONFIG.versiontuple(lib_version) > cls.CONFIG.versiontuple(
                 lversion
             )
         return False
 
-    @staticmethod
-    def curl_os() -> str:
-        return Env.CONFIG.curl_props["os"]
+    @classmethod
+    def curl_os(cls) -> str:
+        return cls.CONFIG.curl_props["os"]
 
-    @staticmethod
-    def curl_fullname() -> str:
-        return Env.CONFIG.curl_props["fullname"]
+    @classmethod
+    def curl_fullname(cls) -> str:
+        return cls.CONFIG.curl_props["fullname"]
 
-    @staticmethod
-    def curl_version() -> str:
-        return Env.CONFIG.curl_props["version"]
+    @classmethod
+    def curl_version(cls) -> str:
+        return cls.CONFIG.curl_props["version"]
 
-    @staticmethod
-    def curl_is_debug() -> bool:
-        return Env.CONFIG.curl_is_debug
+    @classmethod
+    def curl_is_debug(cls) -> bool:
+        return cls.CONFIG.curl_is_debug
 
-    @staticmethod
-    def curl_is_verbose() -> bool:
-        return Env.CONFIG.curl_is_verbose
+    @classmethod
+    def curl_is_verbose(cls) -> bool:
+        return cls.CONFIG.curl_is_verbose
 
-    @staticmethod
-    def curl_can_cert_status() -> bool:
-        return Env.CONFIG.curl_can_cert_status
+    @classmethod
+    def curl_can_cert_status(cls) -> bool:
+        return cls.CONFIG.curl_can_cert_status
 
-    @staticmethod
-    def curl_override_dns() -> bool:
-        return Env.CONFIG.curl_override_dns
+    @classmethod
+    def curl_override_dns(cls) -> bool:
+        return cls.CONFIG.curl_override_dns
 
-    @staticmethod
-    def curl_resolv_threaded() -> bool:
-        return Env.CONFIG.curl_resolv_threaded
+    @classmethod
+    def curl_resolv_threaded(cls) -> bool:
+        return cls.CONFIG.curl_resolv_threaded
 
-    @staticmethod
-    def curl_can_doh() -> bool:
-        return Env.CONFIG.curl_can_doh
+    @classmethod
+    def curl_can_doh(cls) -> bool:
+        return cls.CONFIG.curl_can_doh
 
-    @staticmethod
-    def curl_can_early_data() -> bool:
-        if Env.curl_uses_lib('gnutls'):
-            return Env.curl_lib_version_at_least('gnutls', '3.7.2')
-        return Env.curl_uses_any_libs(['wolfssl', 'quictls', 'openssl'])
+    @classmethod
+    def curl_can_early_data(cls) -> bool:
+        if cls.curl_uses_lib('gnutls'):
+            return cls.curl_lib_version_at_least('gnutls', '3.7.2')
+        return cls.curl_uses_any_libs(['wolfssl', 'quictls', 'openssl'])
 
-    @staticmethod
-    def curl_can_h3_early_data() -> bool:
-        return Env.curl_can_early_data() and Env.curl_uses_lib("ngtcp2")
+    @classmethod
+    def curl_can_h3_early_data(cls) -> bool:
+        return cls.curl_can_early_data() and cls.curl_uses_lib("ngtcp2")
 
-    @staticmethod
-    def http_protos() -> List[str]:
+    @classmethod
+    def http_protos(cls) -> List[str]:
         # http protocols we can test
-        if Env.have_h2_curl():
-            if Env.have_h3():
+        if cls.have_h2_curl():
+            if cls.have_h3():
                 return ["http/1.1", "h2", "h3"]
             return ["http/1.1", "h2"]
         return ["http/1.1"]
 
-    @staticmethod
-    def http_h1_h2_protos() -> List[str]:
+    @classmethod
+    def http_h1_h2_protos(cls) -> List[str]:
         # http 1+2 protocols we can test
-        if Env.have_h2_curl():
+        if cls.have_h2_curl():
             return ["http/1.1", "h2"]
         return ["http/1.1"]
 
-    @staticmethod
-    def http_mplx_protos() -> List[str]:
+    @classmethod
+    def http_mplx_protos(cls) -> List[str]:
         # http multiplexing protocols we can test
-        if Env.have_h2_curl():
-            if Env.have_h3():
+        if cls.have_h2_curl():
+            if cls.have_h3():
                 return ["h2", "h3"]
             return ["h2"]
         return []
 
-    @staticmethod
-    def have_h3() -> bool:
-        return Env.have_h3_curl() and Env.have_h3_server()
+    @classmethod
+    def have_h3(cls) -> bool:
+        return cls.have_h3_curl() and cls.have_h3_server()
 
-    @staticmethod
-    def httpd_version() -> str:
-        return Env.CONFIG.httpd_version
+    @classmethod
+    def httpd_version(cls) -> str:
+        return cls.CONFIG.httpd_version
 
-    @staticmethod
-    def nghttpx_version() -> str:
-        return Env.CONFIG.nghttpx_version
+    @classmethod
+    def nghttpx_version(cls) -> str:
+        return cls.CONFIG.nghttpx_version
 
-    @staticmethod
-    def caddy_version() -> str:
-        return Env.CONFIG.caddy_version
+    @classmethod
+    def caddy_version(cls) -> str:
+        return cls.CONFIG.caddy_version
 
-    @staticmethod
-    def h2o_version() -> str:
-        return Env.CONFIG.h2o_version
+    @classmethod
+    def h2o_version(cls) -> str:
+        return cls.CONFIG.h2o_version
 
-    @staticmethod
-    def caddy_is_at_least(minv) -> bool:
-        return Env.CONFIG.caddy_is_at_least(minv)
+    @classmethod
+    def sshd_version(cls) -> str:
+        return cls.CONFIG.sshd_version
 
-    @staticmethod
-    def httpd_is_at_least(minv) -> bool:
-        return Env.CONFIG.httpd_is_at_least(minv)
+    @classmethod
+    def caddy_is_at_least(cls, minv) -> bool:
+        return cls.CONFIG.caddy_is_at_least(minv)
 
-    @staticmethod
-    def has_caddy() -> bool:
-        return Env.CONFIG.caddy is not None
+    @classmethod
+    def httpd_is_at_least(cls, minv) -> bool:
+        return cls.CONFIG.httpd_is_at_least(minv)
 
-    @staticmethod
-    def has_vsftpd() -> bool:
-        return Env.CONFIG.vsftpd is not None
+    @classmethod
+    def has_caddy(cls) -> bool:
+        return cls.CONFIG.caddy is not None
 
-    @staticmethod
-    def vsftpd_version() -> str:
-        return Env.CONFIG.vsftpd_version
+    @classmethod
+    def has_vsftpd(cls) -> bool:
+        return cls.CONFIG.vsftpd is not None
 
-    @staticmethod
-    def has_danted() -> bool:
-        return Env.CONFIG.danted is not None
+    @classmethod
+    def vsftpd_version(cls) -> str:
+        return cls.CONFIG.vsftpd_version
 
-    @staticmethod
-    def has_sshd() -> bool:
-        return Env.CONFIG.sshd is not None
+    @classmethod
+    def has_danted(cls) -> bool:
+        return cls.CONFIG.danted is not None
 
-    @staticmethod
-    def has_sftpd() -> bool:
-        return Env.has_sshd() and Env.CONFIG.sftpd is not None
+    @classmethod
+    def has_sshd(cls) -> bool:
+        return cls.CONFIG.sshd is not None
 
-    @staticmethod
-    def tcpdump() -> Optional[str]:
-        return Env.CONFIG.tcpdump
+    @classmethod
+    def has_sftpd(cls) -> bool:
+        return cls.has_sshd() and cls.CONFIG.sftpd is not None
+
+    @classmethod
+    def tcpdump(cls) -> Optional[str]:
+        return cls.CONFIG.tcpdump
 
     def __init__(self, pytestconfig=None, env_config=None):
         if env_config:
@@ -714,6 +754,15 @@ class Env:
                 self._ca.issue_certs(self.CONFIG.cert_specs)
                 if self.have_openssl():
                     self._ca.create_hashdir(self.openssl)
+                if self.have_openssl_ech():
+                    for domain in [self.domain1, self.domain2]:
+                        p = subprocess.run(args=[
+                            self.openssl, 'ech',
+                            '-out', os.path.join(ca_dir, f'{domain}.echconfig'),
+                            '-public_name', f'public.{domain}'
+                        ], capture_output=True, text=True, check=True)
+                        if p.returncode != 0:
+                            raise EnvError(f"Error generating ECHConfig for {domain}")
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)
@@ -724,6 +773,28 @@ class Env:
         creds = self.ca.get_credentials_for_name(domain)
         if len(creds) > 0:
             return creds[0]
+        return None
+
+    def get_echconfig_file(self, domain) -> Optional[str]:
+        ech_file = os.path.join(self.gen_dir, f"ca/{domain}.echconfig")
+        if os.path.exists(ech_file):
+            return ech_file
+        return None
+
+    def get_echconfig_arg(self, domain) -> Optional[str]:
+        ech_file = self.get_echconfig_file(domain)
+        if ech_file:
+            ech_config = ''
+            in_pem = False
+            with open(ech_file) as fd:
+                for line in fd.read().splitlines():
+                    if not in_pem and line == '-----BEGIN ECHCONFIG-----':
+                        in_pem = True
+                    elif in_pem and line == '-----END ECHCONFIG-----':
+                        break
+                    elif in_pem:
+                        ech_config += line
+            return ech_config
         return None
 
     @property

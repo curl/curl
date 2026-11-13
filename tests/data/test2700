@@ -18,9 +18,6 @@ ws
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

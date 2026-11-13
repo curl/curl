@@ -186,8 +186,9 @@ char *curl_version(void)
   int j;
 
 #ifdef DEBUGBUILD
-  /* Override version string when environment variable CURL_VERSION is set */
-  const char *debugversion = getenv("CURL_VERSION");
+  /* Override version string when environment variable CURL_DEBUG_VERSION is
+     set */
+  const char *debugversion = getenv("CURL_DEBUG_VERSION");
   if(debugversion) {
     curl_msnprintf(out, sizeof(out), "%s", debugversion);
     return out;
@@ -487,9 +488,7 @@ static const struct feat features_table[] = {
 #ifdef CURL_WITH_MULTI_SSL
   FEATURE("MultiSSL",    NULL,                CURL_VERSION_MULTI_SSL),
 #endif
-#ifdef USE_NTLM
-  FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
-#endif
+  /* NTLM is not supported anymore */
 #ifdef USE_PROXY_HTTP3
   FEATURE("proxy-HTTP3", NULL,                0),
 #endif

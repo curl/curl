@@ -29,6 +29,7 @@
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "bufref.h"
+#include "url.h" /* Curl_uc_to_curlcode() */
 #include "curlx/strparse.h"
 
 /*
@@ -81,7 +82,8 @@ static CURLcode effective_url(struct Curl_easy *data,
                               const char **param_charp)
 {
   const char *s = Curl_bufref_ptr(&data->state.url);
-  *param_charp = s ? s : "";
+  /* never return the URL unfiltered */
+  *param_charp = s ? NULL : "";
   if(s) {
     char *url = NULL;
     /* Make a copy of the URL without credentials */
@@ -103,15 +105,17 @@ static CURLcode effective_url(struct Curl_easy *data,
     curl_url_cleanup(u);
 
     if(uc || !url)
-      return CURLE_OUT_OF_MEMORY;
+      return uc ? Curl_uc_to_curlcode(uc) : CURLE_OUT_OF_MEMORY;
     if(strcmp(url, s)) {
       /* they are different */
       curlx_free(data->info.effective_url);
       data->info.effective_url = url;
       *param_charp = url;
     }
-    else
+    else {
       curl_free(url);
+      *param_charp = s;
+    }
   }
   return CURLE_OK;
 }
@@ -500,7 +504,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = data->id;
     break;
   case CURLINFO_CONN_ID:
-    *param_offt = data->state.lastconnect_id;
+    *param_offt = data->state.last_conn_id;
     break;
   case CURLINFO_EARLYDATA_SENT_T:
     *param_offt = data->progress.earlydata_sent;
@@ -622,7 +626,7 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
     /* we are exposing a pointer to internal memory with unknown
      * lifetime here. */
     *tsip = tsi;
-    if(!Curl_conn_get_ssl_info(data, data->conn, FIRSTSOCKET, query, tsi)) {
+    if(!Curl_conn_get_ssl_info(data, data->conn, query, tsi)) {
       tsi->backend = Curl_ssl_backend();
       tsi->internals = NULL;
     }

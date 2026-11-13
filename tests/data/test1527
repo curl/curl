@@ -11,7 +11,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <connect crlf="headers">
 HTTP/1.1 200 OK
@@ -39,15 +38,11 @@ ETag: "21025-dc7-39462498"
 </datacheck>
 
 </reply>
-# Client-side
 <client>
 <server>
 http
 http-proxy
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Same headers with CURLOPT_HEADEROPT == CURLHEADER_UNIFIED
 </name>
@@ -59,7 +54,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">
 CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1

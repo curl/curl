@@ -2136,8 +2136,7 @@ fi
 
 case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$RUSTLS_ENABLED" in
   x)
-    AC_MSG_ERROR([TLS not detected, cannot build with HTTPS, FTPS, NTLM and more.
-Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
+    AC_MSG_ERROR([TLS not detected. Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
     ;;
   x1)
     dnl one SSL backend is enabled
@@ -2212,7 +2211,8 @@ dnl ----------------------
 dnl check unsafe CA search
 dnl ----------------------
 
-if test "$curl_cv_native_windows" = "yes"; then
+dnl Only used when safe CA search is disabled
+if test "$curl_cv_native_windows" = "yes" && test "$curl_cv_winuwp" != "yes"; then
   ca_search=1
   AC_MSG_CHECKING([whether to enable unsafe CA bundle search in PATH on Windows])
   AC_ARG_ENABLE(ca-search,
@@ -4015,7 +4015,6 @@ AC_CHECK_HEADERS(
   netinet/in.h \
   netinet/in6.h \
   sys/un.h \
-  linux/tcp.h \
   netinet/tcp.h \
   netinet/udp.h \
   netinet/ip.h \
@@ -4221,7 +4220,7 @@ AC_CHECK_FUNCS([\
 ])
 
 if test "$curl_cv_apple" != "yes"; then
-  dnl Apple platforms do not offer pipe2(), but the iPhone Simulator-specific
+  dnl Apple SDK <27 do not offer pipe2(), but the iPhone Simulator-specific
   dnl /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
   dnl detection, omit this feature check for Apple targets.
   AC_CHECK_FUNCS([\
@@ -4243,7 +4242,11 @@ if test "$curl_cv_native_windows" != "yes"; then
 
   CURL_CHECK_FUNC_MEMSET_S
   if test "$curl_cv_func_memset_s" = "no"; then
-    AC_CHECK_FUNCS([memset_explicit])
+    dnl Use complex detection to avoid misdetection on old Linux.
+    CURL_CHECK_FUNC_EXPLICIT_BZERO
+    if test "$curl_cv_func_explicit_bzero" = "no"; then
+      AC_CHECK_FUNCS([memset_explicit])
+    fi
   fi
 fi
 
@@ -4601,26 +4604,6 @@ fi
 if test "$want_httpsig" != "yes"; then
   AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
 fi
-
-dnl ************************************************************
-dnl disable NTLM support
-dnl
-AC_MSG_CHECKING([whether to support NTLM])
-AC_ARG_ENABLE(ntlm,
-AS_HELP_STRING([--enable-ntlm],[Enable NTLM support])
-AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
-[ case "$enableval" in
-  yes)
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(CURL_ENABLE_NTLM, 1, [enable NTLM support])
-    CURL_ENABLE_NTLM=1
-    ;;
-  *)
-    AC_MSG_RESULT(no)
-    ;;
-  esac ],
-    AC_MSG_RESULT(no)
-)
 
 dnl ************************************************************
 dnl disable Unix domain sockets support
@@ -5163,7 +5146,9 @@ while test -n "$1"; do
   shift
 done
 LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $LDFLAGSPC"
+LIBCURL_PC_LDFLAGS_PRIVATE=`echo $LIBCURL_PC_LDFLAGS_PRIVATE | tr ' ' '\012' | uniq | tr '\012' ' '`
 LIBCURL_PC_LIBS_PRIVATE="$LIBS$PTHREAD"
+LIBCURL_PC_LIBS_PRIVATE=`echo $LIBCURL_PC_LIBS_PRIVATE | tr ' ' '\012' | uniq | tr '\012' ' '`
 
 AC_SUBST(LIBCURL_PC_LDFLAGS_PRIVATE)
 AC_SUBST(LIBCURL_PC_LIBS_PRIVATE)
@@ -5277,23 +5262,6 @@ fi
 
 if test "$CURL_DISABLE_KERBEROS_AUTH" != "1" && (test "$HAVE_GSSAPI" = "1" || test "$USE_WINDOWS_SSPI" = "1"); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Kerberos"
-fi
-
-use_curl_ntlm_core=no
-
-if test "$CURL_ENABLE_NTLM" = "1"; then
-  if test "$HAVE_DES_ECB_ENCRYPT" = "1" ||
-     test "$GNUTLS_ENABLED" = "1" ||
-     test "$USE_WIN32_CRYPTO" = "1" ||
-     test "$HAVE_WC_DES_ECBENCRYPT" = "1" ||
-     test "$HAVE_MBEDTLS_DES_CRYPT_ECB" = "1"; then
-    use_curl_ntlm_core=yes
-  fi
-
-  if test "$use_curl_ntlm_core" = "yes" ||
-     test "$USE_WINDOWS_SSPI" = "1"; then
-    SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
-  fi
 fi
 
 if test "$USE_NGHTTP2" = "1"; then

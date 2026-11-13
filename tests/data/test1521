@@ -7,18 +7,13 @@ libtest
 </keywords>
 </info>
 
-# Client-side
 <client>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 Test all curl_easy_setopt and curl_easy_getinfo options
 </name>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 ok

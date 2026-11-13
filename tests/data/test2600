@@ -8,7 +8,6 @@ timing-dependent
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

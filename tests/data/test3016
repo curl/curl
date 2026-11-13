@@ -6,7 +6,6 @@ FILE
 </keywords>
 </info>
 
-# Client-side
 <client>
 <server>
 file
@@ -23,7 +22,6 @@ file://%FILE_PWD/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 0

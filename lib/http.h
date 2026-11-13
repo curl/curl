@@ -81,7 +81,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const size_t thislen);
 
 CURLcode Curl_add_timecondition(struct Curl_easy *data, struct dynbuf *req);
-CURLcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
+CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  int httpversion, struct dynbuf *req);
 
 void Curl_http_to_fold(struct dynbuf *bf);
@@ -92,6 +92,8 @@ void Curl_http_method(struct Curl_easy *data,
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
+CURLcode Curl_http_setup_filters(struct Curl_easy *data,
+                                 struct Curl_cfilter *cf);
 CURLcode Curl_http(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_done(struct Curl_easy *data,
                         CURLcode status, bool premature);
@@ -197,7 +199,7 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
                                bool is_connect);
 
 /* Decode HTTP status code string. */
-CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
+CURLcode Curl_http_decode_status(int32_t *pstatus, const char *s, size_t len);
 
 /**
  * All about a core HTTP request, excluding body and trailers

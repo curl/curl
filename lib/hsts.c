@@ -255,7 +255,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       }
     }
 
-    if(assign && curlx_str_casecompare(&word, "max-age")) {
+    if(assign && curlx_str_casecompare2(&word, STRCONST("max-age"))) {
       const char *vp = curlx_str(&val);
       if(gotma)
         return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -268,7 +268,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
 
       gotma = TRUE;
     }
-    else if(curlx_str_casecompare(&word, "includesubdomains")) {
+    else if(curlx_str_casecompare2(&word, STRCONST("includesubdomains"))) {
       if(gotinc)
         return CURLE_BAD_FUNCTION_ARGUMENT;
       subdomains = TRUE;

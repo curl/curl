@@ -7,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -25,7 +24,6 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 </data>
 </reply>
 
-# Client-side
 <client>
 
 <server>
@@ -38,17 +36,16 @@ proxy
 <setenv>
 CURL_TIME=13
 CURL_DEBUG_SIZE=4019
-CURL_VERSION=curl-unit-test-fake-version
+CURL_DEBUG_VERSION=curl-unit-test-fake-version
 </setenv>
 <name>
 Verify JSON output
 </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -s --write-out '%{json}\n' -o %LOGDIR/out972
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -s --write-out '%{json}\n' -o %LOGDIR/out%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

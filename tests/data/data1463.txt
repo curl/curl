@@ -1,5 +1,7 @@
 file: FILE protocol
      --create-file-mode <mode>  File mode for created files
+ -D, --dump-header <filename>   Write the received headers to <filename>
  -I, --head                     Show document info only
  -l, --list-only                List only mode
  -r, --range <range>            Retrieve only the bytes within RANGE
+ -i, --show-headers             Show response headers in output

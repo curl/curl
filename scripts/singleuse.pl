@@ -57,6 +57,7 @@ my %wl = (
     'curlx_base64_encode' => 'internal api',
     'curlx_base64url_encode' => 'internal api',
     'Curl_multi_clear_dirty' => 'internal api',
+    'Curl_pp_set_io' => 'internal api',
 );
 
 my %api = (
@@ -186,15 +187,17 @@ open(N, '-|', 'nm', $file) or die;
 
 my %exist;
 my %uses;
+my $anyinput = 0;
 while(<N>) {
     my $l = $_;
     chomp $l;
+    $anyinput = 1;
 
-    if($l =~ /^([0-9a-z_-]+)\.o:/) {
+    if($l =~ /^([0-9a-z_-]+)(\.c)?\.o:/) {
         $file = $1;
     }
     # libcurl.a(unity_0_c.c.o):
-    elsif($l =~ /\(([0-9a-z_.-]+)\.o\):/) {  # Apple nm
+    elsif($l =~ /\(([0-9a-z_.-]+)(\.c)?\.o\):/) {  # Apple nm
         $file = $1;
     }
     if($l =~ /^([0-9a-f]+) T _?(.*)/) {
@@ -210,6 +213,11 @@ while(<N>) {
     }
 }
 close(N);
+
+if(!$anyinput) {
+    print STDERR "Bad command or input file missing: $file\n";
+    exit 1;
+}
 
 my $err = 0;
 for(sort keys %exist) {

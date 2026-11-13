@@ -20,13 +20,3 @@ git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' | while read -
     yq eval '.. | select(has("run") and (.run | type == "!!str")) | .run + "\ntrue\n"' "${f}"
   } | shellcheck -
 done
-
-# Circle CI
-git ls-files '.circleci/*.yml' | while read -r f; do
-  echo "Verifying ${f}..."
-  {
-    echo '#!/usr/bin/env bash'
-    echo 'set -eu'
-    yq eval '.. | select(has("command") and (.command | type == "!!str")) | .command + "\ntrue\n"' "${f}"
-  } | shellcheck -
-done

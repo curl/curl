@@ -12,7 +12,6 @@ HTTP auth in URL
 </keywords>
 </info>
 
-# Server-side
 <reply>
 
 # this is returned first since we get no proxy-auth
@@ -54,7 +53,6 @@ Nice auth sir!
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -73,7 +71,6 @@ http://digest:a-lot@data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --p
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1

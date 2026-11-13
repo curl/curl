@@ -8,7 +8,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -20,7 +19,6 @@ Funny-head: yesyes swsclose
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -28,9 +26,6 @@ http
 <name>
 CURLOPT_CURLU and CURLOPT_PORT
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 # The tool does two requests, the first sets CURLOPT_PORT to 1
 # the second resets the port again and expects that request to work.
@@ -39,7 +34,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

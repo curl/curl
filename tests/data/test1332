@@ -8,7 +8,6 @@ HTTP POST
 followlocation
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 HTTP/1.1 303 OK swsclose
@@ -40,7 +39,6 @@ body
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -53,7 +51,6 @@ http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d "moo" --post303
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
 POST /blah/%TESTNUMBER HTTP/1.1

@@ -26,10 +26,9 @@ import logging
 import os
 import re
 from datetime import timedelta
-from typing import Generator
 
 import pytest
-from testenv import CurlClient, Dnsd, Env, LocalClient
+from testenv import CurlClient, Env, LocalClient
 
 log = logging.getLogger(__name__)
 
@@ -38,15 +37,9 @@ log = logging.getLogger(__name__)
 @pytest.mark.skipif(condition=not Env.curl_has_feature('AsynchDNS'), reason="needs AsynchDNS")
 class TestResolve:
 
-    @pytest.fixture(scope='class')
-    def dnsd(self, env: Env) -> Generator[Dnsd, None, None]:
-        dnsd = Dnsd(env=env)
-        assert dnsd.initial_start()
-        yield dnsd
-        dnsd.stop()
-
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd):
+    @classmethod
+    def _class_scope(cls, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-0k", fsize=0)
 

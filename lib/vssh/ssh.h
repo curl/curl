@@ -59,6 +59,7 @@ typedef enum {
   SSH_AUTHLIST,
   SSH_AUTH_PKEY_INIT,
   SSH_AUTH_PKEY,
+  SSH_AUTH_PKEY_AUTO,  /* libssh: ssh-agent, then the default key files */
   SSH_AUTH_PASS_INIT,
   SSH_AUTH_PASS,
   SSH_AUTH_AGENT_INIT, /* initialize then wait for connection to agent */
@@ -129,6 +130,7 @@ struct SSHPROTO {
   struct dynbuf readdir;
   char readdir_filename[CURL_PATH_MAX + 1];
   char readdir_longentry[CURL_PATH_MAX + 1];
+  unsigned int readdir_count; /* entries handled in the current readdir loop */
 
   LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
 
@@ -162,6 +164,8 @@ struct ssh_conn {
   int waitfor;                  /* REQ_IO_RECV/REQ_IO_SEND bits overriding
                                    pollset given flags */
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
+  size_t nsent_already;         /* send data already committed,
+                                 * not reported to caller */
 
 #ifdef USE_LIBSSH
   CURLcode actualcode;        /* the actual error code */

@@ -9,7 +9,6 @@ HTTP Basic auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 # The test server provides no way to respond differently to a subsequent
 # Basic authenticated request (we really want to respond with 200 for
@@ -44,7 +43,6 @@ Content-Length: 0
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -63,7 +61,6 @@ four is the number of lines
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1

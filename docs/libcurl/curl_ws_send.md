@@ -130,8 +130,8 @@ there can be an error message stored in the error buffer when non-zero is
 returned.
 
 Instead of blocking, the function returns **CURLE_AGAIN**. The correct
-behavior is then to wait for the socket to signal readability before calling
-this function again.
+behavior is then to wait until the socket is writable before calling
+this function again. Retry with the same data and length.
 
 Any other non-zero return value indicates an error. See the libcurl-errors(3)
 man page for the full list with descriptions.

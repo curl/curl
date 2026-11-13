@@ -9,7 +9,6 @@ HTTP Digest auth
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 401 Authorization Required
@@ -55,7 +54,6 @@ This IS the real page!
 
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -79,7 +77,6 @@ four is the number of lines
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1

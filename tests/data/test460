@@ -7,7 +7,6 @@ expand
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 try --expand without an argument

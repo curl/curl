@@ -53,14 +53,13 @@ struct t1693_ctx {
   unsigned char output[T1693_WIRE_LEN];
 };
 
-static CURLcode t1693_send(struct Curl_easy *data, int8_t sockindex,
+static CURLcode t1693_send(struct Curl_easy *data,
                           const uint8_t *buf, size_t len, bool eos,
                           size_t *pnwritten)
 {
   struct t1693_ctx *ctx = data->set.private_data;
   const struct t1693_send *send;
   size_t remaining;
-  (void)sockindex;
   (void)eos;
   *pnwritten = 0;
 
@@ -98,13 +97,12 @@ unit_test_abort:
   return CURLE_SEND_ERROR;
 }
 
-static CURLcode t1693_recv(struct Curl_easy *data, int8_t sockindex,
+static CURLcode t1693_recv(struct Curl_easy *data,
                           char *buf, size_t len, size_t *pnread)
 {
   static const unsigned char connack[] = { 0x20, 0x02, 0x00, 0x00 };
   struct t1693_ctx *ctx = data->set.private_data;
   size_t n = sizeof(connack) - ctx->recv_index;
-  (void)sockindex;
   *pnread = 0;
   abort_unless(ctx->written == T1693_CONNECT_LEN,
                "read while an outgoing packet is queued");
@@ -151,12 +149,12 @@ static void t1693_run(const struct t1693_send *sends, size_t nsends,
   abort_unless(data, "easy handle allocation failed");
   conn = curlx_calloc(1, sizeof(*conn));
   abort_unless(conn, "connection allocation failed");
+  Curl_cfchain_init(&conn->chain, conn, TRUE);
   Curl_hash_init(&conn->meta_hash, 23, CURL_HASH_TYPE_BYTES, t1693_meta_dtor);
   data->conn = conn;
-  conn->sock[FIRSTSOCKET] = 42;
-  conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
-  conn->send[FIRSTSOCKET] = t1693_send;
-  conn->recv[FIRSTSOCKET] = t1693_recv;
+  conn->chain.sock = 42;
+  conn->do_send = t1693_send;
+  conn->do_recv = t1693_recv;
   data->set.private_data = &ctx;
   data->set.postfields = CURL_UNCONST("payload");
   data->state.httpreq = HTTPREQ_POST;

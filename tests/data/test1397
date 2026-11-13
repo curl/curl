@@ -7,7 +7,6 @@ Curl_cert_hostcheck
 </keywords>
 </info>
 
-# Client-side
 <client>
 <features>
 unittest

@@ -37,12 +37,6 @@
 # - `MBEDTLS_VERSION`:          Version of mbedTLS.
 # - `CURL::mbedtls`:            mbedTLS library target.
 
-if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
-  message(WARNING "MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.")
-  set(MBEDTLS_INCLUDE_DIR "${MBEDTLS_INCLUDE_DIRS}")
-  unset(MBEDTLS_INCLUDE_DIRS)
-endif()
-
 set(_mbedtls_pc_requires "mbedtls" "mbedx509" "mbedcrypto")
 
 if(NOT DEFINED MBEDTLS_INCLUDE_DIR AND

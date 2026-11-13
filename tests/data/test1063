@@ -7,11 +7,9 @@ Range
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <features>
 file
@@ -31,7 +29,6 @@ Invalid large X- range on a file://
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 36

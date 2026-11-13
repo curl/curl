@@ -6,12 +6,10 @@ netrc
 POP3
 </keywords>
 </info>
-# Server-side
 <reply>
 
 </reply>
 
-# Client-side
 <client>
 <server>
 pop3

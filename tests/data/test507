@@ -9,11 +9,9 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -21,15 +19,11 @@ http
 <name>
 multi interface get with non-existing hostname
 </name>
-<tool>
-lib%TESTNUMBER
-</tool>
 <command>
 http://non-existing-host.haxx.se/
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <errorcode>
 6

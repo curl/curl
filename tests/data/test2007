@@ -7,11 +7,9 @@ SFTP
 </keywords>
 </info>
 
-# Server-side
 <reply>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -20,8 +18,13 @@ sftp
 SFTP quote rmdir command with trailing junk
 </name>
 <command>
---hostpubmd5 %SSHSRVMD5 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt -Q "mkdir /tmp/test trailing_garbage"
+--hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt -Q "mkdir /tmp/test trailing_garbage"
 </command>
+<setenv>
+# Needed for MSYS2 to not treat the base64 hash argument as a POSIX path list
+# that has to be converted to Windows paths
+MSYS2_ARG_CONV_EXCL=*
+</setenv>
 </client>
 
 <verify>

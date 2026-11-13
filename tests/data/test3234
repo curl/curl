@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+CONNECT_ONLY
+CURLOPT_SHARE
+libtest
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+CONNECT_ONLY forgets connection when attaching a shared pool
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+</verify>
+</testcase>

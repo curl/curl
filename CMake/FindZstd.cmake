@@ -35,15 +35,6 @@
 # - `ZSTD_VERSION`:          Version of zstd.
 # - `CURL::zstd`:            zstd library target.
 
-if(DEFINED Zstd_INCLUDE_DIR AND NOT DEFINED ZSTD_INCLUDE_DIR)
-  message(WARNING "Zstd_INCLUDE_DIR is deprecated, use ZSTD_INCLUDE_DIR instead.")
-  set(ZSTD_INCLUDE_DIR "${Zstd_INCLUDE_DIR}")
-endif()
-if(DEFINED Zstd_LIBRARY AND NOT DEFINED ZSTD_LIBRARY)
-  message(WARNING "Zstd_LIBRARY is deprecated, use ZSTD_LIBRARY instead.")
-  set(ZSTD_LIBRARY "${Zstd_LIBRARY}")
-endif()
-
 set(_zstd_pc_requires "libzstd")
 
 if(NOT DEFINED ZSTD_INCLUDE_DIR AND

@@ -29,9 +29,6 @@ Funny-head: yesyes
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 Set CURLOPT_CURLU and dupe the handle
 </name>

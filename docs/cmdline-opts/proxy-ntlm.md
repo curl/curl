@@ -16,5 +16,8 @@ Example:
 
 # `--proxy-ntlm`
 
+NTLM authentication support was removed in 8.24.0. This option is no longer
+supported and causes curl to fail with an unsupported-feature error.
+
 Use HTTP NTLM authentication when communicating with the given proxy. Use
 --ntlm for enabling NTLM with a remote host.

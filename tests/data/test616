@@ -7,13 +7,11 @@ zero-length
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data sendzero="yes">
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 sftp
@@ -28,7 +26,6 @@ SFTP retrieval of empty file
 </file>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 </verify>
 </testcase>

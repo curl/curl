@@ -7,7 +7,6 @@ HTTP GET
 followlocation
 </keywords>
 </info>
-# Server-side
 <reply>
 <data crlf="headers">
 HTTP/1.1 302 OK swsclose
@@ -39,7 +38,6 @@ body
 </datacheck>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -52,7 +50,6 @@ http://%HOSTIP:%HTTPPORT/this/%TESTNUMBER -L
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /this/%TESTNUMBER HTTP/1.1

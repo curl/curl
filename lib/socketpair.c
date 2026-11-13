@@ -55,9 +55,7 @@ static int wakeup_eventfd(curl_socket_t socks[2], bool nonblocking)
 static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
 {
 #ifdef HAVE_PIPE2
-  int flags = nonblocking ? O_NONBLOCK | O_CLOEXEC : O_CLOEXEC;
-  if(pipe2(socks, flags))
-    return -1;
+  return pipe2(socks, (nonblocking ? O_NONBLOCK : 0) | O_CLOEXEC) ? -1 : 0;
 #else
   if(pipe(socks))
     return -1;
@@ -79,9 +77,8 @@ static int wakeup_pipe(curl_socket_t socks[2], bool nonblocking)
       return -1;
     }
   }
-#endif
-
   return 0;
+#endif /* HAVE_PIPE2 */
 }
 
 #elif defined(HAVE_SOCKETPAIR)  /* !USE_EVENTFD && !HAVE_PIPE */
@@ -221,17 +218,21 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
     do {
       ssize_t nread;
 
+      /* Do not block forever */
+      if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
+        goto error;
+
       pfd[0].fd = socks[1];
       pfd[0].events = POLLIN;
       pfd[0].revents = 0;
       (void)Curl_poll(pfd, 1, 1000); /* one second */
 
       nread = sread(socks[1], p, s);
-      if(nread == -1) {
+      if(!nread) { /* unexpected close before getting complete `check` */
+        goto error;
+      }
+      else if(nread == -1) { /* error or close */
         int sockerr = SOCKERRNO;
-        /* Do not block forever */
-        if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
-          goto error;
         if(SOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
            || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)

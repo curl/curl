@@ -7,7 +7,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -24,14 +23,10 @@ Funny-head: yesyes
 -foo-
 </data>
 </reply>
-# Client-side
 <client>
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 
 <name>
 CURLINFO_SIZE_UPLOAD with small SO_SNDBUF
@@ -42,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout>
 -foo-

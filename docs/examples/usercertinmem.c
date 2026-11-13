@@ -26,11 +26,10 @@
  * </DESC>
  */
 
-/* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c. Note that
- * to maintain simplicity this example does not use a CA certificate for peer
- * verification. Some form of peer verification must be used in real
- * circumstances when a secure connection is required.
- */
+/* This example uses the legacy and discouraged method. It also disables
+   server certificate verification; real applications must verify the peer.
+   Use CURLOPT_SSLCERT_BLOB instead, which is TLS backend agnostic. See the
+   clientcert-blob.c example. */
 
 /* Requires: USE_OPENSSL */
 

@@ -125,9 +125,10 @@ push for it.
 
 Based on the description above, here are some planned future release dates:
 
-- June 24, 2026
-- September 2, 2026
-- October 28, 2026
-- December 23, 2026
-- February 17, 2027
-- April 14, 2027
+- October 14, 2026
+- December 9, 2026
+- February 3, 2027
+- March 31, 2027
+- May 26, 2027
+- July 21, 2027
+- September 15, 2027

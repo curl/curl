@@ -8,7 +8,6 @@ followlocation
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data1>
 HTTP/1.1 302 OK
@@ -21,7 +20,6 @@ nomnom
 </data1>
 </reply>
 
-# Client-side
 <client>
 <server>
 http

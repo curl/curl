@@ -7,14 +7,12 @@ HTTP GET
 HTTP/0.9
 </keywords>
 </info>
-# Server-side
 <reply>
 <data>
 no headers swsclose
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
@@ -27,7 +25,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http0.9
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

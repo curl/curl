@@ -68,11 +68,13 @@ struct h1_tunnel_state {
   } keepon;
   curl_off_t cl; /* size of content to read and ignore */
   h1_tunnel_state tunnel_state;
+  BIT(has_transfer_encoding);
   BIT(chunked_encoding);
   BIT(close_connection);
   BIT(maybe_folded);
   BIT(leading_unfold);
   BIT(udp_tunnel);
+  BIT(using_proxy_auth);
 };
 
 /* Persistent context for the H1-PROXY filter */
@@ -112,6 +114,8 @@ static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
   ts->close_connection = FALSE;
   ts->maybe_folded = FALSE;
   ts->leading_unfold = FALSE;
+  ts->has_transfer_encoding = FALSE;
+  ts->chunked_encoding = FALSE;
   ts->nsent = 0;
   ts->headerlines = 0;
   return CURLE_OK;
@@ -123,8 +127,8 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 {
   struct h1_tunnel_state *ts;
 
-  if(cf->conn->scheme->flags & PROTOPT_NOTCPPROXY) {
-    failf(data, "%s cannot be done over CONNECT", cf->conn->scheme->name);
+  if(CF_CONN(cf)->scheme->flags & PROTOPT_NOTCPPROXY) {
+    failf(data, "%s cannot be done over CONNECT", CF_CONN(cf)->scheme->name);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
@@ -190,10 +194,6 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     /* restore the protocol pointer */
     data->info.httpcode = 0; /* clear it as it might have been used for the
                                 proxy */
-    /* If a proxy-authorization header was used for the proxy, then we should
-       make sure that it is not accidentally used for the document request
-       after we have connected. Let's thus free and clear it here. */
-    curlx_safefree(data->req.hd_proxy_auth);
     break;
   }
 }
@@ -253,6 +253,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   curlx_dyn_reset(&ts->request_data);
   ts->nsent = 0;
   ts->headerlines = 0;
+  ts->using_proxy_auth =
+    !!Curl_dynhds_get(&req->headers, STRCONST("Proxy-Authorization"));
   http_minor = ts->httpversion % 10;
 
   result = Curl_h1_req_write_head(req, http_minor, &ts->request_data);
@@ -302,6 +304,30 @@ out:
   return result;
 }
 
+static CURLcode on_resp_status(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct h1_tunnel_state *ts,
+                               const char *header)
+{
+  struct SingleRequest *k = &data->req;
+
+  (void)ts;
+  if(!strncmp(header, "HTTP/1.", 7) &&
+          ((header[7] == '0') || (header[7] == '1')) &&
+          (header[8] == ' ') &&
+          ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
+          !ISDIGIT(header[12])) {
+    /* store the HTTP code from the proxy */
+    data->info.httpproxycode = k->httpcode = ((header[9] - '0') * 100) +
+      ((header[10] - '0') * 10) + (header[11] - '0');
+    CURL_TRC_CF(data, cf, "CONNECT%s HTTP status %d",
+                h1_proxy_is_udp(cf) ? "-UDP" : "", k->httpcode);
+    return CURLE_OK;
+  }
+  failf(data, "Invalid response header");
+  return CURLE_WEIRD_SERVER_REPLY;
+}
+
 static CURLcode on_resp_header(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                struct h1_tunnel_state *ts,
@@ -340,7 +366,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
       infof(data, "Ignoring Content-Length in CONNECT%s %03d response",
             is_udp ? "-UDP" : "", k->httpcode);
     }
-    else {
+    else if(!ts->has_transfer_encoding) {
       const char *p = header + CURL_CSTRLEN("Content-Length:");
       if(curlx_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
@@ -367,13 +393,13 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
       infof(data, "Ignoring Transfer-Encoding in "
             "CONNECT%s %03d response", is_udp ? "-UDP" : "", k->httpcode);
     }
-    else if(Curl_compareheader(header,
-                               STRCONST("Transfer-Encoding:"),
-                               STRCONST("chunked"))) {
-      CURL_TRC_CF(data, cf, "CONNECT%s response chunked",
-                  is_udp ? "-UDP" : "");
-      ts->chunked_encoding = TRUE;
-      Curl_httpchunk_reset(data, &ts->ch, TRUE);
+    else {
+      /* Do not use Content-Length to frame a Transfer-Encoding response. */
+      ts->has_transfer_encoding = TRUE;
+      ts->cl = 0;
+      ts->chunked_encoding = Curl_compareheader(header,
+                                                STRCONST("Transfer-Encoding:"),
+                                                STRCONST("chunked"));
     }
   }
   else if(is_udp && checkprefix("Capsule-protocol:", header)) {
@@ -389,17 +415,6 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "CONNECT%s Proxy-Connection: close",
                 is_udp ? "-UDP" : "");
     ts->close_connection = TRUE;
-  }
-  else if(!strncmp(header, "HTTP/1.", 7) &&
-          ((header[7] == '0') || (header[7] == '1')) &&
-          (header[8] == ' ') &&
-          ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
-          !ISDIGIT(header[12])) {
-    /* store the HTTP code from the proxy */
-    data->info.httpproxycode = k->httpcode = ((header[9] - '0') * 100) +
-      ((header[10] - '0') * 10) + (header[11] - '0');
-    CURL_TRC_CF(data, cf, "CONNECT%s HTTP status %d",
-                is_udp ? "-UDP" : "", k->httpcode);
   }
   return result;
 }
@@ -441,8 +456,23 @@ static CURLcode single_header(struct Curl_cfilter *cf,
 
   if(ISNEWLINE(linep[0])) {
     /* end of response-headers from the proxy */
-
-    if((407 == k->httpcode) && !data->state.authproblem) {
+    if(ts->has_transfer_encoding) {
+      if(ts->chunked_encoding) {
+        CURL_TRC_CF(data, cf, "CONNECT response chunked");
+        Curl_httpchunk_reset(data, &ts->ch, TRUE);
+      }
+      else {
+        /* The final transfer coding is not chunked, so the response body
+           ends at connection close. Do not reuse it for an auth retry. */
+        CURL_TRC_CF(data, cf, "CONNECT response close-delimited");
+        ts->close_connection = TRUE;
+      }
+    }
+    if(ts->headerlines == 1) {
+      ts->keepon = KEEPON_DONE;
+      result = CURLE_WEIRD_SERVER_REPLY;
+    }
+    else if((407 == k->httpcode) && !data->state.authproblem) {
       /* If we get a 407 response code with content length
          when we have no auth problem, we must ignore the
          whole response-body */
@@ -471,7 +501,10 @@ static CURLcode single_header(struct Curl_cfilter *cf,
     return result;
   }
 
-  result = on_resp_header(cf, data, ts, linep);
+  if(ts->headerlines == 1)
+    result = on_resp_status(cf, data, ts, linep);
+  else
+    result = on_resp_header(cf, data, ts, linep);
   if(result)
     return result;
 
@@ -499,7 +532,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
-    result = Curl_conn_recv(data, cf->sockindex, &byte, 1, &nread);
+    result = Curl_conn_cf_recv(cf->next, data, &byte, 1, &nread);
     if(result == CURLE_AGAIN)
       /* socket buffer drained, return */
       return CURLE_OK;
@@ -521,7 +554,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         ts->maybe_folded = FALSE;
       }
       if(data->set.proxyauth && data->state.authproxy.avail &&
-         data->req.hd_proxy_auth) {
+         ts->using_proxy_auth) {
         /* proxy auth was requested and there was proxy auth available,
            then deem this as "mere" proxy disconnect */
         ts->close_connection = TRUE;
@@ -632,7 +665,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            struct h1_tunnel_state *ts)
 {
-  struct connectdata *conn = cf->conn;
+  struct connectdata *conn = CF_CONN(cf);
   CURLcode result;
   bool done;
 
@@ -781,7 +814,6 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
   result = H1_CONNECT(cf, data, ts);
   if(result)
     goto out;
-  curlx_safefree(data->req.hd_proxy_auth);
 
 out:
   *done = (result == CURLE_OK) && tunnel_is_established(pctx->ts);
@@ -807,7 +839,7 @@ static CURLcode cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
   if(!cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are tunneling. */
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sock = cf->chain->sock;
     if(ts) {
       /* when we have sent a CONNECT to a proxy, we should rather either
          wait for the socket to become readable to be able to get the

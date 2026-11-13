@@ -50,18 +50,30 @@
 
 #include <Security/Security.h>
 
-#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
-     MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
-  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
-   __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
+#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+             __MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+             __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000) || \
+    (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+             __TV_OS_VERSION_MAX_ALLOWED >= 120000) || \
+    (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+             __WATCH_OS_VERSION_MAX_ALLOWED >= 50000) || \
+    (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+             __VISION_OS_VERSION_MAX_ALLOWED >= 10000)
 #define SUPPORTS_SecTrustEvaluateWithError 1
 #endif
 
 #if defined(SUPPORTS_SecTrustEvaluateWithError) && \
-  ((defined(MAC_OS_X_VERSION_MIN_REQUIRED) &&      \
-    MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) ||    \
-   (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) &&   \
-    __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
+  ((defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+            __MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) || \
+   (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+            __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000) || \
+   (defined(__TV_OS_VERSION_MIN_REQUIRED) && \
+            __TV_OS_VERSION_MIN_REQUIRED >= 120000) || \
+   (defined(__WATCH_OS_VERSION_MIN_REQUIRED) && \
+            __WATCH_OS_VERSION_MIN_REQUIRED >= 50000) || \
+   (defined(__VISION_OS_VERSION_MIN_REQUIRED) && \
+            __VISION_OS_VERSION_MIN_REQUIRED >= 10000))
 #define REQUIRES_SecTrustEvaluateWithError 1
 #endif
 
@@ -71,10 +83,16 @@
 #undef SUPPORTS_SecTrustEvaluateWithError
 #endif
 
-#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
-     MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
-  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
-   __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
+#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+             __MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
+    (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+             __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000) || \
+    (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
+             __TV_OS_VERSION_MAX_ALLOWED >= 90000) || \
+    (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
+             __WATCH_OS_VERSION_MAX_ALLOWED >= 20000) || \
+    (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
+             __VISION_OS_VERSION_MAX_ALLOWED >= 10000)
 #define SUPPORTS_SecOCSP 1
 #endif
 
@@ -85,7 +103,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 Curl_vtls_get_cert_der *der_cb,
                                 void *cb_user_data,
                                 const unsigned char *ocsp_buf,
-                                size_t ocsp_len)
+                                size_t ocsp_len,
+                                bool require_ocsp)
 {
   struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result = CURLE_OK;
@@ -134,19 +153,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
          * This policy further allows trustd to consult CRLs and OCSP data
          * to determine revocation status (which it may then cache). */
         CFOptionFlags revocation_flags = kSecRevocationUseAnyAvailableMethod;
-#if 0
-        /* `revoke_best_effort` is off by default in libcurl. When we
-         * add `kSecRevocationRequirePositiveResponse` to the Apple
-         * Trust policies, it interprets this as it NEEDs a confirmation
-         * of a cert being NOT REVOKED. Which not in general available for
-         * certificates on the Internet.
-         * It seems that applications using this policy are expected to PIN
-         * their certificate public keys or verification fails.
-         * This does not seem to be what we want here. */
-        if(!conn_config->revoke_best_effort) {
+        if(require_ocsp)
           revocation_flags |= kSecRevocationRequirePositiveResponse;
-        }
-#endif
         policy = SecPolicyCreateRevocation(revocation_flags);
         if(!policy) {
           result = CURLE_OUT_OF_MEMORY;
@@ -157,6 +165,14 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
       }
     }
   }
+#else
+  /* OCSP check not available in this Apple OS version. */
+  if(require_ocsp) {
+    failf(data, "Apple SecTrust version does not support OCSP checks");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
 #endif
 
   cert_array = CFArrayCreateMutable(NULL, num_certs, &kCFTypeArrayCallBacks);
@@ -204,7 +220,10 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
     if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
       CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
-
+      if(!ocspdata) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
       status = SecTrustSetOCSPResponse(trust, ocspdata);
       CFRelease(ocspdata);
       if(status != noErr) {
@@ -233,7 +252,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     result = SecTrustEvaluateWithError(trust, &error) ?
              CURLE_OK : CURLE_PEER_FAILED_VERIFICATION;
     if(error) {
-      VERBOSE(CFIndex code = CFErrorGetCode(error));
+      CFIndex code = CFErrorGetCode(error);
       error_ref = CFErrorCopyDescription(error);
 
       if(error_ref) {
@@ -246,8 +265,10 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
             curlx_safefree(err_desc);
         }
       }
-      infof(data, "Apple SecTrust failure %ld%s%s", code,
+      failf(data, "Apple SecTrust failure %ld%s%s", code,
             err_desc ? ": " : "", err_desc ? err_desc : "");
+      if(code == errSecIncompleteCertRevocationCheck)
+        result = CURLE_SSL_INVALIDCERTSTATUS;
     }
   }
   else
@@ -290,6 +311,18 @@ out:
   if(trust)
     CFRelease(trust);
   return result;
+}
+
+bool Curl_vtls_apple_verifies_ocsp(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
+{
+  (void)cf;
+  (void)data;
+#if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
+  return TRUE;
+#else
+  return FALSE;
+#endif
 }
 
 #endif /* USE_APPLE_SECTRUST */

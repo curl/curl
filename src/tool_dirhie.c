@@ -27,17 +27,8 @@
 #include "tool_msgs.h"
 
 #ifdef UNITTESTS
-#  define toolx_mkdir(x, y) create_dir_hierarchy_trace_mkdir(x)
-#elif defined(_WIN32)
-#  include <direct.h>
-#  define toolx_mkdir(x, y) _mkdir(x)
-#elif defined(MSDOS) && !defined(__DJGPP__)
-#  define toolx_mkdir(x, y) mkdir(x)
-#else
-#  define toolx_mkdir mkdir
-#endif
+#define toolx_mkdir(x, y) create_dir_hierarchy_trace_mkdir(x)
 
-#ifdef UNITTESTS
 static struct dynbuf mkdir_results;
 
 UNITTEST struct dynbuf *create_dir_hierarchy_trace_dynres(void)
@@ -51,6 +42,8 @@ static int create_dir_hierarchy_trace_mkdir(const char *dir)
     curlx_dyn_add(&mkdir_results, dir) ||
     curlx_dyn_add(&mkdir_results, "|") ? -1 : 0;
 }
+#else
+#define toolx_mkdir curlx_mkdir
 #endif
 
 static void show_dir_errno(const char *name)
@@ -117,7 +110,7 @@ CURLcode create_dir_hierarchy(const char *outfile)
     size_t seplen = strspn(outfile, PATH_DELIMITERS);
     size_t len = strcspn(&outfile[seplen], PATH_DELIMITERS);
 
-    /* the last path component is the file and it ends with a null byte */
+    /* the last path component is the file and it ends with a NUL byte */
     if(!outfile[len + seplen])
       break;
 

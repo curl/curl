@@ -7,7 +7,6 @@ URL
 </keywords>
 </info>
 
-# Client-side
 <client>
 <name>
 Space in FTP upload URL
@@ -17,7 +16,6 @@ Space in FTP upload URL
 </command>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 # 3 == CURLE_URL_MALFORMAT
 <errorcode>

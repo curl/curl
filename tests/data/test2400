@@ -9,7 +9,6 @@ HTTPS
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
@@ -23,11 +22,11 @@ Funny-head: yesyes
 </data>
 </reply>
 
-# Client-side
 <client>
 <features>
 Debug
 http/2
+nghttpx
 SSL
 </features>
 <server>
@@ -45,7 +44,6 @@ HTTP/2 GET over HTTPS
 
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">
 HTTP/2 200%SP

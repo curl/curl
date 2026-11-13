@@ -133,7 +133,7 @@ Relying on legacy dependencies is a risk.
 
 curl supports several cryptographic algorithms that are considered weak, like
 DES and MD5. These algorithms are still in use because some protocols and
-transfer options require use of them. For example NTLM or legacy HTTP Digest
+transfer options require use of them. For example legacy HTTP Digest
 authentication.
 
 curl users should consider switching to servers and options that use modern

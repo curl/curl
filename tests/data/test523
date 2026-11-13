@@ -11,7 +11,6 @@ libtest
 </keywords>
 </info>
 
-# Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
@@ -26,14 +25,10 @@ hello
 </data>
 </reply>
 
-# Client-side
 <client>
 <server>
 http
 </server>
-<tool>
-lib%TESTNUMBER
-</tool>
 <name>
 HTTP GET with proxy and CURLOPT_PORT
 </name>
@@ -46,7 +41,6 @@ proxy
 </features>
 </client>
 
-# Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
 GET http://www.example.com:19999/%TESTNUMBER HTTP/1.1

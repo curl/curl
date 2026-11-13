@@ -552,7 +552,8 @@ static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 #if defined(__clang__) && !defined(__GLIBC__)
 #pragma clang diagnostic pop
 #endif
-    if(cmsg->cmsg_level == SOL_UDP && cmsg->cmsg_type == UDP_GRO) {
+    if(cmsg->cmsg_level == SOL_UDP && cmsg->cmsg_type == UDP_GRO &&
+       cmsg->cmsg_len >= CMSG_LEN(sizeof(gso_size))) {
       memcpy(&gso_size, CMSG_DATA(cmsg), sizeof(gso_size));
 
       break;
@@ -592,7 +593,7 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 #else
           cmsg->cmsg_type == IP_TOS
 #endif
-          && cmsg->cmsg_len) {
+          && cmsg->cmsg_len >= CMSG_LEN(sizeof(uint8_t))) {
         return *(uint8_t *)(CMSG_DATA(cmsg)) & IPTOS_ECN_MASK;
       }
     }
@@ -609,7 +610,7 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 #pragma clang diagnostic pop
 #endif
       if(cmsg->cmsg_level == IPPROTO_IPV6 && cmsg->cmsg_type == IPV6_TCLASS &&
-         cmsg->cmsg_len) {
+         cmsg->cmsg_len >= CMSG_LEN(sizeof(int))) {
         unsigned int tos;
 
         memcpy(&tos, CMSG_DATA(cmsg), sizeof(int));
@@ -625,27 +626,53 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 #define vquic_msghdr_get_ecn(a, b)      0
 #endif /* HAVE_SENDMMSG || HAVE_SENDMSG || HAVE_APPLE_MSG_X ... */
 
+#if defined(HAVE_SENDMMSG) || \
+  (defined(HAVE_SENDMSG) && !defined(HAVE_APPLE_MSG_X))
+#ifdef __linux__
+#ifdef UDP_GRO
+#define VQUIC_CMSG_GRO_SPACE CMSG_SPACE(sizeof(int))
+#else
+#define VQUIC_CMSG_GRO_SPACE 0
+#endif
+/* Time64 basic timestamps use two int64_t fields. SCM_TIMESTAMPING carries
+ * three timespecs (six fields) in one cmsg, and OPT_PKTINFO adds a separate
+ * cmsg with four uint32_t fields. A basic timestamp can accompany
+ * timestamping, but the basic timestamp modes are mutually exclusive.
+ */
+#define CMSG_PER_MSG_SIZE \
+  (CMSG_SPACE(2 * sizeof(int64_t)) + \
+   CMSG_SPACE(6 * sizeof(int64_t)) + \
+   CMSG_SPACE(4 * sizeof(uint32_t)) + \
+   CMSG_SPACE(sizeof(int)) + \
+   VQUIC_CMSG_GRO_SPACE)
+#else
+#define CMSG_PER_MSG_SIZE CMSG_SPACE(sizeof(int))
+#endif
+#endif
+
 #ifdef HAVE_SENDMMSG
 
 static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct cf_quic_ctx *qctx,
                                  size_t max_pkts,
-                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
+                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp,
+                                 size_t *pnread)
 {
 #if defined(__linux__) && defined(UDP_GRO)
 #define MMSG_NUM  16
 #define UDP_GRO_CNT_MAX  64
-#define CMSG_PER_MSG_SIZE    (2 * CMSG_SPACE(sizeof(int)))
 #else
 #define MMSG_NUM  64
 #define UDP_GRO_CNT_MAX  1
-#define CMSG_PER_MSG_SIZE    CMSG_SPACE(sizeof(int))
 #endif
 #define MSG_BUF_SIZE  (UDP_GRO_CNT_MAX * 1500)
   struct iovec msg_iov[MMSG_NUM];
   struct mmsghdr mmsg[MMSG_NUM];
-  uint8_t msg_ctrl[MMSG_NUM * CMSG_PER_MSG_SIZE];
+  union {
+    struct cmsghdr align;
+    uint8_t bytes[MMSG_NUM * CMSG_PER_MSG_SIZE];
+  } msg_ctrl;
   struct sockaddr_storage remote_addr[MMSG_NUM];
   size_t total_nread = 0, pkts = 0;
 #ifdef CURLVERBOSE
@@ -677,7 +704,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       mmsg[i].msg_hdr.msg_iovlen = 1;
       mmsg[i].msg_hdr.msg_name = &remote_addr[i];
       mmsg[i].msg_hdr.msg_namelen = sizeof(remote_addr[i]);
-      mmsg[i].msg_hdr.msg_control = &msg_ctrl[i * CMSG_PER_MSG_SIZE];
+      mmsg[i].msg_hdr.msg_control = &msg_ctrl.bytes[i * CMSG_PER_MSG_SIZE];
       mmsg[i].msg_hdr.msg_controllen = CMSG_PER_MSG_SIZE;
     }
 
@@ -733,6 +760,7 @@ out:
                 "vquic_recvmmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
+  *pnread = total_nread;
   return result;
 }
 
@@ -743,7 +771,7 @@ static CURLcode recvmsg_x_packets(struct Curl_cfilter *cf,
                                   struct cf_quic_ctx *qctx,
                                   size_t max_pkts,
                                   Curl_vquic_recv_pkts_cb *recv_cb,
-                                  void *userp)
+                                  void *userp, size_t *pnread)
 {
 #define MSG_X_NUM  64
 #define MSG_BUF_SIZE  (2048)
@@ -843,6 +871,7 @@ out:
                 "vquic_recvmsg_x(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
+  *pnread = total_nread;
   return result;
 }
 
@@ -851,9 +880,9 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 struct cf_quic_ctx *qctx,
                                 size_t max_pkts,
-                                Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
+                                Curl_vquic_recv_pkts_cb *recv_cb, void *userp,
+                                size_t *pnread)
 {
-#define CMSG_PER_MSG_SIZE    CMSG_SPACE(sizeof(int))
   struct iovec msg_iov;
   struct msghdr msg;
   uint8_t buf[64 * 1024];
@@ -863,7 +892,10 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   size_t nread;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
-  uint8_t msg_ctrl[CMSG_PER_MSG_SIZE];
+  union {
+    struct cmsghdr align;
+    uint8_t bytes[CMSG_PER_MSG_SIZE];
+  } msg_ctrl;
   size_t gso_size;
   uint8_t ecn = 0;
 
@@ -876,7 +908,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     msg_iov.iov_len = sizeof(buf);
     msg.msg_iov = &msg_iov;
     msg.msg_iovlen = 1;
-    msg.msg_control = msg_ctrl;
+    msg.msg_control = msg_ctrl.bytes;
     msg.msg_name = &remote_addr;
     msg.msg_namelen = sizeof(remote_addr);
     msg.msg_controllen = CMSG_PER_MSG_SIZE;
@@ -929,6 +961,7 @@ out:
     CURL_TRC_CF(data, cf,
                 "vquic_recvmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
+  *pnread = total_nread;
   return result;
 }
 
@@ -937,7 +970,8 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct cf_quic_ctx *qctx,
                                  size_t max_pkts,
-                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
+                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp,
+                                 size_t *pnread)
 {
   uint8_t buf[64 * 1024];
   int bufsize = (int)sizeof(buf);
@@ -994,6 +1028,7 @@ out:
     CURL_TRC_CF(data, cf,
                 "vquic_recvfrom(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
+  *pnread = total_nread;
   return result;
 }
 #endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG */
@@ -1005,17 +1040,20 @@ CURLcode Curl_vquic_recv_packets(struct Curl_cfilter *cf,
                                  Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
 {
   CURLcode result;
+  size_t nread = 0;
 #ifdef HAVE_SENDMMSG
-  result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp, &nread);
 #elif defined(HAVE_APPLE_MSG_X)
-  result = recvmsg_x_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvmsg_x_packets(cf, data, qctx, max_pkts, recv_cb, userp,
+                             &nread);
 #elif defined(HAVE_SENDMSG)
-  result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp, &nread);
 #else
-  result = recvfrom_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvfrom_packets(cf, data, qctx, max_pkts, recv_cb, userp, &nread);
 #endif
   if(!result) {
-    if(!qctx->got_first_byte) {
+    /* EAGAIN is no error, only count actual packets as a reply */
+    if(!qctx->got_first_byte && nread) {
       qctx->got_first_byte = TRUE;
       qctx->first_byte_at = qctx->last_op;
     }
@@ -1057,10 +1095,11 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 
     if(!result) {
       int qlogfd = curlx_open(curlx_dyn_ptr(&fname),
-                              O_WRONLY | O_CREAT | CURL_O_BINARY,
-                              data->set.new_file_perms
+                              O_WRONLY | O_CREAT | O_TRUNC | CURL_O_BINARY,
 #ifdef _WIN32
-                              & (_S_IREAD | _S_IWRITE)
+                              data->set.new_file_perms & (_S_IREAD | _S_IWRITE)
+#else
+                              (mode_t)data->set.new_file_perms
 #endif
                               );
       if(qlogfd != -1)
@@ -1080,14 +1119,16 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
                                    struct Curl_peer *origin,
                                    struct Curl_peer *peer)
 {
+  struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
   (void)data; /* not used in all cases and compilers are stupid */
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  result = Curl_cf_ngtcp2_insert_after(cf_at, origin, peer);
+  result = Curl_cf_ngtcp2_insert_after(cf_at, origin, peer, &cf);
 #elif defined(USE_QUICHE)
-  result = Curl_cf_quiche_insert_after(cf_at, origin, peer);
+  result = Curl_cf_quiche_insert_after(cf_at, origin, peer, &cf);
 #else
+  (void)cf)
   (void)cf_at;
   (void)origin;
   (void)peer;
@@ -1097,23 +1138,18 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
 #if defined(USE_HTTPSRR) && defined(USE_ECH)
   /* When using ECH, kick off the HTTPS-RR resolve */
   if(!result && (origin->scheme->family == CURLPROTO_HTTP) &&
-     CURLECH_ENABLED(data) &&
-     Curl_ssl_supports(data, SSLSUPP_ECH) &&
-     (data->set.tls_ech != CURLECH_GREASE) &&
-     !CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
-    result = Curl_conn_dns_add_https_resolve(data, cf_at->conn,
-                                             cf_at->sockindex, origin);
+     Curl_ssl_need_httpsrr(cf)) {
+    result = Curl_dns_cf_add_https_resolve(data, cf, origin);
   }
 #endif /* USE_HTTPSRR && USE_ECH */
   return result;
 }
 
-CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_quic_create(struct Curl_cfchain *chain,
                              struct Curl_easy *data,
                              struct Curl_peer *origin,
                              struct Curl_peer *peer,
                              uint8_t transport_peer,
-                             struct connectdata *conn,
                              struct Curl_sockaddr_ex *addr,
                              struct Curl_peer *tunnel_peer,
                              uint8_t tunnel_transport)
@@ -1123,15 +1159,13 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   (void)tunnel_peer;
   DEBUGASSERT(transport_peer == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_create(pcf, data, origin, peer, conn, addr);
+  return Curl_cf_ngtcp2_create(chain, data, origin, peer, addr);
 #elif defined(USE_QUICHE)
-  return Curl_cf_quiche_create(pcf, data, origin, peer, conn, addr);
+  return Curl_cf_quiche_create(chain, data, origin, peer, addr);
 #else
-  *pcf = NULL;
   (void)data;
   (void)origin;
   (void)peer;
-  (void)conn;
   (void)addr;
   (void)tunnel_peer;
   (void)tunnel_transport;
@@ -1162,21 +1196,19 @@ CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
 #endif
 }
 
-CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_h3_proxy_create(struct Curl_cfchain *chain,
                                  struct Curl_easy *data,
                                  struct Curl_peer *origin,
                                  struct Curl_peer *peer,
                                  uint8_t transport_peer,
-                                 struct connectdata *conn,
                                  struct Curl_sockaddr_ex *addr,
                                  struct Curl_peer *tunnel_peer,
                                  uint8_t tunnel_transport)
 {
   DEBUGASSERT(transport_peer == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_proxy_create(pcf, data, origin, peer, transport_peer,
-                                     conn, addr,
-                                     tunnel_peer, tunnel_transport);
+  return Curl_cf_ngtcp2_proxy_create(chain, data, origin, peer, transport_peer,
+                                     addr, tunnel_peer, tunnel_transport);
 #else
   *pcf = NULL;
   (void)data;
@@ -1195,7 +1227,7 @@ CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              struct connectdata *conn)
 {
-  if(Curl_conn_get_first_peer(conn, FIRSTSOCKET)->unix_socket) {
+  if(Curl_conn_get_first_peer(conn)->unix_socket) {
     failf(data, "HTTP/3 cannot be used over UNIX domain sockets");
     return CURLE_QUIC_CONNECT_ERROR;
   }

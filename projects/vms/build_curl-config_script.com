@@ -39,7 +39,7 @@ $ x_cppflag_curl_staticlib = "-DCURL_STATICLIB"
 $ x_enabled_shared = "no"
 $ x_curl_ca_bundle = ""
 $ x_cc = "cc"
-$ x_support_features = "SSL IPv6 libz NTLM"
+$ x_support_features = "SSL IPv6 libz"
 $ x_support_protocols1 = "DICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP"
 $ x_support_protocols2 = " LDAPS POP3 POP3S RTSP SMTP SMTPS TELNET TFTP"
 $ x_support_protocols = x_support_protocols1 + x_support_protocols2
@@ -100,7 +100,7 @@ $ else
 $    part3 = "'--with-gssapi' "
 $ endif
 $ part2 = "'--disable-dependency-tracking' '--disable-libtool-lock' "
-$ part4 = "'--disable-ntlm-wb' '--with-ca-path=gnv$curl_ca_path'"""
+$ part4 = "'--with-ca-path=gnv$curl_ca_path'"""
 $!
 $ x_configure_options = part1 + part2 + part3 + part4
 $!
