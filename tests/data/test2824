@@ -57,10 +57,11 @@ Content-Length: 0
 http
 </server>
 <features>
+!SSPI
 SSL
 proxy
 digest
-!SSPI
+md5
 </features>
 <name>
 HTTP proxy CONNECT 407s with chunked and close-delimited bodies

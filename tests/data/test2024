@@ -119,6 +119,7 @@ http
 !SSPI
 crypto
 digest
+md5
 </features>
 <tool>
 lib2023

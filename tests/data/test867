@@ -35,6 +35,7 @@ pop3
 <features>
 crypto
 digest
+md5
 </features>
 <name>
 POP3 CRAM-MD5 authentication
