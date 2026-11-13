@@ -135,6 +135,7 @@ bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
 }
 
 #ifndef USE_WINDOWS_SSPI
+#ifdef CURL_HAVE_MD5
 /* Convert MD5 chunk to RFC2617 (section 3.1.3) -suitable ASCII string */
 static void auth_digest_md5_to_ascii(
   const unsigned char *source, /* 16 bytes */
@@ -144,6 +145,7 @@ static void auth_digest_md5_to_ascii(
   for(i = 0; i < 16; i++)
     curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
 }
+#endif
 
 /* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
 static void auth_digest_sha256_to_ascii(
@@ -258,6 +260,7 @@ static void auth_digest_get_qop_values(const char *options, int *value)
   }
 }
 
+#ifdef CURL_HAVE_MD5
 /*
  * auth_decode_digest_md5_message()
  *
@@ -310,6 +313,7 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
 
   return CURLE_OK;
 }
+#endif
 
 /*
  * Curl_auth_is_digest_supported()
@@ -348,6 +352,15 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const char *default_service,
                                              struct bufref *out)
 {
+  CURLcode result;
+#ifndef CURL_HAVE_MD5
+  (void)data;
+  (void)chlg;
+  (void)creds;
+  (void)default_service;
+  (void)out;
+  result = CURLE_NOT_BUILT_IN;
+#else
   const char *service = Curl_creds_has_sasl_service(creds) ?
     Curl_creds_sasl_service(creds) : default_service;
   size_t i;
@@ -375,13 +388,13 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char *qspn;
 
   /* Decode the challenge message */
-  CURLcode result = auth_decode_digest_md5_message(chlg,
-                                                   nonce, sizeof(nonce),
-                                                   realm, sizeof(realm),
-                                                   algorithm,
-                                                   sizeof(algorithm),
-                                                   qop_options,
-                                                   sizeof(qop_options));
+  result = auth_decode_digest_md5_message(chlg,
+                                          nonce, sizeof(nonce),
+                                          realm, sizeof(realm),
+                                          algorithm,
+                                          sizeof(algorithm),
+                                          qop_options,
+                                          sizeof(qop_options));
   if(result)
     return result;
 
@@ -510,6 +523,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* Return the response. */
   Curl_bufref_set(out, response, strlen(response), curl_free);
+#endif
   return result;
 }
 
