@@ -30,8 +30,7 @@
   !defined(CURL_DISABLE_DIGEST_AUTH) ||                             \
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
-/* Please keep the SSL backend-specific #if branches in this order:
-
+/* Recommended order of crypto backends:
    1. USE_OPENSSL
    2. USE_WOLFSSL
    3. USE_GNUTLS
@@ -39,9 +38,6 @@
    5. USE_RUSTLS (TBD)
    6. __APPLE__
    7. USE_WIN32_CRYPTO
-
-   This ensures that the same SSL branch gets activated throughout this source
-   file even if multiple backends are enabled at the same time.
  */
 
 #ifdef USE_OPENSSL
