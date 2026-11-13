@@ -27,8 +27,6 @@
 
 #if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
 
-#include "curl_hmac.h"
-
 #define CURL_HAVE_SHA512_256
 #define CURL_SHA512_256_DIGEST_LENGTH 32
 
