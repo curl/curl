@@ -388,7 +388,8 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
         nwritten = 0;
         result = CURLE_OK;
       }
-      goto out;
+      else
+        goto out;
     }
     buf += nwritten;
     blen -= nwritten;

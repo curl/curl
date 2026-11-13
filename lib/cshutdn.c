@@ -73,7 +73,7 @@ static timediff_t cshutdn_conn_timeleft(struct Curl_easy *data,
                                         struct connectdata *conn)
 {
   if(conn->chain.shutdown_start_ms >= 0 &&
-     !conn->chain.shutdown_timeout_ms)
+     conn->chain.shutdown_timeout_ms)
     return Curl_cshutdn_timeleft_ms(data, &conn->chain);
   return 0;
 }
