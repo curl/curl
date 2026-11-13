@@ -186,6 +186,7 @@ static char *auth_digest_string_quoted(const char *s)
   return curlx_dyn_ptr(&out);
 }
 
+#ifdef CURL_HAVE_MD5
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exist
  */
@@ -260,7 +261,6 @@ static void auth_digest_get_qop_values(const char *options, int *value)
   }
 }
 
-#ifdef CURL_HAVE_MD5
 /*
  * auth_decode_digest_md5_message()
  *
