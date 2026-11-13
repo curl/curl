@@ -360,12 +360,6 @@ static CURL_FORCEINLINE uint64_t Curl_rotr64(uint64_t value, unsigned int bits)
 #define SHA512_256_HASH_SIZE_WORDS 8
 
 /**
- * Size of the SHA-512/256 resulting digest in words.
- * This is the final digest size, not intermediate hash.
- */
-#define SHA512_256_DIGEST_SIZE_WORDS (SHA512_256_HASH_SIZE_WORDS / 2)
-
-/**
  * Size of the SHA-512/256 single processing block in bits.
  */
 #define SHA512_256_BLOCK_SIZE_BITS 1024
@@ -422,10 +416,6 @@ typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
 static CURLcode Curl_sha512_256_init(void *context)
 {
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
-
-  /* Check whether the header and this file use the same numbers */
-  DEBUGASSERT(CURL_SHA512_256_DIGEST_LENGTH ==
-              (SHA512_256_DIGEST_SIZE_WORDS * SHA512_256_BYTES_IN_WORD));
 
   DEBUGASSERT(sizeof(uint64_t) == 8);
 
