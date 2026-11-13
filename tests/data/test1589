@@ -61,6 +61,7 @@ http-proxy
 crypto
 proxy
 digest
+md5
 </features>
 <name>
 HTTP proxy auth Digest, then change proxy port and do it again

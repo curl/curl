@@ -51,6 +51,7 @@ http
 !SSPI
 crypto
 digest
+md5
 </features>
 <name>
 HTTP PUT --digest with user-specified Content-Length header

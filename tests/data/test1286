@@ -63,6 +63,7 @@ http
 <features>
 crypto
 digest
+md5
 </features>
 <name>
 HTTP GET --digest increasing nonce-count
