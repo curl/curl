@@ -198,6 +198,8 @@ static void cshutdn_run_once(struct Curl_easy *data,
     if(cshutdn_cfchain_try_once(data, &conn->chain, done))
       *done = TRUE;  /* we are done on errors encountered */
   }
+  else
+    *done = TRUE; /* connection is not clean, just close it */
 
   if(*done)
     conn->bits.shutdown_filters = TRUE;
