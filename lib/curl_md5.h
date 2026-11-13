@@ -88,10 +88,6 @@
 #define CURL_HAVE_MD5
 #endif
 
-#ifndef CURL_HAVE_MD5
-#define CURL_HAVE_MD5
-#endif
-
 #ifdef CURL_HAVE_MD5
 #include "curl_hmac.h"
 
