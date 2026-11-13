@@ -1757,6 +1757,7 @@ TESTCASES = \
   test1946 \
   test1947 \
   test1948 \
+  test1949 \
   test1955 \
   test1956 \
   test1957 \
