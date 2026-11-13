@@ -10,6 +10,7 @@ SHA256
 <client>
 <features>
 unittest
+sha256
 </features>
 <name>
 SHA256 unit tests
