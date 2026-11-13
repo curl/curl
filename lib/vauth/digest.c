@@ -135,17 +135,8 @@ bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
 }
 
 #ifndef USE_WINDOWS_SSPI
-#ifdef CURL_HAVE_SHA256
-/* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
-static void auth_digest_sha256_to_ascii(
-  const unsigned char *source, /* 32 bytes */
-  unsigned char *dest)         /* 65 bytes */
-{
-  int i;
-  for(i = 0; i < 32; i++)
-    curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
-}
 
+#if defined(CURL_HAVE_SHA256) || defined(CURL_HAVE_MD5)
 /* Perform quoted-string escaping as described in RFC 9110, ch. 5.6.4,
  * esp. passing %80-FF unencoded as defined for 'obs-text'. */
 static char *auth_digest_string_quoted(const char *s)
@@ -173,6 +164,18 @@ static char *auth_digest_string_quoted(const char *s)
     s++;
   }
   return curlx_dyn_ptr(&out);
+}
+#endif
+
+#ifdef CURL_HAVE_SHA256
+/* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
+static void auth_digest_sha256_to_ascii(
+  const unsigned char *source, /* 32 bytes */
+  unsigned char *dest)         /* 65 bytes */
+{
+  int i;
+  for(i = 0; i < 32; i++)
+    curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
 }
 #endif
 
