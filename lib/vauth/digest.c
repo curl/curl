@@ -135,18 +135,7 @@ bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
 }
 
 #ifndef USE_WINDOWS_SSPI
-#ifdef CURL_HAVE_MD5
-/* Convert MD5 chunk to RFC2617 (section 3.1.3) -suitable ASCII string */
-static void auth_digest_md5_to_ascii(
-  const unsigned char *source, /* 16 bytes */
-  unsigned char *dest)         /* 33 bytes */
-{
-  int i;
-  for(i = 0; i < 16; i++)
-    curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
-}
-#endif
-
+#ifdef CURL_HAVE_SHA256
 /* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
 static void auth_digest_sha256_to_ascii(
   const unsigned char *source, /* 32 bytes */
@@ -185,8 +174,19 @@ static char *auth_digest_string_quoted(const char *s)
   }
   return curlx_dyn_ptr(&out);
 }
+#endif
 
 #ifdef CURL_HAVE_MD5
+/* Convert MD5 chunk to RFC2617 (section 3.1.3) -suitable ASCII string */
+static void auth_digest_md5_to_ascii(
+  const unsigned char *source, /* 16 bytes */
+  unsigned char *dest)         /* 33 bytes */
+{
+  int i;
+  for(i = 0; i < 16; i++)
+    curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
+}
+
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exist
  */
@@ -637,9 +637,17 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           return CURLE_NOT_BUILT_IN;
 #endif
         else if(curl_strequal(content, "SHA-256"))
+#ifdef CURL_HAVE_SHA256
           digest->algo = ALGO_SHA256;
+#else
+          return CURLE_NOT_BUILT_IN;
+#endif
         else if(curl_strequal(content, "SHA-256-SESS"))
+#ifdef CURL_HAVE_SHA256
           digest->algo = ALGO_SHA256SESS;
+#else
+          return CURLE_NOT_BUILT_IN;
+#endif
         else if(curl_strequal(content, "SHA-512-256")) {
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256;
@@ -1035,12 +1043,14 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                            auth_digest_md5_to_ascii,
                                            Curl_md5it);
 #endif
+#ifdef CURL_HAVE_SHA256
   if(digest->algo <= ALGO_SHA256SESS)
     return auth_create_digest_http_message(data, creds,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,
                                            Curl_sha256it);
+#endif
 #ifdef CURL_HAVE_SHA512_256
   if(digest->algo <= ALGO_SHA512_256SESS)
     return auth_create_digest_http_message(data, creds,
