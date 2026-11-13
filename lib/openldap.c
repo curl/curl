@@ -103,6 +103,7 @@ struct ldapconninfo {
   curl_socket_t dupfd;       /* duplicated socket */
   int proto;                 /* LDAP_PROTO_TCP/LDAP_PROTO_UDP/LDAP_PROTO_IPC */
   int msgid;                 /* Current message id. */
+  bool send_blocked;         /* last TLS send returned CURLE_AGAIN */
 };
 
 struct ldapreqinfo {
@@ -508,11 +509,12 @@ static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
       CURLcode result = CURLE_SEND_ERROR;
       size_t nwritten;
 
-      if(!li) {
+      if(!li || !li->send) {
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
       result = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &nwritten);
+      li->send_blocked = (result == CURLE_AGAIN);
       if(result == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
@@ -1049,6 +1051,9 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
 #ifdef USE_SSL
     if(ssl_installed(conn)) {
       Sockbuf *sb;
+      /* a blocked TLS send must be retried as-is, do not send the unbind */
+      if(li->send_blocked)
+        li->send = NULL;
       if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS ||
          ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
         return CURLE_FAILED_INIT;
