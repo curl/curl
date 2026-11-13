@@ -81,7 +81,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const size_t thislen);
 
 CURLcode Curl_add_timecondition(struct Curl_easy *data, struct dynbuf *req);
-CURLcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
+CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  int httpversion, struct dynbuf *req);
 
 void Curl_http_to_fold(struct dynbuf *bf);

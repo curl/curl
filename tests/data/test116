@@ -46,7 +46,6 @@ PASS ftp@example.com
 PWD
 EPRT |1|1.2.3.4|
 PORT 1,2,3,4,
-QUIT
 </protocol>
 </verify>
 </testcase>

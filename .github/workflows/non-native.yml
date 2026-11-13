@@ -40,7 +40,7 @@ env:
 jobs:
   cross:
     name: "${{ matrix.os }} ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.cc }} ${{ matrix.desc }} ${{ matrix.arch }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     defaults:
       run:
@@ -58,12 +58,12 @@ jobs:
       matrix:
         include:
           # https://github.com/DragonFlyBSD/DPorts
-          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skiprun',
-              install: 'autoconf automake libtool openldap26-client libidn2',
-              options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
-
-          - { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skipall',
-              install: 'cmake ninja' }
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skiprun',
+          #   install: 'autoconf automake libtool openldap26-client libidn2',
+          #   options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
+          #
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skipall',
+          #   install: 'cmake ninja' }
 
           # https://ports.freebsd.org/
           - { os: 'freebsd'     , version: '15.1',  build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'openssl',
@@ -255,7 +255,7 @@ jobs:
 
   amiga:
     name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     cache-mode: write
     env:
@@ -486,7 +486,7 @@ jobs:
 
   msdos:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp !ssl i586"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     cache-mode: write
     env:

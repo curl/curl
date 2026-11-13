@@ -32,6 +32,7 @@ h2 foo.example.com 443 h3 shiny.example.com 8443 "20291231 23:30:00" 0 0
 %TABh3 example.com 443 h3 shiny.example.com 8443 "20231231 00:00:00" 0 0
     # also a comment
 bad example.com 443 h3 shiny.example.com 8443 "20191231 00:00:00" 0 0
+h2 example.com 443 h3 ../../admin?x= 8443 "20191231 00:00:00" 0 0
 rubbish
 </file>
 </client>

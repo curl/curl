@@ -31,7 +31,6 @@ USER anonymous
 PASS ftp@example.com
 PWD
 CWD %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

@@ -37,7 +37,6 @@ EPSV
 PASV
 TYPE I
 SIZE %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

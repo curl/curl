@@ -1914,10 +1914,24 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
       *done = TRUE;
       goto out;
     }
-    if(SSL_get_error(octx->ssl, rc) == SSL_ERROR_WANT_WRITE) {
-      CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
-      connssl->io_need = CURL_SSL_IO_NEED_SEND;
-      goto out;
+    if(rc < 0) {
+      err = SSL_get_error(octx->ssl, rc);
+      if(err == SSL_ERROR_WANT_WRITE) {
+        CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
+        goto out;
+      }
+      if(err != SSL_ERROR_WANT_READ) {
+        VERBOSE(unsigned long sslerr = ERR_get_error());
+        CURL_TRC_CF(data, cf,
+                    "SSL shutdown, ignore send error: %s (%s), errno %d",
+                    SSL_ERROR_to_str(err),
+                    (sslerr ? ossl_strerror(sslerr, buf, sizeof(buf)) :
+                     "no OpenSSL error"),
+                    SOCKERRNO);
+        *done = TRUE;
+        goto out;
+      }
     }
     /* Having sent the close notify, we use SSL_read() to get the
      * missing close notify from the server. */
@@ -2352,8 +2366,8 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
    * - 3rd param: how many seconds of clock skew we allow between
    *   our clock and the instance that issued the OCSP response
    * - 4th param: how many seconds in the past `thisupd` may be, with
-   *   -1 meaning there is no limit. */
-  if(!OCSP_check_validity(thisupd, nextupd, 300L, -1L)) {
+   *   -1 meaning there is no limit. 345600 is four days. */
+  if(!OCSP_check_validity(thisupd, nextupd, 300L, 345600)) {
     failf(data, "OCSP response has expired");
     result = CURLE_SSL_INVALIDCERTSTATUS;
     goto end;
@@ -2712,7 +2726,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
       sc_session->sectrust_verified = octx->sectrust_verified;
 #endif
     if(!result && psession &&  /* return a duplicate if asked for and FTP */
-       (cf->conn->scheme->family == CURLPROTO_FTP)) {
+       (CF_CONN(cf)->scheme->family == CURLPROTO_FTP)) {
         result = Curl_ssl_session_dup(sc_session, &sc_dup);
     }
     if(!result) {
@@ -3476,7 +3490,7 @@ static bool ossl_apply_session(
 #ifdef HAVE_OPENSSL_EARLYDATA
         if(conn_cfg->earlydata && scs->alpn &&
            SSL_SESSION_get_max_early_data(ssl_session) &&
-           !cf->conn->bits.connect_only &&
+           !CF_CONN(cf)->bits.connect_only &&
            (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
           bool do_early_data = FALSE;
           if(sess_reuse_cb)
@@ -3518,12 +3532,11 @@ static CURLcode ossl_init_session_and_alpns(
 
   octx->reused_session = FALSE;
 
-  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+  if(!CF_IS_PRIMARY(cf) && !(cf->cft->flags & CF_TYPE_PROXY)) {
     /* FTP is a bitch. On TLS secured transfers, it is a common server
      * option to require the client to use the SAME TLS session as on
      * the control connection or it fails the request. See #22225. */
-    struct Curl_ssl_session *scs =
-      Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    struct Curl_ssl_session *scs = Curl_ssl_get_primary_session(data, cf->cft);
     if(scs) {
       if(ossl_apply_session(octx, cf, data, &alpns, sess_reuse_cb, scs))
         CURL_TRC_CF(data, cf, "applied SSL session from control connection");
@@ -3626,7 +3639,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
   }
   else {
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex, peer->origin);
+      Curl_dns_cf_get_https(data, cf, peer->origin);
 
     if(Curl_httpsrr_is_for_peer(peer->origin, rinfo) && rinfo->echconfiglist) {
       const unsigned char *ecl = rinfo->echconfiglist;
@@ -3939,6 +3952,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   /* We do retry writes sometimes from another buffer address */
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+  /* Prevent OpenSSL from receiving more records from the BIO when
+   * TLS Meta records (like Session Tickets) are encountered. A server
+   * can stall us with only sending tickets and no data, otherwise. */
+  SSL_CTX_clear_mode(octx->ssl_ctx, SSL_MODE_AUTO_RETRY);
 
   ciphers = conn_config->cipher_list;
   if(!ciphers && (peer->transport != TRNSPRT_QUIC))
@@ -4670,30 +4687,20 @@ out:
   return result;
 }
 
-static const char *pinned(struct Curl_cfilter *cf,
-                          struct Curl_easy *data)
-{
-  (void)cf;
-  return
-#ifndef CURL_DISABLE_PROXY
-    Curl_ssl_cf_is_proxy(cf) ?
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
-#endif
-    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
-}
-
 static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       X509 *server_cert)
 {
-  CURLcode result = CURLE_OK;
-  const char *ptr = pinned(cf, data);
-  if(ptr) {
-    result = ossl_pkp_pin_peer_pubkey(data, server_cert, ptr);
-    if(result)
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+  if(conn_config->pinned_key) {
+    CURLcode result = ossl_pkp_pin_peer_pubkey(data, server_cert,
+                                               conn_config->pinned_key);
+    if(result) {
       failf(data, "SSL: public key does not match pinned public key");
+      return result;
+    }
   }
-  return result;
+  return CURLE_OK;
 }
 
 #ifdef CURLVERBOSE
@@ -4852,13 +4859,19 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
                                    struct ossl_ctx *octx,
                                    struct ssl_peer *peer)
 {
-  struct connectdata *conn = cf->conn;
+  struct connectdata *conn = CF_CONN(cf);
   struct ssl_easy_config *ssl_config = Curl_ssl_cf_get_easy_config(cf, data);
   struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result = CURLE_OK;
   long ossl_verify;
   X509 *server_cert;
   bool verified = FALSE;
+
+  /* we may have offered a session, but the server decides if it resumes */
+  if(octx->reused_session && !SSL_session_reused(octx->ssl)) {
+    infof(data, "SSL session not resumed by server, doing full checks");
+    octx->reused_session = FALSE;
+  }
 
   if(data->set.ssl.certinfo && !octx->reused_session) {
     /* asked to gather certificate info. Reused sessions do not have cert
@@ -4872,7 +4885,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   if(!server_cert) {
     /* no verification at all, this maybe acceptable */
     if(!(conn_config->verifypeer || conn_config->verifyhost) &&
-       !pinned(cf, data))
+       !conn_config->pinned_key)
       goto out;
 
     failf(data, "SSL: could not get peer certificate");
@@ -5074,8 +5087,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
 
   if(connssl->connecting_state == ssl_connect_1) {
     if(Curl_ssl_need_httpsrr(cf) &&
-       !Curl_conn_dns_resolved_https(data, cf->sockindex,
-                                     connssl->peer.peer)) {
+       !Curl_dns_cf_resolved_https(data, cf, connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
       return CURLE_OK;
     }
@@ -5282,10 +5294,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
       break;
     case SSL_ERROR_ZERO_RETURN: /* no more data */
       /* close_notify alert */
-      if(cf->sockindex == FIRSTSOCKET)
-        /* mark the connection for close if it is indeed the control
-           connection */
-        CURL_TRC_CF(data, cf, "TLS close_notify");
+      CURL_TRC_CF(data, cf, "TLS close_notify");
       break;
     case SSL_ERROR_WANT_READ:
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
@@ -5364,7 +5373,6 @@ out:
 }
 
 static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
-                                         int8_t sockindex,
                                          struct dynbuf *binding)
 {
   X509 *cert;
@@ -5377,7 +5385,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
 
   static const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
-  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  struct Curl_cfilter *cf = conn->chain.cf;
   struct ossl_ctx *octx = NULL;
   CURLcode result = CURLE_OK;
 

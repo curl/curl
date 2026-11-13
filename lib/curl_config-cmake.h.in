@@ -234,6 +234,9 @@
 /* Define to 1 if you have the `opendir' function. */
 #cmakedefine HAVE_OPENDIR 1
 
+/* Define to 1 if you have the explicit_bzero function. */
+#cmakedefine HAVE_EXPLICIT_BZERO 1
+
 /* Define to 1 if you have the memset_explicit (C23) function. */
 #cmakedefine HAVE_MEMSET_EXPLICIT 1
 
@@ -676,9 +679,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if wolfSSL has the wolfSSL_BIO_set_shutdown function. */
 #cmakedefine HAVE_WOLFSSL_BIO_SET_SHUTDOWN 1
-
-/* if wolfSSL has the wc_Des_EcbEncrypt function. */
-#cmakedefine HAVE_WC_DES_ECBENCRYPT 1
 
 /* if libssh is in use */
 #cmakedefine USE_LIBSSH 1

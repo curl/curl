@@ -11,7 +11,7 @@ digest
 <reply>
 <data crlf="headers">
 HTTP/1.1 401 Authorization Required
-WWW-Authenticate: Digest realm="testrealm%0a%0d", nonce="1053604145"
+WWW-Authenticate: Digest realm="testrealm%0a%0d%hex[%C3%81]hex%", nonce="1053604145"
 Content-Length: 4
 
 hej
@@ -26,7 +26,7 @@ This IS the real page!
 
 <datacheck crlf="headers">
 HTTP/1.1 401 Authorization Required
-WWW-Authenticate: Digest realm="testrealm%0a%0d", nonce="1053604145"
+WWW-Authenticate: Digest realm="testrealm%0a%0d%hex[%C3%81]hex%", nonce="1053604145"
 Content-Length: 4
 
 HTTP/1.1 200 OK
@@ -46,10 +46,10 @@ crypto
 digest
 </features>
 <name>
-HTTP Digest with CRLF in username
+HTTP Digest with CRLF and non-ASCII in username, non-ASCII in realm
 </name>
 <command>
-http://hello%0a%0d:there@%HOSTIP:%HTTPPORT/ --digest
+http://hello%0a%0d%c3%a9:there@%HOSTIP:%HTTPPORT/ --digest
 </command>
 </client>
 
@@ -62,7 +62,7 @@ Accept: */*
 
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="hello%0A%0D", realm="testrealm%0a%0d", nonce="1053604145", uri="/", response="64e5ae1b90f05309847ac483c1094284"
+Authorization: Digest username="hello%0A%0D%hex[%C3%A9]hex%", realm="testrealm%0a%0d%hex[%C3%81]hex%", nonce="1053604145", uri="/", response="cdc6cf8d0f1ff0d4fa29399d6b57889f"
 User-Agent: curl/%VERSION
 Accept: */*
 

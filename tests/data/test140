@@ -34,7 +34,6 @@ PASS ftp@example.com
 PWD
 CWD blalbla
 MDTM %TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

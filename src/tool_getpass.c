@@ -72,7 +72,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   if(sts & 1) {
     sts = sys$qiow(0, chan,
                    IO$_READPROMPT | IO$M_NOECHO,
-                   &iosb, 0, 0, buffer, buflen, 0, 0,
+                   &iosb, 0, 0, buffer, buflen - 1, 0, 0,
                    prompt, strlen(prompt));
 
     if((sts & 1) && (iosb.iosb$w_status & 1))

@@ -45,7 +45,6 @@ PWD
 EPSV
 TYPE A
 LIST fir#t/third/%TESTNUMBER
-QUIT
 </protocol>
 </verify>
 </testcase>

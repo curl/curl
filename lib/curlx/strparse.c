@@ -254,10 +254,15 @@ int curlx_str_newline(const char **linep)
 #ifndef WITHOUT_LIBCURL
 /* case insensitive compare that the parsed string matches the given string.
    Returns non-zero on match. */
+int curlx_str_casecompare2(struct Curl_str *str,
+                           const char *check, size_t clen)
+{
+  return (str->len == clen) && curl_strnequal(str->str, check, clen);
+}
+
 int curlx_str_casecompare(struct Curl_str *str, const char *check)
 {
-  size_t clen = check ? strlen(check) : 0;
-  return ((str->len == clen) && curl_strnequal(str->str, check, clen));
+  return curlx_str_casecompare2(str, check, check ? strlen(check) : 0);
 }
 #endif
 
@@ -306,8 +311,10 @@ int curlx_str_cspn(const char **linep, struct Curl_str *out,
 /* remove ISBLANK()s from both ends of the string */
 void curlx_str_trimblanks(struct Curl_str *out)
 {
-  while(out->len && ISBLANK(*out->str))
-    curlx_str_nudge(out, 1);
+  while(out->len && ISBLANK(*out->str)) {
+    out->str++;
+    out->len--;
+  }
 
   /* trim trailing spaces and tabs */
   while(out->len && ISBLANK(out->str[out->len - 1]))

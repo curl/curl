@@ -44,7 +44,6 @@ TYPE I
 RETR someothertext.txt
 EPSV
 RETR some%2etxt
-QUIT
 </protocol>
 <stdout>
 match: 'someothertext.txt' against pattern '*.txt'

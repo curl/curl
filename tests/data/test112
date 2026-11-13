@@ -36,7 +36,6 @@ PWD
 EPSV
 TYPE I
 APPE %TESTNUMBER
-QUIT
 </protocol>
 <upload>
  gonna upload

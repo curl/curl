@@ -38,7 +38,7 @@ env:
   CURL_TEST_MIN: 1820
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc
-  AWSLC_VERSION: 5.11.0
+  AWSLC_VERSION: 5.13.0
   # renovate: datasource=github-tags depName=google/boringssl
   BORINGSSL_VERSION: 0.20261020.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver-coerced extractVersion=^nettle_?(?<version>.+)_release_.+$
@@ -46,21 +46,21 @@ env:
   # renovate: datasource=github-tags depName=gnutls/gnutls
   GNUTLS_VERSION: 3.8.13
   # renovate: datasource=github-tags depName=libressl/portable
-  LIBRESSL_VERSION: 4.4.0
+  LIBRESSL_VERSION: 4.4.1
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
   OPENSSL_VERSION: 4.1.0
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>3\.5\..+)$
   OPENSSL_PREV_VERSION: 3.5.9
   # renovate: datasource=github-tags depName=cloudflare/quiche
-  QUICHE_VERSION: 0.30.0
+  QUICHE_VERSION: 0.30.1
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl extractVersion=^v?(?<version>.+)-stable$
   WOLFSSL_VERSION: 5.9.4
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3
-  NGHTTP3_VERSION: 1.18.0
+  NGHTTP3_VERSION: 1.19.0
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2
-  NGTCP2_VERSION: 1.25.0
+  NGTCP2_VERSION: 1.26.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2
-  NGHTTP2_VERSION: 1.70.0
+  NGHTTP2_VERSION: 1.71.0
   # manually bumped (repo not offering tagged releases)
   H2O_VERSION: 11b0cfa2771e3ccad4a852e72473e4e278ab1de7 # 2026-05-28
   H2O_SHA256: 5ae1bd7b09970d7d49c41fa68193e24da04c2a7ac5581fbe2affc79200b0721f
@@ -488,8 +488,7 @@ jobs:
               /home/runner/pkg/ngtcp2/lib/pkgconfig:\
               /home/runner/pkg/nghttp2/lib/pkgconfig"
             generate: >-
-              -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH=ON
-              -DCMAKE_UNITY_BUILD=ON -DCURL_DISABLE_HTTPSIG=OFF -DCURL_ENABLE_NTLM=OFF
+              -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'libressl'
             install_steps: skipall

@@ -230,7 +230,7 @@ class TestFtpsVsFTPD:
         with open(srcfile) as fd:
             newlines = len(fd.readlines())
         assert (srcsize + newlines) == dstsize, \
-            f'expected source with {newlines} lines to be that much larger,'\
+            f'expected source with {newlines} lines to be that much larger, '\
             f'instead srcsize={srcsize}, upload size={dstsize}, diff={dstsize-srcsize}'
 
     def test_32_08_active_download(self, env: Env, vsftpds: VsFTPD):
@@ -287,13 +287,14 @@ class TestFtpsVsFTPD:
 
     def test_32_12_upload_eprt(self, env: Env, vsftpds: VsFTPD):
         docname = 'test_32_12'
+        dstfile = os.path.join(vsftpds.docs_dir, docname)
+        self._rmf(dstfile)
         client = LocalClient(name='cli_ftp_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ftps://{env.ftp_domain}:{vsftpds.port}/{docname}'
         r = client.run(args=['-r', f'{env.ftp_domain}:{vsftpds.port}:127.0.0.1', url])
         r.check_exit_code(0)
-        dstfile = os.path.join(vsftpds.docs_dir, docname)
         assert os.path.exists(dstfile), f'{r.dump_logs()}'
 
     def check_downloads(self, client, srcfile: str, count: int,

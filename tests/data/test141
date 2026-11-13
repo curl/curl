@@ -39,7 +39,6 @@ MDTM %TESTNUMBER
 TYPE I
 SIZE %TESTNUMBER
 REST 0
-QUIT
 </protocol>
 <stdout crlf="headers">
 Last-Modified: Wed, 09 Apr 2003 10:26:59 GMT

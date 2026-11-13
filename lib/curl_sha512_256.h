@@ -27,16 +27,48 @@
 
 #if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
 
-#include "curl_hmac.h"
+/* Recommended order of crypto backends:
+   1. USE_OPENSSL
+   2. USE_WOLFSSL
+   3. USE_GNUTLS
+   4. USE_MBEDTLS (TBD)
+   5. USE_RUSTLS (TBD)
+   6. __APPLE__ (TBD)
+   7. USE_WIN32_CRYPTO (TBD)
+ */
 
-#define CURL_HAVE_SHA512_256
+#ifdef USE_OPENSSL
+#  include <openssl/opensslv.h>
+#  if !defined(LIBRESSL_VERSION_NUMBER) || \
+  (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x3080000fL)
+#    include <openssl/evp.h>
+#    define USE_OPENSSL_SHA512_256
+#    define CURL_HAVE_SHA512_256
+#  endif
+#endif
 
-extern const struct HMAC_params Curl_HMAC_SHA512_256[1];
+#if !defined(CURL_HAVE_SHA512_256) && defined(USE_WOLFSSL)
+#  include <wolfssl/options.h>
+#  ifndef WOLFSSL_NOSHA512_256
+#    define USE_WOLFSSL_SHA512_256
+#    define CURL_HAVE_SHA512_256
+#  endif
+#endif
 
+#if !defined(CURL_HAVE_SHA512_256) && defined(USE_GNUTLS)
+#  include <nettle/sha2.h>
+#  include <nettle/version.h>
+#  ifdef SHA512_256_DIGEST_SIZE
+#    define USE_GNUTLS_SHA512_256
+#    define CURL_HAVE_SHA512_256
+#  endif
+#endif
+
+#ifdef CURL_HAVE_SHA512_256
 #define CURL_SHA512_256_DIGEST_LENGTH 32
-
 CURLcode Curl_sha512_256it(unsigned char *output, const unsigned char *input,
                            size_t input_size);
+#endif /* CURL_HAVE_SHA512_256 */
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
 

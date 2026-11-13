@@ -278,6 +278,13 @@ transmission, curl is stuck, even if curl is configured with a timeout.
 
 [curl issue 8632](https://github.com/curl/curl/issues/8632)
 
+## libssh does not notice SCP upload problems
+
+The SCP implementation in libssh does not notice anything wrong and reports
+success on finishing the upload.
+
+[curl issue 23790](https://github.com/curl/curl/pull/23790)
+
 ## Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
 Running SCP and SFTP tests on Cygwin makes this warning message appear.

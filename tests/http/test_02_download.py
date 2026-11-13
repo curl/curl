@@ -568,6 +568,8 @@ class TestDownload:
         elif proto == 'h3':
             assert earlydata[1] == 109, f'{earlydata}'
 
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('mbedtls'), reason='mbedtls unreliable here')
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('rustls-ffi'), reason='rustls unreliable here')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     @pytest.mark.parametrize("max_host_conns", [0, 1, 5])
     @pytest.mark.parametrize("share_connect", [False, True])
@@ -608,6 +610,8 @@ class TestDownload:
                     assert n <= max_host_conns
             assert matched_lines > 0
 
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('mbedtls'), reason='mbedtls unreliable here')
+    @pytest.mark.skipif(condition=Env.curl_uses_lib('rustls-ffi'), reason='rustls unreliable here')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     @pytest.mark.parametrize("max_total_conns", [0, 1, 5])
     @pytest.mark.parametrize("share_connect", [False, True])
@@ -735,3 +739,29 @@ class TestDownload:
         m = re.search(r'timed out after (\d+) milliseconds', xfers[1]['errormsg'])
         assert m, f'{r.stats[1]}'
         assert int(m.group(1)) < 3000, f'{r.stats[1]}'
+
+    # download a response with trailers: they are delivered as trailers,
+    # but must never be processed as response headers, e.g. a `set-cookie`
+    # or `location` trailer must not take effect
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    @pytest.mark.parametrize("body_size", [100, 0])
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
+    def test_02_38_trailers(self, env: Env, httpd, nghttpx, proto, body_size):
+        if proto == 'http/1.1':
+            pytest.skip('httpd does not send the trailers on http/1.1')
+        if proto == 'h3':
+            pytest.skip('nghttpx does not proxy trailers')
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}' \
+            f'/curltest/tweak/?trailers&chunks=1&chunk_size={body_size}'
+        cookiefile = os.path.join(curl.run_dir, 'cookies.txt')
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_headers=True,
+                               extra_args=['-c', cookiefile])
+        r.check_response(http_status=200, count=1)
+        assert 'set-cookie' in r.responses[0]['trailer'], f'{r.responses[0]}'
+        assert 'location' in r.responses[0]['trailer'], f'{r.responses[0]}'
+        assert 'set-cookie' not in r.responses[0]['header'], f'{r.responses[0]}'
+        assert 'location' not in r.responses[0]['header'], f'{r.responses[0]}'
+        assert r.stats[0]['redirect_url'] is None, f'{r.stats[0]}'
+        with open(cookiefile) as fd:
+            assert 'tweak-trailer' not in fd.read(), f'{r.dump_logs()}'

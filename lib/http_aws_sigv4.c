@@ -914,8 +914,8 @@ static CURLcode get_payload_hash(struct Curl_easy *data,
     CURLcode result;
     /* AWS S3 requires a x-amz-content-sha256 header, and supports special
      * values like UNSIGNED-PAYLOAD */
-    bool sign_as_s3 = curlx_str_casecompare(provider0, "aws") &&
-                      curlx_str_casecompare(service, "s3");
+    bool sign_as_s3 = curlx_str_casecompare2(provider0, STRCONST("aws")) &&
+                      curlx_str_casecompare2(service, STRCONST("s3"));
 
     if(sign_as_s3)
       result = calc_s3_payload_hash(data, httpreq, curlx_str(provider1),

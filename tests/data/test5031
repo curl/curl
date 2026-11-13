@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+retry
+--fail
+</keywords>
+</info>
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 503 BAD
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 21
+Retry-After: 200
+
+server not available
+</data>
+
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+HTTP --retry-max-time with too long Retry-After and --fail
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 2 --retry-max-time 10 --fail
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+22
+</errorcode>
+</verify>
+</testcase>

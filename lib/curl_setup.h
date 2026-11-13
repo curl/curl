@@ -288,30 +288,6 @@
 
 #include <curl/system.h>
 
-#if !defined(HAVE_PIPE2) && \
-  ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-            __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000 && \
-    defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
-            __MAC_OS_X_VERSION_MIN_REQUIRED >= 270000) || \
-   (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-            __IPHONE_OS_VERSION_MAX_ALLOWED >= 270000 && \
-    defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-            __IPHONE_OS_VERSION_MIN_REQUIRED >= 270000) || \
-   (defined(__TV_OS_VERSION_MAX_ALLOWED) && \
-            __TV_OS_VERSION_MAX_ALLOWED >= 270000 && \
-    defined(__TV_OS_VERSION_MIN_REQUIRED) && \
-            __TV_OS_VERSION_MIN_REQUIRED >= 270000) || \
-   (defined(__WATCH_OS_VERSION_MAX_ALLOWED) && \
-            __WATCH_OS_VERSION_MAX_ALLOWED >= 270000 && \
-    defined(__WATCH_OS_VERSION_MIN_REQUIRED) && \
-            __WATCH_OS_VERSION_MIN_REQUIRED >= 270000) || \
-   (defined(__VISION_OS_VERSION_MAX_ALLOWED) && \
-            __VISION_OS_VERSION_MAX_ALLOWED >= 270000 && \
-    defined(__VISION_OS_VERSION_MIN_REQUIRED) && \
-            __VISION_OS_VERSION_MIN_REQUIRED >= 270000))
-#define HAVE_PIPE2
-#endif
-
 /* Helper macro to expand and concatenate two macros.
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
@@ -1110,6 +1086,17 @@ error:                                                                 \
 #ifdef USE_WINSOCK
 #define SOCKERRNO         ((int)WSAGetLastError())
 #define SET_SOCKERRNO(x)  WSASetLastError((int)(x))
+#elif defined(__AMIGA__) && defined(HAVE_PROTO_BSDSOCKET_H) && \
+  !defined(__amigaos4__) && !defined(__MORPHOS__) && !defined(__AROS__)
+/* Native socket errors need not share libc's errno storage. */
+#define SOCKERRNO        ((int)Errno())
+#define SET_SOCKERRNO(x)                                       \
+  do {                                                         \
+    struct TagItem curl_errno_tags[] = {                       \
+      { SBTM_SETVAL(SBTC_ERRNO), (ULONG)(x) }, { TAG_DONE, 0 } \
+    };                                                         \
+    (void)SocketBaseTagList(curl_errno_tags);                  \
+  } while(0)
 #else
 #define SOCKERRNO         errno
 #define SET_SOCKERRNO(x)  (errno = (x))
@@ -1291,6 +1278,17 @@ error:                                                                 \
 #define FOPEN_READTEXT   "r"
 #define FOPEN_WRITETEXT  "w"
 #define FOPEN_APPENDTEXT "a"
+#endif
+
+#ifdef _WIN32
+#define PATHSEP   "\\"
+#define IS_SEP(x) (((x) == '/') || ((x) == '\\'))
+#elif defined(MSDOS) || defined(OS2)
+#define PATHSEP   "\\"
+#define IS_SEP(x) ((x) == '\\')
+#else
+#define PATHSEP   "/"
+#define IS_SEP(x) ((x) == '/')
 #endif
 
 /* for systems that do not detect this in configure */
@@ -1640,9 +1638,8 @@ typedef struct sockaddr_un {
 #endif
 
 /* For FreeBSD it is included from curl/curl.h */
-#if defined(__DragonFly__) || defined(__OpenBSD__) || defined(__NetBSD__)
-#include <sys/param.h>  /* for __DragonFly_version, OpenBSD,
-                           __NetBSD_Version__ */
+#ifdef __NetBSD__
+#include <sys/param.h>  /* for __NetBSD_Version__ */
 #endif
 
 /* NetBSD before 6.1 did not set SS_NBIO for SOCK_NONBLOCK. */
@@ -1662,16 +1659,10 @@ typedef struct sockaddr_un {
 #endif
 #elif defined(HAVE_MEMSET_S)
 #define curlx_memzero_low(buf, size)  (void)memset_s(buf, size, 0, size)
+#elif defined(HAVE_EXPLICIT_BZERO)
+#define curlx_memzero_low(buf, size)  explicit_bzero(buf, size)
 #elif defined(HAVE_MEMSET_EXPLICIT)
 #define curlx_memzero_low(buf, size)  (void)memset_explicit(buf, 0, size)
-#elif defined(__CYGWIN__) || \
-  (defined(__NEWLIB__) && !defined(__CLIB2__)) || \
-  (defined(__GLIBC__) && \
-    (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
-  (defined(__DragonFly__) && __DragonFly_version >= 500600 /* 5.6+ */) || \
-  (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* 11.0+ */) || \
-  (defined(__OpenBSD__) && OpenBSD >= 201405 /* 5.5+ */)
-#define curlx_memzero_low(buf, size)  explicit_bzero(buf, size)
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* 7.2+ */
 #define curlx_memzero_low(buf, size)  (void)explicit_memset(buf, 0, size)
 #endif

@@ -40,7 +40,6 @@ EPSV
 TYPE I
 SIZE %TESTNUMBER
 STOR %TESTNUMBER
-QUIT
 </protocol>
 
 #  (25) Failed FTP upload: 550

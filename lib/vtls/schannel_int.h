@@ -97,7 +97,7 @@ struct Curl_schannel_cred {
   CredHandle cred_handle;
   TCHAR *sni_hostname;
   HCERTSTORE client_cert_store;
-  int refcount;
+  LONG refcount; /* atomic, use Interlocked*() */
 };
 
 struct Curl_schannel_ctxt {

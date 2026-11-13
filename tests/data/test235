@@ -39,7 +39,6 @@ EPSV
 TYPE I
 SIZE %TESTNUMBER
 STOR %TESTNUMBER
-QUIT
 </protocol>
 <upload>
 this is the *****crap******** that we are gonna upload

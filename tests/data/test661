@@ -37,7 +37,6 @@ RETR %TESTNUMBER
 CWD /folderB
 EPSV
 RETR %TESTNUMBER
-QUIT
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -49,18 +48,15 @@ EPSV
 RETR %TESTNUMBER
 EPSV
 RETR /folderA/%TESTNUMBER
-QUIT
 USER anonymous
 PASS ftp@example.com
 PWD
 SYST
-QUIT
 USER anonymous
 PASS ftp@example.com
 PWD
 SYST
 SYST
-QUIT
 </protocol>
 </verify>
 </testcase>
