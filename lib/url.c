@@ -505,6 +505,9 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_peer_unlink(&conn->socks_proxy.peer);
   Curl_creds_unlink(&conn->http_proxy.creds);
   Curl_creds_unlink(&conn->socks_proxy.creds);
+#ifndef CURL_DISABLE_HTTP
+  curlx_safefree(conn->proxy_auth_hd);
+#endif
 #endif
   Curl_creds_unlink(&conn->creds);
   Curl_peer_unlink(&conn->creds_origin);
@@ -750,6 +753,17 @@ static bool url_match_proxy_use(struct connectdata *conn,
 
   if(!proxy_info_matches(&m->needle->http_proxy, &conn->http_proxy))
     return FALSE;
+
+#ifndef CURL_DISABLE_HTTP
+  if(conn->http_proxy.peer && !conn->bits.origin_is_proxy) {
+    /* A tunnel was authenticated by its CONNECT request. Only reuse it
+     * when the transfer brings the same custom Proxy-Authorization. */
+    const char *hd = Curl_checkProxyheaders(m->data, conn,
+                                            STRCONST("Proxy-Authorization"));
+    if(Curl_timestrcmp(hd, conn->proxy_auth_hd))
+      return FALSE;
+  }
+#endif
 
   if(m->data->set.socks5_auth_only && !conn->bits.socks5_authenticated &&
      ((conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ||
@@ -2319,6 +2333,22 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       result = CURLE_NO_CONNECTION_AVAILABLE;
       goto out;
     }
+
+#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+    if(needle->http_proxy.peer && !needle->bits.origin_is_proxy) {
+      /* Remember the custom Proxy-Authorization this tunnel is set up
+       * with, for matching it against later transfers. */
+      const char *hd = Curl_checkProxyheaders(
+        data, needle, STRCONST("Proxy-Authorization"));
+      if(hd) {
+        needle->proxy_auth_hd = curlx_strdup(hd);
+        if(!needle->proxy_auth_hd) {
+          result = CURLE_OUT_OF_MEMORY;
+          goto out;
+        }
+      }
+    }
+#endif
 
     /* Add needle to conn pool, observing the limits.
      * Initializes connection_id.
