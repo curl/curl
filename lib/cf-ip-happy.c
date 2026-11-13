@@ -406,12 +406,6 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
     return CURLE_OK;
 
 evaluate:
-  if(Curl_timeleft_now_ms(data, Curl_pgrs_now(data)) < 0) {
-    failf(data, "Connection timeout after %" FMT_OFF_T " ms",
-          Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE));
-    return CURLE_OPERATION_TIMEDOUT;
-  }
-
   ongoing = inconclusive = 0;
 
   /* check if a running baller connects now */
@@ -459,8 +453,17 @@ evaluate:
     CURL_TRC_CF(data, cf, "checked connect attempts: "
                 "%u ongoing, %u inconclusive", ongoing, inconclusive);
 
-  /* no attempt connected yet, start another one? */
+  /* Nothing connected. Only now check the time: an attempt that completed
+     since we were last called must be accepted even if the application
+     was late in calling us. */
   pnow = Curl_pgrs_now(data);
+  if(Curl_timeleft_now_ms(data, pnow) < 0) {
+    failf(data, "Connection timeout after %" FMT_OFF_T " ms",
+          Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE));
+    return CURLE_OPERATION_TIMEDOUT;
+  }
+
+  /* no attempt connected yet, start another one? */
   if(!ongoing) {
     do_more = TRUE;
   }
