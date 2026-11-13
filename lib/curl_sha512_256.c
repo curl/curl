@@ -809,39 +809,4 @@ CURLcode Curl_sha512_256it(unsigned char *output, const unsigned char *input,
   return Curl_sha512_256_finish(output, &ctx);
 }
 
-/* Wrapper function, takes 'unsigned int' as length type, returns void */
-static void Curl_sha512_256_update_i(void *context,
-                                     const unsigned char *data,
-                                     unsigned int length)
-{
-  /* Hypothetically the function may fail, but assume it does not */
-  (void)Curl_sha512_256_update(context, data, length);
-}
-
-/* Wrapper function, returns void */
-static void Curl_sha512_256_finish_v(unsigned char *result, void *context)
-{
-  /* Hypothetically the function may fail, but assume it does not */
-  (void)Curl_sha512_256_finish(result, context);
-}
-
-/* Wrapper function, takes 'unsigned int' as length type, returns void */
-
-const struct HMAC_params Curl_HMAC_SHA512_256[] = {
-  {
-    /* Initialize context procedure. */
-    Curl_sha512_256_init,
-    /* Update context with data. */
-    Curl_sha512_256_update_i,
-    /* Get final result procedure. */
-    Curl_sha512_256_finish_v,
-    /* Context structure size. */
-    sizeof(Curl_sha512_256_ctx),
-    /* Maximum key length (bytes). */
-    CURL_SHA512_256_BLOCK_SIZE,
-    /* Result length (bytes). */
-    CURL_SHA512_256_DIGEST_SIZE
-  }
-};
-
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
