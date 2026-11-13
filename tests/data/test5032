@@ -25,6 +25,9 @@ stream
 <server>
 http
 </server>
+<features>
+proxy
+</features>
 <name>
 HTTP proxy CONNECT honors the timeout while a 407 body keeps arriving
 </name>
