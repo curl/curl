@@ -37,6 +37,7 @@ http
 SSL
 crypto
 aws
+sha256
 </features>
 
 <name>

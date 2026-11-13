@@ -31,6 +31,7 @@ http
 <features>
 Debug
 aws
+sha256
 </features>
 <name>
 aws-sigv4 with CRLF in username
