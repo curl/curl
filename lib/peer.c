@@ -180,6 +180,49 @@ out:
   return result;
 }
 
+CURLcode Curl_peer_dup(const struct Curl_peer *src,
+                       struct Curl_peer **pdest)
+{
+  struct Curl_peer *peer;
+  size_t userlen, hostlen, zonelen;
+
+  if(!src) {
+    Curl_peer_unlink(pdest);
+    return CURLE_OK;
+  }
+
+  userlen = strlen(src->user_hostname);
+  hostlen = (src->hostname != src->user_hostname) ?
+    strlen(src->hostname) + 1 : 0;
+  zonelen = src->zoneid ? strlen(src->zoneid) + 1 : 0;
+  if(userlen > SIZE_MAX - sizeof(*peer) ||
+     hostlen > SIZE_MAX - sizeof(*peer) - userlen ||
+     zonelen > SIZE_MAX - sizeof(*peer) - userlen - hostlen)
+    return CURLE_OUT_OF_MEMORY;
+
+  peer = curlx_malloc(sizeof(*peer) + userlen + hostlen + zonelen);
+  if(!peer)
+    return CURLE_OUT_OF_MEMORY;
+
+  memcpy(peer, src, sizeof(*peer));
+  peer->refcount = 1;
+  memcpy(peer->user_hostname, src->user_hostname, userlen + 1);
+  peer->hostname = peer->user_hostname;
+  if(hostlen) {
+    peer->hostname += userlen + 1;
+    memcpy(peer->hostname, src->hostname, hostlen);
+  }
+  peer->zoneid = NULL;
+  if(zonelen) {
+    peer->zoneid = peer->user_hostname + userlen + 1 + hostlen;
+    memcpy(peer->zoneid, src->zoneid, zonelen);
+  }
+
+  Curl_peer_unlink(pdest);
+  *pdest = peer;
+  return CURLE_OK;
+}
+
 static CURLcode peer_parse_host(struct Curl_easy *data,
                                 struct peer_parse *pp,
                                 bool scan_for_ipv6)
