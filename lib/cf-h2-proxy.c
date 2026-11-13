@@ -348,7 +348,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
-  size_t nread;
+  size_t nread, loop_read = 0;
 
   /* Process network input buffer first */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
@@ -382,9 +382,17 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
 
+    loop_read += nread;
     result = proxy_h2_process_pending_input(cf, data);
     if(result)
       return result;
+
+    if((!cf->connected && (loop_read >= (16 * 1024))) ||
+       (cf->connected && (loop_read >= H2_TUNNEL_WINDOW_SIZE))) {
+      /* Give other transfers a chance to run. */
+      Curl_multi_mark_dirty(data);
+      break;
+    }
   }
 
   return CURLE_OK;
