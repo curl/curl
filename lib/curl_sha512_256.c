@@ -88,7 +88,9 @@
 /**
  * Size of the SHA-512/256 single processing block in bytes.
  */
+#ifdef DEBUGBUILD
 #define CURL_SHA512_256_BLOCK_SIZE 128
+#endif
 
 /**
  * Context type used for SHA-512/256 calculations
@@ -181,8 +183,6 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 #elif defined(USE_WOLFSSL_SHA512_256)
 #include <wolfssl/wolfcrypt/sha512.h>
 
-#define CURL_SHA512_256_BLOCK_SIZE  WC_SHA512_256_BLOCK_SIZE
-
 typedef struct wc_Sha512 Curl_sha512_256_ctx;
 
 static CURLcode Curl_sha512_256_init(void *ctx)
@@ -214,8 +214,6 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_GNUTLS_SHA512_256)
-
-#define CURL_SHA512_256_BLOCK_SIZE  SHA512_256_BLOCK_SIZE
 
 /**
  * Context type used for SHA-512/256 calculations
