@@ -978,8 +978,9 @@ retry:
   sws_prevpartno = req->partno;
 
   if(req->rcmd == RCMD_STREAM) {
-    /* Reply is out. Keep the socket full: a short write used to stop
-       the stream, and a client could then leave this read. */
+    /* The response headers were sent above. Keep writing to the socket so
+       the client keeps reading a response body that never ends, until it
+       times out or the test harness stops us. */
     static const char streamthis[] = "a string to stream 01234567890\n";
     size_t off = 0;
 
