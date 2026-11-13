@@ -980,19 +980,37 @@ retry:
   if(req->rcmd == RCMD_STREAM) {
     /* The response headers were sent above. Keep writing to the socket so
        the client keeps reading a response body that never ends, until it
-       times out or the test harness stops us. */
+       times out or the test harness stops us. Wait for the socket to become
+       writable first, so a peer that stops reading does not leave us blocked
+       in the write and the exit signal is still checked promptly. */
     static const char streamthis[] = "a string to stream 01234567890\n";
     size_t off = 0;
 
     logmsg("streaming after the response");
     while(!got_exit_signal) {
+      fd_set output;
+      struct timeval timeout;
+      int rc;
+
+      FD_ZERO(&output);
+      FD_SET(sock, &output);
+      timeout.tv_sec = 0;
+      timeout.tv_usec = 100000; /* 100ms */
+      do {
+        rc = select((int)sock + 1, NULL, &output, NULL, &timeout);
+      } while(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal);
+      if(rc < 0) {
+        logmsg("Stopped streaming");
+        break;
+      }
+      if(!rc)
+        continue; /* timeout; re-check the exit signal */
+
       written = swrite(sock, streamthis + off,
                        CURL_CSTRLEN(streamthis) - off);
       if(written < 0) {
-        if(SOCK_EAGAIN(SOCKERRNO)) {
-          curlx_wait_ms(1);
+        if(SOCK_EAGAIN(SOCKERRNO))
           continue;
-        }
         logmsg("Stopped streaming");
         break;
       }
