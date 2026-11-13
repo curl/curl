@@ -26,52 +26,10 @@
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include "curl_md5.h"
-#include "curl_hmac.h"
 
-#ifdef USE_OPENSSL
-#include <openssl/opensslconf.h>
-#endif
+#ifdef CURL_HAVE_MD5
 
-#ifdef USE_WOLFSSL
-#include <wolfssl/options.h>
-#endif
-
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-#error "mbedTLS 3.2.0 or greater required"
-#endif
-#include <psa/crypto_config.h>
-#endif
-
-#ifdef USE_GNUTLS
-#include <nettle/md5.h>
-#include <nettle/version.h>
-
-typedef struct md5_ctx my_md5_ctx;
-
-static CURLcode my_md5_init(void *ctx)
-{
-  md5_init(ctx);
-  return CURLE_OK;
-}
-
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, unsigned int len)
-{
-  md5_update(ctx, len, input);
-}
-
-static void my_md5_final(unsigned char *digest, void *ctx)
-{
-#if NETTLE_VERSION_MAJOR >= 4
-  md5_digest(ctx, digest);
-#else
-  md5_digest(ctx, MD5_DIGEST_LEN, digest);
-#endif
-}
-
-#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD5)
+#ifdef USE_OPENSSL_MD5
 #include <openssl/evp.h>
 
 typedef EVP_MD_CTX *my_md5_ctx;
@@ -106,7 +64,7 @@ static void my_md5_final(unsigned char *digest, void *in)
   *ctx = NULL;
 }
 
-#elif defined(USE_WOLFSSL) && !defined(NO_MD5)
+#elif defined(USE_WOLFSSL_MD5)
 #include <wolfssl/wolfcrypt/md5.h>
 
 typedef wc_Md5 my_md5_ctx;
@@ -129,8 +87,34 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)wc_Md5Final(ctx, digest);
 }
 
-#elif defined(USE_MBEDTLS) && \
-  defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5
+#elif defined(USE_GNUTLS_MD5)
+#include <nettle/md5.h>
+#include <nettle/version.h>
+
+typedef struct md5_ctx my_md5_ctx;
+
+static CURLcode my_md5_init(void *ctx)
+{
+  md5_init(ctx);
+  return CURLE_OK;
+}
+
+static void my_md5_update(void *ctx,
+                          const unsigned char *input, unsigned int len)
+{
+  md5_update(ctx, len, input);
+}
+
+static void my_md5_final(unsigned char *digest, void *ctx)
+{
+#if NETTLE_VERSION_MAJOR >= 4
+  md5_digest(ctx, digest);
+#else
+  md5_digest(ctx, MD5_DIGEST_LEN, digest);
+#endif
+}
+
+#elif defined(USE_MBEDTLS_MD5)
 #include <psa/crypto.h>
 
 typedef psa_hash_operation_t my_md5_ctx;
@@ -156,14 +140,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)psa_hash_finish(ctx, digest, MD5_DIGEST_LEN, &actual_length);
 }
 
-#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
-               __MAC_OS_X_VERSION_MAX_ALLOWED >= 1040 && \
-       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
-               __MAC_OS_X_VERSION_MIN_REQUIRED < 101500) || \
-      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-               __IPHONE_OS_VERSION_MAX_ALLOWED >= 20000 && \
-       defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
-               __IPHONE_OS_VERSION_MIN_REQUIRED < 130000)
+#elif defined(USE_APPLE_MD5)
 #include <CommonCrypto/CommonDigest.h>
 
 /* For Apple operating systems: CommonCrypto has the functions we need.
@@ -191,7 +168,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   CC_MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_WIN32_CRYPTO)
+#elif defined(USE_WIN32_MD5)
 #include <wincrypt.h>
 
 struct md5_ctx {
@@ -236,8 +213,6 @@ static void my_md5_final(unsigned char *digest, void *in)
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
 
-#else
-#error "MD5 support required but not offered by any TLS backend"
 #endif /* CRYPTO LIBS */
 
 const struct HMAC_params Curl_HMAC_MD5 = {
@@ -326,4 +301,6 @@ CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
   return CURLE_OK;
 }
 
-#endif /* Digest */
+#endif /* CURL_HAVE_MD5 */
+
+#endif /* !CURL_DISABLE_DIGEST_AUTH */

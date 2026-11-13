@@ -23,9 +23,72 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
+/* Recommended order of crypto backends:
+   1. USE_OPENSSL
+   2. USE_WOLFSSL
+   3. USE_GNUTLS
+   4. USE_MBEDTLS
+   5. USE_RUSTLS (TBD)
+   6. __APPLE__
+   7. USE_WIN32_CRYPTO
+ */
+
+#ifdef USE_OPENSSL
+#include <openssl/opensslconf.h>
+#ifndef OPENSSL_NO_MD5
+#define USE_OPENSSL_MD5
+#define CURL_HAVE_MD5
+#endif
+#endif
+
+#if !defined(CURL_HAVE_MD5) && defined(USE_WOLFSSL)
+#include <wolfssl/options.h>
+#ifndef NO_MD5
+#define USE_WOLFSSL_MD5
+#define CURL_HAVE_MD5
+#endif
+#endif
+
+#if !defined(CURL_HAVE_MD5) && defined(USE_GNUTLS)
+#define USE_GNUTLS_MD5
+#define CURL_HAVE_MD5
+#endif
+
+#if !defined(CURL_HAVE_MD5) && defined(USE_MBEDTLS)
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+#error "mbedTLS 3.2.0 or greater required"
+#endif
+#include <psa/crypto_config.h>
+#if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5
+#define USE_MBEDTLS_MD5
+#define CURL_HAVE_MD5
+#endif
+#endif
+
+#if !defined(CURL_HAVE_MD5) && \
+  (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+           __MAC_OS_X_VERSION_MAX_ALLOWED >= 1040 && \
+   defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+           __MAC_OS_X_VERSION_MIN_REQUIRED < 101500) || \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+           __IPHONE_OS_VERSION_MAX_ALLOWED >= 20000 && \
+   defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+           __IPHONE_OS_VERSION_MIN_REQUIRED < 130000)
+#define USE_APPLE_MD5
+#define CURL_HAVE_MD5
+#endif
+
+#if !defined(CURL_HAVE_MD5) && defined(USE_WIN32_CRYPTO)
+#define USE_WIN32_MD5
+#define CURL_HAVE_MD5
+#endif
+
+#ifdef CURL_HAVE_MD5
 #include "curl_hmac.h"
 
 #define MD5_DIGEST_LEN  16
@@ -60,7 +123,8 @@ CURLcode Curl_MD5_update(struct MD5_context *context,
                          const unsigned char *input,
                          unsigned int len);
 CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result);
+#endif /* CURL_HAVE_MD5 */
 
-#endif
+#endif /* CURL_DISABLE_DIGEST_AUTH */
 
 #endif /* HEADER_CURL_MD5_H */
