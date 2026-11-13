@@ -363,9 +363,31 @@ CURLcode Curl_ssh_pollset(struct Curl_easy *data, struct easy_pollset *ps)
   return CURLE_OK;
 }
 
+static CURLcode ssh_dup_opt(struct Curl_easy *data, char **dest,
+                            enum dupstring opt)
+{
+  const char *str = CURL_EASY_STR(data, opt);
+  *dest = NULL;
+  if(str) {
+    *dest = curlx_strdup(str);
+    if(!*dest)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
+}
+
 CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
 {
   char *home = NULL;
+
+  /* Remember the host key check this connection was verified with, so that
+     url.c does not reuse it for a transfer that wants a different one. */
+  if(ssh_dup_opt(data, &sshc->hostkey_sha256,
+                 STRING_SSH_HOST_PUBLIC_KEY_SHA256) ||
+     ssh_dup_opt(data, &sshc->hostkey_md5, STRING_SSH_HOST_PUBLIC_KEY_MD5) ||
+     ssh_dup_opt(data, &sshc->knownhosts, STRING_SSH_KNOWNHOSTS))
+    goto fail;
+
   if(data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) {
     const char *str;
 
@@ -450,6 +472,9 @@ fail:
   curlx_safefree(home);
   curlx_safefree(sshc->priv_key);
   curlx_safefree(sshc->pub_key);
+  curlx_safefree(sshc->hostkey_sha256);
+  curlx_safefree(sshc->hostkey_md5);
+  curlx_safefree(sshc->knownhosts);
   return CURLE_OUT_OF_MEMORY;
 }
 

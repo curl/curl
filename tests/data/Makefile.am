@@ -688,6 +688,7 @@ TESTCASES = \
   test691 \
   test692 \
   test693 \
+  test694 \
   test695 \
   test696 \
   test697 \

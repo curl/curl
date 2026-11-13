@@ -148,6 +148,10 @@ struct ssh_conn {
   char *passphrase;           /* strdup'ed pass-phrase to use or NULL */
   char *pub_key;              /* strdup'ed public key file */
   char *priv_key;             /* strdup'ed private key file */
+  /* the host key check this connection was verified with, compared on reuse */
+  char *hostkey_sha256;   /* strdup'ed CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 */
+  char *hostkey_md5;          /* strdup'ed CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 */
+  char *knownhosts;           /* strdup'ed CURLOPT_SSH_KNOWNHOSTS */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
   struct curl_slist *quote_item; /* for the quote option */

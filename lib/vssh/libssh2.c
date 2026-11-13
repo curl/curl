@@ -2587,6 +2587,9 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
   curlx_safefree(sshc->passphrase);
   curlx_safefree(sshc->pub_key);
   curlx_safefree(sshc->priv_key);
+  curlx_safefree(sshc->hostkey_sha256);
+  curlx_safefree(sshc->hostkey_md5);
+  curlx_safefree(sshc->knownhosts);
   curlx_safefree(sshc->quote_path1);
   curlx_safefree(sshc->quote_path2);
   curlx_safefree(sshc->homedir);

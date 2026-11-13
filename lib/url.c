@@ -570,7 +570,10 @@ static bool ssh_config_matches(struct connectdata *one,
   sshc1 = Curl_conn_meta_get(one, CURL_META_SSH_CONN);
   sshc2 = Curl_conn_meta_get(two, CURL_META_SSH_CONN);
   return sshc1 && sshc2 && Curl_safecmp(sshc1->priv_key, sshc2->priv_key) &&
-         Curl_safecmp(sshc1->pub_key, sshc2->pub_key);
+         Curl_safecmp(sshc1->pub_key, sshc2->pub_key) &&
+         Curl_safecmp(sshc1->hostkey_sha256, sshc2->hostkey_sha256) &&
+         Curl_safecmp(sshc1->hostkey_md5, sshc2->hostkey_md5) &&
+         Curl_safecmp(sshc1->knownhosts, sshc2->knownhosts);
 }
 #endif
 
