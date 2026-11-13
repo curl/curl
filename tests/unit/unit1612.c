@@ -28,7 +28,7 @@ static CURLcode test_unit1612(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-#ifdef CURL_HAVE_MD5
+#if defined(CURL_HAVE_MD5) && !defined(CURL_DISABLE_DIGEST_AUTH)
 
   static const char password[] = "Pa55worD";
   static const char string1[] = "1";
