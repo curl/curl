@@ -571,19 +571,14 @@ static void cf_quiche_process_ev(struct Curl_cfilter *cf,
     quiche_h3_event_for_each_header(ev, cb_each_header, &cb_ctx);
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] <- [HEADERS]", stream->id);
     Curl_multi_mark_dirty(data);
-    if(!stream->resp_hds_complete) {
-      stream->resp_hds_complete = TRUE;
-      if(!stream->xfer_result)
-        cf_quiche_write_hd(cf, data, stream, "\r\n", 2, FALSE);
+    if(!stream->xfer_result) {
+      cf_quiche_write_hd(cf, data, stream, "\r\n", 2, FALSE);
+      if(data->req.httpcode >= 200)
+        stream->resp_hds_complete = TRUE;
     }
     break;
   }
   case QUICHE_H3_EVENT_DATA:
-    if(!stream->resp_hds_complete && !stream->xfer_result) {
-      failf(data, "HTTP/3 DATA before response HEADERS");
-      stream->xfer_result = CURLE_WEIRD_SERVER_REPLY;
-      break;
-    }
     cf_quiche_recv_body(cf, data, stream);
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] <- [DATA]", stream->id);
     Curl_multi_mark_dirty(data);
