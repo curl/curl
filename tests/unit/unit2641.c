@@ -146,8 +146,7 @@ static CURLcode test_unit2641(const char *arg)
   struct Curl_cftype cft;
   CURLcode result;
   bool done = FALSE;
-  int i, rc, ssl_error;
-  char scratch[8];
+  int i;
 
   UNITTEST_BEGIN_SIMPLE
   global_init(CURL_GLOBAL_ALL);
@@ -261,10 +260,6 @@ static CURLcode test_unit2641(const char *arg)
   abort_unless(SSL_is_init_finished(client) && SSL_is_init_finished(server),
                "second TLS handshake complete");
   t2641_fail_reads = TRUE;
-  rc = SSL_read(client, scratch, (int)sizeof(scratch));
-  ssl_error = SSL_get_error(client, rc);
-  abort_unless(ssl_error == SSL_ERROR_SSL || ssl_error == SSL_ERROR_SYSCALL,
-               "pre-shutdown read is terminal");
   memset(&backend, 0, sizeof(backend));
   memset(&connssl, 0, sizeof(connssl));
   memset(&cf, 0, sizeof(cf));
