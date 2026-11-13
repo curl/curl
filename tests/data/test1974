@@ -39,6 +39,7 @@ SSL
 Debug
 crypto
 aws
+sha256
 </features>
 
 <name>
