@@ -47,6 +47,9 @@ EPSV
 TYPE A
 LIST
 </protocol>
+<strip>
+QUIT
+</strip>
 
 </verify>
 </testcase>

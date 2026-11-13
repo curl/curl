@@ -67,29 +67,15 @@ CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
 /* The transfer is neither receiving nor sending. */
 void Curl_xfer_setup_nop(struct Curl_easy *data);
 
-/* The transfer sends data on the given socket index */
-void Curl_xfer_setup_send(struct Curl_easy *data,
-                          int8_t sockindex);
+/* The transfer sends data. */
+void Curl_xfer_setup_send(struct Curl_easy *data);
 
-/* The transfer receives data on the given socket index, the
- * amount to receive (or -1 if unknown). */
-void Curl_xfer_setup_recv(struct Curl_easy *data,
-                          int8_t sockindex,
-                          curl_off_t recv_size);
+/* The transfer receives data, the amount to receive (or -1 if unknown). */
+void Curl_xfer_setup_recv(struct Curl_easy *data, curl_off_t recv_size);
 
-/* *After* Curl_xfer_setup_xxx(), tell the transfer to shutdown the
- * connection at the end. Let the transfer either fail or ignore any
- * errors during shutdown. */
-void Curl_xfer_set_shutdown(struct Curl_easy *data,
-                            bool shutdown,
-                            bool ignore_errors);
-
-/**
- * The transfer will use socket 1 to send/recv. `recv_size` is
- * the amount to receive or -1 if unknown.
- */
+/* The transfer will send and receive.
+ * `recv_size` is the amount to receive or -1 if unknown. */
 void Curl_xfer_setup_sendrecv(struct Curl_easy *data,
-                              int8_t sockindex,
                               curl_off_t recv_size);
 
 /**
@@ -133,7 +119,6 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         size_t *pnrcvd);
 
 CURLcode Curl_xfer_send_close(struct Curl_easy *data);
-CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done);
 
 /* Return TRUE if the transfer is not done, but further progress
  * is blocked. For example when it is only receiving and its writer

@@ -357,12 +357,12 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     goto quit;
   }
 
-  result = Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad);
+  result = Curl_conn_get_ip_info(data, conn, &is_ipv6, &ipquad);
   if(result)
     goto quit;
 
   /* Get the URL scheme (either ldap or ldaps) */
-  ldap_ssl = Curl_conn_is_ssl(conn, FIRSTSOCKET);
+  ldap_ssl = Curl_conn_is_ssl(conn);
   infof(data, "LDAP local: trying to establish %s connection",
         ldap_ssl ? "encrypted" : "cleartext");
 

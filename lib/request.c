@@ -52,7 +52,6 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->eos_read = FALSE;
   req->eos_sent = FALSE;
   req->ignorebody = FALSE;
-  req->shutdown = FALSE;
   req->bytecount = 0;
   req->writebytecount = 0;
   req->header = FALSE;
@@ -165,7 +164,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->upload_chunky = FALSE;
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
-  req->shutdown = FALSE;
   /* Unpause all directions */
   Curl_rlimit_block(&data->progress.dl.rlimit, FALSE, &t0);
   Curl_rlimit_block(&data->progress.ul.rlimit, FALSE, &t0);
@@ -328,21 +326,6 @@ static CURLcode req_flush(struct Curl_easy *data)
 
   if(!data->req.upload_done && data->req.eos_read && data->req.eos_sent) {
     DEBUGASSERT(Curl_bufq_is_empty(&data->req.sendbuf));
-    if(data->req.shutdown) {
-      bool done;
-      result = Curl_xfer_send_shutdown(data, &done);
-      if(result && data->req.shutdown_err_ignore) {
-        infof(data, "Shutdown send direction error: %d. Broken server? "
-              "Proceeding as if everything is ok.", (int)result);
-        result = CURLE_OK;
-        done = TRUE;
-      }
-
-      if(result)
-        return result;
-      if(!done)
-        return CURLE_AGAIN;
-    }
     return req_set_upload_done(data);
   }
   return CURLE_OK;
@@ -400,12 +383,13 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
      (blen <= data->req.sendbuf.chunk_size)) {
     data->req.eos_read = TRUE;
     result = xfer_send(data, buf, blen, blen, &nwritten);
-    if(result == CURLE_AGAIN) {
-      nwritten = 0;
-      result = CURLE_OK;
-    }
-    else if(result)
+    if(result) {
+      if(result == CURLE_AGAIN) {
+        nwritten = 0;
+        result = CURLE_OK;
+      }
       goto out;
+    }
     buf += nwritten;
     blen -= nwritten;
     if(!blen) {
