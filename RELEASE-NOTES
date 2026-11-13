@@ -266,7 +266,7 @@ Planned upcoming removals include:
  o Common Name support in TLS certificates for OpenSSL
  o HTTP/2 Server Push
  o local crypto implementations
- o NTLM
+ o mbedTLS
 
  See https://curl.se/dev/deprecate.html
 
@@ -274,9 +274,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   11soda11, Aaron Johnstone, Achim Friedland, Adrien Rey-Jarthon, akasakariko,
-  akashdeshmukh-git, Anthropic, Anthropic's OSS Scanner,
-  Anthropic's OSS Scanner ANT-2026-G2P4XQ8D, Anton Polonskiy, AP,
-  Armaan Sandhu, Bob Swanson, Bootherr on hackerone, chengr28 on github,
+  akashdeshmukh-git, Anthropic, Anton Polonskiy, AP, Armaan Sandhu,
+  Bob Swanson, Bootherr on hackerone, chengr28 on github,
   christos-cantina-security on github, Dan Fandrich, Daniel McCarney,
   Daniel Stenberg, Daniel Wade, Dan Rosser, David H-yan, dependabot[bot],
   Derek Martin, Dilshod Urazov, f0b1x on github, geeknik on github,
@@ -292,7 +291,7 @@ advice from friends like these:
   Sujit Jaunjal, toshg on github, Treston Cuzzort, Umut,
   vansukmbg on hackerone, Vasiliy-Kkk, Victor Hugo, Viktor Szakats,
   Vince Gonzalez, Vishnu Srivatsava, Yegor Yefremov, Zefan Xu, Zheng Yu
-  (85 contributors)
+  (83 contributors)
 
 References to bug reports and discussions on issues:
 
