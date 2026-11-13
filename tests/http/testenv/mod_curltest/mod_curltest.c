@@ -445,6 +445,7 @@ static int curltest_tweak_handler(request_rec *r)
   }
   if(with_trailers) {
     /* fields a client must pass on as trailers, but never act upon */
+    apr_table_setn(r->headers_out, "Trailer", "Set-Cookie, Location");
     apr_table_setn(r->trailers_out, "Set-Cookie", "tweak-trailer=1; path=/");
     apr_table_setn(r->trailers_out, "Location", "/curltest/tweak/?trailer");
   }

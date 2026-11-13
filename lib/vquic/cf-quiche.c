@@ -571,13 +571,14 @@ static void cf_quiche_process_ev(struct Curl_cfilter *cf,
     quiche_h3_event_for_each_header(ev, cb_each_header, &cb_ctx);
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] <- [HEADERS]", stream->id);
     Curl_multi_mark_dirty(data);
+    if(!stream->xfer_result && !stream->resp_hds_complete) {
+      cf_quiche_write_hd(cf, data, stream, "\r\n", 2, FALSE);
+      if(stream->status_code >= 200)
+        stream->resp_hds_complete = TRUE;
+    }
     break;
   }
   case QUICHE_H3_EVENT_DATA:
-    if(!stream->resp_hds_complete) {
-      stream->resp_hds_complete = TRUE;
-      cf_quiche_write_hd(cf, data, stream, "\r\n", 2, FALSE);
-    }
     cf_quiche_recv_body(cf, data, stream);
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] <- [DATA]", stream->id);
     Curl_multi_mark_dirty(data);
@@ -593,10 +594,6 @@ static void cf_quiche_process_ev(struct Curl_cfilter *cf,
 
   case QUICHE_H3_EVENT_FINISHED:
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] CLOSED", stream->id);
-    if(!stream->resp_hds_complete) {
-      stream->resp_hds_complete = TRUE;
-      cf_quiche_write_hd(cf, data, stream, "\r\n", 2, TRUE);
-    }
     stream->closed = TRUE;
     Curl_multi_mark_dirty(data);
     break;
