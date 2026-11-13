@@ -30,7 +30,7 @@ than one thread at any given time.
 When curl_version_info(3) does not report CURL_VERSION_THREADSAFE, an easy
 handle that has been used with a multi handle shares internal data with the
 connections of that multi handle, also after curl_multi_remove_handle(3). Do
-not call curl_easy_cleanup(3) on it while another thread uses the multi
+not use or clean up the easy handle while another thread uses the multi
 handle.
 
 # Shared objects
