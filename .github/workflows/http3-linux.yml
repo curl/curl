@@ -52,7 +52,7 @@ env:
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>3\.5\..+)$
   OPENSSL_PREV_VERSION: 3.5.9
   # renovate: datasource=github-tags depName=cloudflare/quiche
-  QUICHE_VERSION: 0.30.0
+  QUICHE_VERSION: 0.30.1
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl extractVersion=^v?(?<version>.+)-stable$
   WOLFSSL_VERSION: 5.9.4
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3
