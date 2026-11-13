@@ -1775,7 +1775,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
         break;
       result = Curl_bump_headersize(data, curlx_dyn_len(&dbuf), FALSE);
       if(result)
-        return result;
+        break;
     }
     curlx_dyn_free(&dbuf);
     if(result)

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/2
+trailers
+libtest
+</keywords>
+</info>
+
+<client>
+<features>
+http/2
+</features>
+<precheck>
+%LIBTESTS lib%TESTNUMBER check
+</precheck>
+<name>
+HTTP/2 trailers exceeding the response header size limit
+</name>
+<command>
+http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<errorcode>
+56
+</errorcode>
+</verify>
+</testcase>
