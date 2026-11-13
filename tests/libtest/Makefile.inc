@@ -279,6 +279,7 @@ TESTS_C = \
   lib1945.c \
   lib1947.c \
   lib1948.c \
+  lib1949.c \
   lib1955.c \
   lib1956.c \
   lib1957.c \
