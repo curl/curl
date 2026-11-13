@@ -2211,9 +2211,9 @@ static CURLcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
       curl_mime_headers(data->state.mimepost, data->set.headers, 0);
       result = Curl_mime_prepare_headers(data, data->state.mimepost, cthdr,
                                          NULL, MIMESTRATEGY_FORM);
+      curl_mime_headers(data->state.mimepost, NULL, 0);
       if(result)
         return result;
-      curl_mime_headers(data->state.mimepost, NULL, 0);
       result = Curl_creader_set_mime(data, data->state.mimepost);
       if(result)
         return result;
