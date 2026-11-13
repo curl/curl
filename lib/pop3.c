@@ -942,7 +942,7 @@ static CURLcode pop3_state_starttls_resp(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   /* Pipelining in response is forbidden. */
-  if(pop3c->pp.overflow)
+  if(Curl_pp_pipelined(data, &pop3c->pp))
     return CURLE_WEIRD_SERVER_REPLY;
 
   if(pop3code != '+') {
