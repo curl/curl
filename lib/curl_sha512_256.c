@@ -88,13 +88,9 @@
 /**
  * Size of the SHA-512/256 single processing block in bytes.
  */
+#ifdef DEBUGBUILD
 #define CURL_SHA512_256_BLOCK_SIZE 128
-
-/**
- * Size of the SHA-512/256 resulting digest in bytes.
- * This is the final digest size, not intermediate hash.
- */
-#define CURL_SHA512_256_DIGEST_SIZE CURL_SHA512_256_DIGEST_LENGTH
+#endif
 
 /**
  * Context type used for SHA-512/256 calculations
@@ -118,7 +114,7 @@ static CURLcode Curl_sha512_256_init(void *context)
 
   if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
     /* Check whether the header and this file use the same numbers */
-    DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
+    DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LENGTH);
     /* Check whether the block size is correct */
     DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
 
@@ -154,7 +150,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  * Finalise SHA-512/256 calculation, return digest.
  *
  * @param context the calculation context
- * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
+ * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_LENGTH
  *             bytes
  * @return CURLE_OK if succeed,
  *         error code otherwise
@@ -167,11 +163,11 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 #ifdef NEED_NETBSD_SHA512_256_WORKAROUND
   /* Use a larger buffer to work around a bug in NetBSD:
      https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
-  unsigned char tmp_digest[CURL_SHA512_256_DIGEST_SIZE * 2];
+  unsigned char tmp_digest[CURL_SHA512_256_DIGEST_LENGTH * 2];
   result = EVP_DigestFinal_ex(*ctx, tmp_digest, NULL) ?
     CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   if(result == CURLE_OK)
-    memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
+    memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_LENGTH);
   curlx_memzero(tmp_digest, sizeof(tmp_digest));
 #else /* !NEED_NETBSD_SHA512_256_WORKAROUND */
   result = EVP_DigestFinal_ex(*ctx, digest, NULL) ?
@@ -186,9 +182,6 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 
 #elif defined(USE_WOLFSSL_SHA512_256)
 #include <wolfssl/wolfcrypt/sha512.h>
-
-#define CURL_SHA512_256_DIGEST_SIZE WC_SHA512_256_DIGEST_SIZE
-#define CURL_SHA512_256_BLOCK_SIZE  WC_SHA512_256_BLOCK_SIZE
 
 typedef struct wc_Sha512 Curl_sha512_256_ctx;
 
@@ -222,9 +215,6 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 
 #elif defined(USE_GNUTLS_SHA512_256)
 
-#define CURL_SHA512_256_BLOCK_SIZE  SHA512_256_BLOCK_SIZE
-#define CURL_SHA512_256_DIGEST_SIZE SHA512_256_DIGEST_SIZE
-
 /**
  * Context type used for SHA-512/256 calculations
  */
@@ -239,9 +229,6 @@ typedef struct sha512_256_ctx Curl_sha512_256_ctx;
 static CURLcode Curl_sha512_256_init(void *context)
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
-  /* Check whether the header and this file use the same numbers */
-  DEBUGASSERT(CURL_SHA512_256_DIGEST_LENGTH == CURL_SHA512_256_DIGEST_SIZE);
 
   sha512_256_init(ctx);
 
@@ -273,7 +260,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  * Finalise SHA-512/256 calculation, return digest.
  *
  * @param context the calculation context
- * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
+ * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_LENGTH
  *             bytes
  * @return always CURLE_OK
  */
@@ -285,7 +272,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   sha512_256_digest(ctx, (uint8_t *)digest);
 #else
   sha512_256_digest(ctx,
-                    (size_t)CURL_SHA512_256_DIGEST_SIZE, (uint8_t *)digest);
+                    (size_t)CURL_SHA512_256_DIGEST_LENGTH, (uint8_t *)digest);
 #endif
 
   return CURLE_OK;
@@ -373,19 +360,6 @@ static CURL_FORCEINLINE uint64_t Curl_rotr64(uint64_t value, unsigned int bits)
 #define SHA512_256_HASH_SIZE_WORDS 8
 
 /**
- * Size of the SHA-512/256 resulting digest in words.
- * This is the final digest size, not intermediate hash.
- */
-#define SHA512_256_DIGEST_SIZE_WORDS (SHA512_256_HASH_SIZE_WORDS / 2)
-
-/**
- * Size of the SHA-512/256 resulting digest in bytes
- * This is the final digest size, not intermediate hash.
- */
-#define CURL_SHA512_256_DIGEST_SIZE \
-  (SHA512_256_DIGEST_SIZE_WORDS * SHA512_256_BYTES_IN_WORD)
-
-/**
  * Size of the SHA-512/256 single processing block in bits.
  */
 #define SHA512_256_BLOCK_SIZE_BITS 1024
@@ -442,9 +416,6 @@ typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
 static CURLcode Curl_sha512_256_init(void *context)
 {
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
-
-  /* Check whether the header and this file use the same numbers */
-  DEBUGASSERT(CURL_SHA512_256_DIGEST_LENGTH == CURL_SHA512_256_DIGEST_SIZE);
 
   DEBUGASSERT(sizeof(uint64_t) == 8);
 
@@ -704,7 +675,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  * Finalise SHA-512/256 calculation, return digest.
  *
  * @param context the calculation context
- * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_SIZE
+ * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_LENGTH
  *             bytes
  * @return always CURLE_OK
  */
@@ -808,40 +779,5 @@ CURLcode Curl_sha512_256it(unsigned char *output, const unsigned char *input,
 
   return Curl_sha512_256_finish(output, &ctx);
 }
-
-/* Wrapper function, takes 'unsigned int' as length type, returns void */
-static void Curl_sha512_256_update_i(void *context,
-                                     const unsigned char *data,
-                                     unsigned int length)
-{
-  /* Hypothetically the function may fail, but assume it does not */
-  (void)Curl_sha512_256_update(context, data, length);
-}
-
-/* Wrapper function, returns void */
-static void Curl_sha512_256_finish_v(unsigned char *result, void *context)
-{
-  /* Hypothetically the function may fail, but assume it does not */
-  (void)Curl_sha512_256_finish(result, context);
-}
-
-/* Wrapper function, takes 'unsigned int' as length type, returns void */
-
-const struct HMAC_params Curl_HMAC_SHA512_256[] = {
-  {
-    /* Initialize context procedure. */
-    Curl_sha512_256_init,
-    /* Update context with data. */
-    Curl_sha512_256_update_i,
-    /* Get final result procedure. */
-    Curl_sha512_256_finish_v,
-    /* Context structure size. */
-    sizeof(Curl_sha512_256_ctx),
-    /* Maximum key length (bytes). */
-    CURL_SHA512_256_BLOCK_SIZE,
-    /* Result length (bytes). */
-    CURL_SHA512_256_DIGEST_SIZE
-  }
-};
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
