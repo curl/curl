@@ -573,7 +573,7 @@ static void cf_quiche_process_ev(struct Curl_cfilter *cf,
     Curl_multi_mark_dirty(data);
     if(!stream->xfer_result) {
       cf_quiche_write_hd(cf, data, stream, "\r\n", 2, FALSE);
-      if(data->req.httpcode >= 200)
+      if(stream->status_code >= 200)
         stream->resp_hds_complete = TRUE;
     }
     break;
