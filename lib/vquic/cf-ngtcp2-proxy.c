@@ -659,7 +659,7 @@ static ssize_t cf_h3_proxy_recv_closed_stream(struct Curl_cfilter *cf,
     if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
       infof(data, "HTTP/3 stream %" PRId64 " refused by server, try again "
             "on a new connection", stream->id);
-      connclose(cf->conn);
+      connclose(CF_CONN(cf));
       data->state.refused_stream = TRUE;
       *err = CURLE_RECV_ERROR;
       goto out;
@@ -983,7 +983,7 @@ static CURLcode cf_h3_proxy_adjust_pollset(struct Curl_cfilter *cf,
   bool want_recv, want_send;
   CURLcode result = CURLE_OK;
   curl_socket_t sock = (ctx->q.sockfd != CURL_SOCKET_BAD) ?
-   ctx->q.sockfd : Curl_conn_cf_get_socket(cf, data);
+   ctx->q.sockfd : cf->chain->sock;
 
   if(!ctx->qconn || !pctx->tunnel.stream || (sock == CURL_SOCKET_BAD))
     return CURLE_OK;
@@ -1216,31 +1216,36 @@ struct Curl_cftype Curl_cft_h3_proxy = {
   Curl_cf_ngtcp2_cmn_query,
 };
 
-CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfchain *chain,
                                      struct Curl_easy *data,
                                      struct Curl_peer *origin,
                                      struct Curl_peer *peer,
                                      uint8_t transport_peer,
-                                     struct connectdata *conn,
                                      struct Curl_sockaddr_ex *addr,
                                      struct Curl_peer *tunnel_peer,
                                      uint8_t tunnel_transport)
 {
   struct Curl_cfilter *cf = NULL;
-  struct cf_h3_proxy_ctx *ctx;
+  struct cf_h3_proxy_ctx *ctx = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   if(!tunnel_peer)
     return CURLE_FAILED_INIT;
-  if((transport_peer != TRNSPRT_QUIC) || (!conn->http_proxy.peer))
+  if((transport_peer != TRNSPRT_QUIC) || (!chain->conn->http_proxy.peer))
     return CURLE_FAILED_INIT;
+
+  result = Curl_cf_udp_create(chain, data, origin, peer, TRNSPRT_QUIC,
+                              addr, NULL, TRNSPRT_QUIC);
+  if(result)
+    goto out;
 
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  result = cf_h3_proxy_ctx_init(ctx, origin, peer, &conn->proxy_ssl_config,
+  result = cf_h3_proxy_ctx_init(ctx, origin, peer,
+                                &chain->conn->proxy_ssl_config,
                                 tunnel_peer, tunnel_transport);
   if(result)
     goto out;
@@ -1248,25 +1253,15 @@ CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_h3_proxy, ctx);
   if(result)
     goto out;
-  cf->conn = conn;
-
-  result = Curl_cf_udp_create(&cf->next, data, origin, peer, TRNSPRT_QUIC,
-                              conn, addr, NULL, TRNSPRT_QUIC);
-  if(result)
-    goto out;
-  cf->next->conn = cf->conn;
-  cf->next->sockindex = cf->sockindex;
+  Curl_cfchain_add(chain, cf);
+  cf = NULL;
+  ctx = NULL;
 
 out:
-  *pcf = (!result) ? cf : NULL;
-  if(result) {
-    if(cf)
-      Curl_conn_cf_discard_chain(&cf, data);
-    else if(ctx)
-      cf_h3_proxy_ctx_free(ctx);
-  }
-  else
-    CURL_TRC_CF(data, cf, "created, udp_tunnel=%d", ctx->tunnel.udp);
+  if(cf)
+    Curl_conn_cf_discard_chain(&cf, data);
+  if(ctx)
+    cf_h3_proxy_ctx_free(ctx);
   return result;
 }
 
@@ -1286,7 +1281,7 @@ CURLcode Curl_cf_ngtcp2_proxy_insert_after(struct Curl_cfilter *cf_at,
   if(!ctx)
     goto out;
   result = cf_h3_proxy_ctx_init(ctx, origin, peer,
-                                &cf_at->conn->proxy_ssl_config,
+                                &CF_CONN(cf_at)->proxy_ssl_config,
                                 tunnel_peer, tunnel_transport);
   if(result)
     goto out;

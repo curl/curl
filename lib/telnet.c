@@ -639,7 +639,7 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
     /* Make sure socket is writable to avoid EWOULDBLOCK condition */
     struct pollfd pfd[1];
     timediff_t timeout_ms = Curl_timeleft_ms(data);
-    pfd[0].fd = conn->sock[FIRSTSOCKET];
+    pfd[0].fd = conn->chain.sock;
     pfd[0].events = POLLOUT;
     if(timeout_ms < 0)
       return CURLE_OPERATION_TIMEDOUT;
@@ -1221,7 +1221,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
   struct connectdata *conn = data->conn;
-  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = conn->chain.sock;
 #ifdef USE_WINSOCK
   WSAEVENT event_handle;
   WSANETWORKEVENTS events;

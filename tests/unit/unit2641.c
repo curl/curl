@@ -192,7 +192,8 @@ static CURLcode test_unit2641(const char *arg)
   connssl.ssl_impl = &Curl_ssl_openssl;
   cf.cft = &cft;
   cf.ctx = &connssl;
-  cf.conn = &connection;
+  Curl_cfchain_init(&connection.chain, &connection, TRUE);
+  Curl_cfchain_add(&connection.chain, &cf);
   result = Curl_ssl_openssl.shut_down(&cf, easy, TRUE, &done);
   /* Check that the write failure reached the terminal path and that the
    * post-send read path was not entered. Shutdown itself is best-effort. */
