@@ -668,6 +668,18 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   if(!digest->qop && (digest->algo & SESSION_ALGO))
     return CURLE_BAD_CONTENT_ENCODING;
 
+  /* MD5 can be disabled at runtime (FIPS) */
+  if(digest->algo == ALGO_MD5 || digest->algo == ALGO_MD5SESS) {
+    unsigned char md5[MD5_DIGEST_LEN];
+    CURLcode result = Curl_md5it(md5, (const unsigned char *)"", 0);
+    if(result == CURLE_FAILED_INIT) {
+      Curl_auth_digest_cleanup(digest); /* forget this challenge */
+      return CURLE_NOT_BUILT_IN;
+    }
+    if(result)
+      return result;
+  }
+
   return CURLE_OK;
 }
 
