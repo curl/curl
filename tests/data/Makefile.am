@@ -383,6 +383,7 @@ TESTCASES = \
   test379 \
   test380 \
   test381 \
+  test382 \
   test383 \
   test384 \
   test385 \
