@@ -571,7 +571,7 @@ static void cf_quiche_process_ev(struct Curl_cfilter *cf,
     quiche_h3_event_for_each_header(ev, cb_each_header, &cb_ctx);
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] <- [HEADERS]", stream->id);
     Curl_multi_mark_dirty(data);
-    if(!stream->xfer_result) {
+    if(!stream->xfer_result && !stream->resp_hds_complete) {
       cf_quiche_write_hd(cf, data, stream, "\r\n", 2, FALSE);
       if(stream->status_code >= 200)
         stream->resp_hds_complete = TRUE;
