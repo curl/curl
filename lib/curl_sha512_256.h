@@ -27,14 +27,15 @@
 
 #if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
 
-/* The recommended order of the TLS backends:
- * 1. USE_OPENSSL
- * 2. USE_WOLFSSL
- * 3. USE_GNUTLS
- * 4. USE_MBEDTLS (TBD)
- * 5. USE_RUSTLS (TBD)
- * 6. USE_WIN32_CRYPTO (TBD)
- * Skip the backend if it does not support the required algorithm */
+/* Recommended order of crypto backends:
+   1. USE_OPENSSL
+   2. USE_WOLFSSL
+   3. USE_GNUTLS
+   4. USE_MBEDTLS (TBD)
+   5. USE_RUSTLS (TBD)
+   6. __APPLE__ (TBD)
+   7. USE_WIN32_CRYPTO (TBD)
+ */
 
 #ifdef USE_OPENSSL
 #  include <openssl/opensslv.h>

@@ -28,24 +28,19 @@
 #include "curl_sha512_256.h"
 
 #ifdef CURL_HAVE_SHA512_256
+
 #ifdef USE_OPENSSL_SHA512_256
 
 /* OpenSSL does not provide macros for SHA-512/256 sizes */
-
-/**
- * Size of the SHA-512/256 single processing block in bytes.
- */
+/* Size of the SHA-512/256 single processing block in bytes. */
 #ifdef DEBUGBUILD
 #define CURL_SHA512_256_BLOCK_SIZE 128
 #endif
 
-/**
- * Context type used for SHA-512/256 calculations
- */
+/* Context type used for SHA-512/256 calculations */
 typedef EVP_MD_CTX *Curl_sha512_256_ctx;
 
-/**
- * Initialize structure for SHA-512/256 calculation.
+/* Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
  * @return CURLE_OK if succeed,
@@ -68,13 +63,11 @@ static CURLcode Curl_sha512_256_init(void *context)
     return CURLE_OK; /* Success */
   }
 
-  /* Cleanup */
-  EVP_MD_CTX_free(*ctx);
+  EVP_MD_CTX_free(*ctx);  /* Cleanup */
   return CURLE_FAILED_INIT;
 }
 
-/**
- * Process portion of bytes.
+/* Process portion of bytes.
  *
  * @param context the calculation context
  * @param data bytes to add to hash
@@ -93,8 +86,7 @@ static CURLcode Curl_sha512_256_update(void *context,
   return CURLE_OK;
 }
 
-/**
- * Finalise SHA-512/256 calculation, return digest.
+/* Finalise SHA-512/256 calculation, return digest.
  *
  * @param context the calculation context
  * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_LENGTH
@@ -177,13 +169,10 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 
 #elif defined(USE_GNUTLS_SHA512_256)
 
-/**
- * Context type used for SHA-512/256 calculations
- */
+/* Context type used for SHA-512/256 calculations */
 typedef struct sha512_256_ctx Curl_sha512_256_ctx;
 
-/**
- * Initialize structure for SHA-512/256 calculation.
+/* Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
  * @return always CURLE_OK
@@ -197,8 +186,7 @@ static CURLcode Curl_sha512_256_init(void *context)
   return CURLE_OK;
 }
 
-/**
- * Process portion of bytes.
+/* Process portion of bytes.
  *
  * @param context the calculation context
  * @param data bytes to add to hash
@@ -218,8 +206,7 @@ static CURLcode Curl_sha512_256_update(void *context,
   return CURLE_OK;
 }
 
-/**
- * Finalise SHA-512/256 calculation, return digest.
+/* Finalise SHA-512/256 calculation, return digest.
  *
  * @param context the calculation context
  * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_LENGTH
@@ -242,8 +229,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 
 #endif
 
-/**
- * Compute SHA-512/256 hash for the given data in one function call
+/* Compute SHA-512/256 hash for the given data in one function call
  * @param[out] output the pointer to put the hash
  * @param[in] input the pointer to the data to process
  * @param input_size the size of the data pointed by @a input
