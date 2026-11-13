@@ -110,6 +110,18 @@ static CURLcode test_lib1308(const char *URL)
 
   curl_formfree(post);
 
+  post = last = NULL;
+
+  rc = curl_formadd(&post, &last,
+                    CURLFORM_COPYNAME, "name",
+                    CURLFORM_FILE, URL,
+                    CURLFORM_CONTENTTYPE, "text/plain",
+                    CURLFORM_CONTENTTYPE, "text/html",
+                    CURLFORM_END);
+  t1308_fail_unless(rc == CURL_FORMADD_INCOMPLETE,
+                    "file part without a file should be incomplete");
+  curl_formfree(post);
+
   curl_global_cleanup();
 
   return errorcount ? TEST_ERR_FAILURE : CURLE_OK;
