@@ -33,6 +33,10 @@ static bool t2641_send_error;
 static bool t2641_read_after_error;
 static bool t2641_write_failed;
 static bool t2641_fail_writes;
+static bool t2641_fail_reads;
+static bool t2641_read_failed;
+static bool t2641_close_notify;
+static bool t2641_fatal_recv;
 
 static bool t2641_contains(const char *buf, size_t size, const char *text)
 {
@@ -56,6 +60,10 @@ static int t2641_debug(CURL *handle, curl_infotype type, char *buf,
       t2641_send_error = TRUE;
     if(t2641_contains(buf, size, "SSL shutdown read ->"))
       t2641_read_after_error = TRUE;
+    if(t2641_contains(buf, size, "send SSL close notify"))
+      t2641_close_notify = TRUE;
+    if(t2641_contains(buf, size, "SSL shutdown, fatal recv before send:"))
+      t2641_fatal_recv = TRUE;
   }
   return 0;
 }
@@ -86,6 +94,19 @@ static int t2641_bio_read(BIO *bio, char *buf, int len)
 {
   int rc;
   BIO_clear_retry_flags(bio);
+  if(t2641_fail_reads) {
+    /* A non-retryable read is SSL_ERROR_SYSCALL. One broken record makes
+     * the next SSL_read return SSL_ERROR_SSL. */
+    t2641_read_failed = TRUE;
+    if(len < 5)
+      return -1;
+    buf[0] = 0;
+    buf[1] = 3;
+    buf[2] = 3;
+    buf[3] = 0;
+    buf[4] = 0;
+    return 5;
+  }
   rc = BIO_read(BIO_next(bio), buf, len);
   BIO_copy_next_retry(bio);
   return rc;
@@ -134,7 +155,8 @@ static CURLcode test_unit2641(const char *arg)
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, t2641_debug);
   t2641_send_error = t2641_read_after_error = t2641_write_failed = FALSE;
-  t2641_fail_writes = FALSE;
+  t2641_fail_writes = t2641_fail_reads = t2641_read_failed = FALSE;
+  t2641_close_notify = t2641_fatal_recv = FALSE;
 
   /* Connect real client and server SSL objects over an in-memory BIO pair.
    * The test harness supplies the server certificate and key. */
@@ -201,6 +223,61 @@ static CURLcode test_unit2641(const char *arg)
   fail_unless(t2641_send_error, "shutdown error was terminal");
   fail_unless(done, "shutdown finished after terminal error");
   fail_unless(!t2641_read_after_error, "no read after terminal error");
+
+  /* Fatal SSL_read before close_notify must not start another TLS I/O. */
+  SSL_free(client);
+  SSL_free(server);
+  client = NULL;
+  server = NULL;
+  t2641_fail_reads = FALSE;
+  t2641_fail_writes = FALSE;
+  t2641_read_failed = FALSE;
+  t2641_read_after_error = FALSE;
+  t2641_close_notify = FALSE;
+  t2641_fatal_recv = FALSE;
+  t2641_send_error = FALSE;
+  done = FALSE;
+  client = SSL_new(client_ctx);
+  server = SSL_new(server_ctx);
+  abort_unless(client && server, "second SSL connections");
+  abort_unless(BIO_new_bio_pair(&client_bio, 0, &server_bio, 0) == 1,
+               "second BIO pair");
+  filter = BIO_new(method);
+  abort_unless(filter, "second filter BIO");
+  BIO_push(filter, client_bio);
+  client_bio = NULL;
+  SSL_set_bio(client, filter, filter);
+  filter = NULL;
+  SSL_set_bio(server, server_bio, server_bio);
+  server_bio = NULL;
+  SSL_set_connect_state(client);
+  SSL_set_accept_state(server);
+  for(i = 0; i < 100 &&
+      (!SSL_is_init_finished(client) || !SSL_is_init_finished(server)); i++)
+    abort_unless(t2641_handshake_step(client) &&
+                 t2641_handshake_step(server),
+                 "second TLS handshake step");
+  abort_unless(SSL_is_init_finished(client) && SSL_is_init_finished(server),
+               "second TLS handshake complete");
+  t2641_fail_reads = TRUE;
+  memset(&backend, 0, sizeof(backend));
+  memset(&connssl, 0, sizeof(connssl));
+  memset(&cf, 0, sizeof(cf));
+  cft = Curl_cft_ssl;
+  cft.log_level = CURL_LOG_LVL_INFO;
+  backend.ssl = client;
+  connssl.backend = &backend;
+  connssl.ssl_impl = &Curl_ssl_openssl;
+  cf.cft = &cft;
+  cf.ctx = &connssl;
+  cf.conn = &connection;
+  result = Curl_ssl_openssl.shut_down(&cf, easy, TRUE, &done);
+  fail_unless(result == CURLE_OK, "best-effort shutdown after fatal read");
+  fail_unless(t2641_read_failed, "broken record was delivered");
+  fail_unless(done, "shutdown finished after fatal read");
+  fail_unless(t2641_fatal_recv, "fatal recv was recognized");
+  fail_unless(!t2641_close_notify, "no close_notify after fatal read");
+  fail_unless(!t2641_read_after_error, "no second read after fatal read");
   /* !checksrc! disable CLOSEBRACE 1 */
   }
 unit_test_abort:

@@ -1882,6 +1882,19 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
         break;
     }
     err = SSL_get_error(octx->ssl, nread);
+    if(err == SSL_ERROR_SSL || err == SSL_ERROR_SYSCALL) {
+      /* OpenSSL forbids further I/O after these results. A peer close
+       * notify is SSL_ERROR_ZERO_RETURN and stays on the path below. */
+      VERBOSE(unsigned long sslerr = ERR_get_error());
+      CURL_TRC_CF(data, cf,
+                  "SSL shutdown, fatal recv before send: %s (%s), errno %d",
+                  SSL_ERROR_to_str(err),
+                  (sslerr ? ossl_strerror(sslerr, buf, sizeof(buf)) :
+                   "no OpenSSL error"),
+                  SOCKERRNO);
+      *done = TRUE;
+      goto out;
+    }
     if(!nread && err == SSL_ERROR_ZERO_RETURN) {
       bool input_pending;
       /* Yes, it did. */
