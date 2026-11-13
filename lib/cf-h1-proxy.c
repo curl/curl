@@ -533,16 +533,13 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
        second before looping to ensure continuous pgrsUpdates. */
-    if(Curl_timeleft_ms(data) < 0) {
-      /* H1_CONNECT checks the clock before this call. A proxy that keeps
-         the socket readable never returns there. */
-      failf(data, "Proxy CONNECT aborted due to timeout");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
 
-    /* Bound the read so other transfers on this multi can run. */
-    if(taken >= 16384)
+    /* Bound the read so other transfers on this multi can run, and ask the
+       multi to run us again right away instead of waiting for the socket. */
+    if(taken >= 16384) {
+      Curl_multi_mark_dirty(data);
       return CURLE_OK;
+    }
 
     result = Curl_conn_cf_recv(cf->next, data, &byte, 1, &nread);
     if(result == CURLE_AGAIN)
