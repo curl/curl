@@ -743,12 +743,17 @@ class TestDownload:
     # download a response with trailers: they are delivered as trailers,
     # but must never be processed as response headers, e.g. a `set-cookie`
     # or `location` trailer must not take effect
-    @pytest.mark.parametrize("proto", ['h2'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    @pytest.mark.parametrize("body_size", [100, 0])
     @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
-    def test_02_38_trailers(self, env: Env, httpd, nghttpx, proto):
+    def test_02_38_trailers(self, env: Env, httpd, nghttpx, proto, body_size):
+        if proto == 'http/1.1':
+            pytest.skip('httpd does not send the trailers on http/1.1')
+        if proto == 'h3':
+            pytest.skip('nghttpx does not proxy trailers')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-            '/curltest/tweak/?trailers&chunks=1&chunk_size=100'
+            f'/curltest/tweak/?trailers&chunks=1&chunk_size={body_size}'
         cookiefile = os.path.join(curl.run_dir, 'cookies.txt')
         r = curl.http_download(urls=[url], alpn_proto=proto, with_headers=True,
                                extra_args=['-c', cookiefile])
