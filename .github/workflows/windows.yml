@@ -588,7 +588,7 @@ jobs:
             config: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON -DCURL_DISABLE_PROXY=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
             type: 'Release'
             tflags: 'skiprun'
-          - name: 'schannel mbedtls U'  # mingw-w64 6.0
+          - name: 'schannel gnutls mbedtls U'  # mingw-w64 6.0
             sys: 'mingw64'
             dir: 'mingw64'
             env: 'x86_64'
