@@ -263,6 +263,26 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
   32                     /* Result size. */
 };
 
+#else
+
+CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
+                       size_t len)
+{
+  (void)output;
+  (void)input;
+  (void)len;
+  return CURLE_NOT_BUILT_IN;
+}
+
+const struct HMAC_params Curl_HMAC_SHA256 = {
+  NULL,                  /* Hash initialization function. */
+  NULL,                  /* Hash update function. */
+  NULL,                  /* Hash computation end function. */
+  0,                     /* Size of hash context structure. */
+  64,                    /* Maximum key length. */
+  32                     /* Result size. */
+};
+
 #endif /* CURL_HAVE_SHA256 */
 
 #endif /* AWS, httpsig, DIGEST, or libssh2 */

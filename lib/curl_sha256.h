@@ -84,19 +84,13 @@
 #define CURL_HAVE_SHA256
 #endif
 
-#ifdef CURL_HAVE_SHA256
-#include "curl_hmac.h"
+#define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 
 extern const struct HMAC_params Curl_HMAC_SHA256;
 
-#ifndef CURL_SHA256_DIGEST_LENGTH
-#define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
-#endif
-
+#include "curl_hmac.h"
 CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
                        size_t len);
-#endif /* CURL_HAVE_SHA256 */
-
 #endif /* AWS, httpsig, DIGEST, or libssh2 */
 
 #endif /* HEADER_CURL_SHA256_H */
