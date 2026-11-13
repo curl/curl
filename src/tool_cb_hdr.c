@@ -267,6 +267,92 @@ fail:
 }
 
 /*
+ * Returns TRUE if the value of a Trailer: header lists
+ * Content-Disposition, meaning a Content-Disposition header may still
+ * be sent as a trailer after the response body.
+ */
+static bool trailer_lists_cd(const char *str, const char *end)
+{
+  const char *p = str + 8; /* skip "Trailer:" */
+  while(p < end) {
+    const char *tok;
+    size_t len;
+    while((p < end) && (*p == ' ' || *p == '\t' || *p == ','))
+      p++;
+    if((p >= end) || (*p == '\r') || (*p == '\n'))
+      break; /* the end of the header value */
+    tok = p;
+    while((p < end) && (*p != ',') && (*p != ' ') && (*p != '\t') &&
+          (*p != '\r') && (*p != '\n'))
+      p++;
+    len = (size_t)(p - tok);
+    if((len == 19) && curl_strnequal(tok, "Content-Disposition", 19))
+      return TRUE;
+  }
+  return FALSE;
+}
+
+/*
+ * Track whether a Content-Disposition trailer has been announced for
+ * the current response: the state is reset when a new response starts
+ * and set when a Trailer: header lists Content-Disposition, meaning a
+ * Content-Disposition header may still be sent as a trailer after the
+ * response body.
+ */
+static void track_cd_trailer(struct HdrCbData *hdrcbdata,
+                             const char *str, const char *end)
+{
+  if(checkprefix("HTTP/", str))
+    /* a new response starts: no Content-Disposition trailer has been
+       announced for it yet */
+    hdrcbdata->cd_trailer_announced = FALSE;
+  else if(hdrcbdata->honor_cd_filename && checkprefix("Trailer:", str) &&
+          trailer_lists_cd(str, end))
+    /* a Content-Disposition header may still arrive as a trailer,
+       after the response body */
+    hdrcbdata->cd_trailer_announced = TRUE;
+}
+
+/*
+ * Returns TRUE if the header block that just ended was preceded by an
+ * announced Content-Disposition trailer and writing the response body
+ * to the URL-derived output file would truncate an existing file. In
+ * that case the -J filename decision is not final until the trailer
+ * arrives, which is after the body, so the transfer must be refused
+ * before an existing file is touched. When no file exists, nothing
+ * can be clobbered and the transfer is left to proceed as before.
+ *
+ * Informational (1xx) responses and 304 responses carry no body, so
+ * they cannot clobber anything: the refusal only applies to the final
+ * response, whose own header block ends before its body is written.
+ * The protection also only applies to the default clobber mode: with
+ * CLOBBER_NEVER the output file is never truncated, and with
+ * CLOBBER_ALWAYS the user explicitly asked for the overwrite that
+ * --clobber documents as overriding -J.
+ */
+static bool cd_trailer_would_clobber(struct per_transfer *per,
+                                     const char *str, size_t cb,
+                                     long response)
+{
+  struct HdrCbData *hdrcbdata = &per->hdrcbdata;
+  struct OutStruct *outs = &per->outs;
+
+  if((cb <= 2) && (str[0] == '\r' || str[0] == '\n') &&
+     (response / 100 != 1) && (response != 304) &&
+     hdrcbdata->honor_cd_filename && hdrcbdata->cd_trailer_announced &&
+     !outs->stream && outs->filename && !outs->is_cd_filename &&
+     (per->config->file_clobber_mode == CLOBBER_DEFAULT)) {
+    curlx_struct_stat st;
+    if(!curlx_stat(outs->filename, &st) && S_ISREG(st.st_mode)) {
+      warnf("Refusing to overwrite '%s': the server announced a "
+            "Content-Disposition trailer", outs->filename);
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/*
  * Write etag to file when --etag-save option is given.
  */
 static size_t save_etag(const char *etag_h, const char *endp,
@@ -476,6 +562,13 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   if((per->out_scheme == proto_http || per->out_scheme == proto_https)) {
     long response = 0;
     curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
+
+    track_cd_trailer(hdrcbdata, str, end);
+
+    if(cd_trailer_would_clobber(per, str, cb, response))
+      /* The end of a header block (or of a trailer block) while a
+         Content-Disposition trailer was announced */
+      return CURL_WRITEFUNC_ERROR;
 
     if((response / 100 != 2) && (response / 100 != 3))
       /* only care about etag and content-disposition headers in 2xx and 3xx

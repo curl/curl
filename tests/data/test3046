@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Content-Disposition
+-J
+trailer
+304
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 304 Not Modified%CR
+Trailer: Content-Disposition%CR
+Connection: close%CR
+%CR
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+HTTP GET -O -J, 304 announcing a Content-Disposition trailer
+</name>
+<file name="%LOGDIR/victim%TESTNUMBER">
+ORIGINAL-NOTMOD
+</file>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/victim%TESTNUMBER -O -J -z "dec 12 11:00:00 1999 GMT" --output-dir %LOGDIR
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /victim%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT
+
+</protocol>
+<file name="%LOGDIR/victim%TESTNUMBER">
+ORIGINAL-NOTMOD
+</file>
+</verify>
+</testcase>
