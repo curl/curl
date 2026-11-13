@@ -49,6 +49,12 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
                                            struct Curl_creds *creds,
                                            struct bufref *out)
 {
+#ifndef CURL_HAVE_MD5
+  (void)chlg;
+  (void)creds;
+  (void)out;
+  return CURLE_NOT_BUILT_IN;
+#else
   struct HMAC_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];
   char *response;
@@ -81,6 +87,7 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
 
   Curl_bufref_set(out, response, strlen(response), curl_free);
   return CURLE_OK;
+#endif
 }
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH */
