@@ -178,12 +178,12 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
     if [ -n "${RUN_TESTS_VIA_CMAKE:-}" ]; then  # just to document the differences
       export TFLAGS="-j10 ${TFLAGS:-}"
-      TFLAGS="!1238 ${TFLAGS:-}"  # skip slow/CPU-intensive test
+      TFLAGS="!killserver ${TFLAGS:-}"  # skip slow/CPU-intensive test
       time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
     else
       export CURL_DIRSUFFIX="${PRJ_CFG}"
       TFLAGS="!1119 !1167 ${TFLAGS:-}"  # skip tests that need a configured cl.exe
-      TFLAGS="!1238 ${TFLAGS:-}"  # skip slow/CPU-intensive test
+      TFLAGS="!killserver ${TFLAGS:-}"  # skip slow/CPU-intensive test
       (
         cd _bld/tests
         # This command must use the same Perl as detected in the CMake configuration step.
