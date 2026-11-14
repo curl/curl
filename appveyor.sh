@@ -188,7 +188,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
         cd _bld/tests
         # This command must use the same Perl as detected in the CMake configuration step.
         # shellcheck disable=SC2086
-        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ${TFLAGS}
+        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent --retry=5 -j10 --buildinfo ${TFLAGS}
       )
     fi
   else
