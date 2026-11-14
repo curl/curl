@@ -64,6 +64,7 @@ http
 crypto
 proxy
 digest
+sha256
 </features>
 <name>
 HTTP Digest upload with a modified method and SHA-256

@@ -23,6 +23,7 @@ MooMoo
 <client>
 <features>
 SSL
+sha256
 </features>
 <server>
 https test-localhost.pem

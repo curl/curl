@@ -25,6 +25,7 @@ smtp
 <features>
 crypto
 digest
+md5
 </features>
 <name>
 SMTP CRAM-MD5 authentication

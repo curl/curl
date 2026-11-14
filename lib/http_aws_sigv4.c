@@ -1039,6 +1039,7 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
   char *str_to_sign;
   unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
+  CURLcode result;
 
   request_type = curl_maprintf("%.*s4_request",
                                (int)curlx_strlen(provider0),
@@ -1061,11 +1062,12 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(Curl_sha256it(sha_hash, (const unsigned char *)canonical_request,
-                   strlen(canonical_request))) {
+  result = Curl_sha256it(sha_hash, (const unsigned char *)canonical_request,
+                         strlen(canonical_request));
+  if(result) {
     curlx_free(request_type);
     curlx_free(credential_scope);
-    return CURLE_OUT_OF_MEMORY;
+    return result;
   }
 
   sha256_to_hex(sha_hex, sha_hash);

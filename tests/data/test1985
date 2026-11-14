@@ -39,6 +39,7 @@ Digest response when not asked, then use Digest
 !SSPI
 crypto
 digest
+md5
 </features>
 
 <command>

@@ -542,7 +542,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
   return result;
 }
 
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#if !defined(CURL_DISABLE_DIGEST_AUTH) && defined(CURL_HAVE_MD5)
 /***********************************************************************
  *
  * pop3_perform_apop()
@@ -596,7 +596,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
 
   return result;
 }
-#endif
+#endif /* !CURL_DISABLE_DIGEST_AUTH && CURL_HAVE_MD5 */
 
 /***********************************************************************
  *
@@ -702,7 +702,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
   }
 
   if(!result && progress == SASL_IDLE) {
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#if !defined(CURL_DISABLE_DIGEST_AUTH) && defined(CURL_HAVE_MD5)
     if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_APOP)
       /* Perform APOP authentication */
       result = pop3_perform_apop(data, conn);
@@ -980,7 +980,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
       pop3_state(data, POP3_STOP);  /* Authenticated */
       break;
     case SASL_IDLE:            /* No mechanism left after cancellation */
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#if !defined(CURL_DISABLE_DIGEST_AUTH) && defined(CURL_HAVE_MD5)
       if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_APOP)
         /* Perform APOP authentication */
         result = pop3_perform_apop(data, conn);

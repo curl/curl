@@ -28,6 +28,7 @@ smtp
 Debug
 crypto
 digest
+md5
 </features>
 <setenv>
 CURL_ENTROPY=12345678

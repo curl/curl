@@ -22,14 +22,13 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "curl_hmac.h"
 #include "curl_md5.h"
 
 static CURLcode test_unit1612(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#if defined(CURL_HAVE_MD5) && !defined(CURL_DISABLE_DIGEST_AUTH)
 
   static const char password[] = "Pa55worD";
   static const char string1[] = "1";

@@ -54,7 +54,6 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   /* Create HMAC context. */
   i = sizeof(*ctxt) + (2 * hashparams->ctxtsize) + hashparams->resultlen;
   ctxt = curlx_malloc(i);
-
   if(!ctxt)
     return ctxt;
 
@@ -110,9 +109,8 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
 {
   const struct HMAC_params *hashparams = ctxt->hash;
 
-  /* Do not get output if called with a null parameter: only release
+  /* Do not get output if called with a NULL parameter: only release
      storage. */
-
   if(!output)
     output = (unsigned char *)ctxt->hashctxt2 + ctxt->hash->ctxtsize;
 
@@ -146,10 +144,14 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
                      unsigned char *output)
 {
   struct HMAC_context *ctxt;
+
   if(keylen > UINT_MAX) /* unlikely to ever happen */
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  ctxt = Curl_HMAC_init(hashparams, key, curlx_uztoui(keylen));
 
+  if(!hashparams->hinit)
+    return CURLE_NOT_BUILT_IN;
+
+  ctxt = Curl_HMAC_init(hashparams, key, curlx_uztoui(keylen));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
@@ -167,4 +169,4 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
   return CURLE_OK;
 }
 
-#endif /* AWS or Digest and TLS */
+#endif /* AWS, httpsig or Digest and TLS */

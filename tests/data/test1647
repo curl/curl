@@ -53,6 +53,7 @@ crypto
 proxy
 digest
 Debug
+md5
 </features>
 <setenv>
 http_proxy=%HOSTIP:%HTTPPORT

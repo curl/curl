@@ -28,6 +28,7 @@ smtp
 Debug
 crypto
 digest
+md5
 </features>
 <name>
 SMTP DIGEST-MD5 graceful cancellation

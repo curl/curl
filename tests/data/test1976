@@ -27,6 +27,7 @@ SSL
 Debug
 crypto
 aws
+sha256
 </features>
 <name>
 HTTP AWS_SIGV4 canonical request header sorting test

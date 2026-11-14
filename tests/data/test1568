@@ -58,6 +58,7 @@ http
 !SSPI
 crypto
 digest
+md5
 </features>
 <name>
 HTTP with Digest authorization on custom CURLOPT_PORT

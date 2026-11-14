@@ -71,6 +71,7 @@ http
 crypto
 proxy
 digest
+md5
 </features>
 <name>
 HTTP proxy CONNECT auth Digest, large headers and data

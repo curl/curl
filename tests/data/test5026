@@ -66,6 +66,7 @@ http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT -u us
 <features>
 Debug
 aws
+sha256
 proxy
 </features>
 </client>

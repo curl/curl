@@ -35,6 +35,7 @@ http
 <features>
 Debug
 httpsig
+sha256
 </features>
 <name>
 httpsig: same-origin redirect
