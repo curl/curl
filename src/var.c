@@ -311,6 +311,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
             const char *nb = memchr(value, '\0', vlen);
             if(nb) {
               errorf("variable contains NUL byte");
+              curlx_dyn_free(&buf);
               return PARAM_EXPAND_ERROR;
             }
           }
