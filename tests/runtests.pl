@@ -1910,7 +1910,7 @@ sub singletest_check {
     # add 'E' for event-based
     $ok .= $run_event_based ? "E" : "-";
 
-    logmsg "$ok $testnum " if(!$short);
+    logmsg sprintf("%s %04d ", $ok, $testnum) if(!$short);
 
     # timestamp test result verification end
     $timevrfyend{$testnum} = Time::HiRes::time();
