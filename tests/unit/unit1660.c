@@ -108,6 +108,7 @@ static CURLcode test_unit1660(const char *arg)
   const char *chost;
   CURL *easy;
   char savename[256];
+  char longhost[2100];
 
   abort_unless(h, "Curl_hsts_init()");
 
@@ -157,6 +158,17 @@ static CURLcode test_unit1660(const char *arg)
   e = hsts_check(h, "unknown.example", strlen("unknown.example"), FALSE);
   fail_if(!e, "recognized directive after unknown directive was ignored");
   result = Curl_hsts_parse(h, "unknown.example", "max-age=0");
+  fail_if(result, "failed to remove HSTS test entry");
+
+  /* a subdomain longer than 2048 bytes must still match */
+  result = Curl_hsts_parse(h, "long.example", "max-age=60; includeSubDomains");
+  fail_if(result, "failed to parse HSTS header");
+  memset(longhost, 'a', sizeof(longhost));
+  memcpy(&longhost[sizeof(longhost) - sizeof(".long.example")],
+         ".long.example", sizeof(".long.example"));
+  e = hsts_check(h, longhost, strlen(longhost), TRUE);
+  fail_if(!e, "long subdomain did not match includeSubDomains entry");
+  result = Curl_hsts_parse(h, "long.example", "max-age=0");
   fail_if(result, "failed to remove HSTS test entry");
 
   curl_mprintf("Number of entries: %zu\n", Curl_llist_count(&h->list));
