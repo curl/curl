@@ -1589,7 +1589,7 @@ CURLcode Curl_http_doing_pollset(struct Curl_easy *data,
                                  struct easy_pollset *ps)
 {
   /* write mode */
-  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
+  return Curl_pollset_add_out(data, ps, data->conn->chain.sock);
 }
 
 CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
@@ -1599,12 +1599,12 @@ CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   if(CURL_REQ_WANT_RECV(data)) {
-    result = Curl_pollset_add_in(data, ps, conn->sock[FIRSTSOCKET]);
+    result = Curl_pollset_add_in(data, ps, conn->chain.sock);
   }
 
   /* on a "Expect: 100-continue" timed wait, do not poll for outgoing */
   if(!result && Curl_req_want_send(data) && !http_exp100_is_waiting(data)) {
-    result = Curl_pollset_add_out(data, ps, conn->sock[FIRSTSOCKET]);
+    result = Curl_pollset_add_out(data, ps, conn->chain.sock);
   }
   return result;
 }
@@ -2861,7 +2861,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 #endif
 
   case H1_HD_UPGRADE:
-    if(!Curl_conn_is_ssl(data->conn, FIRSTSOCKET) && (httpversion < 20) &&
+    if(!Curl_conn_is_ssl(data->conn) && (httpversion < 20) &&
        (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
        data->state.http_neg.h2_upgrade) {
       /* append HTTP2 upgrade magic stuff to the HTTP request if it is not done
@@ -2969,7 +2969,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   /* setup variables for the upcoming transfer and send */
-  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
+  Curl_xfer_setup_sendrecv(data, -1);
   result = Curl_req_send(data, &req, httpversion);
 
   if((httpversion >= 20) && data->req.upload_chunky)
@@ -3797,7 +3797,7 @@ static CURLcode http_on_101_upgrade(struct Curl_easy *data,
     /* Switch to HTTP/2, where we will get more responses. blen bytes in buf
      * are already h2 protocol bytes */
     infof(data, "Received 101, Switching to HTTP/2");
-    result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+    result = Curl_http2_upgrade(data, buf, blen);
     if(!result)
       *pconsumed += blen;
     return result;

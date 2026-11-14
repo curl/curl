@@ -48,11 +48,10 @@ struct Curl_cfilter;
 
 #include "urldata.h"
 
-CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_ngtcp2_create(struct Curl_cfchain *chain,
                                struct Curl_easy *data,
                                struct Curl_peer *origin,
                                struct Curl_peer *peer,
-                               struct connectdata *conn,
                                struct Curl_sockaddr_ex *addr);
 
 CURLcode Curl_cf_ngtcp2_insert_after(struct Curl_cfilter *cf_at,

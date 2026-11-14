@@ -127,7 +127,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
   *pnread = 0;
   for(;;) {
     timediff_t timeout_ms = Curl_timeleft_ms(data);
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sock = cf->chain->sock;
 
     if(timeout_ms < 0) {
       /* we already got the timeout */
@@ -319,7 +319,7 @@ static CURLproxycode socks4_resolving(struct socks_ctx *sx,
   size_t nwritten;
 
   *done = FALSE;
-  result = Curl_conn_dns_addr_result(cf->conn, cf->sockindex, sx->dest);
+  result = Curl_dns_cf_addr_result(cf, sx->dest);
   if(result) {
     if(result != CURLE_AGAIN) {
       failf(data, "error %d resolving SOCKS destination %s:%u",
@@ -329,7 +329,7 @@ static CURLproxycode socks4_resolving(struct socks_ctx *sx,
     return CURLPX_OK;
   }
 
-  ai = Curl_conn_dns_get_ai(data, sx->dest, cf->sockindex, AF_INET, 0);
+  ai = Curl_dns_cf_get_ai(data, cf, sx->dest, AF_INET, 0);
   if(ai) {
     struct sockaddr_in *saddr_in;
     char ipbuf[64];
@@ -586,9 +586,9 @@ static CURLproxycode socks5_req0_init(struct Curl_cfilter *cf,
     /* disable username/password auth */
     Curl_creds_unlink(&sx->creds);
 
-  if(cf->sockindex == FIRSTSOCKET)
+  if(CF_IS_PRIMARY(cf))
     /* the reuse of this connection depends on how this negotiation ends */
-    cf->conn->bits.socks5_authenticated = FALSE;
+    CF_CONN(cf)->bits.socks5_authenticated = FALSE;
 
   req[0] = 5;   /* version */
   nauths = 0;
@@ -651,8 +651,8 @@ static CURLproxycode socks5_check_resp0(struct socks_ctx *sx,
     return CURLPX_OK;
   case 1:
     if(data->set.socks5auth & CURLAUTH_GSSAPI) {
-      if(cf->sockindex == FIRSTSOCKET)
-        cf->conn->bits.socks5_authenticated = TRUE;
+      if(CF_IS_PRIMARY(cf))
+        CF_CONN(cf)->bits.socks5_authenticated = TRUE;
       sxstate(sx, cf, data, SOCKS5_ST_GSSAPI_INIT);
       return CURLPX_OK;
     }
@@ -661,8 +661,8 @@ static CURLproxycode socks5_check_resp0(struct socks_ctx *sx,
   case 2:
     /* regular name + password authentication */
     if(data->set.socks5auth & CURLAUTH_BASIC) {
-      if(cf->sockindex == FIRSTSOCKET)
-        cf->conn->bits.socks5_authenticated = TRUE;
+      if(CF_IS_PRIMARY(cf))
+        CF_CONN(cf)->bits.socks5_authenticated = TRUE;
       sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
       return CURLPX_OK;
     }
@@ -839,7 +839,7 @@ static CURLproxycode socks5_resolving(struct socks_ctx *sx,
   size_t nwritten;
 
   *done = FALSE;
-  result = Curl_conn_dns_addr_result(cf->conn, cf->sockindex, sx->dest);
+  result = Curl_dns_cf_addr_result(cf, sx->dest);
   if(result) {
     if(result != CURLE_AGAIN) {
       failf(data, "error %d resolving SOCKS destination %s:%u",
@@ -851,10 +851,10 @@ static CURLproxycode socks5_resolving(struct socks_ctx *sx,
 
 #ifdef USE_IPV6
   if(data->set.ipver != CURL_IPRESOLVE_V4)
-    ai = Curl_conn_dns_get_ai(data, sx->dest, cf->sockindex, AF_INET6, 0);
+    ai = Curl_dns_cf_get_ai(data, cf, sx->dest, AF_INET6, 0);
 #endif
   if(!ai)
-    ai = Curl_conn_dns_get_ai(data, sx->dest, cf->sockindex, AF_INET, 0);
+    ai = Curl_dns_cf_get_ai(data, cf, sx->dest, AF_INET, 0);
 
   if(!ai) {
     failf(data, "Failed to resolve \"%s\" for SOCKS5 connect.",
@@ -1133,7 +1133,7 @@ process_state:
     else if(!done)
       return CURLPX_OK;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(cf->conn->socks5_gssapi_enctype) {
+    if(CF_CONN(cf)->socks5_gssapi_enctype) {
       failf(data, "SOCKS5 GSS-API protection not yet implemented.");
       return CURLPX_GSSAPI_PROTECTION;
     }
@@ -1228,13 +1228,13 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad))
       infof(data, "Opened %sSOCKS connection from %s port %d to %s port %d "
             "(via %s port %u)",
-            (cf->sockindex == SECONDARYSOCKET) ? "2nd " : "",
+            !CF_IS_PRIMARY(cf) ? "2nd " : "",
             ipquad.local_ip, ipquad.local_port,
             ctx->dest->hostname, ctx->dest->port,
             ipquad.remote_ip, ipquad.remote_port);
     else
       infof(data, "Opened %sSOCKS connection",
-            (cf->sockindex == SECONDARYSOCKET) ? "2nd " : "");
+            !CF_IS_PRIMARY(cf) ? "2nd " : "");
   }
 #endif
   cf->connected = TRUE;
@@ -1256,7 +1256,7 @@ static CURLcode socks_cf_adjust_pollset(struct Curl_cfilter *cf,
   if(!cf->connected && sx) {
     /* If we are not connected, the filter below is and has nothing
      * to wait on, we determine what to wait for. */
-    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sock = cf->chain->sock;
     switch(sx->state) {
     case SOCKS4_ST_SEND:
     case SOCKS5_ST_REQ0_SEND:
@@ -1378,10 +1378,8 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
   if(!result) {
     Curl_conn_cf_insert_after(cf_at, cf);
     if(ctx->resolve_local) {
-      result = Curl_conn_dns_add_addr_resolve(data, cf_at->conn,
-                                              cf_at->sockindex,
-                                              ctx->dest, dns_queries,
-                                              TRNSPRT_TCP);
+      result = Curl_dns_cf_add_addr_resolve(data, cf_at, ctx->dest,
+                                            dns_queries, TRNSPRT_TCP);
     }
   }
   else
