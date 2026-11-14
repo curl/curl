@@ -136,7 +136,8 @@ bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
 
 #ifndef USE_WINDOWS_SSPI
 
-#if defined(CURL_HAVE_SHA256) || defined(CURL_HAVE_MD5)
+#if defined(CURL_HAVE_MD5) || defined(CURL_HAVE_SHA256) || \
+  defined(CURL_HAVE_SHA512_256)
 /* Perform quoted-string escaping as described in RFC 9110, ch. 5.6.4,
  * esp. passing %80-FF unencoded as defined for 'obs-text'. */
 static char *auth_digest_string_quoted(const char *s)
