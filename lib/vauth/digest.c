@@ -340,7 +340,12 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
  */
 bool Curl_auth_is_digest_supported(void)
 {
+#if defined(CURL_HAVE_MD5) || defined(CURL_HAVE_SHA256) || \
+  defined(CURL_HAVE_SHA512_256)
   return TRUE;
+#else
+  return FALSE;
+#endif
 }
 
 /*
