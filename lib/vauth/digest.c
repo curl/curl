@@ -168,7 +168,7 @@ static char *auth_digest_string_quoted(const char *s)
 }
 #endif
 
-#ifdef CURL_HAVE_SHA256
+#if defined(CURL_HAVE_SHA256) || defined(CURL_HAVE_SHA512_256)
 /* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
 static void auth_digest_sha256_to_ascii(
   const unsigned char *source, /* 32 bytes */
