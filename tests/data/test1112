@@ -9,6 +9,7 @@ RETR
 timeout
 SLOWDOWNDATA
 timing-dependent
+killserver
 </keywords>
 </info>
 

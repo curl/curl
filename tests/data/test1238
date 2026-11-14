@@ -6,6 +6,7 @@ TFTP
 TFTP RRQ
 timeout
 DELAY
+killserver
 </keywords>
 </info>
 
