@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH GSSAPI
+GSS-API
+--login-options
+</keywords>
+</info>
+
+<reply>
+<servercmd>
+AUTH GSSAPI
+REPLY "AUTHENTICATE GSSAPI" A002 NO GSSAPI negotiation deliberately rejected
+</servercmd>
+</reply>
+
+<client>
+<server>
+imap
+</server>
+<features>
+GSS-API
+Kerberos
+!SSPI
+</features>
+<name>
+IMAP explicitly selects GSSAPI with a password
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/' -u user@curl.test:secret --login-options 'AUTH=GSSAPI'
+</command>
+</client>
+
+<verify>
+# 67 - CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+<protocol crlf="yes">
+A001 CAPABILITY
+A002 AUTHENTICATE GSSAPI
+</protocol>
+</verify>
+</testcase>

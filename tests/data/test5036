@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IMAP
+SASL
+SASL AUTH GSSAPI
+GSS-API
+</keywords>
+</info>
+
+<reply>
+<servercmd>
+AUTH GSSAPI
+CAPA LOGINDISABLED
+REPLY "AUTHENTICATE GSSAPI" A002 NO GSSAPI must not be selected
+</servercmd>
+</reply>
+
+<client>
+<server>
+imap
+</server>
+<features>
+GSS-API
+!SSPI
+</features>
+<name>
+IMAP skips GSSAPI when it is the only mechanism
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/' -u user@curl.test:secret
+</command>
+</client>
+
+<verify>
+# 67 - CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+<protocol crlf="yes">
+A001 CAPABILITY
+</protocol>
+</verify>
+</testcase>

@@ -19,10 +19,14 @@ Example:
 Specify the login options to use during server authentication.
 
 You can use login options to specify protocol specific options that may be
-used during authentication. At present only IMAP, POP3 and SMTP support login
-options. For more information about login options please see RFC 2384,
+used during authentication. At present, only IMAP, POP3, SMTP and LDAP support
+login options. For more information about login options please see RFC 2384,
 RFC 5092 and the IETF draft
 https://datatracker.ietf.org/doc/html/draft-earhart-url-smtp-00
+
+With the GSS-API backend, curl does not select GSSAPI by default for SASL
+authentication when a non-empty password is supplied with a domain-qualified
+username. Specify `AUTH=GSSAPI` to request GSSAPI explicitly.
 
 Since 8.2.0, IMAP supports the login option `AUTH=+LOGIN`. With this option,
 curl uses the plain (not SASL) `LOGIN IMAP` command even if the server
