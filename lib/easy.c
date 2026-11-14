@@ -1041,6 +1041,11 @@ CURL *curl_easy_duphandle(CURL *curl)
     if(dupset(outcurl, data))
       goto fail;
 
+#ifndef CURL_DISABLE_RTSP
+    /* RTSP session IDs belong to the source handle, not its duplicate. */
+    CURL_EASY_STR_CLEAR(outcurl, STRING_RTSP_SESSION_ID);
+#endif
+
     outcurl->progress.hide     = data->progress.hide;
     outcurl->progress.callback = data->progress.callback;
 
