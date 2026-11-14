@@ -24,6 +24,15 @@ options. For more information about login options please see RFC 2384,
 RFC 5092 and the IETF draft
 https://datatracker.ietf.org/doc/html/draft-earhart-url-smtp-00
 
+For IMAP, POP3 and SMTP, when the username contains a domain and GSSAPI is
+supported by the curl build and advertised by the server, curl does not select
+GSSAPI with the default mechanism preferences if a non-empty password is
+supplied. If the server advertises another supported password-based mechanism,
+curl can select that mechanism instead. GSSAPI remains eligible with the
+default preferences when the password is omitted or empty. To select GSSAPI
+with a password, specify only `AUTH=GSSAPI`. Listing GSSAPI with another
+mechanism, such as `AUTH=GSSAPI;AUTH=PLAIN`, does not select GSSAPI alone.
+
 Since 8.2.0, IMAP supports the login option `AUTH=+LOGIN`. With this option,
 curl uses the plain (not SASL) `LOGIN IMAP` command even if the server
 advertises SASL authentication. Care should be taken in using this option, as

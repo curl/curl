@@ -311,7 +311,9 @@ static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
   if((sctx->enabledmechs & SASL_MECH_GSSAPI) &&
      Curl_auth_is_gssapi_supported() &&
-     Curl_auth_user_contains_domain(sctx->conn->creds)) {
+     Curl_auth_user_contains_domain(sctx->conn->creds) &&
+     (!Curl_creds_has_passwd(sctx->conn->creds) ||
+      sctx->sasl->prefmech == SASL_MECH_GSSAPI)) {
     const char *service = Curl_creds_has_sasl_service(sctx->conn->creds) ?
       Curl_creds_sasl_service(sctx->conn->creds) : sctx->sasl->params->service;
 

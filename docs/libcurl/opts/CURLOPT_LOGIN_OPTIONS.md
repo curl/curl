@@ -39,6 +39,16 @@ CURLOPT_LOGIN_OPTIONS(3) can be used to set protocol specific login options,
 such as the preferred authentication mechanism via "AUTH=NTLM" or "AUTH=*",
 and should be used in conjunction with the CURLOPT_USERNAME(3) option.
 
+For IMAP, POP3 and SMTP, when the username contains a domain and GSSAPI is
+supported by the libcurl build and advertised by the server, libcurl does not
+select GSSAPI with the default mechanism preferences if a non-empty password
+is provided. If the server advertises another supported password-based
+mechanism, libcurl can select that mechanism instead. GSSAPI remains eligible
+with the default preferences when the password is omitted or empty. Setting
+the login options to "AUTH=GSSAPI" keeps GSSAPI eligible when a password is
+provided. Listing GSSAPI with other mechanisms, such as
+"AUTH=GSSAPI;AUTH=PLAIN", does not select GSSAPI alone.
+
 Since 8.2.0, IMAP supports the login option "AUTH=+LOGIN". With this option,
 curl uses the plain (not SASL) LOGIN IMAP command even if the server
 advertises SASL authentication. Care should be taken in using this option, as
