@@ -618,59 +618,9 @@ static struct TerminalSettings {
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-static void restore_terminal(void)
-{
-  if(InterlockedExchange(&TerminalSettings.valid, (LONG)FALSE))
-    SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
-}
-
-/* This is the console signal handler.
- * The system calls it in a separate thread.
- */
-static BOOL WINAPI signal_handler(DWORD type)
-{
-  if(type == CTRL_C_EVENT || type == CTRL_BREAK_EVENT)
-    restore_terminal();
-  return FALSE;
-}
-
 static void init_terminal(void)
 {
-  TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-
-  /*
-   * Enable VT (Virtual Terminal) output.
-   * Note: VT mode flag can be set on any version of Windows, but VT
-   * processing only performed on Win10 >= version 1709 (OS build 16299)
-   * Creator's Update. Also, ANSI bold on/off supported since then.
-   */
-  if(TerminalSettings.hStdOut == INVALID_HANDLE_VALUE ||
-     !GetConsoleMode(TerminalSettings.hStdOut,
-                     &TerminalSettings.dwOutputMode) ||
-     !curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
-                                   VERSION_GREATER_THAN_EQUAL))
-    return;
-
-  if((TerminalSettings.dwOutputMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
-    tool_term_has_bold = TRUE;
-  else {
-    /* The signal handler is set before attempting to change the console mode
-       because otherwise a signal would not be caught after the change but
-       before the handler was installed. */
-    (void)InterlockedExchange(&TerminalSettings.valid, (LONG)TRUE);
-    if(SetConsoleCtrlHandler(signal_handler, TRUE)) {
-      if(SetConsoleMode(TerminalSettings.hStdOut,
-                        (TerminalSettings.dwOutputMode |
-                         ENABLE_VIRTUAL_TERMINAL_PROCESSING))) {
-        tool_term_has_bold = TRUE;
-        atexit(restore_terminal);
-      }
-      else {
-        SetConsoleCtrlHandler(signal_handler, FALSE);
-        (void)InterlockedExchange(&TerminalSettings.valid, (LONG)FALSE);
-      }
-    }
-  }
+  return;
 }
 
 #ifdef USE_WINSOCK
