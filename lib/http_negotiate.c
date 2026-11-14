@@ -109,9 +109,9 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #ifdef GSS_C_CHANNEL_BOUND_FLAG
 #ifdef USE_SSL
   curlx_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
-  if(Curl_conn_is_ssl(conn)) {
-    result = Curl_ssl_get_channel_binding(
-      data, &neg_ctx->channel_binding_data);
+  if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+    result = Curl_ssl_get_channel_binding(data, FIRSTSOCKET,
+                                          &neg_ctx->channel_binding_data);
     if(result) {
       http_auth_nego_reset(conn, neg_ctx, proxy);
       return result;

@@ -1351,7 +1351,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
        InitializeSecurityContext to continue processing the received TLS
        records. This is because that function is not idempotent and we do not
        support partial save/resume sending replies of handshake tokens. */
-    if(!SOCKET_WRITABLE(cf->chain->sock, 0)) {
+    if(!SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), 0)) {
       SCH_DEV(infof(data, "schannel: handshake waiting for writable socket"));
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       curlx_free(inbuf[0].pvBuffer);
@@ -1758,7 +1758,7 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
      * binding to pass the IIS extended protection checks.
      * Available on Windows 7 or later.
      */
-    CF_CONN(cf)->sslContext = &backend->ctxt->ctxt_handle;
+    cf->conn->sslContext = &backend->ctxt->ctxt_handle;
 
     *done = TRUE;
   }
@@ -1805,7 +1805,7 @@ static CURLcode schannel_recv_renegotiate(
   else
     SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_send"));
 
-  sockfd = cf->chain->sock;
+  sockfd = Curl_conn_cf_get_socket(cf, data);
 
   if(sockfd == CURL_SOCKET_BAD) {
     failf(data, "schannel: renegotiation missing socket");
@@ -1928,7 +1928,7 @@ static CURLcode schannel_recv_renegotiate(
                     ((writefd != CURL_SOCKET_BAD) ? " writable" : ""),
                     timeout_ms));
 
-      what = Curl_socket_check(readfd, writefd, timeout_ms);
+      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd, timeout_ms);
 
       if(what > 0 && (what & (CURL_CSELECT_IN | CURL_CSELECT_OUT))) {
         SCH_DEV(infof(data, "schannel: renegotiation socket %s%s",
@@ -2059,7 +2059,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       else if(!timeout_ms)
         timeout_ms = TIMEDIFF_T_MAX;
-      what = SOCKET_WRITABLE(cf->chain->sock, timeout_ms);
+      what = SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -2582,8 +2582,8 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* free SSPI Schannel API security context handle */
   if(backend->ctxt) {
-    if(CF_CONN(cf)->sslContext == &backend->ctxt->ctxt_handle)
-      CF_CONN(cf)->sslContext = NULL;
+    if(cf->conn->sslContext == &backend->ctxt->ctxt_handle)
+      cf->conn->sslContext = NULL;
 
     DEBUGF(infof(data, "schannel: clear security context handle"));
     Curl_pSecFn->DeleteSecurityContext(&backend->ctxt->ctxt_handle);

@@ -549,9 +549,9 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   CURLcode result;
   bool ssldone = FALSE;
 
-  if(!Curl_conn_is_ssl(conn)) {
+  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(
-      data, Curl_conn_get_origin(conn), &conn->chain);
+      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
     if(result)
       goto out;
     /* Change the connection handler */
@@ -559,7 +559,7 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   }
 
   DEBUGASSERT(!imapc->ssldone);
-  result = Curl_conn_connect(data, FALSE, &ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   DEBUGF(infof(data, "imap_perform_upgrade_tls, connect -> %d, %d",
                (int)result, ssldone));
   if(!result && ssldone) {
@@ -1074,7 +1074,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
       line += wordlen;
     }
   }
-  else if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn)) {
+  else if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
     /* PREAUTH is not compatible with STARTTLS. */
     if(imapcode == IMAP_RESP_OK && imapc->tls_supported && !imapc->preauth) {
       /* Switch to TLS connection now */
@@ -1323,7 +1323,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
              maxdownload and transfer size include both header line and
              literal body */
           data->req.maxdownload = size;
-          Curl_xfer_setup_recv(data, size);
+          Curl_xfer_setup_recv(data, FIRSTSOCKET, size);
         }
         /* End of DO phase */
         imap_state(data, imapc, IMAP_STOP);
@@ -1481,7 +1481,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
     else {
       /* IMAP download */
       data->req.maxdownload = size;
-      Curl_xfer_setup_recv(data, size);
+      Curl_xfer_setup_recv(data, FIRSTSOCKET, size);
     }
   }
   else {
@@ -1532,7 +1532,7 @@ static CURLcode imap_state_append_resp(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* IMAP upload */
-    Curl_xfer_setup_send(data);
+    Curl_xfer_setup_send(data, FIRSTSOCKET);
 
     /* End of DO phase */
     imap_state(data, imapc, IMAP_STOP);
@@ -1587,7 +1587,7 @@ upgrade_tls:
 
   do {
     /* Read the response from the server */
-    result = Curl_pp_readresp(data, pp, &imapcode, &nread);
+    result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &imapcode, &nread);
     if(result)
       return result;
 
@@ -1674,19 +1674,20 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done)
   *done = FALSE;
   if(!imapc)
     return CURLE_FAILED_INIT;
-  result = Curl_pp_statemach(data, &imapc->pp, FALSE);
+  result = Curl_pp_statemach(data, &imapc->pp, FALSE, FALSE);
   *done = (imapc->state == IMAP_STOP);
 
   return result;
 }
 
 static CURLcode imap_block_statemach(struct Curl_easy *data,
-                                     struct imap_conn *imapc)
+                                     struct imap_conn *imapc,
+                                     bool disconnecting)
 {
   CURLcode result = CURLE_OK;
 
   while(imapc->state != IMAP_STOP && !result)
-    result = Curl_pp_statemach(data, &imapc->pp, TRUE);
+    result = Curl_pp_statemach(data, &imapc->pp, TRUE, disconnecting);
 
   return result;
 }
@@ -2036,7 +2037,7 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
 
     /* Run the state-machine */
     if(!result)
-      result = imap_block_statemach(data, imapc);
+      result = imap_block_statemach(data, imapc, FALSE);
   }
 
   imap_easy_reset(imap);
@@ -2108,7 +2109,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   /* Run the state-machine */
   result = imap_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(conn);
+  *connected = Curl_conn_is_connected(conn, FIRSTSOCKET);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));
@@ -2214,7 +2215,7 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
      !dead_connection && conn->bits.protoconnstart &&
      !Curl_pp_needs_flush(data, &imapc->pp) &&
      !imap_perform_logout(data, imapc))
-    (void)imap_block_statemach(data, imapc); /* ignore errors */
+    (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
 
   return CURLE_OK;
 }

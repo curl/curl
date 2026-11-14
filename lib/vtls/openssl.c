@@ -2726,7 +2726,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
       sc_session->sectrust_verified = octx->sectrust_verified;
 #endif
     if(!result && psession &&  /* return a duplicate if asked for and FTP */
-       (CF_CONN(cf)->scheme->family == CURLPROTO_FTP)) {
+       (cf->conn->scheme->family == CURLPROTO_FTP)) {
         result = Curl_ssl_session_dup(sc_session, &sc_dup);
     }
     if(!result) {
@@ -3490,7 +3490,7 @@ static bool ossl_apply_session(
 #ifdef HAVE_OPENSSL_EARLYDATA
         if(conn_cfg->earlydata && scs->alpn &&
            SSL_SESSION_get_max_early_data(ssl_session) &&
-           !CF_CONN(cf)->bits.connect_only &&
+           !cf->conn->bits.connect_only &&
            (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
           bool do_early_data = FALSE;
           if(sess_reuse_cb)
@@ -3532,11 +3532,12 @@ static CURLcode ossl_init_session_and_alpns(
 
   octx->reused_session = FALSE;
 
-  if(!CF_IS_PRIMARY(cf) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
     /* FTP is a bitch. On TLS secured transfers, it is a common server
      * option to require the client to use the SAME TLS session as on
      * the control connection or it fails the request. See #22225. */
-    struct Curl_ssl_session *scs = Curl_ssl_get_primary_session(data, cf->cft);
+    struct Curl_ssl_session *scs =
+      Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
     if(scs) {
       if(ossl_apply_session(octx, cf, data, &alpns, sess_reuse_cb, scs))
         CURL_TRC_CF(data, cf, "applied SSL session from control connection");
@@ -3639,7 +3640,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
   }
   else {
     const struct Curl_https_rrinfo *rinfo =
-      Curl_dns_cf_get_https(data, cf, peer->origin);
+      Curl_conn_dns_get_https(data, cf->sockindex, peer->origin);
 
     if(Curl_httpsrr_is_for_peer(peer->origin, rinfo) && rinfo->echconfiglist) {
       const unsigned char *ecl = rinfo->echconfiglist;
@@ -4859,7 +4860,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
                                    struct ossl_ctx *octx,
                                    struct ssl_peer *peer)
 {
-  struct connectdata *conn = CF_CONN(cf);
+  struct connectdata *conn = cf->conn;
   struct ssl_easy_config *ssl_config = Curl_ssl_cf_get_easy_config(cf, data);
   struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result = CURLE_OK;
@@ -5087,7 +5088,8 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
 
   if(connssl->connecting_state == ssl_connect_1) {
     if(Curl_ssl_need_httpsrr(cf) &&
-       !Curl_dns_cf_resolved_https(data, cf, connssl->peer.peer)) {
+       !Curl_conn_dns_resolved_https(data, cf->sockindex,
+                                     connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
       return CURLE_OK;
     }
@@ -5294,7 +5296,10 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
       break;
     case SSL_ERROR_ZERO_RETURN: /* no more data */
       /* close_notify alert */
-      CURL_TRC_CF(data, cf, "TLS close_notify");
+      if(cf->sockindex == FIRSTSOCKET)
+        /* mark the connection for close if it is indeed the control
+           connection */
+        CURL_TRC_CF(data, cf, "TLS close_notify");
       break;
     case SSL_ERROR_WANT_READ:
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
@@ -5373,6 +5378,7 @@ out:
 }
 
 static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
+                                         int8_t sockindex,
                                          struct dynbuf *binding)
 {
   X509 *cert;
@@ -5385,7 +5391,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
 
   static const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
-  struct Curl_cfilter *cf = conn->chain.cf;
+  struct Curl_cfilter *cf = conn->cfilter[sockindex];
   struct ossl_ctx *octx = NULL;
   CURLcode result = CURLE_OK;
 

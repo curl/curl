@@ -240,14 +240,13 @@ class TestVsFTPD:
 
     def test_30_12_upload_eprt(self, env: Env, vsftpd: VsFTPD):
         docname = 'test_30_12'
-        dstfile = os.path.join(vsftpd.docs_dir, docname)
-        self._rmf(dstfile)
         client = LocalClient(name='cli_ftp_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ftp://{env.ftp_domain}:{vsftpd.port}/{docname}'
         r = client.run(args=['-r', f'{env.ftp_domain}:{vsftpd.port}:127.0.0.1', url])
         r.check_exit_code(0)
+        dstfile = os.path.join(vsftpd.docs_dir, docname)
         assert os.path.exists(dstfile), f'{r.dump_logs()}'
 
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")

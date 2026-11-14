@@ -1289,7 +1289,7 @@ CURLcode Curl_easy_recv(struct Curl_easy *data,
     Curl_attach_connection(data, c, TRUE);
 
   *n = 0;
-  return Curl_conn_recv(data, buffer, buflen, n);
+  return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
 }
 
 CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
@@ -1351,7 +1351,7 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
     Curl_attach_connection(data, c, TRUE);
 
   sigpipe_ignore(data, &sigpipe_ctx);
-  result = Curl_conn_send(data, buffer, buflen, FALSE, n);
+  result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, FALSE, n);
   sigpipe_restore(&sigpipe_ctx);
 
   if(result && result != CURLE_AGAIN)

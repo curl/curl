@@ -1139,17 +1139,19 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
   /* When using ECH, kick off the HTTPS-RR resolve */
   if(!result && (origin->scheme->family == CURLPROTO_HTTP) &&
      Curl_ssl_need_httpsrr(cf)) {
-    result = Curl_dns_cf_add_https_resolve(data, cf, origin);
+    result = Curl_conn_dns_add_https_resolve(data, cf->conn,
+                                             cf->sockindex, origin);
   }
 #endif /* USE_HTTPSRR && USE_ECH */
   return result;
 }
 
-CURLcode Curl_cf_quic_create(struct Curl_cfchain *chain,
+CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct Curl_peer *origin,
                              struct Curl_peer *peer,
                              uint8_t transport_peer,
+                             struct connectdata *conn,
                              struct Curl_sockaddr_ex *addr,
                              struct Curl_peer *tunnel_peer,
                              uint8_t tunnel_transport)
@@ -1159,13 +1161,15 @@ CURLcode Curl_cf_quic_create(struct Curl_cfchain *chain,
   (void)tunnel_peer;
   DEBUGASSERT(transport_peer == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_create(chain, data, origin, peer, addr);
+  return Curl_cf_ngtcp2_create(pcf, data, origin, peer, conn, addr);
 #elif defined(USE_QUICHE)
-  return Curl_cf_quiche_create(chain, data, origin, peer, addr);
+  return Curl_cf_quiche_create(pcf, data, origin, peer, conn, addr);
 #else
+  *pcf = NULL;
   (void)data;
   (void)origin;
   (void)peer;
+  (void)conn;
   (void)addr;
   (void)tunnel_peer;
   (void)tunnel_transport;
@@ -1196,19 +1200,21 @@ CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
 #endif
 }
 
-CURLcode Curl_cf_h3_proxy_create(struct Curl_cfchain *chain,
+CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
                                  struct Curl_easy *data,
                                  struct Curl_peer *origin,
                                  struct Curl_peer *peer,
                                  uint8_t transport_peer,
+                                 struct connectdata *conn,
                                  struct Curl_sockaddr_ex *addr,
                                  struct Curl_peer *tunnel_peer,
                                  uint8_t tunnel_transport)
 {
   DEBUGASSERT(transport_peer == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_proxy_create(chain, data, origin, peer, transport_peer,
-                                     addr, tunnel_peer, tunnel_transport);
+  return Curl_cf_ngtcp2_proxy_create(pcf, data, origin, peer, transport_peer,
+                                     conn, addr,
+                                     tunnel_peer, tunnel_transport);
 #else
   *pcf = NULL;
   (void)data;
@@ -1227,7 +1233,7 @@ CURLcode Curl_cf_h3_proxy_create(struct Curl_cfchain *chain,
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              struct connectdata *conn)
 {
-  if(Curl_conn_get_first_peer(conn)->unix_socket) {
+  if(Curl_conn_get_first_peer(conn, FIRSTSOCKET)->unix_socket) {
     failf(data, "HTTP/3 cannot be used over UNIX domain sockets");
     return CURLE_QUIC_CONNECT_ERROR;
   }

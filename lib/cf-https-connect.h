@@ -28,7 +28,6 @@
 #ifndef CURL_DISABLE_HTTP
 
 struct Curl_cfilter;
-struct Curl_cfchain;
 struct Curl_easy;
 struct connectdata;
 struct Curl_cftype;
@@ -38,7 +37,8 @@ extern struct Curl_cftype Curl_cft_http_connect;
 
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct Curl_peer *destination,
-                             struct Curl_cfchain *chain);
+                             struct connectdata *conn,
+                             int8_t sockindex);
 
 #endif /* !CURL_DISABLE_HTTP */
 #endif /* HEADER_CURL_CF_HTTP_H */

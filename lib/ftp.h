@@ -28,8 +28,8 @@
 #ifndef CURL_DISABLE_FTP
 extern const struct Curl_protocol Curl_protocol_ftp;
 
-bool Curl_ftp_conn_matches(struct Curl_easy *data,
-                           struct connectdata *conn);
+bool Curl_ftp_conns_match(struct connectdata *needle,
+                          struct connectdata *conn);
 
 typedef enum {
   FTPFILE_MULTICWD  = 1, /* as defined by RFC1738 */
@@ -39,8 +39,6 @@ typedef enum {
 } curl_ftpfile;
 
 #endif /* CURL_DISABLE_FTP */
-
-extern struct Curl_cftype Curl_cft_ftp;
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */
 

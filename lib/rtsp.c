@@ -81,7 +81,7 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
                                 struct easy_pollset *ps)
 {
   /* write mode */
-  return Curl_pollset_add_out(data, ps, data->conn->chain.sock);
+  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
@@ -466,7 +466,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     goto out;
 
   if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_xfer_setup_recv(data, -1);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
     goto out;
   }
 
@@ -561,7 +561,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  Curl_xfer_setup_sendrecv(data, -1);
+  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer, HTTPVERSION);

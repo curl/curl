@@ -27,41 +27,43 @@
 
 struct Curl_easy;
 struct connectdata;
-struct Curl_cfchain;
 struct Curl_dns_entry;
 struct Curl_addrinfo;
 struct Curl_peer;
 
-CURLcode Curl_dns_cf_add_addr_resolve(struct Curl_easy *data,
-                                      struct Curl_cfilter *cf,
-                                      struct Curl_peer *peer,
-                                      uint8_t dns_queries,
-                                      uint8_t transport);
+CURLcode Curl_conn_dns_add_addr_resolve(struct Curl_easy *data,
+                                        struct connectdata *conn,
+                                        int8_t sockindex,
+                                        struct Curl_peer *peer,
+                                        uint8_t dns_queries,
+                                        uint8_t transport);
 
-CURLcode Curl_dns_cf_addr_result(struct Curl_cfilter *cf,
-                                 struct Curl_peer *peer);
+CURLcode Curl_conn_dns_addr_result(struct connectdata *conn,
+                                   int8_t sockindex,
+                                   struct Curl_peer *peer);
 
-const struct Curl_addrinfo *Curl_dns_cf_get_ai(struct Curl_easy *data,
-                                               struct Curl_cfilter *cf,
-                                               struct Curl_peer *peer,
-                                               int ai_family,
-                                               unsigned int index);
+const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
+                                                 struct Curl_peer *peer,
+                                                 int8_t sockindex,
+                                                 int ai_family,
+                                                 unsigned int index);
 
 #ifdef USE_HTTPSRR
-CURLcode Curl_dns_cf_add_https_resolve(struct Curl_easy *data,
-                                       struct Curl_cfilter *cf,
-                                       struct Curl_peer *peer);
+CURLcode Curl_conn_dns_add_https_resolve(struct Curl_easy *data,
+                                         struct connectdata *conn,
+                                         int8_t sockindex,
+                                         struct Curl_peer *peer);
 
 const struct Curl_https_rrinfo *
-Curl_dns_cf_get_https(struct Curl_easy *data,
-                      struct Curl_cfilter *cf,
-                      struct Curl_peer *peer);
-bool Curl_dns_cf_resolved_https(struct Curl_easy *data,
-                                struct Curl_cfilter *cf,
-                                struct Curl_peer *peer);
+Curl_conn_dns_get_https(struct Curl_easy *data,
+                        int8_t sockindex,
+                        struct Curl_peer *peer);
+bool Curl_conn_dns_resolved_https(struct Curl_easy *data,
+                                  int8_t sockindex,
+                                  struct Curl_peer *peer);
 #else
-#define Curl_dns_cf_get_https(a, b, c)          NULL
-#define Curl_dns_cf_resolved_https(a, b, c)     TRUE
+#define Curl_conn_dns_get_https(a, b, c)        NULL
+#define Curl_conn_dns_resolved_https(a, b, c)   TRUE
 #endif
 
 extern struct Curl_cftype Curl_cft_dns;

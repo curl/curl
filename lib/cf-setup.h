@@ -25,16 +25,21 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-struct Curl_cfchain;
 struct Curl_dns_entry;
 struct ip_quadruple;
 struct Curl_peer;
 struct Curl_str;
 
-CURLcode Curl_cf_setup_add(struct Curl_cfchain *chain,
-                           struct Curl_easy *data,
+CURLcode Curl_cf_setup_add(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           int8_t sockindex,
                            uint8_t transport,
                            int ssl_mode);
+
+CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
+                                    struct Curl_easy *data,
+                                    uint8_t transport,
+                                    int ssl_mode);
 
 extern struct Curl_cftype Curl_cft_setup;
 

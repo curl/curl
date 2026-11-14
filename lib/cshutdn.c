@@ -40,47 +40,57 @@
 
 #define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
 
-void Curl_cshutdn_start_timer(struct Curl_easy *data,
-                              struct Curl_cfchain *chain,
+void Curl_cshutdn_start_timer(struct Curl_easy *data, int8_t sockindex,
                               int timeout_ms)
 {
+  struct connectdata *conn = data->conn;
   const struct curltime *pnow = Curl_pgrs_now(data);
 
-  chain->shutdown_start_ms = curlx_ptimediff_ms(pnow, &chain->conn->created);
-  chain->shutdown_timeout_ms = (timeout_ms > 0) ?
+  DEBUGASSERT(conn);
+  conn->shutdown.start_ms[sockindex] =
+    curlx_ptimediff_ms(pnow, &conn->created);
+  conn->shutdown.timeout_ms = (timeout_ms > 0) ?
     (timediff_t)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
      data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
   CURL_TRC_M(data, "shutdown start on%s connection",
-             !chain->primary ? " secondary" : "");
+             sockindex ? " secondary" : "");
 }
 
 timediff_t Curl_cshutdn_timeleft_ms(struct Curl_easy *data,
-                                    struct Curl_cfchain *chain)
+                                    struct connectdata *conn,
+                                    int8_t sockindex)
 {
   timediff_t left_ms;
 
-  if(chain->shutdown_start_ms < 0)
+  if(conn->shutdown.start_ms[sockindex] < 0)
     return 0; /* not started or no limits */
 
-  left_ms = chain->shutdown_timeout_ms -
-            (curlx_ptimediff_ms(Curl_pgrs_now(data), &chain->conn->created) -
-             chain->shutdown_start_ms);
+  left_ms = conn->shutdown.timeout_ms -
+            (curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->created) -
+             conn->shutdown.start_ms[sockindex]);
   return left_ms ? left_ms : -1;
 }
 
 static timediff_t cshutdn_conn_timeleft(struct Curl_easy *data,
                                         struct connectdata *conn)
 {
-  if(conn->chain.shutdown_start_ms >= 0 &&
-     conn->chain.shutdown_timeout_ms)
-    return Curl_cshutdn_timeleft_ms(data, &conn->chain);
-  return 0;
+  timediff_t left_ms = 0, ms;
+  int8_t i;
+
+  for(i = 0; conn->shutdown.timeout_ms && (i < 2); ++i) {
+    if(conn->shutdown.start_ms[i] < 0)
+      continue;
+    ms = Curl_cshutdn_timeleft_ms(data, conn, i);
+    if(ms && (!left_ms || ms < left_ms))
+      left_ms = ms;
+  }
+  return left_ms;
 }
 
-void Curl_cshutdn_clear_timer(struct Curl_cfchain *chain)
+void Curl_cshutdn_clear_timer(struct Curl_easy *data, int8_t sockindex)
 {
-  chain->shutdown_start_ms = -1;
+  data->conn->shutdown.start_ms[sockindex] = -1;
 }
 
 static void cshutdn_run_conn_handler(struct Curl_easy *data,
@@ -111,15 +121,20 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
   }
 }
 
-static CURLcode cshutdn_cfchain_try_once(struct Curl_easy *data,
-                                         struct Curl_cfchain *chain,
-                                         bool *done)
+static CURLcode cshutdn_try_once_idx(struct Curl_easy *data,
+                                     int8_t sockindex, bool *done)
 {
-  struct Curl_cfilter *cf = chain->cf;
+  struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms;
 
+  DEBUGASSERT(data->conn);
+
+  if(!CONN_SOCK_IDX_VALID(sockindex))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   /* Get the first connected filter that is not shut down already. */
+  cf = data->conn->cfilter[sockindex];
   while(cf && (!cf->connected || cf->shutdown))
     cf = cf->next;
 
@@ -129,11 +144,11 @@ static CURLcode cshutdn_cfchain_try_once(struct Curl_easy *data,
   }
 
   *done = FALSE;
-  if(!CURL_CFCHAIN_IN_SHUTDOWN(chain)) {
-    Curl_cshutdn_start_timer(data, chain, 0);
+  if(!CURL_CONN_IN_SHUTDOWN(data->conn, sockindex)) {
+    Curl_cshutdn_start_timer(data, sockindex, 0);
   }
   else {
-    timeout_ms = Curl_cshutdn_timeleft_ms(data, chain);
+    timeout_ms = Curl_cshutdn_timeleft_ms(data, data->conn, sockindex);
     if(timeout_ms < 0) {
       /* info message, since this might be regarded as acceptable */
       infof(data, "shutdown timeout");
@@ -162,16 +177,15 @@ static CURLcode cshutdn_cfchain_try_once(struct Curl_easy *data,
   return result;
 }
 
-CURLcode Curl_cshutdn_cfchain_try_once(struct Curl_easy *data,
-                                       struct Curl_cfchain *chain,
-                                       bool *done)
+CURLcode Curl_cshutdn_try_once_idx(struct Curl_easy *data,
+                                   int8_t sockindex, bool *done)
 {
-  CURLcode result = cshutdn_cfchain_try_once(data, chain, done);
+  CURLcode result = cshutdn_try_once_idx(data, sockindex, done);
   /* Set a timer if shutdown is ongoing */
   if(!result && !*done) {
-    timediff_t ms = Curl_cshutdn_timeleft_ms(data, chain);
+    timediff_t ms = cshutdn_conn_timeleft(data, data->conn);
     if(ms)
-      Curl_expire_latest(data, EXPIRE_SHUTDOWN, ms, Curl_pgrs_now(data));
+      Curl_expire_set(data, EXPIRE_SHUTDOWN, ms, Curl_pgrs_now(data));
   }
   return result;
 }
@@ -180,12 +194,15 @@ static void cshutdn_run_once(struct Curl_easy *data,
                              struct connectdata *conn,
                              bool *done)
 {
+  CURLcode r1, r2;
+  bool done1, done2;
+
   /* We expect to be attached when called */
   DEBUGASSERT(data->conn == conn);
 
-  *done = FALSE;
-  if(!CURL_CFCHAIN_IN_SHUTDOWN(&conn->chain))
-    Curl_cshutdn_start_timer(data, &conn->chain, 0);
+  if(!CURL_CONN_IN_SHUTDOWN(conn, FIRSTSOCKET)) {
+    Curl_cshutdn_start_timer(data, FIRSTSOCKET, 0);
+  }
 
   cshutdn_run_conn_handler(data, conn);
 
@@ -194,13 +211,22 @@ static void cshutdn_run_once(struct Curl_easy *data,
     return;
   }
 
-  if(!conn->bits.connect_only && Curl_conn_is_connected(conn)) {
-    if(cshutdn_cfchain_try_once(data, &conn->chain, done))
-      *done = TRUE;  /* we are done on errors encountered */
+  if(!conn->bits.connect_only && Curl_conn_is_connected(conn, FIRSTSOCKET))
+    r1 = cshutdn_try_once_idx(data, FIRSTSOCKET, &done1);
+  else {
+    r1 = CURLE_OK;
+    done1 = TRUE;
   }
-  else
-    *done = TRUE; /* connection is not clean, just close it */
 
+  if(!conn->bits.connect_only && Curl_conn_is_connected(conn, SECONDARYSOCKET))
+    r2 = cshutdn_try_once_idx(data, SECONDARYSOCKET, &done2);
+  else {
+    r2 = CURLE_OK;
+    done2 = TRUE;
+  }
+
+  /* we are done when any failed or both report success */
+  *done = (r1 || r2 || (done1 && done2));
   if(*done)
     conn->bits.shutdown_filters = TRUE;
 }
@@ -242,7 +268,8 @@ void Curl_cshutdn_terminate(struct Curl_easy *admin,
   CURL_TRC_M(admin, "[SHUTDOWN] %sclosing connection #%" FMT_OFF_T,
              conn->bits.shutdown_filters ? "" : "force ",
              conn->connection_id);
-  Curl_cfchain_reset(&conn->chain, admin);
+  Curl_conn_cf_discard_all(admin, conn, SECONDARYSOCKET);
+  Curl_conn_cf_discard_all(admin, conn, FIRSTSOCKET);
   Curl_detach_connection(admin);
 
   if(admin->multi)

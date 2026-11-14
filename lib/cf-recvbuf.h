@@ -29,6 +29,8 @@
 /* only used for this protocol, so far */
 
 CURLcode Curl_cf_recvbuf_add(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             int8_t sockindex,
                              const uint8_t *buf, size_t blen);
 
 extern struct Curl_cftype Curl_cft_recvbuf;

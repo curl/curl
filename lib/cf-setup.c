@@ -87,21 +87,21 @@ static CURLcode cf_setup_add_socks(struct Curl_cfilter *cf,
 {
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
-  if(ctx->state < CF_SETUP_CNNCT_SOCKS && CF_CONN(cf)->socks_proxy.peer) {
+  if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->socks_proxy.peer) {
     /* Add a SOCKS proxy to go through `first_peer` to `second_peer`*/
     struct Curl_peer *second_peer;
 
-    if(CF_CONN(cf)->http_proxy.peer)
-      second_peer = CF_CONN(cf)->http_proxy.peer;
+    if(cf->conn->http_proxy.peer)
+      second_peer = cf->conn->http_proxy.peer;
     else
-      second_peer = Curl_cf_get_destination(cf);
+      second_peer = Curl_conn_get_destination(cf->conn, cf->sockindex);
     if(!second_peer)
       return CURLE_FAILED_INIT;
 
     result = Curl_cf_socks_proxy_insert_after(
-      cf, data, second_peer, CF_CONN(cf)->ip_version,
-      CF_CONN(cf)->socks_proxy.proxytype,
-      CF_CONN(cf)->socks_proxy.creds);
+      cf, data, second_peer, cf->conn->ip_version,
+      cf->conn->socks_proxy.proxytype,
+      cf->conn->socks_proxy.creds);
     if(result) {
       CURL_TRC_CF(data, cf, "adding SOCKS filter failed -> %d", (int)result);
       return result;
@@ -118,20 +118,20 @@ static CURLcode cf_setup_add_socks(struct Curl_cfilter *cf,
 static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
-  struct connectdata *conn = CF_CONN(cf);
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
 
   if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY &&
-     conn->http_proxy.peer && !conn->bits.origin_is_proxy) {
-    struct Curl_peer *peer = conn->http_proxy.peer;
-    struct Curl_peer *tunnel_peer = Curl_cf_get_destination(cf);
+     cf->conn->http_proxy.peer && !cf->conn->bits.origin_is_proxy) {
+    struct Curl_peer *peer = cf->conn->http_proxy.peer;
+    struct Curl_peer *tunnel_peer =
+      Curl_conn_get_destination(cf->conn, cf->sockindex);
 
 #ifdef USE_SSL
-    if(CURL_PROXY_IS_HTTPS(conn->http_proxy.proxytype) &&
-       !Curl_cfchain_is_ssl(cf->chain)) {
+    if(CURL_PROXY_IS_HTTPS(cf->conn->http_proxy.proxytype) &&
+       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
       result = Curl_cf_ssl_proxy_insert_after(
-        cf, data, conn->http_proxy.peer);
+        cf, data, cf->conn->http_proxy.peer);
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for HTTP proxy failed -> %d",
                     (int)result);
@@ -143,7 +143,7 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
 
     result = Curl_cf_http_proxy_insert_after(
       cf, data, peer, tunnel_peer,
-      ctx->transport, conn->http_proxy.proxytype);
+      ctx->transport, cf->conn->http_proxy.proxytype);
     if(result) {
       CURL_TRC_CF(data, cf, "adding HTTP proxy tunnel filter failed -> %d",
                   (int)result);
@@ -159,22 +159,21 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
 
 /* Get the origin curl connects its socket to.
  * Can be origin or the first proxy. */
-static struct Curl_peer *cf_get_first_origin(struct Curl_cfilter *cf)
+static struct Curl_peer *conn_get_first_origin(struct connectdata *conn,
+                                             int8_t sockindex)
 {
-  struct connectdata *conn = CF_CONN(cf);
 #ifndef CURL_DISABLE_PROXY
   if(conn->socks_proxy.peer)
     return conn->socks_proxy.peer;
   if(conn->http_proxy.peer)
     return conn->http_proxy.peer;
 #endif
-  return CF_IS_PRIMARY(cf) ? conn->origin : conn->origin2;
+  return (sockindex == SECONDARYSOCKET) ? conn->origin2 : conn->origin;
 }
 
 static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
-  struct connectdata *conn = CF_CONN(cf);
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
 
@@ -182,8 +181,10 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
     /* What is the first hop we directly connect to and what transport
      * do we use for it? Only on the first hop we can do Happy Eyeballs.
      * first_origin and first_peer differ on --connect-to. */
-    struct Curl_peer *first_origin = cf_get_first_origin(cf);
-    struct Curl_peer *first_peer = Curl_cf_get_first_peer(cf);
+    struct Curl_peer *first_origin =
+      conn_get_first_origin(cf->conn, cf->sockindex);
+    struct Curl_peer *first_peer =
+      Curl_conn_get_first_peer(cf->conn, cf->sockindex);
     struct Curl_peer *tunnel_peer = NULL;
     uint8_t first_transport = ctx->transport;
 
@@ -191,16 +192,15 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
       return CURLE_FAILED_INIT;
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
-    if(conn->http_proxy.peer && !conn->bits.origin_is_proxy) {
-      first_transport = Curl_http_proxy_transport(conn->http_proxy.proxytype);
-      tunnel_peer = Curl_cf_get_destination(cf);
-      if((first_transport == TRNSPRT_QUIC) && conn->socks_proxy.peer) {
+    if(cf->conn->http_proxy.peer && !cf->conn->bits.origin_is_proxy) {
+      first_transport =
+        Curl_http_proxy_transport(cf->conn->http_proxy.proxytype);
+      tunnel_peer = Curl_conn_get_destination(cf->conn, cf->sockindex);
+      if((first_transport == TRNSPRT_QUIC) && cf->conn->socks_proxy.peer) {
         failf(data, "HTTP/3 proxy not possible via SOCKS");
         return CURLE_UNSUPPORTED_PROTOCOL;
       }
     }
-#else
-    (void)conn;
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
     result = Curl_cf_ip_happy_insert_after(cf, data, first_origin, first_peer,
@@ -241,9 +241,10 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
      * the QUIC filter on top. Without tunneling, this has already
      * happened in the Happy Eyeball filter. */
     if(ctx->transport == TRNSPRT_QUIC &&
-       CF_CONN(cf)->http_proxy.peer && !CF_CONN(cf)->bits.origin_is_proxy) {
-      struct Curl_peer *origin = Curl_cf_get_origin(cf);
-      struct Curl_peer *peer = Curl_cf_get_destination(cf);
+       cf->conn->http_proxy.peer && !cf->conn->bits.origin_is_proxy) {
+      struct Curl_peer *origin = Curl_conn_get_origin(cf->conn, cf->sockindex);
+      struct Curl_peer *peer =
+        Curl_conn_get_destination(cf->conn, cf->sockindex);
 
       result = Curl_cf_capsule_insert_after(cf, data);
       if(result) {
@@ -263,12 +264,12 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
 #ifdef USE_SSL
     if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
-         CF_CONN(cf)->scheme->flags & PROTOPT_SSL)) && /* we want SSL */
-       !Curl_cfchain_is_ssl(cf->chain)) { /* it is missing */
+         cf->conn->scheme->flags & PROTOPT_SSL)) && /* we want SSL */
+       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
 
 #ifndef CURL_DISABLE_PROXY
-      if(CF_CONN(cf)->bits.origin_is_proxy) {
-        result = Curl_cf_ssl_proxy_insert_after(cf, data, CF_CONN(cf)->origin);
+      if(cf->conn->bits.origin_is_proxy) {
+        result = Curl_cf_ssl_proxy_insert_after(cf, data, cf->conn->origin);
       }
       else
 #endif
@@ -277,10 +278,11 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
          * (secondary) connection, many servers require TLS sessions reuse
          * to prove they are talking to the same client.
          * For the TLS session lookup to work, we need to instantiate
-         * the SSL filter with the primary peers. See #22225 */
+         * the SSL filter with the same peers as FIRSTSOCKET. See #22225
+         * Meaning: cf->sockindex does not matter here. */
         result = Curl_cf_ssl_insert_after(cf, data,
-          Curl_conn_get_origin(CF_CONN(cf)),
-          Curl_conn_get_destination(CF_CONN(cf)));
+          Curl_conn_get_origin(cf->conn, FIRSTSOCKET),
+          Curl_conn_get_destination(cf->conn, FIRSTSOCKET));
       }
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for origin failed -> %d",
@@ -303,8 +305,8 @@ static CURLcode cf_setup_add_protocol_filters(struct Curl_cfilter *cf,
 
   (void)data; /* not used in all builds */
   if(ctx->state < CF_SETUP_CNNCT_PROTOCOL) {
-    if(CF_CONN(cf)->scheme->run->setup_filters) {
-      result = CF_CONN(cf)->scheme->run->setup_filters(data, cf);
+    if(cf->conn->scheme->run->setup_filters) {
+      result = cf->conn->scheme->run->setup_filters(data, cf);
       if(result) {
         CURL_TRC_CF(data, cf, "adding protocol filters failed -> %d",
                     (int)result);
@@ -330,7 +332,7 @@ static CURLcode cf_setup_connect_steps(struct Curl_cfilter *cf,
 
   /* connect current sub-chain */
 connect_sub_chain:
-  VERBOSE(Curl_cfchain_trc(data, cf->chain, "cf_setup_connect"));
+  VERBOSE(Curl_conn_trc_filters(data, cf->sockindex, "cf_setup_connect"));
 
   if(cf->next && !cf->next->connected) {
     result = Curl_conn_cf_connect(cf->next, data, done);
@@ -469,8 +471,9 @@ out:
   return result;
 }
 
-CURLcode Curl_cf_setup_add(struct Curl_cfchain *chain,
-                           struct Curl_easy *data,
+CURLcode Curl_cf_setup_add(struct Curl_easy *data,
+                           struct connectdata *conn,
+                           int8_t sockindex,
                            uint8_t transport,
                            int ssl_mode)
 {
@@ -481,7 +484,24 @@ CURLcode Curl_cf_setup_add(struct Curl_cfchain *chain,
   result = cf_setup_create(&cf, data, transport, ssl_mode);
   if(result)
     goto out;
-  Curl_cfchain_add(chain, cf);
+  Curl_conn_cf_add(data, conn, sockindex, cf);
+out:
+  return result;
+}
+
+CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
+                                    struct Curl_easy *data,
+                                    uint8_t transport,
+                                    int ssl_mode)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  DEBUGASSERT(data);
+  result = cf_setup_create(&cf, data, transport, ssl_mode);
+  if(result)
+    goto out;
+  Curl_conn_cf_insert_after(cf_at, cf);
 out:
   return result;
 }

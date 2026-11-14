@@ -216,7 +216,7 @@ static CURLcode cf_capsule_adjust_pollset(struct Curl_cfilter *cf,
   struct cf_capsule_ctx *ctx = cf->ctx;
 
   if(!Curl_bufq_is_empty(&ctx->sendbuf)) {
-    curl_socket_t sock = cf->chain->sock;
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
     if(sock != CURL_SOCKET_BAD)
       return Curl_pollset_add_out(data, ps, sock);
   }
@@ -297,7 +297,7 @@ CURLcode Curl_cf_capsule_insert_after(struct Curl_cfilter *cf_at,
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = cf_capsule_create(&cf, data, CF_CONN(cf_at));
+  result = cf_capsule_create(&cf, data, cf_at->conn);
   if(!result)
     Curl_conn_cf_insert_after(cf_at, cf);
   return result;

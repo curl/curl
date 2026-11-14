@@ -50,7 +50,7 @@ typedef enum {
 
 struct cf_hc_baller {
   const char *name;
-  struct Curl_cfchain chain;
+  struct Curl_cfilter *cf;
   CURLcode result;
   int reply_ms;
   uint8_t transport;
@@ -61,48 +61,49 @@ struct cf_hc_baller {
 static void cf_hc_baller_discard(struct cf_hc_baller *b,
                                  struct Curl_easy *data)
 {
-  Curl_cfchain_cleanup(&b->chain, data);
+  if(b->cf) {
+    Curl_conn_cf_discard_chain(&b->cf, data);
+    b->cf = NULL;
+  }
 }
 
 static bool cf_hc_baller_is_connecting(struct cf_hc_baller *b)
 {
-  return b->chain.cf && !b->result;
+  return b->cf && !b->result;
 }
 
 static bool cf_hc_baller_has_started(struct cf_hc_baller *b)
 {
-  return !!b->chain.cf;
+  return !!b->cf;
 }
 
 static int cf_hc_baller_reply_ms(struct cf_hc_baller *b,
                                  struct Curl_easy *data)
 {
-  if(b->chain.cf && (b->reply_ms < 0))
-    b->chain.cf->cft->query(b->chain.cf, data, CF_QUERY_CONNECT_REPLY_MS,
-                            &b->reply_ms, NULL);
+  if(b->cf && (b->reply_ms < 0))
+    b->cf->cft->query(b->cf, data, CF_QUERY_CONNECT_REPLY_MS,
+                      &b->reply_ms, NULL);
   return b->reply_ms;
 }
 
 static bool cf_hc_baller_data_pending(struct cf_hc_baller *b,
                                       const struct Curl_easy *data)
 {
-  return b->chain.cf && !b->result &&
-         b->chain.cf->cft->has_data_pending(b->chain.cf, data);
+  return b->cf && !b->result && b->cf->cft->has_data_pending(b->cf, data);
 }
 
 static bool cf_hc_baller_needs_flush(struct cf_hc_baller *b,
                                      struct Curl_easy *data)
 {
-  return b->chain.cf && !b->result &&
-         Curl_cfchain_needs_flush(data, &b->chain);
+  return b->cf && !b->result && Curl_conn_cf_needs_flush(b->cf, data);
 }
 
 static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
                                    struct Curl_easy *data,
                                    int event, int arg1, void *arg2)
 {
-  if(b->chain.cf && !b->result)
-    return Curl_conn_cf_cntrl(b->chain.cf, data, FALSE, event, arg1, arg2);
+  if(b->cf && !b->result)
+    return Curl_conn_cf_cntrl(b->cf, data, FALSE, event, arg1, arg2);
   return CURLE_OK;
 }
 
@@ -135,16 +136,15 @@ static void cf_hc_ctx_destroy(struct Curl_easy *data,
 }
 
 static void cf_hc_baller_assign(struct cf_hc_baller *b,
-                                struct Curl_cfilter *cf,
                                 enum alpnid alpn_id,
                                 uint8_t def_transport)
 {
   b->alpn_id = alpn_id;
   b->transport = def_transport;
+  b->cf = NULL;
   b->result = CURLE_OK;
   b->reply_ms = -1;
   b->shutdown = FALSE;
-  Curl_cfchain_init_child(&b->chain, cf->chain);
   switch(b->alpn_id) {
   case ALPN_h3:
     b->name = "h3";
@@ -166,18 +166,29 @@ static void cf_hc_baller_assign(struct cf_hc_baller *b,
 }
 
 static void cf_hc_baller_init(struct cf_hc_baller *b,
+                              struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
-  DEBUGASSERT(b->chain.conn);
-  b->result = Curl_cf_setup_add(&b->chain, data, b->transport,
-                                CURL_CF_SSL_ENABLE);
+  struct Curl_cfilter *save = cf->next;
+
+  cf->next = NULL;
+  b->result = Curl_cf_setup_insert_after(cf, data, b->transport,
+                                         CURL_CF_SSL_ENABLE);
+  b->cf = cf->next;
+  cf->next = save;
 }
 
 static CURLcode cf_hc_baller_connect(struct cf_hc_baller *b,
+                                     struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
                                      bool *done)
 {
-  b->result = Curl_conn_cf_connect(b->chain.cf, data, done);
+  struct Curl_cfilter *save = cf->next;
+
+  cf->next = b->cf;
+  b->result = Curl_conn_cf_connect(cf->next, data, done);
+  b->cf = cf->next; /* it might mutate */
+  cf->next = save;
   return b->result;
 }
 
@@ -193,12 +204,13 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
     DEBUGASSERT(0);
     return CURLE_FAILED_INIT;
   }
-  if(!winner->chain.cf) {
+  if(!winner->cf) {
     DEBUGASSERT(0);
     return CURLE_FAILED_INIT;
   }
 
-  Curl_cfchain_merge(cf->chain, &winner->chain);
+  cf->next = winner->cf;
+  winner->cf = NULL;
   ctx->state = CF_HC_SUCCESS;
   cf->connected = TRUE;
 
@@ -253,7 +265,7 @@ static bool cf_hc_may_h3(struct Curl_cfilter *cf,
   struct cf_hc_ctx *ctx = cf->ctx;
   if(!ctx->checked_h3) {
     ctx->check_h3_result =
-      Curl_conn_may_http3(data, CF_CONN(cf));
+      Curl_conn_may_http3(data, cf->conn);
     ctx->checked_h3 = TRUE;
   }
   return !ctx->check_h3_result;
@@ -294,7 +306,7 @@ static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
   size_t i;
 
   /* Do we have HTTPS-RR information? */
-  rr = Curl_dns_cf_get_https(data, cf, ctx->destination);
+  rr = Curl_conn_dns_get_https(data, cf->sockindex, ctx->destination);
 
   CURL_TRC_CF(data, cf, "HTTPS-RR %savailable", rr ? "" : "not ");
   /* We do not support `rr->no_def_alpn`. */
@@ -387,7 +399,7 @@ static CURLcode cf_hc_set_baller1(struct Curl_cfilter *cf,
   enum alpnid alpn1 = ALPN_none;
   VERBOSE(const char *source = "HTTPS-RR");
 
-  DEBUGASSERT(CF_CONN(cf)->bits.tls_enable_alpn);
+  DEBUGASSERT(cf->conn->bits.tls_enable_alpn);
 
   alpn1 = cf_hc_get_httpsrr_alpn(cf, data, ALPN_none);
   if(alpn1 == ALPN_none) {
@@ -418,7 +430,7 @@ static CURLcode cf_hc_set_baller1(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
 
-  cf_hc_baller_assign(&ctx->ballers[0], cf, alpn1, ctx->def_transport);
+  cf_hc_baller_assign(&ctx->ballers[0], alpn1, ctx->def_transport);
   ctx->baller_count = 1;
   CURL_TRC_CF(data, cf, "1st attempt uses %s from %s",
               ctx->ballers[0].name, source);
@@ -469,7 +481,7 @@ static void cf_hc_set_baller2(struct Curl_cfilter *cf,
   }
 
   if(alpn2 != ALPN_none) {
-    cf_hc_baller_assign(&ctx->ballers[1], cf, alpn2, ctx->def_transport);
+    cf_hc_baller_assign(&ctx->ballers[1], alpn2, ctx->def_transport);
     ctx->baller_count = 2;
     CURL_TRC_CF(data, cf, "2nd attempt uses %s from %s",
                 ctx->ballers[1].name, source);
@@ -493,8 +505,8 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(!ctx->httpsrr_resolved) {
-    ctx->httpsrr_resolved =
-      Curl_dns_cf_resolved_https(data, cf, ctx->destination);
+    ctx->httpsrr_resolved = Curl_conn_dns_resolved_https(
+      data, cf->sockindex, ctx->destination);
 #ifdef DEBUGBUILD
     if(!ctx->httpsrr_resolved && getenv("CURL_DBG_AWAIT_HTTPSRR")) {
       CURL_TRC_CF(data, cf, "awaiting HTTPS-RR");
@@ -520,7 +532,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     cf_hc_set_baller2(cf, data);
     pnow = Curl_pgrs_now(data);
     ctx->started = *pnow;
-    cf_hc_baller_init(&ctx->ballers[0], data);
+    cf_hc_baller_init(&ctx->ballers[0], cf, data);
     if((ctx->baller_count > 1) || !ctx->ballers_complete) {
       Curl_expire_set(data, EXPIRE_ALPN_EYEBALLS,
                       ctx->soft_eyeballs_timeout_ms, pnow);
@@ -533,7 +545,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       cf_hc_set_baller2(cf, data);
 
     if(cf_hc_baller_is_connecting(&ctx->ballers[0])) {
-      result = cf_hc_baller_connect(&ctx->ballers[0], data, done);
+      result = cf_hc_baller_connect(&ctx->ballers[0], cf, data, done);
       if(!result && *done) {
         result = baller_connected(cf, data, &ctx->ballers[0]);
         goto out;
@@ -542,11 +554,11 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 
     pnow = Curl_pgrs_now(data);
     if(time_to_start_baller2(cf, data, pnow)) {
-      cf_hc_baller_init(&ctx->ballers[1], data);
+      cf_hc_baller_init(&ctx->ballers[1], cf, data);
     }
 
     if(cf_hc_baller_is_connecting(&ctx->ballers[1])) {
-      result = cf_hc_baller_connect(&ctx->ballers[1], data, done);
+      result = cf_hc_baller_connect(&ctx->ballers[1], cf, data, done);
       if(!result && *done) {
         result = baller_connected(cf, data, &ctx->ballers[1]);
         goto out;
@@ -604,7 +616,7 @@ static CURLcode cf_hc_shutdown(struct Curl_cfilter *cf,
     bool bdone = FALSE;
     if(!cf_hc_baller_is_connecting(b) || b->shutdown)
       continue;
-    b->result = b->chain.cf->cft->do_shutdown(b->chain.cf, data, &bdone);
+    b->result = b->cf->cft->do_shutdown(b->cf, data, &bdone);
     if(b->result || bdone)
       b->shutdown = TRUE; /* treat a failed shutdown as done */
   }
@@ -637,7 +649,7 @@ static CURLcode cf_hc_adjust_pollset(struct Curl_cfilter *cf,
       struct cf_hc_baller *b = &ctx->ballers[i];
       if(!cf_hc_baller_is_connecting(b))
         continue;
-      result = Curl_conn_cf_adjust_pollset(b->chain.cf, data, ps);
+      result = Curl_conn_cf_adjust_pollset(b->cf, data, ps);
     }
     CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %u socks", (int)result,
                 ps->n);
@@ -700,8 +712,8 @@ static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
     case CF_CTRL_CONN_INFO_UPDATE:
       for(i = 0; i < ctx->baller_count; i++) {
         /* Make the first baller that connected at network level report */
-        if(Curl_conn_cf_is_ip_connected(ctx->ballers[i].chain.cf, data)) {
-          Curl_conn_cf_cntrl(ctx->ballers[i].chain.cf, data, TRUE,
+        if(Curl_conn_cf_is_ip_connected(ctx->ballers[i].cf, data)) {
+          Curl_conn_cf_cntrl(ctx->ballers[i].cf, data, TRUE,
                              event, arg1, arg2);
           break;
         }
@@ -778,7 +790,8 @@ out:
 
 static CURLcode cf_hc_add(struct Curl_easy *data,
                           struct Curl_peer *destination,
-                          struct Curl_cfchain *chain,
+                          struct connectdata *conn,
+                          int8_t sockindex,
                           uint8_t def_transport)
 {
   struct Curl_cfilter *cf;
@@ -788,10 +801,11 @@ static CURLcode cf_hc_add(struct Curl_easy *data,
   result = cf_hc_create(&cf, data, destination, def_transport);
   if(result)
     goto out;
-  Curl_cfchain_add(chain, cf);
+  Curl_conn_cf_add(data, conn, sockindex, cf);
 
 #ifdef USE_HTTPSRR
-  result = Curl_dns_cf_add_https_resolve(data, cf, destination);
+  result = Curl_conn_dns_add_https_resolve(data, cf->conn, cf->sockindex,
+                                           destination);
 #endif
 out:
   return result;
@@ -799,9 +813,9 @@ out:
 
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct Curl_peer *destination,
-                             struct Curl_cfchain *chain)
+                             struct connectdata *conn,
+                             int8_t sockindex)
 {
-  struct connectdata *conn = chain->conn;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(conn->scheme->protocol == CURLPROTO_HTTPS);
@@ -815,7 +829,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
      !conn->bits.tls_enable_alpn)
     goto out;
 
-  result = cf_hc_add(data, destination, chain,
+  result = cf_hc_add(data, destination, conn, sockindex,
                      conn->transport_wanted);
 
 out:

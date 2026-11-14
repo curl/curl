@@ -62,7 +62,7 @@ static CURLcode socks5_sspi_setup(struct Curl_cfilter *cf,
                                   CredHandle *cred_handle,
                                   char **service_namep)
 {
-  struct connectdata *conn = CF_CONN(cf);
+  struct connectdata *conn = cf->conn;
   const char *service = Curl_creds_has_sasl_service(creds) ?
     Curl_creds_sasl_service(creds) : "rcmd";
   SECURITY_STATUS status;
@@ -107,7 +107,8 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
                                  char *service_name,
                                  unsigned long *sspi_ret_flagsp)
 {
-  curl_socket_t sock = cf->chain->sock;
+  struct connectdata *conn = cf->conn;
+  curl_socket_t sock = conn->sock[cf->sockindex];
   CURLcode result = CURLE_OK;
   CURLcode code;
   SECURITY_STATUS status;
@@ -460,7 +461,7 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
          ((socksreq[0] == 1) ? "with GSS-API integrity" :
           "with GSS-API confidentiality"));
 
-  CF_CONN(cf)->socks5_gssapi_enctype = socksreq[0];
+  cf->conn->socks5_gssapi_enctype = socksreq[0];
   return CURLE_OK;
 
 fail:
@@ -472,7 +473,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct Curl_creds *creds)
 {
-  curl_socket_t sock = cf->chain->sock;
+  struct connectdata *conn = cf->conn;
+  curl_socket_t sock = conn->sock[cf->sockindex];
   CURLcode result;
   SECURITY_STATUS status;
   CredHandle cred_handle;

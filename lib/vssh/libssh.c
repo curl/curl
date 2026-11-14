@@ -1033,8 +1033,8 @@ static int myssh_in_AUTH_DONE(struct Curl_easy *data,
   /* At this point we have an authenticated ssh session. */
   infof(data, "Authentication complete");
   Curl_pgrsTime(data, TIMER_APPCONNECT);      /* SSH is connected */
-  conn->bits.want_recv = TRUE;
-  conn->bits.want_send = FALSE;
+  conn->recv_idx = FIRSTSOCKET;
+  conn->send_idx = -1;
 
   if(conn->scheme->protocol == CURLPROTO_SFTP) {
     myssh_to(data, sshc, SSH_SFTP_INIT);
@@ -1183,9 +1183,10 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
   }
   /* upload data */
-  Curl_xfer_setup_send(data);
+  Curl_xfer_setup_send(data, FIRSTSOCKET);
+
   /* not set by Curl_xfer_setup to preserve io_flags */
-  data->conn->bits.want_recv = TRUE;
+  data->conn->recv_idx = FIRSTSOCKET;
 
   /* since we do not really wait for anything at this point, we want the
      state machine to move on as soon as possible so we mark this as dirty */
@@ -1305,9 +1306,10 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
     myssh_to(data, sshc, SSH_STOP);
     return rc;
   }
-  Curl_xfer_setup_recv(data, data->req.size);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size);
+
   /* not set by Curl_xfer_setup to preserve io_flags */
-  data->conn->bits.want_send = TRUE;
+  data->conn->send_idx = 0;
 
   sshc->sftp_recv_state = 0;
   myssh_to(data, sshc, SSH_STOP);
@@ -1783,15 +1785,15 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
   return SSH_NO_ERROR;
 }
 
-static void conn_forget_socket(struct Curl_easy *data)
+static void conn_forget_socket(struct Curl_easy *data, int8_t sockindex)
 {
   struct connectdata *conn = data->conn;
-  if(conn) {
-    struct Curl_cfilter *cf = conn->chain.cf;
+  if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
+    struct Curl_cfilter *cf = conn->cfilter[sockindex];
     if(cf)
       (void)Curl_conn_cf_cntrl(cf, data, TRUE, CF_CTRL_FORGET_SOCKET, 0, NULL);
-    fake_sclose(conn->chain.sock);
-    conn->chain.sock = CURL_SOCKET_BAD;
+    fake_sclose(conn->sock[sockindex]);
+    conn->sock[sockindex] = CURL_SOCKET_BAD;
   }
 }
 
@@ -1817,10 +1819,10 @@ static void myssh_SESSION_DISCONNECT(struct Curl_easy *data,
 
   ssh_disconnect(sshc->ssh_session);
   if(!ssh_version(SSH_VERSION_INT(0, 10, 0))) {
-    /* conn->chain.sock is closed by ssh_disconnect
-     * behind our back, tell the connection to forget about it. This libssh
-     * bug is fixed in 0.10.0. */
-    conn_forget_socket(data);
+    /* conn->sock[FIRSTSOCKET] is closed by ssh_disconnect behind our back,
+       tell the connection to forget about it. This libssh
+       bug is fixed in 0.10.0. */
+    conn_forget_socket(data, FIRSTSOCKET);
   }
 
   SSH_STRING_FREE_CHAR(sshc->homedir);
@@ -1845,9 +1847,10 @@ static int myssh_SSH_SCP_DOWNLOAD(struct Curl_easy *data,
     /* unlikely to be a real file */
     return myssh_to_ERROR(data, sshc, CURLE_TOO_LARGE);
   data->req.maxdownload = (curl_off_t)bytecount;
-  Curl_xfer_setup_recv(data, data->req.maxdownload);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.maxdownload);
+
   /* not set by Curl_xfer_setup to preserve io_flags */
-  data->conn->bits.want_send = TRUE;
+  data->conn->send_idx = 0;
 
   myssh_to(data, sshc, SSH_STOP);
   return 0;
@@ -2185,9 +2188,10 @@ static int myssh_in_SCP_UPLOAD_INIT(struct Curl_easy *data,
   }
 
   /* upload data */
-  Curl_xfer_setup_send(data);
+  Curl_xfer_setup_send(data, FIRSTSOCKET);
+
   /* not set by Curl_xfer_setup to preserve io_flags */
-  data->conn->bits.want_recv = TRUE;
+  data->conn->recv_idx = FIRSTSOCKET;
 
   myssh_to(data, sshc, SSH_STOP);
   return SSH_NO_ERROR;
@@ -2526,7 +2530,7 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
     }
 
     if(block) {
-      curl_socket_t fd_read = conn->chain.sock;
+      curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
       (void)SOCKET_READABLE(fd_read,
                             (!left_ms || left_ms > 1000) ? 1000 : left_ms);
@@ -2593,7 +2597,7 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *ssh = Curl_meta_get(data, CURL_META_SSH_EASY);
-  curl_socket_t sock = conn->chain.sock;
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc;
 
   if(!sshc || !ssh)
@@ -2601,12 +2605,12 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
 
   CURL_TRC_SSH(data, "myssh_connect");
   if(conn->scheme->protocol & CURLPROTO_SCP) {
-    conn->do_recv = scp_recv;
-    conn->do_send = scp_send;
+    conn->recv[FIRSTSOCKET] = scp_recv;
+    conn->send[FIRSTSOCKET] = scp_send;
   }
   else {
-    conn->do_recv = sftp_recv;
-    conn->do_send = sftp_send;
+    conn->recv[FIRSTSOCKET] = sftp_recv;
+    conn->send[FIRSTSOCKET] = sftp_send;
   }
 
   sshc->ssh_session = ssh_new();
@@ -2743,7 +2747,7 @@ static CURLcode scp_perform(struct Curl_easy *data,
 
   result = myssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn);
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
   if(*dophase_done) {
     CURL_TRC_SSH(data, "DO phase is complete");
@@ -2810,7 +2814,7 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
   return myssh_done(data, sshc, status);
 }
 
-static CURLcode scp_send(struct Curl_easy *data,
+static CURLcode scp_send(struct Curl_easy *data, int8_t sockindex,
                          const uint8_t *mem, size_t len, bool eos,
                          size_t *pnwritten)
 {
@@ -2820,6 +2824,7 @@ static CURLcode scp_send(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   int rc = SSH_OK;
 
+  (void)sockindex; /* we only support SCP on the fixed known primary socket */
   *pnwritten = 0;
   if(!sshc)
     return CURLE_FAILED_INIT;
@@ -2884,13 +2889,14 @@ out:
   return result;
 }
 
-static CURLcode scp_recv(struct Curl_easy *data,
+static CURLcode scp_recv(struct Curl_easy *data, int8_t sockindex,
                          char *mem, size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   int nread;
 
+  (void)sockindex; /* we only support SCP on the fixed known primary socket */
   *pnread = 0;
 
   if(!sshc)
@@ -2945,7 +2951,7 @@ static CURLcode sftp_perform(struct Curl_easy *data,
   /* run the state-machine */
   result = myssh_multi_statemach(data, dophase_done);
 
-  *connected = Curl_conn_is_connected(data->conn);
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
   if(*dophase_done) {
     CURL_TRC_SSH(data, "DO phase is complete");
@@ -3009,7 +3015,7 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 }
 
 /* return number of sent bytes */
-static CURLcode sftp_send(struct Curl_easy *data,
+static CURLcode sftp_send(struct Curl_easy *data, int8_t sockindex,
                           const uint8_t *mem, size_t len, bool eos,
                           size_t *pnwritten)
 {
@@ -3017,6 +3023,7 @@ static CURLcode sftp_send(struct Curl_easy *data,
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   ssize_t nwrite;
 
+  (void)sockindex;
   (void)eos;
   *pnwritten = 0;
 
@@ -3089,13 +3096,14 @@ static CURLcode sftp_send(struct Curl_easy *data,
  * Return number of received (decrypted) bytes
  * or <0 on error
  */
-static CURLcode sftp_recv(struct Curl_easy *data,
+static CURLcode sftp_recv(struct Curl_easy *data, int8_t sockindex,
                           char *mem, size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   ssize_t nread;
 
+  (void)sockindex;
   *pnread = 0;
 
   DEBUGASSERT(len < CURL_MAX_READ_SIZE);

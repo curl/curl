@@ -483,9 +483,9 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
-  if(!Curl_conn_is_ssl(conn)) {
+  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(
-      data, Curl_conn_get_origin(conn), &conn->chain);
+      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
     if(result)
       goto out;
     /* Change the connection handler */
@@ -493,7 +493,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
   }
 
   DEBUGASSERT(!pop3c->ssldone);
-  result = Curl_conn_connect(data, FALSE, &ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   DEBUGF(infof(data, "pop3_perform_upgrade_tls, connect -> %d, %d",
                (int)result, ssldone));
   if(!result && ssldone) {
@@ -911,7 +911,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
     if(pop3code != '+')
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
-    if(!data->set.use_ssl || Curl_conn_is_ssl(conn))
+    if(!data->set.use_ssl || Curl_conn_is_ssl(conn, FIRSTSOCKET))
       result = pop3_perform_authentication(data, conn);
     else if(pop3code == '+' && pop3c->tls_supported)
       /* Switch to TLS connection now */
@@ -1237,7 +1237,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
 
   if(pop3->transfer == PPTRANSFER_BODY) {
     /* POP3 download */
-    Curl_xfer_setup_recv(data, -1);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
 
     if(pp->overflow) {
       /* The recv buffer contains data that is actually body content so send
@@ -1297,7 +1297,7 @@ upgrade_tls:
 
   do {
      /* Read the response from the server */
-    result = Curl_pp_readresp(data, pp, &pop3code, &nread);
+    result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &pop3code, &nread);
     if(result)
       return result;
 
@@ -1367,14 +1367,15 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
-  result = Curl_pp_statemach(data, &pop3c->pp, FALSE);
+  result = Curl_pp_statemach(data, &pop3c->pp, FALSE, FALSE);
   *done = (pop3c->state == POP3_STOP);
 
   return result;
 }
 
 static CURLcode pop3_block_statemach(struct Curl_easy *data,
-                                     struct connectdata *conn)
+                                     struct connectdata *conn,
+                                     bool disconnecting)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
@@ -1383,7 +1384,7 @@ static CURLcode pop3_block_statemach(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   while(pop3c->state != POP3_STOP && !result)
-    result = Curl_pp_statemach(data, &pop3c->pp, TRUE);
+    result = Curl_pp_statemach(data, &pop3c->pp, TRUE, disconnecting);
 
   return result;
 }
@@ -1522,7 +1523,7 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
 
   /* Run the state-machine */
   result = pop3_multi_statemach(data, dophase_done);
-  *connected = Curl_conn_is_connected(data->conn);
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));
@@ -1622,7 +1623,7 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
   if(!dead_connection && conn->bits.protoconnstart &&
      !Curl_pp_needs_flush(data, &pop3c->pp) &&
      !pop3_perform_quit(data, conn))
-    (void)pop3_block_statemach(data, conn); /* ignore errors on QUIT */
+    (void)pop3_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);

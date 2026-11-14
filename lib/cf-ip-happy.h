@@ -28,27 +28,28 @@
 struct connectdata;
 struct Curl_addrinfo;
 struct Curl_cfilter;
-struct Curl_cfchain;
 struct Curl_easy;
 struct Curl_peer;
 struct Curl_sockaddr_ex;
 
 /**
- * Create a cfilter chain to connect to `origin` via an optional `peer`
+ * Create a cfilter to connect to `origin` via an optional `peer`
  * using `transport_peer` and `addr`.
  * With a `tunnel_peer` present, the filter will be used to proxy tunnel
  * to it and the tunnel will use `tunnel_transport`.
  * `pcf`: the filter created on success
  * `data`: the transfer initiating the connect
+ * `conn`: the connection that gets connected
  *
  * The filter is used in "happy eyeball" scenarios. Once connected,
- * it MAY be moved to the connection filter chain to serve transfers.
+ * it MAY be installed in the connection filter chain to serve transfers.
  */
-typedef CURLcode cf_ip_connect_create(struct Curl_cfchain *chain,
+typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_easy *data,
                                       struct Curl_peer *origin,
                                       struct Curl_peer *peer,
                                       uint8_t transport_peer,
+                                      struct connectdata *conn,
                                       struct Curl_sockaddr_ex *addr,
                                       struct Curl_peer *tunnel_peer,
                                       uint8_t tunnel_transport);

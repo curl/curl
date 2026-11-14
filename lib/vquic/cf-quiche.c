@@ -896,7 +896,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
     if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
       infof(data, "HTTP/3 stream %" PRIu64 " refused by server, try again "
             "on a new connection", stream->id);
-      connclose(CF_CONN(cf)); /* do not use this anymore */
+      connclose(cf->conn); /* do not use this anymore */
       data->state.refused_stream = TRUE;
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
@@ -1281,8 +1281,10 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
     break;
   }
   case CF_CTRL_CONN_INFO_UPDATE:
-    if(cf->connected)
-      Curl_conn_set_multiplex(cf->chain, 30);
+    if(!cf->sockindex && cf->connected) {
+      cf->conn->httpversion_seen = 30;
+      Curl_conn_set_multiplex(cf->conn);
+    }
     break;
   case CF_CTRL_REPORT_STATS:
     if(cf->connected && !ctx->stats_reported &&
@@ -1429,7 +1431,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   if(Curl_ssl_need_httpsrr(cf) &&
-     !Curl_dns_cf_resolved_https(data, cf, ctx->ssl_peer.peer)) {
+     !Curl_conn_dns_resolved_https(data, cf->sockindex, ctx->ssl_peer.peer)) {
     CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
     return CURLE_OK;
   }
@@ -1569,15 +1571,14 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT: {
-    uint64_t max_streams = CF_CONN(cf)->attached_xfers;
+    uint64_t max_streams = cf->conn->attached_xfers;
     if(!ctx->goaway && ctx->qconn) {
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
     *pres1 = (max_streams > INT_MAX) ? INT_MAX : (int)max_streams;
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%u in use)",
-                CF_CONN(cf)->connection_id, *pres1,
-                CF_CONN(cf)->attached_xfers);
+                cf->conn->connection_id, *pres1, cf->conn->attached_xfers);
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:
@@ -1653,8 +1654,7 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_http3 = {
   "HTTP/3",
-  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX |
-  CF_TYPE_HTTP | CF_TYPE_SAFE_EOS,
+  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
   0,
   cf_quiche_destroy,
   cf_quiche_connect,
@@ -1669,40 +1669,45 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_query,
 };
 
-CURLcode Curl_cf_quiche_create(struct Curl_cfchain *chain,
+CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct Curl_peer *origin,
                                struct Curl_peer *peer,
+                               struct connectdata *conn,
                                struct Curl_sockaddr_ex *addr)
 {
   struct cf_quiche_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
-  result = Curl_cf_udp_create(chain, data, origin, peer,
-                              TRNSPRT_QUIC, addr, NULL, TRNSPRT_QUIC);
-  if(result)
-    goto out;
-
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  result = cf_quiche_ctx_init(ctx, origin, peer, &chain->conn->ssl_config);
+  result = cf_quiche_ctx_init(ctx, origin, peer, &conn->ssl_config);
   if(!result)
     result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
     goto out;
-  Curl_cfchain_add(chain, cf);
-  cf = NULL;
-  ctx = NULL;
+  cf->conn = conn;
+
+  result = Curl_cf_udp_create(&cf->next, data, origin, peer, TRNSPRT_QUIC,
+                              conn, addr, NULL, TRNSPRT_QUIC);
+  if(result)
+    goto out;
+  cf->next->conn = cf->conn;
+  cf->next->sockindex = cf->sockindex;
 
 out:
-  if(cf)
-    Curl_conn_cf_discard_chain(&cf, data);
-  if(ctx)
-    cf_quiche_ctx_free(ctx);
+  *pcf = (!result) ? cf : NULL;
+  if(result) {
+    if(cf)
+      Curl_conn_cf_discard_chain(&cf, data);
+    else if(ctx)
+      cf_quiche_ctx_free(ctx);
+  }
+
   return result;
 }
 
@@ -1720,7 +1725,7 @@ CURLcode Curl_cf_quiche_insert_after(struct Curl_cfilter *cf_at,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  result = cf_quiche_ctx_init(ctx, origin, peer, &CF_CONN(cf_at)->ssl_config);
+  result = cf_quiche_ctx_init(ctx, origin, peer, &cf_at->conn->ssl_config);
   if(!result)
     result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)

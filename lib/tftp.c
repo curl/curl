@@ -751,7 +751,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 #else
 #define CURL_SENDTO_ARG5(x) (x)
 #endif
-    remote_addr = Curl_conn_get_remote_addr(data);
+    remote_addr = Curl_conn_get_remote_addr(data, FIRSTSOCKET);
     if(!remote_addr)
       return CURLE_FAILED_INIT;
 
@@ -952,13 +952,13 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
   connclose(conn);
 
   state->data = data;
-  state->sockfd = conn->chain.sock;
+  state->sockfd = conn->sock[FIRSTSOCKET];
   state->state = TFTP_STATE_START;
   state->error = TFTP_ERR_NONE;
   state->blksize = TFTP_BLKSIZE_DEFAULT; /* Unless updated by OACK response */
   state->requested_blksize = blksize;
 
-  remote_addr = Curl_conn_get_remote_addr(data);
+  remote_addr = Curl_conn_get_remote_addr(data, FIRSTSOCKET);
   DEBUGASSERT(remote_addr);
   if(!remote_addr)
     return CURLE_FAILED_INIT;
@@ -1030,7 +1030,7 @@ static CURLcode tftp_done(struct Curl_easy *data, CURLcode status,
 static CURLcode tftp_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps)
 {
-  return Curl_pollset_add_in(data, ps, data->conn->chain.sock);
+  return Curl_pollset_add_in(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
 /**********************************************************

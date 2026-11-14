@@ -229,9 +229,8 @@ static CURLcode test_unit4782(const char *arg)
     ssl.peer.origin = &origin;
     origin.hostname = hostname;
     origin.port = 443;
-    Curl_cfchain_init(&connection.chain, &connection, TRUE);
-    Curl_cfchain_add(&connection.chain, &cf);
     cf.ctx = &ssl;
+    cf.conn = &connection;
     cf.next = &lower;
     lower.cft = &t4782_filter;
 

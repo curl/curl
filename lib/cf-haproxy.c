@@ -72,7 +72,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->state == HAPROXY_INIT);
 #ifdef USE_UNIX_SOCKETS
-  if(Curl_cf_get_first_peer(cf)->unix_socket)
+  if(Curl_conn_get_first_peer(cf->conn, cf->sockindex)->unix_socket)
     /* the buffer is large enough to hold this! */
     result = curlx_dyn_addn(&ctx->data_out, STRCONST("PROXY UNKNOWN\r\n"));
   else {
@@ -173,7 +173,8 @@ static CURLcode cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
   if(cf->next->connected && !cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are sending. */
-    return Curl_pollset_set_out_only(data, ps, cf->chain->sock);
+    return Curl_pollset_set_out_only(
+      data, ps, Curl_conn_cf_get_socket(cf, data));
   }
   return CURLE_OK;
 }

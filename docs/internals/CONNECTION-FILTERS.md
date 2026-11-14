@@ -113,9 +113,9 @@ struct Curl_cfilter {
   const struct Curl_cftype *cft; /* the type providing implementation */
   struct Curl_cfilter *next;     /* next filter in chain */
   void *ctx;                     /* filter type specific settings */
-  struct Curl_cfchain *chain;    /* the chain this filter belongs to */
+  struct connectdata *conn;      /* the connection this filter belongs to */
+  int sockindex;                 /* TODO: like to get rid off this */
   BIT(connected);                /* != 0 iff this filter is connected */
-  BIT(shutdown);                 /* != 0 iff this filter has shut down */
 };
 ```
 
@@ -341,100 +341,3 @@ conn[curl.se] --> HTTPS-CONNECT --> NULL
 conn[curl.se] --> HTTPS-CONNECT --> SETUP[QUIC] --> HAPPY-EYEBALLS --> HTTP/3[151.101.1.91]:443
 * transfer
 ```
-
-## Filter Chains
-
-A connection filter chain keeps a chain of connection filters. The data
-type is:
-
-```c
-struct Curl_cfchain {
-  struct Curl_cfilter *cf;       /* first filter in chain */
-  struct connectdata *conn;      /* connectdata this chain belongs to */
-  struct Curl_cfchain *parent;  /* parent chain or NULL */
-  timediff_t shutdown_start_ms; /* when filter shutdown started */
-  timediff_t shutdown_timeout_ms; /* 0 means no timeout */
-  curl_socket_t sock;            /* main socket of this chain */
-  BIT(primary);                  /* primary chain of a connection */
-  BIT(ipv6);                     /* sock is using IPv6 */
-};
-```
-
-A connection has one primary filter chain. The is a secondary chain for
-the FTP protocol. All other protocols only use the primary.
-
-A chain keeps other properties besides the filters: the main socket it
-works on (if there is one), timeout values for controlled shutdown
-of a chain and an optional link to a "parent" chain.
-
-There are several functions operating on a chain, usually matching the
-name pattern `Curl_cfchain_*()`. Functions named `Curl_conn_*()` that
-involve filters all operate on the primary chain of a connection.
-
-Filter chains can be merged, moving all filters at the end of another
-chain, thereby emptying the former. This also copies the socket and
-its `ipv6` flag.
-
-Merging happens in IP Happy Eyeballing (`cf-ip-happy.c`), where each
-IP address attempt keeps its own filter chain and the successful one
-is then merged into the chain of the `cf-ip-happy` filter. This also
-happens at the `cf-https-connect` filter that "eyeballs" different
-HTTP versions.
-
-While establishing a connection, this may look roughly like this:
-```
-connection
-- primary chain
-  - cf-dns
-  - cf-https-connect
-    - h2 chain
-      - cf-ip-happy
-        - addr1 chain -> cf-tcp
-        - addr2 chain -> cf-tcp
-          ...
-    - h3 chain (B)
-      - cf-ip-happy
-        - addr1 chain -> cf-ngtcp2 -> cf-udp
-        - addr2 chain -> cf-ngtcp2 -> cf-udp
-          ...
-```
-
-While this is ongoing, the `cf-https-filter` has no `next` filter. The
-primary chain ends there. The "sub" chains for `h2` and `h3` are kept
-by `cf-https-connect` internally. Only when one of these chains "wins"
-and is merged, does `cf-https-connect` get a `next`.
-
-Having established the connection, the winner chains are merged, the
-"meta" filters are removed and the connection may look like this:
-
-```
-connection
-- primary chain -> cf-ngtcp2 -> cf-udp (addr2)
-```
-
-### The Parent Chain
-
-The `parent` of a filter chain is used to find the `cf-dns` filter. In the
-example above you see `cf-dns` is the first filter in the primary chain
-of the connection. Its job is to provide DNS information like IP addresses.
-These addresses are needed by the `cf-ip-happy` filters to start attempts
-to reach the server.
-
-`cf-ip-happy` does not find a `cf-dns` filter in its own chain.
-It looks at its `parent` chain. That would be, for example, the `h2` chain.
-There is no `cf-dns` filter in the `h2` chain either.
-
-It then looks into the `parent` chain of `h2` which is the connection's primary
-chain. That one has such a filter. `cf-dns` is found, hands out addresses
-and `cf-ip-happy` can start its work.
-
-### Lifetimes
-
-Keeping to pointers to chains, their parents and the filters is safe because
-the pointers do not live longer than the objects they point to.
-
-When a connection is discarded, it destroys its primary chain. The chain
-destroys all its filters first. `cf-https-connect` is destroyed before
-the primary chain is gone. `cf-https-connect` destroys the `h2` and
-`h3` chains first. Which destroys the `cf-ip-happy` filters, which first
-destroy their address chains, etc. etc.

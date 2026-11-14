@@ -344,7 +344,7 @@ static CURLcode socks5_gss_negotiate_enc(struct Curl_cfilter *cf,
                                          gss_ctx_id_t *gss_context,
                                          OM_uint32 gss_ret_flags)
 {
-  struct connectdata *conn = CF_CONN(cf);
+  struct connectdata *conn = cf->conn;
   OM_uint32 gss_major_status, gss_minor_status, gss_status;
   gss_buffer_desc gss_send_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc gss_recv_token = GSS_C_EMPTY_BUFFER;
@@ -568,8 +568,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct Curl_creds *creds)
 {
-  struct connectdata *conn = CF_CONN(cf);
-  curl_socket_t sock = cf->chain->sock;
+  struct connectdata *conn = cf->conn;
+  curl_socket_t sock = conn->sock[cf->sockindex];
   CURLcode result;
   OM_uint32 gss_ret_flags = 0;
   gss_name_t server = GSS_C_NO_NAME;

@@ -277,14 +277,13 @@ class TestVsFTPD:
 
     def test_31_12_upload_eprt(self, env: Env, vsftpds: VsFTPD):
         docname = 'test_31_12'
-        dstfile = os.path.join(vsftpds.docs_dir, docname)
-        self._rmf(dstfile)
         client = LocalClient(name='cli_ftp_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
         r = client.run(args=['-r', f'{env.ftp_domain}:{vsftpds.port}:127.0.0.1', url])
         r.check_exit_code(0)
+        dstfile = os.path.join(vsftpds.docs_dir, docname)
         assert os.path.exists(dstfile), f'{r.dump_logs()}'
 
     # connection reuse with STARTTLS required

@@ -38,7 +38,6 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
-#include "ftp.h"
 #include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
@@ -286,8 +285,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
   if(Curl_trc_cf_is_verbose(cf, data)) {
     va_list ap;
     va_start(ap, fmt);
-    trc_infof(data, data->state.feat, cf->cft->name,
-              CF_IS_PRIMARY(cf) ? 0 : 1, fmt, ap);
+    trc_infof(data, data->state.feat, cf->cft->name, cf->sockindex, fmt, ap);
     va_end(ap);
   }
 }
@@ -603,9 +601,6 @@ static struct trc_cft_def trc_cfts[] = {
 #endif
 #ifndef CURL_DISABLE_HTTP
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
-#endif
-#ifndef CURL_DISABLE_FTP
-  { &Curl_cft_ftp,            TRC_CT_PROTOCOL },
 #endif
 };
 
