@@ -10,6 +10,7 @@ MD5
 <client>
 <features>
 unittest
+md5
 </features>
 <name>
 MD5 unit tests
