@@ -1083,6 +1083,7 @@ CURL *curl_easy_duphandle(CURL *curl)
       outcurl->asi = Curl_altsvc_init();
       if(!outcurl->asi)
         goto fail;
+      outcurl->asi->flags = data->asi->flags;
       str = CURL_EASY_STR(outcurl, STRING_ALTSVC);
       if(str)
         (void)Curl_altsvc_load(outcurl->asi, str);
