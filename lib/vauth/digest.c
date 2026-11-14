@@ -41,20 +41,29 @@
 #ifndef USE_WINDOWS_SSPI
 #define SESSION_ALGO 1 /* for algos with this bit set */
 
+#ifdef CURL_HAVE_MD5
 #define ALGO_MD5 0
 #define ALGO_MD5SESS (ALGO_MD5 | SESSION_ALGO)
-#define ALGO_SHA256 2
-#define ALGO_SHA256SESS (ALGO_SHA256 | SESSION_ALGO)
-#define ALGO_SHA512_256 4
-#define ALGO_SHA512_256SESS (ALGO_SHA512_256 | SESSION_ALGO)
 
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
 #define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
 
+#define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
+#endif
+
+#ifdef CURL_HAVE_SHA256
+#define ALGO_SHA256 2
+#define ALGO_SHA256SESS (ALGO_SHA256 | SESSION_ALGO)
+#endif
+
+#ifdef CURL_HAVE_SHA512_256
+#define ALGO_SHA512_256 4
+#define ALGO_SHA512_256SESS (ALGO_SHA512_256 | SESSION_ALGO)
+#endif
+
 #define DIGEST_QOP_VALUE_STRING_AUTH      "auth"
 #define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
-#define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
 #endif
 
 bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
@@ -317,7 +326,7 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
 
   return CURLE_OK;
 }
-#endif
+#endif /* CURL_HAVE_MD5 */
 
 /*
  * Curl_auth_is_digest_supported()
@@ -527,7 +536,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* Return the response. */
   Curl_bufref_set(out, response, strlen(response), curl_free);
-#endif
+#endif /* !CURL_HAVE_MD5 */
   return result;
 }
 
@@ -1014,7 +1023,7 @@ oom:
     curlx_dyn_free(&response);
   return result;
 }
-#endif
+#endif /* CURL_HAVE_MD5 || CURL_HAVE_SHA256 || CURL_HAVE_SHA512_256 */
 
 /*
  * Curl_auth_create_digest_http_message()
