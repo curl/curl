@@ -180,6 +180,7 @@ class EnvConfig:
         self.curl_override_dns = 'override-dns: ON' in p.stdout
         self.curl_resolv_threaded = 'resolv-threaded: ON' in p.stdout
         self.curl_can_doh = 'DoH: ON' in p.stdout
+        self.curl_has_sha256 = 'sha256: ON' in p.stdout
 
         self.ports = {}
 
@@ -638,6 +639,10 @@ class Env:
     @classmethod
     def curl_can_doh(cls) -> bool:
         return cls.CONFIG.curl_can_doh
+
+    @classmethod
+    def curl_has_sha256(cls) -> bool:
+        return cls.CONFIG.curl_has_sha256
 
     @classmethod
     def curl_can_early_data(cls) -> bool:
