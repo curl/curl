@@ -31,10 +31,10 @@
    1. USE_OPENSSL
    2. USE_WOLFSSL
    3. USE_GNUTLS
-   4. USE_MBEDTLS (TBD)
-   5. USE_RUSTLS (TBD)
-   6. __APPLE__ (TBD)
-   7. USE_WIN32_CRYPTO (TBD)
+   4. USE_MBEDTLS (not supported)
+   5. USE_RUSTLS (not supported)
+   6. __APPLE__ (not supported)
+   7. USE_WIN32_CRYPTO (not supported)
  */
 
 #ifdef USE_OPENSSL
