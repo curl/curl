@@ -172,7 +172,7 @@ UNITTEST struct stsentry *hsts_check(struct hsts *h, const char *hostname,
     struct Curl_llist_node *n;
     size_t blen = 0;
 
-    if((hlen > MAX_HSTS_HOSTLEN) || !hlen)
+    if(!hlen)
       return NULL;
     if(hostname[hlen - 1] == '.')
       /* remove the trailing dot */
