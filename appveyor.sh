@@ -35,6 +35,11 @@ fi
 export CURL_CI=appveyor
 verbose=''
 
+if [ -n "${REVERT_PATCH:-}" ]; then
+  curl -LO https://github.com/curl/curl/commit/123c11cbace41021968ec5bfff894a3dae281022.diff
+  patch -p1 -R -i 123c11cbace41021968ec5bfff894a3dae281022.diff
+fi
+
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
