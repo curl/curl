@@ -25,13 +25,17 @@
 
 static CURLcode test_lib1902(const char *URL)
 {
+  static const char * const manual[][2] = {
+    { "example.com\tTRUE\t/\tFALSE\t0\thas_js\tfirst",
+      "example.com\tTRUE\t/\tFALSE\t0\thas_js\tmanual" },
+    { "Set-Cookie: has_js=first; domain=example.com; path=/",
+      "Set-Cookie: has_js=manual; domain=example.com; path=/" }
+  };
   CURLcode result = CURLE_OK;
   CURL *curl;
   struct curl_slist *cookies = NULL;
   struct curl_slist *cookie;
-  bool long_found = FALSE;
-  bool short_found = FALSE;
-  size_t count = 0;
+  size_t i;
 
   curl_global_init(CURL_GLOBAL_ALL);
 
@@ -45,27 +49,64 @@ static CURLcode test_lib1902(const char *URL)
 
   /* The original case: no transfer means no cookie jar write. */
   curl_easy_cleanup(curl);
-  curl = curl_easy_init();
-  if(!curl) {
-    result = TEST_ERR_EASY_INIT;
-    goto test_cleanup;
-  }
+  curl = NULL;
 
-  /* Explicitly reload the same jar, also without starting a transfer. */
-  easy_setopt(curl, CURLOPT_COOKIEFILE, URL);
-  easy_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
-  result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-  if(result)
-    goto test_cleanup;
-  for(cookie = cookies; cookie; cookie = cookie->next) {
-    if(strstr(cookie->data, "\tlong\tvalue"))
-      long_found = strlen(cookie->data) > 5048;
-    if(strstr(cookie->data, "\thas_js\t1"))
-      short_found = TRUE;
-    count++;
+  /* Reload with and without a live cookie, without starting a transfer. */
+  for(i = 0; i <= CURL_ARRAYSIZE(manual); i++) {
+    bool long_found = FALSE;
+    bool short_found = FALSE;
+    size_t count = 0;
+
+    curl = curl_easy_init();
+    if(!curl) {
+      result = TEST_ERR_EASY_INIT;
+      goto test_cleanup;
+    }
+    easy_setopt(curl, CURLOPT_COOKIEFILE, URL);
+    if(i) {
+      easy_setopt(curl, CURLOPT_COOKIELIST, manual[i - 1][0]);
+      easy_setopt(curl, CURLOPT_COOKIELIST, manual[i - 1][1]);
+      result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+      if(result)
+        goto test_cleanup;
+      if(!cookies || cookies->next) {
+        curl_mfprintf(stderr, "cookie file was not deferred\n");
+        result = TEST_ERR_FAILURE;
+        goto test_cleanup;
+      }
+      curl_slist_free_all(cookies);
+      cookies = NULL;
+
+      /* Manual insertion must not enable jar writes before a transfer. */
+      easy_setopt(curl, CURLOPT_COOKIEJAR, URL);
+      easy_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
+      easy_setopt(curl, CURLOPT_COOKIEJAR, NULL);
+    }
+    easy_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
+    result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+    if(result)
+      goto test_cleanup;
+    for(cookie = cookies; cookie; cookie = cookie->next) {
+      if(strstr(cookie->data, "\tlong\tvalue"))
+        long_found = strlen(cookie->data) > 5048;
+      if(strstr(cookie->data, i ? "\thas_js\tmanual" : "\thas_js\t1"))
+        short_found = TRUE;
+      count++;
+    }
+    if(i && !short_found) {
+      curl_mfprintf(stderr, "manual cookie lost priority on reload\n");
+      result = TEST_ERR_FAILURE;
+      goto test_cleanup;
+    }
+    if(count != 2 || !long_found || !short_found) {
+      result = TEST_ERR_FAILURE;
+      goto test_cleanup;
+    }
+    curl_slist_free_all(cookies);
+    cookies = NULL;
+    curl_easy_cleanup(curl);
+    curl = NULL;
   }
-  if(count != 2 || !long_found || !short_found)
-    result = TEST_ERR_FAILURE;
 
 test_cleanup:
   curl_slist_free_all(cookies);

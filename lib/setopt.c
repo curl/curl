@@ -1537,11 +1537,12 @@ static CURLcode cookielist(struct Curl_easy *data, const char *ptr)
       result = Curl_cookie_add(data, data->cookies, ptr + 11,
                                NULL, NULL,
                                COOKIE_HTTPHEADER | COOKIE_SECURE |
-                               COOKIE_NOPSL);
+                               COOKIE_NOPSL | COOKIE_LIVE);
     else
       /* Netscape format line */
       result = Curl_cookie_add(data, data->cookies, ptr, NULL,
-                               NULL, COOKIE_SECURE | COOKIE_NOPSL);
+                               NULL, COOKIE_SECURE | COOKIE_NOPSL |
+                               COOKIE_LIVE);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
   return result;

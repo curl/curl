@@ -1179,7 +1179,7 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   if(!real)
     return CURLE_OUT_OF_MEMORY;
 
-  real->livecookie = ci->running;
+  real->livecookie = ci->running || (flags & COOKIE_LIVE);
 
   /* use the time from the cookie this replaces, or get a new one */
   real->creationtime = replacetime ? replacetime : ++ci->lastct;
