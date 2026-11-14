@@ -73,7 +73,7 @@ CURLcode Curl_creds_create(const char *user,
   }
 
   creds->bufsize = bufsize;
-  creds->refcount = 1;
+  Curl_refcount_init(&creds->refcount, 1);
   creds->source = source;
   /* Some compilers try to be too smart about our dynamic struct size */
   buf = ((char *)creds) + offsetof(struct Curl_creds, buf);
@@ -133,8 +133,8 @@ void Curl_creds_link(struct Curl_creds **pdest, struct Curl_creds *src)
     Curl_creds_unlink(pdest);
     *pdest = src;
     if(src) {
-      DEBUGASSERT(src->refcount < UINT32_MAX);
-      src->refcount++;
+      DEBUGASSERT(Curl_refcount_get(&src->refcount) < UINT32_MAX);
+      Curl_refcount_incr(&src->refcount);
     }
   }
 }
@@ -144,11 +144,9 @@ void Curl_creds_unlink(struct Curl_creds **pcreds)
   if(*pcreds) {
     struct Curl_creds *creds = *pcreds;
 
-    DEBUGASSERT(creds->refcount);
+    DEBUGASSERT(Curl_refcount_get(&creds->refcount));
     *pcreds = NULL;
-    if(creds->refcount)
-      creds->refcount--;
-    if(!creds->refcount) {
+    if(!Curl_refcount_decr(&creds->refcount)) {
       curlx_memzero(creds, sizeof(*creds) + creds->bufsize);
       curlx_free(creds);
     }
