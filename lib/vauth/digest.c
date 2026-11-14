@@ -1067,7 +1067,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   (void)outlen;
 
 #ifdef CURL_HAVE_MD5
-  if(digest->algo <= ALGO_MD5SESS)
+  if(digest->algo == ALGO_MD5 ||
+     digest->algo == ALGO_MD5SESS)
     return auth_create_digest_http_message(data, creds,
                                            request, uripath, digest,
                                            outptr, outlen,
@@ -1075,7 +1076,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                            Curl_md5it);
 #endif
 #ifdef CURL_HAVE_SHA256
-  if(digest->algo <= ALGO_SHA256SESS)
+  if(digest->algo == ALGO_SHA256 ||
+     digest->algo == ALGO_SHA256SESS)
     return auth_create_digest_http_message(data, creds,
                                            request, uripath, digest,
                                            outptr, outlen,
@@ -1083,7 +1085,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                            Curl_sha256it);
 #endif
 #ifdef CURL_HAVE_SHA512_256
-  if(digest->algo <= ALGO_SHA512_256SESS)
+  if(digest->algo == ALGO_SHA512_256 ||
+     digest->algo == ALGO_SHA512_256SESS)
     return auth_create_digest_http_message(data, creds,
                                            request, uripath, digest,
                                            outptr, outlen,
