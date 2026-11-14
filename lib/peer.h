@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_refcount.h"
 
 struct Curl_scheme;
 
@@ -35,7 +34,7 @@ struct Curl_peer {
   const struct Curl_scheme *scheme; /* url scheme */
   char *hostname; /* normalized hostname (IDN decoded when supported) */
   char *zoneid; /* NULL or IPv6 zone identifier */
-  curl_refcount refcount;  /* created with 1, freed when dropping to 0 */
+  uint32_t refcount;  /* created with 1, freed when dropping to 0 */
   uint32_t scopeid;  /* != 0, IPv6 scope to use */
   uint16_t port;
   BIT(unix_socket); /* hostname is a UDS path without the prefix */

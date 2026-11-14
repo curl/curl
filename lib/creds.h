@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_refcount.h"
 
 struct Curl_easy;
 
@@ -38,7 +37,7 @@ struct Curl_creds {
   const char *oauth_bearer; /* non-NULL, maybe empty string */
   const char *sasl_authzid; /* non-NULL, maybe empty string */
   const char *sasl_service; /* non-NULL, maybe empty string */
-  curl_refcount refcount;
+  uint32_t refcount;
   uint8_t source; /* CREDS_* value */
   size_t bufsize; /* extra bytes added to sizeof(struct Curl_creds) */
   char buf[1];

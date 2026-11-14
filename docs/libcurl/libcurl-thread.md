@@ -27,12 +27,6 @@ You must **never** share the same handle in multiple threads. You can pass the
 handles around among threads, but you must never use a single handle from more
 than one thread at any given time.
 
-When curl_version_info(3) does not report CURL_VERSION_THREADSAFE, an easy
-handle that has been used with a multi handle shares internal data with the
-connections of that multi handle, also after curl_multi_remove_handle(3). Do
-not use or clean up the easy handle while another thread uses the multi
-handle.
-
 # Shared objects
 
 You can share certain data between multiple handles by using the share

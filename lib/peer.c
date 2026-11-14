@@ -126,7 +126,7 @@ static CURLcode peer_create(struct peer_parse *pp,
     goto out;
   }
 
-  Curl_refcount_init(&peer->refcount, 1);
+  peer->refcount = 1;
   peer->scheme = pp->scheme;
   peer->hostname = peer->user_hostname;
   peer->port = pp->port;
@@ -302,8 +302,8 @@ void Curl_peer_link(struct Curl_peer **pdest, struct Curl_peer *src)
     Curl_peer_unlink(pdest);
     *pdest = src;
     if(src) {
-      DEBUGASSERT(Curl_refcount_get(&src->refcount) < UINT32_MAX);
-      Curl_refcount_incr(&src->refcount);
+      DEBUGASSERT(src->refcount < UINT32_MAX);
+      src->refcount++;
     }
   }
 }
@@ -313,10 +313,13 @@ void Curl_peer_unlink(struct Curl_peer **ppeer)
   if(*ppeer) {
     struct Curl_peer *peer = *ppeer;
 
-    DEBUGASSERT(Curl_refcount_get(&peer->refcount));
+    DEBUGASSERT(peer->refcount);
     *ppeer = NULL;
-    if(!Curl_refcount_decr(&peer->refcount))
+    if(peer->refcount)
+      peer->refcount--;
+    if(!peer->refcount) {
       curlx_free(peer);
+    }
   }
 }
 
