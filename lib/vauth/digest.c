@@ -41,15 +41,18 @@
 #ifndef USE_WINDOWS_SSPI
 #define SESSION_ALGO 1 /* for algos with this bit set */
 
+#define DIGEST_QOP_VALUE_STRING_AUTH      "auth"
+#define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
+
 #ifdef CURL_HAVE_MD5
-#define ALGO_MD5 0
-#define ALGO_MD5SESS (ALGO_MD5 | SESSION_ALGO)
+#define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
 
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
 #define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
 
-#define DIGEST_QOP_VALUE_STRING_AUTH_CONF "auth-conf"
+#define ALGO_MD5 0
+#define ALGO_MD5SESS (ALGO_MD5 | SESSION_ALGO)
 #endif
 
 #ifdef CURL_HAVE_SHA256
@@ -62,9 +65,7 @@
 #define ALGO_SHA512_256SESS (ALGO_SHA512_256 | SESSION_ALGO)
 #endif
 
-#define DIGEST_QOP_VALUE_STRING_AUTH      "auth"
-#define DIGEST_QOP_VALUE_STRING_AUTH_INT  "auth-int"
-#endif
+#endif /* USE_WINDOWS_SSPI */
 
 bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
                                char *content, const char **endptr)
