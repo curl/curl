@@ -212,7 +212,7 @@ jobs:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           PATH=/usr/bin:/cygdrive/c/my-stunnel/bin
-          TFLAGS="-j8 ${TFLAGS}"
+          TFLAGS="-j8 !killserver ${TFLAGS}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
             cmake --build bld --verbose --target test-ci
@@ -499,7 +499,7 @@ jobs:
           MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          TFLAGS="-j8 ${TFLAGS}"
+          TFLAGS="-j8 !killserver ${TFLAGS}"
           if [ "${MATRIX_SYS}" != 'msys' ]; then
             TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
             TFLAGS+=' ~3000 ~3001 ~3023 ~3024'  # 'HTTPS localhost, first/last subject alt name matches, CN does not match' HTTPS, HTTP GET, PEM certificate (returning 56)
@@ -744,7 +744,7 @@ jobs:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
-          TFLAGS="-j8 ${TFLAGS}"
+          TFLAGS="-j8 !killserver ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           TFLAGS+=' ~3000 ~3001 ~3023 ~3024'  # 'HTTPS localhost, last subject alt name matches, CN does not match' HTTPS, HTTP GET, PEM certificate (returning 56)
           PATH="$PWD/bld/lib:$PATH:/c/my-stunnel/bin"
@@ -1176,7 +1176,7 @@ jobs:
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          TFLAGS="-j8 ${TFLAGS}"
+          TFLAGS="-j8 !killserver ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           TFLAGS+=' ~3000 ~3001 ~3023 ~3024'  # 'HTTPS localhost, last subject alt name matches, CN does not match' HTTPS, HTTP GET, PEM certificate (returning 56)
           if [[ "${MATRIX_INSTALL_MSYS2}" = *'libssh2-wincng'* || \
