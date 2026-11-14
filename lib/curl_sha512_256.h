@@ -64,8 +64,6 @@
 #  endif
 #endif
 
-#undef CURL_HAVE_SHA512_256
-
 #ifdef CURL_HAVE_SHA512_256
 #define CURL_SHA512_256_DIGEST_LENGTH 32
 CURLcode Curl_sha512_256it(unsigned char *output, const unsigned char *input,
