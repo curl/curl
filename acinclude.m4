@@ -1012,8 +1012,9 @@ dnl Check if a default ca-bundle should be used
 dnl
 dnl regarding the paths this scans:
 dnl /etc/ssl/certs/ca-certificates.crt Debian systems
-dnl /etc/pki/tls/certs/ca-bundle.crt Redhat and Mandriva
+dnl /etc/pki/tls/certs/ca-bundle.crt older Fedora, Redhat and Mandriva
 dnl /usr/share/ssl/certs/ca-bundle.crt old(er) Redhat
+dnl /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem Fedora, Mageia
 dnl /usr/local/share/certs/ca-root-nss.crt MidnightBSD
 dnl /etc/ssl/cert.pem OpenBSD, MidnightBSD (symlink)
 dnl /etc/ssl/certs (CA path) SUSE, FreeBSD
@@ -1096,7 +1097,9 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
           cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
         fi
 
-        for a in /etc/ssl/certs/ca-certificates.crt \
+        dnl Order with most desired first
+        for a in /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem \
+                 /etc/ssl/certs/ca-certificates.crt \
                  /etc/pki/tls/certs/ca-bundle.crt \
                  /usr/share/ssl/certs/ca-bundle.crt \
                  /usr/local/share/certs/ca-root-nss.crt \

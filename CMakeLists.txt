@@ -1508,6 +1508,7 @@ if(_curl_ca_bundle_supported)
 
     if(_curl_ca_bundle_autodetect)
       foreach(_search_ca_bundle_path IN ITEMS
+          "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
           "/etc/ssl/certs/ca-certificates.crt"
           "/etc/pki/tls/certs/ca-bundle.crt"
           "/usr/share/ssl/certs/ca-bundle.crt"
