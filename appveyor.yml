@@ -85,6 +85,21 @@ environment:
       REVERT_PATCH: '1'
 
     # TEMP
+    - job_name: 'CM VS2022, Release, x64, OpenSSL, Shared, Build-tests !FTP'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A x64 -DUSE_WIN32_IDN=ON -DCURL_USE_OPENSSL=ON'
+      TFLAGS: '--min=0 !FTP'
+
+    # TEMP
+    - job_name: 'CM VS2022, Release, x64, OpenSSL, Shared, Build-tests !FTP W/O 123c11'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      CMAKE_GENERATOR: 'Visual Studio 17 2022'
+      CMAKE_GENERATE: '-A x64 -DUSE_WIN32_IDN=ON -DCURL_USE_OPENSSL=ON'
+      TFLAGS: '--min=0 !FTP'
+      REVERT_PATCH: '1'
+
+    # TEMP
     - job_name: 'CM VS2012, Release, x64, Schannel, Shared, Build-tests !FTP'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       CMAKE_VERSION: 3.21.7  # manually bumped
