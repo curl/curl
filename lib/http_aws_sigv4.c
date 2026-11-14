@@ -1063,7 +1063,7 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
   }
 
   result = Curl_sha256it(sha_hash, (const unsigned char *)canonical_request,
-                         strlen(canonical_request))
+                         strlen(canonical_request));
   if(result) {
     curlx_free(request_type);
     curlx_free(credential_scope);
