@@ -70,7 +70,7 @@ Accept-Encoding: xxx
 %LOGDIR/decoded%TESTNUMBER-zstd
 %endif
 </notexists>
-<stdout>
+<stdout mode="text">
 61
 %if zstd
 61
