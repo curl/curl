@@ -68,11 +68,11 @@ static CURLcode my_sha512_256_init(void *context)
  *         error code otherwise
  */
 static CURLcode my_sha512_256_update(void *context,
-                                     const void *data, size_t length)
+                                     const void *data, size_t input_len)
 {
   EVP_MD_CTX ** const ctx = context;
 
-  if(!EVP_DigestUpdate(*ctx, data, length))
+  if(!EVP_DigestUpdate(*ctx, data, input_len))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   return CURLE_OK;
@@ -139,16 +139,16 @@ static CURLcode my_sha512_256_init(void *ctx)
 }
 
 static CURLcode my_sha512_256_update(void *ctx,
-                                     const void *data, size_t length)
+                                     const void *data, size_t input_len)
 {
   const byte *bytes = data;
   do {
-    word32 ilen = (word32)CURLMIN(length, UINT_MAX);
+    word32 ilen = (word32)CURLMIN(input_len, UINT_MAX);
     if(wc_Sha512_256Update(ctx, bytes, ilen))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    length -= ilen;
+    input_len -= ilen;
     bytes += ilen;
-  } while(length);
+  } while(input_len);
   return CURLE_OK;
 }
 
@@ -179,15 +179,15 @@ static CURLcode my_sha512_256_init(void *ctx)
  *
  * @param context the calculation context
  * @param data bytes to add to hash
- * @param length number of bytes in @a data
+ * @param input_len number of bytes in @a data
  * @return always CURLE_OK
  */
 static CURLcode my_sha512_256_update(void *ctx,
-                                     const void *data, size_t length)
+                                     const void *data, size_t input_len)
 {
-  DEBUGASSERT(data || (length == 0));
+  DEBUGASSERT(data || (input_len == 0));
 
-  sha512_256_update(ctx, length, data);
+  sha512_256_update(ctx, input_len, data);
 
   return CURLE_OK;
 }
