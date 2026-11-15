@@ -5585,12 +5585,12 @@ static CURLcode ossl_random(struct Curl_easy *data,
   return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
-static CURLcode ossl_sha256sum(const void *input, size_t len,
-                               uint8_t *sha256sum, size_t unused)
+static CURLcode ossl_sha256sum(const void *input, size_t input_len,
+                               uint8_t *digest, size_t digest_len)
 {
   CURLcode result = CURLE_OK;
   EVP_MD_CTX *mdctx;
-  (void)unused;
+  (void)digest_len;
 
   mdctx = EVP_MD_CTX_new();
   if(!mdctx)
@@ -5599,8 +5599,8 @@ static CURLcode ossl_sha256sum(const void *input, size_t len,
     result = CURLE_FAILED_INIT;
     goto out;
   }
-  if(!EVP_DigestUpdate(mdctx, input, len) ||
-     !EVP_DigestFinal_ex(mdctx, sha256sum, NULL))
+  if(!EVP_DigestUpdate(mdctx, input, input_len) ||
+     !EVP_DigestFinal_ex(mdctx, digest, NULL))
     result = CURLE_BAD_FUNCTION_ARGUMENT;
 out:
   EVP_MD_CTX_free(mdctx);

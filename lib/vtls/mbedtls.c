@@ -1654,21 +1654,20 @@ static bool mbedtls_data_pending(struct Curl_cfilter *cf,
   return mbedtls_ssl_get_bytes_avail(&backend->ssl) != 0;
 }
 
-static CURLcode mbedtls_sha256sum(const void *input, size_t inputlen,
-                                  uint8_t *sha256sum, size_t sha256len)
+static CURLcode mbedtls_sha256sum(const void *input, size_t input_len,
+                                  uint8_t *digest, size_t digest_len)
 {
 #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
   psa_status_t status;
-  size_t sha256len_actual;
-  status = psa_hash_compute(PSA_ALG_SHA_256, input, inputlen,
-                            sha256sum, sha256len,
-                            &sha256len_actual);
+  size_t digest_len_actual;
+  status = psa_hash_compute(PSA_ALG_SHA_256, input, input_len,
+                            digest, digest_len, &digest_len_actual);
   if(status != PSA_SUCCESS)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 #else
-  (void)sha256len;
-  return Curl_sha256it(sha256sum, input, inputlen);
+  (void)digest_len;
+  return Curl_sha256it(digest, input, input_len);
 #endif
 }
 
