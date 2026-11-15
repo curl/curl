@@ -29,8 +29,9 @@
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
 typedef CURLcode (*HMAC_hinit)(void *context);
-typedef void (*HMAC_hupdate)(void *context, const void *data, size_t len);
-typedef void (*HMAC_hfinal)(uint8_t *result, void *context);
+typedef void (*HMAC_hupdate)(void *context,
+                             const void *input, size_t input_len);
+typedef void (*HMAC_hfinal)(uint8_t *digest, void *context);
 
 /* Per-hash function HMAC parameters. */
 struct HMAC_params {
@@ -38,8 +39,8 @@ struct HMAC_params {
   HMAC_hupdate hupdate;    /* Update context with data. */
   HMAC_hfinal hfinal;      /* Get final result procedure. */
   unsigned int ctxtsize;   /* Context structure size. */
-  size_t maxkeylen;        /* Maximum key length (bytes). */
-  size_t resultlen;        /* Result length (bytes). */
+  size_t key_len_max;      /* Maximum key length (bytes). */
+  size_t digest_len;       /* Result length (bytes). */
 };
 
 /* HMAC computation context. */
@@ -51,14 +52,15 @@ struct HMAC_context {
 
 /* Prototypes. */
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
-                                    const void *key, size_t keylen);
-void Curl_HMAC_update(struct HMAC_context *ctxt, const void *data, size_t len);
-int Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *output);
+                                    const void *key, size_t key_len);
+void Curl_HMAC_update(struct HMAC_context *ctxt,
+                      const void *input, size_t input_len);
+int Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac);
 
 CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
-                     const void *key, const size_t keylen,
-                     const void *data, size_t datalen,
-                     uint8_t *output);
+                     const void *key, const size_t key_len,
+                     const void *input, size_t input_len,
+                     uint8_t *mac);
 #endif
 
 #endif /* HEADER_CURL_HMAC_H */
