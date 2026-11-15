@@ -38,16 +38,12 @@
 
 #include <time.h>
 
-#define HMAC_SHA256(k, kl, d, dl, o)                 \
-  do {                                               \
-    result = Curl_hmacit(&Curl_HMAC_SHA256,          \
-                         (const unsigned char *)(k), \
-                         kl,                         \
-                         (const unsigned char *)(d), \
-                         dl, o);                     \
-    if(result) {                                     \
-      goto fail;                                     \
-    }                                                \
+#define HMAC_SHA256(k, kl, d, dl, o)                          \
+  do {                                                        \
+    result = Curl_hmacit(&Curl_HMAC_SHA256, k, kl, d, dl, o); \
+    if(result) {                                              \
+      goto fail;                                              \
+    }                                                         \
   } while(0)
 
 #define TIMESTAMP_SIZE 17
@@ -1118,8 +1114,8 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   const char *passwd = Curl_creds_passwd(data->state.creds);
   char *secret = NULL;
-  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
-  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  uint8_t sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  uint8_t sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   char sha_hex[SHA256_HEX_LENGTH];
   char *auth_headers = NULL;
   char *user = curl_escape(Curl_creds_user(data->state.creds), 0);
