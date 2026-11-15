@@ -2245,12 +2245,7 @@ static CURLcode gtls_sha256sum(const unsigned char *input,
 {
   struct sha256_ctx SHA256pw;
   sha256_init(&SHA256pw);
-  do {
-    unsigned int ilen = (unsigned int)CURLMIN(len, UINT_MAX);
-    sha256_update(&SHA256pw, ilen, input);
-    len -= ilen;
-    input += ilen;
-  } while(len);
+  sha256_update(&SHA256pw, len, input);
 #if NETTLE_VERSION_MAJOR >= 4
   (void)sha256len;
   sha256_digest(&SHA256pw, sha256sum);
