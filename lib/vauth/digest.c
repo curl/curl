@@ -383,7 +383,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   const char *service = Curl_creds_has_sasl_service(creds) ?
     Curl_creds_sasl_service(creds) : default_service;
   size_t i;
-  struct MD5_context *ctxt;
+  void *ctxt;
   const char *userp = Curl_creds_user(creds);
   const char *passwdp = Curl_creds_passwd(creds);
   char *response = NULL;
