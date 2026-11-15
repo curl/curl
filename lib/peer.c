@@ -302,8 +302,9 @@ void Curl_peer_link(struct Curl_peer **pdest, struct Curl_peer *src)
     Curl_peer_unlink(pdest);
     *pdest = src;
     if(src) {
-      DEBUGASSERT(Curl_refcount_get(&src->refcount) < UINT32_MAX);
-      Curl_refcount_incr(&src->refcount);
+      uint32_t newcount = Curl_refcount_incr(&src->refcount);
+      (void)newcount;
+      DEBUGASSERT(newcount < UINT32_MAX);
     }
   }
 }
@@ -312,10 +313,14 @@ void Curl_peer_unlink(struct Curl_peer **ppeer)
 {
   if(*ppeer) {
     struct Curl_peer *peer = *ppeer;
+    uint32_t newcount;
 
-    DEBUGASSERT(Curl_refcount_get(&peer->refcount));
     *ppeer = NULL;
-    if(!Curl_refcount_decr(&peer->refcount))
+
+    newcount = Curl_refcount_decr(&peer->refcount);
+    DEBUGASSERT(newcount < UINT32_MAX); /* wraparound check */
+
+    if(!newcount)
       curlx_free(peer);
   }
 }
