@@ -105,21 +105,15 @@ struct MD5_params {
   unsigned int md5_ctxtsize;            /* Context structure size */
 };
 
-struct MD5_context {
-  const struct MD5_params *md5_hash;  /* Hash function definition */
-  void *md5_hashctx;                  /* Hash function context */
-};
-
-extern const struct MD5_params Curl_DIGEST_MD5;
 extern const struct HMAC_params Curl_HMAC_MD5;
 
 CURLcode Curl_md5it(unsigned char *output, const unsigned char *input,
                     size_t len);
 
-struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params);
-CURLcode Curl_MD5_update(struct MD5_context *context,
+void *Curl_MD5_init(void);
+CURLcode Curl_MD5_update(void *context,
                          const unsigned char *input, size_t len);
-CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result);
+CURLcode Curl_MD5_final(void *context, unsigned char *result);
 #endif /* CURL_HAVE_MD5 */
 
 #endif /* CURL_DISABLE_DIGEST_AUTH */

@@ -434,7 +434,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return result;
 
   /* Good so far, now calculate A1 and H(A1) according to RFC 2831 */
-  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init();
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
@@ -445,7 +445,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   Curl_MD5_update(ctxt, (const unsigned char *)passwdp, strlen(passwdp));
   Curl_MD5_final(ctxt, digest);
 
-  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init();
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
@@ -466,7 +466,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Calculate H(A2) */
-  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init();
   if(!ctxt) {
     curlx_free(spn);
 
@@ -482,7 +482,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     curl_msnprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Now calculate the response hash */
-  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init();
   if(!ctxt) {
     curlx_free(spn);
 

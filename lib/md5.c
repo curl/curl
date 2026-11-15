@@ -240,13 +240,6 @@ const struct HMAC_params Curl_HMAC_MD5 = {
   CURL_MD5_DIGEST_LEN /* Result size. */
 };
 
-const struct MD5_params Curl_DIGEST_MD5 = {
-  my_md5_init,        /* Digest initialization function */
-  my_md5_update,      /* Digest update function */
-  my_md5_final,       /* Digest computation end function */
-  sizeof(my_md5_ctx), /* Size of digest context struct */
-};
-
 /*
  * @unittest: 1601
  * Returns CURLE_OK on success.
@@ -265,27 +258,13 @@ CURLcode Curl_md5it(unsigned char *output,
   return result;
 }
 
-struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
+void *Curl_MD5_init(void)
 {
-  struct MD5_context *ctxt;
-
-  /* Create MD5 context */
-  ctxt = curlx_malloc(sizeof(*ctxt));
-
+  my_md5_ctx *ctxt = curlx_malloc(sizeof(ctxt));  /* Create MD5 context */
   if(!ctxt)
     return ctxt;
 
-  ctxt->md5_hashctx = curlx_malloc(md5params->md5_ctxtsize);
-
-  if(!ctxt->md5_hashctx) {
-    curlx_free(ctxt);
-    return NULL;
-  }
-
-  ctxt->md5_hash = md5params;
-
-  if((*md5params->md5_init_func)(ctxt->md5_hashctx)) {
-    curlx_free(ctxt->md5_hashctx);
+  if(my_md5_init(&ctxt)) {
     curlx_free(ctxt);
     return NULL;
   }
@@ -293,21 +272,16 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
   return ctxt;
 }
 
-CURLcode Curl_MD5_update(struct MD5_context *context,
-                         const unsigned char *input, size_t len)
+CURLcode Curl_MD5_update(void *context, const unsigned char *input, size_t len)
 {
-  (*context->md5_hash->md5_update_func)(context->md5_hashctx, input, len);
-
+  my_md5_update(&context, input, len);
   return CURLE_OK;
 }
 
-CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
+CURLcode Curl_MD5_final(void *context, unsigned char *result)
 {
-  (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
-
-  curlx_free(context->md5_hashctx);
+  my_md5_final(result, &context);
   curlx_free(context);
-
   return CURLE_OK;
 }
 
