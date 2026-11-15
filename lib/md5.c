@@ -50,8 +50,7 @@ static CURLcode my_md5_init(void *in)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *in,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *in, const void *input, size_t len)
 {
   EVP_MD_CTX ** const ctx = in;
   (void)EVP_DigestUpdate(*ctx, input, len);
@@ -77,8 +76,7 @@ static CURLcode my_md5_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *ctx, const void *input, size_t len)
 {
   do {
     word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
@@ -105,8 +103,7 @@ static CURLcode my_md5_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *ctx, const void *input, size_t len)
 {
   md5_update(ctx, len, input);
 }
@@ -134,8 +131,7 @@ static CURLcode my_md5_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *ctx, const void *input, size_t len)
 {
   (void)psa_hash_update(ctx, input, len);
 }
@@ -163,8 +159,7 @@ static CURLcode my_md5_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *ctx, const void *input, size_t len)
 {
   do {
     CC_LONG ilen = (CC_LONG)CURLMIN(len, UINT32_MAX);
@@ -204,8 +199,7 @@ static CURLcode my_md5_init(void *in)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *in,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *in, const void *input, size_t len)
 {
   struct md5_ctx *ctx = in;
   do {
@@ -219,7 +213,7 @@ static void my_md5_update(void *in,
 static void my_md5_final(unsigned char *digest, void *in)
 {
   struct md5_ctx *ctx = in;
-  unsigned long length = 0;
+  DWORD length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == CURL_MD5_DIGEST_LEN)
     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);

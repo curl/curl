@@ -107,34 +107,27 @@ static CURLcode test_unit1615(const char *arg)
     0xf2, 0xb5, 0x88, 0x60, 0x39, 0x6b, 0x5c, 0x06, 0x70, 0x37
   };
 
-  unsigned char output_buf[CURL_SHA512_256_DIGEST_LENGTH];
+  uint8_t output_buf[CURL_SHA512_256_DIGEST_LENGTH];
 
-  Curl_sha512_256it(output_buf, (const unsigned char *)test_str1,
-                    CURL_ARRAYSIZE(test_str1) - 1);
+  Curl_sha512_256it(output_buf, test_str1, CURL_ARRAYSIZE(test_str1) - 1);
   verify_memory(output_buf, precomp_hash1, CURL_SHA512_256_DIGEST_LENGTH);
 
-  Curl_sha512_256it(output_buf, (const unsigned char *)test_str2,
-                    CURL_ARRAYSIZE(test_str2) - 1);
+  Curl_sha512_256it(output_buf, test_str2, CURL_ARRAYSIZE(test_str2) - 1);
   verify_memory(output_buf, precomp_hash2, CURL_SHA512_256_DIGEST_LENGTH);
 
-  Curl_sha512_256it(output_buf, (const unsigned char *)test_str3,
-                    CURL_ARRAYSIZE(test_str3) - 1);
+  Curl_sha512_256it(output_buf, test_str3, CURL_ARRAYSIZE(test_str3) - 1);
   verify_memory(output_buf, precomp_hash3, CURL_SHA512_256_DIGEST_LENGTH);
 
-  Curl_sha512_256it(output_buf, (const unsigned char *)test_str4,
-                    CURL_ARRAYSIZE(test_str4) - 1);
+  Curl_sha512_256it(output_buf, test_str4, CURL_ARRAYSIZE(test_str4) - 1);
   verify_memory(output_buf, precomp_hash4, CURL_SHA512_256_DIGEST_LENGTH);
 
-  Curl_sha512_256it(output_buf, (const unsigned char *)test_str5,
-                    CURL_ARRAYSIZE(test_str5) - 1);
+  Curl_sha512_256it(output_buf, test_str5, CURL_ARRAYSIZE(test_str5) - 1);
   verify_memory(output_buf, precomp_hash5, CURL_SHA512_256_DIGEST_LENGTH);
 
-  Curl_sha512_256it(output_buf, (const unsigned char *)test_str6,
-                    CURL_ARRAYSIZE(test_str6) - 1);
+  Curl_sha512_256it(output_buf, test_str6, CURL_ARRAYSIZE(test_str6) - 1);
   verify_memory(output_buf, precomp_hash6, CURL_SHA512_256_DIGEST_LENGTH);
 
-  Curl_sha512_256it(output_buf, (const unsigned char *)test_str7,
-                    CURL_ARRAYSIZE(test_str7) - 1);
+  Curl_sha512_256it(output_buf, test_str7, CURL_ARRAYSIZE(test_str7) - 1);
   verify_memory(output_buf, precomp_hash7, CURL_SHA512_256_DIGEST_LENGTH);
 
   Curl_sha512_256it(output_buf, test_seq8,

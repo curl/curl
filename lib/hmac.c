@@ -50,6 +50,7 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
 {
   size_t i;
   struct HMAC_context *ctxt;
+  const unsigned char *bkey;
   unsigned char *hkey;
   unsigned char b;
 
@@ -79,10 +80,11 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
      hashparams->hinit(ctxt->hashctxt2))
     goto fail;
 
+  bkey = key;
   for(i = 0; i < keylen; i++) {
-    b = (unsigned char)(*key ^ hmac_ipad);
+    b = (unsigned char)(*bkey ^ hmac_ipad);
     hashparams->hupdate(ctxt->hashctxt1, &b, 1);
-    b = (unsigned char)(*key++ ^ hmac_opad);
+    b = (unsigned char)(*bkey++ ^ hmac_opad);
     hashparams->hupdate(ctxt->hashctxt2, &b, 1);
   }
 

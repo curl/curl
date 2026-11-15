@@ -52,8 +52,7 @@ static CURLcode my_sha256_init(void *in)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *in,
-                             const unsigned char *data, size_t length)
+static void my_sha256_update(void *in, const void *data, size_t length)
 {
   EVP_MD_CTX ** const ctx = in;
   EVP_DigestUpdate(*ctx, data, length);
@@ -79,8 +78,7 @@ static CURLcode my_sha256_init(void *in)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *in,
-                             const unsigned char *data, size_t length)
+static void my_sha256_update(void *in, const void *data, size_t length)
 {
   do {
     word32 ilen = (word32)CURLMIN(length, UINT32_MAX);
@@ -107,8 +105,7 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx,
-                             const unsigned char *data, size_t length)
+static void my_sha256_update(void *ctx, const void *data, size_t length)
 {
   sha256_update(ctx, length, data);
 }
@@ -136,8 +133,7 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx,
-                             const unsigned char *data, size_t length)
+static void my_sha256_update(void *ctx, const void *data, size_t length)
 {
   (void)psa_hash_update(ctx, data, length);
 }
@@ -160,8 +156,7 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx,
-                             const unsigned char *data, size_t length)
+static void my_sha256_update(void *ctx, const void *data, size_t length)
 {
   do {
     CC_LONG ilen = (CC_LONG)CURLMIN(length, UINT32_MAX);
@@ -201,8 +196,7 @@ static CURLcode my_sha256_init(void *in)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *in,
-                             const unsigned char *data, size_t length)
+static void my_sha256_update(void *in, const void *data, size_t length)
 {
   struct sha256_ctx *ctx = in;
   do {
@@ -216,7 +210,7 @@ static void my_sha256_update(void *in,
 static void my_sha256_final(unsigned char *digest, void *in)
 {
   struct sha256_ctx *ctx = in;
-  unsigned long length = 0;
+  DWORD length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == CURL_SHA256_DIGEST_LENGTH)

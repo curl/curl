@@ -741,7 +741,7 @@ static CURLcode auth_create_digest_http_message(
   struct digestdata *digest,
   char **outptr, size_t *outlen,
   void (*convert_to_ascii)(const unsigned char *, unsigned char *),
-  CURLcode (*hash)(unsigned char *, const unsigned char *, const size_t))
+  CURLcode (*hash)(uint8_t *output, const void *input, const size_t len))
 {
   CURLcode result;
   const char *userp = Curl_creds_user(creds);

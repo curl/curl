@@ -622,8 +622,7 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
     else
       post_data_len = (size_t)data->set.postfieldsize;
   }
-  result = Curl_sha256it(sha_hash, (const unsigned char *)post_data,
-                         post_data_len);
+  result = Curl_sha256it(sha_hash, post_data, post_data_len);
   if(!result)
     sha256_to_hex(sha_hex, sha_hash);
   return result;
@@ -1062,7 +1061,7 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  result = Curl_sha256it(sha_hash, (const unsigned char *)canonical_request,
+  result = Curl_sha256it(sha_hash, canonical_request,
                          strlen(canonical_request));
   if(result) {
     curlx_free(request_type);
