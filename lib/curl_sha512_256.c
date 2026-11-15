@@ -54,18 +54,18 @@ static CURLcode Curl_sha512_256_init(void *context)
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
 
-  if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
-    /* Check whether the header and this file use the same numbers */
-    DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LENGTH);
-    /* Check whether the block size is correct */
-    DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
-
-    return CURLE_OK; /* Success */
+  if(!EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
+    EVP_MD_CTX_free(*ctx);
+    *ctx = NULL;
+    return CURLE_FAILED_INIT;
   }
 
-  EVP_MD_CTX_free(*ctx);  /* Cleanup */
-  *ctx = NULL;
-  return CURLE_FAILED_INIT;
+  /* Check whether the header and this file use the same numbers */
+  DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LENGTH);
+  /* Check whether the block size is correct */
+  DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
+
+  return CURLE_OK;
 }
 
 /* Process portion of bytes.
