@@ -68,8 +68,7 @@ static CURLcode Curl_sha512_256_init(void *context)
  *         error code otherwise
  */
 static CURLcode Curl_sha512_256_update(void *context,
-                                       const unsigned char *data,
-                                       size_t length)
+                                       const void *data, size_t length)
 {
   EVP_MD_CTX ** const ctx = context;
 
@@ -140,8 +139,7 @@ static CURLcode Curl_sha512_256_init(void *ctx)
 }
 
 static CURLcode Curl_sha512_256_update(void *ctx,
-                                       const unsigned char *data,
-                                       size_t length)
+                                       const void *data, size_t length)
 {
   do {
     word32 ilen = (word32)CURLMIN(length, UINT_MAX);
@@ -184,8 +182,7 @@ static CURLcode Curl_sha512_256_init(void *ctx)
  * @return always CURLE_OK
  */
 static CURLcode Curl_sha512_256_update(void *ctx,
-                                       const unsigned char *data,
-                                       size_t length)
+                                       const void *data, size_t length)
 {
   DEBUGASSERT(data || (length == 0));
 
