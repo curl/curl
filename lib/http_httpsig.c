@@ -501,11 +501,10 @@ static CURLcode httpsig_sign_base(struct Curl_easy *data,
 
   switch(alg) {
   case HTTPSIG_ALG_ED25519:
-    result = Curl_ed25519_sign(
-      keybuf, keylen,
-      (const unsigned char *)curlx_dyn_ptr(sig_base),
-      curlx_dyn_len(sig_base),
-      raw_sig, raw_sig_len);
+    result = Curl_ed25519_sign(keybuf, keylen,
+                               curlx_dyn_ptr(sig_base),
+                               curlx_dyn_len(sig_base),
+                               raw_sig, raw_sig_len);
     break;
   case HTTPSIG_ALG_HMAC_SHA256:
     result = Curl_hmacit(&Curl_HMAC_SHA256, keybuf, keylen,

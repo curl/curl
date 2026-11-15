@@ -25,12 +25,14 @@
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HTTPSIG)
 
-/* Please keep the SSL backend-specific #if branches in this order:
- *
- * 1. USE_OPENSSL
- * 2. USE_WOLFSSL
- * 3. USE_GNUTLS
- * 4. USE_MBEDTLS
+/* Recommended order of crypto backends:
+   1. USE_OPENSSL
+   2. USE_WOLFSSL
+   3. USE_GNUTLS
+   4. USE_MBEDTLS
+   5. USE_RUSTLS (not supported)
+   6. __APPLE__ (not supported)
+   7. USE_WIN32_CRYPTO (not supported)
  */
 
 #include "curl_ed25519.h"
@@ -43,9 +45,9 @@
 #ifdef USE_OPENSSL
 #include <openssl/evp.h>
 
-CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
-                           const unsigned char *msg, size_t msglen,
-                           unsigned char *sig, size_t *siglen)
+CURLcode Curl_ed25519_sign(const void *key, size_t keylen,
+                           const void *msg, size_t msglen,
+                           uint8_t *sig, size_t *siglen)
 {
   EVP_PKEY *pkey;
   EVP_MD_CTX *mdctx;
@@ -92,9 +94,9 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/random.h>
 
-CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
-                           const unsigned char *msg, size_t msglen,
-                           unsigned char *sig, size_t *siglen)
+CURLcode Curl_ed25519_sign(const void *key, size_t keylen,
+                           const void *msg, size_t msglen,
+                           uint8_t *sig, size_t *siglen)
 {
   int ret;
   ed25519_key edkey;
@@ -138,9 +140,9 @@ fail:
 #elif defined(USE_GNUTLS)
 #include <nettle/eddsa.h>
 
-CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
-                           const unsigned char *msg, size_t msglen,
-                           unsigned char *sig, size_t *siglen)
+CURLcode Curl_ed25519_sign(const void *key, size_t keylen,
+                           const void *msg, size_t msglen,
+                           uint8_t *sig, size_t *siglen)
 {
   uint8_t pubkey[ED25519_KEY_SIZE];
 
@@ -157,9 +159,9 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
 
 #else /* no Ed25519-capable backend */
 
-CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
-                           const unsigned char *msg, size_t msglen,
-                           unsigned char *sig, size_t *siglen)
+CURLcode Curl_ed25519_sign(const void *key, size_t keylen,
+                           const void *msg, size_t msglen,
+                           uint8_t *sig, size_t *siglen)
 {
   (void)key;
   (void)keylen;
