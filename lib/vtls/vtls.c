@@ -438,7 +438,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     char *cert_hash = NULL;
     const char *pinned_hash, *end_pos;
     size_t cert_hash_len = 0, pinned_hash_len;
-    unsigned char *sha256sumdigest;
+    uint8_t *sha256sumdigest;
 
     if(!Curl_ssl->sha256sum) {
       /* without sha256 support, this cannot match */
@@ -453,8 +453,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                                  sha256sumdigest, CURL_SHA256_DIGEST_LENGTH);
 
     if(!encode)
-      encode = curlx_base64_encode(sha256sumdigest,
-                                   CURL_SHA256_DIGEST_LENGTH,
+      encode = curlx_base64_encode(sha256sumdigest, CURL_SHA256_DIGEST_LENGTH,
                                    &cert_hash, &cert_hash_len);
     curlx_safefree(sha256sumdigest);
 
