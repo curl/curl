@@ -53,8 +53,7 @@ static CURLcode my_sha256_init(void *in)
 }
 
 static void my_sha256_update(void *in,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const unsigned char *data, size_t length)
 {
   EVP_MD_CTX ** const ctx = in;
   EVP_DigestUpdate(*ctx, data, length);
@@ -81,10 +80,14 @@ static CURLcode my_sha256_init(void *in)
 }
 
 static void my_sha256_update(void *in,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const unsigned char *data, size_t length)
 {
-  (void)wc_Sha256Update(in, data, (word32)length);
+  do {
+    word32 ilen = (word32)CURLMIN(length, UINT32_MAX);
+    (void)wc_Sha256Update(in, data, ilen);
+    length -= ilen;
+    data += ilen;
+  } while(length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
@@ -105,8 +108,7 @@ static CURLcode my_sha256_init(void *ctx)
 }
 
 static void my_sha256_update(void *ctx,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const unsigned char *data, size_t length)
 {
   sha256_update(ctx, length, data);
 }
@@ -135,8 +137,7 @@ static CURLcode my_sha256_init(void *ctx)
 }
 
 static void my_sha256_update(void *ctx,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const unsigned char *data, size_t length)
 {
   (void)psa_hash_update(ctx, data, length);
 }
@@ -160,10 +161,14 @@ static CURLcode my_sha256_init(void *ctx)
 }
 
 static void my_sha256_update(void *ctx,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const unsigned char *data, size_t length)
 {
-  (void)CC_SHA256_Update(ctx, data, length);
+  do {
+    CC_LONG ilen = (CC_LONG)CURLMIN(length, UINT32_MAX);
+    CC_SHA256_Update(ctx, data, ilen);
+    length -= ilen;
+    data += ilen;
+  } while(length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
@@ -197,11 +202,15 @@ static CURLcode my_sha256_init(void *in)
 }
 
 static void my_sha256_update(void *in,
-                             const unsigned char *data,
-                             unsigned int length)
+                             const unsigned char *data, size_t length)
 {
   struct sha256_ctx *ctx = in;
-  CryptHashData(ctx->hHash, (const BYTE *)data, length, 0);
+  do {
+    DWORD ilen = (DWORD)CURLMIN(length, 0xffffffffUL);
+    CryptHashData(ctx->hHash, (const BYTE *)data, ilen, 0);
+    length -= ilen;
+    data += ilen;
+  } while(length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
@@ -243,12 +252,7 @@ CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
 
   result = my_sha256_init(&ctx);
   if(!result) {
-    do {
-      unsigned int ilen = (unsigned int)CURLMIN(len, UINT_MAX);
-      my_sha256_update(&ctx, input, ilen);
-      len -= ilen;
-      input += ilen;
-    } while(len);
+    my_sha256_update(&ctx, input, len);
     my_sha256_final(output, &ctx);
   }
   return result;

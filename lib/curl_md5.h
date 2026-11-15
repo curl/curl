@@ -95,8 +95,7 @@
 
 typedef CURLcode (*Curl_MD5_init_func)(void *context);
 typedef void (*Curl_MD5_update_func)(void *context,
-                                     const unsigned char *data,
-                                     unsigned int len);
+                                     const unsigned char *data, size_t len);
 typedef void (*Curl_MD5_final_func)(unsigned char *result, void *context);
 
 struct MD5_params {
@@ -120,8 +119,7 @@ CURLcode Curl_md5it(unsigned char *output, const unsigned char *input,
 
 struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params);
 CURLcode Curl_MD5_update(struct MD5_context *context,
-                         const unsigned char *input,
-                         unsigned int len);
+                         const unsigned char *input, size_t len);
 CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result);
 #endif /* CURL_HAVE_MD5 */
 

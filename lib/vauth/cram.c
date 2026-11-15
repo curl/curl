@@ -63,15 +63,13 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
 
   /* Compute the digest using the password as the key */
   ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
-                        (const unsigned char *)passwd,
-                        curlx_uztoui(strlen(passwd)));
+                        (const unsigned char *)passwd, strlen(passwd));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
   if(Curl_bufref_len(chlg))
-    Curl_HMAC_update(ctxt, Curl_bufref_uptr(chlg),
-                     curlx_uztoui(Curl_bufref_len(chlg)));
+    Curl_HMAC_update(ctxt, Curl_bufref_uptr(chlg), Curl_bufref_len(chlg));
 
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, digest);
