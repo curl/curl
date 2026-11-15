@@ -1654,10 +1654,8 @@ static bool mbedtls_data_pending(struct Curl_cfilter *cf,
   return mbedtls_ssl_get_bytes_avail(&backend->ssl) != 0;
 }
 
-static CURLcode mbedtls_sha256sum(const unsigned char *input,
-                                  size_t inputlen,
-                                  unsigned char *sha256sum,
-                                  size_t sha256len)
+static CURLcode mbedtls_sha256sum(const void *input, size_t inputlen,
+                                  uint8_t *sha256sum, size_t sha256len)
 {
 #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
   psa_status_t status;

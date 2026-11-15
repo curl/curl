@@ -2240,8 +2240,7 @@ static CURLcode wssl_random(struct Curl_easy *data,
 }
 
 static CURLcode wssl_sha256sum(const void *input, size_t len,
-                               uint8_t *sha256sum /* output */,
-                               size_t unused)
+                               uint8_t *sha256sum, size_t unused)
 {
   wc_Sha256 SHA256pw;
   const byte *bytes;
