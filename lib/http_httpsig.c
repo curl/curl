@@ -81,11 +81,10 @@ static enum httpsig_alg id_to_alg(uint8_t val)
 
 static CURLcode decode_hex_key(struct Curl_easy *data,
                                const char *hexstr,
-                               unsigned char **keyout,
-                               size_t *keylen)
+                               uint8_t **keyout, size_t *keylen)
 {
   size_t len, i;
-  unsigned char *keybuf;
+  uint8_t *keybuf;
 
   *keyout = NULL;
   *keylen = 0;
@@ -115,8 +114,8 @@ static CURLcode decode_hex_key(struct Curl_easy *data,
       curlx_free(keybuf);
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    keybuf[i / 2] = (unsigned char)((curlx_hexval(hexstr[i]) << 4) |
-                                     curlx_hexval(hexstr[i + 1]));
+    keybuf[i / 2] = (uint8_t)((curlx_hexval(hexstr[i]) << 4) |
+                               curlx_hexval(hexstr[i + 1]));
   }
 
   *keyout = keybuf;
@@ -545,7 +544,7 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   const char *authority;
   const char *components[HTTPSIG_MAX_COMPONENTS];
   size_t ncomp = 0;
-  void *keybuf = NULL;
+  uint8_t *keybuf = NULL;
   size_t keylen = 0;
   uint8_t raw_sig[HTTPSIG_MAX_RAW_SIG];
   size_t raw_sig_len = 0;
