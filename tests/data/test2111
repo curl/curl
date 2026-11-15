@@ -13,6 +13,11 @@ HTTP/1.1 200 OK%CR
 Content-Length: 5%CR
 %CRX-Bad: he%hex[%00]hex%llo%CR
 body
+
+HTTP/1.1 200 OK%CR
+Content-Length: 5%CR
+%CRX-Bad: hello%CR
+body
 </data>
 </reply>
 
@@ -24,7 +29,7 @@ http
 HTTP response with a NUL byte in the header terminator
 </name>
 <command>
--i http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-i http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -32,8 +37,15 @@ HTTP response with a NUL byte in the header terminator
 <stdout crlf="yes">
 HTTP/1.1 200 OK
 Content-Length: 5
+HTTP/1.1 200 OK
+Content-Length: 5
 </stdout>
 <protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
