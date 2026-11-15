@@ -37,8 +37,7 @@ typedef EVP_MD_CTX *Curl_sha512_256_ctx;
 /* Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
- * @return CURLE_OK if succeed,
- *         error code otherwise
+ * @return CURLE_OK if succeed, error code otherwise
  */
 static CURLcode my_sha512_256_init(void *context)
 {
@@ -64,8 +63,8 @@ static CURLcode my_sha512_256_init(void *context)
  *
  * @param context the calculation context
  * @param input bytes to add to hash
- * @return CURLE_OK if succeed,
- *         error code otherwise
+ * @param input_len number of bytes in @a input
+ * @return CURLE_OK if succeed, error code otherwise
  */
 static CURLcode my_sha512_256_update(void *context,
                                      const void *input, size_t input_len)
@@ -80,11 +79,9 @@ static CURLcode my_sha512_256_update(void *context,
 
 /* Finalise SHA-512/256 calculation, return digest.
  *
+ * @param[out] digest returned, must be #CURL_SHA512_256_DIGEST_LENGTH bytes
  * @param context the calculation context
- * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_LENGTH
- *             bytes
- * @return CURLE_OK if succeed,
- *         error code otherwise
+ * @return CURLE_OK if succeed, error code otherwise
  */
 static CURLcode my_sha512_256_final(uint8_t *digest, void *context)
 {
@@ -161,27 +158,14 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 
 #elif defined(USE_GNUTLS_SHA512_256)
 
-/* Context type used for SHA-512/256 calculations */
 typedef struct sha512_256_ctx Curl_sha512_256_ctx;
 
-/* Initialize structure for SHA-512/256 calculation.
- *
- * @param context the calculation context
- * @return always CURLE_OK
- */
 static CURLcode my_sha512_256_init(void *ctx)
 {
   sha512_256_init(ctx);
   return CURLE_OK;
 }
 
-/* Process portion of bytes.
- *
- * @param context the calculation context
- * @param input bytes to add to hash
- * @param input_len number of bytes in @a input
- * @return always CURLE_OK
- */
 static CURLcode my_sha512_256_update(void *ctx,
                                      const void *input, size_t input_len)
 {
@@ -192,13 +176,6 @@ static CURLcode my_sha512_256_update(void *ctx,
   return CURLE_OK;
 }
 
-/* Finalise SHA-512/256 calculation, return digest.
- *
- * @param context the calculation context
- * @param[out] digest set to the hash, must be #CURL_SHA512_256_DIGEST_LENGTH
- *             bytes
- * @return always CURLE_OK
- */
 static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
