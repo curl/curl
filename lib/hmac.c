@@ -46,7 +46,7 @@ static const unsigned char hmac_opad = 0x5C;
 #define HMAC_CTXT_OFFSET ((sizeof(struct HMAC_context) + 15) & ~(size_t)15)
 
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
-                                    const unsigned char *key, size_t keylen)
+                                    const void *key, size_t keylen)
 {
   size_t i;
   struct HMAC_context *ctxt;
@@ -99,14 +99,13 @@ fail:
   return NULL;
 }
 
-void Curl_HMAC_update(struct HMAC_context *ctxt,
-                      const unsigned char *data, size_t len)
+void Curl_HMAC_update(struct HMAC_context *ctxt, const void *data, size_t len)
 {
   /* Update first hash calculation. */
   ctxt->hash->hupdate(ctxt->hashctxt1, data, len);
 }
 
-int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
+int Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *output)
 {
   const struct HMAC_params *hashparams = ctxt->hash;
 
@@ -140,9 +139,9 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
-                     const unsigned char *key, const size_t keylen,
-                     const unsigned char *data, size_t datalen,
-                     unsigned char *output)
+                     const void *key, const size_t keylen,
+                     const void *data, size_t datalen,
+                     uint8_t *output)
 {
   struct HMAC_context *ctxt;
 

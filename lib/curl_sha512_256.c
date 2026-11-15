@@ -221,7 +221,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
  * @param input_size the size of the data pointed by @a input
  * @return always #CURLE_OK
  */
-CURLcode Curl_sha512_256it(unsigned char *output, const unsigned char *input,
+CURLcode Curl_sha512_256it(uint8_t *output, const void *input,
                            size_t input_size)
 {
   Curl_sha512_256_ctx ctx;

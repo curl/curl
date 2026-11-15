@@ -244,8 +244,7 @@ static void my_sha256_final(unsigned char *digest, void *in)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
-                       size_t len)
+CURLcode Curl_sha256it(uint8_t *output, const void *input, size_t len)
 {
   CURLcode result;
   my_sha256_ctx ctx;
@@ -269,8 +268,7 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
 
 #else
 
-CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
-                       size_t len)
+CURLcode Curl_sha256it(uint8_t *output, const void *input, size_t len)
 {
   (void)output;
   (void)input;

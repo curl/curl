@@ -42,12 +42,12 @@ static CURLcode test_unit1601(const char *arg)
     static const char string2[] = "hello-you-fool";
     unsigned char output[CURL_MD5_DIGEST_LEN];
 
-    Curl_md5it(output, (const unsigned char *)string1, strlen(string1));
+    Curl_md5it(output, string1, strlen(string1));
 
     verify_memory(output, "\xc4\xca\x42\x38\xa0\xb9\x23\x82\x0d\xcc\x50\x9a"
                   "\x6f\x75\x84\x9b", CURL_MD5_DIGEST_LEN);
 
-    Curl_md5it(output, (const unsigned char *)string2, strlen(string2));
+    Curl_md5it(output, string2, strlen(string2));
 
     verify_memory(output, "\x88\x67\x0b\x6d\x5d\x74\x2f\xad\xa5\xcd\xf9\xb6"
                   "\x82\x87\x5f\x22", CURL_MD5_DIGEST_LEN);
@@ -59,13 +59,13 @@ static CURLcode test_unit1601(const char *arg)
     static const char string2[] = "hello-you-fool";
     unsigned char output[CURL_SHA256_DIGEST_LENGTH];
 
-    Curl_sha256it(output, (const unsigned char *)string1, strlen(string1));
+    Curl_sha256it(output, string1, strlen(string1));
 
     verify_memory(output, "\x6b\x86\xb2\x73\xff\x34\xfc\xe1\x9d\x6b\x80\x4e"
                   "\xff\x5a\x3f\x57\x47\xad\xa4\xea\xa2\x2f\x1d\x49\xc0\x1e"
                   "\x52\xdd\xb7\x87\x5b\x4b", CURL_SHA256_DIGEST_LENGTH);
 
-    Curl_sha256it(output, (const unsigned char *)string2, strlen(string2));
+    Curl_sha256it(output, string2, strlen(string2));
 
     verify_memory(output, "\xcb\xb1\x6a\x8a\xb9\xcb\xb9\x35\xa8\xcb\xa0\x2e"
                   "\x28\xc0\x26\x30\xd1\x19\x9c\x1f\x02\x17\xf4\x7c\x96\x20"
@@ -85,17 +85,13 @@ static CURLcode test_unit1601(const char *arg)
     unsigned char output[CURL_MD5_DIGEST_LEN];
 
     Curl_hmacit(&Curl_HMAC_MD5,
-                (const unsigned char *)password, strlen(password),
-                (const unsigned char *)string1, strlen(string1),
-                output);
+                password, strlen(password), string1, strlen(string1), output);
 
     verify_memory(output, "\xd1\x29\x75\x43\x58\xdc\xab\x78\xdf\xcd\x7f\x2b"
                   "\x29\x31\x13\x37", CURL_MD5_DIGEST_LEN);
 
     Curl_hmacit(&Curl_HMAC_MD5,
-                (const unsigned char *)password, strlen(password),
-                (const unsigned char *)string2, strlen(string2),
-                output);
+                password, strlen(password), string2, strlen(string2), output);
 
     verify_memory(output, "\x75\xf1\xa7\xb9\xf5\x40\xe5\xa4\x98\x83\x9f\x64"
                   "\x5a\x27\x6d\xd0", CURL_MD5_DIGEST_LEN);
@@ -109,18 +105,14 @@ static CURLcode test_unit1601(const char *arg)
     unsigned char output[CURL_SHA256_DIGEST_LENGTH];
 
     Curl_hmacit(&Curl_HMAC_SHA256,
-                (const unsigned char *)password, strlen(password),
-                (const unsigned char *)string1, strlen(string1),
-                output);
+                password, strlen(password), string1, strlen(string1), output);
 
     verify_memory(output, "\x8c\x9d\x74\x0f\x32\xf7\xbb\xb7\xec\xe0\x07\x7e"
                   "\xc1\x8e\x1f\xdb\x17\x02\x6e\xaf\x9c\xcf\x76\x3d\x26\x88"
                   "\x56\x6d\xc8\x07\xbf\x59", CURL_SHA256_DIGEST_LENGTH);
 
     Curl_hmacit(&Curl_HMAC_SHA256,
-                (const unsigned char *)password, strlen(password),
-                (const unsigned char *)string2, strlen(string2),
-                output);
+                password, strlen(password), string2, strlen(string2), output);
 
     verify_memory(output, "\xe4\x81\x63\x53\xab\xc6\x8c\x34\xd4\xa8\xe5\xc8"
                   "\xf3\x1d\x12\xbd\xaf\xd6\x58\x73\x11\xe9\xe6\xf9\x93\x2e"
