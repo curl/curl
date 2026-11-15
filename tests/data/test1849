@@ -48,10 +48,19 @@ http-proxy
 proxy
 </features>
 <name>
-HTTPS reuse a proxy with different credentials
+HTTPS proxy tunnel reuse with different credentials and custom headers
 </name>
 <command>
 https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://user1:pwd1@%HOSTIP:%PROXYPORT --insecure --next https://example.com:%HTTPSPORT/path/%TESTNUMBER0002 --proxy http://user2:pwd2@%HOSTIP:%PROXYPORT --insecure
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization: Token A" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization: Token B" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization: Token B" -H "X-Origin: changed" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization: Token B" --proxy-header "X-Proxy: changed" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization:" --proxy-header "Proxy-Authorization: Token E" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization:" --proxy-header "Proxy-Authorization: Token F" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization : Token G" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization : Token H" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next https://example.com:%HTTPSPORT/path/%TESTNUMBER --proxy http://%HOSTIP:%PROXYPORT --insecure --proxy-header "Proxy-Authorization: Token H" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
 </command>
 </client>
 
@@ -69,6 +78,42 @@ Proxy-Authorization: Basic %b64[user2:pwd2]b64%
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
+CONNECT example.com:%HTTPSPORT HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token A
+
+CONNECT example.com:%HTTPSPORT HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token B
+
+CONNECT example.com:%HTTPSPORT HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token E
+
+CONNECT example.com:%HTTPSPORT HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token F
+
+CONNECT example.com:%HTTPSPORT HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token G
+
+CONNECT example.com:%HTTPSPORT HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token H
+
 </proxy>
 <protocol crlf="headers">
 GET /path/%TESTNUMBER HTTP/1.1
@@ -81,6 +126,57 @@ Host: example.com:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+X-Origin: changed
+
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /path/%TESTNUMBER HTTP/1.1
+Host: example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
 </protocol>
+<stdout nonewline="yes">
+first!
+daniel
+connects=1/connects=1/connects=0/connects=0/connects=1/connects=1/connects=1/connects=1/connects=0/
+</stdout>
 </verify>
 </testcase>
