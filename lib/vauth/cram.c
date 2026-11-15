@@ -56,7 +56,7 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   return CURLE_NOT_BUILT_IN;
 #else
   struct HMAC_context *ctxt;
-  unsigned char digest[MD5_DIGEST_LEN];
+  unsigned char digest[CURL_MD5_DIGEST_LEN];
   char *response;
   const char *user = Curl_creds_user(creds);
   const char *passwd = Curl_creds_passwd(creds);
