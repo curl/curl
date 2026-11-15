@@ -199,7 +199,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
                                         struct Curl_easy *data,
                                         struct Curl_peer *peer);
-#endif /* !CURL_DISABLE_PROXY */
+#endif
 
 /**
  * True iff the underlying SSL implementation supports the option.
