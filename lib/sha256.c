@@ -211,14 +211,11 @@ static void my_sha256_final(unsigned char *digest, void *in)
 {
   struct sha256_ctx *ctx = in;
   DWORD length = 0;
-
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == CURL_SHA256_DIGEST_LENGTH)
     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
-
   if(ctx->hHash)
     CryptDestroyHash(ctx->hHash);
-
   if(ctx->hCryptProv)
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
