@@ -4,16 +4,16 @@
 <keywords>
 unittest
 MD5
+SHA256
 </keywords>
 </info>
 
 <client>
 <features>
 unittest
-md5
 </features>
 <name>
-MD5 unit tests
+MD5, SHA256 unit tests
 </name>
 </client>
 </testcase>
