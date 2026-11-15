@@ -36,7 +36,9 @@ export CURL_CI=appveyor
 verbose=''
 
 if [ -n "${REVERT_PATCH:-}" ]; then
+  curl -LO https://github.com/curl/curl/commit/12938b611c5c0e99b38ebfdbea5e13a50bd4db24.diff
   curl -LO https://github.com/curl/curl/commit/123c11cbace41021968ec5bfff894a3dae281022.diff
+  patch -p1 -R -i 12938b611c5c0e99b38ebfdbea5e13a50bd4db24.diff
   patch -p1 -R -i 123c11cbace41021968ec5bfff894a3dae281022.diff
 fi
 
