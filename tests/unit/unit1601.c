@@ -40,7 +40,7 @@ static CURLcode test_unit1601(const char *arg)
   {
     static const char string1[] = "1";
     static const char string2[] = "hello-you-fool";
-    unsigned char output[CURL_MD5_DIGEST_LEN];
+    uint8_t output[CURL_MD5_DIGEST_LEN];
 
     Curl_md5it(output, string1, strlen(string1));
 
@@ -57,7 +57,7 @@ static CURLcode test_unit1601(const char *arg)
   {
     static const char string1[] = "1";
     static const char string2[] = "hello-you-fool";
-    unsigned char output[CURL_SHA256_DIGEST_LENGTH];
+    uint8_t output[CURL_SHA256_DIGEST_LENGTH];
 
     Curl_sha256it(output, string1, strlen(string1));
 
@@ -82,7 +82,7 @@ static CURLcode test_unit1601(const char *arg)
     static const char password[] = "Pa55worD";
     static const char string1[] = "1";
     static const char string2[] = "hello-you-fool";
-    unsigned char output[CURL_MD5_DIGEST_LEN];
+    uint8_t output[CURL_MD5_DIGEST_LEN];
 
     Curl_hmacit(&Curl_HMAC_MD5,
                 password, strlen(password), string1, strlen(string1), output);
@@ -102,7 +102,7 @@ static CURLcode test_unit1601(const char *arg)
     static const char password[] = "Pa55worD";
     static const char string1[] = "1";
     static const char string2[] = "hello-you-fool";
-    unsigned char output[CURL_SHA256_DIGEST_LENGTH];
+    uint8_t output[CURL_SHA256_DIGEST_LENGTH];
 
     Curl_hmacit(&Curl_HMAC_SHA256,
                 password, strlen(password), string1, strlen(string1), output);
