@@ -62,10 +62,11 @@ static CURLcode my_sha256_update(void *pctx, const void *input, size_t input_len
 static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 {
   EVP_MD_CTX ** const ctx = pctx;
-  EVP_DigestFinal_ex(*ctx, digest, NULL);
+  CURLcode result = EVP_DigestFinal_ex(*ctx, digest, NULL) ?
+    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
-  return CURLE_OK;
+  return result;
 }
 
 #elif defined(USE_WOLFSSL_SHA256)

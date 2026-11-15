@@ -70,11 +70,8 @@ static CURLcode my_sha512_256_update(void *pctx,
                                      const void *input, size_t input_len)
 {
   EVP_MD_CTX ** const ctx = pctx;
-
-  if(!EVP_DigestUpdate(*ctx, input, input_len))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  return CURLE_OK;
+  return EVP_DigestUpdate(*ctx, input, input_len) ?
+    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 }
 
 /* Finalise SHA-512/256 calculation, return digest.
