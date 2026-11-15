@@ -179,7 +179,7 @@ typedef struct sha256_ctx my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *in)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+  struct sha256_ctx *ctx = (struct sha256_ctx *)in;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return CURLE_OUT_OF_MEMORY;
@@ -197,13 +197,13 @@ static void my_sha256_update(void *in,
                              const unsigned char *data,
                              unsigned int length)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+  struct sha256_ctx *ctx = (struct sha256_ctx *)in;
   CryptHashData(ctx->hHash, (const BYTE *)data, length, 0);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+  struct sha256_ctx *ctx = (struct sha256_ctx *)in;
   unsigned long length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
