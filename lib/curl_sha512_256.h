@@ -66,8 +66,8 @@
 
 #ifdef CURL_HAVE_SHA512_256
 #define CURL_SHA512_256_DIGEST_LENGTH 32
-CURLcode Curl_sha512_256it(uint8_t *output, const void *input,
-                           size_t input_size);
+CURLcode Curl_sha512_256it(uint8_t *digest,
+                           const void *input, size_t input_len);
 #endif /* CURL_HAVE_SHA512_256 */
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */

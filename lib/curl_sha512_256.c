@@ -218,8 +218,8 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
  * @param input_len the size of the data pointed by @a input
  * @return always #CURLE_OK
  */
-CURLcode Curl_sha512_256it(uint8_t *digest, const void *input,
-                           size_t input_len)
+CURLcode Curl_sha512_256it(uint8_t *digest,
+                           const void *input, size_t input_len)
 {
   Curl_sha512_256_ctx ctx;
   CURLcode result = my_sha512_256_init(&ctx);
