@@ -179,7 +179,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
     if [ -n "${RUN_TESTS_VIA_CMAKE:-}" ]; then  # just to document the differences
-      export TFLAGS="-j10 ${TFLAGS:-}"
+      export TFLAGS="-j0 ${TFLAGS:-}"
       TFLAGS="!killserver ${TFLAGS:-}"  # skip slow/CPU-intensive test
       time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
     else
@@ -190,7 +190,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
         cd _bld/tests
         # This command must use the same Perl as detected in the CMake configuration step.
         # shellcheck disable=SC2086
-        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent --retry=5 -j10 --buildinfo ${TFLAGS}
+        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent --retry=5 -j0 --buildinfo ${TFLAGS}
       )
     fi
   else
