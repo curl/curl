@@ -1032,7 +1032,7 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
   char *request_type;
   char *credential_scope;
   char *str_to_sign;
-  unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t sha_hash[CURL_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
   CURLcode result;
 
@@ -1198,7 +1198,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   const char *method = NULL;
   const char *payload_hash = NULL;
   size_t payload_hash_len = 0;
-  unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t sha_hash[CURL_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
   char content_sha256_hdr[CONTENT_SHA256_HDR_LEN + 2] = ""; /* add \r\n */
   char *canonical_request = NULL;
