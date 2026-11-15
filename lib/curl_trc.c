@@ -287,7 +287,7 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, data->state.feat, cf->cft->name,
-              CF_IS_PRIMARY(cf) ? 0 : 1, fmt, ap);
+              (cf->chain && !CF_IS_PRIMARY(cf)) ? 1 : 0, fmt, ap);
     va_end(ap);
   }
 }
