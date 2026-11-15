@@ -36,7 +36,7 @@ typedef EVP_MD_CTX *my_md5_ctx;
 
 static CURLcode my_md5_init(void *in)
 {
-  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = in;
 
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
@@ -53,13 +53,13 @@ static CURLcode my_md5_init(void *in)
 static void my_md5_update(void *in,
                           const unsigned char *input, unsigned int len)
 {
-  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = in;
   (void)EVP_DigestUpdate(*ctx, input, len);
 }
 
 static void my_md5_final(unsigned char *digest, void *in)
 {
-  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = in;
   (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
@@ -122,7 +122,7 @@ typedef psa_hash_operation_t my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-  psa_hash_operation_t *pctx = (psa_hash_operation_t *)ctx;
+  psa_hash_operation_t *pctx = ctx;
   *pctx = psa_hash_operation_init();
   if(psa_hash_setup(pctx, PSA_ALG_MD5) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
@@ -180,7 +180,7 @@ typedef struct md5_ctx my_md5_ctx;
 
 static CURLcode my_md5_init(void *in)
 {
-  struct md5_ctx *ctx = (struct md5_ctx *)in;
+  struct md5_ctx *ctx = in;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return CURLE_OUT_OF_MEMORY;
@@ -203,7 +203,7 @@ static void my_md5_update(void *in,
 
 static void my_md5_final(unsigned char *digest, void *in)
 {
-  struct md5_ctx *ctx = (my_md5_ctx *)in;
+  struct md5_ctx *ctx = in;
   unsigned long length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == MD5_DIGEST_LEN)
