@@ -13,7 +13,7 @@ file
 <name>
 Get current directory using file://
 </name>
-<!-- does not work on win32, see #6379 -->
+# does not work on win32, see #6379
 <features>
 !win32
 </features>

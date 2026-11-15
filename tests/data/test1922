@@ -11,8 +11,8 @@ libtest
 </info>
 
 <reply>
-<!-- Response to the original handle's direct HTTP request.
-     Strict-Transport-Security header populates the live HSTS cache. -->
+# Response to the original handle's direct HTTP request.
+# Strict-Transport-Security header populates the live HSTS cache.
 <data nocheck="yes" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -24,9 +24,9 @@ Strict-Transport-Security: max-age=31536000
 Hello
 </data>
 
-<!-- Response to the dup handle's proxy CONNECT attempt.
-     The CONNECT to port 443 proves the copied
-     HSTS cache upgraded the dup's HTTP URL to HTTPS. -->
+# Response to the dup handle's proxy CONNECT attempt.
+# The CONNECT to port 443 proves the copied
+# HSTS cache upgraded the dup's HTTP URL to HTTPS.
 <connect crlf="headers">
 HTTP/1.1 403 Forbidden
 Content-Length: 0
