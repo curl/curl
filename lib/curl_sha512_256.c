@@ -86,7 +86,7 @@ static CURLcode my_sha512_256_update(void *context,
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
-static CURLcode Curl_sha512_256_final(uint8_t *digest, void *context)
+static CURLcode my_sha512_256_final(uint8_t *digest, void *context)
 {
   EVP_MD_CTX ** const ctx = context;
   CURLcode result;
@@ -152,7 +152,7 @@ static CURLcode my_sha512_256_update(void *ctx,
   return CURLE_OK;
 }
 
-static CURLcode Curl_sha512_256_final(uint8_t *digest, void *ctx)
+static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 {
   if(wc_Sha512_256Final(ctx, digest))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -199,7 +199,7 @@ static CURLcode my_sha512_256_update(void *ctx,
  *             bytes
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_final(uint8_t *digest, void *ctx)
+static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
   sha512_256_digest(ctx, digest);
@@ -228,11 +228,11 @@ CURLcode Curl_sha512_256it(uint8_t *output, const void *input,
 
   result = my_sha512_256_update(&ctx, input, input_size);
   if(result) {
-    (void)Curl_sha512_256_final(output, &ctx);
+    (void)my_sha512_256_final(output, &ctx);
     return result;
   }
 
-  return Curl_sha512_256_final(output, &ctx);
+  return my_sha512_256_final(output, &ctx);
 }
 
 #endif /* CURL_HAVE_SHA512_256 */
