@@ -179,7 +179,7 @@ typedef struct md5_ctx my_md5_ctx;
 
 static CURLcode my_md5_init(void *in)
 {
-  my_md5_ctx *ctx = (my_md5_ctx *)in;
+  struct md5_ctx *ctx = (struct md5_ctx *)in;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return CURLE_OUT_OF_MEMORY;
@@ -196,13 +196,13 @@ static CURLcode my_md5_init(void *in)
 static void my_md5_update(void *in,
                           const unsigned char *input, unsigned int len)
 {
-  my_md5_ctx *ctx = in;
+  struct md5_ctx *ctx = in;
   CryptHashData(ctx->hHash, (const BYTE *)input, len, 0);
 }
 
 static void my_md5_final(unsigned char *digest, void *in)
 {
-  my_md5_ctx *ctx = (my_md5_ctx *)in;
+  struct md5_ctx *ctx = (my_md5_ctx *)in;
   unsigned long length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == MD5_DIGEST_LEN)
