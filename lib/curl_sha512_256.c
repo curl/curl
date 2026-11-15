@@ -48,7 +48,7 @@ typedef EVP_MD_CTX *Curl_sha512_256_ctx;
  */
 static CURLcode Curl_sha512_256_init(void *context)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)context;
 
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
@@ -78,7 +78,7 @@ static CURLcode Curl_sha512_256_update(void *context,
                                        const unsigned char *data,
                                        size_t length)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)context;
 
   if(!EVP_DigestUpdate(*ctx, data, length))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -97,7 +97,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   CURLcode result;
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)context;
 
 /* Some NetBSD versions have a bug in SHA-512/256.
  * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
