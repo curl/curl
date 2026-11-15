@@ -34,14 +34,11 @@
 #ifdef USE_OPENSSL_SHA256
 #include <openssl/evp.h>
 
-struct ossl_sha256_ctx {
-  EVP_MD_CTX *openssl_ctx;
-};
-typedef struct ossl_sha256_ctx my_sha256_ctx;
+typedef EVP_MD_CTX *my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *in)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
   ctx->openssl_ctx = EVP_MD_CTX_new();
   if(!ctx->openssl_ctx)
     return CURLE_OUT_OF_MEMORY;
@@ -57,13 +54,13 @@ static void my_sha256_update(void *in,
                              const unsigned char *data,
                              unsigned int length)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
   EVP_DigestUpdate(ctx->openssl_ctx, data, length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
 {
-  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
   EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
   EVP_MD_CTX_free(ctx->openssl_ctx);
 }
