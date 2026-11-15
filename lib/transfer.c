@@ -586,7 +586,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 {
   struct connectdata *conn = data->conn;
   bool retry = FALSE;
-  bool refused_stream = data->state.refused_stream;
+  curl_bit refused_stream = data->state.refused_stream;
 
   *url = NULL;
   /* Consume the refused_stream indication for this retry decision. */
