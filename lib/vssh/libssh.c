@@ -1892,6 +1892,11 @@ static int myssh_in_TRANS_INIT(struct Curl_easy *data, struct ssh_conn *sshc,
       failf(data, "SCP requires a known file size for upload");
       return myssh_to_ERROR(data, sshc, CURLE_UPLOAD_FAILED);
     }
+    if(data->state.infilesize &&
+       (data->set.crlf || data->state.prefer_ascii)) {
+      failf(data, "SCP cannot do CRLF conversions on upload");
+      return myssh_to_ERROR(data, sshc, CURLE_UPLOAD_FAILED);
+    }
 
     sshc->scp_session =
       ssh_scp_new(sshc->ssh_session, SSH_SCP_WRITE, sshp->path);

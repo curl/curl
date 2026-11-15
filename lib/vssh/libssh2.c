@@ -2782,6 +2782,12 @@ static CURLcode ssh_state_scp_trans_init(struct Curl_easy *data,
       myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
       return CURLE_UPLOAD_FAILED;
     }
+    if(data->state.infilesize &&
+       (data->set.crlf || data->state.prefer_ascii)) {
+      failf(data, "SCP cannot do CRLF conversions on upload");
+      myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
+      return CURLE_UPLOAD_FAILED;
+    }
     myssh_to(data, sshc, SSH_SCP_UPLOAD_INIT);
   }
   else

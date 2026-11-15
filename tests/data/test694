@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SCP
+SCP upload
+CRLF
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<server>
+scp
+</server>
+<name>
+SCP upload with CRLF conversion fails
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt --crlf scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/upload.%TESTNUMBER --insecure
+</command>
+<file name="%LOGDIR/file%TESTNUMBER.txt">
+Test data
+for ssh upload test
+</file>
+</client>
+
+<verify>
+# CURLE_UPLOAD_FAILED
+<errorcode>
+25
+</errorcode>
+</verify>
+</testcase>
