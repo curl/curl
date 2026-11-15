@@ -2239,21 +2239,22 @@ static CURLcode wssl_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode wssl_sha256sum(const unsigned char *input,
-                               size_t len,
-                               unsigned char *sha256sum /* output */,
+static CURLcode wssl_sha256sum(const void *input, size_t len,
+                               uint8_t *sha256sum /* output */,
                                size_t unused)
 {
   wc_Sha256 SHA256pw;
+  const byte *bytes;
   (void)unused;
   if(wc_InitSha256(&SHA256pw))
     return CURLE_FAILED_INIT;
+  bytes = input;
   do {
     word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
-    if(wc_Sha256Update(&SHA256pw, input, ilen))
+    if(wc_Sha256Update(&SHA256pw, bytes, ilen))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     len -= ilen;
-    input += ilen;
+    bytes += ilen;
   } while(len);
   if(wc_Sha256Final(&SHA256pw, sha256sum))
     return CURLE_BAD_FUNCTION_ARGUMENT;
