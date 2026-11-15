@@ -312,7 +312,7 @@ static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
   if((sctx->enabledmechs & SASL_MECH_GSSAPI) &&
      Curl_auth_is_gssapi_supported() &&
      Curl_auth_user_contains_domain(sctx->conn->creds)
-#if !defined(USE_WINDOWS_SSPI)
+#ifndef(USE_WINDOWS_SSPI)
      && (!Curl_creds_has_passwd(sctx->conn->creds) ||
          sctx->sasl->prefmech == SASL_MECH_GSSAPI)
 #endif
