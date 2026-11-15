@@ -63,16 +63,16 @@ static CURLcode my_sha512_256_init(void *context)
 /* Process portion of bytes.
  *
  * @param context the calculation context
- * @param data bytes to add to hash
+ * @param input bytes to add to hash
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
 static CURLcode my_sha512_256_update(void *context,
-                                     const void *data, size_t input_len)
+                                     const void *input, size_t input_len)
 {
   EVP_MD_CTX ** const ctx = context;
 
-  if(!EVP_DigestUpdate(*ctx, data, input_len))
+  if(!EVP_DigestUpdate(*ctx, input, input_len))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   return CURLE_OK;
@@ -139,9 +139,9 @@ static CURLcode my_sha512_256_init(void *ctx)
 }
 
 static CURLcode my_sha512_256_update(void *ctx,
-                                     const void *data, size_t input_len)
+                                     const void *input, size_t input_len)
 {
-  const byte *bytes = data;
+  const byte *bytes = input;
   do {
     word32 ilen = (word32)CURLMIN(input_len, UINT_MAX);
     if(wc_Sha512_256Update(ctx, bytes, ilen))
@@ -178,16 +178,16 @@ static CURLcode my_sha512_256_init(void *ctx)
 /* Process portion of bytes.
  *
  * @param context the calculation context
- * @param data bytes to add to hash
- * @param input_len number of bytes in @a data
+ * @param input bytes to add to hash
+ * @param input_len number of bytes in @a input
  * @return always CURLE_OK
  */
 static CURLcode my_sha512_256_update(void *ctx,
-                                     const void *data, size_t input_len)
+                                     const void *input, size_t input_len)
 {
-  DEBUGASSERT(data || (input_len == 0));
+  DEBUGASSERT(input || (input_len == 0));
 
-  sha512_256_update(ctx, input_len, data);
+  sha512_256_update(ctx, input_len, input);
 
   return CURLE_OK;
 }
@@ -213,7 +213,7 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 #endif
 
 /* Compute SHA-512/256 hash for the given data in one function call
- * @param[out] output the pointer to put the hash
+ * @param[out] digest the pointer to put the hash
  * @param[in] input the pointer to the data to process
  * @param input_len the size of the data pointed by @a input
  * @return always #CURLE_OK
