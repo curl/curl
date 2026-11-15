@@ -36,6 +36,7 @@ static CURLcode test_unit1601(const char *arg)
 {
   UNITTEST_BEGIN(t1601_setup())
 
+#ifndef CURL_DISABLE_DIGEST_AUTH
 #ifdef CURL_HAVE_MD5
   {
     static const char string1[] = "1";
@@ -52,11 +53,36 @@ static CURLcode test_unit1601(const char *arg)
     verify_memory(output, "\x88\x67\x0b\x6d\x5d\x74\x2f\xad\xa5\xcd\xf9\xb6"
                   "\x82\x87\x5f\x22", CURL_MD5_DIGEST_LEN);
   }
+
+  {
+    static const char password[] = "Pa55worD";
+    static const char string1[] = "1";
+    static const char string2[] = "hello-you-fool";
+    unsigned char output[CURL_MD5_DIGEST_LEN];
+
+    Curl_hmacit(&Curl_HMAC_MD5,
+                (const unsigned char *)password, strlen(password),
+                (const unsigned char *)string1, strlen(string1),
+                output);
+
+    verify_memory(output, "\xd1\x29\x75\x43\x58\xdc\xab\x78\xdf\xcd\x7f\x2b"
+                  "\x29\x31\x13\x37", CURL_MD5_DIGEST_LEN);
+
+    Curl_hmacit(&Curl_HMAC_MD5,
+                (const unsigned char *)password, strlen(password),
+                (const unsigned char *)string2, strlen(string2),
+                output);
+
+    verify_memory(output, "\x75\xf1\xa7\xb9\xf5\x40\xe5\xa4\x98\x83\x9f\x64"
+                  "\x5a\x27\x6d\xd0", CURL_MD5_DIGEST_LEN);
+  }
 #endif
+#endif /* CURL_DISABLE_DIGEST_AUTH */
 
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_HTTPSIG) || \
   !defined(CURL_DISABLE_DIGEST_AUTH) ||                             \
   defined(USE_LIBSSH2) || defined(USE_SSL)
+#ifdef CURL_HAVE_SHA256
   {
     static const char string1[] = "1";
     static const char string2[] = "hello-you-fool";
@@ -74,7 +100,32 @@ static CURLcode test_unit1601(const char *arg)
                   "\xc0\x26\x30\xd1\x19\x9c\x1f\x02\x17\xf4\x7c\x96\x20\xf3\xef"
                   "\xe8\x27\x15\xae", CURL_SHA256_DIGEST_LENGTH);
   }
+  {
+    static const char password[] = "Pa55worD";
+    static const char string1[] = "1";
+    static const char string2[] = "hello-you-fool";
+    unsigned char output[CURL_SHA256_DIGEST_LENGTH];
+
+    Curl_hmacit(&Curl_HMAC_SHA256,
+                (const unsigned char *)password, strlen(password),
+                (const unsigned char *)string1, strlen(string1),
+                output);
+
+    verify_memory(output, "\x8c\x9d\x74\x0f\x32\xf7\xbb\xb7\xec\xe0\x07\x7e"
+                  "\xc1\x8e\x1f\xdb\x17\x02\x6e\xaf\x9c\xcf\x76\x3d\x26\x88"
+                  "\x56\x6d\xc8\x07\xbf\x59", CURL_SHA256_DIGEST_LENGTH);
+
+    Curl_hmacit(&Curl_HMAC_SHA256,
+                (const unsigned char *)password, strlen(password),
+                (const unsigned char *)string2, strlen(string2),
+                output);
+
+    verify_memory(output, "\xe4\x81\x63\x53\xab\xc6\x8c\x34\xd4\xa8\xe5\xc8"
+                  "\xf3\x1d\x12\xbd\xaf\xd6\x58\x73\x11\xe9\xe6\xf9\x93\x2e"
+                  "\x0a\xba\x69\x49\x63\x8c", CURL_SHA256_DIGEST_LENGTH);
+  }
 #endif
+#endif /* features that need SHA256 */
 
   UNITTEST_END(curl_global_cleanup())
 }
