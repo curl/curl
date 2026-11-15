@@ -80,11 +80,12 @@ static CURLcode my_sha256_init(void *in)
 
 static void my_sha256_update(void *in, const void *data, size_t length)
 {
+  const byte *bytes = data;
   do {
     word32 ilen = (word32)CURLMIN(length, UINT32_MAX);
-    (void)wc_Sha256Update(in, data, ilen);
+    (void)wc_Sha256Update(in, bytes, ilen);
     length -= ilen;
-    data += ilen;
+    bytes += ilen;
   } while(length);
 }
 
@@ -158,11 +159,12 @@ static CURLcode my_sha256_init(void *ctx)
 
 static void my_sha256_update(void *ctx, const void *data, size_t length)
 {
+  const uint8_t *bytes = data;
   do {
     CC_LONG ilen = (CC_LONG)CURLMIN(length, UINT32_MAX);
-    CC_SHA256_Update(ctx, data, ilen);
+    CC_SHA256_Update(ctx, bytes, ilen);
     length -= ilen;
-    data += ilen;
+    bytes += ilen;
   } while(length);
 }
 
@@ -199,11 +201,12 @@ static CURLcode my_sha256_init(void *in)
 static void my_sha256_update(void *in, const void *data, size_t length)
 {
   struct sha256_ctx *ctx = in;
+  const BYTE *bytes = data;
   do {
     DWORD ilen = (DWORD)CURLMIN(length, 0xffffffffUL);
-    CryptHashData(ctx->hHash, (const BYTE *)data, ilen, 0);
+    CryptHashData(ctx->hHash, bytes, ilen, 0);
     length -= ilen;
-    data += ilen;
+    bytes += ilen;
   } while(length);
 }
 

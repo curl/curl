@@ -78,11 +78,12 @@ static CURLcode my_md5_init(void *ctx)
 
 static void my_md5_update(void *ctx, const void *input, size_t len)
 {
+  const byte *bytes = input;
   do {
     word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
-    (void)wc_Md5Update(ctx, input, ilen);
+    (void)wc_Md5Update(ctx, bytes, ilen);
     len -= ilen;
-    input += ilen;
+    bytes += ilen;
   } while(len);
 }
 
@@ -161,11 +162,12 @@ static CURLcode my_md5_init(void *ctx)
 
 static void my_md5_update(void *ctx, const void *input, size_t len)
 {
+  const uint8_t *bytes = input;
   do {
     CC_LONG ilen = (CC_LONG)CURLMIN(len, UINT32_MAX);
-    CC_MD5_Update(ctx, input, ilen);
+    CC_MD5_Update(ctx, bytes, ilen);
     len -= ilen;
-    input += ilen;
+    bytes += ilen;
   } while(len);
 }
 
@@ -202,11 +204,12 @@ static CURLcode my_md5_init(void *in)
 static void my_md5_update(void *in, const void *input, size_t len)
 {
   struct md5_ctx *ctx = in;
+  const BYTE *bytes = input;
   do {
     DWORD ilen = (DWORD)CURLMIN(len, 0xffffffffUL);
-    CryptHashData(ctx->hHash, (const BYTE *)input, ilen, 0);
+    CryptHashData(ctx->hHash, bytes, ilen, 0);
     len -= ilen;
-    input += ilen;
+    bytes += ilen;
   } while(len);
 }
 
