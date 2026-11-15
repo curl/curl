@@ -59,12 +59,10 @@ static CURLcode Curl_sha512_256_init(void *context)
     *ctx = NULL;
     return CURLE_FAILED_INIT;
   }
-
   /* Check whether the header and this file use the same numbers */
   DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LENGTH);
   /* Check whether the block size is correct */
   DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
-
   return CURLE_OK;
 }
 

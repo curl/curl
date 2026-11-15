@@ -39,6 +39,7 @@ typedef EVP_MD_CTX *my_sha256_ctx;
 static CURLcode my_sha256_init(void *in)
 {
   EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
+
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
