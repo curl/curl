@@ -149,7 +149,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
    Declaring the functions as static like this seems to be a bit more
    reliable than defining COMMON_DIGEST_FOR_OPENSSL on older cats. */
-#  define my_md5_ctx CC_MD5_CTX
+typedef CC_MD5_CTX my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
