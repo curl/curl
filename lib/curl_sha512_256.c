@@ -177,12 +177,9 @@ typedef struct sha512_256_ctx Curl_sha512_256_ctx;
  * @param context the calculation context
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_init(void *context)
+static CURLcode Curl_sha512_256_init(void *ctx)
 {
-  struct sha512_256_ctx * const ctx = (struct sha512_256_ctx *)context;
-
   sha512_256_init(ctx);
-
   return CURLE_OK;
 }
 
@@ -193,12 +190,10 @@ static CURLcode Curl_sha512_256_init(void *context)
  * @param length number of bytes in @a data
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_update(void *context,
+static CURLcode Curl_sha512_256_update(void *ctx,
                                        const unsigned char *data,
                                        size_t length)
 {
-  struct sha512_256_ctx * const ctx = (struct sha512_256_ctx *)context;
-
   DEBUGASSERT(data || (length == 0));
 
   sha512_256_update(ctx, length, (const uint8_t *)data);
@@ -213,10 +208,8 @@ static CURLcode Curl_sha512_256_update(void *context,
  *             bytes
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
+static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 {
-  struct sha512_256_ctx * const ctx = (struct sha512_256_ctx *)context;
-
 #if NETTLE_VERSION_MAJOR >= 4
   sha512_256_digest(ctx, (uint8_t *)digest);
 #else
