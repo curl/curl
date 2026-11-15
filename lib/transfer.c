@@ -418,13 +418,15 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
 
-  /* Reset the retry count at the start of each request.
+  /* Reset the retry count and clear any stale refused_stream
+   * flag from the previous transfer.
    * If the retry count is not reset, when the connection drops,
    * it will not enter the retry mechanism on CONN_MAX_RETRIES + 1 attempts
    * and will immediately throw
    * "Connection died, tried CONN_MAX_RETRIES times before giving up".
-   * By resetting it here, we ensure each new request starts fresh. */
+   * By resetting it here, we ensure each new transfer starts fresh. */
   data->state.retrycount = 0;
+  data->state.refused_stream = FALSE;
 
   if(!CURL_EASY_STR(data, STRING_SET_URL) && !data->set.uh) {
     /* we cannot do anything without URL */
@@ -584,7 +586,11 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 {
   struct connectdata *conn = data->conn;
   bool retry = FALSE;
+  bool refused_stream = data->state.refused_stream;
+
   *url = NULL;
+  /* Consume the refused_stream indication for this retry decision. */
+  data->state.refused_stream = FALSE;
 
   /* if we are talking upload, we cannot do the checks below, unless the
      protocol is HTTP as when uploading over HTTP we will still get a
@@ -612,15 +618,14 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
        done using it before, but that was closed when we wanted to read from
        it again. Bad luck. Retry the same request on a fresh connect! */
     retry = TRUE;
-  else if(data->state.refused_stream &&
+  else if(refused_stream &&
           (data->req.bytecount + data->req.headerbytecount == 0)) {
     /* This was sent on a refused stream, safe to rerun. A refused stream
-       error can typically only happen on HTTP/2 level if the stream is safe
-       to issue again, but the nghttp2 API can deliver the message to other
-       streams as well, which is why this adds the check the data counters
-       too. */
+       error can typically happen at the HTTP/2 or HTTP/3 level if the
+       request is safe to issue again, but the nghttp2 API can deliver
+       the message to other streams as well, which is why we also check
+       the data counters. */
     infof(data, "REFUSED_STREAM, retrying a fresh connect");
-    data->state.refused_stream = FALSE; /* clear again */
     retry = TRUE;
   }
   if(retry) {
