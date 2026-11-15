@@ -260,11 +260,11 @@ CURLcode Curl_md5it(unsigned char *output,
 
 void *Curl_MD5_init(void)
 {
-  my_md5_ctx *ctxt = curlx_malloc(sizeof(ctxt));  /* Create MD5 context */
+  my_md5_ctx *ctxt = curlx_malloc(sizeof(*ctxt));  /* Create MD5 context */
   if(!ctxt)
     return ctxt;
 
-  if(my_md5_init(&ctxt)) {
+  if(my_md5_init(ctxt)) {
     curlx_free(ctxt);
     return NULL;
   }
@@ -274,13 +274,13 @@ void *Curl_MD5_init(void)
 
 CURLcode Curl_MD5_update(void *context, const unsigned char *input, size_t len)
 {
-  my_md5_update(&context, input, len);
+  my_md5_update(context, input, len);
   return CURLE_OK;
 }
 
 CURLcode Curl_MD5_final(void *context, unsigned char *result)
 {
-  my_md5_final(result, &context);
+  my_md5_final(result, context);
   curlx_free(context);
   return CURLE_OK;
 }
