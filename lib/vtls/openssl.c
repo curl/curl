@@ -5588,10 +5588,8 @@ static CURLcode ossl_random(struct Curl_easy *data,
   return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
-static CURLcode ossl_sha256sum(const unsigned char *input,
-                               size_t len,
-                               unsigned char *sha256sum /* output */,
-                               size_t unused)
+static CURLcode ossl_sha256sum(const void *input, size_t len,
+                               uint8_t *sha256sum, size_t unused)
 {
   CURLcode result = CURLE_OK;
   EVP_MD_CTX *mdctx;

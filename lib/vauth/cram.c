@@ -56,14 +56,13 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   return CURLE_NOT_BUILT_IN;
 #else
   struct HMAC_context *ctxt;
-  unsigned char digest[CURL_MD5_DIGEST_LEN];
+  uint8_t digest[CURL_MD5_DIGEST_LEN];
   char *response;
   const char *user = Curl_creds_user(creds);
   const char *passwd = Curl_creds_passwd(creds);
 
   /* Compute the digest using the password as the key */
-  ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
-                        (const unsigned char *)passwd, strlen(passwd));
+  ctxt = Curl_HMAC_init(&Curl_HMAC_MD5, passwd, strlen(passwd));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 

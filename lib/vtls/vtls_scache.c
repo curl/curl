@@ -51,8 +51,8 @@ struct Curl_ssl_scache_peer {
   struct Curl_llist sessions;
   void *sobj;              /* object instance or NULL */
   Curl_ssl_scache_obj_dtor *sobj_free; /* free `sobj` callback */
-  unsigned char key_salt[CURL_SHA256_DIGEST_LENGTH]; /* for entry export */
-  unsigned char key_hmac[CURL_SHA256_DIGEST_LENGTH]; /* for entry export */
+  uint8_t key_salt[CURL_SHA256_DIGEST_LENGTH]; /* for entry export */
+  uint8_t key_hmac[CURL_SHA256_DIGEST_LENGTH]; /* for entry export */
   size_t max_sessions;
   long age;                /* a number, the higher the more recent */
   BIT(hmac_set);           /* if key_salt and key_hmac are present */
@@ -112,7 +112,7 @@ static CURLcode cf_ssl_peer_key_add_hash(struct dynbuf *buf,
 {
   CURLcode result = CURLE_OK;
   if(blob && blob->len) {
-    unsigned char hash[CURL_SHA256_DIGEST_LENGTH];
+    uint8_t hash[CURL_SHA256_DIGEST_LENGTH];
     size_t i;
 
     result = curlx_dyn_addf(buf, ":%s-", name);
@@ -560,8 +560,8 @@ static CURLcode cf_ssl_scache_peer_init(struct Curl_ssl_scache_peer *peer,
                                         const char *ssl_peer_key,
                                         const char *clientcert,
                                         const char *key_passwd,
-                                        const unsigned char *salt,
-                                        const unsigned char *hmac)
+                                        const uint8_t *salt,
+                                        const uint8_t *hmac)
 {
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
@@ -803,14 +803,13 @@ static CURLcode cf_ssl_find_peer_by_key(struct Curl_easy *data,
        scache->peers[i].hmac_set &&
        cf_ssl_scache_match_auth(&scache->peers[i], conn_config)) {
       /* possible entry with unknown peer_key, check hmac */
-      unsigned char my_hmac[CURL_SHA256_DIGEST_LENGTH];
+      uint8_t my_hmac[CURL_SHA256_DIGEST_LENGTH];
       if(!peer_key_len) /* we are lazy */
         peer_key_len = strlen(ssl_peer_key);
       result = Curl_hmacit(&Curl_HMAC_SHA256,
                            scache->peers[i].key_salt,
                            sizeof(scache->peers[i].key_salt),
-                           (const unsigned char *)ssl_peer_key,
-                           peer_key_len,
+                           ssl_peer_key, peer_key_len,
                            my_hmac);
       if(result)
         goto out;
@@ -1164,8 +1163,7 @@ static CURLcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
 
   result = Curl_hmacit(&Curl_HMAC_SHA256,
                        peer->key_salt, sizeof(peer->key_salt),
-                       (const unsigned char *)peer->ssl_peer_key,
-                       strlen(peer->ssl_peer_key),
+                       peer->ssl_peer_key, strlen(peer->ssl_peer_key),
                        peer->key_hmac);
   if(!result)
     peer->hmac_set = TRUE;
@@ -1173,8 +1171,8 @@ static CURLcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
 }
 
 static CURLcode cf_ssl_find_peer_by_hmac(struct Curl_ssl_scache *scache,
-                                         const unsigned char *salt,
-                                         const unsigned char *hmac,
+                                         const uint8_t *salt,
+                                         const uint8_t *hmac,
                                          struct Curl_ssl_scache_peer **ppeer)
 {
   size_t i;
@@ -1198,12 +1196,11 @@ static CURLcode cf_ssl_find_peer_by_hmac(struct Curl_ssl_scache *scache,
       goto out;
     }
     else if(peer->ssl_peer_key) {
-      unsigned char my_hmac[CURL_SHA256_DIGEST_LENGTH];
+      uint8_t my_hmac[CURL_SHA256_DIGEST_LENGTH];
       /* compute hmac for the passed salt */
       result = Curl_hmacit(&Curl_HMAC_SHA256,
                            salt, sizeof(peer->key_salt),
-                           (const unsigned char *)peer->ssl_peer_key,
-                           strlen(peer->ssl_peer_key),
+                           peer->ssl_peer_key, strlen(peer->ssl_peer_key),
                            my_hmac);
       if(result)
         goto out;
@@ -1225,7 +1222,7 @@ out:
 
 CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const char *ssl_peer_key,
-                                 const unsigned char *shmac, size_t shmac_len,
+                                 const uint8_t *shmac, size_t shmac_len,
                                  const void *sdata, size_t sdata_len)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
@@ -1262,8 +1259,8 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
     goto out;
   }
   else {
-    const unsigned char *salt = shmac;
-    const unsigned char *hmac = shmac + sizeof(peer->key_salt);
+    const uint8_t *salt = shmac;
+    const uint8_t *hmac = shmac + sizeof(peer->key_salt);
 
     result = cf_ssl_find_peer_by_hmac(scache, salt, hmac, &peer);
     if(result)

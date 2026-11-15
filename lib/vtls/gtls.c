@@ -2238,10 +2238,8 @@ static CURLcode gtls_random(struct Curl_easy *data,
   return rc ? CURLE_FAILED_INIT : CURLE_OK;
 }
 
-static CURLcode gtls_sha256sum(const unsigned char *input,
-                               size_t len,
-                               unsigned char *sha256sum, /* output */
-                               size_t sha256len)
+static CURLcode gtls_sha256sum(const void *input, size_t len,
+                               uint8_t *sha256sum, size_t sha256len)
 {
   struct sha256_ctx SHA256pw;
   sha256_init(&SHA256pw);

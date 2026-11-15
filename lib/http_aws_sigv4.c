@@ -38,16 +38,12 @@
 
 #include <time.h>
 
-#define HMAC_SHA256(k, kl, d, dl, o)                 \
-  do {                                               \
-    result = Curl_hmacit(&Curl_HMAC_SHA256,          \
-                         (const unsigned char *)(k), \
-                         kl,                         \
-                         (const unsigned char *)(d), \
-                         dl, o);                     \
-    if(result) {                                     \
-      goto fail;                                     \
-    }                                                \
+#define HMAC_SHA256(k, kl, d, dl, o)                          \
+  do {                                                        \
+    result = Curl_hmacit(&Curl_HMAC_SHA256, k, kl, d, dl, o); \
+    if(result) {                                              \
+      goto fail;                                              \
+    }                                                         \
   } while(0)
 
 #define TIMESTAMP_SIZE 17
@@ -622,8 +618,7 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
     else
       post_data_len = (size_t)data->set.postfieldsize;
   }
-  result = Curl_sha256it(sha_hash, (const unsigned char *)post_data,
-                         post_data_len);
+  result = Curl_sha256it(sha_hash, post_data, post_data_len);
   if(!result)
     sha256_to_hex(sha_hex, sha_hash);
   return result;
@@ -1037,7 +1032,7 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
   char *request_type;
   char *credential_scope;
   char *str_to_sign;
-  unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t sha_hash[CURL_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
   CURLcode result;
 
@@ -1062,7 +1057,7 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  result = Curl_sha256it(sha_hash, (const unsigned char *)canonical_request,
+  result = Curl_sha256it(sha_hash, canonical_request,
                          strlen(canonical_request));
   if(result) {
     curlx_free(request_type);
@@ -1119,8 +1114,8 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   const char *passwd = Curl_creds_passwd(data->state.creds);
   char *secret = NULL;
-  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
-  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  uint8_t sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  uint8_t sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   char sha_hex[SHA256_HEX_LENGTH];
   char *auth_headers = NULL;
   char *user = curl_escape(Curl_creds_user(data->state.creds), 0);
@@ -1203,7 +1198,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   const char *method = NULL;
   const char *payload_hash = NULL;
   size_t payload_hash_len = 0;
-  unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t sha_hash[CURL_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
   char content_sha256_hdr[CONTENT_SHA256_HDR_LEN + 2] = ""; /* add \r\n */
   char *canonical_request = NULL;

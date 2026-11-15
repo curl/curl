@@ -556,7 +556,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   size_t i;
   void *ctxt;
-  unsigned char digest[CURL_MD5_DIGEST_LEN];
+  uint8_t digest[CURL_MD5_DIGEST_LEN];
   char secret[(2 * CURL_MD5_DIGEST_LEN) + 1];
 
   if(!pop3c)
@@ -575,10 +575,10 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, (const unsigned char *)pop3c->apoptimestamp,
+  Curl_MD5_update(ctxt, pop3c->apoptimestamp,
                   strlen(pop3c->apoptimestamp));
 
-  Curl_MD5_update(ctxt, (const unsigned char *)Curl_creds_passwd(conn->creds),
+  Curl_MD5_update(ctxt, Curl_creds_passwd(conn->creds),
                   strlen(Curl_creds_passwd(conn->creds)));
 
   /* Finalise the digest */

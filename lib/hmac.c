@@ -39,19 +39,20 @@
  * initialization.
  */
 
-static const unsigned char hmac_ipad = 0x36;
-static const unsigned char hmac_opad = 0x5C;
+static const uint8_t hmac_ipad = 0x36;
+static const uint8_t hmac_opad = 0x5C;
 
 /* Some hash contexts need 16-byte alignment, e.g. wolfSSL on 64-bit CPUs */
 #define HMAC_CTXT_OFFSET ((sizeof(struct HMAC_context) + 15) & ~(size_t)15)
 
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
-                                    const unsigned char *key, size_t keylen)
+                                    const void *key, size_t keylen)
 {
   size_t i;
   struct HMAC_context *ctxt;
-  unsigned char *hkey;
-  unsigned char b;
+  const uint8_t *bkey;
+  uint8_t *hkey;
+  uint8_t b;
 
   /* Create HMAC context. */
   i = HMAC_CTXT_OFFSET + (2 * hashparams->ctxtsize) + hashparams->resultlen;
@@ -68,7 +69,7 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
     if(hashparams->hinit(ctxt->hashctxt1))
       goto fail;
     hashparams->hupdate(ctxt->hashctxt1, key, keylen);
-    hkey = (unsigned char *)ctxt->hashctxt2 + hashparams->ctxtsize;
+    hkey = (uint8_t *)ctxt->hashctxt2 + hashparams->ctxtsize;
     hashparams->hfinal(hkey, ctxt->hashctxt1);
     key = hkey;
     keylen = hashparams->resultlen;
@@ -79,10 +80,11 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
      hashparams->hinit(ctxt->hashctxt2))
     goto fail;
 
+  bkey = key;
   for(i = 0; i < keylen; i++) {
-    b = (unsigned char)(*key ^ hmac_ipad);
+    b = (uint8_t)(*bkey ^ hmac_ipad);
     hashparams->hupdate(ctxt->hashctxt1, &b, 1);
-    b = (unsigned char)(*key++ ^ hmac_opad);
+    b = (uint8_t)(*bkey++ ^ hmac_opad);
     hashparams->hupdate(ctxt->hashctxt2, &b, 1);
   }
 
@@ -99,21 +101,20 @@ fail:
   return NULL;
 }
 
-void Curl_HMAC_update(struct HMAC_context *ctxt,
-                      const unsigned char *data, size_t len)
+void Curl_HMAC_update(struct HMAC_context *ctxt, const void *data, size_t len)
 {
   /* Update first hash calculation. */
   ctxt->hash->hupdate(ctxt->hashctxt1, data, len);
 }
 
-int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
+int Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *output)
 {
   const struct HMAC_params *hashparams = ctxt->hash;
 
   /* Do not get output if called with a NULL parameter: only release
      storage. */
   if(!output)
-    output = (unsigned char *)ctxt->hashctxt2 + ctxt->hash->ctxtsize;
+    output = (uint8_t *)ctxt->hashctxt2 + ctxt->hash->ctxtsize;
 
   hashparams->hfinal(output, ctxt->hashctxt1);
   hashparams->hupdate(ctxt->hashctxt2, output, hashparams->resultlen);
@@ -140,9 +141,9 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
-                     const unsigned char *key, const size_t keylen,
-                     const unsigned char *data, size_t datalen,
-                     unsigned char *output)
+                     const void *key, const size_t keylen,
+                     const void *data, size_t datalen,
+                     uint8_t *output)
 {
   struct HMAC_context *ctxt;
 

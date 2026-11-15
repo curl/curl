@@ -50,14 +50,13 @@ static CURLcode my_md5_init(void *in)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *in,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *in, const void *input, size_t len)
 {
   EVP_MD_CTX ** const ctx = in;
   (void)EVP_DigestUpdate(*ctx, input, len);
 }
 
-static void my_md5_final(unsigned char *digest, void *in)
+static void my_md5_final(uint8_t *digest, void *in)
 {
   EVP_MD_CTX ** const ctx = in;
   (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
@@ -77,18 +76,18 @@ static CURLcode my_md5_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *ctx, const void *input, size_t len)
 {
+  const byte *bytes = input;
   do {
     word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
-    (void)wc_Md5Update(ctx, input, ilen);
+    (void)wc_Md5Update(ctx, bytes, ilen);
     len -= ilen;
-    input += ilen;
+    bytes += ilen;
   } while(len);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(uint8_t *digest, void *ctx)
 {
   (void)wc_Md5Final(ctx, digest);
 }
@@ -105,13 +104,12 @@ static CURLcode my_md5_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *ctx, const void *input, size_t len)
 {
   md5_update(ctx, len, input);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
   md5_digest(ctx, digest);
@@ -134,13 +132,12 @@ static CURLcode my_md5_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *ctx, const void *input, size_t len)
 {
   (void)psa_hash_update(ctx, input, len);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(uint8_t *digest, void *ctx)
 {
   size_t actual_length;
   (void)psa_hash_finish(ctx, digest, CURL_MD5_DIGEST_LEN, &actual_length);
@@ -163,18 +160,18 @@ static CURLcode my_md5_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *ctx, const void *input, size_t len)
 {
+  const uint8_t *bytes = input;
   do {
     CC_LONG ilen = (CC_LONG)CURLMIN(len, UINT32_MAX);
-    CC_MD5_Update(ctx, input, ilen);
+    CC_MD5_Update(ctx, bytes, ilen);
     len -= ilen;
-    input += ilen;
+    bytes += ilen;
   } while(len);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(uint8_t *digest, void *ctx)
 {
   CC_MD5_Final(digest, ctx);
 }
@@ -204,22 +201,22 @@ static CURLcode my_md5_init(void *in)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *in,
-                          const unsigned char *input, size_t len)
+static void my_md5_update(void *in, const void *input, size_t len)
 {
   struct md5_ctx *ctx = in;
+  const BYTE *bytes = input;
   do {
     DWORD ilen = (DWORD)CURLMIN(len, 0xffffffffUL);
-    CryptHashData(ctx->hHash, (const BYTE *)input, ilen, 0);
+    CryptHashData(ctx->hHash, bytes, ilen, 0);
     len -= ilen;
-    input += ilen;
+    bytes += ilen;
   } while(len);
 }
 
-static void my_md5_final(unsigned char *digest, void *in)
+static void my_md5_final(uint8_t *digest, void *in)
 {
   struct md5_ctx *ctx = in;
-  unsigned long length = 0;
+  DWORD length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == CURL_MD5_DIGEST_LEN)
     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
@@ -244,8 +241,7 @@ const struct HMAC_params Curl_HMAC_MD5 = {
  * @unittest: 1601
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_md5it(unsigned char *output,
-                    const unsigned char *input, size_t len)
+CURLcode Curl_md5it(uint8_t *output, const void *input, size_t len)
 {
   CURLcode result;
   my_md5_ctx ctx;
@@ -272,13 +268,13 @@ void *Curl_MD5_init(void)
   return ctxt;
 }
 
-CURLcode Curl_MD5_update(void *context, const unsigned char *input, size_t len)
+CURLcode Curl_MD5_update(void *context, const void *input, size_t len)
 {
   my_md5_update(context, input, len);
   return CURLE_OK;
 }
 
-CURLcode Curl_MD5_final(void *context, unsigned char *result)
+CURLcode Curl_MD5_final(void *context, uint8_t *result)
 {
   my_md5_final(result, context);
   curlx_free(context);

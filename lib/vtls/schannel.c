@@ -2664,10 +2664,8 @@ static CURLcode schannel_random(struct Curl_easy *data,
   return curlx_win32_random(entropy, length);
 }
 
-static CURLcode schannel_checksum(const unsigned char *input,
-                                  size_t inputlen,
-                                  unsigned char *checksum,
-                                  size_t checksumlen,
+static CURLcode schannel_checksum(const void *input, size_t inputlen,
+                                  uint8_t *checksum, size_t checksumlen,
                                   DWORD provType,
                                   const unsigned int algId)
 {
@@ -2699,7 +2697,7 @@ static CURLcode schannel_checksum(const unsigned char *input,
   off = 0;
   while(off < inputlen) {
     DWORD chunk = (DWORD)CURLMIN(inputlen - off, 0xffffffffUL);
-    if(!CryptHashData(hHash, input + off, chunk, 0))
+    if(!CryptHashData(hHash, (const BYTE *)input + off, chunk, 0))
       goto out;
     off += chunk;
   }
@@ -2730,10 +2728,8 @@ out:
   return result;
 }
 
-static CURLcode schannel_sha256sum(const unsigned char *input,
-                                   size_t inputlen,
-                                   unsigned char *sha256sum,
-                                   size_t sha256len)
+static CURLcode schannel_sha256sum(const void *input, size_t inputlen,
+                                   uint8_t *sha256sum, size_t sha256len)
 {
   return schannel_checksum(input, inputlen, sha256sum, sha256len,
                            PROV_RSA_AES, CALG_SHA_256);
@@ -2757,7 +2753,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
   timediff_t timeout_ms;
-  unsigned char info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
 
   DEBUGASSERT(multi);
 
@@ -2793,10 +2789,8 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(share->CAinfo_blob_size != ca_info_blob->len) {
       return NULL;
     }
-    if(schannel_sha256sum((const unsigned char *)ca_info_blob->data,
-                          ca_info_blob->len,
-                          info_blob_digest,
-                          CURL_SHA256_DIGEST_LENGTH))
+    if(schannel_sha256sum(ca_info_blob->data, ca_info_blob->len,
+                          info_blob_digest, CURL_SHA256_DIGEST_LENGTH))
       return NULL;
     if(memcmp(share->CAinfo_blob_digest, info_blob_digest,
               CURL_SHA256_DIGEST_LENGTH)) {
@@ -2835,7 +2829,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
-  unsigned char digest[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t digest[CURL_SHA256_DIGEST_LENGTH];
   char *CAfile = NULL;
 
   DEBUGASSERT(multi);
@@ -2845,8 +2839,8 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   if(ca_info_blob) {
-    if(schannel_sha256sum((const unsigned char *)ca_info_blob->data,
-                          ca_info_blob->len, digest, sizeof(digest))) {
+    if(schannel_sha256sum(ca_info_blob->data, ca_info_blob->len,
+                          digest, sizeof(digest))) {
       return FALSE;
     }
   }
