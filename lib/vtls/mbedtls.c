@@ -1659,9 +1659,9 @@ static CURLcode mbedtls_sha256sum(const void *input, size_t input_len,
 {
 #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
   psa_status_t status;
-  size_t digest_len_actual;
+  size_t actual_len;
   status = psa_hash_compute(PSA_ALG_SHA_256, input, input_len,
-                            digest, digest_len, &digest_len_actual);
+                            digest, digest_len, &actual_len);
   if(status != PSA_SUCCESS)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
