@@ -278,7 +278,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
          * to prove they are talking to the same client.
          * For the TLS session lookup to work, we need to instantiate
          * the SSL filter with the primary peers. See #22225 */
-        result = Curl_cf_ssl_insert_after(cf, data,
+        result = Curl_ssl_cf_insert_after(cf, data,
           Curl_conn_get_origin(CF_CONN(cf)),
           Curl_conn_get_destination(CF_CONN(cf)));
       }

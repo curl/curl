@@ -187,7 +187,7 @@ CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
                               struct Curl_peer *origin,
                               struct Curl_cfchain *chain);
 
-CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
+CURLcode Curl_ssl_cf_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
                                   struct Curl_peer *origin,
                                   struct Curl_peer *peer);
@@ -236,7 +236,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_cert_status_request()        FALSE
 #define Curl_ssl_supports(a, b)               FALSE
 #define Curl_ssl_cfilter_add(a, b, c)         CURLE_NOT_BUILT_IN
-#define Curl_cf_ssl_insert_after(a, b, c, d)  CURLE_NOT_BUILT_IN
+#define Curl_ssl_cf_insert_after(a, b, c, d)  CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a, b)         CURLE_OK
 #define Curl_ssl_cf_get_easy_config(a, b)     NULL
 #define Curl_ssl_cf_get_filter_config(a)      NULL
