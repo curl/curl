@@ -387,10 +387,10 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   const char *userp = Curl_creds_user(creds);
   const char *passwdp = Curl_creds_passwd(creds);
   char *response = NULL;
-  unsigned char digest[CURL_MD5_DIGEST_LEN];
-  char HA1_hex[(2 * CURL_MD5_DIGEST_LEN) + 1];
-  char HA2_hex[(2 * CURL_MD5_DIGEST_LEN) + 1];
-  char resp_hash_hex[(2 * CURL_MD5_DIGEST_LEN) + 1];
+  unsigned char digest[MD5_DIGEST_LEN];
+  char HA1_hex[(2 * MD5_DIGEST_LEN) + 1];
+  char HA2_hex[(2 * MD5_DIGEST_LEN) + 1];
+  char resp_hash_hex[(2 * MD5_DIGEST_LEN) + 1];
   char nonce[64];
   char realm[128];
   char algorithm[64];
@@ -452,7 +452,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, (const unsigned char *)digest, CURL_MD5_DIGEST_LEN);
+  Curl_MD5_update(ctxt, (const unsigned char *)digest, MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *)nonce,
                   curlx_uztoui(strlen(nonce)));
@@ -462,7 +462,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   Curl_MD5_final(ctxt, digest);
 
   /* Convert calculated 16 octet hex into 32 bytes string */
-  for(i = 0; i < CURL_MD5_DIGEST_LEN; i++)
+  for(i = 0; i < MD5_DIGEST_LEN; i++)
     curl_msnprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate our SPN */
@@ -485,7 +485,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                   curlx_uztoui(strlen(spn)));
   Curl_MD5_final(ctxt, digest);
 
-  for(i = 0; i < CURL_MD5_DIGEST_LEN; i++)
+  for(i = 0; i < MD5_DIGEST_LEN; i++)
     curl_msnprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Now calculate the response hash */
@@ -496,8 +496,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  Curl_MD5_update(ctxt, (const unsigned char *)HA1_hex,
-                  2 * CURL_MD5_DIGEST_LEN);
+  Curl_MD5_update(ctxt, (const unsigned char *)HA1_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *)nonce,
                   curlx_uztoui(strlen(nonce)));
@@ -513,11 +512,10 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                   curlx_uztoui(strlen(qop)));
   Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
 
-  Curl_MD5_update(ctxt, (const unsigned char *)HA2_hex,
-                  2 * CURL_MD5_DIGEST_LEN);
+  Curl_MD5_update(ctxt, (const unsigned char *)HA2_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_final(ctxt, digest);
 
-  for(i = 0; i < CURL_MD5_DIGEST_LEN; i++)
+  for(i = 0; i < MD5_DIGEST_LEN; i++)
     curl_msnprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
 
   /* escape double quotes and backslashes in the username, realm, nonce and

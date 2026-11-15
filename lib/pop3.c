@@ -556,8 +556,8 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   size_t i;
   struct MD5_context *ctxt;
-  unsigned char digest[CURL_MD5_DIGEST_LEN];
-  char secret[(2 * CURL_MD5_DIGEST_LEN) + 1];
+  unsigned char digest[MD5_DIGEST_LEN];
+  char secret[(2 * MD5_DIGEST_LEN) + 1];
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
@@ -585,7 +585,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   Curl_MD5_final(ctxt, digest);
 
   /* Convert the calculated 16 octet digest into a 32-byte hex string */
-  for(i = 0; i < CURL_MD5_DIGEST_LEN; i++)
+  for(i = 0; i < MD5_DIGEST_LEN; i++)
     curl_msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
   result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s",
