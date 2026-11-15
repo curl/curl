@@ -39,6 +39,11 @@ http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-h
 --next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
 --next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B" -H "X-Origin: changed" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
 --next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token B" --proxy-header "X-Proxy: changed" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization:" --proxy-header "Proxy-Authorization: Token E" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization:" --proxy-header "Proxy-Authorization: Token F" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization : Token G" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization : Token H" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
+--next http://test.%TESTNUMBER:%HTTPPORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT --proxy-header "Proxy-Authorization: Token H" -o %LOGDIR/%TESTNUMBER -w "connects=%{num_connects}/"
 </command>
 <features>
 proxy
@@ -58,6 +63,30 @@ Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 Proxy-Authorization: Token B
+
+CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token E
+
+CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token F
+
+CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token G
+
+CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+Proxy-Authorization: Token H
 
 </proxy>
 <protocol crlf="headers">
@@ -82,9 +111,34 @@ Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: test.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
 </protocol>
 <stdout nonewline="yes">
-connects=1/connects=1/connects=0/connects=0/
+connects=1/connects=1/connects=0/connects=0/connects=1/connects=1/connects=1/connects=1/connects=0/
 </stdout>
 </verify>
 </testcase>
