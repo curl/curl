@@ -479,7 +479,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(result)
       break;
 
-    pubkey = X509_get_pubkey(x);
+    pubkey = X509_get0_pubkey(x);
     if(!pubkey)
       infof(data, "   Unable to load public key");
     else {
@@ -498,7 +498,6 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
         result = get_pkey_dh(data, pubkey, mem, i);
         break;
       }
-      EVP_PKEY_free(pubkey);
     }
 
     if(!result && psig) {
@@ -1561,11 +1560,9 @@ static CURLcode client_cert(struct Curl_easy *data,
 
     x509 = SSL_get_certificate(ssl);
 
-    if(x509) {
-      EVP_PKEY *pktmp = X509_get_pubkey(x509);
-      EVP_PKEY_copy_parameters(pktmp, SSL_get_privatekey(ssl));
-      EVP_PKEY_free(pktmp);
-    }
+    if(x509)
+      EVP_PKEY_copy_parameters(X509_get0_pubkey(x509),
+                               SSL_get_privatekey(ssl));
 
 #if !defined(OPENSSL_NO_RSA) && !defined(OPENSSL_NO_DEPRECATED_3_0)
     {
