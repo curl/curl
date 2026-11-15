@@ -36,7 +36,8 @@ typedef EVP_MD_CTX *my_md5_ctx;
 
 static CURLcode my_md5_init(void *in)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = in;
+
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
@@ -52,13 +53,13 @@ static CURLcode my_md5_init(void *in)
 static void my_md5_update(void *in,
                           const unsigned char *input, unsigned int len)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = in;
   (void)EVP_DigestUpdate(*ctx, input, len);
 }
 
 static void my_md5_final(unsigned char *digest, void *in)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = in;
   (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
@@ -121,7 +122,7 @@ typedef psa_hash_operation_t my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-  psa_hash_operation_t *pctx = (psa_hash_operation_t *)ctx;
+  psa_hash_operation_t *pctx = ctx;
   *pctx = psa_hash_operation_init();
   if(psa_hash_setup(pctx, PSA_ALG_MD5) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
@@ -149,7 +150,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 
    Declaring the functions as static like this seems to be a bit more
    reliable than defining COMMON_DIGEST_FOR_OPENSSL on older cats. */
-#  define my_md5_ctx CC_MD5_CTX
+typedef CC_MD5_CTX my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
@@ -179,7 +180,7 @@ typedef struct md5_ctx my_md5_ctx;
 
 static CURLcode my_md5_init(void *in)
 {
-  my_md5_ctx *ctx = (my_md5_ctx *)in;
+  struct md5_ctx *ctx = in;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return CURLE_OUT_OF_MEMORY;
@@ -196,13 +197,13 @@ static CURLcode my_md5_init(void *in)
 static void my_md5_update(void *in,
                           const unsigned char *input, unsigned int len)
 {
-  my_md5_ctx *ctx = in;
+  struct md5_ctx *ctx = in;
   CryptHashData(ctx->hHash, (const BYTE *)input, len, 0);
 }
 
 static void my_md5_final(unsigned char *digest, void *in)
 {
-  my_md5_ctx *ctx = (my_md5_ctx *)in;
+  struct md5_ctx *ctx = in;
   unsigned long length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == MD5_DIGEST_LEN)

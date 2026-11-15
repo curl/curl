@@ -48,23 +48,22 @@ typedef EVP_MD_CTX *Curl_sha512_256_ctx;
  */
 static CURLcode Curl_sha512_256_init(void *context)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
+  EVP_MD_CTX ** const ctx = context;
 
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
 
-  if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
-    /* Check whether the header and this file use the same numbers */
-    DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LENGTH);
-    /* Check whether the block size is correct */
-    DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
-
-    return CURLE_OK; /* Success */
+  if(!EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
+    EVP_MD_CTX_free(*ctx);
+    *ctx = NULL;
+    return CURLE_FAILED_INIT;
   }
-
-  EVP_MD_CTX_free(*ctx);  /* Cleanup */
-  return CURLE_FAILED_INIT;
+  /* Check whether the header and this file use the same numbers */
+  DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LENGTH);
+  /* Check whether the block size is correct */
+  DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
+  return CURLE_OK;
 }
 
 /* Process portion of bytes.
@@ -78,7 +77,7 @@ static CURLcode Curl_sha512_256_update(void *context,
                                        const unsigned char *data,
                                        size_t length)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
+  EVP_MD_CTX ** const ctx = context;
 
   if(!EVP_DigestUpdate(*ctx, data, length))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -96,8 +95,8 @@ static CURLcode Curl_sha512_256_update(void *context,
  */
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
+  EVP_MD_CTX ** const ctx = context;
   CURLcode result;
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
 /* Some NetBSD versions have a bug in SHA-512/256.
  * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
@@ -177,12 +176,9 @@ typedef struct sha512_256_ctx Curl_sha512_256_ctx;
  * @param context the calculation context
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_init(void *context)
+static CURLcode Curl_sha512_256_init(void *ctx)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
   sha512_256_init(ctx);
-
   return CURLE_OK;
 }
 
@@ -193,12 +189,10 @@ static CURLcode Curl_sha512_256_init(void *context)
  * @param length number of bytes in @a data
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_update(void *context,
+static CURLcode Curl_sha512_256_update(void *ctx,
                                        const unsigned char *data,
                                        size_t length)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
   DEBUGASSERT(data || (length == 0));
 
   sha512_256_update(ctx, length, (const uint8_t *)data);
@@ -213,10 +207,8 @@ static CURLcode Curl_sha512_256_update(void *context,
  *             bytes
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
+static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
 #if NETTLE_VERSION_MAJOR >= 4
   sha512_256_digest(ctx, (uint8_t *)digest);
 #else
