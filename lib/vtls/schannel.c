@@ -2664,7 +2664,7 @@ static CURLcode schannel_random(struct Curl_easy *data,
   return curlx_win32_random(entropy, length);
 }
 
-static CURLcode schannel_checksum(const voie *input, size_t inputlen,
+static CURLcode schannel_checksum(const void *input, size_t inputlen,
                                   uint8_t *checksum, size_t checksumlen,
                                   DWORD provType,
                                   const unsigned int algId)
@@ -2697,7 +2697,7 @@ static CURLcode schannel_checksum(const voie *input, size_t inputlen,
   off = 0;
   while(off < inputlen) {
     DWORD chunk = (DWORD)CURLMIN(inputlen - off, 0xffffffffUL);
-    if(!CryptHashData(hHash, (BYTE *)input + off, chunk, 0))
+    if(!CryptHashData(hHash, (const BYTE *)input + off, chunk, 0))
       goto out;
     off += chunk;
   }
