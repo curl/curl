@@ -240,10 +240,8 @@ static void my_sha256_final(uint8_t *digest, void *in)
  */
 CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 {
-  CURLcode result;
   my_sha256_ctx ctx;
-
-  result = my_sha256_init(&ctx);
+  CURLcode result = my_sha256_init(&ctx);
   if(!result) {
     my_sha256_update(&ctx, input, input_len);
     my_sha256_final(digest, &ctx);
