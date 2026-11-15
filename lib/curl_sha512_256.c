@@ -40,7 +40,7 @@ typedef EVP_MD_CTX *Curl_sha512_256_ctx;
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
-static CURLcode Curl_sha512_256_init(void *context)
+static CURLcode my_sha512_256_init(void *context)
 {
   EVP_MD_CTX ** const ctx = context;
 
@@ -67,8 +67,8 @@ static CURLcode Curl_sha512_256_init(void *context)
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
-static CURLcode Curl_sha512_256_update(void *context,
-                                       const void *data, size_t length)
+static CURLcode my_sha512_256_update(void *context,
+                                     const void *data, size_t length)
 {
   EVP_MD_CTX ** const ctx = context;
 
@@ -86,7 +86,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
-static CURLcode Curl_sha512_256_finish(uint8_t *digest, void *context)
+static CURLcode Curl_sha512_256_final(uint8_t *digest, void *context)
 {
   EVP_MD_CTX ** const ctx = context;
   CURLcode result;
@@ -131,15 +131,15 @@ static CURLcode Curl_sha512_256_finish(uint8_t *digest, void *context)
 
 typedef struct wc_Sha512 Curl_sha512_256_ctx;
 
-static CURLcode Curl_sha512_256_init(void *ctx)
+static CURLcode my_sha512_256_init(void *ctx)
 {
   if(wc_InitSha512_256(ctx))
     return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
 
-static CURLcode Curl_sha512_256_update(void *ctx,
-                                       const void *data, size_t length)
+static CURLcode my_sha512_256_update(void *ctx,
+                                     const void *data, size_t length)
 {
   const byte *bytes = data;
   do {
@@ -152,7 +152,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
   return CURLE_OK;
 }
 
-static CURLcode Curl_sha512_256_finish(uint8_t *digest, void *ctx)
+static CURLcode Curl_sha512_256_final(uint8_t *digest, void *ctx)
 {
   if(wc_Sha512_256Final(ctx, digest))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -169,7 +169,7 @@ typedef struct sha512_256_ctx Curl_sha512_256_ctx;
  * @param context the calculation context
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_init(void *ctx)
+static CURLcode my_sha512_256_init(void *ctx)
 {
   sha512_256_init(ctx);
   return CURLE_OK;
@@ -182,8 +182,8 @@ static CURLcode Curl_sha512_256_init(void *ctx)
  * @param length number of bytes in @a data
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_update(void *ctx,
-                                       const void *data, size_t length)
+static CURLcode my_sha512_256_update(void *ctx,
+                                     const void *data, size_t length)
 {
   DEBUGASSERT(data || (length == 0));
 
@@ -199,7 +199,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
  *             bytes
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_finish(uint8_t *digest, void *ctx)
+static CURLcode Curl_sha512_256_final(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
   sha512_256_digest(ctx, digest);
@@ -222,20 +222,17 @@ CURLcode Curl_sha512_256it(uint8_t *output, const void *input,
                            size_t input_size)
 {
   Curl_sha512_256_ctx ctx;
-  CURLcode result;
-
-  result = Curl_sha512_256_init(&ctx);
-  if(result != CURLE_OK)
+  CURLcode result = my_sha512_256_init(&ctx);
+  if(result)
     return result;
 
-  result = Curl_sha512_256_update(&ctx, input, input_size);
-
-  if(result != CURLE_OK) {
-    (void)Curl_sha512_256_finish(output, &ctx);
+  result = my_sha512_256_update(&ctx, input, input_size);
+  if(result) {
+    (void)Curl_sha512_256_final(output, &ctx);
     return result;
   }
 
-  return Curl_sha512_256_finish(output, &ctx);
+  return Curl_sha512_256_final(output, &ctx);
 }
 
 #endif /* CURL_HAVE_SHA512_256 */

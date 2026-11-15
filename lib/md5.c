@@ -243,10 +243,8 @@ const struct HMAC_params Curl_HMAC_MD5 = {
  */
 CURLcode Curl_md5it(uint8_t *output, const void *input, size_t len)
 {
-  CURLcode result;
   my_md5_ctx ctx;
-
-  result = my_md5_init(&ctx);
+  CURLcode result = my_md5_init(&ctx);
   if(!result) {
     my_md5_update(&ctx, input, len);
     my_md5_final(output, &ctx);
