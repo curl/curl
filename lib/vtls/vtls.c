@@ -1761,9 +1761,8 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
   return result;
 }
 
-struct Curl_ssl_session *
-Curl_ssl_get_primary_session(struct Curl_easy *data,
-                             const struct Curl_cftype *cft)
+struct Curl_ssl_session *Curl_ssl_get_primary_session(
+  struct Curl_easy *data, const struct Curl_cftype *cft)
 {
   if(data->conn &&
 #ifndef CURL_DISABLE_PROXY

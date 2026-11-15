@@ -204,9 +204,8 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
 
 /* Retrieve the SSL session held at the filter of type `cft` at
  * data connection's primary filter chain. NULL if not found/available. */
-struct Curl_ssl_session *
-Curl_ssl_get_primary_session(struct Curl_easy *data,
-                             const struct Curl_cftype *cft);
+struct Curl_ssl_session *Curl_ssl_get_primary_session(
+  struct Curl_easy *data, const struct Curl_cftype *cft);
 
 #endif /* USE_SSL */
 
