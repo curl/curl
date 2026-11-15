@@ -46,8 +46,7 @@ static const unsigned char hmac_opad = 0x5C;
 #define HMAC_CTXT_OFFSET ((sizeof(struct HMAC_context) + 15) & ~(size_t)15)
 
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
-                                    const unsigned char *key,
-                                    unsigned int keylen)
+                                    const unsigned char *key, size_t keylen)
 {
   size_t i;
   struct HMAC_context *ctxt;
@@ -101,8 +100,7 @@ fail:
 }
 
 void Curl_HMAC_update(struct HMAC_context *ctxt,
-                      const unsigned char *data,
-                      unsigned int len)
+                      const unsigned char *data, size_t len)
 {
   /* Update first hash calculation. */
   ctxt->hash->hupdate(ctxt->hashctxt1, data, len);
@@ -154,17 +152,12 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
   if(!hashparams->hinit)
     return CURLE_NOT_BUILT_IN;
 
-  ctxt = Curl_HMAC_init(hashparams, key, curlx_uztoui(keylen));
+  ctxt = Curl_HMAC_init(hashparams, key, keylen);
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
-  do {
-    unsigned int ilen = (unsigned int)CURLMIN(datalen, UINT_MAX);
-    Curl_HMAC_update(ctxt, data, ilen);
-    datalen -= ilen;
-    data += ilen;
-  } while(datalen);
+  Curl_HMAC_update(ctxt, data, datalen);
 
   /* Finalise the digest */
   Curl_HMAC_final(ctxt, output);
