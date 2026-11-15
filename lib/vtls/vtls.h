@@ -209,13 +209,12 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
 
 /* Get the ssl_easy_config from `data` relevant for cfilter `cf`. */
-struct ssl_easy_config *
-Curl_ssl_cf_get_easy_config(struct Curl_cfilter *cf,
-                            struct Curl_easy *data);
+struct ssl_easy_config *Curl_ssl_cf_get_easy_config(
+  struct Curl_cfilter *cf, struct Curl_easy *data);
 
 /* Get the filter config relevant for cfilter `cf`. */
-struct ssl_filter_config *
-Curl_ssl_cf_get_filter_config(struct Curl_cfilter *cf);
+struct ssl_filter_config *Curl_ssl_cf_get_filter_config(
+  struct Curl_cfilter *cf);
 
 extern struct Curl_cftype Curl_cft_ssl;
 #ifndef CURL_DISABLE_PROXY

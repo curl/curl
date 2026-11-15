@@ -1565,9 +1565,8 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
   return (cf->cft->flags & CF_TYPE_SSL) && (cf->cft->flags & CF_TYPE_PROXY);
 }
 
-struct ssl_easy_config *
-Curl_ssl_cf_get_easy_config(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
+struct ssl_easy_config *Curl_ssl_cf_get_easy_config(
+  struct Curl_cfilter *cf, struct Curl_easy *data)
 {
 #ifdef CURL_DISABLE_PROXY
   (void)cf;
@@ -1577,8 +1576,8 @@ Curl_ssl_cf_get_easy_config(struct Curl_cfilter *cf,
 #endif
 }
 
-struct ssl_filter_config *
-Curl_ssl_cf_get_filter_config(struct Curl_cfilter *cf)
+struct ssl_filter_config *Curl_ssl_cf_get_filter_config(
+  struct Curl_cfilter *cf)
 {
 #ifdef CURL_DISABLE_PROXY
   return &CF_CONN(cf)->ssl_config;
