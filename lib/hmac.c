@@ -146,9 +146,6 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
 {
   struct HMAC_context *ctxt;
 
-  if(keylen > UINT_MAX) /* unlikely to ever happen */
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
   if(!hashparams->hinit)
     return CURLE_NOT_BUILT_IN;
 
