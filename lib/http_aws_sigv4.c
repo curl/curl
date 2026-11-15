@@ -38,14 +38,6 @@
 
 #include <time.h>
 
-#define HMAC_SHA256(k, kl, d, dl, o)                          \
-  do {                                                        \
-    result = Curl_hmacit(&Curl_HMAC_SHA256, k, kl, d, dl, o); \
-    if(result) {                                              \
-      goto fail;                                              \
-    }                                                         \
-  } while(0)
-
 #define TIMESTAMP_SIZE 17
 
 /* hex-encoded with null-terminator */
@@ -1118,7 +1110,12 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   uint8_t sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   char sha_hex[SHA256_HEX_LENGTH];
   char *auth_headers = NULL;
-  char *user = curl_escape(Curl_creds_user(data->state.creds), 0);
+  char *user;
+
+  if(!request_type || !str_to_sign)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  user = curl_escape(Curl_creds_user(data->state.creds), 0);
   if(!user)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1129,15 +1126,26 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   /* make provider0 part done uppercase */
   Curl_strntoupper(secret, curlx_str(provider0), curlx_strlen(provider0));
 
-  HMAC_SHA256(secret, strlen(secret), date, strlen(date), sign0);
-  HMAC_SHA256(sign0, sizeof(sign0),
-              curlx_str(region), curlx_strlen(region), sign1);
-  HMAC_SHA256(sign1, sizeof(sign1),
-              curlx_str(service), curlx_strlen(service), sign0);
-  HMAC_SHA256(sign0, sizeof(sign0),
-              request_type, strlen(request_type), sign1);
-  HMAC_SHA256(sign1, sizeof(sign1),
-              str_to_sign, strlen(str_to_sign), sign0);
+  result = Curl_hmacit(&Curl_HMAC_SHA256, secret, strlen(secret),
+                       date, strlen(date), sign0);
+  if(result)
+    goto fail;
+  result = Curl_hmacit(&Curl_HMAC_SHA256, sign0, sizeof(sign0),
+                        curlx_str(region), curlx_strlen(region), sign1);
+  if(result)
+    goto fail;
+  result = Curl_hmacit(&Curl_HMAC_SHA256, sign1, sizeof(sign1),
+                       curlx_str(service), curlx_strlen(service), sign0);
+  if(result)
+    goto fail;
+  result = Curl_hmacit(&Curl_HMAC_SHA256, sign0, sizeof(sign0),
+                       request_type, strlen(request_type), sign1);
+  if(result)
+    goto fail;
+  result = Curl_hmacit(&Curl_HMAC_SHA256, sign1, sizeof(sign1),
+                       str_to_sign, strlen(str_to_sign), sign0);
+  if(result)
+    goto fail;
 
   sha256_to_hex(sha_hex, sign0);
 

@@ -52,18 +52,22 @@ static CURLcode my_sha256_init(void *pctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *pctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *pctx,
+                                 const void *input, size_t input_len)
 {
   EVP_MD_CTX ** const ctx = pctx;
-  EVP_DigestUpdate(*ctx, input, input_len);
+  return EVP_DigestUpdate(*ctx, input, input_len) ?
+    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 }
 
-static void my_sha256_final(uint8_t *digest, void *pctx)
+static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 {
   EVP_MD_CTX ** const ctx = pctx;
-  EVP_DigestFinal_ex(*ctx, digest, NULL);
+  CURLcode result = EVP_DigestFinal_ex(*ctx, digest, NULL) ?
+    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
+  return result;
 }
 
 #elif defined(USE_WOLFSSL_SHA256)
@@ -78,20 +82,25 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *ctx,
+                                 const void *input, size_t input_len)
 {
   const byte *bytes = input;
   do {
     word32 ilen = (word32)CURLMIN(input_len, UINT32_MAX);
-    (void)wc_Sha256Update(ctx, bytes, ilen);
+    if(wc_Sha256Update(ctx, bytes, ilen))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
   } while(input_len);
+  return CURLE_OK;
 }
 
-static void my_sha256_final(uint8_t *digest, void *ctx)
+static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 {
-  (void)wc_Sha256Final(ctx, digest);
+  if(wc_Sha256Final(ctx, digest))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_OK;
 }
 
 #elif defined(USE_GNUTLS_SHA256)
@@ -106,18 +115,21 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *ctx,
+                                 const void *input, size_t input_len)
 {
   sha256_update(ctx, input_len, input);
+  return CURLE_OK;
 }
 
-static void my_sha256_final(uint8_t *digest, void *ctx)
+static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
   sha256_digest(ctx, digest);
 #else
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
 #endif
+  return CURLE_OK;
 }
 
 #elif defined(USE_MBEDTLS_SHA256)
@@ -130,20 +142,25 @@ static CURLcode my_sha256_init(void *pctx)
   psa_hash_operation_t *ctx = pctx;
   *ctx = psa_hash_operation_init();
   if(psa_hash_setup(ctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *ctx,
+                                 const void *input, size_t input_len)
 {
-  (void)psa_hash_update(ctx, input, input_len);
+  if(psa_hash_update(ctx, input, input_len) != PSA_SUCCESS)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_OK;
 }
 
-static void my_sha256_final(uint8_t *digest, void *ctx)
+static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 {
   size_t actual_length;
-  (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
-                        &actual_length);
+  if(psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
+                     &actual_length) != PSA_SUCCESS)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_OK;
 }
 
 #elif defined(USE_APPLE_SHA256)
@@ -157,20 +174,23 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *ctx,
+                                 const void *input, size_t input_len)
 {
   const uint8_t *bytes = input;
   do {
     CC_LONG ilen = (CC_LONG)CURLMIN(input_len, UINT32_MAX);
-    CC_SHA256_Update(ctx, bytes, ilen);
+    CC_SHA256_Update(ctx, bytes, ilen);  /* always returns 1 */
     input_len -= ilen;
     bytes += ilen;
   } while(input_len);
+  return CURLE_OK;
 }
 
-static void my_sha256_final(uint8_t *digest, void *ctx)
+static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 {
-  (void)CC_SHA256_Final(digest, ctx);
+  (void)CC_SHA256_Final(digest, ctx);  /* always returns 1 */
+  return CURLE_OK;
 }
 
 #elif defined(USE_WIN32_SHA256)
@@ -198,32 +218,47 @@ static CURLcode my_sha256_init(void *pctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *pctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *pctx,
+                                 const void *input, size_t input_len)
 {
   struct sha256_ctx *ctx = pctx;
   const BYTE *bytes = input;
   do {
     DWORD ilen = (DWORD)CURLMIN(input_len, 0xffffffffUL);
-    CryptHashData(ctx->hHash, bytes, ilen, 0);
+    if(!CryptHashData(ctx->hHash, bytes, ilen, 0))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
   } while(input_len);
+  return CURLE_OK;
 }
 
-static void my_sha256_final(uint8_t *digest, void *pctx)
+static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
   DWORD length = 0;
-  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == CURL_SHA256_DIGEST_LENGTH)
-    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  if(CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0) &&
+     length == CURL_SHA256_DIGEST_LENGTH &&
+     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0))
+    result = CURLE_OK;
   if(ctx->hHash)
     CryptDestroyHash(ctx->hHash);
   if(ctx->hCryptProv)
     CryptReleaseContext(ctx->hCryptProv, 0);
+  return result;
 }
 
-#endif
+#endif /* CRYPTO LIBS */
+
+const struct HMAC_params Curl_HMAC_SHA256 = {
+  my_sha256_init,           /* Hash initialization function. */
+  my_sha256_update,         /* Hash update function. */
+  my_sha256_final,          /* Hash computation end function. */
+  sizeof(my_sha256_ctx),    /* Size of hash context structure. */
+  64,                       /* Maximum key length. */
+  CURL_SHA256_DIGEST_LENGTH /* Result size. */
+};
 
 /*
  * Curl_sha256it()
@@ -242,23 +277,28 @@ CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 {
   my_sha256_ctx ctx;
   CURLcode result = my_sha256_init(&ctx);
-  if(!result) {
-    my_sha256_update(&ctx, input, input_len);
-    my_sha256_final(digest, &ctx);
+  if(result)
+    return result;
+
+  result = my_sha256_update(&ctx, input, input_len);
+  if(result) {
+    (void)my_sha256_final(digest, &ctx);
+    return result;
   }
-  return result;
+
+  return my_sha256_final(digest, &ctx);
 }
 
-const struct HMAC_params Curl_HMAC_SHA256 = {
-  my_sha256_init,        /* Hash initialization function. */
-  my_sha256_update,      /* Hash update function. */
-  my_sha256_final,       /* Hash computation end function. */
-  sizeof(my_sha256_ctx), /* Size of hash context structure. */
-  64,                    /* Maximum key length. */
-  32                     /* Result size. */
-};
-
 #else
+
+const struct HMAC_params Curl_HMAC_SHA256 = {
+  NULL,                     /* Hash initialization function. */
+  NULL,                     /* Hash update function. */
+  NULL,                     /* Hash computation end function. */
+  0,                        /* Size of hash context structure. */
+  64,                       /* Maximum key length. */
+  CURL_SHA256_DIGEST_LENGTH /* Result size. */
+};
 
 CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 {
@@ -267,15 +307,6 @@ CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
   (void)input_len;
   return CURLE_NOT_BUILT_IN;
 }
-
-const struct HMAC_params Curl_HMAC_SHA256 = {
-  NULL,                  /* Hash initialization function. */
-  NULL,                  /* Hash update function. */
-  NULL,                  /* Hash computation end function. */
-  0,                     /* Size of hash context structure. */
-  64,                    /* Maximum key length. */
-  32                     /* Result size. */
-};
 
 #endif /* CURL_HAVE_SHA256 */
 

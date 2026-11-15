@@ -29,9 +29,9 @@
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
 typedef CURLcode (*HMAC_hinit)(void *context);
-typedef void (*HMAC_hupdate)(void *context,
-                             const void *input, size_t input_len);
-typedef void (*HMAC_hfinal)(uint8_t *digest, void *context);
+typedef CURLcode (*HMAC_hupdate)(void *context,
+                                 const void *input, size_t input_len);
+typedef CURLcode (*HMAC_hfinal)(uint8_t *digest, void *context);
 
 /* Per-hash function HMAC parameters. */
 struct HMAC_params {
@@ -53,9 +53,9 @@ struct HMAC_context {
 /* Prototypes. */
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
                                     const void *key, size_t key_len);
-void Curl_HMAC_update(struct HMAC_context *ctxt,
-                      const void *input, size_t input_len);
-int Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac);
+CURLcode Curl_HMAC_update(struct HMAC_context *ctxt,
+                          const void *input, size_t input_len);
+CURLcode Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac);
 
 CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
                      const void *key, const size_t key_len,

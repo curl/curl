@@ -553,7 +553,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
-  CURLcode result = CURLE_OK;
+  CURLcode result = CURLE_OK, hok;
   size_t i;
   void *ctxt;
   uint8_t digest[CURL_MD5_DIGEST_LEN];
@@ -575,14 +575,14 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, pop3c->apoptimestamp,
-                  strlen(pop3c->apoptimestamp));
-
-  Curl_MD5_update(ctxt, Curl_creds_passwd(conn->creds),
-                  strlen(Curl_creds_passwd(conn->creds)));
-
-  /* Finalise the digest */
-  Curl_MD5_final(ctxt, digest);
+  hok = CURLE_OK;
+  hok |= Curl_MD5_update(ctxt, pop3c->apoptimestamp,
+                         strlen(pop3c->apoptimestamp));
+  hok |= Curl_MD5_update(ctxt, Curl_creds_passwd(conn->creds),
+                         strlen(Curl_creds_passwd(conn->creds)));
+  hok |= Curl_MD5_final(ctxt, digest);  /* Finalise the digest */
+  if(hok)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* Convert the calculated 16 octet digest into a 32-byte hex string */
   for(i = 0; i < CURL_MD5_DIGEST_LEN; i++)

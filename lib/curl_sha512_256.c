@@ -70,11 +70,8 @@ static CURLcode my_sha512_256_update(void *pctx,
                                      const void *input, size_t input_len)
 {
   EVP_MD_CTX ** const ctx = pctx;
-
-  if(!EVP_DigestUpdate(*ctx, input, input_len))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  return CURLE_OK;
+  return EVP_DigestUpdate(*ctx, input, input_len) ?
+    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 }
 
 /* Finalise SHA-512/256 calculation, return digest.
@@ -170,9 +167,7 @@ static CURLcode my_sha512_256_update(void *ctx,
                                      const void *input, size_t input_len)
 {
   DEBUGASSERT(input || (input_len == 0));
-
   sha512_256_update(ctx, input_len, input);
-
   return CURLE_OK;
 }
 
@@ -183,7 +178,6 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 #else
   sha512_256_digest(ctx, CURL_SHA512_256_DIGEST_LENGTH, digest);
 #endif
-
   return CURLE_OK;
 }
 
