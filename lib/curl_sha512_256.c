@@ -31,12 +31,6 @@
 
 #ifdef USE_OPENSSL_SHA512_256
 
-/* OpenSSL does not provide macros for SHA-512/256 sizes */
-/* Size of the SHA-512/256 single processing block in bytes. */
-#ifdef DEBUGBUILD
-#define CURL_SHA512_256_BLOCK_SIZE 128
-#endif
-
 /* Context type used for SHA-512/256 calculations */
 typedef EVP_MD_CTX *Curl_sha512_256_ctx;
 
@@ -62,7 +56,7 @@ static CURLcode Curl_sha512_256_init(void *context)
   /* Check whether the header and this file use the same numbers */
   DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LENGTH);
   /* Check whether the block size is correct */
-  DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
+  DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == 128);
   return CURLE_OK;
 }
 
