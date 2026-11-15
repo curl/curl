@@ -133,8 +133,9 @@ void Curl_creds_link(struct Curl_creds **pdest, struct Curl_creds *src)
     Curl_creds_unlink(pdest);
     *pdest = src;
     if(src) {
-      DEBUGASSERT(Curl_refcount_get(&src->refcount) < UINT32_MAX);
-      Curl_refcount_incr(&src->refcount);
+      uint32_t newcount = Curl_refcount_incr(&src->refcount);
+      (void)newcount;
+      DEBUGASSERT(newcount < UINT32_MAX);
     }
   }
 }
@@ -143,10 +144,14 @@ void Curl_creds_unlink(struct Curl_creds **pcreds)
 {
   if(*pcreds) {
     struct Curl_creds *creds = *pcreds;
+    uint32_t newcount;
 
-    DEBUGASSERT(Curl_refcount_get(&creds->refcount));
     *pcreds = NULL;
-    if(!Curl_refcount_decr(&creds->refcount)) {
+
+    newcount = Curl_refcount_decr(&creds->refcount);
+    DEBUGASSERT(newcount < UINT32_MAX); /* wraparound check */
+
+    if(!newcount) {
       curlx_memzero(creds, sizeof(*creds) + creds->bufsize);
       curlx_free(creds);
     }
