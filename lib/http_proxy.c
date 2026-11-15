@@ -83,6 +83,46 @@ static CURLcode prox_custom_ignore(void *user_data,
   return CURLE_OK;
 }
 
+static CURLcode proxy_auth_key_add(void *user_data,
+                                   struct Curl_str *name,
+                                   struct Curl_str *value,
+                                   const char *orig_data)
+{
+  struct dynbuf *key = user_data;
+  CURLcode result;
+
+  (void)orig_data;
+  if(!curlx_str_casecompare2(name, STRCONST("Proxy-Authorization")))
+    return CURLE_AGAIN;
+  result = curlx_dyn_addn(key, curlx_str(value), curlx_strlen(value));
+  if(!result)
+    result = curlx_dyn_addn(key, STRCONST("\n"));
+  return result ? result : CURLE_AGAIN;
+}
+
+/*
+ * Build the key a CONNECT tunnel's custom Proxy-Authorization is matched
+ * on for reuse: every Proxy-Authorization field the CONNECT request sends,
+ * parsed as for the request, in order and each terminated by a newline.
+ * *keyp is NULL when none is sent.
+ */
+CURLcode Curl_http_proxy_auth_key(struct Curl_easy *data, char **keyp)
+{
+  struct dynbuf key;
+  CURLcode result;
+
+  *keyp = NULL;
+  curlx_dyn_init(&key, DYN_HTTP_REQUEST);
+  result = Curl_dynhds_add_slist(NULL, data->set.sep_headers ?
+                                 data->set.proxyheaders : data->set.headers,
+                                 proxy_auth_key_add, &key);
+  if(!result && curlx_dyn_len(&key))
+    *keyp = curlx_dyn_ptr(&key);
+  else
+    curlx_dyn_free(&key);
+  return result;
+}
+
 static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   bool is_connect, int httpversion,
                                   struct dynhds *hds)

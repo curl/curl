@@ -585,6 +585,10 @@ struct url_conn_match {
   struct ssl_filter_config ssl_config;
 #ifndef CURL_DISABLE_PROXY
   struct ssl_filter_config proxy_ssl_config;
+#ifndef CURL_DISABLE_HTTP
+  char *proxy_auth_key; /* custom Proxy-Authorization this transfer's
+                           CONNECT would send, or NULL */
+#endif
 #endif
   BIT(may_multiplex);
   BIT(want_nego_http);
@@ -758,9 +762,7 @@ static bool url_match_proxy_use(struct connectdata *conn,
   if(conn->http_proxy.peer && !conn->bits.origin_is_proxy) {
     /* A tunnel was authenticated by its CONNECT request. Only reuse it
      * when the transfer brings the same custom Proxy-Authorization. */
-    const char *hd = Curl_checkProxyheaders(m->data, conn,
-                                            STRCONST("Proxy-Authorization"));
-    if(Curl_timestrcmp(hd, conn->proxy_auth_hd))
+    if(Curl_timestrcmp(m->proxy_auth_key, conn->proxy_auth_hd))
       return FALSE;
   }
 #endif
@@ -2171,10 +2173,23 @@ out:
   return result;
 }
 
+static void url_match_destroy(struct url_conn_match *m)
+{
+  Curl_ssl_config_cleanup(&m->ssl_config);
+#ifndef CURL_DISABLE_PROXY
+  Curl_ssl_config_cleanup(&m->proxy_ssl_config);
+#ifndef CURL_DISABLE_HTTP
+  curlx_safefree(m->proxy_auth_key);
+#endif
+#endif
+}
+
 static CURLcode url_match_init(struct Curl_easy *data,
                                struct connectdata *needle,
                                struct url_conn_match *m)
 {
+  CURLcode result;
+
   memset(m, 0, sizeof(*m));
   m->data = data;
   m->needle = needle;
@@ -2197,22 +2212,29 @@ static CURLcode url_match_init(struct Curl_easy *data,
   m->may_tls = data->set.use_ssl > CURLUSESSL_NONE;
 
   /* Get a shallow setup of filter configs for connection cache matching */
-  return Curl_ssl_filter_config_tmp_init(data, needle->origin,
-                                         &m->ssl_config,
+  result = Curl_ssl_filter_config_tmp_init(data, needle->origin,
+                                           &m->ssl_config,
 #ifndef CURL_DISABLE_PROXY
-                                         &m->proxy_ssl_config);
+                                           &m->proxy_ssl_config);
 #else
-                                         NULL);
+                                           NULL);
 #endif
+  if(result)
+    return result;
+
+#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+  if(needle->http_proxy.peer && !needle->bits.origin_is_proxy) {
+    /* All Proxy-Authorization fields a CONNECT for this transfer sends. */
+    result = Curl_http_proxy_auth_key(data, &m->proxy_auth_key);
+    if(result) {
+      url_match_destroy(m);
+      return result;
+    }
+  }
+#endif
+  return CURLE_OK;
 }
 
-static void url_match_destroy(struct url_conn_match *m)
-{
-  Curl_ssl_config_cleanup(&m->ssl_config);
-#ifndef CURL_DISABLE_PROXY
-  Curl_ssl_config_cleanup(&m->proxy_ssl_config);
-#endif
-}
 
 /**
  * Find an existing connection for the transfer or create a new one.
@@ -2335,19 +2357,10 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
     }
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
-    if(needle->http_proxy.peer && !needle->bits.origin_is_proxy) {
-      /* Remember the custom Proxy-Authorization this tunnel is set up
-       * with, for matching it against later transfers. */
-      const char *hd = Curl_checkProxyheaders(
-        data, needle, STRCONST("Proxy-Authorization"));
-      if(hd) {
-        needle->proxy_auth_hd = curlx_strdup(hd);
-        if(!needle->proxy_auth_hd) {
-          result = CURLE_OUT_OF_MEMORY;
-          goto out;
-        }
-      }
-    }
+    /* The new tunnel remembers the custom Proxy-Authorization it is set
+     * up with, for matching it against later transfers. */
+    needle->proxy_auth_hd = match.proxy_auth_key;
+    match.proxy_auth_key = NULL;
 #endif
 
     /* Add needle to conn pool, observing the limits.
