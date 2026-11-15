@@ -2664,8 +2664,8 @@ static CURLcode schannel_random(struct Curl_easy *data,
   return curlx_win32_random(entropy, length);
 }
 
-static CURLcode schannel_checksum(const void *input, size_t inputlen,
-                                  uint8_t *checksum, size_t checksumlen,
+static CURLcode schannel_checksum(const void *input, size_t input_len,
+                                  uint8_t *digest, size_t digest_len,
                                   DWORD provType,
                                   const unsigned int algId)
 {
@@ -2683,7 +2683,7 @@ static CURLcode schannel_checksum(const void *input, size_t inputlen,
   /* since this can fail in multiple ways, zero memory first so we never
    * return old data
    */
-  memset(checksum, 0, checksumlen);
+  memset(digest, 0, digest_len);
 
   if(!CryptAcquireContext(&hProv, NULL, NULL, provType,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
@@ -2695,8 +2695,8 @@ static CURLcode schannel_checksum(const void *input, size_t inputlen,
   result = CURLE_BAD_FUNCTION_ARGUMENT;
 
   off = 0;
-  while(off < inputlen) {
-    DWORD chunk = (DWORD)CURLMIN(inputlen - off, 0xffffffffUL);
+  while(off < input_len) {
+    DWORD chunk = (DWORD)CURLMIN(input_len - off, 0xffffffffUL);
     if(!CryptHashData(hHash, (const BYTE *)input + off, chunk, 0))
       goto out;
     off += chunk;
@@ -2710,11 +2710,11 @@ static CURLcode schannel_checksum(const void *input, size_t inputlen,
     goto out;
 
   /* check if hash fits into the return buffer */
-  if(checksumlen < cbHashSize)
+  if(digest_len < cbHashSize)
     goto out;
 
-  dwChecksumLen = (DWORD)checksumlen;
-  if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &dwChecksumLen, 0) &&
+  dwChecksumLen = (DWORD)digest_len;
+  if(CryptGetHashParam(hHash, HP_HASHVAL, digest, &dwChecksumLen, 0) &&
      dwChecksumLen == cbHashSize)
     result = CURLE_OK;
 
@@ -2728,10 +2728,10 @@ out:
   return result;
 }
 
-static CURLcode schannel_sha256sum(const void *input, size_t inputlen,
-                                   uint8_t *sha256sum, size_t sha256len)
+static CURLcode schannel_sha256sum(const void *input, size_t input_len,
+                                   uint8_t *digest, size_t digest_len)
 {
-  return schannel_checksum(input, inputlen, sha256sum, sha256len,
+  return schannel_checksum(input, input_len, digest, digest_len,
                            PROV_RSA_AES, CALG_SHA_256);
 }
 

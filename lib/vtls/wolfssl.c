@@ -2239,23 +2239,23 @@ static CURLcode wssl_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode wssl_sha256sum(const void *input, size_t len,
-                               uint8_t *sha256sum, size_t unused)
+static CURLcode wssl_sha256sum(const void *input, size_t input_len,
+                               uint8_t *digest, size_t digest_len)
 {
-  wc_Sha256 SHA256pw;
+  wc_Sha256 ctx;
   const byte *bytes;
-  (void)unused;
-  if(wc_InitSha256(&SHA256pw))
+  (void)digest_len;
+  if(wc_InitSha256(&ctx))
     return CURLE_FAILED_INIT;
   bytes = input;
   do {
-    word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
-    if(wc_Sha256Update(&SHA256pw, bytes, ilen))
+    word32 ilen = (word32)CURLMIN(input_len, UINT32_MAX);
+    if(wc_Sha256Update(&ctx, bytes, ilen))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    len -= ilen;
+    input_len -= ilen;
     bytes += ilen;
-  } while(len);
-  if(wc_Sha256Final(&SHA256pw, sha256sum))
+  } while(input_len);
+  if(wc_Sha256Final(&ctx, digest))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 }

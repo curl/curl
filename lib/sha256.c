@@ -36,9 +36,9 @@
 
 typedef EVP_MD_CTX *my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *in)
+static CURLcode my_sha256_init(void *pctx)
 {
-  EVP_MD_CTX ** const ctx = in;
+  EVP_MD_CTX ** const ctx = pctx;
 
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
@@ -52,15 +52,15 @@ static CURLcode my_sha256_init(void *in)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *in, const void *data, size_t length)
+static void my_sha256_update(void *pctx, const void *input, size_t input_len)
 {
-  EVP_MD_CTX ** const ctx = in;
-  EVP_DigestUpdate(*ctx, data, length);
+  EVP_MD_CTX ** const ctx = pctx;
+  EVP_DigestUpdate(*ctx, input, input_len);
 }
 
-static void my_sha256_final(uint8_t *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *pctx)
 {
-  EVP_MD_CTX ** const ctx = in;
+  EVP_MD_CTX ** const ctx = pctx;
   EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
@@ -71,27 +71,27 @@ static void my_sha256_final(uint8_t *digest, void *in)
 
 typedef struct wc_Sha256 my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *in)
+static CURLcode my_sha256_init(void *ctx)
 {
-  if(wc_InitSha256(in))
+  if(wc_InitSha256(ctx))
     return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *in, const void *data, size_t length)
+static void my_sha256_update(void *ctx, const void *input, size_t input_len)
 {
-  const byte *bytes = data;
+  const byte *bytes = input;
   do {
-    word32 ilen = (word32)CURLMIN(length, UINT32_MAX);
-    (void)wc_Sha256Update(in, bytes, ilen);
-    length -= ilen;
+    word32 ilen = (word32)CURLMIN(input_len, UINT32_MAX);
+    (void)wc_Sha256Update(ctx, bytes, ilen);
+    input_len -= ilen;
     bytes += ilen;
-  } while(length);
+  } while(input_len);
 }
 
-static void my_sha256_final(uint8_t *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *ctx)
 {
-  (void)wc_Sha256Final(in, digest);
+  (void)wc_Sha256Final(ctx, digest);
 }
 
 #elif defined(USE_GNUTLS_SHA256)
@@ -106,9 +106,9 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx, const void *data, size_t length)
+static void my_sha256_update(void *ctx, const void *input, size_t input_len)
 {
-  sha256_update(ctx, length, data);
+  sha256_update(ctx, input_len, input);
 }
 
 static void my_sha256_final(uint8_t *digest, void *ctx)
@@ -125,18 +125,18 @@ static void my_sha256_final(uint8_t *digest, void *ctx)
 
 typedef psa_hash_operation_t my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *ctx)
+static CURLcode my_sha256_init(void *pctx)
 {
-  psa_hash_operation_t *pctx = ctx;
-  *pctx = psa_hash_operation_init();
-  if(psa_hash_setup(pctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
+  psa_hash_operation_t *ctx = pctx;
+  *ctx = psa_hash_operation_init();
+  if(psa_hash_setup(ctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx, const void *data, size_t length)
+static void my_sha256_update(void *ctx, const void *input, size_t input_len)
 {
-  (void)psa_hash_update(ctx, data, length);
+  (void)psa_hash_update(ctx, input, input_len);
 }
 
 static void my_sha256_final(uint8_t *digest, void *ctx)
@@ -157,15 +157,15 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *ctx, const void *data, size_t length)
+static void my_sha256_update(void *ctx, const void *input, size_t input_len)
 {
-  const uint8_t *bytes = data;
+  const uint8_t *bytes = input;
   do {
-    CC_LONG ilen = (CC_LONG)CURLMIN(length, UINT32_MAX);
+    CC_LONG ilen = (CC_LONG)CURLMIN(input_len, UINT32_MAX);
     CC_SHA256_Update(ctx, bytes, ilen);
-    length -= ilen;
+    input_len -= ilen;
     bytes += ilen;
-  } while(length);
+  } while(input_len);
 }
 
 static void my_sha256_final(uint8_t *digest, void *ctx)
@@ -182,9 +182,9 @@ struct sha256_ctx {
 };
 typedef struct sha256_ctx my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *in)
+static CURLcode my_sha256_init(void *pctx)
 {
-  struct sha256_ctx *ctx = in;
+  struct sha256_ctx *ctx = pctx;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return CURLE_OUT_OF_MEMORY;
@@ -198,21 +198,21 @@ static CURLcode my_sha256_init(void *in)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *in, const void *data, size_t length)
+static void my_sha256_update(void *pctx, const void *input, size_t input_len)
 {
-  struct sha256_ctx *ctx = in;
-  const BYTE *bytes = data;
+  struct sha256_ctx *ctx = pctx;
+  const BYTE *bytes = input;
   do {
-    DWORD ilen = (DWORD)CURLMIN(length, 0xffffffffUL);
+    DWORD ilen = (DWORD)CURLMIN(input_len, 0xffffffffUL);
     CryptHashData(ctx->hHash, bytes, ilen, 0);
-    length -= ilen;
+    input_len -= ilen;
     bytes += ilen;
-  } while(length);
+  } while(input_len);
 }
 
-static void my_sha256_final(uint8_t *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *pctx)
 {
-  struct sha256_ctx *ctx = in;
+  struct sha256_ctx *ctx = pctx;
   DWORD length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == CURL_SHA256_DIGEST_LENGTH)
@@ -232,21 +232,19 @@ static void my_sha256_final(uint8_t *digest, void *in)
  *
  * Parameters:
  *
- * output [in/out] - The output buffer.
- * input  [in]     - The input data.
- * length [in]     - The input length.
+ * digest [in/out] - The output buffer.
+ * input [in]      - The input data.
+ * input_len [in]  - The input length.
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_sha256it(uint8_t *output, const void *input, size_t len)
+CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 {
-  CURLcode result;
   my_sha256_ctx ctx;
-
-  result = my_sha256_init(&ctx);
+  CURLcode result = my_sha256_init(&ctx);
   if(!result) {
-    my_sha256_update(&ctx, input, len);
-    my_sha256_final(output, &ctx);
+    my_sha256_update(&ctx, input, input_len);
+    my_sha256_final(digest, &ctx);
   }
   return result;
 }
@@ -262,11 +260,11 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
 
 #else
 
-CURLcode Curl_sha256it(uint8_t *output, const void *input, size_t len)
+CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 {
-  (void)output;
+  (void)digest;
   (void)input;
-  (void)len;
+  (void)input_len;
   return CURLE_NOT_BUILT_IN;
 }
 

@@ -2238,17 +2238,17 @@ static CURLcode gtls_random(struct Curl_easy *data,
   return rc ? CURLE_FAILED_INIT : CURLE_OK;
 }
 
-static CURLcode gtls_sha256sum(const void *input, size_t len,
-                               uint8_t *sha256sum, size_t sha256len)
+static CURLcode gtls_sha256sum(const void *input, size_t input_len,
+                               uint8_t *digest, size_t digest_len)
 {
-  struct sha256_ctx SHA256pw;
-  sha256_init(&SHA256pw);
-  sha256_update(&SHA256pw, len, input);
+  struct sha256_ctx ctx;
+  sha256_init(&ctx);
+  sha256_update(&ctx, input_len, input);
 #if NETTLE_VERSION_MAJOR >= 4
-  (void)sha256len;
-  sha256_digest(&SHA256pw, sha256sum);
+  (void)digest_len;
+  sha256_digest(&ctx, digest);
 #else
-  sha256_digest(&SHA256pw, (unsigned int)sha256len, sha256sum);
+  sha256_digest(&ctx, (unsigned int)digest_len, digest);
 #endif
   return CURLE_OK;
 }
