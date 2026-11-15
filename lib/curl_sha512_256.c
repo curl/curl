@@ -215,24 +215,24 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 /* Compute SHA-512/256 hash for the given data in one function call
  * @param[out] output the pointer to put the hash
  * @param[in] input the pointer to the data to process
- * @param input_size the size of the data pointed by @a input
+ * @param input_len the size of the data pointed by @a input
  * @return always #CURLE_OK
  */
-CURLcode Curl_sha512_256it(uint8_t *output, const void *input,
-                           size_t input_size)
+CURLcode Curl_sha512_256it(uint8_t *digest, const void *input,
+                           size_t input_len)
 {
   Curl_sha512_256_ctx ctx;
   CURLcode result = my_sha512_256_init(&ctx);
   if(result)
     return result;
 
-  result = my_sha512_256_update(&ctx, input, input_size);
+  result = my_sha512_256_update(&ctx, input, input_len);
   if(result) {
-    (void)my_sha512_256_final(output, &ctx);
+    (void)my_sha512_256_final(digest, &ctx);
     return result;
   }
 
-  return my_sha512_256_final(output, &ctx);
+  return my_sha512_256_final(digest, &ctx);
 }
 
 #endif /* CURL_HAVE_SHA512_256 */

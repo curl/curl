@@ -241,13 +241,13 @@ const struct HMAC_params Curl_HMAC_MD5 = {
  * @unittest: 1601
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_md5it(uint8_t *output, const void *input, size_t len)
+CURLcode Curl_md5it(uint8_t *digest, const void *input, size_t input_len)
 {
   my_md5_ctx ctx;
   CURLcode result = my_md5_init(&ctx);
   if(!result) {
-    my_md5_update(&ctx, input, len);
-    my_md5_final(output, &ctx);
+    my_md5_update(&ctx, input, input_len);
+    my_md5_final(digest, &ctx);
   }
   return result;
 }
@@ -266,9 +266,9 @@ void *Curl_MD5_init(void)
   return ctxt;
 }
 
-CURLcode Curl_MD5_update(void *context, const void *input, size_t len)
+CURLcode Curl_MD5_update(void *context, const void *input, size_t input_len)
 {
-  my_md5_update(context, input, len);
+  my_md5_update(context, input, input_len);
   return CURLE_OK;
 }
 
