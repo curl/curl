@@ -9,7 +9,7 @@ HTTP Basic auth
 </info>
 <reply>
 
-<!-- First request has Basic auth, right password -->
+# First request has Basic auth, right password
 <data100>
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
@@ -19,7 +19,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data100>
 
-<!-- Second request with Basic auth disabled -->
+# Second request with Basic auth disabled
 <data200>
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0

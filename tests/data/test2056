@@ -8,7 +8,7 @@ HTTP Negotiate auth (stub krb5)
 </keywords>
 </info>
 <reply>
-<!-- First request, expect success in one shot -->
+# First request, expect success in one shot
 <data1>
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/7.0

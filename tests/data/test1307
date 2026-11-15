@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
-<!-- This replaces test 577 -->
+# This replaces test 577
 <info>
 <keywords>
 unittest
