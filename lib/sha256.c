@@ -83,11 +83,11 @@ static void my_sha256_update(void *in,
                              const unsigned char *data, size_t length)
 {
   do {
-    word32 ilen = (word32)CURLMIN(length, UINT_MAX);
-    (void)wc_Sha256Update(ctx, input, ilen);
+    word32 ilen = (word32)CURLMIN(length, UINT32_MAX);
+    (void)wc_Sha256Update(in, data, ilen);
     length -= ilen;
     data += ilen;
-  } while(len);
+  } while(length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
@@ -164,11 +164,11 @@ static void my_sha256_update(void *ctx,
                              const unsigned char *data, size_t length)
 {
   do {
-    CC_LONG ilen = (CC_LONG)CURLMIN(len, UINT32_MAX);
-    CC_SHA256_Update(ctx, data, length);
-    len -= ilen;
-    input += ilen;
-  } while(len);
+    CC_LONG ilen = (CC_LONG)CURLMIN(length, UINT32_MAX);
+    CC_SHA256_Update(ctx, data, ilen);
+    length -= ilen;
+    data += ilen;
+  } while(length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
@@ -207,10 +207,10 @@ static void my_sha256_update(void *in,
   struct sha256_ctx *ctx = in;
   do {
     DWORD ilen = (DWORD)CURLMIN(length, 0xffffffffUL);
-    CryptHashData(ctx->hHash, (const BYTE *)data, length, 0);
+    CryptHashData(ctx->hHash, (const BYTE *)data, ilen, 0);
     length -= ilen;
     data += ilen;
-  } while(len);
+  } while(length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)

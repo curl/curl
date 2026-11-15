@@ -81,7 +81,7 @@ static void my_md5_update(void *ctx,
                           const unsigned char *input, size_t len)
 {
   do {
-    word32 ilen = (word32)CURLMIN(len, UINT_MAX);
+    word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
     (void)wc_Md5Update(ctx, input, ilen);
     len -= ilen;
     input += ilen;
@@ -210,7 +210,7 @@ static void my_md5_update(void *in,
   struct md5_ctx *ctx = in;
   do {
     DWORD ilen = (DWORD)CURLMIN(len, 0xffffffffUL);
-    CryptHashData(ctx->hHash, (const BYTE *)input, len, 0);
+    CryptHashData(ctx->hHash, (const BYTE *)input, ilen, 0);
     len -= ilen;
     input += ilen;
   } while(len);
