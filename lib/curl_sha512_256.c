@@ -187,7 +187,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
 {
   DEBUGASSERT(data || (length == 0));
 
-  sha512_256_update(ctx, length, (const uint8_t *)data);
+  sha512_256_update(ctx, length, data);
 
   return CURLE_OK;
 }
@@ -202,10 +202,9 @@ static CURLcode Curl_sha512_256_update(void *ctx,
 static CURLcode Curl_sha512_256_finish(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
-  sha512_256_digest(ctx, (uint8_t *)digest);
+  sha512_256_digest(ctx, digest);
 #else
-  sha512_256_digest(ctx,
-                    (size_t)CURL_SHA512_256_DIGEST_LENGTH, (uint8_t *)digest);
+  sha512_256_digest(ctx, CURL_SHA512_256_DIGEST_LENGTH, digest);
 #endif
 
   return CURLE_OK;
@@ -229,7 +228,7 @@ CURLcode Curl_sha512_256it(uint8_t *output, const void *input,
   if(result != CURLE_OK)
     return result;
 
-  result = Curl_sha512_256_update(&ctx, (const void *)input, input_size);
+  result = Curl_sha512_256_update(&ctx, input, input_size);
 
   if(result != CURLE_OK) {
     (void)Curl_sha512_256_finish(output, &ctx);
