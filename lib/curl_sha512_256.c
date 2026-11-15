@@ -86,7 +86,7 @@ static CURLcode Curl_sha512_256_update(void *context,
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
-static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
+static CURLcode Curl_sha512_256_finish(uint8_t *digest, void *context)
 {
   EVP_MD_CTX ** const ctx = context;
   CURLcode result;
@@ -109,7 +109,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
     __NetBSD_Version__ <  1099001100))
   /* Use a larger buffer to work around a bug in NetBSD:
      https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
-  unsigned char tmp_digest[CURL_SHA512_256_DIGEST_LENGTH * 2];
+  uint8_t tmp_digest[CURL_SHA512_256_DIGEST_LENGTH * 2];
   result = EVP_DigestFinal_ex(*ctx, tmp_digest, NULL) ?
     CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   if(result == CURLE_OK)
@@ -151,7 +151,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
   return CURLE_OK;
 }
 
-static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
+static CURLcode Curl_sha512_256_finish(uint8_t *digest, void *ctx)
 {
   if(wc_Sha512_256Final(ctx, digest))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -198,7 +198,7 @@ static CURLcode Curl_sha512_256_update(void *ctx,
  *             bytes
  * @return always CURLE_OK
  */
-static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
+static CURLcode Curl_sha512_256_finish(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
   sha512_256_digest(ctx, (uint8_t *)digest);

@@ -58,7 +58,7 @@ static void my_sha256_update(void *in, const void *data, size_t length)
   EVP_DigestUpdate(*ctx, data, length);
 }
 
-static void my_sha256_final(unsigned char *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *in)
 {
   EVP_MD_CTX ** const ctx = in;
   EVP_DigestFinal_ex(*ctx, digest, NULL);
@@ -89,7 +89,7 @@ static void my_sha256_update(void *in, const void *data, size_t length)
   } while(length);
 }
 
-static void my_sha256_final(unsigned char *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *in)
 {
   (void)wc_Sha256Final(in, digest);
 }
@@ -111,7 +111,7 @@ static void my_sha256_update(void *ctx, const void *data, size_t length)
   sha256_update(ctx, length, data);
 }
 
-static void my_sha256_final(unsigned char *digest, void *ctx)
+static void my_sha256_final(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
   sha256_digest(ctx, digest);
@@ -139,7 +139,7 @@ static void my_sha256_update(void *ctx, const void *data, size_t length)
   (void)psa_hash_update(ctx, data, length);
 }
 
-static void my_sha256_final(unsigned char *digest, void *ctx)
+static void my_sha256_final(uint8_t *digest, void *ctx)
 {
   size_t actual_length;
   (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
@@ -168,7 +168,7 @@ static void my_sha256_update(void *ctx, const void *data, size_t length)
   } while(length);
 }
 
-static void my_sha256_final(unsigned char *digest, void *ctx)
+static void my_sha256_final(uint8_t *digest, void *ctx)
 {
   (void)CC_SHA256_Final(digest, ctx);
 }
@@ -210,7 +210,7 @@ static void my_sha256_update(void *in, const void *data, size_t length)
   } while(length);
 }
 
-static void my_sha256_final(unsigned char *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *in)
 {
   struct sha256_ctx *ctx = in;
   DWORD length = 0;

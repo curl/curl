@@ -56,7 +56,7 @@ static void my_md5_update(void *in, const void *input, size_t len)
   (void)EVP_DigestUpdate(*ctx, input, len);
 }
 
-static void my_md5_final(unsigned char *digest, void *in)
+static void my_md5_final(uint8_t *digest, void *in)
 {
   EVP_MD_CTX ** const ctx = in;
   (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
@@ -87,7 +87,7 @@ static void my_md5_update(void *ctx, const void *input, size_t len)
   } while(len);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(uint8_t *digest, void *ctx)
 {
   (void)wc_Md5Final(ctx, digest);
 }
@@ -109,7 +109,7 @@ static void my_md5_update(void *ctx, const void *input, size_t len)
   md5_update(ctx, len, input);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(uint8_t *digest, void *ctx)
 {
 #if NETTLE_VERSION_MAJOR >= 4
   md5_digest(ctx, digest);
@@ -137,7 +137,7 @@ static void my_md5_update(void *ctx, const void *input, size_t len)
   (void)psa_hash_update(ctx, input, len);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(uint8_t *digest, void *ctx)
 {
   size_t actual_length;
   (void)psa_hash_finish(ctx, digest, CURL_MD5_DIGEST_LEN, &actual_length);
@@ -171,7 +171,7 @@ static void my_md5_update(void *ctx, const void *input, size_t len)
   } while(len);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(uint8_t *digest, void *ctx)
 {
   CC_MD5_Final(digest, ctx);
 }
@@ -213,7 +213,7 @@ static void my_md5_update(void *in, const void *input, size_t len)
   } while(len);
 }
 
-static void my_md5_final(unsigned char *digest, void *in)
+static void my_md5_final(uint8_t *digest, void *in)
 {
   struct md5_ctx *ctx = in;
   DWORD length = 0;
