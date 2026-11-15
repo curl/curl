@@ -91,7 +91,7 @@
 #ifdef CURL_HAVE_MD5
 #include "curl_hmac.h"
 
-#define MD5_DIGEST_LEN  16
+#define CURL_MD5_DIGEST_LEN  16
 
 typedef CURLcode (*Curl_MD5_init_func)(void *context);
 typedef void (*Curl_MD5_update_func)(void *context,
