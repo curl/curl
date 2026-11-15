@@ -245,7 +245,6 @@ const struct MD5_params Curl_DIGEST_MD5 = {
   my_md5_update,      /* Digest update function */
   my_md5_final,       /* Digest computation end function */
   sizeof(my_md5_ctx), /* Size of digest context struct */
-  CURL_MD5_DIGEST_LEN /* Result size */
 };
 
 /*
