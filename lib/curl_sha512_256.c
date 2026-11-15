@@ -64,6 +64,7 @@ static CURLcode Curl_sha512_256_init(void *context)
   }
 
   EVP_MD_CTX_free(*ctx);  /* Cleanup */
+  *ctx = NULL;
   return CURLE_FAILED_INIT;
 }
 
