@@ -387,7 +387,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   const char *userp = Curl_creds_user(creds);
   const char *passwdp = Curl_creds_passwd(creds);
   char *response = NULL;
-  unsigned char digest[CURL_MD5_DIGEST_LEN];
+  uint8_t digest[CURL_MD5_DIGEST_LEN];
   char HA1_hex[(2 * CURL_MD5_DIGEST_LEN) + 1];
   char HA2_hex[(2 * CURL_MD5_DIGEST_LEN) + 1];
   char resp_hash_hex[(2 * CURL_MD5_DIGEST_LEN) + 1];
@@ -744,7 +744,7 @@ static CURLcode auth_create_digest_http_message(
   CURLcode result;
   const char *userp = Curl_creds_user(creds);
   const char *passwdp = Curl_creds_passwd(creds);
-  unsigned char hashbuf[32]; /* 32 bytes/256 bits */
+  uint8_t hashbuf[32]; /* 32 bytes/256 bits */
   unsigned char request_digest[65];
   unsigned char ha1[65];    /* 64 digits and 1 zero byte */
   unsigned char ha2[65];    /* 64 digits and 1 zero byte */
@@ -790,7 +790,7 @@ static CURLcode auth_create_digest_http_message(
       goto oom;
     }
 
-    result = hash(hashbuf, (unsigned char *)hasht, strlen(hasht));
+    result = hash(hashbuf, hasht, strlen(hasht));
     curlx_free(hasht);
     if(result)
       goto oom;
@@ -814,7 +814,7 @@ static CURLcode auth_create_digest_http_message(
     goto oom;
   }
 
-  result = hash(hashbuf, (unsigned char *)hashthis, strlen(hashthis));
+  result = hash(hashbuf, hashthis, strlen(hashthis));
   curlx_free(hashthis);
   if(result)
     goto oom;
@@ -828,7 +828,7 @@ static CURLcode auth_create_digest_http_message(
       goto oom;
     }
 
-    result = hash(hashbuf, (unsigned char *)tmp, strlen(tmp));
+    result = hash(hashbuf, tmp, strlen(tmp));
     curlx_free(tmp);
     if(result)
       goto oom;
@@ -864,7 +864,7 @@ static CURLcode auth_create_digest_http_message(
     char hashed[65];
     char *hashthis2;
 
-    result = hash(hashbuf, (const unsigned char *)"", 0);
+    result = hash(hashbuf, "", 0);
     if(result) {
       curlx_free(hashthis);
       goto oom;
@@ -880,7 +880,7 @@ static CURLcode auth_create_digest_http_message(
     }
   }
 
-  result = hash(hashbuf, (unsigned char *)hashthis, strlen(hashthis));
+  result = hash(hashbuf, hashthis, strlen(hashthis));
   curlx_free(hashthis);
   if(result)
     goto oom;
@@ -898,7 +898,7 @@ static CURLcode auth_create_digest_http_message(
     goto oom;
   }
 
-  result = hash(hashbuf, (unsigned char *)hashthis, strlen(hashthis));
+  result = hash(hashbuf, hashthis, strlen(hashthis));
   curlx_free(hashthis);
   if(result)
     goto oom;
