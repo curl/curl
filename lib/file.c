@@ -639,6 +639,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
         bytestoread = xfer_blen - 1;
 
       nread = read(fd, xfer_buf, bytestoread);
+      if(nread < 0)
+        result = CURLE_READ_ERROR;
 
       if(nread > 0)
         xfer_buf[nread] = 0;
