@@ -113,9 +113,11 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
 
 fail:
   if(hashctxt1_initialized)
-    hashparams->hfinal(NULL, ctxt->hashctxt1);
+    hashparams->hfinal((uint8_t *)ctxt->hashctxt2 + hashparams->ctxtsize,
+                       ctxt->hashctxt1);
   if(hashctxt2_initialized)
-    hashparams->hfinal(NULL, ctxt->hashctxt2);
+    hashparams->hfinal((uint8_t *)ctxt->hashctxt2 + hashparams->ctxtsize,
+                       ctxt->hashctxt2);
   curlx_free(ctxt);
   return NULL;
 }
