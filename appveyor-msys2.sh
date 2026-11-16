@@ -32,4 +32,4 @@ curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 -
 echo '------222'
 tar -xJf pkg.bin
 ls -l
-mv msys64 /c/
+mv c/msys64 /c/
