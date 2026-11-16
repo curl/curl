@@ -28,8 +28,25 @@
 
 #include "curl_fopen.h"
 
+static void t1699_stop(CURL *easy, FILE *out, char *tempstore,
+                       const char *filename)
+{
+  if(out)
+    curlx_fclose(out);
+  if(tempstore)
+    unlink(tempstore);
+  curlx_free(tempstore);
+  unlink(filename);
+  curl_easy_cleanup(easy);
+  curl_global_cleanup();
+}
+
 static CURLcode test_unit1699(const char *arg)
 {
+  CURL *easy = NULL;
+  FILE *out = NULL;
+  char *tempstore = NULL;
+
   UNITTEST_BEGIN_SIMPLE
 
   struct pair {
@@ -52,10 +69,7 @@ static CURLcode test_unit1699(const char *arg)
 
   int fails = 0;
   unsigned int i;
-  CURL *easy;
-  FILE *out;
-  char *tempstore = NULL;
-  const char *filename = "log/unit1699-state";
+  const char *filename = arg;
 
   for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
     char *dir = dirslash(tests[i].in);
@@ -77,24 +91,18 @@ static CURLcode test_unit1699(const char *arg)
   abort_unless(out, "create original file failed");
   fputc('x', out);
   curlx_fclose(out);
+  out = NULL;
 
   abort_unless(Curl_fopen(easy, filename, &out, &tempstore) == CURLE_OK,
                "open replacement failed");
   curlx_fclose(out);
-  /* Abandon the replacement, as on a failed save. */
-  if(tempstore)
-    unlink(tempstore);
-  curlx_free(tempstore);
+  /* Leave the replacement unpublished, as on a failed save. */
   out = curlx_fopen(filename, FOPEN_READTEXT);
   abort_unless(out, "open original file failed");
   fail_unless(fgetc(out) == 'x' && fgetc(out) == EOF,
               "abandoned replacement must preserve original contents");
-  curlx_fclose(out);
-  unlink(filename);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
 
-  UNITTEST_END_SIMPLE
+  UNITTEST_END(t1699_stop(easy, out, tempstore, arg))
 }
 #else
 static CURLcode test_unit1699(const char *arg)
