@@ -373,9 +373,12 @@ CURLcode Curl_pp_pollset(struct Curl_easy *data,
                          struct pingpong *pp,
                          struct easy_pollset *ps)
 {
-  int flags = pp->sendleft ? CURL_POLL_OUT : CURL_POLL_IN;
-  return Curl_pollset_change(data, ps, data->conn->chain.sock,
-                             flags, 0);
+  if(data->conn && (data->conn->chain.sock != CURL_SOCKET_BAD)) {
+    int flags = pp->sendleft ? CURL_POLL_OUT : CURL_POLL_IN;
+    return Curl_pollset_change(data, ps, data->conn->chain.sock,
+                               flags, 0);
+  }
+  return CURLE_OK;
 }
 
 bool Curl_pp_needs_flush(struct Curl_easy *data,
