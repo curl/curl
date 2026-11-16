@@ -232,8 +232,7 @@ uint64_t Curl_ngtcp2_conn_get_max_data_left(struct curl_ngtcp2 *ntp2)
   return ngtcp2_conn_get_max_data_left(ntp2->conn);
 }
 
-size_t Curl_ngtcp2_conn_get_max_tx_udp_payload_size(
-  struct curl_ngtcp2 *ntp2)
+size_t Curl_ngtcp2_conn_get_max_tx_udp_payload_size(struct curl_ngtcp2 *ntp2)
 {
   if(!ntp2_allow_normal(ntp2))
     return 0;
@@ -248,8 +247,8 @@ size_t Curl_ngtcp2_conn_get_path_max_tx_udp_payload_size(
   return ngtcp2_conn_get_path_max_tx_udp_payload_size(ntp2->conn);
 }
 
-const ngtcp2_transport_params *
-Curl_ngtcp2_conn_get_remote_transport_params(struct curl_ngtcp2 *ntp2)
+const ngtcp2_transport_params *Curl_ngtcp2_conn_get_remote_transport_params(
+  struct curl_ngtcp2 *ntp2)
 {
   if(!ntp2_allow_normal(ntp2))
     return NULL;
@@ -278,8 +277,7 @@ uint8_t Curl_ngtcp2_conn_get_tls_alert(struct curl_ngtcp2 *ntp2)
 }
 
 #if NGTCP2_VERSION_NUM >= 0x011700
-int Curl_ngtcp2_conn_get_tls_early_data_rejected2(
-  struct curl_ngtcp2 *ntp2)
+int Curl_ngtcp2_conn_get_tls_early_data_rejected2(struct curl_ngtcp2 *ntp2)
 {
   if(!ntp2_allow_normal(ntp2))
     return 0;
