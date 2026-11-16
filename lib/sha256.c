@@ -245,6 +245,15 @@ static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 
 #endif
 
+const struct HMAC_params Curl_HMAC_SHA256 = {
+  my_sha256_init,        /* Hash initialization function. */
+  my_sha256_update,      /* Hash update function. */
+  my_sha256_final,       /* Hash computation end function. */
+  sizeof(my_sha256_ctx), /* Size of hash context structure. */
+  64,                    /* Maximum key length. */
+  32                     /* Result size. */
+};
+
 /*
  * Curl_sha256it()
  *
@@ -274,24 +283,7 @@ CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
   return my_sha256_final(digest, &ctx);
 }
 
-const struct HMAC_params Curl_HMAC_SHA256 = {
-  my_sha256_init,        /* Hash initialization function. */
-  my_sha256_update,      /* Hash update function. */
-  my_sha256_final,       /* Hash computation end function. */
-  sizeof(my_sha256_ctx), /* Size of hash context structure. */
-  64,                    /* Maximum key length. */
-  32                     /* Result size. */
-};
-
 #else
-
-CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
-{
-  (void)digest;
-  (void)input;
-  (void)input_len;
-  return CURLE_NOT_BUILT_IN;
-}
 
 const struct HMAC_params Curl_HMAC_SHA256 = {
   NULL,                  /* Hash initialization function. */
@@ -301,6 +293,14 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
   64,                    /* Maximum key length. */
   32                     /* Result size. */
 };
+
+CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
+{
+  (void)digest;
+  (void)input;
+  (void)input_len;
+  return CURLE_NOT_BUILT_IN;
+}
 
 #endif /* CURL_HAVE_SHA256 */
 
