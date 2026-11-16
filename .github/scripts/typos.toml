@@ -36,6 +36,7 @@ extend-exclude = [
   "tests/data/test*",
   "tests/unit/unit1625.c",
   "tests/unit/unit1627.c",
+  "tests/unit/unit1675.c",
   "tests/perf/urlparser.c",
   "tests/perf/cookierecv.c",
 ]
