@@ -107,14 +107,14 @@ fail:
   return NULL;
 }
 
-void Curl_HMAC_update(struct HMAC_context *ctxt,
-                      const void *input, size_t input_len)
+CURLcode Curl_HMAC_update(struct HMAC_context *ctxt,
+                          const void *input, size_t input_len)
 {
   /* Update first hash calculation. */
-  ctxt->hash->hupdate(ctxt->hashctxt1, input, input_len);
+  return ctxt->hash->hupdate(ctxt->hashctxt1, input, input_len);
 }
 
-int Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac)
+CURLcode Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac)
 {
   const struct HMAC_params *hashparams = ctxt->hash;
 
@@ -127,7 +127,7 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac)
   hashparams->hupdate(ctxt->hashctxt2, mac, hashparams->digest_len);
   hashparams->hfinal(mac, ctxt->hashctxt2);
   curlx_free(ctxt);
-  return 0;
+  return CURLE_OK;
 }
 
 /*

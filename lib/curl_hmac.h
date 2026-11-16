@@ -53,9 +53,9 @@ struct HMAC_context {
 /* Prototypes. */
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
                                     const void *key, size_t key_len);
-void Curl_HMAC_update(struct HMAC_context *ctxt,
-                      const void *input, size_t input_len);
-int Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac);
+CURLcode Curl_HMAC_update(struct HMAC_context *ctxt,
+                          const void *input, size_t input_len);
+CURLcode Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac);
 
 CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
                      const void *key, const size_t key_len,
