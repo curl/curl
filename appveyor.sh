@@ -62,8 +62,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     archive='msys.zip'
     find /c/msys64 > files.tmp
     echo 'Creating artifact (MSYS2)'
-    time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp
-    rm files.tmp
+    time tar --create --no-recursion --files-from files.tmp | xz > "${archive}"
     appveyor PushArtifact "${archive}" &
   fi
 
