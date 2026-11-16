@@ -517,8 +517,11 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
       goto out;
     }
   }
-  else
-    Curl_multi_pollset(data, &ps);
+  else {
+    mresult = Curl_multi_pollset(data, &ps);
+    if(mresult)
+      goto out;
+  }
   last_ps = mev_get_last_pollset(data, conn);
 
   if(!last_ps && ps.n) {
