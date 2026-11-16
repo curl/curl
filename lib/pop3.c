@@ -576,11 +576,11 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   hok = CURLE_OK;
-  hok &= Curl_MD5_update(ctxt, pop3c->apoptimestamp,
+  hok |= Curl_MD5_update(ctxt, pop3c->apoptimestamp,
                          strlen(pop3c->apoptimestamp));
-  hok &= Curl_MD5_update(ctxt, Curl_creds_passwd(conn->creds),
+  hok |= Curl_MD5_update(ctxt, Curl_creds_passwd(conn->creds),
                          strlen(Curl_creds_passwd(conn->creds)));
-  hok &= Curl_MD5_final(ctxt, digest);  /* Finalise the digest */
+  hok |= Curl_MD5_final(ctxt, digest);  /* Finalise the digest */
   if(hok)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
