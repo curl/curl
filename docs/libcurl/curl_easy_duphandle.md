@@ -29,9 +29,8 @@ CURL *curl_easy_duphandle(CURL *handle);
 # DESCRIPTION
 
 This function returns a new curl handle, a duplicate, using all the options
-previously set in the input curl *handle* except CURLOPT_RTSP_SESSION_ID(3),
-which is never copied. Both handles can subsequently be used independently
-and they must both be freed with curl_easy_cleanup(3).
+previously set in the input curl *handle*. Both handles can subsequently be
+used independently and they must both be freed with curl_easy_cleanup(3).
 
 Any options that the input handle has been told to point to (as opposed to
 copy) with previous calls to curl_easy_setopt(3), are pointed to by the new

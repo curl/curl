@@ -1042,8 +1042,9 @@ CURL *curl_easy_duphandle(CURL *curl)
       goto fail;
 
 #ifndef CURL_DISABLE_RTSP
-    /* RTSP session IDs belong to the source handle, not its duplicate. */
-    CURL_EASY_STR_CLEAR(outcurl, STRING_RTSP_SESSION_ID);
+    /* A server-learned RTSP session ID is state, not a set option. */
+    if(data->state.rtsp_session_origin)
+      CURL_EASY_STR_CLEAR(outcurl, STRING_RTSP_SESSION_ID);
 #endif
 
     outcurl->progress.hide     = data->progress.hide;

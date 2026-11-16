@@ -110,8 +110,10 @@ static CURLcode test_unit1620(const char *arg)
   abort_unless(dupe, "curl_easy_duphandle() failed");
 
 #ifndef CURL_DISABLE_RTSP
-  fail_unless(!CURL_EASY_STR(dupe, STRING_RTSP_SESSION_ID),
-              "duplicate must not preserve an RTSP session ID option");
+  fail_unless(CURL_EASY_STR(dupe, STRING_RTSP_SESSION_ID) &&
+              !strcmp(CURL_EASY_STR(dupe, STRING_RTSP_SESSION_ID),
+                      "explicit-id"),
+              "duplicate must preserve an explicit RTSP session ID option");
 #endif
 
   result = Curl_init_transfer(dupe, NULL);
