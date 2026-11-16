@@ -71,27 +71,27 @@ static void my_sha256_final(uint8_t *digest, void *in)
 
 typedef struct wc_Sha256 my_sha256_ctx;
 
-static CURLcode my_sha256_init(void *in)
+static CURLcode my_sha256_init(void *ctx)
 {
-  if(wc_InitSha256(in))
+  if(wc_InitSha256(ctx))
     return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *in, const void *input, size_t input_len)
+static void my_sha256_update(void *ctx, const void *input, size_t input_len)
 {
   const byte *bytes = input;
   do {
     word32 ilen = (word32)CURLMIN(input_len, UINT32_MAX);
-    (void)wc_Sha256Update(in, bytes, ilen);
+    (void)wc_Sha256Update(ctx, bytes, ilen);
     input_len -= ilen;
     bytes += ilen;
   } while(input_len);
 }
 
-static void my_sha256_final(uint8_t *digest, void *in)
+static void my_sha256_final(uint8_t *digest, void *ctx)
 {
-  (void)wc_Sha256Final(in, digest);
+  (void)wc_Sha256Final(ctx, digest);
 }
 
 #elif defined(USE_GNUTLS_SHA256)
