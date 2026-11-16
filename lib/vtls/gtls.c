@@ -2243,7 +2243,7 @@ static CURLcode gtls_sha256sum(const void *input, size_t input_len,
 {
   struct sha256_ctx ctx;
   sha256_init(&ctx);
-  sha256_update(&ctx, len, input);
+  sha256_update(&ctx, input_len, input);
 #if NETTLE_VERSION_MAJOR >= 4
   (void)digest_len;
   sha256_digest(&ctx, digest);
