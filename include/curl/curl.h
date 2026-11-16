@@ -1432,9 +1432,9 @@ typedef enum {
    */
   CURLOPT(CURLOPT_HTTPGET, CURLOPTTYPE_LONG, 80),
 
-  /* Set if we should verify the Common name from the peer certificate in SSL
-   * handshake, set 1 to check existence, 2 to ensure that it matches the
-   * provided hostname. */
+  /* Set to 1 or 2 to check if some name in the peer certificate in the SSL
+     handshake matches the provided hostname. Set to 0 to disable this security
+     check. It is enabled by default. */
   CURLOPT(CURLOPT_SSL_VERIFYHOST, CURLOPTTYPE_LONG, 81),
 
   /* Specify which filename to write all known cookies in after completed
@@ -2031,9 +2031,9 @@ typedef enum {
      set 1 to verify. */
   CURLOPT(CURLOPT_PROXY_SSL_VERIFYPEER, CURLOPTTYPE_LONG, 248),
 
-  /* Set if we should verify the Common name from the proxy certificate in SSL
-   * handshake, set 1 to check existence, 2 to ensure that it matches
-   * the provided hostname. */
+  /* Set to 1 or 2 to check if some name in the proxy certificate in the SSL
+     handshake matches the provided hostname. Set to 0 to disable this security
+     check. It is enabled by default. */
   CURLOPT(CURLOPT_PROXY_SSL_VERIFYHOST, CURLOPTTYPE_LONG, 249),
 
   /* What version to specifically try to use for proxy.
