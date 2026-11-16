@@ -512,8 +512,10 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   hok |= Curl_MD5_update(ctxt, HA2_hex, 2 * CURL_MD5_DIGEST_LEN);
   hok |= Curl_MD5_final(ctxt, digest);
-  if(hok)
+  if(hok) {
+    curlx_free(spn);
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   for(i = 0; i < CURL_MD5_DIGEST_LEN; i++)
     curl_msnprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
