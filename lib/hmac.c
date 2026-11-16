@@ -54,12 +54,17 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   uint8_t *hkey;
   uint8_t b;
   CURLcode hok;
+  bool hashctxt1_initialized;
+  bool hashctxt2_initialized;
 
   /* Create HMAC context. */
   i = HMAC_CTXT_OFFSET + (2 * hashparams->ctxtsize) + hashparams->digest_len;
   ctxt = curlx_malloc(i);
   if(!ctxt)
     return ctxt;
+
+  hashctxt1_initialized = FALSE;
+  hashctxt2_initialized = FALSE;
 
   ctxt->hash = hashparams;
   ctxt->hashctxt1 = (void *)((char *)ctxt + HMAC_CTXT_OFFSET);
@@ -79,9 +84,12 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   }
 
   /* Prime the two hash contexts with the modified key. */
-  if(hashparams->hinit(ctxt->hashctxt1) ||
-     hashparams->hinit(ctxt->hashctxt2))
+  if(hashparams->hinit(ctxt->hashctxt1))
     goto fail;
+  hashctxt1_initialized = TRUE;
+  if(hashparams->hinit(ctxt->hashctxt2))
+    goto fail;
+  hashctxt2_initialized = TRUE;
 
   bkey = key;
   for(i = 0; i < key_len; i++) {
@@ -104,8 +112,10 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   return ctxt;
 
 fail:
-  hashparams->hfinal(NULL, ctxt->hashctxt1);
-  hashparams->hfinal(NULL, ctxt->hashctxt2);
+  if(hashctxt1_initialized)
+    hashparams->hfinal(NULL, ctxt->hashctxt1);
+  if(hashctxt2_initialized)
+    hashparams->hfinal(NULL, ctxt->hashctxt2);
   curlx_free(ctxt);
   return NULL;
 }
