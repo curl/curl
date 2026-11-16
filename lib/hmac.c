@@ -126,7 +126,8 @@ CURLcode Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac)
     mac = (uint8_t *)ctxt->hashctxt2 + ctxt->hash->ctxtsize;
 
   hok = hashparams->hfinal(mac, ctxt->hashctxt1);
-  hok |= hashparams->hupdate(ctxt->hashctxt2, mac, hashparams->digest_len);
+  if(!hok)
+    hok |= hashparams->hupdate(ctxt->hashctxt2, mac, hashparams->digest_len);
   hok |= hashparams->hfinal(mac, ctxt->hashctxt2);
 
   curlx_free(ctxt);
