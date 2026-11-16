@@ -75,6 +75,7 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DUSE_WIN32_IDN=ON -DCURL_USE_OPENSSL=ON'
       TFLAGS: '--min=1600'
+      UPLOAD_MSYS: '1'
 
     # TEMP
     - job_name: 'CM VS2022, Release, x64, OpenSSL, Shared, Build-tests W/O 123c11'

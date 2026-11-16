@@ -58,6 +58,15 @@ echo '----------------'
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
 
+  if [ -n "${UPLOAD_MSYS:-}" ]; then
+    archive='msys.zip'
+    find /c/msys64 > files.tmp
+    echo 'Creating artifact (MSYS2)'
+    time 7z a "${archive}" -y -bb1 -bsp0 -tzip -i@files.tmp
+    rm files.tmp
+    appveyor PushArtifact "${archive}" &
+  fi
+
   PRJ_CFG='Debug'
   [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && PRJ_CFG='Release'
   [[ "${APPVEYOR_JOB_NAME}" = *'RelWithDebInfo'* ]] && PRJ_CFG='RelWithDebInfo'
