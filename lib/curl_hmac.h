@@ -29,9 +29,9 @@
   defined(USE_LIBSSH2) || defined(USE_SSL)
 
 typedef CURLcode (*HMAC_hinit)(void *context);
-typedef void (*HMAC_hupdate)(void *context,
-                             const void *input, size_t input_len);
-typedef void (*HMAC_hfinal)(uint8_t *digest, void *context);
+typedef CURLcode (*HMAC_hupdate)(void *context,
+                                 const void *input, size_t input_len);
+typedef CURLcode (*HMAC_hfinal)(uint8_t *digest, void *context);
 
 /* Per-hash function HMAC parameters. */
 struct HMAC_params {
