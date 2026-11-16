@@ -131,18 +131,14 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
       if(result == CURLE_AGAIN) {
         if(interval_ms && (Curl_pp_state_timeleft_ms(data, pp) <= 0))
           return CURLE_OPERATION_TIMEDOUT;
-        result = CURLE_OK;
+        return Curl_pgrsCheck(data);
       }
+      else if(!result)
+        result = Curl_pgrsCheck(data);
     }
   }
 
-  if(!result)
-    result = Curl_pgrsCheck(data);
-
-  if(!result)
-    result = pp->statemachine(data, data->conn);
-
-  return result;
+  return result ? result : pp->statemachine(data, data->conn);
 }
 
 /* initialize stuff to prepare for reading a fresh new response */
