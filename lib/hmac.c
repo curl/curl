@@ -104,6 +104,8 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   return ctxt;
 
 fail:
+  hashparams->hfinal(NULL, ctxt->hashctxt1);
+  hashparams->hfinal(NULL, ctxt->hashctxt2);
   curlx_free(ctxt);
   return NULL;
 }
