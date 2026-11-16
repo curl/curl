@@ -85,7 +85,10 @@ static CURLcode pp_poll(struct pingpong *pp,
                         bool want_send,
                         timediff_t timeout_ms)
 {
-  if(pp->do_poll)
+  if(!data->conn) {
+    return CURLE_FAILED_INIT;
+  }
+  else if(pp->do_poll)
     return pp->do_poll(data, pp->io_user_data, want_send, !want_send,
                        timeout_ms);
   else {
