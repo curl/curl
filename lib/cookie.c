@@ -1726,6 +1726,12 @@ static CURLcode cookie_output(struct Curl_easy *data,
     curlx_free(array);
   }
 
+  /* Catch buffered and earlier write errors before publishing the jar. */
+  if(fflush(out) || ferror(out)) {
+    result = CURLE_WRITE_ERROR;
+    goto error;
+  }
+
   if(!use_stdout) {
     int close_result = curlx_fclose(out);
     out = NULL;

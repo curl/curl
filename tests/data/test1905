@@ -27,10 +27,10 @@ Set-Cookie: secondcookie=present;
 http
 </server>
 <name>
-CURLOPT_COOKIELIST set to "FLUSH" of a shared cookie object
+Shared cookie FLUSH and cookie jar write failure
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER %LOGDIR/cookies%TESTNUMBER-failed
 </command>
 <features>
 cookies

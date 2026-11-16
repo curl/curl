@@ -22,6 +22,15 @@
  *
  ***************************************************************************/
 #include "first.h"
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
+#include <signal.h>
+
+#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) && \
+  defined(RLIMIT_FSIZE) && defined(SIGXFSZ)
+#define T1905_WRITE_FAILURE
+#endif
 
 static CURLcode test_lib1905(const char *URL)
 {
@@ -29,6 +38,7 @@ static CURLcode test_lib1905(const char *URL)
   CURL *curl = NULL;
   int unfinished;
   CURLM *multi;
+  CURLcode result = CURLE_OK;
 
   curl_global_init(CURL_GLOBAL_ALL);
 
@@ -82,6 +92,40 @@ static CURLcode test_lib1905(const char *URL)
   }
 
   curl_easy_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
+#ifdef T1905_WRITE_FAILURE
+  {
+    struct rlimit original, limited;
+    void (*handler)(int);
+    FILE *file;
+
+    unlink(libtest_arg3);
+    if(getrlimit(RLIMIT_FSIZE, &original)) {
+      result = TEST_ERR_FAILURE;
+      goto cleanup;
+    }
+    limited = original;
+    /* Force a partial write when the buffered cookie jar is flushed. */
+    limited.rlim_cur = 50;
+    handler = signal(SIGXFSZ, SIG_IGN);
+    if(setrlimit(RLIMIT_FSIZE, &limited)) {
+      signal(SIGXFSZ, handler);
+      result = TEST_ERR_FAILURE;
+      goto cleanup;
+    }
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, libtest_arg3);
+    curl_easy_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
+    setrlimit(RLIMIT_FSIZE, &original);
+    signal(SIGXFSZ, handler);
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, libtest_arg2);
+    file = curlx_fopen(libtest_arg3, FOPEN_READTEXT);
+    if(!file || fgetc(file) != EOF) {
+      curl_mfprintf(stderr, "partial cookie jar was published\n");
+      result = TEST_ERR_FAILURE;
+    }
+    if(file)
+      curlx_fclose(file);
+  }
+#endif
   curl_easy_setopt(curl, CURLOPT_SHARE, NULL);
 
   curl_multi_remove_handle(multi, curl);
@@ -91,5 +135,5 @@ cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return CURLE_OK;
+  return result;
 }
