@@ -441,12 +441,12 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     uint8_t *sha256_digest;
 
     /* compute sha256sum of public key */
-    sha256_digest = curlx_malloc(CURL_SHA256_DIGEST_LENGTH);
+    sha256_digest = curlx_malloc(CURL_SHA256_DIGEST_LEN);
     if(!sha256_digest)
       return CURLE_OUT_OF_MEMORY;
     encode = Curl_sha256it(sha256_digest, pubkey, pubkeylen);
     if(!encode)
-      encode = curlx_base64_encode(sha256_digest, CURL_SHA256_DIGEST_LENGTH,
+      encode = curlx_base64_encode(sha256_digest, CURL_SHA256_DIGEST_LEN,
                                    &cert_hash, &cert_hash_len);
     curlx_safefree(sha256_digest);
 

@@ -509,7 +509,7 @@ static CURLcode httpsig_sign_base(struct Curl_easy *data,
                          curlx_dyn_ptr(sig_base), curlx_dyn_len(sig_base),
                          raw_sig);
     if(!result)
-      *raw_sig_len = CURL_SHA256_DIGEST_LENGTH;
+      *raw_sig_len = CURL_SHA256_DIGEST_LEN;
     break;
   default:
     result = CURLE_BAD_FUNCTION_ARGUMENT;

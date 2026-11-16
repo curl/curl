@@ -2696,7 +2696,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
   timediff_t timeout_ms;
-  uint8_t info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t info_blob_digest[CURL_SHA256_DIGEST_LEN];
 
   DEBUGASSERT(multi);
 
@@ -2735,7 +2735,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(Curl_sha256it(info_blob_digest, ca_info_blob->data, ca_info_blob->len))
       return NULL;
     if(memcmp(share->CAinfo_blob_digest, info_blob_digest,
-              CURL_SHA256_DIGEST_LENGTH)) {
+              CURL_SHA256_DIGEST_LEN)) {
       return NULL;
     }
   }
@@ -2771,7 +2771,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
-  uint8_t digest[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t digest[CURL_SHA256_DIGEST_LEN];
   char *CAfile = NULL;
 
   DEBUGASSERT(multi);

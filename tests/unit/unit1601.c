@@ -60,7 +60,7 @@ static CURLcode test_unit1601(const char *arg)
 #endif
 #ifdef CURL_HAVE_SHA256
   {
-    uint8_t output[CURL_SHA256_DIGEST_LENGTH];
+    uint8_t output[CURL_SHA256_DIGEST_LEN];
 
     Curl_sha256it(output, NULL, 0);
     verify_memory(output, "\xe3\xb0\xc4\x42\x98\xfc\x1c\x14\x9a\xfb\xf4\xc8"
@@ -75,12 +75,12 @@ static CURLcode test_unit1601(const char *arg)
     Curl_sha256it(output, STRCONST("1"));
     verify_memory(output, "\x6b\x86\xb2\x73\xff\x34\xfc\xe1\x9d\x6b\x80\x4e"
                   "\xff\x5a\x3f\x57\x47\xad\xa4\xea\xa2\x2f\x1d\x49\xc0\x1e"
-                  "\x52\xdd\xb7\x87\x5b\x4b", CURL_SHA256_DIGEST_LENGTH);
+                  "\x52\xdd\xb7\x87\x5b\x4b", CURL_SHA256_DIGEST_LEN);
 
     Curl_sha256it(output, STRCONST("hello-you-fool"));
     verify_memory(output, "\xcb\xb1\x6a\x8a\xb9\xcb\xb9\x35\xa8\xcb\xa0\x2e"
                   "\x28\xc0\x26\x30\xd1\x19\x9c\x1f\x02\x17\xf4\x7c\x96\x20"
-                  "\xf3\xef\xe8\x27\x15\xae", CURL_SHA256_DIGEST_LENGTH);
+                  "\xf3\xef\xe8\x27\x15\xae", CURL_SHA256_DIGEST_LEN);
   }
 #endif
 #ifdef CURL_HAVE_SHA512_256
@@ -168,7 +168,7 @@ static CURLcode test_unit1601(const char *arg)
 #endif
 #ifdef CURL_HAVE_SHA256
   {
-    uint8_t output[CURL_SHA256_DIGEST_LENGTH];
+    uint8_t output[CURL_SHA256_DIGEST_LEN];
 
     Curl_hmacit(&Curl_HMAC_SHA256, NULL, 0, NULL, 0, output);
     verify_memory(output, "\xb6\x13\x67\x9a\x08\x14\xd9\xec\x77\x2f\x95\xd7"
@@ -185,13 +185,13 @@ static CURLcode test_unit1601(const char *arg)
                 STRCONST("Pa55worD"), STRCONST("1"), output);
     verify_memory(output, "\x8c\x9d\x74\x0f\x32\xf7\xbb\xb7\xec\xe0\x07\x7e"
                   "\xc1\x8e\x1f\xdb\x17\x02\x6e\xaf\x9c\xcf\x76\x3d\x26\x88"
-                  "\x56\x6d\xc8\x07\xbf\x59", CURL_SHA256_DIGEST_LENGTH);
+                  "\x56\x6d\xc8\x07\xbf\x59", CURL_SHA256_DIGEST_LEN);
 
     Curl_hmacit(&Curl_HMAC_SHA256,
                 STRCONST("Pa55worD"), STRCONST("hello-you-fool"), output);
     verify_memory(output, "\xe4\x81\x63\x53\xab\xc6\x8c\x34\xd4\xa8\xe5\xc8"
                   "\xf3\x1d\x12\xbd\xaf\xd6\x58\x73\x11\xe9\xe6\xf9\x93\x2e"
-                  "\x0a\xba\x69\x49\x63\x8c", CURL_SHA256_DIGEST_LENGTH);
+                  "\x0a\xba\x69\x49\x63\x8c", CURL_SHA256_DIGEST_LEN);
   }
 #endif
 #endif /* feature using HMAC */

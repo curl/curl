@@ -41,7 +41,7 @@
 #define TIMESTAMP_SIZE 17
 
 /* hex-encoded with null-terminator */
-#define SHA256_HEX_LENGTH ((2 * CURL_SHA256_DIGEST_LENGTH) + 1)
+#define SHA256_HEX_LENGTH ((2 * CURL_SHA256_DIGEST_LEN) + 1)
 
 #define MAX_QUERY_COMPONENTS 128
 
@@ -52,7 +52,7 @@ struct pair {
 
 static void sha256_to_hex(char *dst, unsigned char *sha)
 {
-  Curl_hexencode(sha, CURL_SHA256_DIGEST_LENGTH,
+  Curl_hexencode(sha, CURL_SHA256_DIGEST_LEN,
                  (unsigned char *)dst, SHA256_HEX_LENGTH);
 }
 
@@ -1031,7 +1031,7 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
   char *request_type;
   char *credential_scope;
   char *str_to_sign;
-  uint8_t sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t sha_hash[CURL_SHA256_DIGEST_LEN];
   char sha_hex[SHA256_HEX_LENGTH];
   CURLcode result;
 
@@ -1113,8 +1113,8 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   const char *passwd = Curl_creds_passwd(data->state.creds);
   char *secret = NULL;
-  uint8_t sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
-  uint8_t sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  uint8_t sign0[CURL_SHA256_DIGEST_LEN] = { 0 };
+  uint8_t sign1[CURL_SHA256_DIGEST_LEN] = { 0 };
   char sha_hex[SHA256_HEX_LENGTH];
   char *auth_headers = NULL;
   char *user;
@@ -1213,7 +1213,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   const char *method = NULL;
   const char *payload_hash = NULL;
   size_t payload_hash_len = 0;
-  uint8_t sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t sha_hash[CURL_SHA256_DIGEST_LEN];
   char sha_hex[SHA256_HEX_LENGTH];
   char content_sha256_hdr[CONTENT_SHA256_HDR_LEN + 2] = ""; /* add \r\n */
   char *canonical_request = NULL;
