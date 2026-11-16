@@ -66,14 +66,11 @@ static CURLcode my_sha512_256_init(void *pctx)
  * @param input_len number of bytes in @a input
  * @return CURLE_OK if succeed, error code otherwise
  */
-static CURLcode my_sha512_256_update(void *pctx,
+static CURLcode my_sha512_256_update(void *ctx,
                                      const void *input, size_t input_len)
 {
-  EVP_MD_CTX ** const ctx = pctx;
-
-  if(!EVP_DigestUpdate(*ctx, input, input_len))
+  if(!EVP_DigestUpdate(ctx, input, input_len))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-
   return CURLE_OK;
 }
 

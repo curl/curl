@@ -52,10 +52,9 @@ static CURLcode my_sha256_init(void *pctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(void *pctx, const void *input, size_t input_len)
+static void my_sha256_update(void *ctx, const void *input, size_t input_len)
 {
-  EVP_MD_CTX ** const ctx = pctx;
-  EVP_DigestUpdate(*ctx, input, input_len);
+  EVP_DigestUpdate(ctx, input, input_len);
 }
 
 static void my_sha256_final(uint8_t *digest, void *pctx)
