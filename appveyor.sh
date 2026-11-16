@@ -47,7 +47,9 @@ if [ -n "${REVERT_PATCH:-}" ]; then
 fi
 
 echo '----------------'
-grep /usr/lib/perl5/core_perl/Time/HiRes.pm -F 'VERSION' || true
+find /usr -name HiRes.pm || true
+echo '----------------'
+grep -F 'VERSION' /usr/lib/perl5/core_perl/Time/HiRes.pm || true
 echo '----------------'
 head -n 30 /usr/lib/perl5/core_perl/Time/Changes || true
 echo '----------------'
