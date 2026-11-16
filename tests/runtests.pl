@@ -1969,10 +1969,6 @@ sub singletest {
 
     if($singletest_state{$runnerid} == ST_INIT) {
         my $logdir = getrunnerlogdir($runnerid);
-        if(-f "$logdir/$MEMDUMP") {
-            rename("$logdir/$MEMDUMP", "$logdir/$MEMDUMP.bak");
-            unlink("$logdir/$MEMDUMP.bak");
-        }
         # first, remove all lingering log & lock files
         if(!cleardir($logdir)) {
             #logmsg "Warning: $runnerid: cleardir($logdir) failed\n";
