@@ -14,5 +14,8 @@ unittest
 <name>
 dirslash unit tests
 </name>
+<command>
+%LOGDIR/unit%TESTNUMBER-state
+</command>
 </client>
 </testcase>
