@@ -84,7 +84,8 @@ static CURLcode my_md5_update(void *ctx, const void *input, size_t input_len)
   const byte *bytes = input;
   do {
     word32 ilen = (word32)CURLMIN(input_len, UINT32_MAX);
-    (void)wc_Md5Update(ctx, bytes, ilen);
+    if(wc_Md5Update(ctx, bytes, ilen))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
   } while(input_len);
