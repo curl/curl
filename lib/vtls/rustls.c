@@ -1516,7 +1516,6 @@ const struct Curl_ssl Curl_ssl_rustls = {
   cr_close,                        /* close_one */
   NULL,                            /* close_all */
   NULL,                            /* engines_list */
-  NULL,                            /* sha256sum */
   cr_recv,                         /* recv decrypted data */
   cr_send,                         /* send data to encrypt */
   NULL,                            /* get_channel_binding */

@@ -2239,27 +2239,6 @@ static CURLcode wssl_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode wssl_sha256sum(const void *input, size_t input_len,
-                               uint8_t *digest, size_t digest_len)
-{
-  wc_Sha256 ctx;
-  const byte *bytes;
-  (void)digest_len;
-  if(wc_InitSha256(&ctx))
-    return CURLE_FAILED_INIT;
-  bytes = input;
-  do {
-    word32 ilen = (word32)CURLMIN(input_len, UINT32_MAX);
-    if(wc_Sha256Update(&ctx, bytes, ilen))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    input_len -= ilen;
-    bytes += ilen;
-  } while(input_len);
-  if(wc_Sha256Final(&ctx, digest))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  return CURLE_OK;
-}
-
 static void *wssl_get_internals(struct ssl_connect_data *connssl,
                                 CURLINFO info)
 {
@@ -2306,7 +2285,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wssl_close,                      /* close_one */
   NULL,                            /* close_all */
   NULL,                            /* engines_list */
-  wssl_sha256sum,                  /* sha256sum */
   wssl_recv,                       /* recv decrypted data */
   wssl_send,                       /* send data to encrypt */
   NULL,                            /* get_channel_binding */

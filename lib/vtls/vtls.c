@@ -440,18 +440,11 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     size_t cert_hash_len = 0, pinned_hash_len;
     uint8_t *sha256_digest;
 
-    if(!Curl_ssl->sha256sum) {
-      /* without sha256 support, this cannot match */
-      return result;
-    }
-
     /* compute sha256sum of public key */
     sha256_digest = curlx_malloc(CURL_SHA256_DIGEST_LENGTH);
     if(!sha256_digest)
       return CURLE_OUT_OF_MEMORY;
-    encode = Curl_ssl->sha256sum(pubkey, pubkeylen,
-                                 sha256_digest, CURL_SHA256_DIGEST_LENGTH);
-
+    encode = Curl_sha256it(sha256_digest, pubkey, pubkeylen);
     if(!encode)
       encode = curlx_base64_encode(sha256_digest, CURL_SHA256_DIGEST_LENGTH,
                                    &cert_hash, &cert_hash_len);
@@ -656,7 +649,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_close,                    /* close_one */
   NULL,                              /* close_all */
   NULL,                              /* engines_list */
-  NULL,                              /* sha256sum */
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
   NULL,                              /* get_channel_binding */

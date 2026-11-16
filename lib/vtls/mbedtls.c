@@ -67,7 +67,6 @@
 #include "vtls/x509asn1.h"
 #include "connect.h" /* for the connect timeout */
 #include "curlx/strdup.h"
-#include "curl_sha256.h"
 
 /* ALPN for http2 */
 #if defined(USE_HTTP2) && defined(MBEDTLS_SSL_ALPN)
@@ -1654,23 +1653,6 @@ static bool mbedtls_data_pending(struct Curl_cfilter *cf,
   return mbedtls_ssl_get_bytes_avail(&backend->ssl) != 0;
 }
 
-static CURLcode mbedtls_sha256sum(const void *input, size_t input_len,
-                                  uint8_t *digest, size_t digest_len)
-{
-#if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
-  psa_status_t status;
-  size_t actual_len;
-  status = psa_hash_compute(PSA_ALG_SHA_256, input, input_len,
-                            digest, digest_len, &actual_len);
-  if(status != PSA_SUCCESS)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  return CURLE_OK;
-#else
-  (void)digest_len;
-  return Curl_sha256it(digest, input, input_len);
-#endif
-}
-
 static void *mbedtls_get_internals(struct ssl_connect_data *connssl,
                                    CURLINFO info)
 {
@@ -1716,7 +1698,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_close,                    /* close_one */
   NULL,                             /* close_all */
   NULL,                             /* engines_list */
-  mbedtls_sha256sum,                /* sha256sum */
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */
   NULL,                             /* get_channel_binding */
