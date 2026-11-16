@@ -53,6 +53,7 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   const uint8_t *bkey;
   uint8_t *hkey;
   uint8_t b;
+  CURLcode hok;
 
   /* Create HMAC context. */
   i = HMAC_CTXT_OFFSET + (2 * hashparams->ctxtsize) + hashparams->digest_len;
@@ -68,10 +69,11 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   if(key_len > hashparams->key_len_max) {
     if(hashparams->hinit(ctxt->hashctxt1))
       goto fail;
-    if(hashparams->hupdate(ctxt->hashctxt1, key, key_len))
-      goto fail;
+    hok = CURLE_OK;
+    hok |= hashparams->hupdate(ctxt->hashctxt1, key, key_len);
     hkey = (uint8_t *)ctxt->hashctxt2 + hashparams->ctxtsize;
-    if(hashparams->hfinal(hkey, ctxt->hashctxt1))
+    hok |= hashparams->hfinal(hkey, ctxt->hashctxt1);
+    if(hok)
       goto fail;
     key = hkey;
     key_len = hashparams->digest_len;
