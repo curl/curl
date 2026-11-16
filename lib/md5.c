@@ -272,9 +272,9 @@ CURLcode Curl_MD5_update(void *ctx, const void *input, size_t input_len)
   return CURLE_OK;
 }
 
-CURLcode Curl_MD5_final(void *ctx, uint8_t *result)
+CURLcode Curl_MD5_final(void *ctx, uint8_t *digest)
 {
-  my_md5_final(result, ctx);
+  my_md5_final(digest, ctx);
   curlx_free(ctx);
   return CURLE_OK;
 }
