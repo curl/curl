@@ -68,9 +68,11 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   if(key_len > hashparams->key_len_max) {
     if(hashparams->hinit(ctxt->hashctxt1))
       goto fail;
-    hashparams->hupdate(ctxt->hashctxt1, key, key_len);
+    if(hashparams->hupdate(ctxt->hashctxt1, key, key_len))
+      goto fail;
     hkey = (uint8_t *)ctxt->hashctxt2 + hashparams->ctxtsize;
-    hashparams->hfinal(hkey, ctxt->hashctxt1);
+    if(hashparams->hfinal(hkey, ctxt->hashctxt1))
+      goto fail;
     key = hkey;
     key_len = hashparams->digest_len;
   }
@@ -83,14 +85,18 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   bkey = key;
   for(i = 0; i < key_len; i++) {
     b = (uint8_t)(*bkey ^ hmac_ipad);
-    hashparams->hupdate(ctxt->hashctxt1, &b, 1);
+    if(hashparams->hupdate(ctxt->hashctxt1, &b, 1))
+      goto fail;
     b = (uint8_t)(*bkey++ ^ hmac_opad);
-    hashparams->hupdate(ctxt->hashctxt2, &b, 1);
+    if(hashparams->hupdate(ctxt->hashctxt2, &b, 1))
+      goto fail;
   }
 
   for(; i < hashparams->key_len_max; i++) {
-    hashparams->hupdate(ctxt->hashctxt1, &hmac_ipad, 1);
-    hashparams->hupdate(ctxt->hashctxt2, &hmac_opad, 1);
+    if(hashparams->hupdate(ctxt->hashctxt1, &hmac_ipad, 1))
+      goto fail;
+    if(hashparams->hupdate(ctxt->hashctxt2, &hmac_opad, 1))
+      goto fail;
   }
 
   /* Done, return pointer to HMAC context. */
