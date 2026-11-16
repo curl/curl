@@ -222,7 +222,8 @@ static CURLcode my_md5_update(void *pctx, const void *input, size_t input_len)
   const BYTE *bytes = input;
   do {
     DWORD ilen = (DWORD)CURLMIN(input_len, 0xffffffffUL);
-    CryptHashData(ctx->hHash, bytes, ilen, 0);
+    if(!CryptHashData(ctx->hHash, bytes, ilen, 0))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
   } while(input_len);
