@@ -2718,10 +2718,8 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(share->CAinfo_blob_size != ca_info_blob->len) {
       return NULL;
     }
-    if(Curl_sha256it(info_blob_digest,
-                     ca_info_blob->data, ca_info_blob->len)) {
+    if(Curl_sha256it(info_blob_digest, ca_info_blob->data, ca_info_blob->len))
       return NULL;
-    }
     if(memcmp(share->CAinfo_blob_digest, info_blob_digest,
               CURL_SHA256_DIGEST_LENGTH)) {
       return NULL;
