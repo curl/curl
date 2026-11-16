@@ -443,8 +443,7 @@ ngtcp2_ssize Curl_ngtcp2_conn_writev_stream(
   if(ntp2->state == CURL_NGTCP2_CLOSE_ONLY)
     return ntp2_error(ntp2);
 
-  may_coalesce = was_coalescing ||
-    !!(flags & NGTCP2_WRITE_STREAM_FLAG_MORE);
+  may_coalesce = was_coalescing || !!(flags & NGTCP2_WRITE_STREAM_FLAG_MORE);
   if((rv < 0) && may_coalesce && !ntp2_is_continuation(rv)) {
     ntp2_set_close_only(ntp2, rv);
     return rv;
