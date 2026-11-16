@@ -469,7 +469,6 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   ctxt = Curl_MD5_init();
   if(!ctxt) {
     curlx_free(spn);
-
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -485,7 +484,6 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   ctxt = Curl_MD5_init();
   if(!ctxt) {
     curlx_free(spn);
-
     return CURLE_OUT_OF_MEMORY;
   }
 
