@@ -52,6 +52,10 @@ static CURLcode test_unit1699(const char *arg)
 
   int fails = 0;
   unsigned int i;
+  CURL *easy;
+  FILE *out;
+  char *tempstore = NULL;
+  const char *filename = "log/unit1699-state";
 
   for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
     char *dir = dirslash(tests[i].in);
@@ -64,6 +68,31 @@ static CURLcode test_unit1699(const char *arg)
   }
 
   abort_if(fails, "dirslash tests failed");
+
+  abort_unless(curl_global_init(CURL_GLOBAL_ALL) == CURLE_OK,
+               "global init failed");
+  easy = curl_easy_init();
+  abort_unless(easy, "easy init failed");
+  out = curlx_fopen(filename, FOPEN_WRITETEXT);
+  abort_unless(out, "create original file failed");
+  fputc('x', out);
+  curlx_fclose(out);
+
+  abort_unless(Curl_fopen(easy, filename, &out, &tempstore) == CURLE_OK,
+               "open replacement failed");
+  curlx_fclose(out);
+  /* Abandon the replacement, as on a failed save. */
+  if(tempstore)
+    unlink(tempstore);
+  curlx_free(tempstore);
+  out = curlx_fopen(filename, FOPEN_READTEXT);
+  abort_unless(out, "open original file failed");
+  fail_unless(fgetc(out) == 'x' && fgetc(out) == EOF,
+              "abandoned replacement must preserve original contents");
+  curlx_fclose(out);
+  unlink(filename);
+  curl_easy_cleanup(easy);
+  curl_global_cleanup();
 
   UNITTEST_END_SIMPLE
 }
