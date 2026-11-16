@@ -243,6 +243,32 @@ static CURLcode t643_cyclic_add(void)
   return CURLE_OK;
 }
 
+static CURLcode t643_nested_add(void)
+{
+  CURL *curl = curl_easy_init();
+  curl_mime *mime = curl_mime_init(curl);
+  curl_mimepart *part = curl_mime_addpart(mime);
+  curl_mime *submime = curl_mime_init(curl);
+  curl_mimepart *subpart = curl_mime_addpart(submime);
+  curl_mime *subsubmime = curl_mime_init(curl);
+  CURLcode result = curl_mime_subparts(part, submime);
+
+  if(!result)
+    result = curl_mime_subparts(subpart, subsubmime);
+  if(!result)
+    /* replacing the subtree with a part of itself must fail */
+    result = curl_mime_subparts(part, subsubmime);
+  if(result == CURLE_BAD_FUNCTION_ARGUMENT)
+    /* and leave the part's subparts in place */
+    result = curl_mime_subparts(part, submime);
+  else
+    result = TEST_ERR_FAILURE;
+
+  curl_mime_free(mime);
+  curl_easy_cleanup(curl);
+  return result;
+}
+
 static CURLcode test_lib643(const char *URL)
 {
   CURLcode result;
@@ -258,6 +284,9 @@ static CURLcode test_lib643(const char *URL)
 
   if(!result)
     result = t643_cyclic_add();
+
+  if(!result)
+    result = t643_nested_add();
 
   curl_global_cleanup();
 
