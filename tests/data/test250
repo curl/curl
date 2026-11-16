@@ -36,7 +36,7 @@ ftp
 FTP dir list PASV with slow response
 </name>
 <command option="binary-trace">
-ftp://%HOSTIP:%FTPPORT/
+ftp://%HOSTIP:%FTPPORT/ --trace-config ftp,tcp,multi
 </command>
 </client>
 
@@ -49,5 +49,8 @@ EPSV
 TYPE A
 LIST
 </protocol>
+<errorcode>
+100000
+</errorcode>
 </verify>
 </testcase>
