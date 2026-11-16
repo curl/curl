@@ -180,7 +180,7 @@ static CURLcode my_sha256_update(void *ctx,
   const uint8_t *bytes = input;
   do {
     CC_LONG ilen = (CC_LONG)CURLMIN(input_len, UINT32_MAX);
-    CC_SHA256_Update(ctx, bytes, ilen);
+    CC_SHA256_Update(ctx, bytes, ilen);  /* always returns 1 */
     input_len -= ilen;
     bytes += ilen;
   } while(input_len);
@@ -189,7 +189,7 @@ static CURLcode my_sha256_update(void *ctx,
 
 static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 {
-  (void)CC_SHA256_Final(digest, ctx);
+  (void)CC_SHA256_Final(digest, ctx);  /* always returns 1 */
   return CURLE_OK;
 }
 

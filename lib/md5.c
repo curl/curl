@@ -179,7 +179,7 @@ static CURLcode my_md5_update(void *ctx, const void *input, size_t input_len)
   const uint8_t *bytes = input;
   do {
     CC_LONG ilen = (CC_LONG)CURLMIN(input_len, UINT32_MAX);
-    CC_MD5_Update(ctx, bytes, ilen);
+    CC_MD5_Update(ctx, bytes, ilen);  /* always returns 1 */
     input_len -= ilen;
     bytes += ilen;
   } while(input_len);
@@ -188,7 +188,7 @@ static CURLcode my_md5_update(void *ctx, const void *input, size_t input_len)
 
 static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 {
-  CC_MD5_Final(digest, ctx);
+  CC_MD5_Final(digest, ctx);  /* always returns 1 */
   return CURLE_OK;
 }
 
