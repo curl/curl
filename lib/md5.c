@@ -288,15 +288,14 @@ void *Curl_MD5_init(void)
 
 CURLcode Curl_MD5_update(void *ctx, const void *input, size_t input_len)
 {
-  my_md5_update(ctx, input, input_len);
-  return CURLE_OK;
+  return my_md5_update(ctx, input, input_len);
 }
 
 CURLcode Curl_MD5_final(void *ctx, uint8_t *digest)
 {
-  my_md5_final(digest, ctx);
+  CURLcode result = my_md5_final(digest, ctx);
   curlx_free(ctx);
-  return CURLE_OK;
+  return result;
 }
 
 #endif /* CURL_HAVE_MD5 */
