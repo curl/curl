@@ -465,6 +465,7 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
                               size_t hlen) /* length of hostname */
 {
   size_t len;
+  char *hp;
   DEBUGASSERT(*hostname == '[');
   if(hlen < 4) /* '[::]' is the shortest possible valid string */
     return CURLUE_BAD_IPV6;
@@ -472,22 +473,24 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
   hlen -= 2;
 
   /* only valid IPv6 letters are ok */
-  len = strspn(hostname, "0123456789abcdefABCDEF:.");
+  for(hp = hostname, len = 0;
+      ISXDIGIT(*hp) || (*hp == ':') || (*hp == '.');
+      len++, hp++)
+    ;
 
   if(hlen != len) {
-    hlen = len;
     if(hostname[len] == '%') {
       /* this could now be '%[zone id]' */
-      char zoneid[MAX_ZONEID_LEN];
       int i = 0;
-      char *h = &hostname[len + 1];
-      while(!invalid_host_char[(unsigned char)*h] && (*h != ']') &&
-            (i < (MAX_ZONEID_LEN - 1)))
-        zoneid[i++] = *h++;
-      if(!i || (']' != *h))
+      hp = &hostname[len + 1];
+      while(!invalid_host_char[(unsigned char)*hp] && (*hp != ']') &&
+            (i < (MAX_ZONEID_LEN - 1))) {
+        i++;
+        hp++;
+      }
+      if(!i || (']' != *hp))
         return CURLUE_BAD_IPV6;
-      zoneid[i] = 0;
-      u->zoneid = curlx_strdup(zoneid);
+      u->zoneid = curlx_memdup0(&hostname[len + 1], i);
       if(!u->zoneid)
         return CURLUE_OUT_OF_MEMORY;
       hostname[len] = ']'; /* insert end bracket */
@@ -496,6 +499,7 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
     else
       return CURLUE_BAD_IPV6;
     /* hostname is fine */
+    hlen = len;
   }
 
   /* Normalize the IPv6 address */
