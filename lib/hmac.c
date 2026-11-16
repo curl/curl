@@ -131,8 +131,6 @@ CURLcode Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac)
   if(result)
     goto out;
   result = hashparams->hfinal(mac, ctxt->hashctxt2);
-  if(result)
-    goto out;
 out:
   curlx_free(ctxt);
   return result;
