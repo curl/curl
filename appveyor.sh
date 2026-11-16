@@ -42,6 +42,12 @@ if [ -n "${REVERT_PATCH:-}" ]; then
   patch -p1 -R -i 123c11cbace41021968ec5bfff894a3dae281022.diff
 fi
 
+echo '----------------'
+grep /usr/lib/perl5/core_perl/Time/HiRes.pm -F 'VERSION' || true
+echo '----------------'
+head -n 30 /usr/lib/perl5/core_perl/Time/Changes || true
+echo '----------------'
+
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
