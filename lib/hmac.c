@@ -119,23 +119,20 @@ CURLcode Curl_HMAC_update(struct HMAC_context *ctxt,
 CURLcode Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac)
 {
   const struct HMAC_params *hashparams = ctxt->hash;
-  CURLcode result;
+  CURLcode hok;
 
   /* Do not get output if called with a NULL parameter: only release
      storage. */
   if(!mac)
     mac = (uint8_t *)ctxt->hashctxt2 + ctxt->hash->ctxtsize;
 
-  result = hashparams->hfinal(mac, ctxt->hashctxt1);
-  if(result)
-    goto out;
-  result = hashparams->hupdate(ctxt->hashctxt2, mac, hashparams->digest_len);
-  if(result)
-    goto out;
-  result = hashparams->hfinal(mac, ctxt->hashctxt2);
-out:
+  hok = CURLE_OK;
+  hok |= hashparams->hfinal(mac, ctxt->hashctxt1);
+  hok |= hashparams->hupdate(ctxt->hashctxt2, mac, hashparams->digest_len);
+  hok |= hashparams->hfinal(mac, ctxt->hashctxt2);
+
   curlx_free(ctxt);
-  return result;
+  return hok ? CURLE_BAD_FUNCTION_ARGUMENT : hok;
 }
 
 /*
