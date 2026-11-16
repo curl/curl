@@ -120,32 +120,25 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   }
 
   if(!pp->overflow) {
-    timediff_t interval_ms = 0;
-
-    if(block) {
-      interval_ms = 1000;  /* use 1 second timeout intervals */
-      if(timeout_ms < interval_ms)
-        interval_ms = timeout_ms;
-    }
-
     /* Wake the multi socket API even when the server sends no response. */
     Curl_expire(data, timeout_ms, EXPIRE_SERVER_RESPONSE);
-    result = pp_poll(pp, data, pp->sendleft, !pp->sendleft, interval_ms);
+    if(block) {
+      timediff_t interval_ms = 1000; /* use 1 second timeout intervals */
+      if(timeout_ms < interval_ms)
+        interval_ms = timeout_ms;
 
-    if(result == CURLE_AGAIN) {
-      if(interval_ms && (Curl_pp_state_timeleft_ms(data, pp) <= 0))
-        return CURLE_OPERATION_TIMEDOUT;
-      result = CURLE_OK;
+      result = pp_poll(pp, data, pp->sendleft, !pp->sendleft, interval_ms);
+      if(result == CURLE_AGAIN) {
+        if(interval_ms && (Curl_pp_state_timeleft_ms(data, pp) <= 0))
+          return CURLE_OPERATION_TIMEDOUT;
+        return Curl_pgrsCheck(data);
+      }
+      else if(!result)
+        result = Curl_pgrsCheck(data);
     }
   }
 
-  if(!result)
-    result = Curl_pgrsCheck(data);
-
-  if(!result)
-    result = pp->statemachine(data, data->conn);
-
-  return result;
+  return result ? result : pp->statemachine(data, data->conn);
 }
 
 /* initialize stuff to prepare for reading a fresh new response */

@@ -1608,7 +1608,8 @@ static CURLcode cf_socket_adjust_pollset(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "adjust_pollset, !connected, POLLOUT fd=%"
                   FMT_SOCKET_T, ctx->sock);
     }
-    else if(!ctx->active) {
+    else if(cf->chain && cf->chain->parent) {
+      /* still in its own eyeballing filter chain */
       result = Curl_pollset_add_in(data, ps, ctx->sock);
       CURL_TRC_CF(data, cf, "adjust_pollset, !active, POLLIN fd=%"
                   FMT_SOCKET_T, ctx->sock);
