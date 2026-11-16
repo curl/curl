@@ -52,7 +52,8 @@ static CURLcode my_sha256_init(void *pctx)
   return CURLE_OK;
 }
 
-static CURLcode my_sha256_update(void *pctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *pctx,
+                                 const void *input, size_t input_len)
 {
   EVP_MD_CTX ** const ctx = pctx;
   return EVP_DigestUpdate(*ctx, input, input_len) ?
@@ -81,7 +82,8 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static CURLcode my_sha256_update(void *ctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *ctx,
+                                 const void *input, size_t input_len)
 {
   const byte *bytes = input;
   do {
@@ -113,7 +115,8 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static CURLcode my_sha256_update(void *ctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *ctx,
+                                 const void *input, size_t input_len)
 {
   sha256_update(ctx, input_len, input);
   return CURLE_OK;
@@ -143,7 +146,8 @@ static CURLcode my_sha256_init(void *pctx)
   return CURLE_OK;
 }
 
-static CURLcode my_sha256_update(void *ctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *ctx,
+                                 const void *input, size_t input_len)
 {
   if(psa_hash_update(ctx, input, input_len) != PSA_SUCCESS)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -170,7 +174,8 @@ static CURLcode my_sha256_init(void *ctx)
   return CURLE_OK;
 }
 
-static CURLcode my_sha256_update(void *ctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *ctx,
+                                 const void *input, size_t input_len)
 {
   const uint8_t *bytes = input;
   do {
@@ -213,7 +218,8 @@ static CURLcode my_sha256_init(void *pctx)
   return CURLE_OK;
 }
 
-static CURLcode my_sha256_update(void *pctx, const void *input, size_t input_len)
+static CURLcode my_sha256_update(void *pctx,
+                                 const void *input, size_t input_len)
 {
   struct sha256_ctx *ctx = pctx;
   const BYTE *bytes = input;
