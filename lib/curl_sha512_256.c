@@ -36,12 +36,12 @@ typedef EVP_MD_CTX *Curl_sha512_256_ctx;
 
 /* Initialize structure for SHA-512/256 calculation.
  *
- * @param context the calculation context
+ * @param pctx the calculation context
  * @return CURLE_OK if succeed, error code otherwise
  */
-static CURLcode my_sha512_256_init(void *context)
+static CURLcode my_sha512_256_init(void *pctx)
 {
-  EVP_MD_CTX ** const ctx = context;
+  EVP_MD_CTX ** const ctx = pctx;
 
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
@@ -61,15 +61,15 @@ static CURLcode my_sha512_256_init(void *context)
 
 /* Process portion of bytes.
  *
- * @param context the calculation context
+ * @param pctx the calculation context
  * @param input bytes to add to hash
  * @param input_len number of bytes in @a input
  * @return CURLE_OK if succeed, error code otherwise
  */
-static CURLcode my_sha512_256_update(void *context,
+static CURLcode my_sha512_256_update(void *pctx,
                                      const void *input, size_t input_len)
 {
-  EVP_MD_CTX ** const ctx = context;
+  EVP_MD_CTX ** const ctx = pctx;
 
   if(!EVP_DigestUpdate(*ctx, input, input_len))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -80,12 +80,12 @@ static CURLcode my_sha512_256_update(void *context,
 /* Finalise SHA-512/256 calculation, return digest.
  *
  * @param[out] digest returned, must be #CURL_SHA512_256_DIGEST_LENGTH bytes
- * @param context the calculation context
+ * @param pctx the calculation context
  * @return CURLE_OK if succeed, error code otherwise
  */
-static CURLcode my_sha512_256_final(uint8_t *digest, void *context)
+static CURLcode my_sha512_256_final(uint8_t *digest, void *pctx)
 {
-  EVP_MD_CTX ** const ctx = context;
+  EVP_MD_CTX ** const ctx = pctx;
   CURLcode result;
 
 /* Some NetBSD versions have a bug in SHA-512/256.

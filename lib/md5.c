@@ -34,9 +34,9 @@
 
 typedef EVP_MD_CTX *my_md5_ctx;
 
-static CURLcode my_md5_init(void *in)
+static CURLcode my_md5_init(void *pctx)
 {
-  EVP_MD_CTX ** const ctx = in;
+  EVP_MD_CTX ** const ctx = pctx;
 
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
@@ -50,15 +50,15 @@ static CURLcode my_md5_init(void *in)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *in, const void *input, size_t input_len)
+static void my_md5_update(void *pctx, const void *input, size_t input_len)
 {
-  EVP_MD_CTX ** const ctx = in;
+  EVP_MD_CTX ** const ctx = pctx;
   (void)EVP_DigestUpdate(*ctx, input, input_len);
 }
 
-static void my_md5_final(uint8_t *digest, void *in)
+static void my_md5_final(uint8_t *digest, void *pctx)
 {
-  EVP_MD_CTX ** const ctx = in;
+  EVP_MD_CTX ** const ctx = pctx;
   (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
@@ -123,10 +123,10 @@ static void my_md5_final(uint8_t *digest, void *ctx)
 
 typedef psa_hash_operation_t my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx)
+static CURLcode my_md5_init(void *pctx)
 {
-  psa_hash_operation_t *pctx = ctx;
-  *pctx = psa_hash_operation_init();
+  psa_hash_operation_t *ctx = pctx;
+  *ctx = psa_hash_operation_init();
   if(psa_hash_setup(pctx, PSA_ALG_MD5) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
@@ -185,9 +185,9 @@ struct md5_ctx {
 };
 typedef struct md5_ctx my_md5_ctx;
 
-static CURLcode my_md5_init(void *in)
+static CURLcode my_md5_init(void *pctx)
 {
-  struct md5_ctx *ctx = in;
+  struct md5_ctx *ctx = pctx;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return CURLE_OUT_OF_MEMORY;
@@ -201,9 +201,9 @@ static CURLcode my_md5_init(void *in)
   return CURLE_OK;
 }
 
-static void my_md5_update(void *in, const void *input, size_t input_len)
+static void my_md5_update(void *pctx, const void *input, size_t input_len)
 {
-  struct md5_ctx *ctx = in;
+  struct md5_ctx *ctx = pctx;
   const BYTE *bytes = input;
   do {
     DWORD ilen = (DWORD)CURLMIN(input_len, 0xffffffffUL);
@@ -213,9 +213,9 @@ static void my_md5_update(void *in, const void *input, size_t input_len)
   } while(input_len);
 }
 
-static void my_md5_final(uint8_t *digest, void *in)
+static void my_md5_final(uint8_t *digest, void *pctx)
 {
-  struct md5_ctx *ctx = in;
+  struct md5_ctx *ctx = pctx;
   DWORD length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == CURL_MD5_DIGEST_LEN)
@@ -254,28 +254,28 @@ CURLcode Curl_md5it(uint8_t *digest, const void *input, size_t input_len)
 
 void *Curl_MD5_init(void)
 {
-  my_md5_ctx *ctxt = curlx_malloc(sizeof(*ctxt));  /* Create MD5 context */
-  if(!ctxt)
-    return ctxt;
+  my_md5_ctx *ctx = curlx_malloc(sizeof(*ctx));  /* Create MD5 context */
+  if(!ctx)
+    return ctx;
 
-  if(my_md5_init(ctxt)) {
-    curlx_free(ctxt);
+  if(my_md5_init(ctx)) {
+    curlx_free(ctx);
     return NULL;
   }
 
-  return ctxt;
+  return ctx;
 }
 
-CURLcode Curl_MD5_update(void *context, const void *input, size_t input_len)
+CURLcode Curl_MD5_update(void *ctx, const void *input, size_t input_len)
 {
-  my_md5_update(context, input, input_len);
+  my_md5_update(ctx, input, input_len);
   return CURLE_OK;
 }
 
-CURLcode Curl_MD5_final(void *context, uint8_t *result)
+CURLcode Curl_MD5_final(void *ctx, uint8_t *result)
 {
-  my_md5_final(result, context);
-  curlx_free(context);
+  my_md5_final(result, ctx);
+  curlx_free(ctx);
   return CURLE_OK;
 }
 
