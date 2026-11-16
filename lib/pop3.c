@@ -553,7 +553,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
-  CURLcode result = CURLE_OK;
+  CURLcode result = CURLE_OK, hok;
   size_t i;
   void *ctxt;
   uint8_t digest[CURL_MD5_DIGEST_LEN];
