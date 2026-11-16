@@ -60,18 +60,25 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   char *response;
   const char *user = Curl_creds_user(creds);
   const char *passwd = Curl_creds_passwd(creds);
+  CURLcode hok;
 
   /* Compute the digest using the password as the key */
   ctxt = Curl_HMAC_init(&Curl_HMAC_MD5, passwd, strlen(passwd));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
+  hok = CURLE_OK;
+
   /* Update the digest with the given challenge */
   if(Curl_bufref_len(chlg))
-    Curl_HMAC_update(ctxt, Curl_bufref_uptr(chlg), Curl_bufref_len(chlg));
+    hok |= Curl_HMAC_update(ctxt,
+    Curl_bufref_uptr(chlg), Curl_bufref_len(chlg));
 
   /* Finalise the digest */
-  Curl_HMAC_final(ctxt, digest);
+  hok |= Curl_HMAC_final(ctxt, digest);
+
+  if(hok)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* Generate the response */
   response = curl_maprintf(
