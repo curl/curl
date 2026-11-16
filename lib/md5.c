@@ -143,14 +143,16 @@ static CURLcode my_md5_init(void *pctx)
 
 static CURLcode my_md5_update(void *ctx, const void *input, size_t input_len)
 {
-  (void)psa_hash_update(ctx, input, input_len);
+  if(psa_hash_update(ctx, input, input_len) != PSA_SUCCESS)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 }
 
 static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 {
   size_t actual_length;
-  (void)psa_hash_finish(ctx, digest, CURL_MD5_DIGEST_LEN, &actual_length);
+  if(psa_hash_finish(ctx, digest, CURL_MD5_DIGEST_LEN, &actual_length) != PSA_SUCCESS)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 }
 
