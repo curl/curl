@@ -176,8 +176,6 @@ struct Curl_ssl {
 
   struct curl_slist *(*engines_list)(struct Curl_easy *data);
 
-  CURLcode (*sha256sum)(const void *input, size_t inputlen,
-                        uint8_t *sha256sum, size_t sha256sumlen);
   CURLcode (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                          char *buf, size_t len, size_t *pnread);
   CURLcode (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,

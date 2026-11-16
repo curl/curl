@@ -2238,21 +2238,6 @@ static CURLcode gtls_random(struct Curl_easy *data,
   return rc ? CURLE_FAILED_INIT : CURLE_OK;
 }
 
-static CURLcode gtls_sha256sum(const void *input, size_t input_len,
-                               uint8_t *digest, size_t digest_len)
-{
-  struct sha256_ctx ctx;
-  sha256_init(&ctx);
-  sha256_update(&ctx, input_len, input);
-#if NETTLE_VERSION_MAJOR >= 4
-  (void)digest_len;
-  sha256_digest(&ctx, digest);
-#else
-  sha256_digest(&ctx, (unsigned int)digest_len, digest);
-#endif
-  return CURLE_OK;
-}
-
 static bool gtls_cert_status_request(void)
 {
   return TRUE;
@@ -2296,7 +2281,6 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   gtls_close,                    /* close_one */
   NULL,                          /* close_all */
   NULL,                          /* engines_list */
-  gtls_sha256sum,                /* sha256sum */
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */
   NULL,                          /* get_channel_binding */

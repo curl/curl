@@ -5585,28 +5585,6 @@ static CURLcode ossl_random(struct Curl_easy *data,
   return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
-static CURLcode ossl_sha256sum(const void *input, size_t input_len,
-                               uint8_t *digest, size_t digest_len)
-{
-  CURLcode result = CURLE_OK;
-  EVP_MD_CTX *ctx;
-  (void)digest_len;
-
-  ctx = EVP_MD_CTX_new();
-  if(!ctx)
-    return CURLE_OUT_OF_MEMORY;
-  if(!EVP_DigestInit_ex(ctx, EVP_sha256(), NULL)) {
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
-  if(!EVP_DigestUpdate(ctx, input, input_len) ||
-     !EVP_DigestFinal_ex(ctx, digest, NULL))
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-out:
-  EVP_MD_CTX_free(ctx);
-  return result;
-}
-
 static bool ossl_cert_status_request(void)
 {
 #ifndef OPENSSL_NO_OCSP
@@ -5666,7 +5644,6 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_close,               /* close_one */
   ossl_close_all,           /* close_all */
   ossl_engines_list,        /* engines_list */
-  ossl_sha256sum,           /* sha256sum */
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
   ossl_get_channel_binding  /* get_channel_binding */
