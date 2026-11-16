@@ -69,8 +69,7 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   if(key_len > hashparams->key_len_max) {
     if(hashparams->hinit(ctxt->hashctxt1))
       goto fail;
-    hok = CURLE_OK;
-    hok |= hashparams->hupdate(ctxt->hashctxt1, key, key_len);
+    hok = hashparams->hupdate(ctxt->hashctxt1, key, key_len);
     hkey = (uint8_t *)ctxt->hashctxt2 + hashparams->ctxtsize;
     hok |= hashparams->hfinal(hkey, ctxt->hashctxt1);
     if(hok)
@@ -126,8 +125,7 @@ CURLcode Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac)
   if(!mac)
     mac = (uint8_t *)ctxt->hashctxt2 + ctxt->hash->ctxtsize;
 
-  hok = CURLE_OK;
-  hok |= hashparams->hfinal(mac, ctxt->hashctxt1);
+  hok = hashparams->hfinal(mac, ctxt->hashctxt1);
   hok |= hashparams->hupdate(ctxt->hashctxt2, mac, hashparams->digest_len);
   hok |= hashparams->hfinal(mac, ctxt->hashctxt2);
 
