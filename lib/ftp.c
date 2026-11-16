@@ -4484,33 +4484,34 @@ static CURLcode cf_ftp_adjust_pollset(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   bool want_recv, want_send;
 
-  if(!ftpc)
+  if(!ftpc || (cf->chain->sock == CURL_SOCKET_BAD))
     return CURLE_OK;
 
   if(ftpc->chain_data.cf) {
-    if(ftpc->chain_data.cf->connected) {
+    if(ftpc->chain_data.cf->connected &&
+       (ftpc->chain_data.sock != CURL_SOCKET_BAD)) {
+      /* Move the POLL flags from the primary socket to the data one */
       Curl_pollset_check(data, ps, cf->chain->sock, &want_recv, &want_send);
-      if(ftpc->chain_data.sock != CURL_SOCKET_BAD) {
-        if(want_send)
-          result = Curl_pollset_add_out(data, ps, ftpc->chain_data.sock);
-        if(!result && want_recv)
-          result = Curl_pollset_add_in(data, ps, ftpc->chain_data.sock);
-        if(result)
-          return result;
-      }
+      if(want_send)
+        result = Curl_pollset_add_out(data, ps, ftpc->chain_data.sock);
+      if(!result && want_recv)
+        result = Curl_pollset_add_in(data, ps, ftpc->chain_data.sock);
+      if(result)
+        return result;
     }
     result = Curl_cfchain_adjust_pollset(data, &ftpc->chain_data, ps);
     if(result)
       return result;
+    Curl_pollset_remove(ps, cf->chain->sock);
   }
 
-  if(cf->chain->sock == CURL_SOCKET_BAD)
-    return CURLE_OK;
-  else if(ftpc->pp.sendleft)
-    return Curl_pollset_change(data, ps, cf->chain->sock,
-      CURL_POLL_IN | CURL_POLL_OUT, 0);
-  else
+  if(data->mstate != MSTATE_PERFORMING) {
+    if(ftpc->pp.sendleft)
+      return Curl_pollset_change(data, ps, cf->chain->sock,
+        CURL_POLL_IN | CURL_POLL_OUT, 0);
     return Curl_pollset_set_in_only(data, ps, cf->chain->sock);
+  }
+  return CURLE_OK;
 }
 
 static CURLcode cf_ftp_cntrl(struct Curl_cfilter *cf,
