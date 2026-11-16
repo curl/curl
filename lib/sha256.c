@@ -139,7 +139,7 @@ static CURLcode my_sha256_init(void *pctx)
   psa_hash_operation_t *ctx = pctx;
   *ctx = psa_hash_operation_init();
   if(psa_hash_setup(ctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
 

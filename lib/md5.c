@@ -137,7 +137,7 @@ static CURLcode my_md5_init(void *pctx)
   psa_hash_operation_t *ctx = pctx;
   *ctx = psa_hash_operation_init();
   if(psa_hash_setup(pctx, PSA_ALG_MD5) != PSA_SUCCESS)
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
 
