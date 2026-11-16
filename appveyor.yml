@@ -63,6 +63,7 @@ install:
   - ps: $env:PATH = "C:/msys64/usr/bin;$env:PATH_OLD"
 
 build_script:
+  - cmd: which sh
   - cmd: sh -c ./appveyor.sh
 
 init:

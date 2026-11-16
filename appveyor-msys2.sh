@@ -30,4 +30,6 @@ echo '------111'
 curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
   --location --proto-redir =https 'https://ci.appveyor.com/api/buildjobs/3xly5fhfwxai6r1q/artifacts/msys.zip' --output pkg.bin
 echo '------222'
-tar -xvJf pkg.bin
+tar -xJf pkg.bin
+ls -l
+mv msys64 /c/
