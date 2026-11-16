@@ -56,8 +56,7 @@ static void ntp2_set_close_only(struct curl_ngtcp2 *ntp2, ngtcp2_ssize rv)
 
 static ngtcp2_ssize ntp2_error(const struct curl_ngtcp2 *ntp2)
 {
-  return (ntp2->error_rv < 0) ? ntp2->error_rv :
-    NGTCP2_ERR_INVALID_STATE;
+  return (ntp2->error_rv < 0) ? ntp2->error_rv : NGTCP2_ERR_INVALID_STATE;
 }
 
 static bool ntp2_allow_normal(struct curl_ngtcp2 *ntp2)
@@ -132,12 +131,14 @@ ngtcp2_conn *Curl_ngtcp2_conn(const struct curl_ngtcp2 *ntp2)
   return ntp2->conn;
 }
 
-int Curl_ngtcp2_conn_client_new(
-  struct curl_ngtcp2 *ntp2, const ngtcp2_cid *dcid,
-  const ngtcp2_cid *scid, const ngtcp2_path *path,
-  uint32_t client_chosen_version, const ngtcp2_callbacks *callbacks,
-  const ngtcp2_settings *settings, const ngtcp2_transport_params *params,
-  const ngtcp2_mem *mem, void *user_data)
+int Curl_ngtcp2_conn_client_new(struct curl_ngtcp2 *ntp2,
+                                const ngtcp2_cid *dcid, const ngtcp2_cid *scid,
+                                const ngtcp2_path *path,
+                                uint32_t client_chosen_version,
+                                const ngtcp2_callbacks *callbacks,
+                                const ngtcp2_settings *settings,
+                                const ngtcp2_transport_params *params,
+                                const ngtcp2_mem *mem, void *user_data)
 {
   ngtcp2_conn *conn = NULL;
   int rv;
@@ -290,7 +291,7 @@ int Curl_ngtcp2_conn_handle_expiry(struct curl_ngtcp2 *ntp2,
   if(!ntp2_allow_normal(ntp2))
     return (int)ntp2_error(ntp2);
   return ntp2_check_terminal_int(ntp2,
-    ngtcp2_conn_handle_expiry(ntp2->conn, ts));
+                                 ngtcp2_conn_handle_expiry(ntp2->conn, ts));
 }
 
 int Curl_ngtcp2_conn_in_draining_period(struct curl_ngtcp2 *ntp2)
