@@ -92,7 +92,7 @@ static CURLcode my_md5_update(void *ctx, const void *input, size_t input_len)
   return CURLE_OK;
 }
 
-static void my_md5_final(uint8_t *digest, void *ctx)
+static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 {
   if(wc_Md5Final(ctx, digest))
     return CURLE_BAD_FUNCTION_ARGUMENT;
