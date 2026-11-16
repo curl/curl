@@ -137,7 +137,6 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
         result = Curl_pgrsCheck(data);
     }
   }
-
   return result ? result : pp->statemachine(data, data->conn);
 }
 
