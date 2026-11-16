@@ -96,7 +96,8 @@ static CURLcode my_sha256_update(void *ctx, const void *input, size_t input_len)
 
 static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 {
-  (void)wc_Sha256Final(ctx, digest);
+  if(wc_Sha256Final(ctx, digest))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 }
 
