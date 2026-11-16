@@ -230,15 +230,17 @@ static CURLcode my_sha256_update(void *pctx, const void *input, size_t input_len
 static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
   DWORD length = 0;
-  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == CURL_SHA256_DIGEST_LENGTH)
-    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  if(CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0) &&
+     length == CURL_SHA256_DIGEST_LENGTH &&
+     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0))
+    result = CURLE_OK;
   if(ctx->hHash)
     CryptDestroyHash(ctx->hHash);
   if(ctx->hCryptProv)
     CryptReleaseContext(ctx->hCryptProv, 0);
-  return CURLE_OK;
+  return result;
 }
 
 #endif
