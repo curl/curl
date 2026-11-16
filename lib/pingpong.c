@@ -82,18 +82,18 @@ static CURLcode pp_send(struct pingpong *pp,
 
 static CURLcode pp_poll(struct pingpong *pp,
                         struct Curl_easy *data,
-                        bool want_send, bool want_recv,
+                        bool want_send,
                         timediff_t timeout_ms)
 {
   if(pp->do_poll)
-    return pp->do_poll(data, pp->io_user_data, want_send, want_recv,
+    return pp->do_poll(data, pp->io_user_data, want_send, !want_send,
                        timeout_ms);
   else {
-    if(Curl_conn_data_pending(data))
+    if(!want_send && Curl_conn_data_pending(data))
       return CURLE_OK;
     else {
       curl_socket_t sock = data->conn->chain.sock;
-      int rc = Curl_socket_check(want_recv ? sock : CURL_SOCKET_BAD,
+      int rc = Curl_socket_check(!want_send ? sock : CURL_SOCKET_BAD,
                                  want_send ? sock : CURL_SOCKET_BAD,
                                  timeout_ms);
       if(rc == -1) {
@@ -127,7 +127,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
       if(timeout_ms < interval_ms)
         interval_ms = timeout_ms;
 
-      result = pp_poll(pp, data, pp->sendleft, !pp->sendleft, interval_ms);
+      result = pp_poll(pp, data, pp->sendleft, interval_ms);
       if(result == CURLE_AGAIN) {
         if(interval_ms && (Curl_pp_state_timeleft_ms(data, pp) <= 0))
           return CURLE_OPERATION_TIMEDOUT;
@@ -135,6 +135,11 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
       }
       else if(!result)
         result = Curl_pgrsCheck(data);
+    }
+    else {
+      result = pp_poll(pp, data, pp->sendleft, 0);
+      if(result == CURLE_AGAIN)
+        return CURLE_OK;
     }
   }
   return result ? result : pp->statemachine(data, data->conn);
