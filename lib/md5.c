@@ -260,11 +260,16 @@ CURLcode Curl_md5it(uint8_t *digest, const void *input, size_t input_len)
 {
   my_md5_ctx ctx;
   CURLcode result = my_md5_init(&ctx);
-  if(!result) {
-    my_md5_update(&ctx, input, input_len);
-    my_md5_final(digest, &ctx);
+  if(result)
+    return result;
+
+  result = my_md5_update(&ctx, input, input_len)
+  if(result) {
+    (void)my_md5_final(digest, &ctx);
+    return result;
   }
-  return result;
+
+  return my_md5_final(digest, &ctx);
 }
 
 void *Curl_MD5_init(void)

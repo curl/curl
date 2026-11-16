@@ -257,11 +257,16 @@ CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 {
   my_sha256_ctx ctx;
   CURLcode result = my_sha256_init(&ctx);
-  if(!result) {
-    my_sha256_update(&ctx, input, input_len);
-    my_sha256_final(digest, &ctx);
+  if(result)
+    return result;
+
+  result = my_sha256_update(&ctx, input, input_len);
+  if(result) {
+    (void)my_sha256_final(digest, &ctx);
+    return result;
   }
-  return result;
+
+  return my_sha256_final(digest, &ctx);
 }
 
 const struct HMAC_params Curl_HMAC_SHA256 = {
