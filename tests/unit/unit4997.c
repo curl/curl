@@ -88,8 +88,8 @@ static CURLcode test_unit4997(const char *arg)
   CURL *easy = NULL;
   struct Curl_easy *data;
   CURLcode result;
-  const char *oldcookie = "example.com\tFALSE\t/\tFALSE\t0\tsid\told";
-  const char *newcookie = "example.com\tFALSE\t/\tFALSE\t0\tsid\tnew";
+  static const char *oldcookie = "example.com\tFALSE\t/\tFALSE\t0\tsid\told";
+  static const char *newcookie = "example.com\tFALSE\t/\tFALSE\t0\tsid\tnew";
 
   UNITTEST_BEGIN_SIMPLE
 
