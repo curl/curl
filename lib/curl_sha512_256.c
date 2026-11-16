@@ -167,9 +167,7 @@ static CURLcode my_sha512_256_update(void *ctx,
                                      const void *input, size_t input_len)
 {
   DEBUGASSERT(input || (input_len == 0));
-
   sha512_256_update(ctx, input_len, input);
-
   return CURLE_OK;
 }
 
@@ -180,7 +178,6 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 #else
   sha512_256_digest(ctx, CURL_SHA512_256_DIGEST_LENGTH, digest);
 #endif
-
   return CURLE_OK;
 }
 
