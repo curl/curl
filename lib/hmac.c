@@ -159,6 +159,7 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
                      uint8_t *mac)
 {
   struct HMAC_context *ctxt;
+  CURLcode result;
 
   if(!hashparams->hinit)
     return CURLE_NOT_BUILT_IN;
@@ -168,12 +169,13 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
     return CURLE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
-  Curl_HMAC_update(ctxt, input, input_len);
+  result = Curl_HMAC_update(ctxt, input, input_len);
+  if(result) {
+    (void)Curl_HMAC_final(ctxt, mac);
+    return result;
+  }
 
-  /* Finalise the digest */
-  Curl_HMAC_final(ctxt, mac);
-
-  return CURLE_OK;
+  return Curl_HMAC_final(ctxt, mac);  /* Finalise the digest */
 }
 
 #endif /* AWS, httpsig or Digest and TLS */
