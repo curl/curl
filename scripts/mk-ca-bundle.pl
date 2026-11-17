@@ -439,7 +439,7 @@ print CRT <<EOT;
 ## SHA256: $newhash
 ##
 ## This file is subject to the terms of the Mozilla Public License, v. 2.0.
-## SPDX-License-Identifier: MPL-2.0
+## https://mozilla.org/MPL/2.0/
 ##
 EOT
 
