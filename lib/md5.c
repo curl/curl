@@ -198,8 +198,6 @@ static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 struct md5_ctx {
   BCRYPT_ALG_HANDLE hAlg;
   BCRYPT_HASH_HANDLE hHash;
-  unsigned char *pbHashObject;
-  ULONG cbHash;
 };
 typedef struct md5_ctx my_md5_ctx;
 
@@ -208,34 +206,15 @@ static CURLcode my_md5_init(void *pctx)
   struct md5_ctx *ctx = pctx;
   BCRYPT_ALG_HANDLE hAlg;
   BCRYPT_HASH_HANDLE hHash;
-  unsigned char *pbHashObject;
-  ULONG dwHashObject, dwHash, cbData;
 
   if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg,
                                                  BCRYPT_MD5_ALGORITHM,
                                                  NULL, 0)) ||
-     !BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
-                                       (unsigned char *)&dwHash,
-                                       sizeof(dwHash), &cbData, 0)) ||
-     !BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH,
-                                       (unsigned char *)&dwHashObject,
-                                       sizeof(dwHashObject), &cbData, 0)))
+    !BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash, NULL, 0, NULL, 0, 0)))
     return CURLE_FAILED_INIT;
-
-  pbHashObject = curlx_malloc(dwHashObject);
-  if(!pbHashObject)
-    return CURLE_OUT_OF_MEMORY;
-
-  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash, pbHashObject, dwHashObject,
-                                      NULL, 0, 0))) {
-    curlx_free(pbHashObject);
-    return CURLE_FAILED_INIT;
-  }
 
   ctx->hAlg = hAlg;
   ctx->hHash = hHash;
-  ctx->pbHashObject = pbHashObject;
-  ctx->cbHash = dwHash;
 
   return CURLE_OK;
 }
@@ -260,8 +239,8 @@ static CURLcode my_md5_final(uint8_t *digest, void *pctx)
   struct md5_ctx *ctx = pctx;
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if(ctx->cbHash <= CURL_MD5_DIGEST_LEN &&
-     BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash, digest, ctx->cbHash, 0)))
+  if(BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash,
+                                     digest, CURL_MD5_DIGEST_LEN, 0)))
     result = CURLE_OK;
 
   BCryptDestroyHash(ctx->hHash);
@@ -269,9 +248,6 @@ static CURLcode my_md5_final(uint8_t *digest, void *pctx)
 
   BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
   ctx->hAlg = NULL;
-
-  curlx_safefree(ctx->pbHashObject);
-  ctx->cbHash = 0;
 
   return result;
 }
