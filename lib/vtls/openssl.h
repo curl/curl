@@ -27,7 +27,7 @@
 
 #ifdef USE_OPENSSL
 
-#ifdef USE_WIN32_CRYPTO
+#ifdef _WIN32
 #include <wincrypt.h>
 /* If <wincrypt.h> is included directly, or indirectly via <schannel.h>,
  * <winldap.h>, <iphlpapi.h>, or something else, <wincrypt.h> does this:
@@ -58,7 +58,7 @@
 #undef PKCS7_SIGNER_INFO
 #undef OCSP_REQUEST
 #undef OCSP_RESPONSE
-#endif /* USE_WIN32_CRYPTO */
+#endif /* _WIN32 */
 
 /*
  * This header should only be needed to get included by vtls.c, openssl.c
