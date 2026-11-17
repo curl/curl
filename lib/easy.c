@@ -1043,6 +1043,12 @@ CURL *curl_easy_duphandle(CURL *curl)
 
     outcurl->progress.hide     = data->progress.hide;
     outcurl->progress.callback = data->progress.callback;
+    Curl_rlimit_change(&outcurl->progress.ul.rlimit,
+                        data->progress.ul.rlimit.rate_per_sec,
+                        data->progress.ul.rlimit.burst_per_sec);
+    Curl_rlimit_change(&outcurl->progress.dl.rlimit,
+                        data->progress.dl.rlimit.rate_per_sec,
+                        data->progress.dl.rlimit.burst_per_sec);
 
 #ifndef CURL_DISABLE_COOKIES
     outcurl->state.cookielist = NULL;
