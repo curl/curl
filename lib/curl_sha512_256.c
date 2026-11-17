@@ -136,13 +136,13 @@ static CURLcode my_sha512_256_update(void *ctx,
                                      const void *input, size_t input_len)
 {
   const byte *bytes = input;
-  while(input_len) {
+  do {
     word32 ilen = (word32)CURLMIN(input_len, UINT_MAX);
     if(wc_Sha512_256Update(ctx, bytes, ilen))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
-  }
+  } while(input_len);
   return CURLE_OK;
 }
 

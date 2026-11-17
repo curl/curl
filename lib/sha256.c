@@ -86,13 +86,13 @@ static CURLcode my_sha256_update(void *ctx,
                                  const void *input, size_t input_len)
 {
   const byte *bytes = input;
-  while(input_len) {
+  do {
     word32 ilen = (word32)CURLMIN(input_len, UINT32_MAX);
     if(wc_Sha256Update(ctx, bytes, ilen))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
-  }
+  } while(input_len);
   return CURLE_OK;
 }
 
@@ -178,12 +178,12 @@ static CURLcode my_sha256_update(void *ctx,
                                  const void *input, size_t input_len)
 {
   const uint8_t *bytes = input;
-  while(input_len) {
+  do {
     CC_LONG ilen = (CC_LONG)CURLMIN(input_len, UINT32_MAX);
     CC_SHA256_Update(ctx, bytes, ilen);  /* always returns 1 */
     input_len -= ilen;
     bytes += ilen;
-  }
+  } while(input_len);
   return CURLE_OK;
 }
 
@@ -226,14 +226,14 @@ static CURLcode my_sha256_update(void *pctx,
 {
   struct sha256_ctx *ctx = pctx;
   const BYTE *bytes = input;
-  while(input_len) {
+  do {
     ULONG ilen = (ULONG)CURLMIN(input_len, ULONG_MAX);
     if(!BCRYPT_SUCCESS(BCryptHashData(ctx->hHash, CURL_UNCONST(bytes),
                                       ilen, 0)))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
-  }
+  } while(input_len);
   return CURLE_OK;
 }
 
