@@ -1221,7 +1221,8 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
     data->req.reader_started = TRUE;
   }
 
-  if(Curl_rlimit_active(&data->progress.ul.rlimit)) {
+  if(Curl_rlimit_active(&data->progress.ul.rlimit) &&
+     !(data->conn->scheme->flags & PROTOPT_NONETWORK)) {
     curl_off_t ul_avail = Curl_rlimit_avail(&data->progress.ul.rlimit, NULL);
     if(ul_avail <= 0) {
       result = CURLE_OK;
