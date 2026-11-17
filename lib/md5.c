@@ -195,8 +195,8 @@ static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 #elif defined(USE_WIN32_MD5)
 #include <wincrypt.h>
 
-static BCRYPT_ALG_HANDLE hAlg;
-static bool hAlgInit = FALSE;
+static BCRYPT_ALG_HANDLE hAlgMD5;
+static bool hAlgMD5Init = FALSE;
 
 struct md5_ctx {
   BCRYPT_HASH_HANDLE hHash;
@@ -208,8 +208,8 @@ typedef struct md5_ctx my_md5_ctx;
 #if 0
 static CURLcode my_md5_exit(void)
 {
-  if(hAlg)
-    (void)BCryptCloseAlgorithmProvider(hAlg, 0);
+  if(hAlgMD5)
+    (void)BCryptCloseAlgorithmProvider(hAlgMD5, 0);
 }
 #endif
 
@@ -220,19 +220,20 @@ static CURLcode my_md5_init(void *pctx)
   unsigned char *pbHashObject;
   ULONG dwHashObject, dwHash, cbData;
 
-  if(!hAlgInit) {
-    if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_MD5_ALGORITHM,
+  if(!hAlgMD5Init) {
+    if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlgMD5,
+                                                   BCRYPT_MD5_ALGORITHM,
                                                    NULL, 0)))
-      hAlg = NULL;
-    hAlgInit = TRUE;
+      hAlgMD5 = NULL;
+    hAlgMD5Init = TRUE;
   }
 
-  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
+  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlgMD5, BCRYPT_HASH_LENGTH,
                      (unsigned char *)&dwHash, sizeof(dwHash),
                      &cbData, 0)))
     return CURLE_FAILED_INIT;
 
-  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH,
+  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlgMD5, BCRYPT_OBJECT_LENGTH,
                      (unsigned char *)&dwHashObject, sizeof(dwHashObject),
                      &cbData, 0)))
     return CURLE_FAILED_INIT;
@@ -241,8 +242,8 @@ static CURLcode my_md5_init(void *pctx)
   if(!pbHashObject)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash, pbHashObject, dwHashObject,
-                     NULL, 0, 0))) {
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlgMD5, &hHash,
+                     pbHashObject, dwHashObject, NULL, 0, 0))) {
     curlx_free(pbHashObject);
     return CURLE_FAILED_INIT;
   }

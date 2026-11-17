@@ -196,24 +196,62 @@ static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 #elif defined(USE_WIN32_SHA256)
 #include <wincrypt.h>
 
+static BCRYPT_ALG_HANDLE hAlgSHA256;
+static bool hAlgSHA256Init = FALSE;
+
 struct sha256_ctx {
-  HCRYPTPROV hCryptProv;
-  HCRYPTHASH hHash;
+  BCRYPT_HASH_HANDLE hHash;
+  unsigned char *pbHashObject;
+  ULONG cbHash;
 };
 typedef struct sha256_ctx my_sha256_ctx;
+
+#if 0
+static CURLcode my_sha256_exit(void)
+{
+  if(hAlgSHA256)
+    (void)BCryptCloseAlgorithmProvider(hAlgSHA256, 0);
+}
+#endif
 
 static CURLcode my_sha256_init(void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
-  if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
-                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+  BCRYPT_HASH_HANDLE hHash;
+  unsigned char *pbHashObject;
+  ULONG dwHashObject, dwHash, cbData;
+
+  if(!hAlgSHA256Init) {
+    if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlgSHA256,
+                                                   BCRYPT_SHA256_ALGORITHM,
+                                                   NULL, 0)))
+      hAlgSHA256 = NULL;
+    hAlgSHA256Init = TRUE;
+  }
+
+  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlgSHA256, BCRYPT_HASH_LENGTH,
+                     (unsigned char *)&dwHash, sizeof(dwHash),
+                     &cbData, 0)))
+    return CURLE_FAILED_INIT;
+
+  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlgSHA256, BCRYPT_OBJECT_LENGTH,
+                     (unsigned char *)&dwHashObject, sizeof(dwHashObject),
+                     &cbData, 0)))
+    return CURLE_FAILED_INIT;
+
+  pbHashObject = curlx_malloc(dwHashObject);
+  if(!pbHashObject)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash)) {
-    CryptReleaseContext(ctx->hCryptProv, 0);
-    ctx->hCryptProv = 0;
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlgSHA256, &hHash,
+                     pbHashObject, dwHashObject, NULL, 0, 0))) {
+    curlx_free(pbHashObject);
     return CURLE_FAILED_INIT;
   }
+
+  ctx->hHash = hHash;
+  ctx->pbHashObject = pbHashObject;
+  ctx->cbHash = dwHash;
 
   return CURLE_OK;
 }
@@ -224,8 +262,9 @@ static CURLcode my_sha256_update(void *pctx,
   struct sha256_ctx *ctx = pctx;
   const BYTE *bytes = input;
   do {
-    DWORD ilen = (DWORD)CURLMIN(input_len, 0xffffffffUL);
-    if(!CryptHashData(ctx->hHash, bytes, ilen, 0))
+    ULONG ilen = (ULONG)CURLMIN(input_len, ULONG_MAX);
+    if(!BCRYPT_SUCCESS(BCryptHashData(ctx->hHash, CURL_UNCONST(bytes),
+                                      ilen, 0)))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
@@ -237,15 +276,18 @@ static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-  DWORD length = 0;
-  if(CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0) &&
-     length == CURL_SHA256_DIGEST_LENGTH &&
-     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0))
+
+  if(ctx->cbHash <= CURL_SHA256_DIGEST_LENGTH &&
+     BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash, digest, ctx->cbHash, 0)))
     result = CURLE_OK;
-  if(ctx->hHash)
-    CryptDestroyHash(ctx->hHash);
-  if(ctx->hCryptProv)
-    CryptReleaseContext(ctx->hCryptProv, 0);
+
+  BCryptDestroyHash(ctx->hHash);
+  ctx->hHash = NULL;
+
+  curlx_free(ctx->pbHashObject);
+  ctx->pbHashObject = NULL;
+  ctx->cbHash = 0;
+
   return result;
 }
 
