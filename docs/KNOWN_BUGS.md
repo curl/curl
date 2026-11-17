@@ -482,7 +482,7 @@ triggers for idle connections in the pool.
 
 The main impact in QUIC is that performance is decreased should the
 connection be reused for another transfer. The server may have shrunk
-its connection windows due to the lost ACKs and it takes time to
+its connection windows due to the lost acknowledgements and it takes time to
 open them up again.
 
 [curl issue 23967](https://github.com/curl/curl/issues/23967)
