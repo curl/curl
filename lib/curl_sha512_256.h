@@ -34,7 +34,7 @@
    4. USE_MBEDTLS (not supported)
    5. USE_RUSTLS (not supported)
    6. __APPLE__ (not supported)
-   7. USE_WIN32_CRYPTO (not supported)
+   7. _WIN32 (not supported)
  */
 
 #ifdef USE_OPENSSL

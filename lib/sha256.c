@@ -194,24 +194,27 @@ static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 }
 
 #elif defined(USE_WIN32_SHA256)
-#include <wincrypt.h>
+#include <bcrypt.h>
 
 struct sha256_ctx {
-  HCRYPTPROV hCryptProv;
-  HCRYPTHASH hHash;
+  BCRYPT_ALG_HANDLE hAlg;
+  BCRYPT_HASH_HANDLE hHash;
 };
 typedef struct sha256_ctx my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
-  if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
-                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-    return CURLE_OUT_OF_MEMORY;
 
-  if(!CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash)) {
-    CryptReleaseContext(ctx->hCryptProv, 0);
-    ctx->hCryptProv = 0;
+  ctx->hAlg = ctx->hHash = NULL;
+  if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&ctx->hAlg,
+                                                 BCRYPT_SHA256_ALGORITHM,
+                                                 NULL, 0)))
+    return CURLE_FAILED_INIT;
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(ctx->hAlg, &ctx->hHash,
+                                      NULL, 0, NULL, 0, 0))) {
+    BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
+    ctx->hAlg = NULL;
     return CURLE_FAILED_INIT;
   }
 
@@ -224,8 +227,9 @@ static CURLcode my_sha256_update(void *pctx,
   struct sha256_ctx *ctx = pctx;
   const BYTE *bytes = input;
   do {
-    DWORD ilen = (DWORD)CURLMIN(input_len, 0xffffffffUL);
-    if(!CryptHashData(ctx->hHash, bytes, ilen, 0))
+    ULONG ilen = (ULONG)CURLMIN(input_len, ULONG_MAX);
+    if(!BCRYPT_SUCCESS(BCryptHashData(ctx->hHash, CURL_UNCONST(bytes),
+                                      ilen, 0)))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
@@ -237,15 +241,15 @@ static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-  DWORD length = 0;
-  if(CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0) &&
-     length == CURL_SHA256_DIGEST_LENGTH &&
-     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0))
+  if(BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash,
+                                     digest, CURL_SHA256_DIGEST_LENGTH, 0)))
     result = CURLE_OK;
-  if(ctx->hHash)
-    CryptDestroyHash(ctx->hHash);
-  if(ctx->hCryptProv)
-    CryptReleaseContext(ctx->hCryptProv, 0);
+  BCryptDestroyHash(ctx->hHash);
+  ctx->hHash = NULL;
+  if(ctx->hAlg) {
+    BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
+    ctx->hAlg = NULL;
+  }
   return result;
 }
 

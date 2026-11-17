@@ -34,7 +34,7 @@
    4. USE_MBEDTLS
    5. USE_RUSTLS (not supported)
    6. __APPLE__
-   7. USE_WIN32_CRYPTO
+   7. _WIN32
  */
 
 #ifdef USE_OPENSSL
@@ -83,7 +83,7 @@
 #define CURL_HAVE_MD5
 #endif
 
-#if !defined(CURL_HAVE_MD5) && defined(USE_WIN32_CRYPTO)
+#if !defined(CURL_HAVE_MD5) && defined(_WIN32)
 #define USE_WIN32_MD5
 #define CURL_HAVE_MD5
 #endif
