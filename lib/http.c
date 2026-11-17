@@ -1612,16 +1612,10 @@ CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
 static CURLcode http_write_header(struct Curl_easy *data,
                                   const char *hd, size_t hdlen)
 {
-  CURLcode result;
-  int writetype;
-
-  /* now, only output this if the header AND body are requested:
-   */
-  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
-
-  writetype = CLIENTWRITE_HEADER |
+  int writetype = CLIENTWRITE_HEADER |
     ((data->req.httpcode / 100 == 1) ? CLIENTWRITE_1XX : 0);
 
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
   return Curl_client_write(data, writetype, hd, hdlen);
 }
 
