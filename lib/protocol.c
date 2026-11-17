@@ -435,8 +435,11 @@ const struct Curl_scheme Curl_scheme_wss = {
   PORT_HTTPS                            /* defport */
 };
 
-#define MKPROT(a,b,c,d) ((((uint32_t)(a))<<24) | (((uint32_t)(b))<<16) | \
-                         (((uint32_t)(c))<<8) | ((uint32_t)(d)))
+#define MKPROT(a, b, c, d) \
+  ((((uint32_t)(a)) << 24) | \
+   (((uint32_t)(b)) << 16) | \
+   (((uint32_t)(c)) <<  8) | \
+    ((uint32_t)(d)))
 
 /* Since LWR() does a shortcut trick and just ORs 0x20, that works fine for
    A-Z ascii letters but not for '3' as in pop3. Characters outside of the A-Z
