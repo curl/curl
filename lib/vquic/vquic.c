@@ -380,6 +380,8 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
   VERBOSE(size_t calls = 0);
 
   *psent = 0;
+  if(!gsolen)
+    gsolen = pktlen;
 
   for(p = pkt; p < end; p += gsolen) {
     len = CURLMIN(gsolen, (size_t)(end - p));
