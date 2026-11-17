@@ -206,12 +206,10 @@ static CURLcode my_md5_init(void *pctx)
   struct md5_ctx *ctx = pctx;
 
   ctx->hAlg = ctx->hHash = NULL;
-
   if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&ctx->hAlg,
                                                  BCRYPT_MD5_ALGORITHM,
                                                  NULL, 0)))
     return CURLE_FAILED_INIT;
-
   if(!BCRYPT_SUCCESS(BCryptCreateHash(ctx->hAlg, &ctx->hHash,
                                       NULL, 0, NULL, 0, 0))) {
     BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
@@ -241,16 +239,13 @@ static CURLcode my_md5_final(uint8_t *digest, void *pctx)
 {
   struct md5_ctx *ctx = pctx;
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-
   if(BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash,
                                      digest, CURL_MD5_DIGEST_LEN, 0)))
     result = CURLE_OK;
-
   if(ctx->hHash)
     BCryptDestroyHash(ctx->hHash);
   if(ctx->hAlg);
     BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
-
   return result;
 }
 

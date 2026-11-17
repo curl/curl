@@ -207,12 +207,10 @@ static CURLcode my_sha256_init(void *pctx)
   struct sha256_ctx *ctx = pctx;
 
   ctx->hAlg = ctx->hHash = NULL;
-
   if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&ctx->hAlg,
                                                  BCRYPT_SHA256_ALGORITHM,
                                                  NULL, 0)))
     return CURLE_FAILED_INIT;
-
   if(!BCRYPT_SUCCESS(BCryptCreateHash(ctx->hAlg, &ctx->hHash,
                                       NULL, 0, NULL, 0, 0))) {
     BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
@@ -243,17 +241,13 @@ static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-
   if(BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash,
                                      digest, CURL_SHA256_DIGEST_LENGTH, 0)))
     result = CURLE_OK;
-
   BCryptDestroyHash(ctx->hHash);
   ctx->hHash = NULL;
-
   BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
   ctx->hAlg = NULL;
-
   return result;
 }
 
