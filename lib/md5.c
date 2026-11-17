@@ -195,36 +195,30 @@ static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 #elif defined(USE_WIN32_MD5)
 #include <bcrypt.h>
 
-struct md5_ctx {
-  BCRYPT_HASH_HANDLE hHash;
-};
-typedef struct md5_ctx my_md5_ctx;
-
+typedef BCRYPT_HASH_HANDLE my_md5_ctx;
 static BCRYPT_ALG_HANDLE hAlgMD5;
 
-static CURLcode my_md5_init(void *pctx)
+static CURLcode my_md5_init(void *ctx)
 {
-  struct md5_ctx *ctx = pctx;
-
-  if(!hAlgMD5 && !BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlgMD5,
+  BCRYPT_HASH_HANDLE *hHash = ctx;
+  if(!hAlgMD5 &&
+     !BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlgMD5,
                                                  BCRYPT_MD5_ALGORITHM,
                                                  NULL, 0)))
     return CURLE_FAILED_INIT;
-
-  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlgMD5, &ctx->hHash,
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlgMD5, hHash,
                                       NULL, 0, NULL, 0, 0)))
     return CURLE_FAILED_INIT;
-
   return CURLE_OK;
 }
 
-static CURLcode my_md5_update(void *pctx, const void *input, size_t input_len)
+static CURLcode my_md5_update(void *ctx, const void *input, size_t input_len)
 {
-  struct md5_ctx *ctx = pctx;
+  BCRYPT_HASH_HANDLE *hHash = ctx;
   const BYTE *bytes = input;
   do {
     ULONG ilen = (ULONG)CURLMIN(input_len, ULONG_MAX);
-    if(!BCRYPT_SUCCESS(BCryptHashData(ctx->hHash, CURL_UNCONST(bytes),
+    if(!BCRYPT_SUCCESS(BCryptHashData(*hHash, CURL_UNCONST(bytes),
                                       ilen, 0)))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
@@ -233,15 +227,15 @@ static CURLcode my_md5_update(void *pctx, const void *input, size_t input_len)
   return CURLE_OK;
 }
 
-static CURLcode my_md5_final(uint8_t *digest, void *pctx)
+static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 {
-  struct md5_ctx *ctx = pctx;
+  BCRYPT_HASH_HANDLE *hHash = ctx;
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-  if(BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash,
+  if(BCRYPT_SUCCESS(BCryptFinishHash(*hHash,
                                      digest, CURL_MD5_DIGEST_LEN, 0)))
     result = CURLE_OK;
-  BCryptDestroyHash(ctx->hHash);
-  ctx->hHash = NULL;
+  BCryptDestroyHash(*hHash);
+  *hHash = NULL;
   return result;
 }
 
