@@ -828,6 +828,8 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
 
   /* Tell event handling that this transfer is definitely going away */
   Curl_multi_ev_xfer_done(multi, data);
+  /* Remove it from any outstanding notifications */
+  Curl_mntfy_remove(data);
 
   if(data->set.connect_only) {
     if(data->multi_easy) {
