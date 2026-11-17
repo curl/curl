@@ -1887,7 +1887,9 @@ if(WIN32)
   if(NOT WINDOWS_STORE)
     list(APPEND CURL_NETWORK_AND_TIME_LIBS "iphlpapi")  # for if_nametoindex()
   endif()
-  list(APPEND CURL_LIBS "bcrypt")  # for BCryptGenRandom()
+  # for BCryptCloseAlgorithmProvider(), BCryptCreateHash(), BCryptDestroyHash(), BCryptFinishHash(),
+  #     BCryptGenRandom(), BCryptGetProperty(), BCryptHashData(), BCryptOpenAlgorithmProvider()
+  list(APPEND CURL_LIBS "bcrypt")
 
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
@@ -1895,11 +1897,6 @@ if(WIN32)
   endif()
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
-  if(USE_WIN32_CRYPTO)
-    # for CryptAcquireContext(), CryptCreateHash(), CryptDestroyHash(), CryptGetHashParam(), CryptHashData(),
-    #     CryptReleaseContext() in md5, sha256
-    list(APPEND CURL_LIBS "advapi32")
-  endif()
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
     # for Cert*() in openssl.c Native CA, Schannel
     # for CryptDecodeObjectEx(), CryptQueryObject(), CryptStringToBinary(), PFXImportCertStore() in Schannel
