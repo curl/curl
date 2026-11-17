@@ -32,7 +32,7 @@
    4. USE_MBEDTLS
    5. USE_RUSTLS (not supported)
    6. __APPLE__ (not supported)
-   7. USE_WIN32_CRYPTO (not supported)
+   7. _WIN32 (not supported)
  */
 
 #include "curl_ed25519.h"
