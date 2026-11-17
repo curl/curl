@@ -71,7 +71,7 @@ class TestSSLUse:
     def test_17_01_sslinfo_plain(self, env: Env, httpd):
         if env.curl_uses_lib('libressl') and \
            env.curl_lib_version_at_least('libressl', '4.4.0') and \
-           not env.curl_lib_version_before('libressl', '4.4.2'):
+           env.curl_lib_version_before('libressl', '4.4.2'):
             pytest.skip('LibreSSL 4.4.0-4.4.1 skipped due to missing SSL_SESSION_ID with OpenSSL 4.1.0+-based servers')
         proto = 'http/1.1'
         curl = CurlClient(env=env)
