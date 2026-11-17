@@ -471,14 +471,14 @@ The transfer ends with error "QUIC connection is draining".
 
 [curl issue 12037](https://github.com/curl/curl/issues/12037)
 
-## no ACKs while in connection pool
+## no ACK while in connection pool
 
-When a QUIC connection's last transfer is done/removed, any pending ACKs
+When a QUIC connection's last transfer is done/removed, any pending ACK
 of server packets may not be sent. The reason is, similar to the HTTP/2
 bug listed above, there is no active maintenance of idle connections in
 the pool. QUIC implementations like `ngtcp2` use delays to combine
-outstanding ACKs for better performance and that delay no longer triggers
-for idle connections in the pool.
+outstanding ACK replies for better performance and that delay no longer
+triggers for idle connections in the pool.
 
 The main impact in QUIC is that performance is decreased should the
 connection be reused for another transfer. The server may have shrunk
