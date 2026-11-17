@@ -180,7 +180,6 @@ void Curl_mntfy_remove(struct Curl_easy *data)
   struct Curl_multi *multi = data ? data->multi : NULL;
   uint32_t mid = data ? data->mid : UINT32_MAX;
   struct mntfy_chunk *chunk;
-  struct mntfy_entry *e;
   size_t i;
 
   if(!multi || (mid == UINT32_MAX))
@@ -188,9 +187,8 @@ void Curl_mntfy_remove(struct Curl_easy *data)
 
   for(chunk = multi->ntfy.head; chunk; chunk = chunk->next) {
     for(i = chunk->r_offset; i < chunk->w_offset; ++i) {
-      e = &chunk->entries[chunk->r_offset];
-      if(e->mid == mid)
-        e->mid = UINT32_MAX;
+      if(chunk->entries[i].mid == mid)
+        chunk->entries[i].mid = UINT32_MAX;
     }
   }
 }
