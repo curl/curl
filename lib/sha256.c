@@ -196,45 +196,33 @@ static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 #elif defined(USE_WIN32_SHA256)
 #include <bcrypt.h>
 
-static BCRYPT_ALG_HANDLE hAlgSHA256;
-static bool hAlgSHA256Init = FALSE;
-
 struct sha256_ctx {
+  BCRYPT_ALG_HANDLE hAlg;
   BCRYPT_HASH_HANDLE hHash;
   unsigned char *pbHashObject;
   ULONG cbHash;
 };
 typedef struct sha256_ctx my_sha256_ctx;
 
-#if 0
-static CURLcode my_sha256_exit(void)
-{
-  if(hAlgSHA256)
-    (void)BCryptCloseAlgorithmProvider(hAlgSHA256, 0);
-}
-#endif
-
 static CURLcode my_sha256_init(void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
+  BCRYPT_ALG_HANDLE hAlg;
   BCRYPT_HASH_HANDLE hHash;
   unsigned char *pbHashObject;
   ULONG dwHashObject, dwHash, cbData;
 
-  if(!hAlgSHA256Init) {
-    if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlgSHA256,
-                                                   BCRYPT_SHA256_ALGORITHM,
-                                                   NULL, 0)))
-      hAlgSHA256 = NULL;
-    hAlgSHA256Init = TRUE;
-  }
+  if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg,
+                                                 BCRYPT_SHA256_ALGORITHM,
+                                                 NULL, 0)))
+    return CURLE_FAILED_INIT;
 
-  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlgSHA256, BCRYPT_HASH_LENGTH,
+  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
                      (unsigned char *)&dwHash, sizeof(dwHash),
                      &cbData, 0)))
     return CURLE_FAILED_INIT;
 
-  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlgSHA256, BCRYPT_OBJECT_LENGTH,
+  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH,
                      (unsigned char *)&dwHashObject, sizeof(dwHashObject),
                      &cbData, 0)))
     return CURLE_FAILED_INIT;
@@ -243,12 +231,13 @@ static CURLcode my_sha256_init(void *pctx)
   if(!pbHashObject)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlgSHA256, &hHash,
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash,
                      pbHashObject, dwHashObject, NULL, 0, 0))) {
     curlx_free(pbHashObject);
     return CURLE_FAILED_INIT;
   }
 
+  ctx->hAlg = hAlg;
   ctx->hHash = hHash;
   ctx->pbHashObject = pbHashObject;
   ctx->cbHash = dwHash;
