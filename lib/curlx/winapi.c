@@ -105,18 +105,14 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 }
 
 #ifndef WITHOUT_LIBCURL
-
 #include <bcrypt.h>
-#ifndef STATUS_SUCCESS
-#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
-#endif
 
 CURLcode curlx_win32_random(unsigned char *entropy, size_t length)
 {
   memset(entropy, 0, length);
 
-  if(BCryptGenRandom(NULL, entropy, (ULONG)length,
-                     BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
+  if(!BCRYPT_SUCCESS(BCryptGenRandom(NULL, entropy, (ULONG)length,
+                                     BCRYPT_USE_SYSTEM_PREFERRED_RNG)))
     return CURLE_FAILED_INIT;
 
   return CURLE_OK;
