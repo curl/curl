@@ -41,6 +41,14 @@ static CURLcode test_unit1601(const char *arg)
   {
     uint8_t output[CURL_MD5_DIGEST_LEN];
 
+    Curl_md5it(output, NULL, 0);
+    verify_memory(output, "\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\x09\x98"
+                  "\xec\xf8\x42\x7e", CURL_MD5_DIGEST_LEN);
+
+    Curl_md5it(output, STRCONST(""));
+    verify_memory(output, "\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\x09\x98"
+                  "\xec\xf8\x42\x7e", CURL_MD5_DIGEST_LEN);
+
     Curl_md5it(output, STRCONST("1"));
     verify_memory(output, "\xc4\xca\x42\x38\xa0\xb9\x23\x82\x0d\xcc\x50\x9a"
                   "\x6f\x75\x84\x9b", CURL_MD5_DIGEST_LEN);
@@ -53,6 +61,16 @@ static CURLcode test_unit1601(const char *arg)
 #ifdef CURL_HAVE_SHA256
   {
     uint8_t output[CURL_SHA256_DIGEST_LENGTH];
+
+    Curl_sha256it(output, NULL, 0);
+    verify_memory(output, "\xe3\xb0\xc4\x42\x98\xfc\x1c\x14\x9a\xfb\xf4\xc8"
+                  "\x99\x6f\xb9\x24\x27\xae\x41\xe4\x64\x9b\x93\x4c\xa4\x95"
+                  "\x99\x1b\x78\x52\xb8\x55", CURL_SHA256_DIGEST_LENGTH);
+
+    Curl_sha256it(output, STRCONST(""));
+    verify_memory(output, "\xe3\xb0\xc4\x42\x98\xfc\x1c\x14\x9a\xfb\xf4\xc8"
+                  "\x99\x6f\xb9\x24\x27\xae\x41\xe4\x64\x9b\x93\x4c\xa4\x95"
+                  "\x99\x1b\x78\x52\xb8\x55", CURL_SHA256_DIGEST_LENGTH);
 
     Curl_sha256it(output, STRCONST("1"));
     verify_memory(output, "\x6b\x86\xb2\x73\xff\x34\xfc\xe1\x9d\x6b\x80\x4e"
@@ -69,6 +87,16 @@ static CURLcode test_unit1601(const char *arg)
   {
     uint8_t output[CURL_SHA512_256_DIGEST_LENGTH];
 
+    Curl_sha512_256it(output, NULL, 0);
+    verify_memory(output, "\xc6\x72\xb8\xd1\xef\x56\xed\x28\xab\x87\xc3\x62"
+                  "\x2c\x51\x14\x06\x9b\xdd\x3a\xd7\xb8\xf9\x73\x74\x98\xd0"
+                  "\xc0\x1e\xce\xf0\x96\x7a", CURL_SHA512_256_DIGEST_LENGTH);
+
+    Curl_sha512_256it(output, STRCONST(""));
+    verify_memory(output, "\xc6\x72\xb8\xd1\xef\x56\xed\x28\xab\x87\xc3\x62"
+                  "\x2c\x51\x14\x06\x9b\xdd\x3a\xd7\xb8\xf9\x73\x74\x98\xd0"
+                  "\xc0\x1e\xce\xf0\x96\x7a", CURL_SHA512_256_DIGEST_LENGTH);
+
     Curl_sha512_256it(output, STRCONST("1"));
     verify_memory(output, "\x18\xd2\x75\x66\xbd\x1a\xc6\x6b\x23\x32\xd8\xc5"
                   "\x4a\xd4\x3f\x7b\xb2\x20\x79\xc9\x06\xd0\x5f\x49\x1f\x3f"
@@ -83,11 +111,6 @@ static CURLcode test_unit1601(const char *arg)
     verify_memory(output, "\x53\x04\x8E\x26\x81\x94\x1E\xF9\x9B\x2E\x29\xB7"
                   "\x6B\x4C\x7D\xAB\xE4\xC2\xD0\xC6\x34\xFC\x6D\x46\xE0\xE2"
                   "\xF1\x31\x07\xE7\xAF\x23", CURL_SHA512_256_DIGEST_LENGTH);
-
-    Curl_sha512_256it(output, STRCONST(""));  /* empty, zero size input */
-    verify_memory(output, "\xc6\x72\xb8\xd1\xef\x56\xed\x28\xab\x87\xc3\x62"
-                  "\x2c\x51\x14\x06\x9b\xdd\x3a\xd7\xb8\xf9\x73\x74\x98\xd0"
-                  "\xc0\x1e\xce\xf0\x96\x7a", CURL_SHA512_256_DIGEST_LENGTH);
 
     Curl_sha512_256it(output, STRCONST(
                       "abcdefghijklmnopqrstuvwxyzzyxwvutsrqponMLKJIHGFEDCBA"
@@ -123,6 +146,15 @@ static CURLcode test_unit1601(const char *arg)
   {
     uint8_t output[CURL_MD5_DIGEST_LEN];
 
+    Curl_hmacit(&Curl_HMAC_MD5, NULL, 0, NULL, 0, output);
+    verify_memory(output, "\x74\xe6\xf7\x29\x8a\x9c\x2d\x16\x89\x35\xf5\x8c"
+                  "\x00\x1b\xad\x88", CURL_MD5_DIGEST_LEN);
+
+    Curl_hmacit(&Curl_HMAC_MD5,
+                STRCONST("Pa55worD"), STRCONST(""), output);
+    verify_memory(output, "\xe5\xf5\xf5\x64\xfa\xbf\x58\xa7\x2a\x93\x02\x3b"
+                  "\x3a\x17\x7d\x52", CURL_MD5_DIGEST_LEN);
+
     Curl_hmacit(&Curl_HMAC_MD5,
                 STRCONST("Pa55worD"), STRCONST("1"), output);
     verify_memory(output, "\xd1\x29\x75\x43\x58\xdc\xab\x78\xdf\xcd\x7f\x2b"
@@ -137,6 +169,17 @@ static CURLcode test_unit1601(const char *arg)
 #ifdef CURL_HAVE_SHA256
   {
     uint8_t output[CURL_SHA256_DIGEST_LENGTH];
+
+    Curl_hmacit(&Curl_HMAC_SHA256, NULL, 0, NULL, 0, output);
+    verify_memory(output, "\xb6\x13\x67\x9a\x08\x14\xd9\xec\x77\x2f\x95\xd7"
+                  "\x78\xc3\x5f\xc5\xff\x16\x97\xc4\x93\x71\x56\x53\xc6\xc7"
+                  "\x12\x14\x42\x92\xc5\xad", CURL_SHA256_DIGEST_LENGTH);
+
+    Curl_hmacit(&Curl_HMAC_SHA256,
+                STRCONST("Pa55worD"), STRCONST(""), output);
+    verify_memory(output, "\xef\x4c\x89\x33\x02\x33\x57\x7f\xe6\xa2\x7d\x61"
+                  "\x7e\x39\x20\x1c\x6b\xd4\x11\x65\xad\x26\xaa\x97\xf1\x69"
+                  "\xcd\xaa\xe1\xef\x0d\xd9", CURL_SHA256_DIGEST_LENGTH);
 
     Curl_hmacit(&Curl_HMAC_SHA256,
                 STRCONST("Pa55worD"), STRCONST("1"), output);
