@@ -62,8 +62,8 @@ static CURLcode my_sha512_256_init(void *pctx)
 /* Process portion of bytes.
  *
  * @param pctx the calculation context
- * @param input bytes to add to hash
- * @param input_len number of bytes in @a input
+ * @param[in] input bytes to add to hash
+ * @param[in] input_len number of bytes in @a input
  * @return CURLE_OK if succeed, error code otherwise
  */
 static CURLcode my_sha512_256_update(void *pctx,
@@ -186,7 +186,7 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 /* Compute SHA-512/256 hash for the given data in one function call
  * @param[out] digest the pointer to put the hash
  * @param[in] input the pointer to the data to process
- * @param input_len the size of the data pointed by @a input
+ * @param[in] input_len the size of the data pointed by @a input
  * @return always #CURLE_OK
  */
 CURLcode Curl_sha512_256it(uint8_t *digest,

@@ -270,9 +270,9 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
  *
  * Parameters:
  *
- * digest [in/out] - The output buffer.
- * input [in]      - The input data.
- * input_len [in]  - The input length.
+ * digest [out]   - The output buffer.
+ * input [in]     - The input data.
+ * input_len [in] - The input length.
  *
  * Returns CURLE_OK on success.
  */
