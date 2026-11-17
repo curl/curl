@@ -262,8 +262,8 @@ jobs:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
       # renovate: datasource=github-releases depName=jens-maus/amissl versioning=semver-coerced
-      AMISSL_VERSION: 5.27
-      AMISSL_SHA256: 5003bef8c5930354d16b0ce7196d71b2811891c42fad38a9238c5ce4098ad42a
+      AMISSL_VERSION: 6.1
+      AMISSL_SHA256: 4bad86512fd062cad7d82cd933e439eb6d4c2a6f9fbd7ae7c605981f8320953e
       TOOLCHAIN_VERSION: 6.5.0  # manually bumped
       TOOLCHAIN_SHA256: 381e227c9ef552f073771d6f851cfdf873b574f3cf5db7c1c0107ea5d7146edc
     strategy:
