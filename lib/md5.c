@@ -205,6 +205,8 @@ static CURLcode my_md5_init(void *pctx)
 {
   struct md5_ctx *ctx = pctx;
 
+  ctx->hAlg = ctx->hHash = NULL;
+
   if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&ctx->hAlg,
                                                  BCRYPT_MD5_ALGORITHM,
                                                  NULL, 0)))
