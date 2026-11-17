@@ -201,7 +201,6 @@ static bool hAlgInit = FALSE;
 struct md5_ctx {
   BCRYPT_HASH_HANDLE hHash;
   unsigned char *pbHashObject;
-  ULONG dwHashObject;
   ULONG cbHash;
 };
 typedef struct md5_ctx my_md5_ctx;
@@ -217,6 +216,9 @@ static CURLcode my_md5_exit(void)
 static CURLcode my_md5_init(void *pctx)
 {
   struct md5_ctx *ctx = pctx;
+  BCRYPT_HASH_HANDLE hHash;
+  unsigned char *pbHashObject;
+  ULONG dwHashObject, dwHash, cbData;
 
   if(!hAlgInit) {
     if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_MD5_ALGORITHM,
@@ -224,10 +226,6 @@ static CURLcode my_md5_init(void *pctx)
       hAlg = NULL;
     hAlgInit = TRUE;
   }
-
-  BCRYPT_HASH_HANDLE hHash;
-  unsigned char *pbHashObject;
-  ULONG dwHashObject, dwHash, cbData;
 
   if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
                      (unsigned char *)&dwHash, sizeof(dwHash),
@@ -251,7 +249,6 @@ static CURLcode my_md5_init(void *pctx)
 
   ctx->hHash = hHash;
   ctx->pbHashObject = pbHashObject;
-  ctx->dwHashObject = dwHashObject;
   ctx->cbHash = dwHash;
 
   return CURLE_OK;
@@ -286,7 +283,6 @@ static CURLcode my_md5_final(uint8_t *digest, void *pctx)
 
   curlx_free(ctx->pbHashObject);
   ctx->pbHashObject = NULL;
-  ctx->dwHashObject = 0;
   ctx->cbHash = 0;
 
   return result;
