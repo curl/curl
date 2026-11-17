@@ -98,10 +98,23 @@ static CURLcode test_unit1620(const char *arg)
   result = curl_easy_setopt((CURL *)empty, CURLOPT_NOBODY, 1L);
   fail_unless(result == CURLE_OK, "curl_easy_setopt(CURLOPT_NOBODY) failed");
 
+#ifndef CURL_DISABLE_RTSP
+  result = curl_easy_setopt((CURL *)empty, CURLOPT_RTSP_SESSION_ID,
+                            "explicit-id");
+  fail_unless(result == CURLE_OK, "setting explicit RTSP session ID failed");
+#endif
+
   dupe = (struct Curl_easy *)curl_easy_duphandle((CURL *)empty);
   if(!dupe)
     Curl_close(&empty);
   abort_unless(dupe, "curl_easy_duphandle() failed");
+
+#ifndef CURL_DISABLE_RTSP
+  fail_unless(CURL_EASY_STR(dupe, STRING_RTSP_SESSION_ID) &&
+              !strcmp(CURL_EASY_STR(dupe, STRING_RTSP_SESSION_ID),
+                      "explicit-id"),
+              "duplicate must preserve an explicit RTSP session ID option");
+#endif
 
   result = Curl_init_transfer(dupe, NULL);
   fail_unless(result == CURLE_OK, "Curl_init_transfer() on duplicate failed");

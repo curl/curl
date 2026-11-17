@@ -1041,6 +1041,12 @@ CURL *curl_easy_duphandle(CURL *curl)
     if(dupset(outcurl, data))
       goto fail;
 
+#ifndef CURL_DISABLE_RTSP
+    /* A server-learned RTSP session ID is state, not a set option. */
+    if(data->state.rtsp_session_origin)
+      CURL_EASY_STR_CLEAR(outcurl, STRING_RTSP_SESSION_ID);
+#endif
+
     outcurl->progress.hide     = data->progress.hide;
     outcurl->progress.callback = data->progress.callback;
 

@@ -30,7 +30,10 @@ static CURLcode test_lib569(const char *URL)
 {
   CURLcode result;
   CURL *curl;
+  CURL *clone = NULL;
+  struct curl_slist *resolve = NULL;
   char *stream_uri = NULL;
+  const char *rtsp_session_id = NULL;
   int request = 1;
   int i;
 
@@ -71,7 +74,6 @@ static CURLcode test_lib569(const char *URL)
 
   /* Go through the various Session IDs */
   for(i = 0; i < 3; i++) {
-    const char *rtsp_session_id;
     stream_uri = tutil_suburl(URL, request++);
     if(!stream_uri) {
       result = TEST_ERR_MAJOR_BAD;
@@ -106,9 +108,29 @@ static CURLcode test_lib569(const char *URL)
     if(result)
       goto test_cleanup;
 
-    /* Clear for the next go-round */
-    easy_setopt(curl, CURLOPT_RTSP_SESSION_ID, NULL);
+    /* Clear for the next go-round, retaining the final ID on the source. */
+    if(i < 2)
+      easy_setopt(curl, CURLOPT_RTSP_SESSION_ID, NULL);
   }
+
+  /* The clone must forget the learned ID before it contacts any origin. */
+  clone = curl_easy_duphandle(curl);
+  resolve = curl_slist_append(NULL, libtest_arg4);
+  if(!clone || !resolve) {
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  result = curl_easy_getinfo(clone, CURLINFO_RTSP_SESSION_ID,
+                             &rtsp_session_id);
+  if(result || rtsp_session_id) {
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  easy_setopt(clone, CURLOPT_RESOLVE, resolve);
+  easy_setopt(clone, CURLOPT_URL, libtest_arg3);
+  easy_setopt(clone, CURLOPT_RTSP_STREAM_URI, libtest_arg3);
+  easy_setopt(clone, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
+  result = curl_easy_perform(clone);
 
 test_cleanup:
 
@@ -116,6 +138,8 @@ test_cleanup:
     curlx_fclose(idfile);
 
   curl_free(stream_uri);
+  curl_easy_cleanup(clone);
+  curl_slist_free_all(resolve);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

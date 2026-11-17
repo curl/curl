@@ -50,6 +50,12 @@ Curl-Private: swsclose
 CSeq: 6
 
 </data6>
+<data7>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+
+</data7>
 </reply>
 
 <client>
@@ -61,7 +67,7 @@ rtsp
 RTSP Session ID parsing
 </name>
 <command>
-rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/idfile%TESTNUMBER.txt
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/idfile%TESTNUMBER.txt rtsp://example.com:%RTSPPORT/%TESTNUMBER0007 example.com:%RTSPPORT:%HOSTIP
 </command>
 </client>
 
@@ -93,6 +99,9 @@ Transport: Fake/NotReal/JustATest;foo=baz
 TEARDOWN rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0006 RTSP/1.0
 CSeq: 6
 Session: A
+
+OPTIONS rtsp://example.com:%RTSPPORT/%TESTNUMBER0007 RTSP/1.0
+CSeq: 1
 
 </protocol>
 <file name="%LOGDIR/idfile%TESTNUMBER.txt">
