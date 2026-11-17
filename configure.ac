@@ -2122,12 +2122,11 @@ CURL_WITH_WOLFSSL
 CURL_WITH_RUSTLS
 CURL_WITH_APPLE_SECTRUST
 
-dnl link required libraries for cert/crypto functions
-if test "$curl_cv_winuwp" != "yes" || test "$SCHANNEL_ENABLED" = "1"; then
-  LIBS="-lcrypt32 $LIBS"
-fi
-
 if test "$curl_cv_native_windows" = "yes"; then
+  dnl link required libraries for cert/crypto functions
+  if test "$curl_cv_winuwp" != "yes" || test "$SCHANNEL_ENABLED" = "1"; then
+    LIBS="-lcrypt32 $LIBS"
+  fi
   LIBS="-lbcrypt $LIBS"
 fi
 
