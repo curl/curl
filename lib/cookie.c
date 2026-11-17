@@ -1733,8 +1733,12 @@ static CURLcode cookie_output(struct Curl_easy *data,
   }
 
   if(!use_stdout) {
-    curlx_fclose(out);
+    int close_result = curlx_fclose(out);
     out = NULL;
+    if(close_result) {
+      result = CURLE_WRITE_ERROR;
+      goto error;
+    }
     if(tempstore && curlx_rename(tempstore, filename)) {
       result = CURLE_WRITE_ERROR;
       goto error;
