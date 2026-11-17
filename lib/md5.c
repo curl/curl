@@ -208,8 +208,8 @@ typedef struct md5_ctx my_md5_ctx;
 #if 0
 static CURLcode my_md5_exit(void)
 {
-  if(ssh2_wcng.hAlgHmacMD5)
-    (void)BCryptCloseAlgorithmProvider(ssh2_wcng.hAlgHmacMD5, 0);
+  if(hAlg)
+    (void)BCryptCloseAlgorithmProvider(hAlg, 0);
 }
 #endif
 
