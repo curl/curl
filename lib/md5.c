@@ -213,15 +213,11 @@ static CURLcode my_md5_init(void *pctx)
 
   if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg,
                                                  BCRYPT_MD5_ALGORITHM,
-                                                 NULL, 0)))
-    return CURLE_FAILED_INIT;
-
-  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
+                                                 NULL, 0)) ||
+     !BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
                      (unsigned char *)&dwHash, sizeof(dwHash),
-                     &cbData, 0)))
-    return CURLE_FAILED_INIT;
-
-  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH,
+                     &cbData, 0)) ||
+     !BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH,
                      (unsigned char *)&dwHashObject, sizeof(dwHashObject),
                      &cbData, 0)))
     return CURLE_FAILED_INIT;
