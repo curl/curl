@@ -392,7 +392,6 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream;
 
-  (void)cf;
   DEBUGASSERT(data);
 
   if(!data)

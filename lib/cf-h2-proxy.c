@@ -127,7 +127,6 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                bool udp_tunnel)
 {
-  (void)cf;
   (void)udp_tunnel;
 
   if(ts->state == new_state)
@@ -224,7 +223,6 @@ static void drain_tunnel(struct Curl_cfilter *cf,
                          struct tunnel_stream *tunnel)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  (void)cf;
   if(!tunnel->closed && !tunnel->reset &&
      (!Curl_bufq_is_empty(&ctx->tunnel.sendbuf) ||
       !Curl_bufq_is_empty(&ctx->tunnel.recvbuf)))

@@ -543,7 +543,6 @@ static long ossl_bio_cf_ctrl(BIO *bio, int cmd, long num, void *ptr)
   struct Curl_cfilter *cf = BIO_get_data(bio);
   long ret = 1;
 
-  (void)cf;
   (void)ptr;
   switch(cmd) {
   case BIO_CTRL_GET_CLOSE:

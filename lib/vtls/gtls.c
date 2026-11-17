@@ -1633,7 +1633,6 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   long * const certverifyresult = &ssl_config->certverifyresult;
 
-  (void)cf;
   /* This function returns the peer's raw certificate (chain) as sent by
      the peer. These certificates are in raw format (DER encoded for
      X.509). In case of a X.509 then a certificate list may be present. The

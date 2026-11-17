@@ -571,7 +571,6 @@ static CURLproxycode socks5_req0_init(struct Curl_cfilter *cf,
   size_t req_len, nwritten;
   CURLcode result;
 
-  (void)cf;
   /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
   if(!sx->resolve_local && strlen(sx->dest->hostname) > 255) {
     failf(data, "SOCKS5: the destination hostname is too long to be "

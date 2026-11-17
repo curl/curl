@@ -315,7 +315,6 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
-  (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] easy handle is done", stream->id);
     cf_quiche_stream_close(cf, data, stream);

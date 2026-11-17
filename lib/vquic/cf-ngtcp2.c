@@ -275,7 +275,6 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
   (void)conn;
   (void)stream_id;
   (void)fin;
-  (void)cf;
 
   if(!stream || !data)
     return 0;
@@ -353,7 +352,6 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   (void)stream_id;
   (void)token;
   (void)flags;
-  (void)cf;
 
   /* we might have cleaned up this transfer already */
   if(!stream || !data)
@@ -519,7 +517,6 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
                                    struct h3_stream_ctx *stream,
                                    size_t *pnread)
 {
-  (void)cf;
   *pnread = 0;
   if(stream->reset) {
     if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
@@ -631,11 +628,10 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
                                 uint64_t datalen, void *user_data,
                                 void *stream_user_data)
 {
-  struct Curl_cfilter *cf = user_data;
   struct h3_stream_ctx *stream = stream_user_data;
   size_t skiplen;
 
-  (void)cf;
+  (void)user_data;
   if(!stream)
     return 0;
   /* The server acknowledged `datalen` of bytes from our request body.
@@ -669,7 +665,6 @@ static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
     Curl_cf_ngtcp2_get_xfer(cf, stream_user_data, &stream);
   size_t nwritten = 0;
   size_t nvecs = 0;
-  (void)cf;
   (void)conn;
   (void)stream_id;
   (void)user_data;

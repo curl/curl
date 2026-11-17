@@ -1999,7 +1999,6 @@ void Curl_cf_ngtcp2_h3_stream_done(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] easy handle is done", stream->id);
     Curl_cf_ngtcp2_h3_stream_close(cf, data, stream);
