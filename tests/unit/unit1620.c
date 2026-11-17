@@ -98,10 +98,24 @@ static CURLcode test_unit1620(const char *arg)
   result = curl_easy_setopt((CURL *)empty, CURLOPT_NOBODY, 1L);
   fail_unless(result == CURLE_OK, "curl_easy_setopt(CURLOPT_NOBODY) failed");
 
+  result = curl_easy_setopt((CURL *)empty, CURLOPT_MAX_SEND_SPEED_LARGE,
+                            (curl_off_t)1024);
+  fail_unless(result == CURLE_OK, "set upload speed limit failed");
+  result = curl_easy_setopt((CURL *)empty, CURLOPT_MAX_RECV_SPEED_LARGE,
+                            (curl_off_t)65536);
+  fail_unless(result == CURLE_OK, "set download speed limit failed");
+
   dupe = (struct Curl_easy *)curl_easy_duphandle((CURL *)empty);
   if(!dupe)
     Curl_close(&empty);
   abort_unless(dupe, "curl_easy_duphandle() failed");
+
+  fail_unless(dupe->progress.ul.rlimit.rate_per_sec == 1024 &&
+              dupe->progress.ul.rlimit.burst_per_sec == 32768,
+              "duplicate handle should keep upload rate and burst limits");
+  fail_unless(dupe->progress.dl.rlimit.rate_per_sec == 65536 &&
+              dupe->progress.dl.rlimit.burst_per_sec == 65536,
+              "duplicate handle should keep download rate and burst limits");
 
   result = Curl_init_transfer(dupe, NULL);
   fail_unless(result == CURLE_OK, "Curl_init_transfer() on duplicate failed");
