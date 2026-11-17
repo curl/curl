@@ -23,17 +23,17 @@
  ***************************************************************************/
 #include "first.h"
 
-/* this is 256 bytes using the octets 0-255, base64 encoded */
-#define BLOB64                                                          \
-  "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMD"  \
-  "EyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFi"  \
-  "Y2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5"  \
-  "SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TF"  \
-  "xsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19v"  \
-  "f4+fr7/P3+/w=="
-
 static int test_base64dec(int argc, const char **argv)
 {
+  /* this is 256 bytes using the octets 0-255, base64 encoded */
+  static const char blob[] =
+    "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMD"
+    "EyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFi"
+    "Y2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5"
+    "SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TF"
+    "xsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19v"
+    "f4+fr7/P3+/w==";
+
   struct curltime start;
   struct curltime end;
   timediff_t us;
@@ -51,7 +51,7 @@ static int test_base64dec(int argc, const char **argv)
   for(loop = 0; loop < loops; loop++) {
     unsigned char *recoded = NULL;
     size_t reclen;
-    CURLcode result = curlx_base64_decode(BLOB64, &recoded, &reclen);
+    CURLcode result = curlx_base64_decode(blob, &recoded, &reclen);
     curlx_free(recoded);
     if(result) {
       curl_mfprintf(stderr, "unexpected coding error: %d\n", (int)result);
