@@ -107,7 +107,6 @@
 
 #define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1
-#define USE_WIN32_CRYPTO 1
 #define USE_UNIX_SOCKETS 1
 
 #ifndef CURL_OS

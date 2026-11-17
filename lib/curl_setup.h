@@ -1034,6 +1034,8 @@ typedef unsigned int curl_bit;
 #endif
 
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#define USE_WIN32_CRYPTO
+
 #include <tlhelp32.h>
 /* Print the list of all loaded modules with full paths. */
 #define CURL_DUMP_MODULE_PATHS(printf_f)                               \

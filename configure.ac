@@ -731,8 +731,6 @@ dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
 
-CURL_CHECK_WIN32_CRYPTO
-
 curl_cv_android='no'
 curl_cv_apple='no'
 case $host in
@@ -2124,12 +2122,11 @@ CURL_WITH_WOLFSSL
 CURL_WITH_RUSTLS
 CURL_WITH_APPLE_SECTRUST
 
-dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
-if test "$USE_WIN32_CRYPTO" = "1" || test "$SCHANNEL_ENABLED" = "1"; then
-  LIBS="-lcrypt32 $LIBS"
-fi
-
 if test "$curl_cv_native_windows" = "yes"; then
+  dnl link required libraries for cert/crypto functions
+  if test "$curl_cv_winuwp" != "yes" || test "$SCHANNEL_ENABLED" = "1"; then
+    LIBS="-lcrypt32 $LIBS"
+  fi
   LIBS="-lbcrypt $LIBS"
 fi
 

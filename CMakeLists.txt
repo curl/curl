@@ -1891,13 +1891,8 @@ if(WIN32)
   #     BCryptGenRandom(), BCryptGetProperty(), BCryptHashData(), BCryptOpenAlgorithmProvider()
   list(APPEND CURL_LIBS "bcrypt")
 
-  # We use crypto functions that are not available for UWP apps
-  if(NOT WINDOWS_STORE)
-    set(USE_WIN32_CRYPTO ON)
-  endif()
-
-  # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
-  if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
+  # Link required libraries for cert/crypto functions
+  if(NOT WINDOWS_STORE OR USE_SCHANNEL)
     # for Cert*() in openssl.c Native CA, Schannel
     # for CryptDecodeObjectEx(), CryptQueryObject(), CryptStringToBinary(), PFXImportCertStore() in Schannel
     list(APPEND CURL_LIBS "crypt32")

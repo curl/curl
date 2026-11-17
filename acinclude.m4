@@ -1215,47 +1215,6 @@ AS_HELP_STRING([--without-ca-embed], [Do not embed a default CA bundle in the cu
   fi
 ])
 
-dnl CURL_CHECK_WIN32_CRYPTO
-dnl -------------------------------------------------
-dnl Check if curl's Win32 crypto lib can be used
-
-AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])
-  AC_MSG_CHECKING([whether build target supports Win32 crypto API])
-  curl_win32_crypto_api="no"
-  if test "$curl_cv_native_windows" = "yes" && test "$curl_cv_winuwp" != "yes"; then
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #undef inline
-        #ifndef WIN32_LEAN_AND_MEAN
-        #define WIN32_LEAN_AND_MEAN
-        #endif
-        #include <windows.h>
-        #include <wincrypt.h>
-      ]],[[
-        HCRYPTPROV hCryptProv;
-        if(CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                               CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
-          CryptReleaseContext(hCryptProv, 0);
-        }
-      ]])
-    ],[
-      curl_win32_crypto_api="yes"
-    ])
-  fi
-  case "$curl_win32_crypto_api" in
-    yes)
-      AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED(USE_WIN32_CRYPTO, 1,
-        [Define to 1 if you are building a Windows target with crypto API support.])
-      USE_WIN32_CRYPTO=1
-      ;;
-    *)
-      AC_MSG_RESULT([no])
-      ;;
-  esac
-])
-
 dnl CURL_EXPORT_PCDIR ($pcdir, [$additive])
 dnl ------------------------
 dnl if $pcdir is not empty, set PKG_CONFIG_LIBDIR to $pcdir and export.
