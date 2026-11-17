@@ -442,12 +442,12 @@ then subsequently fails anyway if that was actually in use.
 
 [curl issue 12641](https://github.com/curl/curl/issues/12641)
 
-## HTTP/2 frames while in the connection pool kill reuse
+## HTTP/2 frames while in the connection pool are not answered
 
 If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
-curl while the connection is held in curl's connection pool, the socket is
-found readable when considered for reuse and that makes curl think it is dead
-and then it is closed and a new connection gets created instead.
+curl while the connection is held in curl's connection pool, these frames
+are not received nor answered. This may cause the server to consider the
+connection dead.
 
 This is *best* fixed by adding monitoring to connections while they are kept
 in the pool so that pings can be responded to appropriately.
@@ -458,16 +458,6 @@ Infinite retries with 2 parallel requests on one connection receiving `GOAWAY`
 with `ENHANCE_YOUR_CALM` error code.
 
 See [curl issue 5119](https://github.com/curl/curl/issues/5119)
-
-## HTTP/2 + TLS spends a lot of time in recv
-
-It has been observed that by making the speed limit less accurate we could
-improve this performance. (by reverting
-[db5c9f4f9e0779](https://github.com/curl/curl/commit/db5c9f4f9e0779b49624752b135281a0717b277b))
-Can we find a golden middle ground?
-
-See https://curl.se/mail/lib-2024-05/0026.html and
-[curl issue 13416](https://github.com/curl/curl/issues/13416)
 
 # HTTP/3
 
@@ -480,3 +470,19 @@ See https://curl.se/mail/lib-2024-05/0026.html and
 The transfer ends with error "QUIC connection is draining".
 
 [curl issue 12037](https://github.com/curl/curl/issues/12037)
+
+## no ACK while in connection pool
+
+When a QUIC connection's last transfer is done/removed, any pending ACK
+of server packets may not be sent. The reason is, similar to the HTTP/2
+bug listed above, there is no active maintenance of idle connections in
+the pool. QUIC implementations like `ngtcp2` use delays to combine
+outstanding ACK replies for better performance and that delay no longer
+triggers for idle connections in the pool.
+
+The main impact in QUIC is that performance is decreased should the
+connection be reused for another transfer. The server may have shrunk
+its connection windows due to the lost acknowledgements and it takes time to
+open them up again.
+
+[curl issue 23967](https://github.com/curl/curl/issues/23967)
