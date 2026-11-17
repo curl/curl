@@ -284,8 +284,7 @@ static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
   BCryptDestroyHash(ctx->hHash);
   ctx->hHash = NULL;
 
-  curlx_free(ctx->pbHashObject);
-  ctx->pbHashObject = NULL;
+  curlx_safefree(ctx->pbHashObject);
   ctx->cbHash = 0;
 
   return result;
