@@ -2130,7 +2130,6 @@ if test "$USE_WIN32_CRYPTO" = "1" || test "$SCHANNEL_ENABLED" = "1"; then
 fi
 
 if test "$curl_cv_native_windows" = "yes"; then
-  dnl for BCryptGenRandom()
   LIBS="-lbcrypt $LIBS"
 fi
 
