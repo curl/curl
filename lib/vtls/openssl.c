@@ -2841,7 +2841,7 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
   return (count > 0) ? CURLE_OK : CURLE_SSL_CACERT_BADFILE;
 }
 
-#ifdef _WIN32
+#ifdef USE_WIN32_CRYPTO
 static CURLcode ossl_win_load_store(struct Curl_easy *data,
                                     struct Curl_cfilter *cf,
                                     const char *win_store,
@@ -3068,7 +3068,7 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
   return result;
 }
 
-#endif /* _WIN32 */
+#endif /* USE_WIN32_CRYPTO */
 
 static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
@@ -3085,7 +3085,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
 
   octx->store_is_empty = TRUE;
   if(conn_config->native_ca_store) {
-#ifdef _WIN32
+#ifdef USE_WIN32_CRYPTO
     bool added = FALSE;
     result = ossl_windows_load_anchors(cf, data, store, &added);
     if(result)
