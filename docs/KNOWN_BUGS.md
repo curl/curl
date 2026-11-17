@@ -477,7 +477,7 @@ When a QUIC connection's last transfer is done/removed, any pending ACKs
 of server packets may not be sent. The reason is, similar to the HTTP/2
 bug listed above, there is no active maintenance of idle connections in
 the pool. QUIC implementations like `ngtcp2` use delays to combine
-oustanding ACKs for better performance and that delay no longer triggers
+outstanding ACKs for better performance and that delay no longer triggers
 for idle connections in the pool.
 
 The main impact in QUIC is that performance is decreased should the
