@@ -195,24 +195,64 @@ static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 #elif defined(USE_WIN32_MD5)
 #include <wincrypt.h>
 
+static BCRYPT_ALG_HANDLE hAlg;
+static bool hAlgInit = FALSE;
+
 struct md5_ctx {
-  HCRYPTPROV hCryptProv;
-  HCRYPTHASH hHash;
+  BCRYPT_HASH_HANDLE hHash;
+  unsigned char *pbHashObject;
+  ULONG dwHashObject;
+  ULONG cbHash;
 };
 typedef struct md5_ctx my_md5_ctx;
+
+#if 0
+static CURLcode my_md5_exit(void)
+{
+  if(ssh2_wcng.hAlgHmacMD5)
+    (void)BCryptCloseAlgorithmProvider(ssh2_wcng.hAlgHmacMD5, 0);
+}
+#endif
 
 static CURLcode my_md5_init(void *pctx)
 {
   struct md5_ctx *ctx = pctx;
-  if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+
+  if(!hAlgInit) {
+    if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_MD5_ALGORITHM,
+                                                   NULL, 0)))
+      hAlg = NULL;
+    hAlgInit = TRUE;
+  }
+
+  BCRYPT_HASH_HANDLE hHash;
+  unsigned char *pbHashObject;
+  ULONG dwHashObject, dwHash, cbData;
+
+  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
+                     (unsigned char *)&dwHash, sizeof(dwHash),
+                     &cbData, 0)))
+    return CURLE_FAILED_INIT;
+
+  if(!BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH,
+                     (unsigned char *)&dwHashObject, sizeof(dwHashObject),
+                     &cbData, 0)))
+    return CURLE_FAILED_INIT;
+
+  pbHashObject = curlx_malloc(dwHashObject);
+  if(!pbHashObject)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash)) {
-    CryptReleaseContext(ctx->hCryptProv, 0);
-    ctx->hCryptProv = 0;
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash, pbHashObject, dwHashObject,
+                     NULL, 0, 0))) {
+    curlx_free(pbHashObject);
     return CURLE_FAILED_INIT;
   }
+
+  ctx->hHash = hHash;
+  ctx->pbHashObject = pbHashObject;
+  ctx->dwHashObject = dwHashObject;
+  ctx->cbHash = dwHash;
 
   return CURLE_OK;
 }
@@ -222,8 +262,9 @@ static CURLcode my_md5_update(void *pctx, const void *input, size_t input_len)
   struct md5_ctx *ctx = pctx;
   const BYTE *bytes = input;
   do {
-    DWORD ilen = (DWORD)CURLMIN(input_len, 0xffffffffUL);
-    if(!CryptHashData(ctx->hHash, bytes, ilen, 0))
+    ULONG ilen = (ULONG)CURLMIN(input_len, ULONG_MAX);
+    if(!BCRYPT_SUCCESS(BCryptHashData(ctx->hHash, CURL_UNCONST(bytes),
+                                      ilen, 0)))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     input_len -= ilen;
     bytes += ilen;
@@ -235,15 +276,19 @@ static CURLcode my_md5_final(uint8_t *digest, void *pctx)
 {
   struct md5_ctx *ctx = pctx;
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-  DWORD length = 0;
-  if(CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0) &&
-     length == CURL_MD5_DIGEST_LEN &&
-     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0))
+
+  if(ctx->cbHash <= CURL_MD5_DIGEST_LEN &&
+     BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash, digest, ctx->cbHash, 0)))
     result = CURLE_OK;
-  if(ctx->hHash)
-    CryptDestroyHash(ctx->hHash);
-  if(ctx->hCryptProv)
-    CryptReleaseContext(ctx->hCryptProv, 0);
+
+  BCryptDestroyHash(ctx->hHash);
+  ctx->hHash = NULL;
+
+  curlx_free(ctx->pbHashObject);
+  ctx->pbHashObject = NULL;
+  ctx->dwHashObject = 0;
+  ctx->cbHash = 0;
+
   return result;
 }
 
