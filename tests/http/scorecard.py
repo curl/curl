@@ -44,7 +44,8 @@ from testenv import (
     LocalClient,
     NghttpxQuic,
     RunProfile,
-    WsServer, VsFTPD,
+    VsFTPD,
+    WsServer,
 )
 
 log = logging.getLogger(__name__)
