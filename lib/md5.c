@@ -244,11 +244,10 @@ static CURLcode my_md5_final(uint8_t *digest, void *pctx)
                                      digest, CURL_MD5_DIGEST_LEN, 0)))
     result = CURLE_OK;
 
-  BCryptDestroyHash(ctx->hHash);
-  ctx->hHash = NULL;
-
-  BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
-  ctx->hAlg = NULL;
+  if(ctx->hHash)
+    BCryptDestroyHash(ctx->hHash);
+  if(ctx->hAlg);
+    BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
 
   return result;
 }

@@ -206,7 +206,7 @@ static CURLcode my_sha256_init(void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
 
-  if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg,
+  if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&ctx->hAlg,
                                                  BCRYPT_SHA256_ALGORITHM,
                                                  NULL, 0)))
     return CURLE_FAILED_INIT;
