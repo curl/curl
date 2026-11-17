@@ -1107,6 +1107,12 @@ CURL *curl_easy_duphandle(CURL *curl)
         goto fail;
     }
 #endif
+#ifndef CURL_DISABLE_RTSP
+    /* STRING_RTSP_SESSION_ID has been dup'ed into the new handle,
+     * we must also link its origin to preserve its scope. */
+    Curl_peer_link(&outcurl->state.rtsp_session_origin,
+                   data->state.rtsp_session_origin);
+#endif
 
     /* we reach this point and thus we are OK */
     outcurl->magic = CURLEASY_MAGIC_NUMBER;
