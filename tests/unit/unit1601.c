@@ -45,7 +45,7 @@ static CURLcode test_unit1601(const char *arg)
     verify_memory(output, "\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\x09\x98"
                   "\xec\xf8\x42\x7e", CURL_MD5_DIGEST_LEN);
 
-    Curl_md5it(output, STRCONST(""));  /* empty, zero size input */
+    Curl_md5it(output, STRCONST(""));
     verify_memory(output, "\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\x09\x98"
                   "\xec\xf8\x42\x7e", CURL_MD5_DIGEST_LEN);
 
@@ -67,7 +67,7 @@ static CURLcode test_unit1601(const char *arg)
                   "\x99\x6f\xb9\x24\x27\xae\x41\xe4\x64\x9b\x93\x4c\xa4\x95"
                   "\x99\x1b\x78\x52\xb8\x55", CURL_SHA256_DIGEST_LENGTH);
 
-    Curl_sha256it(output, STRCONST(""));  /* empty, zero size input */
+    Curl_sha256it(output, STRCONST(""));
     verify_memory(output, "\xe3\xb0\xc4\x42\x98\xfc\x1c\x14\x9a\xfb\xf4\xc8"
                   "\x99\x6f\xb9\x24\x27\xae\x41\xe4\x64\x9b\x93\x4c\xa4\x95"
                   "\x99\x1b\x78\x52\xb8\x55", CURL_SHA256_DIGEST_LENGTH);
@@ -87,7 +87,12 @@ static CURLcode test_unit1601(const char *arg)
   {
     uint8_t output[CURL_SHA512_256_DIGEST_LENGTH];
 
-    Curl_sha512_256it(output, STRCONST(""));  /* empty, zero size input */
+    Curl_sha512_256it(output, NULL, 0);
+    verify_memory(output, "\xc6\x72\xb8\xd1\xef\x56\xed\x28\xab\x87\xc3\x62"
+                  "\x2c\x51\x14\x06\x9b\xdd\x3a\xd7\xb8\xf9\x73\x74\x98\xd0"
+                  "\xc0\x1e\xce\xf0\x96\x7a", CURL_SHA512_256_DIGEST_LENGTH);
+
+    Curl_sha512_256it(output, STRCONST(""));
     verify_memory(output, "\xc6\x72\xb8\xd1\xef\x56\xed\x28\xab\x87\xc3\x62"
                   "\x2c\x51\x14\x06\x9b\xdd\x3a\xd7\xb8\xf9\x73\x74\x98\xd0"
                   "\xc0\x1e\xce\xf0\x96\x7a", CURL_SHA512_256_DIGEST_LENGTH);
