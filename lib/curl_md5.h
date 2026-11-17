@@ -95,7 +95,7 @@
 
 extern const struct HMAC_params Curl_HMAC_MD5;
 
-CURLcode Curl_md5it(uint8_t *digest, const void *input, size_t input_len);
+CURL_EXTERN CURLcode Curl_md5it(uint8_t *digest, const void *input, size_t input_len);
 
 void *Curl_MD5_init(void);
 CURLcode Curl_MD5_update(void *ctx, const void *input, size_t input_len);

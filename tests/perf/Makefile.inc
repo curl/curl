@@ -48,6 +48,7 @@ TESTS_C = \
   base64enc.c \
   cookierecv.c \
   dateparser.c \
+  hashes.c \
   maprintf.c \
   numparser.c \
   respheaders.c \
