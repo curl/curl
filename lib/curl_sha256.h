@@ -89,7 +89,7 @@
 extern const struct HMAC_params Curl_HMAC_SHA256;
 
 #include "curl_hmac.h"
-CURL_EXTERN CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len);
+CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len);
 #endif /* AWS, httpsig, DIGEST, or libssh2 */
 
 #endif /* HEADER_CURL_SHA256_H */

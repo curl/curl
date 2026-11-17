@@ -46,13 +46,6 @@ Runs through 180+ date strings and parses them (converts them to epoch time)
 
     ./perf dateparser [loops]
 
-## `hash`
-
-This test SHA-256 hash a 256-byte buffer that has every different byte octet
-represented. Repeatedly in a loop the provided number of times:
-
-    ./perf hash [loops]
-
 ## `maprintf`
 
 This test repeatedly formats a request header block with `curl_maprintf()`,
