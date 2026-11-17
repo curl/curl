@@ -556,6 +556,9 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
   if(ssldone) {
     Sockbuf *sb;
 
+    if(data->set.connect_only)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
     /* Install the libcurl SSL handlers into the sockbuf. */
     if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS) ||
        ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
