@@ -215,19 +215,19 @@ static CURLcode my_md5_init(void *pctx)
                                                  BCRYPT_MD5_ALGORITHM,
                                                  NULL, 0)) ||
      !BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
-                     (unsigned char *)&dwHash, sizeof(dwHash),
-                     &cbData, 0)) ||
+                                       (unsigned char *)&dwHash,
+                                       sizeof(dwHash), &cbData, 0)) ||
      !BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH,
-                     (unsigned char *)&dwHashObject, sizeof(dwHashObject),
-                     &cbData, 0)))
+                                       (unsigned char *)&dwHashObject,
+                                       sizeof(dwHashObject), &cbData, 0)))
     return CURLE_FAILED_INIT;
 
   pbHashObject = curlx_malloc(dwHashObject);
   if(!pbHashObject)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash,
-                     pbHashObject, dwHashObject, NULL, 0, 0))) {
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash, pbHashObject, dwHashObject,
+                                      NULL, 0, 0))) {
     curlx_free(pbHashObject);
     return CURLE_FAILED_INIT;
   }
