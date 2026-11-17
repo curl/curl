@@ -286,7 +286,7 @@ can also be used on other distributions
 
 ## SPACK
 
-- curl package source and patches: https://github.com/spack/spack/tree/develop/var/spack/repos/builtin/packages/curl
+- curl package source and patches: https://github.com/spack/spack-packages/tree/develop/repos/spack_repo/builtin/packages/curl
 
 ## vcpkg
 
