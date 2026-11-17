@@ -196,24 +196,26 @@ static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 #include <bcrypt.h>
 
 struct md5_ctx {
+  BCRYPT_ALG_HANDLE hAlg;
   BCRYPT_HASH_HANDLE hHash;
 };
 typedef struct md5_ctx my_md5_ctx;
-
-static BCRYPT_ALG_HANDLE hAlgMD5;
 
 static CURLcode my_md5_init(void *pctx)
 {
   struct md5_ctx *ctx = pctx;
 
-  if(!hAlgMD5 && !BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlgMD5,
+  ctx->hAlg = ctx->hHash = NULL;
+  if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&ctx->hAlg,
                                                  BCRYPT_MD5_ALGORITHM,
                                                  NULL, 0)))
     return CURLE_FAILED_INIT;
-
-  if(!BCRYPT_SUCCESS(BCryptCreateHash(hAlgMD5, &ctx->hHash,
-                                      NULL, 0, NULL, 0, 0)))
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(ctx->hAlg, &ctx->hHash,
+                                      NULL, 0, NULL, 0, 0))) {
+    BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
+    ctx->hAlg = NULL;
     return CURLE_FAILED_INIT;
+  }
 
   return CURLE_OK;
 }
@@ -242,6 +244,10 @@ static CURLcode my_md5_final(uint8_t *digest, void *pctx)
     result = CURLE_OK;
   BCryptDestroyHash(ctx->hHash);
   ctx->hHash = NULL;
+  if(ctx->hAlg) {
+    BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
+    ctx->hAlg = NULL;
+  }
   return result;
 }
 
