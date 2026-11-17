@@ -205,17 +205,18 @@ typedef struct sha256_ctx my_sha256_ctx;
 static CURLcode my_sha256_init(void *pctx)
 {
   struct sha256_ctx *ctx = pctx;
-  BCRYPT_ALG_HANDLE hAlg;
-  BCRYPT_HASH_HANDLE hHash;
 
   if(!BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg,
                                                  BCRYPT_SHA256_ALGORITHM,
-                                                 NULL, 0)) ||
-    !BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash, NULL, 0, NULL, 0, 0)))
+                                                 NULL, 0)))
     return CURLE_FAILED_INIT;
 
-  ctx->hAlg = hAlg;
-  ctx->hHash = hHash;
+  if(!BCRYPT_SUCCESS(BCryptCreateHash(ctx->hAlg, &ctx->hHash,
+                                      NULL, 0, NULL, 0, 0))) {
+    BCryptCloseAlgorithmProvider(ctx->hAlg, 0);
+    ctx->hAlg = NULL;
+    return CURLE_FAILED_INIT;
+  }
 
   return CURLE_OK;
 }
