@@ -92,6 +92,8 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
       }
       *is_local = TRUE;
     }
+#else
+    (void)is_local;
 #endif
     return curlx_dyn_addf(buf, ":%s-%s", name, path);
   }
@@ -1119,7 +1121,6 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result;
 
-  (void)cf;
   if(!scache)
     return;
 

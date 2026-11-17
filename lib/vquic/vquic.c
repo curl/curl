@@ -358,7 +358,6 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     }
   }
 #endif
-  (void)cf;
 
 out:
   CURL_TRC_CF(data, cf,
@@ -1100,7 +1099,7 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
 #elif defined(USE_QUICHE)
   result = Curl_cf_quiche_insert_after(cf_at, origin, peer, &cf);
 #else
-  (void)cf)
+  (void)cf;
   (void)cf_at;
   (void)origin;
   (void)peer;
