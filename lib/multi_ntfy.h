@@ -46,6 +46,7 @@ CURLMcode Curl_mntfy_enable(struct Curl_multi *multi, unsigned int type);
 CURLMcode Curl_mntfy_disable(struct Curl_multi *multi, unsigned int type);
 
 void Curl_mntfy_add(struct Curl_easy *data, unsigned int type);
+void Curl_mntfy_remove(struct Curl_easy *data);
 
 #define CURLM_NTFY(d, t)                              \
   do {                                                \
