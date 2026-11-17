@@ -194,7 +194,7 @@ static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 }
 
 #elif defined(USE_WIN32_SHA256)
-#include <wincrypt.h>
+#include <bcrypt.h>
 
 static BCRYPT_ALG_HANDLE hAlgSHA256;
 static bool hAlgSHA256Init = FALSE;

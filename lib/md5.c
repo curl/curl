@@ -193,7 +193,7 @@ static CURLcode my_md5_final(uint8_t *digest, void *ctx)
 }
 
 #elif defined(USE_WIN32_MD5)
-#include <wincrypt.h>
+#include <bcrypt.h>
 
 static BCRYPT_ALG_HANDLE hAlgMD5;
 static bool hAlgMD5Init = FALSE;
