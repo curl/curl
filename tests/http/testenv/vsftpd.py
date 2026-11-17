@@ -25,6 +25,7 @@
 import logging
 import os
 import re
+import shutil
 import socket
 import subprocess
 import time
@@ -177,9 +178,17 @@ class VsFTPD:
         log.error(f"Server still not responding after {timeout}")
         return False
 
+    def clear_docs(self):
+        self._rmrf(self.docs_dir)
+        self._mkpath(self.docs_dir)
+
     def _rmf(self, path):
         if os.path.exists(path):
             os.remove(path)
+
+    def _rmrf(self, path):
+        if os.path.exists(path):
+            shutil.rmtree(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
