@@ -326,9 +326,6 @@ static void cf_h3_write_field(struct Curl_cfilter *cf,
       Curl_client_write(data, CLIENTWRITE_HEADER | CLIENTWRITE_TRAILER,
                         curlx_dyn_ptr(&ctx->scratch),
                         curlx_dyn_len(&ctx->scratch));
-    if(!stream->xfer_result)
-      stream->xfer_result =
-        Curl_bump_headersize(data, curlx_dyn_len(&ctx->scratch), FALSE);
   }
   else
     h3_xfer_write_resp_hd(cf, data, stream, curlx_dyn_ptr(&ctx->scratch),

@@ -62,10 +62,6 @@ struct http_negotiation {
 
 void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg);
 
-CURLcode Curl_bump_headersize(struct Curl_easy *data,
-                              size_t delta,
-                              bool connect_only);
-
 /* Header specific functions */
 bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
