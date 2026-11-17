@@ -1895,11 +1895,12 @@ if(WIN32)
   endif()
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
-  if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
+  if(USE_WIN32_CRYPTO)
     # for CryptAcquireContext(), CryptCreateHash(), CryptDestroyHash(), CryptGetHashParam(), CryptHashData(),
-    #     CryptReleaseContext() in NTLM, md4, md5, sha256, Schannel
-    # for CryptDestroyKey(), CryptEncrypt(), CryptImportKey() in NTLM
+    #     CryptReleaseContext() in md5, sha256
     list(APPEND CURL_LIBS "advapi32")
+  endif()
+  if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
     # for Cert*() in openssl.c Native CA, Schannel
     # for CryptDecodeObjectEx(), CryptQueryObject(), CryptStringToBinary(), PFXImportCertStore() in Schannel
     list(APPEND CURL_LIBS "crypt32")
