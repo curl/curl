@@ -79,7 +79,7 @@
 #define CURL_HAVE_SHA256
 #endif
 
-#if !defined(CURL_HAVE_SHA256) && defined(USE_WIN32_CRYPTO)
+#if !defined(CURL_HAVE_SHA256) && defined(_WIN32)
 #define USE_WIN32_SHA256
 #define CURL_HAVE_SHA256
 #endif

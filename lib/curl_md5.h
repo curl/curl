@@ -83,7 +83,7 @@
 #define CURL_HAVE_MD5
 #endif
 
-#if !defined(CURL_HAVE_MD5) && defined(USE_WIN32_CRYPTO)
+#if !defined(CURL_HAVE_MD5) && defined(_WIN32)
 #define USE_WIN32_MD5
 #define CURL_HAVE_MD5
 #endif
