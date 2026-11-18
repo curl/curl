@@ -29,11 +29,12 @@ http
 <name>
 Shared cookie FLUSH and cookie jar write failure
 </name>
-<command>
+<command option="no-memdebug">
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER %LOGDIR/cookies%TESTNUMBER-failed
 </command>
 <features>
 cookies
+getrlimit
 </features>
 </client>
 
