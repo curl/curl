@@ -911,7 +911,6 @@ jobs:
             install-msys2: >-
               perl
               mingw-w64-ucrt-x86_64-brotli
-              mingw-w64-ucrt-x86_64-zlib
               mingw-w64-ucrt-x86_64-zstd
               mingw-w64-ucrt-x86_64-openssl
               mingw-w64-ucrt-x86_64-libssh2
@@ -941,8 +940,6 @@ jobs:
               -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
               -DZSTD_INCLUDE_DIR=/ucrt64/include
               -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
-              -DZLIB_INCLUDE_DIR=/ucrt64/include
-              -DZLIB_LIBRARY=/ucrt64/lib/libz.dll.a
               -DLIBSSH2_INCLUDE_DIR=/ucrt64/include
               -DLIBSSH2_LIBRARY=/ucrt64/lib/libssh2.dll.a
               -DNGHTTP2_INCLUDE_DIR=/ucrt64/include
@@ -1009,7 +1006,6 @@ jobs:
           MATRIX_CONFIG: '${{ matrix.config }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          [ -f "${MINGW_PREFIX}/include/zconf.h" ] && sed -i -E 's|(# *define +(Z_)?HAVE_UNISTD_H)|/*\1*/|g' "${MINGW_PREFIX}/include/zconf.h"  # Patch MSYS2 zconf.h for MSVC
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             cflags=''
