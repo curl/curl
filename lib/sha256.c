@@ -264,8 +264,6 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
 };
 
 /*
- * Curl_sha256it()
- *
  * Generates a SHA256 hash for the given input data.
  *
  * Parameters:
@@ -275,6 +273,7 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
  * input_len [in] - The input length.
  *
  * Returns CURLE_OK on success.
+ * @unittest: 1601
  */
 CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 {
