@@ -685,7 +685,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     nread = ctx->read_cb(buf, 1, blen, ctx->cb_user_data);
     CURL_CBAPI_END(&guard);
     ctx->has_used_cb = TRUE;
-    if(ctx->use_fread && ferror(ctx->cb_user_data)) {
+    if(ctx->use_fread && ferror((FILE *)ctx->cb_user_data)) {
       failf(data, "Error reading upload data");
       ctx->errored = TRUE;
       ctx->error_result = CURLE_READ_ERROR;
