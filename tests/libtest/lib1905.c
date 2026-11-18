@@ -100,7 +100,7 @@ static CURLcode test_lib1905(const char *URL)
 
     unlink(libtest_arg3);
     if(getrlimit(RLIMIT_FSIZE, &original)) {
-      result = TEST_ERR_FAILURE;
+      curl_mfprintf(stderr, "getrlimit does not work, skipping\n");
       goto cleanup;
     }
     limited = original;
@@ -109,7 +109,7 @@ static CURLcode test_lib1905(const char *URL)
     handler = signal(SIGXFSZ, SIG_IGN);
     if(setrlimit(RLIMIT_FSIZE, &limited)) {
       signal(SIGXFSZ, handler);
-      result = TEST_ERR_FAILURE;
+      curl_mfprintf(stderr, "setrlimit does not work, skipping\n");
       goto cleanup;
     }
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, libtest_arg3);
