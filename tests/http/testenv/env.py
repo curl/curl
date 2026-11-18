@@ -657,27 +657,30 @@ class Env:
     @classmethod
     def http_protos(cls) -> List[str]:
         # http protocols we can test
+        protos = ['http/1.1']
         if cls.have_h2_curl():
-            if cls.have_h3():
-                return ["http/1.1", "h2", "h3"]
-            return ["http/1.1", "h2"]
-        return ["http/1.1"]
+            protos.append('h2')
+        if cls.have_h3():
+            protos.append('h3')
+        return protos
 
     @classmethod
     def http_h1_h2_protos(cls) -> List[str]:
         # http 1+2 protocols we can test
+        protos = ['http/1.1']
         if cls.have_h2_curl():
-            return ["http/1.1", "h2"]
-        return ["http/1.1"]
+            protos.append('h2')
+        return protos
 
     @classmethod
     def http_mplx_protos(cls) -> List[str]:
         # http multiplexing protocols we can test
+        protos = []
         if cls.have_h2_curl():
-            if cls.have_h3():
-                return ["h2", "h3"]
-            return ["h2"]
-        return []
+            protos.append('h2')
+        if cls.have_h3():
+            protos.append('h3')
+        return protos
 
     @classmethod
     def have_h3(cls) -> bool:
