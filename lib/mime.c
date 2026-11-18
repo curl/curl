@@ -630,6 +630,7 @@ static size_t mime_file_read(char *buffer, size_t size, size_t nitems,
                              void *instream)
 {
   curl_mimepart *part = (curl_mimepart *)instream;
+  size_t nread;
 
   if(!nitems)
     return STOP_FILLING;
@@ -637,7 +638,9 @@ static size_t mime_file_read(char *buffer, size_t size, size_t nitems,
   if(mime_open_file(part))
     return READ_ERROR;
 
-  return fread(buffer, size, nitems, part->fp);
+  clearerr(part->fp);
+  nread = fread(buffer, size, nitems, part->fp);
+  return ferror(part->fp) ? READ_ERROR : nread;
 }
 
 static int mime_file_seek(void *instream, curl_off_t offset, int whence)

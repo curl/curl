@@ -13,7 +13,13 @@ SMTP
 unittest
 </features>
 <name>
-reject CR and LF in mail mime part name and filename
+MIME headers and file read errors
 </name>
+<command>
+%LOGDIR/mime%TESTNUMBER
+</command>
+<file name="%LOGDIR/mime%TESTNUMBER">
+attachment
+</file>
 </client>
 </testcase>
