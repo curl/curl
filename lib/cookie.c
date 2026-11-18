@@ -1714,22 +1714,22 @@ static CURLcode cookie_output(struct Curl_easy *data,
 
     for(i = 0; i < nvalid; i++) {
       char *format_ptr = get_netscape_format(array[i]);
+      int rc;
       if(!format_ptr) {
         curlx_free(array);
         result = CURLE_OUT_OF_MEMORY;
         goto error;
       }
-      curl_mfprintf(out, "%s\n", format_ptr);
+      rc = curl_mfprintf(out, "%s\n", format_ptr);
       curlx_free(format_ptr);
+      if(rc < 0) {
+        curlx_free(array);
+        result = CURLE_WRITE_ERROR;
+        goto error;
+      }
     }
 
     curlx_free(array);
-  }
-
-  /* Catch buffered and earlier write errors before publishing the jar. */
-  if(fflush(out) || ferror(out)) {
-    result = CURLE_WRITE_ERROR;
-    goto error;
   }
 
   if(!use_stdout) {
@@ -1743,6 +1743,11 @@ static CURLcode cookie_output(struct Curl_easy *data,
       result = CURLE_WRITE_ERROR;
       goto error;
     }
+  }
+  else if(fflush(out) || ferror(out)) {
+    /* Catch buffered and earlier write errors before publishing the jar. */
+    result = CURLE_WRITE_ERROR;
+    goto error;
   }
 
   /*
