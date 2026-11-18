@@ -1727,7 +1727,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
       infof(data, "HTTP/2 stream %d refused by server, try again on a new "
                   "connection", stream->id);
       connclose(CF_CONN(cf)); /* do not use this anymore */
-      data->state.refused_stream = TRUE;
+      data->req.refused_stream = TRUE;
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
     else if(stream->resp_hds_complete && data->req.no_body) {

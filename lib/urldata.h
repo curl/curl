@@ -608,7 +608,6 @@ struct UrlState {
 
   BIT(really_alive); /* transfer is really alive in multi, passed INIT */
   BIT(this_is_a_follow); /* this is a followed Location: request */
-  BIT(refused_stream); /* this was refused, try again */
   BIT(errorbuf); /* Set to TRUE if the error buffer is already filled in.
                     This must be set to FALSE every time _easy_perform() is
                     called. */
