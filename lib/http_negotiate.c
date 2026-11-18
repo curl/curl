@@ -171,7 +171,9 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 }
 
 CURLcode Curl_output_negotiate(struct Curl_easy *data,
-                               struct connectdata *conn, bool proxy)
+                               struct connectdata *conn,
+                               const char *hd_name,
+                               bool proxy)
 {
   struct negotiatedata *neg_ctx;
   struct auth *authp;
@@ -244,8 +246,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
     if(result)
       return result;
 
-    userp = curl_maprintf("%sAuthorization: Negotiate %s\r\n",
-                          proxy ? "Proxy-" : "", base64);
+    userp = curl_maprintf("%s: Negotiate %s\r\n", hd_name, base64);
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY
