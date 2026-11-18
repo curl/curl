@@ -34,6 +34,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies%TESTNUMBER %LOGDIR/
 </command>
 <features>
 cookies
+getrlimit
 </features>
 </client>
 
