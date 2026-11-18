@@ -615,10 +615,10 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
   else if(data->req.refused_stream &&
           (data->req.bytecount + data->req.headerbytecount == 0)) {
     /* This was sent on a refused stream, safe to rerun. A refused stream
-       error can only happens on multiplexed protoccols (HTTP/2+3).
+       error can only happen on multiplexed protoccols (HTTP/2+3).
        While this *should* imply that the server never processed any
        of the request data, we only act on this when we have
-       neither sent a request body nor have received response headers. */
+       not received any response headers or content bytes. */
     infof(data, "REFUSED_STREAM, retrying a fresh connect");
     retry = TRUE;
   }
