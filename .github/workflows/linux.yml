@@ -867,9 +867,7 @@ jobs:
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
+        run: echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'; grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'libcurl.pc, curl-config'
         run: |

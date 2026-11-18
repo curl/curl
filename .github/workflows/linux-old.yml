@@ -118,9 +118,7 @@ jobs:
         run: cat bld-1/CMakeFiles/CMake*.log 2>/dev/null || true
 
       - name: 'CM build-only curl_config.h'
-        run: |
-          echo '::group::raw'; cat bld-1/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld-1/lib/curl_config.h | sort || true
+        run: echo '::group::raw'; cat bld-1/lib/curl_config.h || true; echo '::endgroup::'; grep -F '#define' bld-1/lib/curl_config.h | sort || true
 
       # when this job can get libssh 0.9.0 or greater, this should get that enabled again
       # when this job can get c-ares 1.16.0 or greater, this should get that enabled again
@@ -136,9 +134,7 @@ jobs:
         run: cat bld-oldie/CMakeFiles/CMake*.log 2>/dev/null || true
 
       - name: 'CM curl_config.h'
-        run: |
-          echo '::group::raw'; cat bld-oldie/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld-oldie/lib/curl_config.h | sort || true
+        run: echo '::group::raw'; cat bld-oldie/lib/curl_config.h || true; echo '::endgroup::'; grep -F '#define' bld-oldie/lib/curl_config.h | sort || true
 
       - name: 'CM build'
         run: ~/cmake/bin/cmake --build bld-oldie
@@ -174,9 +170,7 @@ jobs:
         run: cat bld-am/config.log 2>/dev/null || true
 
       - name: 'AM curl_config.h'
-        run: |
-          echo '::group::raw'; cat bld-am/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld-am/lib/curl_config.h | sort || true
+        run: echo '::group::raw'; cat bld-am/lib/curl_config.h || true; echo '::endgroup::'; grep -F '#define' bld-am/lib/curl_config.h | sort || true
 
       - name: 'AM build'
         run: make -C bld-am
