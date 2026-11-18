@@ -118,12 +118,16 @@
 #    endif
 #  endif
 
+#ifndef CURL_WINDOWS_UWP
+#define USE_WIN32_CRYPTO
+#endif
+
 /* Mandatory to define SECURITY_WIN32 or SECURITY_KERNEL to indicating who is
    compiling the code. */
 #undef SECURITY_KERNEL
 #undef SECURITY_WIN32
 #define SECURITY_WIN32  /* for <sspi.h> */
-#endif
+#endif /* _WIN32 */
 
 /*
  * Include configuration script results or hand-crafted
@@ -1034,8 +1038,6 @@ typedef unsigned int curl_bit;
 #endif
 
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-#define USE_WIN32_CRYPTO
-
 #include <tlhelp32.h>
 /* Print the list of all loaded modules with full paths. */
 #define CURL_DUMP_MODULE_PATHS(printf_f)                               \
