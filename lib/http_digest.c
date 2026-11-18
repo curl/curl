@@ -108,6 +108,8 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
 }
 
 CURLcode Curl_output_digest(struct Curl_easy *data,
+                            struct Curl_creds *creds,
+                            const char *hd_name,
                             bool proxy,
                             const unsigned char *request,
                             const unsigned char *uripath)
@@ -116,15 +118,8 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
   CURLcode result;
   char *response;
   size_t len;
-  bool have_chlg;
-
-  /* Point to the address of the pointer that holds the string to send to the
-     server, which is for a plain host or for an HTTP proxy */
-  char **allocuserpwd;
-
-  /* Point to the name and password for this */
-  struct Curl_creds *creds = NULL;
-
+  /* Point to the address of the pointer that holds the header. */
+  char **pauth_hd;
   /* Point to the correct struct with this */
   struct digestdata *digest;
   struct auth *authp;
@@ -135,8 +130,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 #else
     digest = &data->state.proxydigest;
     origin = data->conn->http_proxy.peer;
-    creds = data->conn->http_proxy.creds;
-    allocuserpwd = &data->req.hd_proxy_auth;
+    pauth_hd = &data->req.hd_proxy_auth;
     authp = &data->state.authproxy;
 #endif
   }
@@ -144,21 +138,18 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
     DEBUGASSERT(data->state.origin);
     digest = &data->state.digest;
     origin = data->state.origin;
-    creds = data->state.creds;
-    allocuserpwd = &data->req.hd_auth;
+    pauth_hd = &data->req.hd_auth;
     authp = &data->state.authhost;
   }
 
   digest_flush_stale(data, digest, origin, creds);
-  curlx_safefree(*allocuserpwd);
+  curlx_safefree(*pauth_hd);
 
 #ifdef USE_WINDOWS_SSPI
-  have_chlg = !!digest->input_token;
+  if(!digest->input_token) {
 #else
-  have_chlg = !!digest->nonce;
+  if(!digest->nonce) {
 #endif
-
-  if(!have_chlg) {
     authp->done = FALSE;
     return CURLE_OK;
   }
@@ -169,10 +160,9 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
   if(result)
     return result;
 
-  *allocuserpwd = curl_maprintf("%sAuthorization: Digest %s\r\n",
-                                proxy ? "Proxy-" : "", response);
+  *pauth_hd = curl_maprintf("%s: Digest %s\r\n", hd_name, response);
   curlx_free(response);
-  if(!*allocuserpwd)
+  if(!*pauth_hd)
     return CURLE_OUT_OF_MEMORY;
 
   authp->done = TRUE;

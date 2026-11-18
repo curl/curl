@@ -33,6 +33,8 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
 
 /* this is for creating digest header output */
 CURLcode Curl_output_digest(struct Curl_easy *data,
+                            struct Curl_creds *creds,
+                            const char *hd_name,
                             bool proxy,
                             const unsigned char *request,
                             const unsigned char *uripath);

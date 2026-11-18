@@ -397,7 +397,7 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
   }
 
   /* setup the authentication headers */
-  result = Curl_http_output_auth(data, conn, b->request, HTTPREQ_GET,
+  result = Curl_http_output_auth(data, conn, HTTPREQ_GET, b->request,
                                  b->stream_uri, NULL, FALSE);
   if(result)
     return result;
