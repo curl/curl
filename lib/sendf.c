@@ -637,6 +637,7 @@ struct cr_in_ctx {
   BIT(errored);
   BIT(has_used_cb);
   BIT(is_paused);
+  BIT(use_fread);
 };
 
 static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
@@ -644,6 +645,7 @@ static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
   struct cr_in_ctx *ctx = reader->ctx;
   ctx->read_cb = data->state.fread_func;
   ctx->cb_user_data = data->state.in;
+  ctx->use_fread = !data->set.is_fread_set;
   ctx->total_len = -1;
   ctx->read_len = 0;
   return CURLE_OK;
@@ -683,6 +685,14 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     nread = ctx->read_cb(buf, 1, blen, ctx->cb_user_data);
     CURL_CBAPI_END(&guard);
     ctx->has_used_cb = TRUE;
+    if(ctx->use_fread && ferror((FILE *)ctx->cb_user_data)) {
+      failf(data, "Error reading upload data");
+      ctx->errored = TRUE;
+      ctx->error_result = CURLE_READ_ERROR;
+      *pnread = 0;
+      *peos = FALSE;
+      return CURLE_READ_ERROR;
+    }
   }
 
   switch(nread) {
