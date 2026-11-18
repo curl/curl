@@ -251,7 +251,6 @@ static CURLcode http_output_basic(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
     p_hd = &data->req.hd_proxy_auth;
 #else
-    (void)conn;
     return CURLE_NOT_BUILT_IN;
 #endif
   }
