@@ -218,7 +218,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   struct cw_download_ctx *ctx = writer->ctx;
   CURLcode result;
   size_t nwrite, excess_len = 0;
-  bool is_connect = !!(type & CLIENTWRITE_CONNECT);
+  bool is_connect = (type & CLIENTWRITE_CONNECT);
 
   if(!ctx->started_response &&
      !(type & CLIENTWRITE_CONNECT) &&
@@ -229,7 +229,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 
   if(!(type & CLIENTWRITE_BODY)) {
 #ifndef CURL_DISABLE_HTTP
-    if((type & CLIENTWRITE_HEADER) && ctx->limit_hds) {
+    if((type & CLIENTWRITE_HEADER) && (ctx->limit_hds || is_connect)) {
       result = cw_download_limit_hds(data, type, nbytes, is_connect);
       if(result)
         return result;
