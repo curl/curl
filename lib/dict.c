@@ -47,11 +47,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef _MSC_VER
-/* try figuring out where it was originally defined */
-#define HAVE_UNISTD_H
-#endif
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
