@@ -157,6 +157,7 @@ struct SingleRequest {
                         negotiation. */
   BIT(sendbuf_init); /* sendbuf is initialized */
   BIT(reader_started); /* client reads have started */
+  BIT(refused_stream); /* request was refused, try again */
 };
 
 /**
