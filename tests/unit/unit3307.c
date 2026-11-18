@@ -27,6 +27,37 @@
 
 #ifdef CURL_MEMDEBUG
 
+static CURLcode t3307_read_error(const char *filename)
+{
+  struct Curl_easy *data;
+  FILE *file;
+  char buffer;
+  size_t nread;
+  bool eos;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+
+  if(result)
+    return result;
+  data = curl_easy_init();
+  file = curlx_fopen(filename, FOPEN_WRITETEXT);
+  if(data && file) {
+    data->state.fread_func = data->set.fread_func_set;
+    data->state.in = file;
+    result = Curl_creader_set_fread(data, -1);
+    if(!result)
+      result = Curl_creader_read(data, data->req.reader.stack,
+                                 &buffer, 1, &nread, &eos);
+  }
+  else
+    result = CURLE_FAILED_INIT;
+  curl_easy_cleanup(data);
+  if(file)
+    curlx_fclose(file);
+  unlink(filename);
+  curl_global_cleanup();
+  return result;
+}
+
 static int t3307_close_count;
 
 static curl_off_t t3307_total_length(struct Curl_easy *data,
@@ -69,6 +100,9 @@ static CURLcode test_unit3307(const char *arg)
   struct Curl_easy data;
   struct Curl_creader *reader;
   CURLcode result;
+
+  fail_unless(t3307_read_error(arg) == CURLE_READ_ERROR,
+              "default reader must not treat file read errors as EOF");
 
   memset(&data, 0, sizeof(data));
   data.set.crlf = TRUE;
