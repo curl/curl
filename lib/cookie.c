@@ -1501,7 +1501,7 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
     }
   }
 
-  if(matches) {
+  if(matches > 1) {
 #define NUM_ON_STACK 16
 
     /*
