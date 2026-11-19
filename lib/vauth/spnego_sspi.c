@@ -363,6 +363,7 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   nego->havenoauthpersist = FALSE;
   nego->havenegdata = FALSE;
   nego->havemultiplerequests = FALSE;
+  nego->nego2 = FALSE;
 }
 
 #endif /* USE_WINDOWS_SSPI && USE_SPNEGO */
