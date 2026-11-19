@@ -638,6 +638,7 @@ static size_t mime_file_read(char *buffer, size_t size, size_t nitems,
   if(mime_open_file(part))
     return READ_ERROR;
 
+  clearerr(part->fp);
   nread = fread(buffer, size, nitems, part->fp);
   return ferror(part->fp) ? READ_ERROR : nread;
 }
