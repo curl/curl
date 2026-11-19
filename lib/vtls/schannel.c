@@ -2667,7 +2667,7 @@ static void schannel_cleanup(void)
 
 static size_t schannel_version(char *buffer, size_t size)
 {
-  return curl_msnprintf(buffer, size, "Schannel");
+  return curl_msnprintf(buffer, size, SCHANNEL_NAME_A);
 }
 
 static CURLcode schannel_random(struct Curl_easy *data,
