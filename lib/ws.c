@@ -2140,7 +2140,7 @@ static CURLcode ws_connecting(struct Curl_easy *data, bool *done)
       /* Got a response that was not an upgrade */
       failf(data, "upgrade to websockets failed, http status %d",
             data->req.httpcode);
-      return CURLE_COULDNT_CONNECT;
+      return CURLE_HTTP_RETURNED_ERROR;
     }
     else {
       /* check connect timeout */
