@@ -2128,9 +2128,11 @@ static CURLcode ws_connecting(struct Curl_easy *data, bool *done)
   CURLcode result;
 
   result = Curl_sendrecv(data);
+  if(result == CURLE_AGAIN)
+    result = CURLE_OK;
 
   if(!result) {
-    if(data->req.done || (data->req.upgr101 == UPGR101_RECEIVED)) {
+    if(data->req.done || (data->req.httpcode == 101)) {
       /* set APPCONNECT progress timer, maybe? */
       *done = TRUE;
     }
