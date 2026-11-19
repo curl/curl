@@ -154,7 +154,6 @@ void Curl_cfchain_trc(struct Curl_easy *data,
       if(chain->sock != CURL_SOCKET_BAD) {
         n = curl_msnprintf(buf, blen, "<fd=%" FMT_SOCKET_T ">",
                            chain->sock);
-        buf += n;
         blen -= n;
       }
       if(cf_report)
