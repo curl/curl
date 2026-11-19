@@ -175,8 +175,11 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
 
 static CURLcode cf_hc_baller_connect(struct cf_hc_baller *b,
                                      struct Curl_easy *data,
+                                     struct Curl_cfilter *cf,
                                      bool *done)
 {
+  (void)cf;
+  VERBOSE(Curl_cfchain_trc(data, cf, &b->chain, b->name));
   b->result = Curl_conn_cf_connect(b->chain.cf, data, done);
   return b->result;
 }
@@ -201,6 +204,7 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   Curl_cfchain_merge(cf->chain, &winner->chain);
   ctx->state = CF_HC_SUCCESS;
   cf->connected = TRUE;
+  VERBOSE(Curl_cfchain_trc(data, cf, cf->chain, "merged winner"));
 
   /* ballers may have failf()'d, the winner resets it, so our
    * errorbuf is clean again. */
@@ -533,7 +537,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       cf_hc_set_baller2(cf, data);
 
     if(cf_hc_baller_is_connecting(&ctx->ballers[0])) {
-      result = cf_hc_baller_connect(&ctx->ballers[0], data, done);
+      result = cf_hc_baller_connect(&ctx->ballers[0], data, cf, done);
       if(!result && *done) {
         result = baller_connected(cf, data, &ctx->ballers[0]);
         goto out;
@@ -546,7 +550,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     }
 
     if(cf_hc_baller_is_connecting(&ctx->ballers[1])) {
-      result = cf_hc_baller_connect(&ctx->ballers[1], data, done);
+      result = cf_hc_baller_connect(&ctx->ballers[1], data, cf, done);
       if(!result && *done) {
         result = baller_connected(cf, data, &ctx->ballers[1]);
         goto out;

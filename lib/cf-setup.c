@@ -330,7 +330,7 @@ static CURLcode cf_setup_connect_steps(struct Curl_cfilter *cf,
 
   /* connect current sub-chain */
 connect_sub_chain:
-  VERBOSE(Curl_cfchain_trc(data, cf->chain, "cf_setup_connect"));
+  VERBOSE(Curl_cfchain_trc(data, cf, cf->chain, "connect"));
 
   if(cf->next && !cf->next->connected) {
     result = Curl_conn_cf_connect(cf->next, data, done);
