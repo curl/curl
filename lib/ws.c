@@ -2111,7 +2111,7 @@ static CURLcode ws_connect_it(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
 
-  CURL_TRC_WS(data, "sending HTTP Websocket ugrade");
+  CURL_TRC_WS(data, "sending HTTP Websocket upgrade");
   result = Curl_http(data, done);
   if(!result) {
     *done = FALSE;
@@ -2149,7 +2149,7 @@ static CURLcode ws_connecting(struct Curl_easy *data, bool *done)
         data->progress.delta.startsingle_us;
       if(timeout_us <= elapsed_us)
         return CURLE_OPERATION_TIMEDOUT;
-      CURL_TRC_WS(data, "waiting for ugrade response, left %"
+      CURL_TRC_WS(data, "waiting for upgrade response, left %"
                   FMT_TIMEDIFF_T "us", timeout_us - elapsed_us);
     }
   }
