@@ -246,6 +246,7 @@ struct negotiatedata {
   BIT(havenoauthpersist);
   BIT(havenegdata);
   BIT(havemultiplerequests);
+  BIT(nego2); /* use [MS-N2HT] */
 };
 
 struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy);
