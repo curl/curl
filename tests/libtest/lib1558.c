@@ -23,6 +23,15 @@
  ***************************************************************************/
 #include "first.h"
 
+static size_t t1558_truncate(char *ptr, size_t size, size_t nmemb, void *userp)
+{
+  FILE *file = curlx_fopen(userp, FOPEN_WRITETEXT);
+  (void)ptr;
+  if(!file)
+    return CURL_WRITEFUNC_ERROR;
+  return curlx_fclose(file) ? CURL_WRITEFUNC_ERROR : size * nmemb;
+}
+
 static CURLcode test_lib1558(const char *URL)
 {
   CURLcode result = CURLE_OK;
@@ -49,10 +58,17 @@ static CURLcode test_lib1558(const char *URL)
 
   curl_mprintf("Protocol: %lx\n", (unsigned long)protocol);
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
-
-  return CURLE_OK;
+  /* Shrink the source after its size was determined, before reading it. */
+  easy_setopt(curl, CURLOPT_HEADERFUNCTION, t1558_truncate);
+  easy_setopt(curl, CURLOPT_HEADERDATA, libtest_arg2);
+  result = curl_easy_perform(curl);
+  if(result != CURLE_PARTIAL_FILE) {
+    curl_mfprintf(stderr, "premature EOF returned %d, expected PARTIAL_FILE\n",
+                  (int)result);
+    result = TEST_ERR_FAILURE;
+  }
+  else
+    result = CURLE_OK;
 
 test_cleanup:
 

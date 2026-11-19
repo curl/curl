@@ -463,6 +463,23 @@ static CURLcode win32_file_list(struct Curl_easy *data, const char *path)
 }
 #endif
 
+static CURLcode file_check_eof(struct Curl_easy *data, int fd,
+                               const curlx_struct_stat *initial,
+                               curl_off_t expected_size)
+{
+  if(expected_size &&
+     ((curl_off_t)initial->st_size - data->state.resume_from >
+      data->progress.dl.cur_size)) {
+    curlx_struct_stat current;
+    /* Virtual files can report a size larger than their readable data. */
+    if(!curlx_fstat(fd, &current) && (current.st_size < initial->st_size)) {
+      failf(data, "File ended before the expected size");
+      return CURLE_PARTIAL_FILE;
+    }
+  }
+  return CURLE_OK;
+}
+
 /*
  * file_do() is the protocol-specific function for the do-phase, separated
  * from the connect-phase above. Other protocols merely setup the transfer in
@@ -641,6 +658,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       nread = read(fd, xfer_buf, bytestoread);
       if(nread < 0)
         result = CURLE_READ_ERROR;
+      else if(!nread && size_known)
+        result = file_check_eof(data, fd, &statbuf, expected_size);
 
       if(nread > 0)
         xfer_buf[nread] = 0;
