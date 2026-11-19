@@ -307,3 +307,11 @@ class TestWebsockets:
         url = f'ws://localhost:{ws_4frames.port}/meta'
         r = client.run(args=[url])
         r.check_exit_code(0)
+
+    def test_20_17_fail_upgrade(self, env: Env, httpd):
+        curl = CurlClient(env=env)
+        url = f'wss://{env.authority_for(env.domain1, "http/1.1")}/data.json'
+        r = curl.http_download(urls=[url])
+        r.check_exit_code(22)
+        r.check_response(http_status=200)
+
