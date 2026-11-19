@@ -543,9 +543,21 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   for(;;) {
     struct Curl_str value;
     char content[DIGEST_MAX_CONTENT_LENGTH];
+    const char *p;
+    size_t len;
 
     /* Pass all additional spaces here */
     curlx_str_passblanks(&chlg);
+
+    /* A scheme token followed by credentials or a delimiter ends Digest. */
+    len = strspn(chlg, "abcdefghijklmnopqrstuvwxyz"
+                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'*+-.^_`|~");
+    p = chlg + len;
+    if(len && (!*p || *p == ',' || *p == ' ' || *p == '\t')) {
+      curlx_str_passblanks(&p);
+      if(*p != '=')
+        break;
+    }
 
     /* Extract a value=content pair */
     if(Curl_auth_digest_get_pair(chlg, &value, content, &chlg)) {
