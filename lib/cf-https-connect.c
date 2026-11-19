@@ -178,6 +178,7 @@ static CURLcode cf_hc_baller_connect(struct cf_hc_baller *b,
                                      struct Curl_cfilter *cf,
                                      bool *done)
 {
+  (void)cf;
   VERBOSE(Curl_cfchain_trc(data, cf, &b->chain, b->name));
   b->result = Curl_conn_cf_connect(b->chain.cf, data, done);
   return b->result;
