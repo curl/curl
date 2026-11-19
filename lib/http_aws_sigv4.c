@@ -188,16 +188,26 @@ static bool is_reserved_char(const char c)
 }
 
 static CURLcode uri_encode_path(struct Curl_str *original_path,
-                                struct dynbuf *new_path)
+                                struct dynbuf *new_path,
+                                bool double_encode)
 {
   const char *p = curlx_str(original_path);
+  size_t len = curlx_strlen(original_path);
   size_t i;
 
-  for(i = 0; i < curlx_strlen(original_path); i++) {
+  for(i = 0; i < len; i++) {
     /* Do not encode slashes or unreserved chars from RFC 3986 */
     CURLcode result = CURLE_OK;
-    unsigned char c = p[i];
-    if(is_reserved_char(c) || c == '/')
+    unsigned char c = (unsigned char)p[i];
+
+    if(!double_encode && (c == '%') && (i + 2 < len) &&
+       ISXDIGIT(p[i + 1]) && ISXDIGIT(p[i + 2])) {
+      /* Preserve already percent-encoded sequence when double encoding is
+         disabled */
+      result = curlx_dyn_addn(new_path, &p[i], 3);
+      i += 2;
+    }
+    else if(is_reserved_char(c) || c == '/')
       result = curlx_dyn_addn(new_path, &c, 1);
     else
       result = curlx_dyn_addf(new_path, "%%%02X", c);
@@ -708,10 +718,7 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
   /* Normalized path will be either the same or shorter than the original
    * path, plus trailing slash */
 
-  if(do_uri_encode)
-    result = uri_encode_path(&original_path, new_path);
-  else
-    result = curlx_dyn_addn(new_path, q, len);
+  result = uri_encode_path(&original_path, new_path, do_uri_encode);
 
   if(!result && curlx_dyn_len(new_path) == 0)
     result = curlx_dyn_add(new_path, "/");

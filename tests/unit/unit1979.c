@@ -47,7 +47,19 @@ static CURLcode test_unit1979(const char *arg)
       "test-equals-noencode",
       FALSE,
       "/a=b",
-      "/a=b"
+      "/a%3Db"
+    },
+    {
+      "test-colon-noencode",
+      FALSE,
+      "/bucket/test:key",
+      "/bucket/test%3Akey"
+    },
+    {
+      "test-already-encoded-noencode",
+      FALSE,
+      "/bucket/test%3Akey",
+      "/bucket/test%3Akey"
     },
     {
       "test-s3-tables",
