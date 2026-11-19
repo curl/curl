@@ -314,4 +314,3 @@ class TestWebsockets:
         r = curl.http_download(urls=[url])
         r.check_exit_code(22)
         r.check_response(http_status=200)
-
