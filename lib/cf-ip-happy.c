@@ -230,6 +230,7 @@ static CURLcode cf_ip_attempt_connect(struct cf_ip_attempt *a,
                                       struct Curl_cfilter *cf,
                                       bool *connected)
 {
+  (void)cf;
   *connected = (bool)a->connected;
   if(!a->result && !*connected) {
     /* evaluate again */
