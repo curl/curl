@@ -602,7 +602,9 @@ int Curl_conn_get_stream_error(struct Curl_easy *data,
 
 #ifdef CURLVERBOSE
 void Curl_cfchain_trc(struct Curl_easy *data,
-                      struct Curl_cfchain *chain, const char *info);
+                      struct Curl_cfilter *cf_report,
+                      struct Curl_cfchain *chain,
+                      const char *info);
 #endif
 
 /*

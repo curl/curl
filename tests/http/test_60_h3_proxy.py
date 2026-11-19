@@ -196,20 +196,20 @@ class TestH3Proxy:
             pytest.param(
                 "http/1.1",
                 "h3",
-                "could not connect to server",
+                7,  # COULDNT_CONNECT
                 id="fail_h1_over_h3_proxytunnel",
             ),
             pytest.param(
                 "h2",
                 "h3",
-                "could not connect to server",
+                7,  # COULDNT_CONNECT
                 marks=MARK_NEEDS_NGHTTP2,
                 id="fail_h2_over_h3_proxytunnel",
             ),
             pytest.param(
                 "h3",
                 "h3",
-                "could not connect to server",
+                7,  # COULDNT_CONNECT
                 id="fail_h3_over_h3_proxytunnel",
             ),
             #pytest.param(
@@ -222,7 +222,7 @@ class TestH3Proxy:
             pytest.param(
                 "h3",
                 "http/1.1",
-                "connect-udp tunnel failed",
+                7,  # COULDNT_CONNECT
                 id="fail_h3_over_h1_proxytunnel",
             ),
         ],
@@ -249,10 +249,7 @@ class TestH3Proxy:
         r = curl.http_download(
             urls=[url], alpn_proto=alpn_proto, with_stats=True, extra_args=proxy_args
         )
-        assert r.exit_code != 0, f"Expected failure but curl succeeded: {r.dump_logs()}"
-        assert exp_err in r.stderr.lower(), (
-            f"Expected protocol/proxy error but got: {r.dump_logs()}"
-        )
+        r.check_exit_code(exp_err)
 
     # Behavior checks for tunnel vs non-tunnel proxy mode selection.
 

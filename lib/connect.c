@@ -376,16 +376,16 @@ CURLcode Curl_cfchain_connect(struct Curl_easy *data,
       conn_report_stats(data, chain);
       Curl_cpool_conn_was_used(data, data->conn, Curl_pgrs_now(data));
       VERBOSE(result = conn_connect_trace(data, cf));
-      VERBOSE(Curl_cfchain_trc(data, chain, "connected"));
+      VERBOSE(Curl_cfchain_trc(data, NULL, chain, "connected"));
       Curl_cfchain_remove_setup_filters(data, chain);
-      VERBOSE(Curl_cfchain_trc(data, chain, "reduced to"));
+      VERBOSE(Curl_cfchain_trc(data, NULL, chain, "reduced to"));
       data->conn->connect_start_ms = -1;
       goto out;
     }
     else if(result) {
       CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
                   (int)result);
-      VERBOSE(Curl_cfchain_trc(data, chain, "failed to connect"));
+      VERBOSE(Curl_cfchain_trc(data, NULL, chain, "failed to connect"));
       Curl_cfchain_report_failed(data, chain);
       goto out;
     }

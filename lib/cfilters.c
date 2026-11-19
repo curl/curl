@@ -128,7 +128,9 @@ CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
 
 #ifdef CURLVERBOSE
 void Curl_cfchain_trc(struct Curl_easy *data,
-                      struct Curl_cfchain *chain, const char *info)
+                      struct Curl_cfilter *cf_report,
+                      struct Curl_cfchain *chain,
+                      const char *info)
 {
   if(CURL_TRC_M_is_verbose(data) && chain) {
     struct Curl_cfilter *cf = chain->cf;
@@ -138,8 +140,9 @@ void Curl_cfchain_trc(struct Curl_easy *data,
 
       buf = msg;
       blen = sizeof(msg) - 1;
-      n = curl_msnprintf(buf, blen, "%s [%d]", info,
-                         chain->primary ? 0 : 1);
+      n = curl_msnprintf(buf, blen, "%s [CHAIN%s]%s", info,
+                         chain->primary ? "" : "-1",
+                         chain->parent ? "..." : "");
       buf += n;
       blen -= n;
       for(; cf && blen; cf = cf->next) {
@@ -148,10 +151,24 @@ void Curl_cfchain_trc(struct Curl_easy *data,
         buf += n;
         blen -= n;
       }
-      CURL_TRC_M(data, "%s%s", msg, blen ? "" : "...");
+      if(chain->sock != CURL_SOCKET_BAD) {
+        n = curl_msnprintf(buf, blen, "<fd=%" FMT_SOCKET_T ">",
+                           chain->sock);
+        buf += n;
+        blen -= n;
+      }
+      if(cf_report)
+        CURL_TRC_CF(data, cf_report, "%s%s", msg, blen ? "" : "...");
+      else
+        CURL_TRC_M(data, "%s%s", msg, blen ? "" : "...");
     }
-    else
-      CURL_TRC_M(data, "%s [%d][-]", info, chain->primary ? 0 : 1);
+    else {
+      if(cf_report)
+        CURL_TRC_CF(data, cf_report, "%s [%d][-]",
+                    info, chain->primary ? 0 : 1);
+      else
+        CURL_TRC_M(data, "%s [%d][-]", info, chain->primary ? 0 : 1);
+    }
   }
 }
 #endif /* CURLVERBOSE */
