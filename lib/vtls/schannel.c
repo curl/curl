@@ -164,6 +164,38 @@ static void InitSecBufferDesc(SecBufferDesc *desc, SecBuffer *BufArr,
   desc->cBuffers = NumArrElem;
 }
 
+#define SUPPORTS_TLS13       1
+#define SUPPORTS_PRIVATE_KEY 2
+#define SUPPORTS_CA_BUNDLE   3
+#define SUPPORTS_ALPN        4
+
+static bool platform_supports(const int what)
+{
+  switch(what) {
+  case SUPPORTS_CA_BUNDLE:
+    return curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
+                                        VERSION_GREATER_THAN_EQUAL);
+  case SUPPORTS_PRIVATE_KEY:
+    /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server 2012,
+       (NT 6.2). For older versions we use CURL_FIND_ANY. */
+    return curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                        VERSION_GREATER_THAN_EQUAL);
+  case SUPPORTS_ALPN:
+    /* ALPN is supported on Windows 8.1 / Server 2012 R2 or newer. */
+    return curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
+                                        VERSION_GREATER_THAN_EQUAL);
+  case SUPPORTS_TLS13:
+    /* Windows Server 2022 and newer (including Windows 11) support TLS 1.3
+       built-in. Previous builds of Windows 10 had broken TLS 1.3
+       implementations that could be enabled via registry. */
+    return curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
+                                        VERSION_GREATER_THAN_EQUAL);
+  default:
+    DEBUGASSERT(0);
+  }
+  return FALSE;
+}
+
 static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
                                                  struct Curl_cfilter *cf,
                                                  struct Curl_easy *data)
@@ -176,17 +208,9 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
   switch(ssl_version_max) {
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_DEFAULT:
-
-    /* Windows Server 2022 and newer (including Windows 11) support TLS 1.3
-       built-in. Previous builds of Windows 10 had broken TLS 1.3
-       implementations that could be enabled via registry. */
-    if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
-                                    VERSION_GREATER_THAN_EQUAL)) {
-      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
-    }
-    else /* Windows 10 or older */
-      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
-
+    ssl_version_max = platform_supports(SUPPORTS_TLS13) ?
+      CURL_SSLVERSION_MAX_TLSv1_3 :
+      CURL_SSLVERSION_MAX_TLSv1_2;
     break;
   }
 
@@ -204,8 +228,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
     case CURL_SSLVERSION_TLSv1_3:
 
       /* Windows Server 2022 or newer */
-      if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
-                                      VERSION_GREATER_THAN_EQUAL)) {
+      if(platform_supports(SUPPORTS_TLS13)) {
         *enabled_protocols |= SP_PROT_TLS1_3_CLIENT;
         break;
       }
@@ -527,13 +550,9 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
         return CURLE_SSL_CERTPROBLEM;
       }
 
-      /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server
-         2012, (NT 6.2). For older versions we use CURL_FIND_ANY. */
-      if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
-                                      VERSION_GREATER_THAN_EQUAL))
-        cert_find_flags = CERT_FIND_HAS_PRIVATE_KEY;
-      else
-        cert_find_flags = CERT_FIND_ANY;
+      cert_find_flags = platform_supports(SUPPORTS_PRIVATE_KEY) ?
+        CERT_FIND_HAS_PRIVATE_KEY :
+        CERT_FIND_ANY;
 
       client_cert =
         CertFindCertificateInStore(cert_store,
@@ -619,9 +638,7 @@ static CURLcode acquire_sspi_handle(struct Curl_cfilter *cf,
 
   /* We support TLS 1.3 starting in Windows Server 2022 or later
    * (OS build 20348) */
-  if(!conn_config->cipher_list &&
-     curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL)) {
+  if(!conn_config->cipher_list && platform_supports(SUPPORTS_TLS13)) {
 
     SCH_CREDENTIALS credentials = { 0 };
     TLS_PARAMETERS tls_parameters = { 0 };
@@ -872,13 +889,11 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   backend->use_alpn = connssl->alpn && s_win_has_alpn;
 
   if(conn_config->CAfile || conn_config->ca_info_blob) {
-    if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
-                                    VERSION_GREATER_THAN_EQUAL)) {
+    if(platform_supports(SUPPORTS_CA_BUNDLE))
       backend->use_manual_cred_validation = TRUE;
-    }
     else {
       failf(data, "schannel: this version of Windows is too old to support "
-                  "certificate verification via CA bundle file.");
+            "certificate verification via CA bundle file.");
       return CURLE_SSL_CACERT_BADFILE;
     }
   }
@@ -2639,8 +2654,7 @@ static int schannel_init(void)
   }
   else {
     /* ALPN is supported on Windows 8.1 / Server 2012 R2 or newer. */
-    s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
-                                                  VERSION_GREATER_THAN_EQUAL);
+    s_win_has_alpn = platform_supports(SUPPORTS_ALPN);
   }
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
