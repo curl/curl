@@ -641,6 +641,12 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       nread = read(fd, xfer_buf, bytestoread);
       if(nread < 0)
         result = CURLE_READ_ERROR;
+      else if(!nread && size_known && expected_size &&
+              ((curl_off_t)statbuf.st_size - data->state.resume_from >
+               data->progress.dl.cur_size)) {
+        failf(data, "File ended before the expected size");
+        result = CURLE_PARTIAL_FILE;
+      }
 
       if(nread > 0)
         xfer_buf[nread] = 0;
