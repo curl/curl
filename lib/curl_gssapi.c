@@ -151,6 +151,12 @@ static OM_uint32 stub_gss_init_sec_context(
   output_token->length = 0;
   output_token->value = NULL;
 
+  /* An [MS-N2HT] Nego2 initial token ('N') starts the exchange, just like
+   * a first call without an input token below */
+  if(input_token && input_token->length && !ctx &&
+     ((char *)input_token->value)[0] == 'N')
+    input_token = NULL;
+
   if(input_token && input_token->length) {
     if(!ctx) {
       *min = STUB_GSS_INVALID_CTX;
