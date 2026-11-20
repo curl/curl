@@ -132,9 +132,6 @@ struct cf_ftp_ctx {
   BIT(dont_check);  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
                        read the line, ignore the result. */
-  BIT(ctl_valid);   /* Tells Curl_ftp_quit() whether or not to do anything. If
-                       the connection has timed out or been closed, this
-                       should be FALSE when it gets to Curl_ftp_quit() */
   BIT(cwddone);     /* if it has been determined that the proper CWD combo
                        already has been done */
   BIT(cwdfail);     /* set TRUE if a CWD command fails, as then we must prevent

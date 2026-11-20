@@ -224,7 +224,6 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
   const char *rawPath = NULL; /* URL-decoded "raw" path */
   size_t pathLen = 0;
 
-  ftpc->ctl_valid = FALSE;
   ftpc->cwdfail = FALSE;
 
   if(ftpc->rawpath)
@@ -2373,8 +2372,6 @@ static CURLcode ftp_dophase_done(struct Curl_easy *data,
     /* since we did not connect now, we want do_more to get called */
     data->conn->bits.do_more = TRUE;
 
-  ftpc->ctl_valid = TRUE; /* seems good */
-
   return CURLE_OK;
 }
 
@@ -3563,7 +3560,6 @@ static CURLcode ftp_done_status(struct Curl_easy *data,
     FALLTHROUGH();
   default:       /* by default, an error means the control connection is
                     wedged and should not be used anymore */
-    ftpc->ctl_valid = FALSE;
     ftpc->cwdfail = TRUE; /* set this TRUE to prevent us to remember the
                              current path, as this connection is going */
     CURL_TRC_FTP(data, "FTP ended with bad error code");
@@ -3594,7 +3590,6 @@ static void ftp_done_path(struct Curl_easy *data, struct cf_ftp_ctx *ftpc,
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
-    ftpc->ctl_valid = FALSE; /* mark control connection as bad */
     connclose(conn); /* mark for connection closure */
     curlx_safefree(ftpc->prevpath); /* no path remembering */
   }
@@ -3637,7 +3632,6 @@ static CURLcode ftp_done_secondary_socket(struct Curl_easy *data,
       if(result) {
         failf(data, "Failure sending ABOR command: %s",
               curl_easy_strerror(result));
-        ftpc->ctl_valid = FALSE; /* mark control connection as bad */
         connclose(conn); /* connection closure */
       }
     }
@@ -3656,7 +3650,7 @@ static CURLcode ftp_done_control_reply(struct Curl_easy *data,
   size_t nread;
   int ftpcode;
 
-  if(!result && (ftp->transfer == PPTRANSFER_BODY) && ftpc->ctl_valid &&
+  if(!result && (ftp->transfer == PPTRANSFER_BODY) &&
      ftpc->pp.pending_resp && !premature) {
     /*
      * Let's see what the server says about the transfer we performed, but
@@ -3669,7 +3663,6 @@ static CURLcode ftp_done_control_reply(struct Curl_easy *data,
 
     if(!nread && (result == CURLE_OPERATION_TIMEDOUT)) {
       failf(data, "control connection looks dead");
-      ftpc->ctl_valid = FALSE; /* mark control connection as bad */
       connclose(conn); /* close */
     }
 
@@ -4099,8 +4092,6 @@ static CURLcode wc_statemach(struct Curl_easy *data,
  * Performs all commands done before a regular transfer between a local and a
  * remote host.
  *
- * ftp->ctl_valid starts out as FALSE, and gets set to TRUE if we reach the
- * ftp_done() function without finding any major problem.
  */
 static CURLcode ftp_regular_transfer(struct Curl_easy *data,
                                      struct cf_ftp_ctx *ftpc,
@@ -4112,8 +4103,6 @@ static CURLcode ftp_regular_transfer(struct Curl_easy *data,
   data->req.size = -1; /* make sure this is unknown at this point */
 
   Curl_pgrsReset(data);
-
-  ftpc->ctl_valid = TRUE; /* starts good */
 
   result = ftp_perform(data, ftpc, ftp,
                        &connected, /* have we connected after PASV/PORT */
@@ -4295,7 +4284,6 @@ static struct cf_ftp_ctx *cf_ftp_ctx_create(struct Curl_easy *data,
   }
 
   Curl_cfchain_init(&ftpc->chain_data, conn, FALSE);
-  ftpc->ctl_valid = TRUE;
   ftpc->known_filesize = -1; /* unknown size for now */
   ftpc->use_ssl = data->set.use_ssl;
   ftpc->ccc = data->set.ftp_ccc;
@@ -4466,7 +4454,7 @@ static CURLcode cf_ftp_shutdown(struct Curl_cfilter *cf,
   *done = FALSE;
   if(ftpc && ftpc->chain_data.cf)
     ftp_close_chain_data(data, ftpc);
-  if(!cf->connected || !ftpc || !ftpc->ctl_valid || cf->shutdown) {
+  if(!cf->connected || !ftpc || data->conn->bits.close || cf->shutdown) {
     *done = TRUE;
     return CURLE_OK;
   }
