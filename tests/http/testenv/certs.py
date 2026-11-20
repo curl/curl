@@ -561,6 +561,7 @@ class TestCA:
                                  key_type: Any,
                                  valid_from: timedelta = timedelta(days=-1),
                                  valid_to: timedelta = timedelta(days=89),
+                                 domain_in_common_name_only: bool = False,
                                  ) -> Credentials:
         pkey = _private_key(key_type=key_type)
         common_name = name
