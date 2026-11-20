@@ -315,10 +315,6 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
          remote file? */
       if(!data->state.upload &&
          !curlx_str_number(&value, &tsize, CURL_OFF_T_MAX)) {
-        if(!tsize) {
-          failf(data, "invalid tsize -:%s:- value in OACK packet", value);
-          return CURLE_TFTP_ILLEGAL;
-        }
         infof(data, "tsize parsed from OACK (%" CURL_FORMAT_CURL_OFF_T ")",
               tsize);
         Curl_pgrsSetDownloadSize(data, tsize);

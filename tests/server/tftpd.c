@@ -119,6 +119,8 @@ struct testcase {
   int ofile;        /* file descriptor for output file when uploading to us */
 
   int writedelay;   /* number of seconds between each packet */
+  bool oack;        /* send an OACK before the data */
+  long oacktsize;   /* tsize value to send in the OACK */
 };
 
 struct formats {
@@ -154,6 +156,7 @@ struct bf {
 #define opcode_DATA  3
 #define opcode_ACK   4
 #define opcode_ERROR 5
+#define opcode_OACK  6
 
 #define TIMEOUT 5
 
@@ -565,6 +568,11 @@ static int tftpd_parse_servercmd(struct testcase *req)
         logmsg("instructed to delay %d secs between packets", num);
         req->writedelay = num;
       }
+      else if(sscanf(cmd, "oacktsize: %d", &num) == 1) {
+        logmsg("instructed to send OACK with tsize %d", num);
+        req->oack = TRUE;
+        req->oacktsize = num;
+      }
       else {
         logmsg("Unknown <servercmd> instruction found: %s", cmd);
       }
@@ -710,6 +718,47 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, timer);
 #endif
+  if(test->oack) {
+    /* the client acknowledges an OACK with an ACK of block 0 */
+    char oack[64];
+    int len;
+
+    oack[0] = 0;
+    oack[1] = opcode_OACK;
+    memcpy(&oack[2], "tsize", 6); /* the option name and its zero */
+    snprintf(&oack[8], sizeof(oack) - 8, "%ld", test->oacktsize);
+    len = (int)(8 + strlen(&oack[8]) + 1);
+    timeout = 0;
+#ifdef HAVE_SIGSETJMP
+    (void)sigsetjmp(timeoutbuf, 1);
+#endif
+    logmsg("write OACK");
+    if(swrite(peer, oack, len) != len) {
+      logmsg("write: fail");
+      return;
+    }
+    for(;;) {
+#ifdef HAVE_ALARM
+      alarm(rexmtval);
+#endif
+      n = sread(peer, &ackbuf.storage[0], sizeof(ackbuf.storage));
+#ifdef HAVE_ALARM
+      alarm(0);
+#endif
+      if(got_exit_signal)
+        return;
+      if(n < 0) {
+        logmsg("read: fail");
+        return;
+      }
+      if(ntohs(sap->th_opcode) == opcode_ERROR) {
+        logmsg("got ERROR");
+        return;
+      }
+      if(ntohs(sap->th_opcode) == opcode_ACK && !ntohs(sap->th_block))
+        break;
+    }
+  }
   do {
     size = readit(test, (struct tftphdr * volatile *)&sdp, pf->f_convert);
     if(size < 0) {

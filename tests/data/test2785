@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+TFTP
+TFTP RRQ
+</keywords>
+</info>
+
+<reply>
+<data>
+</data>
+<servercmd>
+oacktsize: 0
+</servercmd>
+</reply>
+
+<client>
+<server>
+tftp
+</server>
+<name>
+TFTP retrieve empty file with tsize 0 in OACK
+</name>
+<command>
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<strip>
+^timeout = [5-6]$
+</strip>
+<protocol>
+opcode = 1
+mode = octet
+tsize = 0
+blksize = 512
+filename = /%TESTNUMBER
+</protocol>
+</verify>
+</testcase>
