@@ -146,6 +146,7 @@ CRLF
 crontab
 crt
 crypto
+CryptoAPI
 cryptographic
 cryptographically
 CSEQ
@@ -537,6 +538,8 @@ MITM
 mk
 mkdir
 mktime
+mockup
+Mockup
 Monnerat
 monospace
 MorphOS
@@ -763,6 +766,7 @@ SAS
 SASL
 Satiro
 Schannel
+schannel
 Schindelin
 SCO
 SCP
