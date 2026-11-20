@@ -147,13 +147,13 @@ static void mstate_enter_completed(struct Curl_easy *data,
 }
 
 /* always use this function to change state, to make debugging easier */
-static void mstate(struct Curl_easy *data, CURLMstate state
+static void mstate(struct Curl_easy *data, uint8_t state
 #ifdef DEBUGBUILD
                    , int lineno
 #endif
 )
 {
-  CURLMstate oldstate = data->mstate;
+  uint8_t oldstate = data->mstate;
   static const mstate_enter_func state_enter[MSTATE_LAST] = {
     NULL,                      /* INIT */
     NULL,                      /* PENDING */
@@ -185,7 +185,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 #endif
 
   /* really switching state */
-  data->mstate = state;
+  data->mstate = (uint8_t)state;
   if(state_enter[state])
     state_enter[state](data, oldstate);
 }
