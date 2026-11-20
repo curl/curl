@@ -943,15 +943,6 @@ CURLcode Curl_conn_do_maintenance(struct Curl_easy *data)
 
 /**
  * Notify connection filters that the transfer represented by `data`
- * is done with sending data (e.g. has uploaded everything).
- */
-void Curl_conn_ev_data_done_send(struct Curl_easy *data)
-{
-  cf_cntrl_all(data->conn, data, TRUE, CF_CTRL_DATA_DONE_SEND, 0, NULL);
-}
-
-/**
- * Notify connection filters that the transfer represented by `data`
  * is finished - eventually premature, e.g. before being complete.
  */
 void Curl_conn_ev_data_done(struct Curl_easy *data, bool premature)

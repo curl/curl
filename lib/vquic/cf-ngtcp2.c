@@ -693,12 +693,10 @@ static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
     DEBUGASSERT(nvecs > 0); /* we SHOULD have been be able to peek */
   }
 
-  if(nwritten > 0 && stream->upload_left != -1)
-    stream->upload_left -= nwritten;
-
   /* When we stopped sending and everything in `sendbuf` is "in flight",
    * we are at the end of the request body. */
-  if(stream->upload_left == 0) {
+  if(stream->sendbuf_eos &&
+     (stream->tx_in_flight_size == Curl_bufq_len(&stream->sendbuf))) {
     *pflags = NGHTTP3_DATA_FLAG_EOF;
     stream->send_closed = TRUE;
   }
@@ -709,17 +707,18 @@ static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   }
 
   CURL_TRC_CF(data, cf, "[%" PRId64 "] read req body -> "
-              "%zu vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
+              "%zu vecs%s with %zu (buffered=%zu, buf-eos%d)",
               stream->id, nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
-              stream->upload_left);
+              stream->sendbuf_eos);
   return (nghttp3_ssize)nvecs;
 }
 
 static CURLcode h3_stream_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const uint8_t *buf, size_t len,
+                               bool eos,
                                size_t *pnwritten)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
@@ -786,28 +785,25 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   stream->id = sid;
   ++ctx->used_bidi_streams;
 
-  switch(data->state.httpreq) {
-  case HTTPREQ_POST:
-  case HTTPREQ_POST_FORM:
-  case HTTPREQ_POST_MIME:
-  case HTTPREQ_PUT:
-    /* known request body size or -1 */
-    if(data->state.infilesize != -1)
-      stream->upload_left = data->state.infilesize;
-    else
-      /* data sending without specifying the data amount up front */
-      stream->upload_left = -1; /* unknown */
-    break;
-  default:
-    /* there is no request body */
-    stream->upload_left = 0; /* no request body */
-    break;
-  }
-
-  stream->send_closed = (stream->upload_left == 0);
+  stream->sendbuf_eos = stream->send_closed = (eos && *pnwritten == len);
   if(!stream->send_closed) {
     reader.read_data = cb_h3_read_req_body;
     preader = &reader;
+  }
+
+  if(*pnwritten < len) {
+    /* There is also upload data in buf, add it */
+    size_t body_written = 0;
+    result = Curl_bufq_write(
+      &stream->sendbuf, buf + *pnwritten, len - *pnwritten, &body_written);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] stream open, adding to "
+                "sendbuf(len=%zu, eos=%d) -> %d, %zu",
+                stream->id, len - *pnwritten, eos, (int)result,
+                body_written);
+    if(result)
+      goto out;
+    *pnwritten += body_written;
+    stream->sendbuf_eos = (eos && *pnwritten == len);
   }
 
   rc = nghttp3_conn_submit_request(ctx->h3conn, stream->id,
@@ -869,7 +865,6 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto denied;
   }
 
-  (void)eos; /* use for stream EOF and block handling */
   result = Curl_cf_ngtcp2_progress_ingress(cf, data, &pktx);
   if(result)
     goto out;
@@ -880,7 +875,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       result = CURLE_SEND_ERROR;
       goto out;
     }
-    result = h3_stream_open(cf, data, buf, len, pnwritten);
+    result = h3_stream_open(cf, data, buf, len, eos, pnwritten);
     if(result) {
       CURL_TRC_CF(data, cf, "failed to open stream -> %d", (int)result);
       goto out;
@@ -921,12 +916,19 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
   else {
+    if(len && stream->sendbuf_eos) {
+      failf(data, "adding upload data after EOS");
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
     result = Curl_bufq_write(&stream->sendbuf, buf, len, pnwritten);
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send, add to "
-                "sendbuf(len=%zu) -> %d, %zu",
-                stream->id, len, (int)result, *pnwritten);
+                "sendbuf(len=%zu, eos=%d) -> %d, %zu",
+                stream->id, len, eos, (int)result, *pnwritten);
     if(result)
       goto out;
+    if(eos && (len == *pnwritten))
+      stream->sendbuf_eos = TRUE;
     (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
   }
 
@@ -964,8 +966,8 @@ out:
   if(ctx->tls_vrfy_result)
     result = ctx->tls_vrfy_result;
 denied:
-  CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu) -> %d, %zu",
-              stream ? stream->id : -1, len, (int)result, *pnwritten);
+  CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu, eos=%d) -> %d, %zu",
+              stream ? stream->id : -1, len, eos, (int)result, *pnwritten);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -986,7 +988,6 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int event, int arg1, void *arg2)
 {
-  struct cf_ngtcp2_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
   struct cf_call_data save;
 
@@ -1000,16 +1001,6 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_DONE:
     Curl_cf_ngtcp2_h3_stream_done(cf, data);
     break;
-  case CF_CTRL_DATA_DONE_SEND: {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-    if(stream && !stream->send_closed) {
-      stream->send_closed = TRUE;
-      stream->upload_left = Curl_bufq_len(&stream->sendbuf) -
-        stream->tx_in_flight_size;
-      (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
-    }
-    break;
-  }
   case CF_CTRL_CONN_INFO_UPDATE:
     if(cf->connected)
       Curl_conn_set_multiplex(cf->chain, 30);
