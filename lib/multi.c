@@ -768,7 +768,6 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
                                    struct Curl_easy *data)
 {
   CURLMcode mresult;
-  bool premature;
   uint32_t mid;
 
   /* Prevent users from trying to remove same easy handle more than once */
@@ -788,9 +787,9 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
     return CURLM_INTERNAL_ERROR;
   }
 
-  premature = (data->mstate < MSTATE_COMPLETED);
-
   if(data->conn) {
+    bool premature = (data->mstate < MSTATE_COMPLETED);
+
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
     if(premature && (data->mstate > MSTATE_DO))
@@ -800,7 +799,7 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
        connection.
        Note that this ignores the return code because there is
        nothing really useful to do with it anyway! */
-    (void)multi_done(data, data->result, premature);
+    (void)multi_done(data, (CURLcode)data->done, premature);
   }
 
   /* The timer must be shut down before data->multi is set to NULL, else
@@ -2936,7 +2935,7 @@ statemachine_end:
           multi_ischanged(multi, FALSE));
 
 out:
-  data->result = result;
+  data->done = result;
   return mresult;
 }
 
