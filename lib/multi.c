@@ -400,7 +400,7 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 
 bool Curl_is_connecting(struct Curl_easy *data)
 {
-  return data->mstate < MSTATE_DO;
+  return (data->mstate < MSTATE_DO) || data->state.still_connecting;
 }
 
 static CURLMcode multi_assess_wakeup(struct Curl_multi *multi)
