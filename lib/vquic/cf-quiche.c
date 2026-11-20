@@ -1265,20 +1265,6 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_DONE:
     h3_data_done(cf, data);
     break;
-  case CF_CTRL_DATA_DONE_SEND: {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-    if(stream && !stream->send_closed) {
-      unsigned char body[1];
-      size_t sent;
-
-      stream->send_closed = TRUE;
-      body[0] = 'X';
-      result = cf_quiche_send(cf, data, body, 0, TRUE, &sent);
-      CURL_TRC_CF(data, cf, "[%" PRIu64 "] DONE_SEND -> %d, %zu",
-                  stream->id, (int)result, sent);
-    }
-    break;
-  }
   case CF_CTRL_CONN_INFO_UPDATE:
     if(cf->connected)
       Curl_conn_set_multiplex(cf->chain, 30);

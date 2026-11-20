@@ -292,7 +292,7 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
           "Request completely sent off");
   }
 
-  return Curl_xfer_send_close(data);
+  return CURLE_OK;
 }
 
 static CURLcode req_flush(struct Curl_easy *data)

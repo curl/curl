@@ -116,7 +116,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 /* unused now                           5 */
 #define CF_CTRL_DATA_PAUSE              6  /* on/off     NULL     first fail */
 #define CF_CTRL_DATA_DONE               7  /* premature  NULL     ignored */
-#define CF_CTRL_DATA_DONE_SEND          8  /* 0          NULL     ignored */
+/* unused now                           8 */
 /* update conn info at connection and data */
 #define CF_CTRL_CONN_INFO_UPDATE (256 + 0) /* 0          NULL     ignored */
 #define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
@@ -546,12 +546,6 @@ CURLcode Curl_cf_send_bufq(struct Curl_cfilter *cf,
  * a transfer.
  */
 CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data);
-
-/**
- * Notify connection filters that the transfer represented by `data`
- * is done with sending data (e.g. has uploaded everything).
- */
-void Curl_conn_ev_data_done_send(struct Curl_easy *data);
 
 /**
  * Notify connection filters that the transfer represented by `data`

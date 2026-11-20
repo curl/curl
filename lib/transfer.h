@@ -118,8 +118,6 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         char *buf, size_t blen,
                         size_t *pnrcvd);
 
-CURLcode Curl_xfer_send_close(struct Curl_easy *data);
-
 /* Return TRUE if the transfer is not done, but further progress
  * is blocked. For example when it is only receiving and its writer
  * is PAUSED. */
