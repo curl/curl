@@ -2935,7 +2935,7 @@ statemachine_end:
           multi_ischanged(multi, FALSE));
 
 out:
-  data->done = result;
+  data->done = (uint8_t)result;
   return mresult;
 }
 
