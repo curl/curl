@@ -60,7 +60,7 @@ signals to be used unless CURLOPT_NOSIGNAL(3) is set.
 ## Connection Phase
 
 This includes the operations to establish the connection to a server, including
-DNS resolve and proxying, plus any negotiation before the transfer can start.
+DNS resolve and proxies, plus any negotiation before the transfer can start.
 
 For several protocols, this includes the authentication, but for HTTP it does
 not. HTTP is a request based protocol and authentication happens when the
