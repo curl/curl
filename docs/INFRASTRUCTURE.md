@@ -21,6 +21,9 @@ site.
 
 We accept sponsorship via GitHub Sponsors.
 
+We keep a git repository mirror on https://codeberg.org/curl/curl-mirror which
+can be used as a read-only code source.
+
 ## CI services
 
 For every pull request and git push to the master repository, a number of
@@ -72,13 +75,14 @@ maintainers to access these reports soon.
 ## Domain names
 
 The project runs services and website using a few different curl related
-domain names, including `curl.se` and `curl.dev`. Daniel Stenberg owns these
-domain names.
+domain names, including `curl.se`, `libcurl.se` and `curl.dev`. Daniel
+Stenberg owns these domain names. The two latter names redirect visitors to
+`curl.se`.
 
 Until a few years ago, the curl website was present at `curl.haxx.se`. The
 `haxx.se` domain is owned by Haxx AB, administered by Daniel Stenberg. The
-curl.haxx.se name is meant to keep working and be redirecting to curl.se for
-the foreseeable future.
+`curl.haxx.se name` is meant to keep working and be redirecting to `curl.se`
+for the foreseeable future.
 
 ## Websites
 
