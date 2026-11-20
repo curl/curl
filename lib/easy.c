@@ -1159,6 +1159,7 @@ void curl_easy_reset(CURL *curl)
     memset(&data->set, 0, sizeof(struct UserDefined));
     Curl_init_userdefined(data);
     data->state.resolve = NULL;
+    data->state.still_connecting = FALSE;
 
     /* zero out Progress data: */
     memset(&data->progress, 0, sizeof(struct Progress));
