@@ -1480,6 +1480,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(data->conn);
+  data->state.still_connecting = FALSE;
   ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     size_t chunk_size = WS_CHUNK_SIZE;
@@ -2032,6 +2033,8 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
   data->state.http_neg.only_10 = FALSE;
   data->state.http_neg.wanted = CURL_HTTP_V1x;
   data->state.http_neg.allowed = CURL_HTTP_V1x;
+  data->state.still_connecting = !data->set.connect_only ||
+                                 data->set.connect_only_ws;
   return Curl_http_setup_conn(data, conn);
 }
 
