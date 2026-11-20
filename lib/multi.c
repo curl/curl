@@ -187,7 +187,7 @@ static void mstate(struct Curl_easy *data, uint8_t state
   /* really switching state */
   data->mstate = (uint8_t)state;
   if(state_enter[state])
-    state_enter[state](data, oldstate);
+    state_enter[state](data, (CURLMstate)oldstate);
 }
 
 #ifndef DEBUGBUILD
