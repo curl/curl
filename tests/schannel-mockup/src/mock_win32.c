@@ -179,7 +179,6 @@ CertDuplicateCertificateContext(PCCERT_CONTEXT pCertContext)
   return pCertContext;
 }
 
-
 LONG WINAPI InterlockedIncrement(LONG volatile *Addend)
 {
   return ++(*Addend);
