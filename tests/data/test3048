@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-J
+--retry
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK swsbounce
+Content-Length: 0
+Connection: close
+
+</data>
+<data1 nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 0
+Connection: close
+
+</data1>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+HTTP GET -O -J --retry, unopenable output file must be retried
+</name>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/empty%TESTNUMBER -O -J --retry 1 --retry-all-errors --output-dir %LOGDIR/noexist
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /empty%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /empty%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+23
+</errorcode>
+</verify>
+</testcase>

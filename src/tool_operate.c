@@ -644,6 +644,19 @@ static CURLcode post_check_result(struct per_transfer *per, CURLcode result)
   return result;
 }
 
+/*
+ * With -O -J, creating the output file under its URL-derived name must
+ * wait until it is known that no retry follows: a later attempt can
+ * still return a Content-Disposition filename that must be honored (or
+ * refused) before any existing file is truncated. When this returns
+ * TRUE, post_per_transfer() performs the creation instead, once the
+ * retry decision is final.
+ */
+static bool cd_creation_deferred(struct per_transfer *per)
+{
+  return per->hdrcbdata.honor_cd_filename && (per->retry_remaining > 0);
+}
+
 static CURLcode post_output_handling(struct per_transfer *per,
                                      CURLcode result)
 {
@@ -667,7 +680,8 @@ static CURLcode post_output_handling(struct per_transfer *per,
     }
   }
 
-  if(!result && !outs->stream && !outs->bytes) {
+  if(!result && !outs->stream && !outs->bytes &&
+     !cd_creation_deferred(per)) {
     /* we have received no data despite the transfer was successful
        ==> force creation of an empty output file (if an output file
        was specified) */
@@ -693,6 +707,46 @@ static CURLcode post_output_handling(struct per_transfer *per,
     }
   }
 
+  return result;
+}
+
+/*
+ * If creating the output file was deferred in post_output_handling()
+ * because a retry could still follow, create it now. A failure is
+ * returned as CURLE_WRITE_ERROR so the caller can route it through
+ * the retry decision, like a creation failure raised by
+ * post_output_handling() itself.
+ */
+static CURLcode create_deferred_output(struct per_transfer *per,
+                                       CURLcode result)
+{
+  struct OutStruct *outs = &per->outs;
+  struct OperationConfig *config = per->config;
+
+  if(!result && !outs->stream && !outs->bytes &&
+     per->hdrcbdata.honor_cd_filename) {
+    long cond_unmet = 0L;
+    /* do not create (or even overwrite) the file in case we get no
+       data because of unmet condition */
+    curl_easy_getinfo(per->curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
+    if(!cond_unmet && !tool_create_output_file(outs, config))
+      return CURLE_WRITE_ERROR;
+    /* write headers buffered while waiting for a -J filename */
+    if(outs->stream && per->hdrcbdata.headlist &&
+       tool_write_headers(&per->hdrcbdata, outs->stream))
+      return CURLE_WRITE_ERROR;
+    /* Set file extended attributes */
+    if(config->xattr && outs->fopened && outs->stream) {
+      int rc = fwrite_xattr(per->curl, per->url, fileno(outs->stream),
+                            outs->filename);
+      if(rc) {
+        char errbuf[STRERROR_LEN];
+        warnf("Error setting extended attributes on '%s': %s",
+              outs->filename,
+              curlx_strerror(errno, errbuf, sizeof(errbuf)));
+      }
+    }
+  }
   return result;
 }
 
@@ -783,6 +837,24 @@ static CURLcode post_per_transfer(struct per_transfer *per,
       result = retrycheck(config, per, result, retryp, delay);
       if(!result && *retryp)
         return CURLE_OK; /* retry! */
+    }
+
+    /* If creating the output file was deferred in post_output_handling()
+       because a retry could still follow, and no retry follows, create
+       it now that the -J filename decision is final. A creation failure
+       only becomes known at this point, after the retry decision
+       above: route it through the retry decision as well, like a
+       creation failure raised by post_output_handling() itself. */
+    if(!result) {
+      result = create_deferred_output(per, result);
+      if(result && per->retry_remaining &&
+         (!config->retry_maxtime_ms ||
+          (curlx_timediff_ms(curlx_now(), per->retrystart) <
+           config->retry_maxtime_ms))) {
+        result = retrycheck(config, per, result, retryp, delay);
+        if(!result && *retryp)
+          return CURLE_OK; /* retry! */
+      }
     }
 
     if((global->progressmode == CURL_PROGRESS_BAR) &&
@@ -1242,6 +1314,7 @@ static void setup_header_cb(struct OperationConfig *config,
                             struct OutStruct *etag)
 {
   hdrcbdata->honor_cd_filename = (config->content_disposition && u->useremote);
+  hdrcbdata->cd_trailer_announced = FALSE;
   hdrcbdata->outs = outs;
   hdrcbdata->heads = heads;
   hdrcbdata->etag_save = etag;

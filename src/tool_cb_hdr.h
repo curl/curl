@@ -48,6 +48,10 @@ struct HdrCbData {
   struct OutStruct *etag_save;
   struct slist_wc *headlist;
   bool honor_cd_filename;
+  /* TRUE when the current response announced Content-Disposition in its
+     Trailer: header, so a Content-Disposition header may still arrive as
+     a trailer, after the response body */
+  bool cd_trailer_announced;
 };
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream);
