@@ -37,6 +37,7 @@
 #include "sendf.h"
 #include "curl_trc.h"
 #include "multiif.h"
+#include "progress.h"
 #include "easyif.h"
 #include "transfer.h"
 #include "select.h"
@@ -2106,14 +2107,60 @@ out:
   return result;
 }
 
+static CURLcode ws_connect_it(struct Curl_easy *data, bool *done)
+{
+  CURLcode result;
+
+  CURL_TRC_WS(data, "sending HTTP Websocket upgrade");
+  result = Curl_http(data, done);
+  if(!result) {
+    *done = FALSE;
+    if(data->req.upgr101 != UPGR101_WS) {
+      failf(data, "did not send a WS upgrade request");
+      return CURLE_FAILED_INIT;
+    }
+  }
+  return result;
+}
+
+static CURLcode ws_connecting(struct Curl_easy *data, bool *done)
+{
+  CURLcode result;
+
+  result = Curl_sendrecv(data);
+  if(result == CURLE_AGAIN)
+    result = CURLE_OK;
+
+  if(!result) {
+    if(data->req.done || (data->req.httpcode == 101)) {
+      /* set APPCONNECT progress timer, maybe? */
+      *done = TRUE;
+    }
+    else if(data->req.httpcode) {
+      /* Got a response that was not an upgrade */
+      failf(data, "upgrade to websockets failed, http status %d",
+            data->req.httpcode);
+      return CURLE_HTTP_RETURNED_ERROR;
+    }
+    else
+      CURL_TRC_WS(data, "still waiting for upgrade response");
+  }
+  else {
+    CURL_TRC_WS(data, "upgrade failed with error %d, http status %d",
+                (int)result, data->req.httpcode);
+    /* Could make this a CURLE_COULDNT_CONNECT... */
+  }
+  return result;
+}
+
 const struct Curl_protocol Curl_protocol_ws = {
   ws_setup_conn,                        /* setup_connection */
   Curl_http_setup_filters,              /* setup_filters */
-  Curl_http,                            /* do_it */
+  ZERO_NULL,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
-  ZERO_NULL,                            /* connect_it */
-  ZERO_NULL,                            /* connecting */
+  ws_connect_it,                        /* connect_it */
+  ws_connecting,                        /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
   Curl_http_doing_pollset,              /* doing_pollset */

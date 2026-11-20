@@ -307,3 +307,19 @@ class TestWebsockets:
         url = f'ws://localhost:{ws_4frames.port}/meta'
         r = client.run(args=[url])
         r.check_exit_code(0)
+
+    def test_20_17_fail_upgrade(self, env: Env, httpd):
+        curl = CurlClient(env=env)
+        url = f'wss://{env.authority_for(env.domain1, "http/1.1")}/data.json'
+        r = curl.http_download(urls=[url])
+        r.check_exit_code(22)  # CURLE_HTTP_RETURNED_ERROR
+        r.check_response(http_status=200)
+
+    def test_20_18_late_http_answer(self, env: Env, httpd):
+        curl = CurlClient(env=env)
+        url = f'wss://{env.authority_for(env.domain1, "http/1.1")}/curltest/tweak?delay=2000ms'
+        r = curl.http_download(urls=[url], extra_args=[
+            '--connect-timeout=1'
+        ])
+        r.check_exit_code(28)  # CURLE_OPERATION_TIMEDOUT
+        r.check_response(http_status=0)  # did not get the answer before timeout
