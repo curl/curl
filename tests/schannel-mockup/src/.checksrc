@@ -1,0 +1,7 @@
+allowfunc calloc
+allowfunc malloc
+allowfunc strdup
+allowfunc free
+allowfunc inet_pton
+allowfunc snprintf
+disable TYPEDEFSTRUCT
