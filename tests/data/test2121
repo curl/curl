@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+CURLPAUSE_RECV
+libtest
+Content-Encoding
+</keywords>
+</info>
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK swsclose%CR
+Content-Encoding: gzip%CR
+Content-Length: 97%CR
+%CR
+%hex[%1f%8b%08%00%00%00%00%00%02%ff%ed%c1%81%00%00%00%00%80%20%b6%fd%a5%16%a9%0a%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%6a%80%06%9b%a0%00%00%01%00]hex%
+</data>
+<datacheck>
+Received 65536 bytes, paused 1 time
+</datacheck>
+</reply>
+<client>
+<features>
+libz
+</features>
+<server>
+http
+</server>
+<tool>
+lib2120
+</tool>
+<name>
+API receive pause stops callbacks during gzip decoding
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Accept-Encoding: gzip
+
+</protocol>
+</verify>
+</testcase>
