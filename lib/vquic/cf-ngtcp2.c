@@ -790,7 +790,8 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
     reader.read_data = cb_h3_read_req_body;
     preader = &reader;
   }
-  else if(*pnwritten < len) {
+
+  if(*pnwritten < len) {
     /* There is also upload data in buf, add it */
     size_t body_written = 0;
     result = Curl_bufq_write(
