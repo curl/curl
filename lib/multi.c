@@ -2539,15 +2539,16 @@ static CURLMcode multistate_init(struct Curl_easy *data, CURLcode *result)
 static CURLMcode multistate_setup(struct Curl_easy *data)
 {
   const struct curltime *pnow = Curl_pgrs_now(data);
+  timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
+    data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+
   Curl_pgrsTimeWas(data, TIMER_STARTSINGLE, *pnow);
   if(data->set.timeout)
     Curl_expire_set(data, EXPIRE_TIMEOUT, data->set.timeout, pnow);
-  if(data->set.connecttimeout)
-    /* Since a connection might go to pending and back to CONNECT several
-       times before it actually takes off, we need to set the timeout once
-       in SETUP before we enter CONNECT the first time. */
-    Curl_expire_set(data, EXPIRE_CONNECTTIMEOUT,
-                    data->set.connecttimeout, pnow);
+  /* Since a connection might go to pending and back to CONNECT several
+     times before it actually takes off, we need to set the timeout once
+     in SETUP before we enter CONNECT the first time. */
+  Curl_expire_set(data, EXPIRE_CONNECTTIMEOUT, ctimeout_ms, pnow);
 
   multistate(data, MSTATE_CONNECT);
   return CURLM_CALL_MULTI_PERFORM;

@@ -2033,7 +2033,8 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
   data->state.http_neg.only_10 = FALSE;
   data->state.http_neg.wanted = CURL_HTTP_V1x;
   data->state.http_neg.allowed = CURL_HTTP_V1x;
-  data->state.still_connecting = TRUE;
+  data->state.still_connecting = !data->set.connect_only ||
+                                 data->set.connect_only_ws;
   return Curl_http_setup_conn(data, conn);
 }
 
