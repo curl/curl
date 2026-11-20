@@ -43,28 +43,29 @@ struct Curl_eapi_fn_props {
   uint8_t readonly;       /* call is not modifying easy handle */
   uint8_t no_scache_lock; /* may not be called with easy's vtls_scache
                              locked by current thread */
+  uint8_t allow_ntfy_cb;  /* may be called from a multi notify callback */
 };
 
 static const struct Curl_eapi_fn_props eapi_fn_props[CURL_EAPI_FN_LAST] = {
-  /* function                   kill rec  RO !sc */
-  { CURL_EAPI_FN_easy_cleanup,     1,  0,  0,  0 },
-  { CURL_EAPI_FN_easy_duphandle,   0,  1,  1,  0 },
-  { CURL_EAPI_FN_easy_getinfo,     0,  1,  1,  0 },
-  { CURL_EAPI_FN_easy_header,      0,  1,  1,  0 },
-  { CURL_EAPI_FN_easy_nextheader,  0,  1,  1,  0 },
-  { CURL_EAPI_FN_easy_pause,       0,  1,  0,  0 },
-  { CURL_EAPI_FN_easy_perform_ev,  0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_perform,     0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_recv,        0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_reset,       0,  0,  0,  0 },
-  { CURL_EAPI_FN_easy_send,        0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_setopt,      0,  1,  0,  0 },
-  { CURL_EAPI_FN_easy_ssls_export, 0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_ssls_import, 0,  0,  0,  1 },
-  { CURL_EAPI_FN_easy_upkeep,      0,  0,  0,  1 },
-  { CURL_EAPI_FN_ws_recv,          0,  1,  0,  1 },
-  { CURL_EAPI_FN_ws_send,          0,  1,  0,  1 },
-  { CURL_EAPI_FN_ws_start_frame,   0,  1,  0,  0 },
+  /* function                   kill rec  RO !sc ntfy */
+  { CURL_EAPI_FN_easy_cleanup,      1,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_duphandle,    0,  1,  1,  0,  1 },
+  { CURL_EAPI_FN_easy_getinfo,      0,  1,  1,  0,  1 },
+  { CURL_EAPI_FN_easy_header,       0,  1,  1,  0,  1 },
+  { CURL_EAPI_FN_easy_nextheader,   0,  1,  1,  0,  1 },
+  { CURL_EAPI_FN_easy_pause,        0,  1,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_perform_ev,   0,  0,  0,  1,  0 },
+  { CURL_EAPI_FN_easy_perform,      0,  0,  0,  1,  0 },
+  { CURL_EAPI_FN_easy_recv,         0,  0,  0,  1,  1 },
+  { CURL_EAPI_FN_easy_reset,        0,  0,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_send,         0,  0,  0,  1,  1 },
+  { CURL_EAPI_FN_easy_setopt,       0,  1,  0,  0,  1 },
+  { CURL_EAPI_FN_easy_ssls_export,  0,  0,  0,  1,  1 },
+  { CURL_EAPI_FN_easy_ssls_import,  0,  0,  0,  1,  1 },
+  { CURL_EAPI_FN_easy_upkeep,       0,  0,  0,  1,  1 },
+  { CURL_EAPI_FN_ws_recv,           0,  1,  0,  1,  1 },
+  { CURL_EAPI_FN_ws_send,           0,  1,  0,  1,  1 },
+  { CURL_EAPI_FN_ws_start_frame,    0,  1,  0,  0,  1 },
 };
 
 struct Curl_mapi_fn_props {
@@ -164,6 +165,16 @@ static bool mapi_in_ntfy_cb(struct Curl_multi *multi)
   return FALSE;
 }
 
+/* TRUE only when the notify callback is the innermost entry of the multi
+ * call stack. Nested callbacks invoked from within the notify callback
+ * (socket, timer, ...) push above that entry and stay restricted. */
+static bool mapi_top_is_ntfy_cb(struct Curl_multi *multi)
+{
+  return multi && multi->callstack.count &&
+    multi->callstack.calls[multi->callstack.count - 1] ==
+    CURL_CBAPI_FN_multi_ntfy_cb;
+}
+
 bool Curl_api_multi_is_in_callback(struct Curl_multi *multi)
 {
   if(multi && multi->callstack.count) {
@@ -241,15 +252,22 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
       goto out;
     }
     if(data->multi && data->multi->callstack.count) {
+      if(fn_props->allow_ntfy_cb && mapi_top_is_ntfy_cb(data->multi)) {
+        /* explicitly allowed: an application may reset a handle that has
+         * completed its transfer from its CURLMNOTIFY_EASY_DONE callback,
+         * a call order the man pages permit */
+      }
+      else {
 #ifdef CURLVERBOSE
 
-      DEBUGF(curl_mfprintf(stderr,
-        "EAPI guard: calling %hu with multi call to %u ongoing\n",
-        (uint16_t)fn,
-        data->multi->callstack.calls[data->multi->callstack.count - 1]));
+        DEBUGF(curl_mfprintf(stderr,
+          "EAPI guard: calling %hu with multi call to %u ongoing\n",
+          (uint16_t)fn,
+          data->multi->callstack.calls[data->multi->callstack.count - 1]));
 #endif
-      result = CURLE_RECURSIVE_API_CALL;
-      goto out;
+        result = CURLE_RECURSIVE_API_CALL;
+        goto out;
+      }
     }
   }
 
