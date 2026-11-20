@@ -56,6 +56,10 @@ This option may cause libcurl to use the SIGALRM signal to timeout system
 calls on builds not using asynch DNS. In Unix-like systems, this might cause
 signals to be used unless CURLOPT_NOSIGNAL(3) is set.
 
+## Connection Phase
+
+See CURLOPT_CONNECTTIMEOUT_MS(3) for details.
+
 # DEFAULT
 
 300

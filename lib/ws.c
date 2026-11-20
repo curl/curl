@@ -2142,18 +2142,8 @@ static CURLcode ws_connecting(struct Curl_easy *data, bool *done)
             data->req.httpcode);
       return CURLE_HTTP_RETURNED_ERROR;
     }
-    else {
-      /* check connect timeout */
-      timediff_t timeout_us = ((data->set.connecttimeout > 0) ?
-        data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT) * 1000;
-      timediff_t elapsed_us =
-        curlx_ptimediff_us(Curl_pgrs_now(data), &data->progress.start) -
-        data->progress.delta.startsingle_us;
-      if(timeout_us <= elapsed_us)
-        return CURLE_OPERATION_TIMEDOUT;
-      CURL_TRC_WS(data, "waiting for upgrade response, left %"
-                  FMT_TIMEDIFF_T "us", timeout_us - elapsed_us);
-    }
+    else
+      CURL_TRC_WS(data, "still waiting for upgrade response");
   }
   else {
     CURL_TRC_WS(data, "upgrade failed with error %d, http status %d",
