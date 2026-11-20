@@ -57,8 +57,8 @@ static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd,
 /**
  * Add a file descriptor to a sockets array.
  */
-static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
-                       const char *what)
+static int t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
+                      const char *what)
 {
   /**
    * To ensure we only have each file descriptor once, we remove it then add
@@ -71,8 +71,10 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
    */
   if(!sockets->sockets) {
     sockets->sockets = curlx_malloc(sizeof(curl_socket_t) * 20U);
-    if(!sockets->sockets)
-      return;
+    if(!sockets->sockets) {
+      curl_mfprintf(stderr, "error alloc sockets\n");
+      return 1;
+    }
     sockets->max_count = 20;
   }
   else if(sockets->count >= sockets->max_count) {
@@ -85,6 +87,7 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
    */
   sockets->sockets[sockets->count] = fd;
   ++sockets->count;
+  return 0;
 }
 
 /**
@@ -99,10 +102,12 @@ static int t582_curlSocketCallback(CURL *curl, curl_socket_t s, int action,
   (void)socketp;
 
   if(action == CURL_POLL_IN || action == CURL_POLL_INOUT)
-    t582_addFd(&sockets->read, s, "read");
+    if(t582_addFd(&sockets->read, s, "read"))
+      return -1;
 
   if(action == CURL_POLL_OUT || action == CURL_POLL_INOUT)
-    t582_addFd(&sockets->write, s, "write");
+    if(t582_addFd(&sockets->write, s, "write"))
+      return -1;
 
   if(action == CURL_POLL_REMOVE) {
     t582_removeFd(&sockets->read, s, 1);
@@ -187,8 +192,8 @@ static void t582_updateFdSet(struct t582_Sockets *sockets, fd_set *fdset,
   }
 }
 
-static void notifyCurl(CURLM *multi, curl_socket_t s, int evBitmask,
-                       const char *info)
+static int notifyCurl(CURLM *multi, curl_socket_t s, int evBitmask,
+                      const char *info)
 {
   int numhandles = 0;
   CURLMcode mresult = curl_multi_socket_action(multi, s, evBitmask,
@@ -196,21 +201,25 @@ static void notifyCurl(CURLM *multi, curl_socket_t s, int evBitmask,
   if(mresult != CURLM_OK) {
     curl_mfprintf(stderr, "curl error on %s (%d) %s\n",
                   info, mresult, curl_multi_strerror(mresult));
+    return 1;
   }
+  return 0;
 }
 
 /**
  * Invoke curl when a file descriptor is set.
  */
-static void t582_checkFdSet(CURLM *multi, struct t582_Sockets *sockets,
-                            fd_set *fdset, int evBitmask, const char *name)
+static int t582_checkFdSet(CURLM *multi, struct t582_Sockets *sockets,
+                           fd_set *fdset, int evBitmask, const char *name)
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      notifyCurl(multi, sockets->sockets[i], evBitmask, name);
+      if(notifyCurl(multi, sockets->sockets[i], evBitmask, name))
+        return 1;
     }
   }
+  return 0;
 }
 
 static CURLcode test_lib582(const char *URL)
@@ -284,6 +293,7 @@ static CURLcode test_lib582(const char *URL)
   easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
+  curl_mfprintf(stderr, "easy is setup\n");
 
   multi_init(multi);
 
@@ -292,6 +302,7 @@ static CURLcode test_lib582(const char *URL)
 
   multi_setopt(multi, CURLMOPT_TIMERFUNCTION, t582_curlTimerCallback);
   multi_setopt(multi, CURLMOPT_TIMERDATA, &timeout);
+  curl_mfprintf(stderr, "multi is setup\n");
 
   multi_add_handle(multi, curl);
 
@@ -301,6 +312,7 @@ static CURLcode test_lib582(const char *URL)
     struct timeval tv = { 0 };
     tv.tv_sec = 10;
 
+    curl_mfprintf(stderr, "loop\n");
     FD_ZERO(&readSet);
     FD_ZERO(&writeSet);
     t582_updateFdSet(&sockets.read, &readSet, &maxFd);
@@ -316,18 +328,26 @@ static CURLcode test_lib582(const char *URL)
       tv.tv_usec = 100000;
     }
 
+    curl_mfprintf(stderr, "select max=%d, timeout %dsec %dus\n",
+                  (int)maxFd, (int)tv.tv_sec, (int)tv.tv_usec);
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    t582_checkFdSet(multi, &sockets.read, &readSet, CURL_CSELECT_IN,
-                    "read");
-    t582_checkFdSet(multi, &sockets.write, &writeSet, CURL_CSELECT_OUT,
-                    "write");
+    if(t582_checkFdSet(multi, &sockets.read, &readSet,
+                       CURL_CSELECT_IN, "read") ||
+       t582_checkFdSet(multi, &sockets.write,
+                       &writeSet, CURL_CSELECT_OUT, "write")) {
+       curl_mfprintf(stderr, "fatal error in socket check\n");
+       break;
+    }
 
     if(timeout.tv_sec != (time_t)-1 &&
        t582_getMicroSecondTimeout(&timeout) == 0) {
       /* curl's timer has elapsed. */
-      notifyCurl(multi, CURL_SOCKET_TIMEOUT, 0, "timeout");
+      if(notifyCurl(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+        curl_mfprintf(stderr, "fatal error in timeout check\n");
+        break;
+      }
     }
 
     abort_on_test_timeout();
@@ -341,6 +361,7 @@ static CURLcode test_lib582(const char *URL)
 test_cleanup:
 
   /* proper cleanup sequence - type PB */
+  curl_mfprintf(stderr, "test_cleanup\n");
 
   curl_multi_remove_handle(multi, curl);
   curl_easy_cleanup(curl);
