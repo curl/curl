@@ -414,7 +414,7 @@ issue.
 `writedelay: [secs]` delay this amount between reply packets (each packet
   being 512 bytes payload)
 
-`oacktsize: [num]` send an OACK with this `tsize` value before the data
+`oacktsize: [num]` send an `OACK` with this `tsize` value before the data
 
 ### `<dns>`
 

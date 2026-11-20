@@ -725,9 +725,9 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
 
     oack[0] = 0;
     oack[1] = opcode_OACK;
-    len = snprintf(&oack[2], sizeof(oack) - 2, "tsize%c%ld", '\0',
-                   test->oacktsize);
-    len += 3; /* opcode and the trailing zero */
+    memcpy(&oack[2], "tsize", 6); /* the option name and its zero */
+    snprintf(&oack[8], sizeof(oack) - 8, "%ld", test->oacktsize);
+    len = (int)(8 + strlen(&oack[8]) + 1);
     timeout = 0;
 #ifdef HAVE_SIGSETJMP
     (void)sigsetjmp(timeoutbuf, 1);
