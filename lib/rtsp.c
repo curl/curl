@@ -65,6 +65,15 @@ struct rtsp_conn {
   BIT(in_header);
 };
 
+static void rtsp_conn_reset(struct rtsp_conn *rtspc)
+{
+  curlx_dyn_reset(&rtspc->buf);
+  rtspc->rtp_channel = -1;
+  rtspc->rtp_len = 0;
+  rtspc->state = RTP_PARSE_SKIP;
+  rtspc->in_header = FALSE;
+}
+
 /* RTSP transfer data */
 struct RTSP {
   uint32_t CSeq_sent; /* CSeq of this request */
@@ -855,6 +864,12 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
 
   if(!data->req.header)
     rtspc->in_header = FALSE;
+  else if(!rtspc->in_header) {
+    /* A new response starts here. Discard any incomplete RTP frame left by
+     * the previous response before parsing its headers.
+     */
+    rtsp_conn_reset(rtspc);
+  }
   if(!blen) {
     goto out;
   }
