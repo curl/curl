@@ -1,0 +1,33 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+/.deps
+/.dirstamp
+/.libs
+/Makefile
+/Makefile.in
+/aclocal.m4
+/autom4te.cache
+/build-aux
+/config.log
+/config.status
+/configure
+/lib
+/libschannelmockup.la
+/libtool
+/m4
+/schannel-mockup.pc
+/so_locations
+*.lo
+*.o
+tests/.deps
+tests/.dirstamp
+tests/.libs
+tests/Makefile
+tests/Makefile.in
+tests/test_credentials
+tests/test_sspi_handshake
+tests/test_encrypt_decrypt
+tests/test_crypto_store
+tests/*.log
+tests/*.trs

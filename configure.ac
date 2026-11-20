@@ -305,6 +305,38 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to th
   fi
 ])
 
+AC_ARG_WITH(schannel-mockup,
+  AS_HELP_STRING([--with-schannel-mockup=PATH],
+                 [Use Schannel mockup library]),
+  [OPT_SCHANNEL_MOCKUP=$withval], [OPT_SCHANNEL_MOCKUP=no])
+
+if test "x$OPT_SCHANNEL_MOCKUP" != "xno"; then
+  AC_MSG_CHECKING([for Schannel mockup library])
+  if test "x$OPT_SCHANNEL_MOCKUP" = "xyes"; then
+    MOCKUP_DIR="${srcdir}/tests/schannel-mockup"
+  else
+    MOCKUP_DIR="$OPT_SCHANNEL_MOCKUP"
+  fi
+
+  MOCKUP_CPPFLAGS="-I${MOCKUP_DIR}/include"
+  MOCKUP_LIBS="-L${MOCKUP_DIR}/lib -lschannelmockup"
+
+  CPPFLAGS="$CPPFLAGS $MOCKUP_CPPFLAGS"
+  LIBS="$MOCKUP_LIBS $LIBS"
+
+  AC_DEFINE(USE_SCHANNEL, 1, [to enable Schannel support via mockup])
+  AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support via mockup])
+  AC_DEFINE(USE_SCHANNEL_MOCKUP, 1, [built with schannel-mockup])
+
+  SCHANNEL_MOCKUP=1
+  SCHANNEL_ENABLED=1
+  USE_WINDOWS_SSPI=1
+  curl_ssl_msg="Schannel (Mockup)"
+  test "schannel" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+  AC_MSG_RESULT([yes ($MOCKUP_DIR)])
+  TLSCHOICE="Schannel (Mockup)"
+fi
+
 OPT_APPLE_SECTRUST=no
 AC_ARG_WITH(apple-sectrust,
 AS_HELP_STRING([--with-apple-sectrust],[enable Apple OS native certificate verification]),[
@@ -4452,7 +4484,9 @@ AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
   )
 
   if test "$USE_WINDOWS_SSPI" = "1"; then
-    LIBS="-lsecur32 $LIBS"
+    if test "$SCHANNEL_MOCKUP" != "1"; then
+      LIBS="-lsecur32 $LIBS"
+    fi
   fi
 fi
 

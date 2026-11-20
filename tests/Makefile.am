@@ -52,6 +52,38 @@ TESTSCRIPTS = \
   test3500.pl \
   test3990.pl
 
+SCHANNEL_MOCKUP = \
+  schannel-mockup/CMakeLists.txt \
+  schannel-mockup/Makefile.am \
+  schannel-mockup/README.md \
+  schannel-mockup/autogen.sh \
+  schannel-mockup/configure.ac \
+  schannel-mockup/include/.checksrc \
+  schannel-mockup/include/curl_win32.h \
+  schannel-mockup/include/ntsecapi.h \
+  schannel-mockup/include/schannel.h \
+  schannel-mockup/include/security.h \
+  schannel-mockup/include/sspi.h \
+  schannel-mockup/include/subauth.h \
+  schannel-mockup/include/wincrypt.h \
+  schannel-mockup/include/windows.h \
+  schannel-mockup/schannel-mockup.pc.in \
+  schannel-mockup/src/.checksrc \
+  schannel-mockup/src/mock_compat.c \
+  schannel-mockup/src/mock_crypto.c \
+  schannel-mockup/src/mock_hash.c \
+  schannel-mockup/src/mock_internal.h \
+  schannel-mockup/src/mock_sspi.c \
+  schannel-mockup/src/mock_win32.c \
+  schannel-mockup/src/mock_x509.c \
+  schannel-mockup/tests/.checksrc \
+  schannel-mockup/tests/CMakeLists.txt \
+  schannel-mockup/tests/Makefile.am \
+  schannel-mockup/tests/test_credentials.c \
+  schannel-mockup/tests/test_crypto_store.c \
+  schannel-mockup/tests/test_encrypt_decrypt.c \
+  schannel-mockup/tests/test_sspi_handshake.c
+
 EXTRA_DIST =         \
   CMakeLists.txt     \
   allversions.pm     \
@@ -89,7 +121,8 @@ EXTRA_DIST =         \
   util.py            \
   valgrind.pm        \
   valgrind.supp      \
-  $(TESTSCRIPTS)
+  $(TESTSCRIPTS)     \
+  $(SCHANNEL_MOCKUP)
 
 # we have two variables here to make sure DIST_SUBDIRS does not get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to

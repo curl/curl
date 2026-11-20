@@ -741,6 +741,9 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Windows SSL */
 #cmakedefine USE_SCHANNEL 1
 
+/* built with schannel-mockup */
+#cmakedefine USE_SCHANNEL_MOCKUP 1
+
 /* if Watt-32 is in use */
 #cmakedefine USE_WATT32 1
 
