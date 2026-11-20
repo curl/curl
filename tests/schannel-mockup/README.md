@@ -1,3 +1,8 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
 # Schannel Mockup Library (OpenSSL Backend)
 
 This directory contains a mockup implementation of the Windows Security
