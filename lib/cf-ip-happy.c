@@ -227,11 +227,14 @@ static CURLcode cf_ip_attempt_new(struct cf_ip_attempt **pa,
 
 static CURLcode cf_ip_attempt_connect(struct cf_ip_attempt *a,
                                       struct Curl_easy *data,
+                                      struct Curl_cfilter *cf,
                                       bool *connected)
 {
+  (void)cf;
   *connected = (bool)a->connected;
   if(!a->result && !*connected) {
     /* evaluate again */
+    VERBOSE(Curl_cfchain_trc(data, cf, &a->chain, "attempt"));
     a->result = Curl_conn_cf_connect(a->chain.cf, data, connected);
 
     if(!a->result) {
@@ -288,7 +291,7 @@ static CURLcode cf_ip_attempt_restart(struct cf_ip_attempt *a,
                         a->tunnel_transport);
   if(!result) {
     bool dummy;
-    a->result = cf_ip_attempt_connect(a, data, &dummy);
+    a->result = cf_ip_attempt_connect(a, data, cf, &dummy);
   }
   return result;
 }
@@ -400,7 +403,7 @@ evaluate:
   for(panchor = &bs->running; *panchor;) {
     VERBOSE(++i);
     a = *panchor;
-    a->result = cf_ip_attempt_connect(a, data, connected);
+    a->result = cf_ip_attempt_connect(a, data, cf, connected);
     if(!a->result) {
       if(*connected) {
         /* connected, declare the winner, remove from running,
@@ -863,6 +866,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
       ctx->state = SCFST_DONE;
       cf->connected = TRUE;
       Curl_cfchain_merge(cf->chain, &ctx->ballers.winner->chain);
+      VERBOSE(Curl_cfchain_trc(data, cf, cf->chain, "merged winner"));
 
       if(CF_CONN(cf)->scheme->protocol & PROTO_FAMILY_SSH)
         Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
