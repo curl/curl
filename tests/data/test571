@@ -48,6 +48,39 @@ CSeq: 4
 
 </data4>
 
+<data5 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: asdf
+CSeq: 5
+
+</data5>
+
+<data6 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: asdf
+CSeq: 6
+
+</data6>
+
+<data7 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: asdf
+CSeq: 7
+Curl-Private: swsclose
+
+</data7>
+
+<data8 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+Session: asdf
+CSeq: 8
+
+</data8>
+
 <servercmd>
 rtp: part 2 channel 1 size 10
 rtp: part 2 channel 0 size 500
@@ -69,6 +102,8 @@ rtp: part 4 channel 0 size 127
 rtp: part 4 channel 1 size 24 size_err 11
 rtp: part 4 channel 0 size 37
 rtp: part 4 channel 0 size 63
+rtp: part 5 channel 0 size 0 size_err 10 coalesce
+rtp: part 7 channel 0 size 0 size_err 10 coalesce
 </servercmd>
 </reply>
 
