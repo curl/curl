@@ -2,6 +2,7 @@
 <testcase>
 <info>
 <keywords>
+FILE
 curl_easy_getinfo
 CURLINFO_PROTOCOL
 libtest
@@ -17,10 +18,10 @@ file
 </features>
 
 <name>
-CURLINFO_PROTOCOL for file:// transfer
+CURLINFO_PROTOCOL and premature EOF for file:// transfers
 </name>
 <command>
-file://%FILE_PWD/%LOGDIR/data%TESTNUMBER
+file://%FILE_PWD/%LOGDIR/data%TESTNUMBER %LOGDIR/data%TESTNUMBER
 </command>
 <file name="%LOGDIR/data%TESTNUMBER">
 hello
