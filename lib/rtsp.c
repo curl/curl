@@ -672,6 +672,9 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
     if((rtspc->state != RTP_PARSE_SKIP) && data->req.header &&
        (data->set.rtspreq != RTSPREQ_RECEIVE) && (buf[0] == 'R') &&
        !strncmp(buf, "RTSP/", (blen < 5) ? blen : 5)) {
+      /* The control response is recoverable on this socket, but the socket
+       * must not be reused after abandoning an incomplete RTP frame. */
+      connclose(data->conn);
       curlx_dyn_free(&rtspc->buf);
       rtspc->rtp_channel = -1;
       rtspc->rtp_len = 0;
