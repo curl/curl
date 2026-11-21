@@ -347,7 +347,7 @@ static bool is_outfile_auto_resumable(struct OperationConfig *config,
   return config->use_resume && config->resume_from_current &&
     config->resume_from >= 0 && outs->init == config->resume_from &&
     outs->bytes > 0 && outs->filename && outs->regular_file && outs->fopened &&
-    outs->stream && !ferror(outs->stream) &&
+    outs->stream && !ferror(outs->stream) && !config->encoding &&
     !config->customrequest && !per->uploadfile &&
     (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
      config->httpreq == TOOL_HTTPREQ_GET) &&
