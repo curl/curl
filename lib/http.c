@@ -863,6 +863,7 @@ static bool authcmp(const char *auth, const char *line)
 #ifdef USE_SPNEGO
 static CURLcode auth_spnego(struct Curl_easy *data,
                             bool proxy,
+                            bool nego2,
                             const char *auth,
                             struct auth *authp,
                             uint32_t *availp)
@@ -873,7 +874,7 @@ static CURLcode auth_spnego(struct Curl_easy *data,
 
     if(authp->picked == CURLAUTH_NEGOTIATE) {
       struct connectdata *conn = data->conn;
-      CURLcode result = Curl_input_negotiate(data, conn, proxy, auth);
+      CURLcode result = Curl_input_negotiate(data, conn, proxy, nego2, auth);
       uint8_t *negstate = proxy ? &conn->proxy_negotiate_state :
         &conn->http_negotiate_state;
       if(!result) {
@@ -887,6 +888,12 @@ static CURLcode auth_spnego(struct Curl_easy *data,
       }
       else
         data->state.authproblem = TRUE;
+    }
+    else if(nego2 && (authp->want & CURLAUTH_NEGOTIATE)) {
+      /* Negotiate is wanted but not picked yet (--anyauth). Prime the
+       * security context with the Nego2 initial token */
+      struct connectdata *conn = data->conn;
+      (void)Curl_input_negotiate(data, conn, proxy, nego2, auth);
     }
   }
   return CURLE_OK;
@@ -1013,8 +1020,12 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 
   while(*auth) {
 #ifdef USE_SPNEGO
+    /* [MS-N2HT] uses the "Nego2" variant; if the server sends this
+     * we have to answer using it too. */
     if(authcmp("Negotiate", auth))
-      result = auth_spnego(data, proxy, auth, authp, availp);
+      result = auth_spnego(data, proxy, false, auth, authp, availp);
+    if(authcmp("Nego2", auth))
+      result = auth_spnego(data, proxy, true, auth, authp, availp);
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
     if(!result && authcmp("Digest", auth))

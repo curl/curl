@@ -95,6 +95,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   unsigned long attrs;
   SecPkgContext_Bindings pkgBindings = { 0, NULL };
 
+  /* If the credentials handle is absent on entry, this is the first call and
+   * no security context exists yet. */
+  bool initial_call = !nego->credentials;
+
   if(nego->context && nego->status == SEC_E_OK) {
     /* We finished successfully our part of authentication, but server
      * rejected it (since we are again here). Exit with an error since we
@@ -246,7 +250,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       sspi_flags |= ISC_REQ_DELEGATE | ISC_REQ_MUTUAL_AUTH;
     nego->status =
       Curl_pSecFn->InitializeSecurityContext(nego->credentials,
-                                             chlg ? nego->context : NULL,
+                                             (chlg && !initial_call) ?
+                                               nego->context : NULL,
                                              nego->spn,
                                              sspi_flags,
                                              0, SECURITY_NATIVE_DREP,
@@ -363,6 +368,7 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   nego->havenoauthpersist = FALSE;
   nego->havenegdata = FALSE;
   nego->havemultiplerequests = FALSE;
+  nego->nego2 = FALSE;
 }
 
 #endif /* USE_WINDOWS_SSPI && USE_SPNEGO */

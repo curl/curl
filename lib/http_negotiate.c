@@ -68,7 +68,7 @@ static void http_auth_nego_fail(struct Curl_easy *data,
 }
 
 CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
-                              bool proxy, const char *header)
+                              bool proxy, bool nego2, const char *header)
 {
   CURLcode result;
   size_t len;
@@ -100,8 +100,20 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   if(!neg_ctx)
     return CURLE_OUT_OF_MEMORY;
 
-  /* Obtain the input token, if any */
-  header += CURL_CSTRLEN("Negotiate");
+  /* Servers commonly advertise both schemes, e.g. IIS sends:
+   *   WWW-Authenticate: Nego2 <initial token>
+   *   WWW-Authenticate: Negotiate
+   * If we already have a Nego2 running, ignore the following Negotiate. */
+  if(!nego2 && neg_ctx->nego2 && (state != CURL_NEGO_AUTH_SUCC))
+    return CURLE_OK;
+
+  neg_ctx->nego2 = nego2;
+
+  /* Obtain the input token, if any. */
+  if(nego2)
+    header += CURL_CSTRLEN("Nego2");
+  else
+    header += CURL_CSTRLEN("Negotiate");
   curlx_str_passblanks(&header);
 
   len = strlen(header);
@@ -223,7 +235,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
       reauth = TRUE;
     }
     if(!neg_ctx->context) {
-      result = Curl_input_negotiate(data, conn, proxy, "Negotiate");
+      result = Curl_input_negotiate(data, conn, proxy, false, "Negotiate");
       if(result && reauth) {
         /* the connection was authenticated before the reset, see
            http_auth_nego_fail() */
@@ -246,7 +258,10 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
     if(result)
       return result;
 
-    userp = curl_maprintf("%s: Negotiate %s\r\n", hd_name, base64);
+    userp = curl_maprintf("%s: %s %s\r\n",
+                          hd_name,
+                          neg_ctx->nego2 ? "Nego2" : "Negotiate",
+                          base64);
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY
