@@ -238,7 +238,8 @@ static CURLcode test_lib571(const char *URL)
   if(result)
     goto test_cleanup;
   if(numconnects != 1) {
-    curl_mfprintf(stderr, "Expected a new RTSP connection after an incomplete RTP "
+    curl_mfprintf(stderr,
+                  "Expected a new RTSP connection after an incomplete RTP "
                   "frame, got %ld new connects\n", numconnects);
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
