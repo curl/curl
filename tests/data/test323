@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+IMAP
+MULTIPART
+followlocation
+--resolve
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Location: imap://host:%IMAPPORT/%TESTNUMBER/
+Content-Length: 8
+Connection: close
+
+contents
+</data>
+
+<datacheck>
+HTTP/1.1 302 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Location: imap://host:%IMAPPORT/%TESTNUMBER/
+Content-Length: 8
+Connection: close
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<features>
+Mime
+</features>
+<server>
+http
+imap
+</server>
+<name>
+HTTP multipart POST redirected to IMAP does not upload the form
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/page/%TESTNUMBER -F "name=value" -H "Authorization: Bearer s3cr3t" -H "Cookie: sid=s3cr3t" --location --proto-redir imap --resolve host:%IMAPPORT:%HOSTIP
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+#
+# The 302 switches the request to GET, so the IMAP transfer must not APPEND
+# the form. It selects the mailbox instead, and neither the form nor the two
+# sensitive headers reach the redirect target.
+<verify>
+<protocol crlf="yes">
+POST /page/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Authorization: Bearer s3cr3t
+Cookie: sid=s3cr3t
+Content-Length: 156
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------%CR
+Content-Disposition: form-data; name="name"%CR
+%CR
+value%CR
+--------------------------------%CR
+B001 CAPABILITY
+B002 LIST "%TESTNUMBER" *
+B003 LOGOUT
+</protocol>
+<strippart>
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
+</strippart>
+</verify>
+</testcase>
