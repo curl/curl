@@ -402,7 +402,7 @@ jobs:
       - uses: $/.github/actions/macos-fix-certs
 
       - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'openssl@4') }}
+        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') }}
         run: |
           if [ -d "$(brew --prefix)"/include/openssl ]; then
             brew unlink openssl
