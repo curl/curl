@@ -85,8 +85,8 @@ UNITTEST bool cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
       return FALSE;
     return TRUE;
   }
-  else if(!bits && !check)
-    /* 0.0.0.0/0 matches everything */
+  else if(!bits)
+    /* a /0 prefix matches everything */
     return TRUE;
 
   return address == check;
