@@ -2328,6 +2328,12 @@ static CURLcode ssh_state_sftp_close(struct Curl_easy *data,
 
   CURL_TRC_SSH(data, "SFTP DONE done");
 
+  if(rc < 0) {
+    sshc->nextstate = SSH_NO_STATE;
+    myssh_to(data, sshc, SSH_STOP);
+    return libssh2_session_error_to_CURLE(rc);
+  }
+
   /* Check if nextstate is set and move .nextstate could be POSTQUOTE_INIT
      After nextstate is executed, the control should come back to
      SSH_SFTP_CLOSE to pass the correct result back */
