@@ -446,10 +446,6 @@ static CURLcode single_header(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  result = Curl_bump_headersize(data, line_len, TRUE);
-  if(result)
-    return result;
-
   /* Newlines are CRLF, so the CR is ignored as the line is not
      really terminated until the LF comes. Treat a following CR
      as end-of-headers as well.*/

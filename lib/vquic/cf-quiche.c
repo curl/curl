@@ -365,8 +365,6 @@ static void cf_quiche_write_trailer(struct Curl_cfilter *cf,
                                             CLIENTWRITE_HEADER |
                                             CLIENTWRITE_TRAILER,
                                             buf, blen);
-    if(!stream->xfer_result)
-      stream->xfer_result = Curl_bump_headersize(data, blen, FALSE);
     if(stream->xfer_result)
       CURL_TRC_CF(data, cf, "[%" PRIu64 "] error %d writing %zu "
                   "bytes of trailer", stream->id, (int)stream->xfer_result,
