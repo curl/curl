@@ -86,7 +86,7 @@ static CURLcode test_unit1614(const char *arg)
     { NULL, NULL, 0, FALSE } /* end marker */
   };
 
-#define ADDR1614 "ac1d:ba17:cafe:deb7:ea57:face:f157:51de"
+#define ADDR1614 "ac1d:f00d:cafe:deb7:ea57:face:f157:51de"
 #ifdef USE_IPV6
   struct check list6[] = {
     { "::1", "::1", 0, TRUE },
