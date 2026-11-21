@@ -644,8 +644,13 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       else if(!nread && size_known && expected_size &&
               ((curl_off_t)statbuf.st_size - data->state.resume_from >
                data->progress.dl.cur_size)) {
-        failf(data, "File ended before the expected size");
-        result = CURLE_PARTIAL_FILE;
+        curlx_struct_stat current;
+        /* Virtual files can report a size larger than their readable data. */
+        if(!curlx_fstat(fd, &current) &&
+           (current.st_size < statbuf.st_size)) {
+          failf(data, "File ended before the expected size");
+          result = CURLE_PARTIAL_FILE;
+        }
       }
 
       if(nread > 0)
