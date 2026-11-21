@@ -172,12 +172,13 @@ static CURLcode rtsp_done(struct Curl_easy *data,
 
   result = Curl_http_done(data, status, premature);
 
-  /* A control transfer must not leave a connection reusable while the RTP
-   * parser is mid-frame. RECEIVE is the streaming path and may continue the
-   * same frame on the next RECEIVE operation. */
-  if((data->set.rtspreq != RTSPREQ_RECEIVE) &&
-     (rtspc->state != RTP_PARSE_SKIP))
-    connclose(data->conn);
+  /* An incomplete frame can continue arriving on a live interleaved
+   * connection. Only retire it here when the peer has closed the socket. */
+  if(rtspc->state != RTP_PARSE_SKIP) {
+    bool input_pending;
+    if(!Curl_conn_is_alive(data, data->conn, &input_pending))
+      connclose(data->conn);
+  }
 
   if(!status && !result) {
     /* Check the sequence numbers */
