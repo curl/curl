@@ -469,6 +469,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   Curl_peer_unlink(&data->state.initial_origin);
   Curl_peer_unlink(&data->state.origin);
   data->state.requests = 0;
+  data->state.still_connecting = FALSE;
   data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.http_ignorecustom = FALSE; /* use custom HTTP method */

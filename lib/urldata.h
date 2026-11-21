@@ -643,6 +643,9 @@ struct UrlState {
   BIT(maybe_folded);
   BIT(leading_unfold); /* unfold started, this is the leading bytes */
 #endif
+  BIT(still_connecting); /* transfer may have been in DO/DID/PERFORMING
+                          * state, but is still connecting, e.g. limited
+                          * by connect timeouts. */
 };
 
 /*
