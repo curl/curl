@@ -1722,6 +1722,9 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
   CURLcode result;
 
   *pnlen = 0;
+  if(stream->close_handled)
+    return CURLE_OK;
+
   if(stream->reset) {
     if(stream->error == NGHTTP2_REFUSED_STREAM) {
       infof(data, "HTTP/2 stream %d refused by server, try again on a new "
