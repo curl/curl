@@ -243,6 +243,23 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   return n;
 }
 
+/* When stdin is a regular file, as in 'curl -T - [URL] < file', return the
+   number of bytes left to read from it. Returns -1 when the size is not
+   known, which makes the upload use chunked encoding over HTTP/1.1. */
+static curl_off_t stdin_upload_size(void)
+{
+#ifndef __VMS /* file sizes from stat are not reliable on VMS */
+  curlx_struct_stat fileinfo;
+  if(!curlx_fstat(STDIN_FILENO, &fileinfo) && S_ISREG(fileinfo.st_mode)) {
+    /* stdin might not be at the start of the file */
+    curl_off_t pos = (curl_off_t)curl_lseek(STDIN_FILENO, 0, SEEK_CUR);
+    if((pos >= 0) && (pos <= fileinfo.st_size))
+      return fileinfo.st_size - pos;
+  }
+#endif
+  return -1;
+}
+
 static CURLcode pre_transfer(struct per_transfer *per)
 {
   curl_off_t uploadfilesize = -1;
@@ -311,6 +328,12 @@ static CURLcode pre_transfer(struct per_transfer *per)
     }
 #endif
 
+    if(uploadfilesize != -1)
+      my_setopt_offt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
+  }
+  else if(per->uploadfile) {
+    /* uploading from stdin */
+    uploadfilesize = stdin_upload_size();
     if(uploadfilesize != -1)
       my_setopt_offt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
   }

@@ -28,7 +28,7 @@ HTTP PUT from stdin with set size, disabling chunked transfer-encoding
 <command>
 -T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
-<stdin>
+<stdin pipe="yes">
 data on stdin
 </stdin>
 </client>

@@ -92,14 +92,6 @@ of the file.
 
 See [curl issue 12177](https://github.com/curl/curl/issues/12177)
 
-## `-T -` always uploads chunked
-
-When the `<` shell operator is used. curl should realize that stdin is a
-regular file in this case, and that it can do a non-chunked upload, like it
-would do if you used `-T` file.
-
-See [curl issue 12171](https://github.com/curl/curl/issues/12171)
-
 # Build and portability issues
 
 ## OS400 port requires deprecated IBM library
