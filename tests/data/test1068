@@ -30,7 +30,7 @@ HTTP PUT from stdin
 <command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T -
 </command>
-<stdin>
+<stdin pipe="yes">
 more than one byte
 </stdin>
 </client>

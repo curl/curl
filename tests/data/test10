@@ -15,6 +15,14 @@ Server: test-server/fake
 blablabla
 
 </data>
+<data2>
+HTTP/1.0 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data2>
 </reply>
 
 <client>
@@ -22,10 +30,10 @@ blablabla
 http
 </server>
 <name>
-simple HTTP PUT from file
+simple HTTP PUT from file and from stdin
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER0002 -T -
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 Weird
@@ -38,6 +46,10 @@ the
    PUT
       feature
 </file>
+<stdin>
+stdin is a regular file
+so its size is known
+</stdin>
 </client>
 
 <verify>
@@ -57,6 +69,14 @@ for
 the
    PUT
       feature
+PUT /we/want/%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 45
+
+stdin is a regular file
+so its size is known
 </protocol>
 </verify>
 </testcase>

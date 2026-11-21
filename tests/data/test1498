@@ -30,7 +30,7 @@ HTTP PUT from stdin using period
 <command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T .
 </command>
-<stdin>
+<stdin pipe="yes">
 %repeat[2000 x hej]%
 </stdin>
 </client>
