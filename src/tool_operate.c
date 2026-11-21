@@ -1838,13 +1838,17 @@ static CURLcode parallel_event(struct parastate *s)
 
     if(!s->still_running && s->more_transfers) {
       curl_off_t nxfers;
+      CURLcode res;
       /* None are running, but there may be more ready to run. Try
        * to add more when possible. */
-      s->result = add_parallel_transfers(s->multi, s->share,
-                                         &s->more_transfers,
-                                         &s->added_transfers);
-      if(s->result)
+      res = add_parallel_transfers(s->multi, s->share,
+                                   &s->more_transfers,
+                                   &s->added_transfers);
+      if(res) {
+        if(!s->result)
+          s->result = res;
         break;
+      }
       if(s->more_transfers) {
         /* There are still more transfers, so not all were added. If we
          * did not add *any*, it means there is nothing to do until time
@@ -2063,11 +2067,14 @@ static CURLcode parallel_transfers(CURLSH *share)
         }
       }
       else if(s->more_transfers) {
-        s->result = add_parallel_transfers(s->multi, s->share,
-                                           &s->more_transfers,
-                                           &s->added_transfers);
-        if(s->result)
+        CURLcode res = add_parallel_transfers(s->multi, s->share,
+                                              &s->more_transfers,
+                                              &s->added_transfers);
+        if(res) {
+          if(!s->result)
+            s->result = res;
           break;
+        }
       }
 
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
