@@ -275,7 +275,16 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
   Curl_creader_done(data, data->req.upload_aborted);
 
   if(data->req.upload_aborted) {
-    Curl_bufq_reset(&data->req.sendbuf);
+    /* If we have not already sent EOS, clear buffer and read flag,
+     * so we no longer flush anything. If EOS has been sent, our
+     * sendbuf should be empty. */
+    if(!data->req.eos_sent) {
+      Curl_bufq_reset(&data->req.sendbuf);
+      data->req.eos_read = FALSE;
+    }
+    else
+      DEBUGASSERT(Curl_bufq_is_empty(&data->req.sendbuf));
+
     if(data->req.writebytecount)
       infof(data, "abort upload after having sent %" FMT_OFF_T " bytes",
             data->req.writebytecount);
@@ -292,7 +301,7 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
           "Request completely sent off");
   }
 
-  return Curl_xfer_send_close(data);
+  return CURLE_OK;
 }
 
 static CURLcode req_flush(struct Curl_easy *data)

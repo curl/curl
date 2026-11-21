@@ -821,12 +821,6 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
   return Curl_conn_recv(data, buf, blen, pnrcvd);
 }
 
-CURLcode Curl_xfer_send_close(struct Curl_easy *data)
-{
-  Curl_conn_ev_data_done_send(data);
-  return CURLE_OK;
-}
-
 bool Curl_xfer_is_blocked(struct Curl_easy *data)
 {
   bool want_send = CURL_REQ_WANT_SEND(data);
