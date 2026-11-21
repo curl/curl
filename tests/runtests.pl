@@ -2304,6 +2304,9 @@ sub runnerready {
 #
 sub createrunners {
     my ($numrunners) = @_;
+    cleardir($LOGDIR);
+    mkdir($LOGDIR, 0777);
+    mkdir("$LOGDIR/$LOCKDIR", 0777);
     if(! $numrunners) {
         $numrunners++;
     }
@@ -2716,16 +2719,6 @@ if($gdbthis) {
         $gdb = "../libtool --mode=execute gdb";
     }
 }
-
-#######################################################################
-# clear and create logging directory:
-#
-
-# TODO: figure how to get around this. This directory is needed for checksystemfeatures()
-# Maybe create & use & delete a temporary directory in that function
-cleardir($LOGDIR);
-mkdir($LOGDIR, 0777);
-mkdir("$LOGDIR/$LOCKDIR", 0777);
 
 #######################################################################
 # initialize some variables
