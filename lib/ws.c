@@ -127,6 +127,9 @@ struct websocket {
   struct ws_cntrl_frame pending; /* a control frame pending to be sent */
   uint8_t ping[WS_MAX_CNTRL_LEN]; /* received PING payload for auto PONG */
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
+  curl_off_t sendbuf_out; /* bytes taken out of sendbuf so far */
+  curl_off_t data_end;    /* sendbuf_out once the data frame bytes
+                             queued so far have been taken out */
   BIT(using_reader);      /* sending WS data is handled via a client reader */
 };
 
@@ -1040,14 +1043,24 @@ static CURLcode ws_enc_write_head(struct Curl_easy *data,
                                   curl_off_t payload_len,
                                   struct bufq *out)
 {
+  CURLcode result;
+
   /* starting a new frame, we want a clean sendbuf.
    * Any pending control frame we can add now as part of the flush. */
   if(ws->pending.type) {
-    CURLcode result = ws_enc_add_pending(data, ws);
+    result = ws_enc_add_pending(data, ws);
+    if((result == CURLE_AGAIN) && !enc->payload_remain) {
+      result = ws_flush(data, ws, Curl_api_is_in_callback(data));
+      if(!result)
+        result = ws_enc_add_pending(data, ws);
+    }
     if(result)
       return result;
   }
-  return ws_enc_add_frame(data, enc, flags, payload_len, out);
+  result = ws_enc_add_frame(data, enc, flags, payload_len, out);
+  if(!result)
+    ws->data_end = ws->sendbuf_out + (curl_off_t)Curl_bufq_len(out);
+  return result;
 }
 
 /*
@@ -1136,6 +1149,8 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
     return CURLE_OK;
   if(ws->enc.payload_remain) /* in the middle of another frame */
     return CURLE_AGAIN;
+  if(Curl_bufq_is_full(&ws->sendbuf)) /* needs flushing first */
+    return CURLE_AGAIN;
 
   result = ws_enc_add_frame(data, &ws->enc, ws->pending.type,
                             (curl_off_t)ws->pending.payload_len,
@@ -1145,14 +1160,17 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
                 (int)result);
     goto out;
   }
-  result = ws_enc_write_payload(&ws->enc, data, ws->pending.payload,
-                                ws->pending.payload_len,
-                                &ws->sendbuf, &n);
+  /* The head is queued, the payload has to follow it even when sendbuf
+   * is beyond its soft limit. */
+  result = ws_enc_mask_write(ws->enc.mask, &ws->enc.xori,
+                             ws->pending.payload, ws->pending.payload_len,
+                             &ws->sendbuf, &n);
   if(result) {
     CURL_TRC_WS(data, "ws_enc_cntrl(), error adding payload: %d",
                 (int)result);
     goto out;
   }
+  ws->enc.payload_remain -= (curl_off_t)n;
   if(n != ws->pending.payload_len) {
     DEBUGASSERT(0); /* buffer should always be able to take all */
     CURL_TRC_WS(data, "ws_enc_cntrl(), error added only %zu/%zu payload,",
@@ -1166,6 +1184,20 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
 
 out:
   return result;
+}
+
+/* The payload bytes of the ongoing curl_ws_send() that are still in
+ * sendbuf. They are the last data frame bytes queued, control frames
+ * may sit before or after them. */
+static size_t ws_payload_unsent(struct websocket *ws)
+{
+  curl_off_t left = ws->data_end - ws->sendbuf_out;
+
+  if(left <= 0)
+    return 0;
+  if(left > (curl_off_t)ws->sendbuf_payload)
+    return ws->sendbuf_payload;
+  return (size_t)left;
 }
 
 static CURLcode ws_enc_send(struct Curl_easy *data,
@@ -1182,7 +1214,8 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
   DEBUGASSERT(!data->set.ws_raw_mode);
   *pnsent = 0;
 
-  if(ws->enc.payload_remain || !Curl_bufq_is_empty(&ws->sendbuf)) {
+  if(ws->enc.payload_remain || ws->sendbuf_payload ||
+     (ws->data_end > ws->sendbuf_out)) {
     /* a frame is ongoing with payload buffered or more payload
      * that needs to be encoded into the buffer */
     if(buflen < ws->sendbuf_payload) {
@@ -1218,18 +1251,23 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
     }
   }
 
-  /* While there is either sendbuf to flush OR more payload to encode... */
-  while(!Curl_bufq_is_empty(&ws->sendbuf) || (buflen > ws->sendbuf_payload)) {
+  /* While there is either sendbuf to flush, payload to report as sent OR
+   * more payload to encode... */
+  while(!Curl_bufq_is_empty(&ws->sendbuf) || ws->sendbuf_payload ||
+        (buflen > ws->sendbuf_payload)) {
     /* Try to add more payload to sendbuf */
     if(buflen > ws->sendbuf_payload) {
       size_t prev_len = Curl_bufq_len(&ws->sendbuf);
+      size_t len;
       result = ws_enc_write_payload(&ws->enc, data,
                                     buffer + ws->sendbuf_payload,
                                     buflen - ws->sendbuf_payload,
                                     &ws->sendbuf, &n);
       if(result && (result != CURLE_AGAIN))
         return result;
-      ws->sendbuf_payload += Curl_bufq_len(&ws->sendbuf) - prev_len;
+      len = Curl_bufq_len(&ws->sendbuf);
+      ws->sendbuf_payload += len - prev_len;
+      ws->data_end = ws->sendbuf_out + (curl_off_t)len;
       if(!ws->sendbuf_payload) {
         return CURLE_AGAIN;
       }
@@ -1244,10 +1282,11 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
       ws->sendbuf_payload = 0;
     }
     else if(result == CURLE_AGAIN) {
-      if(ws->sendbuf_payload > Curl_bufq_len(&ws->sendbuf)) {
+      size_t unsent = ws_payload_unsent(ws);
+      if(ws->sendbuf_payload > unsent) {
         /* blocked, part of payload bytes remain, report length
          * that we managed to send. */
-        size_t flushed = (ws->sendbuf_payload - Curl_bufq_len(&ws->sendbuf));
+        size_t flushed = ws->sendbuf_payload - unsent;
         *pnsent += flushed;
         ws->sendbuf_payload -= flushed;
         return CURLE_OK;
@@ -1359,6 +1398,8 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
   DEBUGASSERT(!Curl_bufq_is_empty(&ws->sendbuf));
   *peos = FALSE;
   result = Curl_bufq_cread(&ws->sendbuf, buf, blen, pnread);
+  if(!result)
+    ws->sendbuf_out += (curl_off_t)*pnread;
   if(!result && ctx->read_eos && Curl_bufq_is_empty(&ws->sendbuf)) {
     /* no more data, read all, done. */
     ctx->eos = TRUE;
@@ -1852,8 +1893,11 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
       else {
         CURL_TRC_WS(data, "flushed %zu bytes", n);
         Curl_bufq_skip(&ws->sendbuf, n);
+        ws->sendbuf_out += (curl_off_t)n;
       }
     }
+    if(ws->pending.type && !ws->enc.payload_remain)
+      return ws_flush(data, ws, blocking);
   }
   return CURLE_OK;
 }
