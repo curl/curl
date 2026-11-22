@@ -1176,6 +1176,9 @@ void curl_easy_reset(CURL *curl)
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
     Curl_http_auth_cleanup_digest(data);
 #endif
+#ifndef CURL_DISABLE_RTSP
+    curlx_safefree(data->state.session_id);
+#endif
     data->master_mid = UINT32_MAX;
   }
   CURL_EAPI_LEAVE(&guard);
