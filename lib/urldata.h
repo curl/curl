@@ -1106,6 +1106,7 @@ struct UserDefined {
 #ifdef USE_OPENSSL
   BIT(engine_default);
 #endif
+  BIT(urlencode); /* URL-Encode the given URL */
   BIT(never_retry);    /* No matter what, never retry this transfer */
 };
 
