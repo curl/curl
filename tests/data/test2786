@@ -9,6 +9,10 @@ mode=
 </info>
 
 <client>
+# line ends are not converted on Windows
+<features>
+!win32
+</features>
 <server>
 tftp
 </server>
