@@ -2941,7 +2941,10 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...)
     result = Curl_vsetopt(data, option, arg);
 
     va_end(arg);
-    if(result == CURLE_BAD_FUNCTION_ARGUMENT)
+    if(result == CURLE_UNKNOWN_OPTION && curl_easy_option_by_id(option))
+      /* a known option, but support for it was not built in */
+      result = CURLE_NOT_BUILT_IN;
+    else if(result == CURLE_BAD_FUNCTION_ARGUMENT)
       failf(data, "setopt 0x%x got bad argument", (unsigned int)option);
   }
   CURL_EAPI_LEAVE(&guard);
