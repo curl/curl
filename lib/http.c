@@ -3226,7 +3226,7 @@ static CURLcode http_header_l(struct Curl_easy *data,
       data->info.filetime = k->timeofdoc;
     return CURLE_OK;
   }
-  if(HD_IS(hd, hdlen, "Location:")) {
+  if(HD_IS(hd, hdlen, "Location:") && (k->httpcode/3 == 100)) {
     /* this is the URL that the server advises us to use instead */
     char *location = Curl_copy_header_value(hd);
     if(!location)
@@ -3246,8 +3246,7 @@ static CURLcode http_header_l(struct Curl_easy *data,
       }
       data->req.location = location;
 
-      if((k->httpcode >= 300 && k->httpcode < 400) &&
-         data->set.http_follow_mode) {
+      if(data->set.http_follow_mode) {
         CURLcode result;
         DEBUGASSERT(!data->req.newurl);
         data->req.newurl = curlx_strdup(data->req.location); /* clone */

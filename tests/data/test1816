@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+103
+Early Hints
+followlocation
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 103 Early Hints
+Location: tricky-thing
+
+HTTP/1.1 301 OK
+Content-Length: 6
+Location: over-there
+
+12345
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+Ignore Location: in 103 responses
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/ --silent -w '%{stderr}%{redirect_url}'
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET / HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stderr nonewline="yes">
+http://%HOSTIP:%HTTPPORT/over-there
+</stderr>
+</verify>
+</testcase>
