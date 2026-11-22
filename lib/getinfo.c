@@ -190,7 +190,9 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_RTSP_SESSION_ID:
 #ifndef CURL_DISABLE_RTSP
-    *param_charp = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
+    *param_charp = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID) ?
+      CURL_EASY_STR(data, STRING_RTSP_SESSION_ID) :
+      data->state.session_id;
 #else
     *param_charp = NULL;
 #endif
