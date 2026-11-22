@@ -3202,6 +3202,20 @@ static CURLcode http_header_c(struct Curl_easy *data,
         /* we asked for a resume and we got it */
         k->content_range = TRUE;
     }
+    else if(*ptr == '*' && ptr[1] == '/' && k->httpcode == 416 &&
+            data->state.resume_from && data->state.httpreq == HTTPREQ_GET) {
+      curl_off_t total;
+      ptr += 2;
+      if(!curlx_str_number(&ptr, &total, CURL_OFF_T_MAX)) {
+        while(ISBLANK(*ptr))
+          ptr++;
+        if((*ptr == '\r' || *ptr == '\n' || !*ptr) &&
+           total != data->state.resume_from) {
+          failf(data, "Cannot resume: remote file size differs from offset");
+          return CURLE_RANGE_ERROR;
+        }
+      }
+    }
     else if(k->httpcode < 300)
       data->state.resume_from = 0; /* get everything */
   }

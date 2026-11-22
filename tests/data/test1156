@@ -45,6 +45,51 @@ Content-Range: bytes */2
 
 body
 </data3>
+
+<data4 crlf="headers" nocheck="yes">
+HTTP/1.1 416 Requested Range Not Satisfiable
+Content-Type: text/html
+Content-Length: 5
+Content-Range: bytes */3
+
+body
+</data4>
+
+<data5 crlf="headers" nocheck="yes">
+HTTP/1.1 416 Requested Range Not Satisfiable
+Content-Type: text/html
+Content-Length: 5
+Content-Range: bytes */4
+
+body
+</data5>
+
+<data6 crlf="headers" nocheck="yes">
+HTTP/1.1 416 Requested Range Not Satisfiable
+Content-Type: text/html
+Content-Length: 5
+Content-Range: bytes */unknown
+
+body
+</data6>
+
+<data7 crlf="headers" nocheck="yes">
+HTTP/1.1 416 Requested Range Not Satisfiable
+Content-Type: text/html
+Content-Length: 5
+Content-Range: bytes */999999999999999999999999
+
+body
+</data7>
+
+<data8 crlf="headers" nocheck="yes">
+HTTP/1.1 416 Requested Range Not Satisfiable
+Content-Type: text/html
+Content-Length: 5
+Content-Range: bytes */2junk
+
+body
+</data8>
 </reply>
 
 <client>
@@ -64,7 +109,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 0
 </stdout>
 <limits>
-Allocations: 1300
+Allocations: 2200
 </limits>
 </verify>
 </testcase>
