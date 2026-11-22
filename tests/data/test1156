@@ -45,6 +45,24 @@ Content-Range: bytes */2
 
 body
 </data3>
+
+<data4 crlf="headers" nocheck="yes">
+HTTP/1.1 416 Requested Range Not Satisfiable
+Content-Type: text/html
+Content-Length: 5
+Content-Range: bytes */3
+
+body
+</data4>
+
+<data5 crlf="headers" nocheck="yes">
+HTTP/1.1 416 Requested Range Not Satisfiable
+Content-Type: text/html
+Content-Length: 5
+Content-Range: bytes */4
+
+body
+</data5>
 </reply>
 
 <client>

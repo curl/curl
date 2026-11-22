@@ -37,6 +37,8 @@
 #define F_FAIL         (1 << 2)        /* Fail on error. */
 #define F_CONTENTRANGE (1 << 3)        /* Server sends content-range hdr. */
 #define F_IGNOREBODY   (1 << 4)        /* Body should be ignored. */
+#define F_EQUALSIZE    (1 << 5)        /* 416 total equals resume offset. */
+#define F_BIGSIZE      (1 << 6)        /* 416 total exceeds resume offset. */
 
 struct testparams {
   unsigned int flags; /* ORed flags as above. */
@@ -61,10 +63,17 @@ static const struct testparams testparams[] = {
                                                           CURLE_RANGE_ERROR },
   { F_RESUME |             F_FAIL | F_CONTENTRANGE,                CURLE_OK },
   { F_RESUME | F_HTTP416 |                           F_IGNOREBODY, CURLE_OK },
-  { F_RESUME | F_HTTP416 |          F_CONTENTRANGE | F_IGNOREBODY, CURLE_OK },
+  { F_RESUME | F_HTTP416 |          F_CONTENTRANGE | F_IGNOREBODY,
+                                                          CURLE_RANGE_ERROR },
   { F_RESUME | F_HTTP416 | F_FAIL |                  F_IGNOREBODY, CURLE_OK },
   { F_RESUME | F_HTTP416 | F_FAIL | F_CONTENTRANGE | F_IGNOREBODY,
-                                                                   CURLE_OK }
+                                                          CURLE_RANGE_ERROR },
+  { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_EQUALSIZE,
+                                                                   CURLE_OK },
+  { F_RESUME | F_HTTP416 | F_FAIL | F_CONTENTRANGE | F_IGNOREBODY |
+    F_EQUALSIZE,                                                   CURLE_OK },
+  { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_BIGSIZE,
+                                                          CURLE_RANGE_ERROR }
 };
 
 static int hasbody;
@@ -89,6 +98,10 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   replyselector = (p->flags & F_CONTENTRANGE) ? 1 : 0;
   if(p->flags & F_HTTP416)
     replyselector += 2;
+  if(p->flags & F_EQUALSIZE)
+    replyselector = 4;
+  if(p->flags & F_BIGSIZE)
+    replyselector = 5;
   curl_msnprintf(urlbuf, sizeof(urlbuf), "%s%04u", url, replyselector);
   easy_setopt(curl, CURLOPT_URL, urlbuf);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
