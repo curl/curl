@@ -34,6 +34,10 @@ or similar.
 libcurl does not do a complete ASCII conversion when doing ASCII transfers
 over FTP. libcurl only sets the mode to ASCII and performs a standard transfer.
 
+For TFTP, this makes libcurl use the `netascii` mode. On systems other than
+Windows, uploads are then converted: each `LF` is sent as `CR LF` and each
+`CR` as `CR NUL`.
+
 # DEFAULT
 
 0, disabled

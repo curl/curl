@@ -958,17 +958,6 @@ sent, when the data is already perfectly accessible where it is when
 Additionally, libcurl does not support using the read callback for sending
 MQTT which is yet another way to avoid having to hold large payload in memory.
 
-# TFTP
-
-## TFTP does not convert LF to CRLF for `mode=netascii`
-
-RFC 3617 defines that an TFTP transfer can be done using `netascii` mode. curl
-does not support extracting that mode from the URL nor does it treat such
-transfers specifically. It should probably do LF to CRLF translations for
-them.
-
-See [curl issue 12655](https://github.com/curl/curl/issues/12655)
-
 # Gopher
 
 ## Handle network blocks

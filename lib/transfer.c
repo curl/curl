@@ -459,6 +459,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   }
 
   data->state.prefer_ascii = data->set.prefer_ascii;
+  data->state.netascii = FALSE;
 #ifdef CURL_LIST_ONLY_PROTOCOL
   data->state.list_only = data->set.list_only;
 #endif

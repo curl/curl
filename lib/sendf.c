@@ -988,13 +988,14 @@ struct cr_lc_ctx {
   BIT(read_eos);  /* we read an EOS from the next reader */
   BIT(eos);       /* we have returned an EOS */
   BIT(prev_cr);   /* the last byte was a CR */
+  BIT(netascii);  /* LF to CRLF and CR to CR NUL, see RFC 764 */
 };
 
 static CURLcode cr_lc_init(struct Curl_easy *data, struct Curl_creader *reader)
 {
   struct cr_lc_ctx *ctx = reader->ctx;
-  (void)data;
   Curl_bufq_init2(&ctx->buf, (16 * 1024), 1, BUFQ_OPT_SOFT_LIMIT);
+  ctx->netascii = data->state.netascii;
   return CURLE_OK;
 }
 
@@ -1035,7 +1036,8 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
       return result;
     ctx->read_eos = eos;
 
-    if(!nread || !memchr(buf, '\n', nread)) {
+    if(!nread || (!memchr(buf, '\n', nread) &&
+                  !(ctx->netascii && memchr(buf, '\r', nread)))) {
       /* nothing to convert, return this right away */
       if(nread)
         ctx->prev_cr = (buf[nread - 1] == '\r');
@@ -1048,17 +1050,30 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
 
     /* at least one \n might need conversion to '\r\n', place into ctx->buf */
     for(i = start = 0; i < nread; ++i) {
+      const char *rep;
+      if(ctx->netascii) {
+        /* every line end and every CR is converted, an existing CRLF
+           becomes CR NUL CR LF */
+        if(buf[i] == '\n')
+          rep = "\r\n";
+        else if(buf[i] == '\r')
+          rep = "\r\0";
+        else
+          continue;
+      }
       /* if this byte is not an LF character, or if the preceding character is
          a CR (meaning this already is a CRLF pair), go to next */
-      if((buf[i] != '\n') || ctx->prev_cr) {
+      else if((buf[i] != '\n') || ctx->prev_cr) {
         ctx->prev_cr = (buf[i] == '\r');
         continue;
       }
+      else
+        rep = "\r\n";
       ctx->prev_cr = FALSE;
       /* on a soft limit bufq, we do not need to check length */
       result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
       if(!result)
-        result = Curl_bufq_cwrite(&ctx->buf, STRCONST("\r\n"), &n);
+        result = Curl_bufq_cwrite(&ctx->buf, rep, 2, &n);
       if(result)
         return result;
       start = i + 1;
