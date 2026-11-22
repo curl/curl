@@ -659,10 +659,9 @@ CURLcode Curl_dns_cf_add_https_resolve(struct Curl_easy *data,
  * connection. If the DNS resolving is not done yet or if there
  * is no HTTPS-RR info, returns NULL.
  */
-const struct Curl_https_rrinfo *
-Curl_dns_cf_get_https(struct Curl_easy *data,
-                      struct Curl_cfilter *cf,
-                      struct Curl_peer *peer)
+const struct Curl_https_rrinfo *Curl_dns_cf_get_https(struct Curl_easy *data,
+                                                      struct Curl_cfilter *cf,
+                                                      struct Curl_peer *peer)
 {
   struct Curl_cfchain *chain;
   for(chain = cf->chain; chain; chain = chain->parent) {
