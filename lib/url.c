@@ -282,6 +282,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
   curlx_safefree(data->state.rangeline);
   curlx_safefree(data->state.http_host);
 #endif
+#ifndef CURL_DISABLE_RTSP
+  curlx_safefree(data->state.session_id);
+#endif
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(data->req.cookiehost);
 #endif

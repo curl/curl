@@ -2410,8 +2410,12 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
     return Curl_setstropt(data, STRING_SASL_AUTHZID, ptr);
 #ifndef CURL_DISABLE_RTSP
   case CURLOPT_RTSP_SESSION_ID:
-    Curl_peer_unlink(&data->state.rtsp_session_origin);
-    return Curl_setstropt(data, STRING_RTSP_SESSION_ID, ptr);
+    result = Curl_setstropt(data, STRING_RTSP_SESSION_ID, ptr);
+    if(!result) {
+      curlx_safefree(data->state.session_id);
+      Curl_peer_unlink(&data->state.rtsp_session_origin);
+    }
+    return result;
   case CURLOPT_RTSP_STREAM_URI:
     return Curl_setstropt(data, STRING_RTSP_STREAM_URI, ptr);
   case CURLOPT_RTSP_TRANSPORT:
