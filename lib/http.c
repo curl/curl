@@ -3226,7 +3226,7 @@ static CURLcode http_header_l(struct Curl_easy *data,
       data->info.filetime = k->timeofdoc;
     return CURLE_OK;
   }
-  if(HD_IS(hd, hdlen, "Location:") && (k->httpcode/3 == 100)) {
+  if(HD_IS(hd, hdlen, "Location:") && (k->httpcode/100 == 3)) {
     /* this is the URL that the server advises us to use instead */
     char *location = Curl_copy_header_value(hd);
     if(!location)
