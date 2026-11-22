@@ -405,7 +405,8 @@ static CURLcode file_upload(struct Curl_easy *data,
     result = Curl_pgrsUpdate(data);
 
 out:
-  curlx_close(fd);
+  if(curlx_close(fd) && !result)
+    result = CURLE_WRITE_ERROR;
   Curl_multi_xfer_ulbuf_release(data, xfer_ulbuf);
 
   return result;
