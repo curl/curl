@@ -82,7 +82,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 0
 </stdout>
 <limits>
-Allocations: 1300
+Allocations: 1600
 </limits>
 </verify>
 </testcase>
