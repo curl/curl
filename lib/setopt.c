@@ -2906,6 +2906,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     case CURLOPT_STREAM_DEPENDS:   /* CURL * */
     case CURLOPT_STREAM_DEPENDS_E: /* CURL * */
       return CURLE_OK;
+    case CURLOPT_URLENCODE:
+      data->set.urlencode = (0 != va_arg(param, long));
+      break;
     default:
       break;
     }
