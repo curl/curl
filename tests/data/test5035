@@ -23,6 +23,7 @@ imap
 </server>
 <features>
 GSS-API
+Kerberos
 !SSPI
 </features>
 <name>
