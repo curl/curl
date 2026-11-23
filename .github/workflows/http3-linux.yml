@@ -277,7 +277,7 @@ jobs:
             "https://www.gnupg.org/ftp/gcrypt/gnutls/v${GNUTLS_VERSION%.*}/gnutls-${GNUTLS_VERSION}.tar.xz" --output pkg.bin
           sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin
           cd "gnutls-${GNUTLS_VERSION}"
-          # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
+          # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-dev
           ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/gnutls \
             PKG_CONFIG_PATH=/home/runner/pkg/nettle/lib/pkgconfig \
             LDFLAGS=-Wl,-rpath,/home/runner/pkg/nettle/lib \
