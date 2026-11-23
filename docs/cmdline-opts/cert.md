@@ -28,7 +28,7 @@ independently.
 
 In the \<certificate\> portion of the argument, you must escape the character
 `:` as `\:` so that it is not recognized as the password delimiter. Similarly,
-you must escape the double quote character as \" so that it is not recognized
+you must escape the double quote character as `\"` so that it is not recognized
 as an escape character. To pass a backslash, you must escape it as `\\`.
 
 If curl is built against OpenSSL, and the engine pkcs11 or pkcs11
