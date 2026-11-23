@@ -2041,15 +2041,17 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
     bool prepend_sheme = FALSE;
     /* special-case when 'file' is default as a normal path is not a valid URL
        without the 'file' scheme present */
-    unsigned int flags = CURLU_GUESS_SCHEME |
-      CURLU_NON_SUPPORT_SCHEME | (data->set.disallow_username_in_url ? CURLU_DISALLOW_USER : 0) |
-      (data->set.path_as_is ? CURLU_PATH_AS_IS : 0) | (data->set.urlencode ? CURLU_URLENCODE : 0);
-    
+    unsigned int flags = CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME |
+      (data->set.disallow_username_in_url ? CURLU_DISALLOW_USER : 0) |
+      (data->set.path_as_is ? CURLU_PATH_AS_IS : 0) |
+      (data->set.urlencode ? CURLU_URLENCODE : 0);
+
     if(curl_strequal("file", CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL)) &&
        !Curl_is_absolute_url(Curl_bufref_ptr(&data->state.url), NULL, 0, TRUE))
       prepend_sheme = TRUE;
     else {
-      uc = curl_url_set(uh, CURLUPART_URL, Curl_bufref_ptr(&data->state.url), flags);
+      uc = curl_url_set(uh, CURLUPART_URL,
+                        Curl_bufref_ptr(&data->state.url), flags);
       if(uc) {
         failf(data, "URL rejected: %s", curl_url_strerror(uc));
         result = Curl_uc_to_curlcode(uc);
