@@ -717,6 +717,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
   case CURLOPT_PATH_AS_IS:
     s->path_as_is = enabled;
     break;
+  case CURLOPT_URLENCODE:
+    s->urlencode = enabled;
+    break;
   case CURLOPT_PIPEWAIT:
     s->pipewait = enabled;
     break;
@@ -2906,9 +2909,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     case CURLOPT_STREAM_DEPENDS:   /* CURL * */
     case CURLOPT_STREAM_DEPENDS_E: /* CURL * */
       return CURLE_OK;
-    case CURLOPT_URLENCODE:
-      data->set.urlencode = (0 != va_arg(param, long));
-      break;
     default:
       break;
     }
