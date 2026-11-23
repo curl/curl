@@ -200,8 +200,7 @@ int Curl_ngh2_session_client_new3(
   if(ngh2->fatal_rv)
     return ngh2->fatal_rv;
   return ngh2_check(ngh2,
-    nghttp2_session_client_new3(
-      &ngh2->s, callbacks, user_data, option, mem));
+    nghttp2_session_client_new3(&ngh2->s, callbacks, user_data, option, mem));
 }
 
 int Curl_ngh2_session_want_read(struct curl_ngh2 *ngh2)
