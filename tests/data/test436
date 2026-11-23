@@ -21,6 +21,8 @@ Content-Type: text/1
 --next
 header = "a: a"
 data = "curlrc read"
+request = "PUT"
+request = ""
 </file1>
 <server>
 http
@@ -40,7 +42,7 @@ Find .curlrc in .config/curlrc via CURL_HOME
 
 <verify>
 <protocol crlf="yes" nonewline="yes">
-POST /%TESTNUMBER HTTP/1.1
+PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

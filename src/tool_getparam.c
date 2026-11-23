@@ -43,11 +43,11 @@
 
 static ParameterError getstr(char **str, const char *val, bool allowblank)
 {
-  if(*str)
-    curlx_safefree(*str);
   DEBUGASSERT(val);
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
+  if(*str)
+    curlx_free(*str);
 
   *str = curlx_strdup(val);
   if(!*str)
@@ -59,11 +59,11 @@ static ParameterError getstr(char **str, const char *val, bool allowblank)
 static ParameterError getstrn(char **str, const char *val,
                               size_t len, bool allowblank)
 {
-  if(*str)
-    curlx_safefree(*str);
   DEBUGASSERT(val);
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
+  if(*str)
+    curlx_free(*str);
 
   *str = curlx_memdup0(val, len);
   if(!*str)
