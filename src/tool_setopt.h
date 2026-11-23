@@ -146,7 +146,7 @@ CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...);
 
 #define my_setopt_slist(x, y, z)                   \
   do {                                             \
-    result = tool_setopt_slist(x, #y, y, z);       \
+    result = curl_easy_setopt(x, y, z);       \
     if(setopt_bad(result))                         \
       return result;                               \
   } while(0)
