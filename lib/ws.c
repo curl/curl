@@ -600,6 +600,7 @@ static void update_meta(struct websocket *ws,
 struct ws_cw_ctx {
   struct Curl_cwriter super;
   struct bufq buf;
+  CURLcode result;
   /* the frame being passed on, for curl_ws_meta() in the write callback */
   struct curl_ws_frame recvframe;
 };
@@ -609,6 +610,7 @@ static CURLcode ws_cw_init(struct Curl_easy *data,
 {
   struct ws_cw_ctx *ctx = writer->ctx;
   (void)data;
+  ctx->result = CURLE_OK;
   Curl_bufq_init2(&ctx->buf, WS_CHUNK_SIZE, 1, BUFQ_OPT_SOFT_LIMIT);
   return CURLE_OK;
 }
@@ -748,6 +750,11 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
   if(!(type & CLIENTWRITE_BODY) || data->set.ws_raw_mode)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
+  if(ctx->result) {
+    CURL_TRC_WRITE(data, "[WS] failing write due to earlier error");
+    return ctx->result;
+  }
+
   ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     failf(data, "[WS] not a websocket transfer");
@@ -822,6 +829,11 @@ static CURLcode ws_cw_flush(struct Curl_easy *data,
     struct ws_cw_ctx *ctx = writer->ctx;
     struct websocket *ws;
 
+    if(ctx->result) {
+      CURL_TRC_WRITE(data, "[WS] failing flush due to earlier error");
+      return ctx->result;
+    }
+
     /* Frames should be written one by one, else the meta data does
      * not fit. Flush the next writer first, so it does not aggregate
      * our flushed data with anything it might have buffered. */
@@ -852,6 +864,7 @@ static CURLcode ws_cw_flush(struct Curl_easy *data,
       }
       else if(result) {
         failf(data, "[WS] decode payload error %d", (int)result);
+        ctx->result = result; /* remember error state */
         Curl_bufq_reset(&ctx->buf);
         goto out;
       }
