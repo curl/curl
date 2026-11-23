@@ -28,8 +28,8 @@ updates:
     cooldown:
       default-days: 7
       semver-major-days: 15
-      semver-minor-days: 7
-      semver-patch-days: 3
+      semver-minor-days: 10
+      semver-patch-days: 7
     groups:
       pip-dependencies:
         patterns:
