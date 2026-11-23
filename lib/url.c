@@ -163,6 +163,8 @@ void Curl_freeset(struct Curl_easy *data)
     curlx_safefree(data->set.blobs[j]);
   }
 
+  Curl_frzn_strs_safefree(&data->set.resolve);
+  Curl_frzn_strs_safefree(&data->set.connect_to);
   Curl_bufref_free(&data->state.referer);
   Curl_bufref_free(&data->state.url);
 
@@ -1715,17 +1717,20 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct Curl_peer *origin = conn->origin;
   struct Curl_peer *via_peer = NULL;
-  struct curl_slist *conn_to_entry = data->set.connect_to;
+  struct Curl_frzn_strs *cto_strs = data->set.connect_to;
+  const char *s;
+  size_t i;
 
   DEBUGASSERT(!conn->via_peer);
   Curl_peer_unlink(&conn->via_peer);
 
-  while(conn_to_entry && !via_peer) {
-    result = parse_connect_to_string(data, origin, conn_to_entry->data,
-                                     &via_peer);
+  for(i = 0; (i < Curl_frzn_strs_count(cto_strs)) && !via_peer; ++i) {
+    s = Curl_frzn_strs_get_str(cto_strs, i);
+    if(!s)
+      continue;
+    result = parse_connect_to_string(data, origin, s, &via_peer);
     if(result)
       return result;
-    conn_to_entry = conn_to_entry->next;
   }
 
 #ifndef CURL_DISABLE_ALTSVC

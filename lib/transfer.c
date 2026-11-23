@@ -510,7 +510,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     Curl_cookie_run(data); /* activate */
 
   /* If there is a list of host pairs to deal with */
-  if(!result && data->state.resolve)
+  if(!result && !data->state.resolve_loaded)
     result = Curl_loadhostpairs(data);
 
   if(!result)

@@ -61,6 +61,7 @@
 #include "formdata.h"
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hash.h"
+#include "frzn_strs.h"
 #include "peer.h"
 #include "proxy.h"
 #include "splay.h"
@@ -548,8 +549,6 @@ struct UrlState {
   struct urlpieces up;
   struct bufref url;        /* work URL, initially copied from UserDefined */
   struct bufref referer;    /* referer string */
-  struct curl_slist *resolve; /* set to point to the set.resolve list when
-                                 this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
   curl_mimepart *mimepost;
 #ifndef CURL_DISABLE_FORM_API
@@ -647,6 +646,7 @@ struct UrlState {
   BIT(still_connecting); /* transfer may have been in DO/DID/PERFORMING
                           * state, but is still connecting, e.g. limited
                           * by connect timeouts. */
+  BIT(resolve_loaded); /* user set resolve list has been loaded */
 };
 
 /*
@@ -856,10 +856,10 @@ struct UserDefined {
 #ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
 #endif
-  struct curl_slist *resolve;     /* list of names to add/remove from
+  struct Curl_frzn_strs *resolve; /* list of names to add/remove from
                                      DNS cache */
-  struct curl_slist *connect_to; /* list of host:port mappings to override
-                                    the hostname and port to connect to */
+  struct Curl_frzn_strs *connect_to; /* list of host:port mappings to override
+                                        the hostname and port to connect to */
   time_t timevalue;       /* what time to compare with */
   struct ssl_easy_config ssl;  /* user defined SSL stuff */
   curl_ssl_ctx_callback ssl_fsslctx; /* function to initialize SSL ctx */

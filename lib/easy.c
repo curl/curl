@@ -927,7 +927,12 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 
   /* Copy src->set into dst->set first, then deal with the strings
      afterwards */
-  dst->set = src->set;
+  dst->set = src->set; /* this is yikes! */
+
+  /* clear frozen strings from copy */
+  dst->set.resolve = NULL;
+  dst->set.connect_to = NULL;
+
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   dst->set.mimepostp = NULL;
 #endif
@@ -937,6 +942,18 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
   memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
+
+  /* duplicate frozen strings */
+  if(src->set.resolve) {
+    dst->set.resolve = Curl_frzn_strs_dup(src->set.resolve);
+    if(!dst->set.resolve)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  if(src->set.connect_to) {
+    dst->set.connect_to = Curl_frzn_strs_dup(src->set.connect_to);
+    if(!dst->set.connect_to)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   /* duplicate all strings */
   result = Curl_u8_strset_copy(&dst->set.strings, &src->set.strings);
@@ -978,9 +995,6 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
       return result;
   }
 #endif
-
-  if(src->set.resolve)
-    dst->state.resolve = dst->set.resolve;
 
   return result;
 }
@@ -1040,6 +1054,9 @@ CURL *curl_easy_duphandle(CURL *curl)
     /* copy all userdefined values */
     if(dupset(outcurl, data))
       goto fail;
+
+    /* if it had been loaded, no need to do that again */
+    outcurl->state.resolve_loaded = data->state.resolve_loaded;
 
     outcurl->progress.hide     = data->progress.hide;
     outcurl->progress.callback = data->progress.callback;
@@ -1158,7 +1175,7 @@ void curl_easy_reset(CURL *curl)
     Curl_freeset(data);
     memset(&data->set, 0, sizeof(struct UserDefined));
     Curl_init_userdefined(data);
-    data->state.resolve = NULL;
+    data->state.resolve_loaded = FALSE;
     data->state.still_connecting = FALSE;
 
     /* zero out Progress data: */
