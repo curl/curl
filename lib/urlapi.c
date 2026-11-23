@@ -466,8 +466,12 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
 {
   size_t len;
   char *hp;
+  const char *endbracket;
   DEBUGASSERT(*hostname == '[');
   if(hlen < 4) /* '[::]' is the shortest possible valid string */
+    return CURLUE_BAD_IPV6;
+  endbracket = &hostname[hlen - 1];
+  if(*endbracket != ']')
     return CURLUE_BAD_IPV6;
   hostname++;
   hlen -= 2;
@@ -488,7 +492,7 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
         i++;
         hp++;
       }
-      if(!i || (']' != *hp))
+      if(!i || (hp != endbracket))
         return CURLUE_BAD_IPV6;
       u->zoneid = curlx_memdup0(&hostname[len + 1], i);
       if(!u->zoneid)

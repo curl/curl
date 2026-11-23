@@ -212,6 +212,8 @@ static CURLcode test_unit1675(const char *arg)
         "[ac1d:ba17:cafe:deb7:ea57:face:f157:51de]", "ethethethethet0" },
       { "[fe80::1%25eth0]", "[fe80::1]", "25eth0" },
       { "[::1", NULL, NULL }, /* missing bracket */
+      { "[::1@", NULL, NULL }, /* wrong closing character */
+      { "[fe80::1%eth0]@example.com]", NULL, NULL }, /* trailing data */
       { "[]", NULL, NULL }, /* empty */
     };
 
