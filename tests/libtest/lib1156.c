@@ -39,6 +39,9 @@
 #define F_IGNOREBODY   (1 << 4)        /* Body should be ignored. */
 #define F_EQUALSIZE    (1 << 5)        /* 416 total equals resume offset. */
 #define F_BIGSIZE      (1 << 6)        /* 416 total exceeds resume offset. */
+#define F_NONNUMERIC   (1 << 7)        /* 416 total is not a number. */
+#define F_OVERFLOW     (1 << 8)        /* 416 total is too large. */
+#define F_TRAILING     (1 << 9)        /* 416 total has trailing junk. */
 
 struct testparams {
   unsigned int flags; /* ORed flags as above. */
@@ -73,7 +76,19 @@ static const struct testparams testparams[] = {
   { F_RESUME | F_HTTP416 | F_FAIL | F_CONTENTRANGE | F_IGNOREBODY |
     F_EQUALSIZE,                                                   CURLE_OK },
   { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_BIGSIZE,
-                                                          CURLE_RANGE_ERROR }
+                                                          CURLE_RANGE_ERROR },
+  { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_NONNUMERIC,
+                                                                   CURLE_OK },
+  { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_NONNUMERIC |
+    F_FAIL,                                                        CURLE_OK },
+  { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_OVERFLOW,
+                                                                   CURLE_OK },
+  { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_OVERFLOW |
+    F_FAIL,                                                        CURLE_OK },
+  { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_TRAILING,
+                                                                   CURLE_OK },
+  { F_RESUME | F_HTTP416 | F_CONTENTRANGE | F_IGNOREBODY | F_TRAILING |
+    F_FAIL,                                                        CURLE_OK }
 };
 
 static int hasbody;
@@ -102,6 +117,12 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
     replyselector = 4;
   if(p->flags & F_BIGSIZE)
     replyselector = 5;
+  if(p->flags & F_NONNUMERIC)
+    replyselector = 6;
+  if(p->flags & F_OVERFLOW)
+    replyselector = 7;
+  if(p->flags & F_TRAILING)
+    replyselector = 8;
   curl_msnprintf(urlbuf, sizeof(urlbuf), "%s%04u", url, replyselector);
   easy_setopt(curl, CURLOPT_URL, urlbuf);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
