@@ -313,6 +313,7 @@ DPAGES = \
   upload-file.md \
   upload-flags.md \
   url.md \
+  url-encode.md \
   url-query.md \
   use-ascii.md \
   user-agent.md \
