@@ -469,7 +469,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'gnutls'
-            install_packages: libp11-kit-dev libssh-dev
+            install_packages: libp11-kit-dev libtasn1-dev libssh-dev
             install_steps: skipall
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/gnutls/lib -Wl,-rpath,/home/runner/pkg/nettle/lib -Wl,-rpath,/home/runner/pkg/ngtcp2/lib
             PKG_CONFIG_PATH: /home/runner/pkg/nettle/lib/pkgconfig:/home/runner/pkg/gnutls/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
@@ -478,7 +478,7 @@ jobs:
 
           - name: 'gnutls'
             tflags: '--min=1900'
-            install_packages: libp11-kit-dev libssh-dev
+            install_packages: libp11-kit-dev libtasn1-dev libssh-dev
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/gnutls/lib
             PKG_CONFIG_PATH: "\
               /home/runner/pkg/nettle/lib/pkgconfig:\
