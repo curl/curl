@@ -1055,8 +1055,9 @@ CURL *curl_easy_duphandle(CURL *curl)
     if(dupset(outcurl, data))
       goto fail;
 
-    /* if it had been loaded, no need to do that again */
-    outcurl->state.resolve_loaded = data->state.resolve_loaded;
+    /* The DNS cache of the dup might be different from the original.
+     * Better be safe than sorry. */
+    outcurl->state.resolve_loaded = FALSE;
 
     outcurl->progress.hide     = data->progress.hide;
     outcurl->progress.callback = data->progress.callback;

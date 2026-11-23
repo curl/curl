@@ -1373,6 +1373,7 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
     break;
 #endif
   case CURLOPT_CONNECT_TO:
+    Curl_frzn_strs_safefree(&s->connect_to);
     s->connect_to = Curl_frzn_strs_from_slist(slist);
     if(slist && !s->connect_to)
       result = CURLE_OUT_OF_MEMORY;

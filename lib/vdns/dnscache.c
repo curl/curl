@@ -862,7 +862,6 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   if(data->state.resolve_loaded)
     return CURLE_OK;
 
-  data->state.resolve_loaded = TRUE;
   /* Default is no wildcard found */
   data->state.wildcard_resolve = FALSE;
 
@@ -1041,5 +1040,6 @@ err:
     }
   }
 
+  data->state.resolve_loaded = TRUE;
   return CURLE_OK;
 }
