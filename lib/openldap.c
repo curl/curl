@@ -487,7 +487,7 @@ static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
-      result = (li->recv)(data, buf, len, &nread);
+      result = li->recv(data, buf, len, &nread);
       if(result == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
@@ -513,7 +513,7 @@ static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
-      result = (li->send)(data, buf, len, FALSE, &nwritten);
+      result = li->send(data, buf, len, FALSE, &nwritten);
       li->send_blocked = (result == CURLE_AGAIN);
       if(result == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
