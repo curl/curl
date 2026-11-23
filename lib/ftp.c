@@ -3650,7 +3650,7 @@ static CURLcode ftp_done_control_reply(struct Curl_easy *data,
   size_t nread;
   int ftpcode;
 
-  if(!result && (ftp->transfer == PPTRANSFER_BODY) && !conn->bits.close &&
+  if(!result && (ftp->transfer == PPTRANSFER_BODY) &&
      ftpc->pp.pending_resp && !premature) {
     /*
      * Let's see what the server says about the transfer we performed, but
