@@ -366,6 +366,7 @@ const struct curl_easyoption Curl_easyopts[] = {
   { "UPLOAD_BUFFERSIZE", CURLOPT_UPLOAD_BUFFERSIZE, CURLOT_LONG, 0 },
   { "UPLOAD_FLAGS", CURLOPT_UPLOAD_FLAGS, CURLOT_LONG, 0 },
   { "URL", CURLOPT_URL, CURLOT_STRING, 0 },
+  { "URLENCODE", CURLOPT_URLENCODE, CURLOT_LONG, 0 },
   { "USERAGENT", CURLOPT_USERAGENT, CURLOT_STRING, 0 },
   { "USERNAME", CURLOPT_USERNAME, CURLOT_STRING, 0 },
   { "USERPWD", CURLOPT_USERPWD, CURLOT_STRING, 0 },
@@ -389,6 +390,6 @@ const struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return (CURLOPT_LASTENTRY % 10000) != (332 + 1);
+  return (CURLOPT_LASTENTRY % 10000) != (333 + 1);
 }
 #endif
