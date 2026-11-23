@@ -26,7 +26,7 @@
 use strict;
 use warnings;
 
-my %whitelist = (
+my %allowlist = (
     'https://curl.se' => 1,
     'https://curl.se/' => 1,
     'https://curl.se/bug/' => 1,
@@ -104,9 +104,9 @@ sub storelink {
     $link =~ s:\#.*\z::;
 
     if($link =~ /^(https|http):/) {
-        if($whitelist{$link}) {
-            #print "-- whitelisted: $link\n";
-            $whitelist{$link}++;
+        if($allowlist{$link}) {
+            #print "-- allowlisted: $link\n";
+            $allowlist{$link}++;
         }
         # example.com is used as example
         elsif($link =~ /^https:\/\/(.*)example.(com|org|net)/) {
@@ -182,8 +182,8 @@ sub findlinks {
 sub checkurl {
     my ($url) = @_;
 
-    if($whitelist{$url}) {
-        #print STDERR "$url is whitelisted\n";
+    if($allowlist{$url}) {
+        #print STDERR "$url is allowlisted\n";
         return 0;
     }
 
@@ -209,9 +209,9 @@ for my $f (@files) {
     }
 }
 
-for my $u (sort keys %whitelist) {
-    if($whitelist{$u} == 1) {
-        printf STDERR "warning: unused whitelist entry: '$u'\n";
+for my $u (sort keys %allowlist) {
+    if($allowlist{$u} == 1) {
+        printf STDERR "warning: unused allowlist entry: '$u'\n";
     }
 }
 

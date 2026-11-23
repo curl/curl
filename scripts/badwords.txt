@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 #
-# whitelisted uses of bad words (case insensitive) can be done in two ways,
+# allowlisted uses of bad words (case insensitive) can be done in two ways,
 # globally and per-file.
 #
 # ---[word]

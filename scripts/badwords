@@ -159,7 +159,7 @@ sub sourcecode {
     return @lines;
 }
 
-my @whitelist = (
+my @allowlist = (
     # ignore what looks like URLs
     '(^|\W)((https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&\'\(\)*+,;=]+)',
     # remove bolded sections
@@ -182,13 +182,13 @@ while(<CONFIG>) {
         next;
     }
     if(/^---:([^:]*):(.*)/) {
-        # whitelist file + word
+        # allowlist file + word
         my $word = lc($2);
         $wl{"$1:$word"} = 1;
     }
     elsif($_ =~ /^---(.+)/) {
-        # whitelist word
-        push @whitelist, $1;
+        # allowlist word
+        push @allowlist, $1;
     }
     elsif($_ =~ /^(.*)([:=])(.*)/) {
         my ($bad, $sep, $better) = ($1, $2, $3);
@@ -218,8 +218,8 @@ if(@exact) {
     $re_cs = qr/\b($pat)\b/;
 }
 
-# Build a single combined regex for removing whitelisted content
-my $pat = join('|', map { $_ } @whitelist);
+# Build a single combined regex for removing allowlisted content
+my $pat = join('|', map { $_ } @allowlist);
 my $re_wl = qr/($pat)/;
 
 my $errors = 0;
@@ -233,20 +233,20 @@ sub highlight {
     my $dir = dirname($f);
     $ch = $dir . "/" . ":" . lc($w);
     if($wl{$ch}) {
-        # whitelisted dirname + word
+        # allowlisted dirname + word
         return;
     }
     my $updir = dirname($dir);
     if($dir ne $updir) {
         $ch = $updir . "/" . ":" . lc($w);
         if($wl{$ch}) {
-            # whitelisted upper dirname + word
+            # allowlisted upper dirname + word
             return;
         }
     }
     $ch = $f . ":" . lc($w);
     if($wl{$ch}) {
-        # whitelisted filename + word
+        # allowlisted filename + word
         return;
     }
 
@@ -298,7 +298,7 @@ sub file {
         }
         # remove the link part
         $in =~ s/(\[.*\])\(.*\)/$1/g;
-        # remove whitelisted patterns (pre-compiled)
+        # remove allowlisted patterns (pre-compiled)
         if($re_wl) {
             $in =~ s/${re_wl}//ig;
         }
