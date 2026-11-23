@@ -1410,7 +1410,7 @@ bool Curl_secure_context(struct Curl_easy *data, const char *host,
 {
   return Curl_xfer_is_secure(data) ||
     (!data->info.used_proxy &&
-     (((hlen == 9) && (curl_strnequal("localhost", host, 9))) ||
+     (((hlen == 9) && curl_strnequal("localhost", host, 9)) ||
       ((hlen == 9) && !memcmp(host, "127.0.0.1", 9)) ||
       ((hlen == 3) && !memcmp(host, "::1", 3))));
 }
