@@ -1344,8 +1344,11 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
      * This API can remove any entry from the DNS cache, but only entries
      * that are not actually in use right now will be pruned immediately.
      */
-    s->resolve = slist;
-    data->state.resolve = s->resolve;
+    Curl_frzn_strs_safefree(&s->resolve);
+    s->resolve = Curl_frzn_strs_from_slist(slist);
+    data->state.resolve_loaded = FALSE;
+    if(slist && !s->resolve)
+      result = CURLE_OUT_OF_MEMORY;
     break;
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MIME)
   case CURLOPT_HTTPHEADER:
@@ -1370,7 +1373,10 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
     break;
 #endif
   case CURLOPT_CONNECT_TO:
-    s->connect_to = slist;
+    Curl_frzn_strs_safefree(&s->connect_to);
+    s->connect_to = Curl_frzn_strs_from_slist(slist);
+    if(slist && !s->connect_to)
+      result = CURLE_OUT_OF_MEMORY;
     break;
   default:
     return CURLE_UNKNOWN_OPTION;

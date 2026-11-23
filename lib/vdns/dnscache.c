@@ -851,19 +851,24 @@ void Curl_dnscache_destroy(struct Curl_dnscache *dns)
 CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
-  struct curl_slist *hostp;
   struct dnsc_id id;
   struct dnsc_key key;
+  const char *host, *entry;
+  size_t idx;
 
   if(!dnscache)
     return CURLE_FAILED_INIT;
 
+  if(data->state.resolve_loaded)
+    return CURLE_OK;
+
   /* Default is no wildcard found */
   data->state.wildcard_resolve = FALSE;
 
-  for(hostp = data->state.resolve; hostp; hostp = hostp->next) {
-    const char *host = hostp->data;
+  for(idx = 0; idx < Curl_frzn_strs_count(data->set.resolve); ++idx) {
     struct Curl_str source;
+
+    host = entry = Curl_frzn_strs_get_str(data->set.resolve, idx);
     if(!host)
       continue;
     if(*host == '-') {
@@ -981,7 +986,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       error = FALSE;
 err:
       if(error) {
-        failf(data, "Could not parse CURLOPT_RESOLVE entry '%s'", hostp->data);
+        failf(data, "Could not parse CURLOPT_RESOLVE entry '%s'", entry);
         Curl_freeaddrinfo(head);
         return CURLE_SETOPT_OPTION_SYNTAX;
       }
@@ -1034,7 +1039,7 @@ err:
       }
     }
   }
-  data->state.resolve = NULL; /* dealt with now */
 
+  data->state.resolve_loaded = TRUE;
   return CURLE_OK;
 }

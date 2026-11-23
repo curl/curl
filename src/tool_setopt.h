@@ -107,7 +107,14 @@ CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...);
 #define my_setopt_ptr(x, y, z)        tool_setopt_ptr(x, #y, y, z)
 #define my_setopt_str(x, y, z)        tool_setopt_str(x, config, #y, y, z)
 #define my_setopt_mimepost(x, y, z)   tool_setopt_mimepost(x, config, #y, y, z)
-#define my_setopt_slist(x, y, z)      tool_setopt_slist(x, #y, y, z)
+
+#define my_setopt_slist(x, y, z)                             \
+  do {                                                       \
+    CURLcode slist_result = tool_setopt_slist(x, #y, y, z);  \
+    if(setopt_bad(slist_result))                             \
+      return slist_result;                                   \
+  } while(0)
+
 #define my_setopt_SSLVERSION(x, y, z) tool_setopt_SSLVERSION(x, #y, y, z)
 #define my_setopt_enum(x, y, z)       \
   tool_setopt_enum(x, #y, y, setopt_nv_ ## y, z)
@@ -133,10 +140,16 @@ CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...);
 #define my_setopt_ptr(x, y, z)        curl_easy_setopt(x, y, z)
 #define my_setopt_str(x, y, z)        curl_easy_setopt(x, y, z)
 #define my_setopt_mimepost(x, y, z)   curl_easy_setopt(x, y, z)
-#define my_setopt_slist(x, y, z)      curl_easy_setopt(x, y, z)
 #define my_setopt_SSLVERSION(x, y, z) curl_easy_setopt(x, y, z)
 #define my_setopt_enum(x, y, z)       curl_easy_setopt(x, y, z)
 #define my_setopt_bitmask(x, y, z)    curl_easy_setopt(x, y, (long)(z))
+
+#define my_setopt_slist(x, y, z)                       \
+  do {                                                 \
+    CURLcode slist_result = curl_easy_setopt(x, y, z); \
+    if(setopt_bad(slist_result))                       \
+      return slist_result;                             \
+  } while(0)
 
 #define MY_SETOPT_STR(x, y, z)          \
   do {                                  \

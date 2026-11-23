@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+frzn_strs
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+Debug
+</features>
+<name>
+frozen strings unit tests
+</name>
+</client>
+</testcase>

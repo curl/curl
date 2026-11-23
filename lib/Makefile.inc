@@ -219,6 +219,7 @@ LIB_CFILES =         \
   file.c             \
   fileinfo.c         \
   formdata.c         \
+  frzn_strs.c        \
   ftp.c              \
   ftplistparser.c    \
   getenv.c           \
@@ -353,6 +354,7 @@ LIB_HFILES =         \
   file.h             \
   fileinfo.h         \
   formdata.h         \
+  frzn_strs.h        \
   ftp.h              \
   ftp-int.h          \
   ftplistparser.h    \
