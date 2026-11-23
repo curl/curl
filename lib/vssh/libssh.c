@@ -2687,8 +2687,10 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   }
 
   if(conn->origin->port) {
+    /* SSH wants an unsigned int pointer, not a uint16_t */
+    unsigned int port = conn->origin->port;
     rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_PORT,
-                         &conn->origin->port);
+                         &port);
     if(rc != SSH_OK) {
       failf(data, "Could not set remote port");
       return CURLE_FAILED_INIT;
