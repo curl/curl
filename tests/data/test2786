@@ -4,7 +4,6 @@
 <keywords>
 TFTP
 TFTP WRQ
-mode=
 </keywords>
 </info>
 
@@ -17,12 +16,14 @@ mode=
 tftp
 </server>
 <name>
-TFTP send with mode=netascii keeps CR and CRLF intact
+TFTP send with --use-ascii, CR and CRLF across a block boundary
 </name>
 <command>
--T %LOGDIR/test%TESTNUMBER.txt "tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=netascii"
+-T %LOGDIR/test%TESTNUMBER.txt --use-ascii tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
+%repeat[511 x a]%
+%repeat[510 x b]%%CR
 unix line
 dos line%CR
 bare%CR carriage return
@@ -35,6 +36,8 @@ nul after cr%CR%hex[%00]hex% end
 ^timeout = [5-6]$
 </strip>
 <upload>
+%repeat[511 x a]%
+%repeat[510 x b]%%CR
 unix line
 dos line%CR
 bare%CR carriage return
