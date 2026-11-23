@@ -230,7 +230,7 @@ jobs:
             libev-dev
             libuv1-dev
             libc-ares-dev
-            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
+            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-dev
 
       - name: 'build awslc'
         if: ${{ !steps.cache1-awslc.outputs.cache-hit }}
