@@ -310,6 +310,7 @@ struct OperationConfig {
   BIT(mptcp);                     /* enable MPTCP support */
   BIT(rm_partial);                /* on error, remove partially written output
                                      files */
+  BIT(urlencode);                 /* URL-Encode the given URL */
   BIT(skip_existing);
 };
 
