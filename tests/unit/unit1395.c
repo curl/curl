@@ -37,6 +37,10 @@ static CURLcode test_unit1395(const char *arg)
 
   static const struct dotdot pairs[] = {
     { "/%2f%2e%2e%2f/../a", "/a" },
+    { "/%2f%2E%2e%2f/../a", "/a" },
+    { "/%2f%2e%2E%2f/../a", "/a" },
+    { "/%2f%2E%2E%2f/../a", "/a" },
+    { "/%2F%2E%2e%2F/../a", "/a" },
     { "/%2f%2e%2e%2f/../", "/" },
     { "/%2f%2e%2e%2f/.", "/%2f%2e%2e%2f/" },
     { "/%2f%2e%2e%2f/", NULL },
@@ -91,6 +95,8 @@ static CURLcode test_unit1395(const char *arg)
     { "/a/c/../b", "/a/b" },
     { "/a/b/c/./../../g", "/a/g" },
     { "/a/b/c/./%2e%2E/../g", "/a/g" },
+    { "/a/b/c/./%2E%2e/../g", "/a/g" },
+    { "/a/b/c/./%2E%2E/../g", "/a/g" },
     { "/a/b/c/./../%2e%2E/g", "/a/g" },
     { "/a/b/c/%2E/%2e%2E/%2e%2E/g", "/a/g" },
     { "mid/content=5/../6", "mid/6" },

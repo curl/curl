@@ -353,6 +353,8 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
 
   b->session_id = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
+  if(!b->session_id)
+    b->session_id = data->state.session_id;
 
   /* Stream URI. Default to server '*' if not specified */
   if(CURL_EASY_STR(data, STRING_RTSP_STREAM_URI))
@@ -1017,9 +1019,12 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
       end++;
     idlen = end - start;
 
-    str = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
-    if(str) {
+    if(!data->state.session_id)
+      str = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
+    else
+      str = data->state.session_id;
 
+    if(str) {
       /* If the Session ID is set, then compare */
       if(strlen(str) != idlen ||
          strncmp(start, str, idlen)) {
@@ -1029,13 +1034,13 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
       }
     }
     else {
-      /* If the Session ID is not set, and we find it in a response, then set
-       * it.
-       * Copy the id substring into a new buffer */
+      /* If the Session ID is not set for the handle, and we find it in a
+       * response, then remember it.
+       */
       void *mem = curlx_memdup0(start, idlen);
-      if(!mem ||
-         CURL_EASY_STR_SETN(data, STRING_RTSP_SESSION_ID, mem))
+      if(!mem)
         return CURLE_OUT_OF_MEMORY;
+      data->state.session_id = mem;
       Curl_peer_link(&data->state.rtsp_session_origin, data->state.origin);
     }
   }
