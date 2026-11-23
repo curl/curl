@@ -220,6 +220,8 @@ error:
   return result;
 }
 
+#define ABS(x) ((x) > 0 ? (x) : -(x))
+
 static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
                            size_t *posp, curl_off_t *amount,
                            int globindex, const struct Curl_str *name)
@@ -242,16 +244,16 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
   if(ISALPHA(*pattern)) {
     /* character range detected */
     bool pmatch = FALSE;
-    char min_c = 0;
-    char max_c = 0;
+    char start_c = 0;
+    char stop_c = 0;
     char end_c = 0;
     unsigned char step = 1;
 
     pat->type = GLOB_ASCII;
 
     if((pattern[1] == '-') && pattern[2] && pattern[3]) {
-      min_c = pattern[0];
-      max_c = pattern[2];
+      start_c = pattern[0];
+      stop_c = pattern[2];
       end_c = pattern[3];
       pmatch = TRUE;
 
@@ -275,25 +277,27 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
     *posp += (pattern - *patternp);
 
     if(!pmatch || !step ||
-       (min_c == max_c && step != 1) ||
-       (min_c != max_c && (min_c > max_c || step > (unsigned)(max_c - min_c) ||
-                           (max_c - min_c) > ('z' - 'a'))))
+       (start_c == stop_c && step != 1) ||
+       (start_c != stop_c && (step > (unsigned)ABS(stop_c - start_c) ||
+                              ABS(stop_c - start_c) > ('z' - 'a') ||
+                              (ISLOWER(start_c) && !ISLOWER(stop_c)) ||
+                              (ISUPPER(start_c) && !ISUPPER(stop_c)))))
       /* the pattern is not well-formed */
       return globerror(glob, "bad range", *posp, CURLE_URL_MALFORMAT);
 
     /* if there was a ":[num]" thing, use that as step or else use 1 */
-    pat->c.ascii.step = step;
-    pat->c.ascii.letter = pat->c.ascii.min = (unsigned char)min_c;
-    pat->c.ascii.max = (unsigned char)max_c;
+    pat->c.ascii.step = (start_c < stop_c) ? step : -step;
+    pat->c.ascii.letter = pat->c.ascii.start = (unsigned char)start_c;
+    pat->c.ascii.stop = (unsigned char)stop_c;
 
-    if(multiply(amount, (((pat->c.ascii.max - pat->c.ascii.min) /
-                         pat->c.ascii.step) + 1)))
+    if(multiply(amount, ((ABS(pat->c.ascii.stop - pat->c.ascii.start) /
+                          step) + 1)))
       return globerror(glob, "range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else if(ISDIGIT(*pattern)) {
     /* numeric range detected */
-    curl_off_t min_n = 0;
-    curl_off_t max_n = 0;
+    curl_off_t start_n = 0;
+    curl_off_t stop_n = 0;
     curl_off_t step_n = 0;
     curl_off_t num;
 
@@ -311,11 +315,18 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
     }
 
     if(!curlx_str_number(&pattern, &num, CURL_OFF_T_MAX)) {
-      min_n = num;
+      start_n = num;
       if(!curlx_str_single(&pattern, '-')) {
         curlx_str_passblanks(&pattern);
+        if(*pattern == '0' && !pat->c.num.npad) {
+          c = pattern;
+          while(ISDIGIT(*c)) {
+            c++;
+            ++pat->c.num.npad;
+          }
+        }
         if(!curlx_str_number(&pattern, &num, CURL_OFF_T_MAX)) {
-          max_n = num;
+          stop_n = num;
           if(!curlx_str_single(&pattern, ']'))
             step_n = 1;
           else if(!curlx_str_single(&pattern, ':') &&
@@ -331,21 +342,24 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
     *posp += (pattern - *patternp);
 
     if(!step_n ||
-       (min_n == max_n && step_n != 1) ||
-       (min_n != max_n && (min_n > max_n || step_n > (max_n - min_n))))
+       (start_n == stop_n && step_n != 1) ||
+       (start_n != stop_n && (step_n > ABS(stop_n - start_n))))
       /* the pattern is not well-formed */
       return globerror(glob, "bad range", *posp, CURLE_URL_MALFORMAT);
 
-    if((CURL_OFF_T_MAX - step_n) < max_n)
+    if((CURL_OFF_T_MAX - step_n) < stop_n)
       return globerror(glob, "range end/step overflow", *posp,
                        CURLE_URL_MALFORMAT);
 
-    pat->c.num.idx = pat->c.num.min = min_n;
-    pat->c.num.max = max_n;
-    pat->c.num.step = step_n;
+    pat->c.num.idx = pat->c.num.start = start_n;
+    pat->c.num.stop = stop_n;
+    if(start_n > stop_n)
+      pat->c.num.step = -step_n;
+    else
+      pat->c.num.step = step_n;
 
-    if(multiply(amount, (((pat->c.num.max - pat->c.num.min) /
-                         pat->c.num.step) + 1)))
+    num = ABS(pat->c.num.stop - pat->c.num.start) / step_n;
+    if((num == CURL_OFF_T_MAX) || multiply(amount, num + 1))
       return globerror(glob, "range overflow", *posp, CURLE_URL_MALFORMAT);
   }
   else
@@ -657,18 +671,36 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
         }
         break;
       case GLOB_ASCII:
-        pat->c.ascii.letter += pat->c.ascii.step;
-        if(pat->c.ascii.letter > pat->c.ascii.max) {
-          pat->c.ascii.letter = pat->c.ascii.min;
-          carry = TRUE;
+        if(pat->c.ascii.step > 0) {
+          if(pat->c.ascii.stop - pat->c.ascii.letter < pat->c.ascii.step) {
+            pat->c.ascii.letter = pat->c.ascii.start;
+            carry = TRUE;
+          }
         }
+        else {
+          if(pat->c.ascii.stop - pat->c.ascii.letter > pat->c.ascii.step) {
+            pat->c.ascii.letter = pat->c.ascii.start;
+            carry = TRUE;
+          }
+        }
+        if(!carry)
+          pat->c.ascii.letter += pat->c.ascii.step;
         break;
       case GLOB_NUM:
-        pat->c.num.idx += pat->c.num.step;
-        if(pat->c.num.idx > pat->c.num.max) {
-          pat->c.num.idx = pat->c.num.min;
-          carry = TRUE;
+        if(pat->c.num.step > 0) {
+          if(pat->c.num.stop - pat->c.num.idx < pat->c.num.step) {
+            pat->c.num.idx = pat->c.num.start;
+            carry = TRUE;
+          }
         }
+        else {
+          if(pat->c.num.stop - pat->c.num.idx > pat->c.num.step) {
+            pat->c.num.idx = pat->c.num.start;
+            carry = TRUE;
+          }
+        }
+        if(!carry)
+          pat->c.num.idx += pat->c.num.step;
         break;
       default:
         DEBUGASSERT(0);
