@@ -384,7 +384,7 @@ static const struct LongShort aliases[] = {
  * nicknames containing ':'. See <https://sourceforge.net/p/curl/bugs/1196/>
  * for details.
  *
- * Unit test 1394
+ * @unittest: 1394
  */
 UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
                                              char **certname,
@@ -564,7 +564,7 @@ static const struct sizeunit *getunit(char unit)
 /* Get a size parameter for '--limit-rate' or '--max-filesize'.
    We support P, T, G, M and K (case insensitive) suffixes.
 
-   Unit test 1623
+   @unittest: 1623
  */
 UNITTEST ParameterError GetSizeParameter(const char *arg, curl_off_t *out)
 {
