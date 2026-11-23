@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: url-encode
 Help: URL-encode the URL
-Added: 8.23.1
+Added: 8.24.0
 Category: curl
 Multi: boolean
 See-also:

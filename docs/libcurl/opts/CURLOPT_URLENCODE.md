@@ -11,7 +11,7 @@ See-also:
   - curl_url_set (3)
 Protocol:
   - All
-Added-in: 8.23.1
+Added-in: 8.24.0
 ---
 
 # NAME
