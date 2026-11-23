@@ -429,6 +429,7 @@ man_MANS =                                      \
   CURLOPT_UPLOAD_BUFFERSIZE.3                   \
   CURLOPT_UPLOAD_FLAGS.3                        \
   CURLOPT_URL.3                                 \
+  CURLOPT_URLENCODE.3                           \
   CURLOPT_USE_SSL.3                             \
   CURLOPT_USERAGENT.3                           \
   CURLOPT_USERNAME.3                            \
