@@ -82,15 +82,6 @@ adding monitoring of the connections while in the pool, libcurl can detect
 dead connections (and close them) better and earlier, and it can handle HTTP/2
 pings to keep such ones alive even when not actively doing transfers on them.
 
-## Try to URL encode given URL
-
-Given a URL that for example contains spaces, libcurl could have an option
-that would try somewhat harder than it does now and convert spaces to %20 and
-perhaps URL encoded byte values over 128 etc (do what the redirect following
-code already does).
-
-[curl issue 514](https://github.com/curl/curl/issues/514)
-
 ## Add support for IRIs
 
 IRIs (RFC 3987) allow localized, non-ASCII, names in the URL. To properly

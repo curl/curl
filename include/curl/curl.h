@@ -2288,6 +2288,9 @@ typedef enum {
   /* Space-separated list of components to sign for HTTP Message Signatures */
   CURLOPT(CURLOPT_HTTPSIG_HEADERS, CURLOPTTYPE_STRINGPOINT, 332),
 
+  /* URL-Encode the given URL */
+  CURLOPT(CURLOPT_URLENCODE, CURLOPTTYPE_LONG, 333),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

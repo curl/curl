@@ -717,6 +717,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
   case CURLOPT_PATH_AS_IS:
     s->path_as_is = enabled;
     break;
+  case CURLOPT_URLENCODE:
+    s->urlencode = enabled;
+    break;
   case CURLOPT_PIPEWAIT:
     s->pipewait = enabled;
     break;

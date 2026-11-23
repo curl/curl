@@ -154,7 +154,8 @@ static CURLcode url_proto_and_rewrite(char **url,
     char *schemep = NULL;
     CURLUcode uc =
       curl_url_set(uh, CURLUPART_URL, *url,
-                   CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
+                   CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME
+                   | (config->urlencode ? CURLU_URLENCODE : 0));
     if(!uc) {
       if(config->proto_default) {
         /* when a default proto is requested, do not guess */
@@ -1179,7 +1180,7 @@ static CURLcode misc_setopts(struct OperationConfig *config, CURL *curl)
 
   my_setopt_long(curl, CURLOPT_DISALLOW_USERNAME_IN_URL,
                  config->disallow_username_in_url);
-
+  my_setopt_long(curl, CURLOPT_URLENCODE, config->urlencode);
   if(config->ip_tos > 0 || config->vlan_priority > 0) {
 #if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
     my_setopt_ptr(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);

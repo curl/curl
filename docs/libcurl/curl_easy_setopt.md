@@ -1321,6 +1321,10 @@ Set upload flags. See CURLOPT_UPLOAD_FLAGS(3)
 
 URL to work on. See CURLOPT_URL(3)
 
+## CURLOPT_URLENCODE
+
+URL-encode the given URL. See CURLOPT_URLENCODE(3)
+
 ## CURLOPT_USERAGENT
 
 User-Agent: header. See CURLOPT_USERAGENT(3)

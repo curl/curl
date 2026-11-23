@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 --url-query
+--url-encode
 --next
 </keywords>
 </info>
@@ -40,6 +41,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 --url-query literal=
 --url-query after=2
 --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--next --url-encode "http://%HOSTIP:%HTTPPORT/test path/%TESTNUMBER?a=1 2"
 </command>
 <file name="%LOGDIR/empty%TESTNUMBER" nonewline="yes">
 
@@ -57,6 +59,11 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /test%20path/%TESTNUMBER?a=1+2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

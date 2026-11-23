@@ -1,8 +1,8 @@
 curl and libcurl 8.23.1
 
  Public curl releases:         277
- Command line options:         278
- curl_easy_setopt() options:   312
+ Command line options:         279
+ curl_easy_setopt() options:   313
  Public functions in libcurl:  100
  Authors:                      1591
  Contributors:                 3919
@@ -10,7 +10,7 @@ curl and libcurl 8.23.1
 This release includes the following changes:
 
  o NTLM: drop support [162]
- o openssl: remove the common name fallback [293]
+ o urlencode: add CURLOPT_URLENCODE and --url-encode
 
 This release includes the following bugfixes:
 
