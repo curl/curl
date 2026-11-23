@@ -364,6 +364,7 @@ static const struct LongShort aliases[] = {
   {"upload-file",                ARG_FILE, 'T', C_UPLOAD_FILE},
   {"upload-flags",               ARG_STRG, ' ', C_UPLOAD_FLAGS},
   {"url",                        ARG_STRG, ' ', C_URL},
+  {"url-encode",                 ARG_BOOL, ' ', C_URL_ENCODE},
   {"url-query",                  ARG_STRG, ' ', C_URL_QUERY},
   {"use-ascii",                  ARG_BOOL, 'B', C_USE_ASCII},
   {"user",                       ARG_STRG|ARG_CLEAR, 'u', C_USER},
@@ -2237,6 +2238,9 @@ static ParameterError opt_bool(struct OperationConfig *config,
     if(config->followlocation == CURLFOLLOW_ALL)
       warnf("--follow overrides --location");
     config->followlocation = toggle ? CURLFOLLOW_OBEYCODE : 0;
+    break;
+  case C_URL_ENCODE: /* --url-encode */
+    config->urlencode = toggle;
     break;
   default:
     return PARAM_OPTION_UNKNOWN;
