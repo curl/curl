@@ -398,7 +398,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
      * including QPACK HEADERS. In other words, it does not consume payload of
      * DATA frame. */
     Curl_ngtcp2_conn_extend_max_stream_offset(&ctx->qconn, stream_id,
-                                               nconsumed);
+                                              nconsumed);
     Curl_ngtcp2_conn_extend_max_offset(&ctx->qconn, nconsumed);
     if(stream) {
       stream->rx_offset += nconsumed;
@@ -468,10 +468,10 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
 
 #ifdef NGTCP2_CALLBACKS_V5  /* ngtcp2 v1.25.0+ */
 static int cb_stream_close2(ngtcp2_conn *tconn, uint32_t flags,
-                           int64_t stream_id,
-                           uint64_t rx_app_error_code,
-                           uint64_t tx_app_error_code,
-                           void *user_data, void *stream_user_data)
+                            int64_t stream_id,
+                            uint64_t rx_app_error_code,
+                            uint64_t tx_app_error_code,
+                            void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
@@ -1140,7 +1140,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 #endif
 
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA) && \
-    defined(OPENSSL_QUIC_API2)
+  defined(OPENSSL_QUIC_API2)
   /* We need to tell OpenSSL to *really* use Early Data for QUIC and
    * this only works *after* ngtcp2 has tweaked all SSL parameters,
    * otherwise OpenSSL does not accept it. */
@@ -1617,8 +1617,7 @@ CURLcode Curl_cf_ngtcp2_progress_egress(struct Curl_cfilter *cf,
    * be followed by other packets of lesser size. Because those would
    * also fail then. If we detect a PMTUD while buffering, we flush.
    */
-  max_payload_size =
-    Curl_ngtcp2_conn_get_max_tx_udp_payload_size(&ctx->qconn);
+  max_payload_size = Curl_ngtcp2_conn_get_max_tx_udp_payload_size(&ctx->qconn);
   path_max_payload_size =
     Curl_ngtcp2_conn_get_path_max_tx_udp_payload_size(&ctx->qconn);
   send_quantum = Curl_ngtcp2_conn_get_send_quantum(&ctx->qconn);

@@ -88,8 +88,7 @@ static int ntp2_check_int(struct curl_ngtcp2 *ntp2, int rv)
 {
   if(rv < NGTCP2_ERR_FATAL)
     ntp2_set_close_only(ntp2, rv);
-  return (ntp2->state == CURL_NGTCP2_CLOSE_ONLY) ?
-    (int)ntp2_error(ntp2) : rv;
+  return (ntp2->state == CURL_NGTCP2_CLOSE_ONLY) ? (int)ntp2_error(ntp2) : rv;
 }
 
 static int ntp2_check_terminal_int(struct curl_ngtcp2 *ntp2, int rv)
@@ -99,13 +98,11 @@ static int ntp2_check_terminal_int(struct curl_ngtcp2 *ntp2, int rv)
   return ntp2_check_int(ntp2, rv);
 }
 
-static ngtcp2_ssize ntp2_check_ssize(struct curl_ngtcp2 *ntp2,
-                                     ngtcp2_ssize rv)
+static ngtcp2_ssize ntp2_check_ssize(struct curl_ngtcp2 *ntp2, ngtcp2_ssize rv)
 {
   if(rv < NGTCP2_ERR_FATAL)
     ntp2_set_close_only(ntp2, rv);
-  return (ntp2->state == CURL_NGTCP2_CLOSE_ONLY) ?
-    ntp2_error(ntp2) : rv;
+  return (ntp2->state == CURL_NGTCP2_CLOSE_ONLY) ? ntp2_error(ntp2) : rv;
 }
 
 static bool ntp2_is_continuation(ngtcp2_ssize rv)
