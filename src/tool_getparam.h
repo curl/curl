@@ -305,6 +305,7 @@ typedef enum {
   C_UPLOAD_FILE,
   C_UPLOAD_FLAGS,
   C_URL,
+  C_URL_ENCODE,
   C_URL_QUERY,
   C_USE_ASCII,
   C_USER,
