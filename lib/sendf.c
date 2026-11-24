@@ -522,7 +522,7 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
 CURLcode Curl_cwriter_unpause(struct Curl_easy *data, bool flush)
 {
   data->req.writer.paused = FALSE;
-  return flush ?
+  return (flush && data->req.writer.stack) ?
     Curl_cwriter_flush(data, data->req.writer.stack, FALSE) : CURLE_OK;
 }
 
