@@ -664,10 +664,16 @@ static CURLcode test_tool2155(const char *arg)
     fail_unless(!result, "glob_url failed for step matching");
     fail_unless(num == 4, "step matching count should be 4");
 
-    while(!(result = glob_next_url(&url, &glob)) && url) {
+    do {
       char *output = NULL;
       SANITIZEcode sc;
-      CURLcode mres = glob_match_url(&output, "#1-#2.log", &glob, NULL, &sc);
+      CURLcode mres;
+
+      result = glob_next_url(&url, &glob);
+      if(result || !url)
+        break;
+
+      mres = glob_match_url(&output, "#1-#2.log", &glob, NULL, &sc);
 
       fail_unless(!mres, "glob_match_url failed in loop");
       if(output && (step < CURL_ARRAYSIZE(expected_matches))) {
@@ -684,7 +690,7 @@ static CURLcode test_tool2155(const char *arg)
       curlx_safefree(output);
       curlx_safefree(url);
       step++;
-    }
+    } while(1);
 
     fail_unless(step == 4, "Should have stepped exactly 4 times");
     glob_cleanup(&glob);
