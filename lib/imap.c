@@ -117,6 +117,7 @@ struct imap_conn {
   BIT(login_disabled);        /* LOGIN command disabled by server */
   BIT(ir_supported);          /* Initial response supported by server */
   BIT(mb_uidvalidity_set);
+  BIT(literal_cont);          /* Response continues after a literal */
 };
 
 /* This IMAP struct is used in the Curl_easy. All IMAP data that is
@@ -334,7 +335,7 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
   if(!imapc || !imap)
     return FALSE;
 
-  if(imapc->literal_bytes > 0) {
+  if(imapc->literal_bytes > 0 || imapc->literal_cont) {
     /* Inside a literal. Its bytes are content and cannot end the response, no
        matter what they look like: the '{size}' count is wire framing. Without
        this, a line in a fetched message that happens to match the response tag
@@ -342,15 +343,21 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
        response to whatever is sent next on this connection. */
     curl_off_t used = ((curl_off_t)len < imapc->literal_bytes) ?
       (curl_off_t)len : imapc->literal_bytes;
+    curl_off_t size;
 
     imapc->literal_bytes -= used;
 
-    if(!imapc->literal_bytes && ((size_t)used < len)) {
-      /* The literal ended within this line, so the remainder is protocol
-         again and may declare the next literal of a multi-literal response. */
-      curl_off_t size;
-      if(imap_literal_size(line + used, len - (size_t)used, &size))
-        imapc->literal_bytes = size;
+    /* Still inside the literal, or it ended exactly at the end of this line:
+       either way the response continues after it, on the next line. */
+    if(imapc->literal_bytes || ((size_t)used == len))
+      return FALSE;
+
+    /* What follows the literal is the rest of the response line that declared
+       it, and may declare the next literal of a multi-literal response. */
+    imapc->literal_cont = FALSE;
+    if(imap_literal_size(line + used, len - (size_t)used, &size)) {
+      imapc->literal_bytes = size;
+      imapc->literal_cont = TRUE;
     }
     return FALSE;
   }
@@ -534,10 +541,12 @@ static void imap_state(struct Curl_easy *data,
 #else
   (void)data;
 #endif
-  if(imapc->state != newstate)
+  if(imapc->state != newstate) {
     /* a literal is only ever consumed within a single state, so this cannot
        leak a count into the next request on a reused connection */
     imapc->literal_bytes = 0;
+    imapc->literal_cont = FALSE;
+  }
   imapc->state = newstate;
 }
 
@@ -1281,8 +1290,10 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
        has to be framed, so that the content is consumed as content instead of
        being parsed as further responses. */
     curl_off_t size;
-    if(imap_literal_size(line, len, &size))
+    if(imap_literal_size(line, len, &size)) {
       imapc->literal_bytes = size;
+      imapc->literal_cont = TRUE;
+    }
   }
   else if(imapcode == '*') {
     /* Check if this response contains a literal (e.g. FETCH responses with
