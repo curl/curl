@@ -1897,7 +1897,7 @@ TESTCASES = \
   test2117 \
   test2118 \
   test2119 \
-  \
+  test2155 \
   test2173 \
   \
   test2200 \
