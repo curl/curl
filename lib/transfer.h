@@ -129,7 +129,7 @@ bool Curl_xfer_recv_is_paused(struct Curl_easy *data);
 
 /* Enable/Disable pausing of send/recv for the transfer. */
 CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable);
-CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable);
+CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable, bool flush);
 
 /* TRUE if the transfer is secure, e.g. uses TLS and does not
  * use a forward proxy. */

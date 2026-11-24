@@ -519,10 +519,11 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
   return NULL;
 }
 
-CURLcode Curl_cwriter_unpause(struct Curl_easy *data)
+CURLcode Curl_cwriter_unpause(struct Curl_easy *data, bool flush)
 {
   data->req.writer.paused = FALSE;
-  return Curl_cwriter_flush(data, data->req.writer.stack, FALSE);
+  return (flush && data->req.writer.stack) ?
+    Curl_cwriter_flush(data, data->req.writer.stack, FALSE) : CURLE_OK;
 }
 
 CURLcode Curl_creader_read(struct Curl_easy *data,

@@ -1247,7 +1247,8 @@ CURLcode curl_easy_pause(CURL *curl, int action)
     if(recv_paused != recv_paused_new) {
       changed = TRUE;
       result = Curl_1st_fatal(
-        result, Curl_xfer_pause_recv(data, recv_paused_new));
+        result, Curl_xfer_pause_recv(data, recv_paused_new,
+                                     !Curl_api_is_in_callback(data)));
     }
 
     /* If not completely pausing both directions, run again in any case. */

@@ -202,9 +202,8 @@ static CURLcode cw_out_cb_write(struct Curl_easy *data,
       failf(data, "Write callback asked for PAUSE when not supported");
       return CURLE_WRITE_ERROR;
     }
-    data->req.writer.paused = TRUE;
     CURL_TRC_WRITE(data, "[OUT] PAUSE requested by client");
-    result = Curl_xfer_pause_recv(data, TRUE);
+    result = Curl_xfer_pause_recv(data, TRUE, FALSE);
     return result ? result : CURLE_AGAIN;
   }
   else if(nwritten == CURL_WRITEFUNC_ERROR) {
