@@ -487,6 +487,7 @@ static CURLcode test_tool2155(const char *arg)
       curl_mprintf("glob_url failed for '%s' with result %d\n",
                    tc->pattern, (int)result);
       fail("glob_url unexpectedly failed");
+      glob_cleanup(&glob);
       continue;
     }
 
@@ -607,6 +608,7 @@ static CURLcode test_tool2155(const char *arg)
       curl_mprintf("glob_url failed for match test url_glob '%s'\n",
                    tc->url_glob);
       fail("match_test glob_url failed");
+      glob_cleanup(&glob);
       continue;
     }
 
@@ -617,6 +619,7 @@ static CURLcode test_tool2155(const char *arg)
                      tc->second_glob);
         fail("match_test second_glob glob_url failed");
         glob_cleanup(&glob);
+        glob_cleanup(&glob2);
         continue;
       }
       g2_ptr = &glob2;
