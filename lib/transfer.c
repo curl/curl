@@ -213,7 +213,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 
     if(!safe_eos) {
       /* When the connection handles End-Of-Stream (EOS) safely
-       * AND we either don't do a range request OR we are HTTP
+       * AND we either do not do a range request OR we are HTTP
        * (in HTTP, ranged downloads retrieve the right amount),
        * we do not have to watch the amount we try to receive.
        * This changes only in one direction. */

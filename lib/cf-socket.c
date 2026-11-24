@@ -182,7 +182,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
  * use millisecond units. */
 static void alive_unit(int *x)
 {
-  /* make sure this doesn't wrap */
+  /* make sure this does not wrap */
   if(*x < (INT_MAX / 1000))
     *x *= 1000;
   else
