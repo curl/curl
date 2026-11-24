@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+--upload-file
+--remove-on-error
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes" crlf="headers">
+HTTP/1.1 204 No Content
+
+</data>
+<data1 crlf="headers">
+HTTP/1.1 404 Not Found
+Content-Length: 4
+
+bad
+</data1>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+Release the upload file before the next transfer removes it
+</name>
+<command option="no-output,no-include">
+-T %LOGDIR/input%TESTNUMBER -w '%{response_code} %{size_upload}\n' http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--next --fail-with-body --remove-on-error -o %LOGDIR/input%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+</command>
+<file name="%LOGDIR/input%TESTNUMBER" nonewline="yes">
+abcdefghij
+</file>
+</client>
+
+<verify>
+<errorcode>
+22
+</errorcode>
+<stdout mode="text">
+204 10
+</stdout>
+<notexists>
+%LOGDIR/input%TESTNUMBER
+</notexists>
+</verify>
+</testcase>
