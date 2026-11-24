@@ -568,7 +568,7 @@ static int datenum(const char *indate, const char **datep, struct when *w)
     else if(w->year == -1) {
       w->year = val;
       if(w->year < 100) {
-        if(w->year > 70)
+        if(w->year >= 70)
           w->year += 1900;
         else
           w->year += 2000;
