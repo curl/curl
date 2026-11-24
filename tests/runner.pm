@@ -126,7 +126,7 @@ my %oldenv;       # environment variables before test is started
 my $CURLLOG = "commands.log"; # all command lines run
 my $defserverlogslocktimeout = 5; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
-my $multiprocess;   # nonzero with a separate test runner process
+my $multiprocess;   # non-zero with a separate test runner process
 
 # pipes
 my $runnerr;        # pipe that runner reads from

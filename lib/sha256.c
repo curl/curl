@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Florin Petriuc, <petriuc.florin@gmail.com>
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -157,7 +156,7 @@ static CURLcode my_sha256_update(void *ctx,
 static CURLcode my_sha256_final(uint8_t *digest, void *ctx)
 {
   size_t actual_length;
-  if(psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
+  if(psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LEN,
                      &actual_length) != PSA_SUCCESS)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
@@ -242,7 +241,7 @@ static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
   struct sha256_ctx *ctx = pctx;
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
   if(BCRYPT_SUCCESS(BCryptFinishHash(ctx->hHash,
-                                     digest, CURL_SHA256_DIGEST_LENGTH, 0)))
+                                     digest, CURL_SHA256_DIGEST_LEN, 0)))
     result = CURLE_OK;
   BCryptDestroyHash(ctx->hHash);
   ctx->hHash = NULL;
@@ -256,26 +255,25 @@ static CURLcode my_sha256_final(uint8_t *digest, void *pctx)
 #endif /* CRYPTO LIBS */
 
 const struct HMAC_params Curl_HMAC_SHA256 = {
-  my_sha256_init,           /* Hash initialization function. */
-  my_sha256_update,         /* Hash update function. */
-  my_sha256_final,          /* Hash computation end function. */
-  sizeof(my_sha256_ctx),    /* Size of hash context structure. */
-  64,                       /* Maximum key length. */
-  CURL_SHA256_DIGEST_LENGTH /* Result size. */
+  my_sha256_init,        /* Hash initialization function. */
+  my_sha256_update,      /* Hash update function. */
+  my_sha256_final,       /* Hash computation end function. */
+  sizeof(my_sha256_ctx), /* Size of hash context structure. */
+  64,                    /* Maximum key length. */
+  CURL_SHA256_DIGEST_LEN /* Result size. */
 };
 
 /*
- * Curl_sha256it()
- *
  * Generates a SHA256 hash for the given input data.
  *
  * Parameters:
  *
- * digest [in/out] - The output buffer.
- * input [in]      - The input data.
- * input_len [in]  - The input length.
+ * digest [out]   - The output buffer.
+ * input [in]     - The input data.
+ * input_len [in] - The input length.
  *
  * Returns CURLE_OK on success.
+ * @unittest: 1601
  */
 CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 {
@@ -296,12 +294,12 @@ CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)
 #else
 
 const struct HMAC_params Curl_HMAC_SHA256 = {
-  NULL,                     /* Hash initialization function. */
-  NULL,                     /* Hash update function. */
-  NULL,                     /* Hash computation end function. */
-  0,                        /* Size of hash context structure. */
-  64,                       /* Maximum key length. */
-  CURL_SHA256_DIGEST_LENGTH /* Result size. */
+  NULL,                  /* Hash initialization function. */
+  NULL,                  /* Hash update function. */
+  NULL,                  /* Hash computation end function. */
+  0,                     /* Size of hash context structure. */
+  64,                    /* Maximum key length. */
+  CURL_SHA256_DIGEST_LEN /* Result size. */
 };
 
 CURLcode Curl_sha256it(uint8_t *digest, const void *input, size_t input_len)

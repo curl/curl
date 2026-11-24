@@ -276,7 +276,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       pp->nfinal = 0; /* now gone */
     }
     if(!pp->overflow) {
-      if(!maxloops--) /* don't get stuck */
+      if(!maxloops--) /* do not get stuck */
         return CURLE_OK;
 
       result = pp_recv(pp, data, buffer, sizeof(buffer), &gotbytes);

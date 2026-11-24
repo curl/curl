@@ -69,7 +69,7 @@ static CURLcode test_unit1694(const char *arg)
 
   static const struct testcase tests[] = {
 
-    /* Make sure Curl_range doesn't do anything unless the range
+    /* Make sure Curl_range does not do anything unless the range
      * request data is initialized.
      *
      * The use_range and range variables are ANDead together
@@ -124,7 +124,7 @@ static CURLcode test_unit1694(const char *arg)
     /*                        */
 
     /* Returns OK and sets resume_from, maxdownload NOT set.
-     * Comments mention " to end of file", so shouldn't
+     * Comments mention " to end of file", so should not
      * maxdownload be set to -1? */
     { TRUE,  "101-",                  CURLE_OK,          101, -8 },
     { TRUE,  "102- ",                 CURLE_OK,          102, -8 },
@@ -173,7 +173,7 @@ static CURLcode test_unit1694(const char *arg)
     { TRUE,  "100-100",               CURLE_OK,            100,  1 },
     { TRUE,  "101-101 ",              CURLE_OK,            101,  1 },
     { TRUE,  "101-101\t",             CURLE_OK,            101,  1 },
-    /* Parser can't get past the whitespace after the dash,
+    /* Parser cannot get past the whitespace after the dash,
      * takes the no second number path in the code. */
     { TRUE,  "102- 102",              CURLE_OK,            102, -8 },
     { TRUE,  "103- 103 ",             CURLE_OK,            103, -8 },
@@ -213,7 +213,7 @@ static CURLcode test_unit1694(const char *arg)
     { TRUE,  "300-500",               CURLE_OK,            300,  201 },
     { TRUE,  "301-501 ",              CURLE_OK,            301,  201 },
     { TRUE,  "301-501\t",             CURLE_OK,            301,  201 },
-    /* Parser can't get past the whitespace after the dash,
+    /* Parser cannot get past the whitespace after the dash,
      * takes the no second number path in the code. */
     { TRUE,  "302- 502",              CURLE_OK,            302, -8 },
     { TRUE,  "303- 503 ",             CURLE_OK,            303, -8 },

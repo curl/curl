@@ -177,7 +177,7 @@ if(MINGW OR MSVC)
     curl_prefill_type_size("OFF_T" 4)
   else()
     curl_prefill_type_size("SSIZE_T" ${CMAKE_SIZEOF_VOID_P})
-    set(HAVE_FILE_OFFSET_BITS 1)  # mingw-w64 v3+
-    curl_prefill_type_size("OFF_T" 8)  # mingw-w64 v3+
+    set(HAVE_FILE_OFFSET_BITS 1)  # mingw-w64 3+
+    curl_prefill_type_size("OFF_T" 8)  # mingw-w64 3+
   endif()
 endif()

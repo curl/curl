@@ -62,7 +62,7 @@ static CURLcode test_lib589(const char *URL)
 
   easy_setopt(curl, CURLOPT_MIMEPOST, NULL);
 
-  /* Now, we should be making a zero byte POST request */
+  /* Now, we should be making a zero-length POST request */
   result = curl_easy_perform(curl);
 
 test_cleanup:

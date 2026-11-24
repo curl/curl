@@ -47,7 +47,7 @@ struct Curl_share {
 
   uint32_t ref_count;
 #ifdef USE_MUTEX
-   /* do `ref_count` and `has_been_shared` checks using this mutex. */
+  /* do `ref_count` and `has_been_shared` checks using this mutex. */
   curl_mutex_t lock;
   int has_been_shared;
 #else

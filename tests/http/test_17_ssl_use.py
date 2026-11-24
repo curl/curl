@@ -459,12 +459,12 @@ class TestSSLUse:
     def test_17_15_session_export(self, env: Env, httpd):
         proto = 'http/1.1'
         if env.curl_uses_lib('libressl'):
-            pytest.skip('Libressl resumption does not work in TLSv1.3')
+            pytest.skip('LibreSSL resumption does not work in TLSv1.3')
         if env.curl_uses_lib('rustls-ffi'):
-            pytest.skip('rustsls does not expose sessions')
+            pytest.skip('Rustls does not expose sessions')
         if env.curl_uses_lib('mbedtls') and \
            not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
-            pytest.skip('mbedtls TLSv1.3 session resume not working before 3.6.0')
+            pytest.skip('mbedTLS TLSv1.3 session resume not working before 3.6.0')
         if not env.curl_has_sha256():
             pytest.skip(reason="curl built without SHA-256")
         run_env = os.environ.copy()

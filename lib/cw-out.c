@@ -412,7 +412,7 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
       return result;
     result = CURLE_OK;
     if((consumed < blen) ||
-       ((otype == CW_OUT_BODY_0LEN && data->req.writer.paused))) {
+       ((otype == CW_OUT_BODY_0LEN) && data->req.writer.paused)) {
       /* did not write all or paused, append the rest */
       result = cw_out_append(ctx, data, otype,
                              buf + consumed, blen - consumed);

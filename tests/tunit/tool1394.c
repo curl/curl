@@ -35,7 +35,7 @@ static CURLcode test_tool1394(const char *arg)
   };
 
   static const struct cert values[] = {
-    /* -E parameter */        /* exp. cert name */  /* exp. passphrase */
+    /* -E parameter */         /* exp. cert name */  /* exp. passphrase */
     {"foo:bar:baz",            "foo",                "bar:baz"},
     {"foo\\:bar:baz",          "foo:bar",            "baz"},
     {"foo\\\\:bar:baz",        "foo\\",              "bar:baz"},

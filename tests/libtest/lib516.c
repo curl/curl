@@ -46,7 +46,7 @@ static CURLcode test_lib516(const char *URL)
   easy_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
   easy_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
-  /* Now, we should be making a zero byte POST request */
+  /* Now, we should be making a zero-length POST request */
   result = curl_easy_perform(curl);
 
 test_cleanup:

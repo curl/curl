@@ -102,7 +102,7 @@
 #define OPENSSL_HAS_PROVIDERS
 #endif
 
-/* AWS-LC fixed a bug with large buffers in v1.61.0 which also introduced
+/* AWS-LC fixed a bug with large buffers in 1.61.0 which also introduced
  * X509_V_ERR_EC_KEY_EXPLICIT_PARAMS. */
 #if !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL) && \
   (!defined(OPENSSL_IS_AWSLC) || defined(X509_V_ERR_EC_KEY_EXPLICIT_PARAMS))
@@ -2868,7 +2868,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
         continue;
 
       {
-        /* Blacklisted roots and intermediates.
+        /* Blocklisted roots and intermediates.
          * https://emudhra.we-have-a-problem.com/
          *
          * Microsoft blocked the bad eMudhra intermediate certificates in
@@ -2876,10 +2876,10 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
          * trust the issuer root certificates which other vendors have removed.
          *
          * Regardless we skip importing these certificates. OpenSSL does not
-         * check Microsoft's blacklist and assuming the user did not provide a
+         * check Microsoft's blocklist and assuming the user did not provide a
          * CRL file it would otherwise be possible for verification to succeed.
          */
-        static const char * const blacklist[] = {
+        static const char * const blocklist[] = {
           "emSign Root TLS CA - G3",
           "emSign Root CS CA - G3",
           "AAA Certificate Services",
@@ -2899,7 +2899,7 @@ static CURLcode ossl_win_load_store(struct Curl_easy *data,
                               CURL_UNCONST(szOID_COMMON_NAME),
                               cert_name, sizeof(cert_name)) > 1) {
           const char * const *b;
-          for(b = blacklist; *b && strcmp(cert_name, *b); ++b)
+          for(b = blocklist; *b && strcmp(cert_name, *b); ++b)
             ;
           if(*b)
             continue;
@@ -3310,7 +3310,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
 #ifdef OPENSSL_HAS_PROVIDERS
 /* CApath certificates loaded under a provider libctx can outlive that libctx
    when the store is shared with the multi handle. */
-#define USING_PROVIDER(octx) octx->p.libctx
+#define USING_PROVIDER(octx) (octx)->p.libctx
 #else
 #define USING_PROVIDER(x) 0
 #endif
@@ -4087,7 +4087,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
   BIO_set_data(bio, cf);
 #ifdef HAVE_SSL_SET0_WBIO
-  /* with OpenSSL v1.1.1 we get an alternative to SSL_set_bio() that works
+  /* with OpenSSL 1.1.1 we get an alternative to SSL_set_bio() that works
    * without backward compat quirks. Every call takes one reference, so we
    * up it and pass. SSL* then owns and frees it.
    * We check on the function in configure, since LibreSSL and friends
@@ -4279,7 +4279,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       }
 #ifdef SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED
       /* SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED is only available on
-         OpenSSL version above v1.1.1, not AWS-LC, BoringSSL, or LibreSSL */
+         OpenSSL version above 1.1.1, not AWS-LC, BoringSSL, or LibreSSL */
       else if((lib == ERR_LIB_SSL) &&
               (reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)) {
         /* If client certificate is required, communicate the

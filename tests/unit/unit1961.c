@@ -100,10 +100,11 @@ static int test_ntop(void)
 
 static int test_pton(void)
 {
+  static const char *ipv6src = "fe80::214:4fff:fe0b:76c8";
+  static const char *ipv4src = "192.168.100.1";
+
   unsigned char ipv6a[16 + 1];
   unsigned char ipv4a[4 + 1];
-  const char *ipv6src = "fe80::214:4fff:fe0b:76c8";
-  const char *ipv4src = "192.168.100.1";
 
   memset(ipv4a, 1, sizeof(ipv4a));
   if(curlx_inet_pton(AF_INET, ipv4src, ipv4a) != 1)

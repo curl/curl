@@ -187,7 +187,7 @@ CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
                               struct Curl_peer *origin,
                               struct Curl_cfchain *chain);
 
-CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
+CURLcode Curl_ssl_cf_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
                                   struct Curl_peer *origin,
                                   struct Curl_peer *peer);
@@ -199,7 +199,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
                                         struct Curl_easy *data,
                                         struct Curl_peer *peer);
-#endif /* !CURL_DISABLE_PROXY */
+#endif
 
 /**
  * True iff the underlying SSL implementation supports the option.
@@ -209,37 +209,36 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
 
 /* Get the ssl_easy_config from `data` relevant for cfilter `cf`. */
-struct ssl_easy_config *
-Curl_ssl_cf_get_easy_config(struct Curl_cfilter *cf,
-                            struct Curl_easy *data);
+struct ssl_easy_config *Curl_ssl_cf_get_easy_config(
+  struct Curl_cfilter *cf, struct Curl_easy *data);
 
 /* Get the filter config relevant for cfilter `cf`. */
-struct ssl_filter_config *
-Curl_ssl_cf_get_filter_config(struct Curl_cfilter *cf);
+struct ssl_filter_config *Curl_ssl_cf_get_filter_config(
+  struct Curl_cfilter *cf);
 
 extern struct Curl_cftype Curl_cft_ssl;
 #ifndef CURL_DISABLE_PROXY
 extern struct Curl_cftype Curl_cft_ssl_proxy;
 #endif
 
-#else /* if not USE_SSL */
+#else /* !USE_SSL */
 
 /* When SSL support is not present, define away these function calls */
-#define Curl_ssl_init() 1
-#define Curl_ssl_cleanup() Curl_nop_stmt
-#define Curl_ssl_close_all(x) Curl_nop_stmt
-#define Curl_ssl_set_engine(x, y) CURLE_NOT_BUILT_IN
-#define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN
-#define Curl_ssl_engines_list(x) NULL
-#define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_random(x, y, z) ((void)(x), CURLE_NOT_BUILT_IN)
-#define Curl_ssl_cert_status_request() FALSE
-#define Curl_ssl_supports(a, b) FALSE
-#define Curl_ssl_cfilter_add(a, b, c)    CURLE_NOT_BUILT_IN
-#define Curl_cf_ssl_insert_after(a,b,c,d)  CURLE_NOT_BUILT_IN
-#define Curl_ssl_cfilter_remove(a, b)    CURLE_OK
-#define Curl_ssl_cf_get_easy_config(a, b) NULL
-#define Curl_ssl_cf_get_filter_config(a) NULL
+#define Curl_ssl_init()                       1
+#define Curl_ssl_cleanup()                    Curl_nop_stmt
+#define Curl_ssl_close_all(x)                 Curl_nop_stmt
+#define Curl_ssl_set_engine(x, y)             CURLE_NOT_BUILT_IN
+#define Curl_ssl_set_engine_default(x)        CURLE_NOT_BUILT_IN
+#define Curl_ssl_engines_list(x)              NULL
+#define Curl_ssl_free_certinfo(x)             Curl_nop_stmt
+#define Curl_ssl_random(x, y, z)              ((void)(x), CURLE_NOT_BUILT_IN)
+#define Curl_ssl_cert_status_request()        FALSE
+#define Curl_ssl_supports(a, b)               FALSE
+#define Curl_ssl_cfilter_add(a, b, c)         CURLE_NOT_BUILT_IN
+#define Curl_ssl_cf_insert_after(a, b, c, d)  CURLE_NOT_BUILT_IN
+#define Curl_ssl_cfilter_remove(a, b)         CURLE_OK
+#define Curl_ssl_cf_get_easy_config(a, b)     NULL
+#define Curl_ssl_cf_get_filter_config(a)      NULL
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

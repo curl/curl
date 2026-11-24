@@ -436,7 +436,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
 #ifdef USE_HTTPSRR
   if(CURL_DNSQ_IS_ADDR(async->dns_queries) &&
      (async->dns_queries & CURL_DNSQ_HTTPS)) {
-    /* Can't mix those in the same async resolve */
+    /* Cannot mix those in the same async resolve */
     DEBUGASSERT(0);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }

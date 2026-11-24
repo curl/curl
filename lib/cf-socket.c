@@ -182,7 +182,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
  * use millisecond units. */
 static void alive_unit(int *x)
 {
-  /* make sure this doesn't wrap */
+  /* make sure this does not wrap */
   if(*x < (INT_MAX / 1000))
     *x *= 1000;
   else
@@ -214,15 +214,15 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
                                     VERSION_GREATER_THAN_EQUAL)) {
       CURL_TRC_CF(data, cf, "Set TCP_KEEP* on fd=%" FMT_SOCKET_T, sockfd);
       optval = curlx_sltosi(data->set.tcp_keepidle);
-/* Offered by mingw-w64 v12+, MS SDK 6.0A/VS2008+ */
+/* Offered by mingw-w64 12+, MS SDK 6.0A/VS2008+ */
 #ifndef TCP_KEEPALIVE
 #define TCP_KEEPALIVE 3
 #endif
-/* Offered by mingw-w64 v12+, MS SDK 10.0.15063.0/VS2017 15.1+ */
+/* Offered by mingw-w64 12+, MS SDK 10.0.15063.0/VS2017 15.1+ */
 #ifndef TCP_KEEPCNT
 #define TCP_KEEPCNT 16
 #endif
-/* Offered by mingw-w64 v12+, MS SDK 10.0.16299.0/VS2017 15.4+ */
+/* Offered by mingw-w64 12+, MS SDK 10.0.16299.0/VS2017 15.4+ */
 #ifndef TCP_KEEPIDLE
 #define TCP_KEEPIDLE TCP_KEEPALIVE
 #endif
@@ -1205,7 +1205,7 @@ static int cf_socktype(int x)
 }
 
 #ifdef _WIN32
-/* Offered by mingw-w64 v10+, MS SDK 8.0/~VS2012+ */
+/* Offered by mingw-w64 10+, MS SDK 8.0/~VS2012+ */
 #ifndef SIO_TCP_INITIAL_RTO
 #define SIO_TCP_INITIAL_RTO _WSAIOW(IOC_VENDOR, 17)
 #define TCP_INITIAL_RTO_DEFAULT_RTT 0
@@ -1619,7 +1619,7 @@ static CURLcode cf_socket_adjust_pollset(struct Curl_cfilter *cf,
 
 #ifdef USE_WINSOCK
 
-/* Offered by mingw-w64 v13+, MS SDK 7.0A/VS2010+ */
+/* Offered by mingw-w64 13+, MS SDK 7.0A/VS2010+ */
 #ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
 #define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
 #endif

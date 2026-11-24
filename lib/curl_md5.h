@@ -91,7 +91,7 @@
 #ifdef CURL_HAVE_MD5
 #include "curl_hmac.h"
 
-#define CURL_MD5_DIGEST_LEN  16
+#define CURL_MD5_DIGEST_LEN 16
 
 extern const struct HMAC_params Curl_HMAC_MD5;
 

@@ -613,7 +613,7 @@ static struct TerminalSettings {
   LONG valid;
 } TerminalSettings;
 
-/* Offered by mingw-w64 v7+, MS SDK 10.0.10586.0/VS2015 Update 1+ */
+/* Offered by mingw-w64 7+, MS SDK 10.0.10586.0/VS2015 Update 1+ */
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
@@ -895,12 +895,12 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    /* We don't need the listening socket anymore */
+    /* We do not need the listening socket anymore */
     sclose(socket_l);
     socket_l = CURL_SOCKET_BAD;
 
     /* Authenticate the reading socket to the writing socket to make sure
-     * we don't leak information.*/
+     * we do not leak information.*/
     if(curlx_win32_random((unsigned char *)&auth_rnd, sizeof(auth_rnd))) {
       errorf("curlx_win32_random() error");
       break;
@@ -944,7 +944,7 @@ curl_socket_t win32_stdin_read_thread(void)
     }
     CloseHandle(stdin_thread);
 
-    /* Starting the thread is the last thing we do, since there aren't any
+    /* Starting the thread is the last thing we do, since there are no
      * reliable ways to close it in case of subsequent errors. */
 
     rc = 1;
@@ -974,8 +974,7 @@ curl_socket_t win32_stdin_read_thread(void)
     return CURL_SOCKET_BAD;
   }
 
-  /* prevent mem leak warnings */
-  atexit(&cleanup_tdata_sync);
+  atexit(&cleanup_tdata_sync);  /* prevent mem leak warnings */
 
   DEBUGASSERT(socket_r != CURL_SOCKET_BAD);
   return socket_r;

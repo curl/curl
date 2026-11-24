@@ -29,7 +29,7 @@
    1. USE_OPENSSL
    2. USE_WOLFSSL
    3. USE_GNUTLS
-   4. USE_MBEDTLS
+   4. USE_MBEDTLS (not supported)
    5. USE_RUSTLS (not supported)
    6. __APPLE__ (not supported)
    7. _WIN32 (not supported)

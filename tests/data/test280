@@ -23,7 +23,7 @@ drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub
 dr-xr-xr-x   5 0        1            512 Oct  1  1997 fine
 </data>
 <servercmd>
-REPLY USER 530 We don't like USER commands
+REPLY USER 530 We do not like USER commands
 COUNT USER 1
 </servercmd>
 </reply>

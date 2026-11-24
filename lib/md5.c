@@ -263,8 +263,8 @@ const struct HMAC_params Curl_HMAC_MD5 = {
 };
 
 /*
- * @unittest: 1601
  * Returns CURLE_OK on success.
+ * @unittest: 1601
  */
 CURLcode Curl_md5it(uint8_t *digest, const void *input, size_t input_len)
 {

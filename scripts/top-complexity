@@ -76,7 +76,7 @@ my @output = <$pmc>;
 close($pmc);
 
 # these functions can have these scores, but not higher
-my %whitelist = (
+my %allowlist = (
 
     );
 
@@ -100,8 +100,8 @@ for my $l (@output) {
         my ($score, $len, $path, $func) = ($1, $2, $3, $4);
 
         my $allow = 0;
-        if($whitelist{$func} &&
-           ($score <= $whitelist{$func})) {
+        if($allowlist{$func} &&
+           ($score <= $allowlist{$func})) {
             $allow = 1;
         }
         $where{"$path:$func"} = $score;

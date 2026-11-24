@@ -3194,7 +3194,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     if((ftpcode == 234) || (ftpcode == 334)) {
       /* this was BLOCKING, keep it so for now */
       if(!Curl_conn_is_ssl(conn)) {
-        result = Curl_cf_ssl_insert_after(cf, data,
+        result = Curl_ssl_cf_insert_after(cf, data,
           Curl_conn_get_origin(conn),
           Curl_conn_get_destination(conn));
         if(result) {

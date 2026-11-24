@@ -35,7 +35,7 @@
 #define Curl_gss_free  free    /* pair of the above */
 #define CURL_GSS_STUB
 /* For correctness this would be required for all platforms, not only Windows,
-   but, as of v1.22.1, MIT Kerberos uses a special allocator only for Windows,
+   but, as of 1.22.1, MIT Kerberos uses a special allocator only for Windows,
    and the availability of 'gssapi/gssapi_alloc.h' is difficult to detect,
    because GSS headers are not versioned, and there is also no other macro to
    indicate 1.18+ vs. previous versions. On Windows we can use 'GSS_S_BAD_MIC'.

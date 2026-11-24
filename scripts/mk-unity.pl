@@ -101,13 +101,13 @@ foreach my $src (@src) {
         my $name = $1;
         include($src);
         if(not exists $include{$src}) {  # register test entry function
-            $tlist .= "  {\"$name\", test_$name},\n";
+            $tlist .= "  { \"$name\", test_$name },\n";
         }
     }
 }
 
 if($any_test) {
-    print "\nconst struct entry_s s_entries[] = {\n$tlist  {NULL, NULL}\n};\n\n";
+    print "\nconst struct entry_s s_entries[] = {\n$tlist  { NULL, NULL }\n};\n\n";
     include("first.c");
     if($concat) {
         print "/* NOLINTEND(readability-duplicate-include) */\n";

@@ -21,7 +21,7 @@ libtest
 </data>
 <servercmd>
 NODATACONN
-REPLY EPRT 500 we don't like EPRT now
+REPLY EPRT 500 we do not like EPRT now
 </servercmd>
 </reply>
 

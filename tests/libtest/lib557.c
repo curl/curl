@@ -1350,7 +1350,7 @@ static int var557(int expected_len, const char *format, ...)
 
   va_end(arg);
   va_start(arg, format);
-  /* this unfortunately writes to stdout but we can't prevent it */
+  /* this unfortunately writes to stdout but we cannot prevent it */
   len = curl_mvprintf(format, arg);
   if(len != expected_len) {
     curl_mfprintf(stderr, "curl_mvprintf: expected length %d but got %d\n",

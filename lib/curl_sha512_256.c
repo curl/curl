@@ -53,7 +53,7 @@ static CURLcode my_sha512_256_init(void *pctx)
     return CURLE_FAILED_INIT;
   }
   /* Check whether the header and this file use the same numbers */
-  DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LENGTH);
+  DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_LEN);
   /* Check whether the block size is correct */
   DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == 128);
   return CURLE_OK;
@@ -62,8 +62,8 @@ static CURLcode my_sha512_256_init(void *pctx)
 /* Process portion of bytes.
  *
  * @param pctx the calculation context
- * @param input bytes to add to hash
- * @param input_len number of bytes in @a input
+ * @param[in] input bytes to add to hash
+ * @param[in] input_len number of bytes in @a input
  * @return CURLE_OK if succeed, error code otherwise
  */
 static CURLcode my_sha512_256_update(void *pctx,
@@ -76,7 +76,7 @@ static CURLcode my_sha512_256_update(void *pctx,
 
 /* Finalise SHA-512/256 calculation, return digest.
  *
- * @param[out] digest returned, must be #CURL_SHA512_256_DIGEST_LENGTH bytes
+ * @param[out] digest returned, must be #CURL_SHA512_256_DIGEST_LEN bytes
  * @param pctx the calculation context
  * @return CURLE_OK if succeed, error code otherwise
  */
@@ -103,11 +103,11 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *pctx)
     __NetBSD_Version__ <  1099001100))
   /* Use a larger buffer to work around a bug in NetBSD:
      https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
-  uint8_t tmp_digest[CURL_SHA512_256_DIGEST_LENGTH * 2];
+  uint8_t tmp_digest[CURL_SHA512_256_DIGEST_LEN * 2];
   result = EVP_DigestFinal_ex(*ctx, tmp_digest, NULL) ?
     CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   if(result == CURLE_OK)
-    memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_LENGTH);
+    memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_LEN);
   curlx_memzero(tmp_digest, sizeof(tmp_digest));
 #else
   result = EVP_DigestFinal_ex(*ctx, digest, NULL) ?
@@ -176,7 +176,7 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 #if NETTLE_VERSION_MAJOR >= 4
   sha512_256_digest(ctx, digest);
 #else
-  sha512_256_digest(ctx, CURL_SHA512_256_DIGEST_LENGTH, digest);
+  sha512_256_digest(ctx, CURL_SHA512_256_DIGEST_LEN, digest);
 #endif
   return CURLE_OK;
 }
@@ -186,7 +186,7 @@ static CURLcode my_sha512_256_final(uint8_t *digest, void *ctx)
 /* Compute SHA-512/256 hash for the given data in one function call
  * @param[out] digest the pointer to put the hash
  * @param[in] input the pointer to the data to process
- * @param input_len the size of the data pointed by @a input
+ * @param[in] input_len the size of the data pointed by @a input
  * @return always #CURLE_OK
  */
 CURLcode Curl_sha512_256it(uint8_t *digest,

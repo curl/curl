@@ -84,7 +84,7 @@
 #define CURL_HAVE_SHA256
 #endif
 
-#define CURL_SHA256_DIGEST_LENGTH 32
+#define CURL_SHA256_DIGEST_LEN 32
 
 extern const struct HMAC_params Curl_HMAC_SHA256;
 

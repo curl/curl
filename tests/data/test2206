@@ -30,7 +30,7 @@ mqtt
 mqtt
 </server>
 <name>
-MQTT reject PINGRESP with nonzero remaining_length in place of CONNACK
+MQTT reject PINGRESP with non-zero remaining_length in place of CONNACK
 </name>
 <command option="binary-trace">
 mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER

@@ -43,8 +43,8 @@ options.
 Enabling CURLOPT_NOBODY(3) means asking for a download without a body.
 
 If you do a transfer with HTTP that involves a method other than HEAD, you get
-a body (unless the resource and server sends a zero byte body for the specific
-URL you request).
+a body (unless the resource and server sends a zero-length body for
+the specific URL you request).
 
 # DEFAULT
 

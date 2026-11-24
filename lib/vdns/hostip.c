@@ -1014,7 +1014,7 @@ static CURLcode resolv_unix(struct Curl_easy *data,
  * done using this struct) to decrease the reference counter again.
  *
  * If built with a synchronous resolver and use of signals is not
- * disabled by the application, then a nonzero timeout will cause a
+ * disabled by the application, then a non-zero timeout will cause a
  * timeout after the specified number of milliseconds. Otherwise, timeout
  * is ignored.
  *

@@ -160,7 +160,7 @@ CURLHcode Curl_eapi_hcode(CURLcode result);
 /* Curl_eapi_enter() checks for curl being NULL, but windows compiler
  * analyzers do not realize this. *sigh* */
 #define CURL_EAPI_ENTER(g, curl, fn, r) \
-  Curl_eapi_enter((g), (curl), CURL_EAPI_FN_##fn, (r)) && (curl)
+  Curl_eapi_enter(g, curl, CURL_EAPI_FN_##fn, r) && (curl)
 #define CURL_EAPI_LEAVE(g) \
   Curl_eapi_leave(g)
 
@@ -187,7 +187,7 @@ void Curl_mapi_leave(struct Curl_mapi_guard *guard);
 /* Curl_mapi_enter() checks for m being NULL, but windows compiler
  * analyzers do not realize this. *sigh* */
 #define CURL_MAPI_ENTER(g, m, fn, r) \
-  Curl_mapi_enter((g), (m), CURL_MAPI_FN_##fn, (r)) && (m)
+  Curl_mapi_enter(g, m, CURL_MAPI_FN_##fn, r) && (m)
 #define CURL_MAPI_LEAVE(g) \
   Curl_mapi_leave(g)
 
@@ -198,9 +198,9 @@ void Curl_cbapi_enter(struct Curl_mapi_guard *guard,
 void Curl_cbapi_leave(struct Curl_mapi_guard *guard);
 
 #define CURL_CBAPI_START(g, d, fn) \
-  Curl_cbapi_enter((g), (d), NULL, CURL_CBAPI_FN_##fn)
+  Curl_cbapi_enter(g, d, NULL, CURL_CBAPI_FN_##fn)
 #define CURL_CBAPI_MULTI_START(g, m, fn) \
-  Curl_cbapi_enter((g), NULL, (m), CURL_CBAPI_FN_##fn)
+  Curl_cbapi_enter(g, NULL, m, CURL_CBAPI_FN_##fn)
 #define CURL_CBAPI_END(g) \
   Curl_cbapi_leave(g)
 #define CURL_CBAPI_MULTI_END(g) \

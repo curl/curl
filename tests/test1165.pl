@@ -88,7 +88,7 @@ sub scan_cmake_config_h {
     scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config-cmake.h.in");
 }
 
-my %whitelisted = (
+my %allowlisted = (
   'CURL_DISABLE_DEPRECATION' => 1,
   'CURL_DISABLE_TYPECHECK' => 1,
 );
@@ -100,7 +100,7 @@ sub scan_file {
         while(s/(CURL_DISABLE_[A-Z0-9_]+)//) {
             my ($sym) = ($1);
 
-            if(!$whitelisted{$sym}) {
+            if(!$allowlisted{$sym}) {
                 $file{$sym} = $source;
             }
         }

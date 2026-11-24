@@ -441,12 +441,12 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     uint8_t *sha256_digest;
 
     /* compute sha256sum of public key */
-    sha256_digest = curlx_malloc(CURL_SHA256_DIGEST_LENGTH);
+    sha256_digest = curlx_malloc(CURL_SHA256_DIGEST_LEN);
     if(!sha256_digest)
       return CURLE_OUT_OF_MEMORY;
     encode = Curl_sha256it(sha256_digest, pubkey, pubkeylen);
     if(!encode)
-      encode = curlx_base64_encode(sha256_digest, CURL_SHA256_DIGEST_LENGTH,
+      encode = curlx_base64_encode(sha256_digest, CURL_SHA256_DIGEST_LEN,
                                    &cert_hash, &cert_hash_len);
     curlx_safefree(sha256_digest);
 
@@ -1370,7 +1370,7 @@ CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
   return result;
 }
 
-CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
+CURLcode Curl_ssl_cf_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
                                   struct Curl_peer *origin,
                                   struct Curl_peer *peer)
@@ -1565,9 +1565,8 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
   return (cf->cft->flags & CF_TYPE_SSL) && (cf->cft->flags & CF_TYPE_PROXY);
 }
 
-struct ssl_easy_config *
-Curl_ssl_cf_get_easy_config(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
+struct ssl_easy_config *Curl_ssl_cf_get_easy_config(
+  struct Curl_cfilter *cf, struct Curl_easy *data)
 {
 #ifdef CURL_DISABLE_PROXY
   (void)cf;
@@ -1577,8 +1576,8 @@ Curl_ssl_cf_get_easy_config(struct Curl_cfilter *cf,
 #endif
 }
 
-struct ssl_filter_config *
-Curl_ssl_cf_get_filter_config(struct Curl_cfilter *cf)
+struct ssl_filter_config *Curl_ssl_cf_get_filter_config(
+  struct Curl_cfilter *cf)
 {
 #ifdef CURL_DISABLE_PROXY
   return &CF_CONN(cf)->ssl_config;
@@ -1762,9 +1761,8 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
   return result;
 }
 
-struct Curl_ssl_session *
-Curl_ssl_get_primary_session(struct Curl_easy *data,
-                             const struct Curl_cftype *cft)
+struct Curl_ssl_session *Curl_ssl_get_primary_session(
+  struct Curl_easy *data, const struct Curl_cftype *cft)
 {
   if(data->conn &&
 #ifndef CURL_DISABLE_PROXY

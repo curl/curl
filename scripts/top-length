@@ -76,7 +76,7 @@ my @output = <$pmc>;
 close($pmc);
 
 # these functions can be this long, but not longer
-my %whitelist = (
+my %allowlist = (
     );
 
 # function length above this level is treated as an error and contributes to
@@ -99,8 +99,8 @@ for my $l (@output) {
         my ($score, $length, $path, $func) = ($1, $2, $3, $4);
 
         my $allow = 0;
-        if($whitelist{$func} &&
-           ($length <= $whitelist{$func})) {
+        if($allowlist{$func} &&
+           ($length <= $allowlist{$func})) {
             $allow = 1;
         }
         $where{"$path:$func"} = $length;

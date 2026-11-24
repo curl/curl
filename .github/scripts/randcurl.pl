@@ -128,18 +128,18 @@ sub runone {
         my $ar = "";
         $uniq{$option}++;
         if($arg{$option}) {
-            $ar = " ".randarg();
+            $ar = " " . randarg();
 
             if($useropt{$option}) {
                 # append password to avoid prompting
-                $ar .= ":".randarg();
+                $ar .= ":" . randarg();
             }
         }
         $a .= sprintf(" %s%s", $option, $ar);
     }
     if(getnum(100) < 15) {
         # add a fake arg
-        $a .= " ".addarg();
+        $a .= " " . addarg();
     }
 
     my $cmd = "$curl$a $url";
@@ -177,18 +177,18 @@ sub runconfig {
         $uniq{$option} = 0 if(!exists $uniq{$option});
         $uniq{$option}++;
         if($arg{$option}) {
-            $ar = " ".randarg();
+            $ar = " " . randarg();
 
             if($useropt{$option}) {
                 # append password
-                $ar .= ":".randarg();
+                $ar .= ":" . randarg();
             }
         }
         $a .= sprintf("\n%s%s", $option, $ar);
     }
     if(getnum(100) < 15) {
         # add a fake arg
-        $a .= "\n".addarg();
+        $a .= "\n" . addarg();
     }
 
     print C "$a\n";

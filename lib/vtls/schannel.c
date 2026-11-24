@@ -70,7 +70,7 @@
 #define SCH_DEV_SHOWBOOL(x) do {} while(0)
 #endif
 
-/* Offered by mingw-w64 v8+, MS SDK 7.0A/VS2010+ */
+/* Offered by mingw-w64 8+, MS SDK 7.0A/VS2010+ */
 #ifndef SP_PROT_TLS1_0_CLIENT
 #define SP_PROT_TLS1_0_CLIENT           SP_PROT_TLS1_CLIENT
 #endif
@@ -81,16 +81,16 @@
 #define SP_PROT_TLS1_2_CLIENT           0x00000800
 #endif
 
-/* Offered by mingw-w64 v8+, MS SDK 10.0.15063.0/VS2017 15.1+ */
+/* Offered by mingw-w64 8+, MS SDK 10.0.15063.0/VS2017 15.1+ */
 #ifndef SP_PROT_TLS1_3_CLIENT
 #define SP_PROT_TLS1_3_CLIENT           0x00002000
 #endif
-/* Offered by mingw-w64 v8+, MS SDK 8.1/VS2013+ */
+/* Offered by mingw-w64 8+, MS SDK 8.1/VS2013+ */
 #ifndef SCH_USE_STRONG_CRYPTO
 #define SCH_USE_STRONG_CRYPTO           0x00400000
 #endif
 
-/* Offered by mingw-w64 v10+, MS SDK 7.0A/VS2010+ */
+/* Offered by mingw-w64 10+, MS SDK 7.0A/VS2010+ */
 #ifndef SECBUFFER_ALERT
 #define SECBUFFER_ALERT                 17
 #endif
@@ -107,12 +107,12 @@
  * #define failf(x, y, ...) curl_mprintf(y, __VA_ARGS__)
  */
 
-/* Offered by mingw-w64 v4+, MS SDK 6.0A/VS2008+ */
+/* Offered by mingw-w64 4+, MS SDK 6.0A/VS2008+ */
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
-/* Offered by mingw-w64 v4+, MS SDK 8.0/~VS2012+ */
+/* Offered by mingw-w64 4+, MS SDK 8.0/~VS2012+ */
 #ifndef CERT_FIND_HAS_PRIVATE_KEY
 #define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
 #endif
@@ -122,7 +122,7 @@
 
 static bool s_win_has_alpn;
 
-/* Offered by mingw-w64 v9+, MS SDK 8.1/VS2013+ */
+/* Offered by mingw-w64 9+, MS SDK 8.1/VS2013+ */
 #ifndef SECBUFFER_APPLICATION_PROTOCOLS
 #define SECBUFFER_APPLICATION_PROTOCOLS 18
 #define SECPKG_ATTR_APPLICATION_PROTOCOL 35
@@ -299,12 +299,12 @@ static const struct algo algs[] = {
   CIPHEROPTION(CALG_SHA_384),
   CIPHEROPTION(CALG_SHA_512),
   CIPHEROPTION(CALG_ECDH),
-/* Offered by mingw-w64 v4+, MS SDK 6.0A/VS2008+ */
+/* Offered by mingw-w64 4+, MS SDK 6.0A/VS2008+ */
 #ifdef CALG_ECMQV
   CIPHEROPTION(CALG_ECMQV),
 #endif
   CIPHEROPTION(CALG_ECDSA),
-/* Offered by mingw-w64 v7+, MS SDK 7.0A/VS2010+ */
+/* Offered by mingw-w64 7+, MS SDK 7.0A/VS2010+ */
 #ifdef CALG_ECDH_EPHEM
   CIPHEROPTION(CALG_ECDH_EPHEM),
 #endif
@@ -2696,7 +2696,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
   timediff_t timeout_ms;
-  uint8_t info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t info_blob_digest[CURL_SHA256_DIGEST_LEN];
 
   DEBUGASSERT(multi);
 
@@ -2735,7 +2735,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(Curl_sha256it(info_blob_digest, ca_info_blob->data, ca_info_blob->len))
       return NULL;
     if(memcmp(share->CAinfo_blob_digest, info_blob_digest,
-              CURL_SHA256_DIGEST_LENGTH)) {
+              CURL_SHA256_DIGEST_LEN)) {
       return NULL;
     }
   }
@@ -2771,7 +2771,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
-  uint8_t digest[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t digest[CURL_SHA256_DIGEST_LEN];
   char *CAfile = NULL;
 
   DEBUGASSERT(multi);

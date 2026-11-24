@@ -384,7 +384,7 @@ static const struct LongShort aliases[] = {
  * nicknames containing ':'. See <https://sourceforge.net/p/curl/bugs/1196/>
  * for details.
  *
- * Unit test 1394
+ * @unittest: 1394
  */
 UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
                                              char **certname,
@@ -564,7 +564,7 @@ static const struct sizeunit *getunit(char unit)
 /* Get a size parameter for '--limit-rate' or '--max-filesize'.
    We support P, T, G, M and K (case insensitive) suffixes.
 
-   Unit test 1623
+   @unittest: 1623
  */
 UNITTEST ParameterError GetSizeParameter(const char *arg, curl_off_t *out)
 {
@@ -706,7 +706,7 @@ static ParameterError data_urlencode(const char *nextarg,
   }
 
   if(!postdata) {
-    /* no data from the file, point to a zero byte string to make this
+    /* no data from the file, point to a zero-length string to make this
        get sent as a POST anyway */
     postdata = curlx_strdup("");
     if(!postdata)
@@ -991,7 +991,7 @@ static ParameterError set_data(cmdline_t cmd,
       return err;
 
     if(!postdata) {
-      /* no data from the file, point to a zero byte string to make this
+      /* no data from the file, point to a zero-length string to make this
          get sent as a POST anyway */
       postdata = curlx_strdup("");
       if(!postdata)

@@ -53,7 +53,7 @@ static CURLcode test_lib1911(const char *URL)
     if(o->type == CURLOT_STRING) {
       CURLcode result;
       /*
-       * Whitelist string options that are safe for abuse
+       * Allow string options that are safe for abuse
        */
       switch(o->id) {
       case CURLOPT_PROXY_TLSAUTH_TYPE:

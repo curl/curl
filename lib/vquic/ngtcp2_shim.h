@@ -78,18 +78,16 @@ uint64_t Curl_ngtcp2_conn_get_cwnd_left(struct curl_ngtcp2 *ntp2);
 ngtcp2_tstamp Curl_ngtcp2_conn_get_expiry(struct curl_ngtcp2 *ntp2);
 int Curl_ngtcp2_conn_get_handshake_completed(struct curl_ngtcp2 *ntp2);
 uint64_t Curl_ngtcp2_conn_get_max_data_left(struct curl_ngtcp2 *ntp2);
-size_t Curl_ngtcp2_conn_get_max_tx_udp_payload_size(
-  struct curl_ngtcp2 *ntp2);
+size_t Curl_ngtcp2_conn_get_max_tx_udp_payload_size(struct curl_ngtcp2 *ntp2);
 size_t Curl_ngtcp2_conn_get_path_max_tx_udp_payload_size(
   struct curl_ngtcp2 *ntp2);
-const ngtcp2_transport_params *
-Curl_ngtcp2_conn_get_remote_transport_params(struct curl_ngtcp2 *ntp2);
+const ngtcp2_transport_params *Curl_ngtcp2_conn_get_remote_transport_params(
+  struct curl_ngtcp2 *ntp2);
 size_t Curl_ngtcp2_conn_get_send_quantum(struct curl_ngtcp2 *ntp2);
 uint64_t Curl_ngtcp2_conn_get_streams_uni_left(struct curl_ngtcp2 *ntp2);
 uint8_t Curl_ngtcp2_conn_get_tls_alert(struct curl_ngtcp2 *ntp2);
 #if NGTCP2_VERSION_NUM >= 0x011700
-int Curl_ngtcp2_conn_get_tls_early_data_rejected2(
-  struct curl_ngtcp2 *ntp2);
+int Curl_ngtcp2_conn_get_tls_early_data_rejected2(struct curl_ngtcp2 *ntp2);
 #endif
 int Curl_ngtcp2_conn_handle_expiry(struct curl_ngtcp2 *ntp2,
                                    ngtcp2_tstamp ts);
