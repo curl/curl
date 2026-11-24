@@ -457,8 +457,13 @@ static const struct glob_match_case match_cases[] = {
   { "http://example.com/{<name>a,b}", NULL,
     "file_#<nonexistent>.txt", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
   { "http://example.com/{<name>a,b}", NULL,
+#if defined(_WIN32) || defined(MSDOS)
+    /* On Windows and MS-DOS, glob_match_url() passes successful output
+       through sanitize_file_name(), which replaces < with _. */
+    "#<unclosed", "#_unclosed", CURLE_OK },
+#else
     "#<unclosed", "#<unclosed", CURLE_OK },
-
+#endif
   /* Two globs */
   { "http://example.com/{<site>siteA,siteB}", "[<part>1-2]",
     "dump_#<site>_#<part>.tar", "dump_siteA_1.tar", CURLE_OK },
