@@ -34,7 +34,9 @@ curl_global_init(3), after you are done using libcurl.
 
 This function is thread-safe since libcurl 7.84.0 if
 curl_version_info(3) has the CURL_VERSION_THREADSAFE feature bit set
-(most platforms).
+(most platforms). This means two (or more) threads can each call
+curl_global_init(3), do their work and then call curl_global_cleanup(3)
+when they are done without interfering with each other.
 
 If this is not thread-safe, you must not call this function when any other
 thread in the program (i.e. a thread sharing the same memory) is running. This
@@ -42,6 +44,10 @@ does not only mean other threads that use libcurl. Because
 curl_global_cleanup(3) calls functions of other libraries that are similarly
 thread-unsafe, it could conflict with any other thread that uses these other
 libraries.
+
+It is *never* safe to invoke the "last" curl_global_cleanup(3) while there
+is still code running that uses libcurl ("last" meaning the number matching
+the times curl_global_init(3) had been called).
 
 See the description in libcurl(3) of global environment requirements for
 details of how to use this function.
