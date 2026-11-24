@@ -721,6 +721,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   if(!digest->qop && (digest->algo & SESSION_ALGO))
     return CURLE_BAD_CONTENT_ENCODING;
 
+#ifdef CURL_HAVE_MD5
   /* MD5 can be disabled at runtime (FIPS) */
   if(digest->algo == ALGO_MD5 || digest->algo == ALGO_MD5SESS) {
     uint8_t md5[CURL_MD5_DIGEST_LEN];
@@ -732,6 +733,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
     if(result)
       return result;
   }
+#endif
 
   return CURLE_OK;
 }
