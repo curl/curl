@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+multi
+notify
+curl_multi_remove_handle
+curl_easy_reset
+libtest
+</keywords>
+</info>
+
+<client>
+<server>
+http
+</server>
+<name>
+reset a completed easy handle from the notify callback and reuse it
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+</testcase>
