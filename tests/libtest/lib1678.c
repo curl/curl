@@ -30,6 +30,15 @@
 #define T1678_FIRST_QUICTP_SIZE 127
 #define T1678_FIRST_ALPN_SIZE 10
 
+/* A TLS 1.3 session in the order written by the packer. */
+static const uint8_t t1678_session[] = {
+  0x01,                                /* format version */
+  0x04, 0x00, 0x03, 'T', 0x00, 'K',    /* binary ticket */
+  0x02, 0x03, 0x04,                    /* TLS 1.3 */
+  0x03, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, /* CURL_OFF_T_MAX */
+  0x05, 0x00, 0x02, 'h', '2'           /* ALPN */
+};
+
 static CURLcode t1678_export_cb(CURL *handle,
                                 void *userptr,
                                 const char *session_key,
@@ -47,12 +56,18 @@ static CURLcode t1678_export_cb(CURL *handle,
   (void)session_key;
   (void)shmac;
   (void)shmac_len;
-  (void)sdata;
-  (void)sdata_len;
-  (void)valid_until;
-  (void)ietf_tls_id;
-  (void)alpn;
   (void)earlydata_max;
+
+  if(!sdata || sdata_len != sizeof(t1678_session) ||
+     memcmp(sdata, t1678_session, sdata_len)) {
+    curl_mfprintf(stderr, "session data changed on export\n");
+    return TEST_ERR_FAILURE;
+  }
+  if(valid_until != CURL_OFF_T_MAX || ietf_tls_id != 0x0304 ||
+     !alpn || strcmp(alpn, "h2")) {
+    curl_mfprintf(stderr, "unexpected exported session metadata\n");
+    return TEST_ERR_FAILURE;
+  }
   (*exported)++;
   return CURLE_OK;
 }
@@ -149,6 +164,7 @@ static CURLcode test_lib1678(const char *URL)
   if(result != CURLE_OK)
     goto test_cleanup;
 
+  result = CURLE_FAILED_INIT;
   share = curl_share_init();
   easy = curl_easy_init();
 
@@ -207,6 +223,19 @@ static CURLcode test_lib1678(const char *URL)
     goto test_cleanup;
   }
 
+  result = curl_easy_ssls_import(easy, NULL, shmac, sizeof(shmac),
+                                 t1678_session, sizeof(t1678_session));
+  if(result)
+    goto test_cleanup;
+  result = curl_easy_ssls_export(easy, t1678_export_cb, &exported);
+  if(result)
+    goto test_cleanup;
+  if(exported != 1) {
+    curl_mfprintf(stderr, "expected exactly one exported session\n");
+    result = TEST_ERR_FAILURE;
+    goto test_cleanup;
+  }
+
   for(i = 0; i < T1678_IMPORT_COUNT; ++i) {
     result = curl_easy_ssls_import(easy,
                                    "example.test:443",
@@ -221,16 +250,6 @@ static CURLcode test_lib1678(const char *URL)
                     curl_easy_strerror(result));
       break;
     }
-  }
-
-  if(!result) {
-    result = curl_easy_ssls_import(easy, NULL, shmac, sizeof(shmac),
-                                   packet, packet_len);
-  }
-  if(!result) {
-    result = curl_easy_ssls_export(easy, t1678_export_cb, &exported);
-    if(!result && !exported)
-      result = CURLE_READ_ERROR;
   }
 
 test_cleanup:
