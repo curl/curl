@@ -2922,7 +2922,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(data->mstate >= MSTATE_CONNECT &&
-       (data->mstate < MSTATE_DO ||
+       data->mstate < MSTATE_COMPLETED &&
+       (Curl_is_connecting(data) ||
         (data->conn && data->conn->connect_start_ms >= 0)) &&
        mresult != CURLM_CALL_MULTI_PERFORM &&
        !multi_ischanged(multi, FALSE)) {
@@ -2931,9 +2932,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        * that if we know we have additional work to do immediately
        * (i.e. CURLM_CALL_MULTI_PERFORM == TRUE) then we should do that before
        * declaring the connection timed out as we may almost have a completed
-       * connection. This covers the connect of the transfer's connection as
-       * well as a connect of a secondary connection (`connect_start_ms`
-       * set), like the FTP data connection, in a later state. */
+       * connection. This covers the connect of the transfer's connection,
+       * a handshake still connecting in a later state (WebSocket Upgrade)
+       * and a connect of a secondary connection (`connect_start_ms` set),
+       * like the FTP data connection. */
       pnow = Curl_pgrs_now(data);
       multi_handle_timeout(data, pnow, &stream_error, &result, TRUE);
     }
