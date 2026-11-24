@@ -1403,8 +1403,8 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     const char *fragment;
     if(pathlen && !(flags & CURLU_URLENCODE) &&
        !badoctets(path, pathlen, flags))
-      /* there is bad octet in there, but we don't know in which component so
-         we just set the boolean for now */
+      /* there is a bad octet in there, but we don't know in which component
+         so we just set the boolean for now */
       badoctets_clean = TRUE;
 
     /* The path might at this point contain a fragment and/or a query to
