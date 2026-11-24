@@ -508,7 +508,10 @@ static CURLcode test_tool2155(const char *arg)
       curl_off_t count = 0;
       char *url = NULL;
 
-      while(!(result = glob_next_url(&url, &glob)) && url) {
+      do {
+        result = glob_next_url(&url, &glob);
+        if(result || !url)
+          break;
         if(!tc->expected_urls[count]) {
           curl_mprintf("Unexpected extra URL '%s' at index %" FMT_OFF_T
                        " for '%s'\n", url, count, tc->pattern);
@@ -526,7 +529,7 @@ static CURLcode test_tool2155(const char *arg)
 
         curlx_safefree(url);
         count++;
-      }
+      } while(1);
 
       if(result) {
         curl_mprintf("glob_next_url failed for '%s' with %d\n",
