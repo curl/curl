@@ -104,8 +104,8 @@ static const char *find_host_sep(const char *url)
 #define cc2cu(x) \
   ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE : CURLUE_OUT_OF_MEMORY)
 
-/* urlencode_str() writes data into an output dynbuf and URL-encodes the
- * spaces in the source URL accordingly.
+/* urlencode_str() copies plain URL bytes to an output dynbuf in runs and
+ * encodes spaces and nonprintable bytes.
  *
  * This function re-encodes the string, meaning that it leaves already encoded
  * bytes as-is and works by encoding only what *has* to be encoded - unless it
@@ -175,6 +175,36 @@ UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
     }
     else {
       const unsigned char *start = iptr;
+#if SIZEOF_SIZE_T >= 8
+      /* SWAR (SIMD within a register) tests eight bytes in one word.
+         The high bit of each byte is a flag. A borrow can also set a
+         flag in the next byte, so we do not use the flag's position.
+         If any flag is set, the byte-by-byte loop starts at this word. */
+      const uint64_t ones = 0x0101010101010101ULL;
+      const uint64_t high = ones * 0x80;
+      while(len >= sizeof(uint64_t)) {
+        uint64_t w, marked, pct;
+        memcpy(&w, iptr, sizeof(w));
+        /* Non-ASCII bytes already have bit 7 set. Adding 1 per byte
+           turns DEL (0x7f) into 0x80. Subtracting ' ' + 1 per byte
+           sets bit 7 by borrowing when a byte is space or below. */
+        marked = w | (w + ones) | (w - ones * (' ' + 1));
+        /* XOR each byte with the delimiter to turn matches into zero.
+           Subtracting 1 per byte makes a zero byte borrow, which sets
+           bit 7. The mask ignores bytes that had bit 7 set before the
+           subtraction. Test '?' only if it can start the query. */
+        pct = w ^ (ones * '%');
+        marked |= (pct - ones) & ~pct;
+        if(query == QUERY_NOT_YET) {
+          uint64_t q = w ^ (ones * '?');
+          marked |= (q - ones) & ~q;
+        }
+        if(marked & high)
+          break;
+        iptr += sizeof(w);
+        len -= sizeof(w);
+      }
+#endif
       while(len) {
         if(*iptr == ' ' || *iptr < ' ' || *iptr >= 0x7f)
           break;

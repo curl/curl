@@ -174,6 +174,12 @@ static CURLcode test_unit1675(const char *arg)
       { "~-._", TRUE, QUERY_YES, "~-._" },
       { "foo bar?foo bar", TRUE, QUERY_NO, "foo%20bar?foo%20bar" },
       { "foo bar?foo bar", TRUE, QUERY_NOT_YET, "foo%20bar?foo+bar" },
+      { "1234567%ab12345678%AF%zz%", TRUE, QUERY_NO,
+        "1234567%AB12345678%AF%zz%" },
+      { "/1234567/123456?one two?three four", TRUE, QUERY_NOT_YET,
+        "/1234567/123456?one+two?three+four" },
+      { "1234567\x01" "1234567\x7f" "1234567\x80" "1234567 ", TRUE, QUERY_NO,
+        "1234567%01" "1234567%7F" "1234567%80" "1234567%20" },
     };
 
     curlx_dyn_init(&out, 256);
