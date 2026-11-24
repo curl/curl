@@ -269,6 +269,7 @@ TESTS_C = \
   lib1921.c \
   lib1922.c \
   lib1923.c \
+  lib1924.c \
   lib1933.c \
   lib1934.c \
   lib1935.c \

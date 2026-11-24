@@ -2831,10 +2831,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        machine must get to see the connected socket before we declare the
        connect timed out. Otherwise an application that is slow to call
        curl_multi_perform() gets CURLE_OPERATION_TIMEDOUT on a connection
-       that is already up. */
+       that is already up.
+
+       In MSTATE_CONNECT no connect is underway yet, so the connect timeout
+       is still checked here: a transfer queued by a connection limit past
+       its connect timeout must fail instead of going back to PENDING. */
     if((data->mstate >= MSTATE_CONNECT) && (data->mstate < MSTATE_COMPLETED)) {
       pnow = Curl_pgrs_now(data);
-      if(multi_handle_timeout(data, pnow, &stream_error, &result, FALSE))
+      if(multi_handle_timeout(data, pnow, &stream_error, &result,
+                              data->mstate == MSTATE_CONNECT))
         /* Skip the statemachine and go directly to error handling section. */
         goto statemachine_end;
       pnow = NULL;
