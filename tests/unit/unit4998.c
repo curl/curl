@@ -92,7 +92,7 @@ static CURLcode t4998_recv(struct Curl_easy *data,
 static void t4998_hash_dtor(void *p)
 {
   (void)p;
-  DEBUGASSERT(0);
+  fail("unexpected MQTT connection metadata destructor");
 }
 
 static size_t t4998_write_cb(char *ptr, size_t size, size_t nmemb,
