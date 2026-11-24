@@ -16,5 +16,8 @@ URL globbing tests (tool_urlglob)
 </client>
 
 <verify>
+<limits>
+Allocations: 1100
+</limits>
 </verify>
 </testcase>
