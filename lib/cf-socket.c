@@ -1040,7 +1040,6 @@ struct cf_socket_ctx {
   BIT(listening);                    /* socket is listening */
   BIT(accepted);                     /* socket was accepted, not connected */
   BIT(sock_connected);               /* socket is "connected", e.g. in UDP */
-  BIT(active);
   BIT(stats_reported);
 };
 
@@ -1611,7 +1610,7 @@ static CURLcode cf_socket_adjust_pollset(struct Curl_cfilter *cf,
     else if(cf->chain && cf->chain->parent) {
       /* still in its own eyeballing filter chain */
       result = Curl_pollset_add_in(data, ps, ctx->sock);
-      CURL_TRC_CF(data, cf, "adjust_pollset, !active, POLLIN fd=%"
+      CURL_TRC_CF(data, cf, "adjust_pollset, sub-chain, POLLIN fd=%"
                   FMT_SOCKET_T, ctx->sock);
     }
   }
@@ -1783,14 +1782,6 @@ static void cf_socket_update_data(struct Curl_cfilter *cf,
   }
 }
 
-static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_socket_ctx *ctx = cf->ctx;
-
-  set_local_ip(cf, data);
-  ctx->active = TRUE;
-}
-
 static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int event, int arg1, void *arg2)
@@ -1801,9 +1792,6 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
   (void)arg2;
   switch(event) {
   case CF_CTRL_CONN_INFO_UPDATE:
-    cf_socket_active(cf, data);
-    cf_socket_update_data(cf, data);
-    break;
   case CF_CTRL_DATA_SETUP:
     cf_socket_update_data(cf, data);
     break;
@@ -2406,7 +2394,6 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   cf->chain->sock = ctx->sock;
   cf_tcp_set_accepted_remote_ip(cf, data);
   set_local_ip(cf, data);
-  ctx->active = TRUE;
   ctx->connected_at = *Curl_pgrs_now(data);
   cf->connected = TRUE;
   CURL_TRC_CF(data, cf, "accepted_set(sock=%" FMT_SOCKET_T
