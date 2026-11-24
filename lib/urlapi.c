@@ -222,6 +222,24 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
   if(guess_scheme && STARTS_WITH_DRIVE_PREFIX(url))
     return 0;
 #endif
+  /* shortcuts for http and https make the performance test run faster but
+     might also reflect reality? */
+  if((url[0] | 0x20) == 'h' &&
+     (url[1] | 0x20) == 't' &&
+     (url[2] | 0x20) == 't' &&
+     (url[3] | 0x20) == 'p') {
+    if((url[4] == ':') && ((url[5] == '/') || !guess_scheme)) {
+      if(buf)
+        memcpy(buf, "http", 5);
+      return 4;
+    }
+    if(((url[4] | 0x20) == 's') && (url[5] == ':') &&
+       ((url[6] == '/') || !guess_scheme)) {
+      if(buf)
+        memcpy(buf, "https", 6);
+      return 5;
+    }
+  }
   if(ISALPHA(url[0])) {
     if(buf)
       buf[0] = Curl_raw_tolower(url[0]);
@@ -256,7 +274,59 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
 static bool badoctets(const char *input, size_t n, int flags)
 {
   const uint8_t *p = (const unsigned char *)input;
-  const uint8_t control = flags & CURLU_ALLOW_SPACE ? 0x1f : 0x20;
+  const uint8_t control = (flags & CURLU_ALLOW_SPACE) ? 0x1f : 0x20;
+  /* SWAR (SIMD within a register) 64-bit comparison:
+     Process 8 bytes at a time in 64-bit words to quickly detect bad octets
+     (byte <= control or byte == 127) without byte-by-byte branches.
+
+     1. Detect byte <= control:
+        'sub' contains (control + 1) in each byte (0x20 or 0x21). For any
+        byte < (control + 1), subtracting 'sub' borrows into the high bit
+        (0x80). Masking with (~w) ensures the byte had bit 7 clear initially,
+        so (~w) & (w - sub) has bit 7 set if and only if byte <= control.
+
+     2. Detect byte == 127 (0x7f):
+        XORing with 0x7f turns 0x7f bytes into 0x00. We then detect zero bytes
+        in 'x' using the standard zero-byte test: (~x) & (x - 0x0101...).
+
+     If any high bit is set in (low | del), at least one bad byte was found;
+     break out to the byte-by-byte loop to confirm and return TRUE. */
+  const uint64_t sub = (flags & CURLU_ALLOW_SPACE) ?
+    0x2020202020202020ULL : 0x2121212121212121ULL;
+
+  while(n >= 16) {
+    uint64_t w1, w2;
+    uint64_t low, x1, x2, del;
+    memcpy(&w1, p, sizeof(w1));
+    memcpy(&w2, p + 8, sizeof(w2));
+    /* check for bytes <= control */
+    low = ((~w1) & (w1 - sub)) | ((~w2) & (w2 - sub));
+    /* check for 0x7f */
+    x1 = w1 ^ 0x7f7f7f7f7f7f7f7fULL;
+    x2 = w2 ^ 0x7f7f7f7f7f7f7f7fULL;
+    del = ((~x1) & (x1 - 0x0101010101010101ULL)) |
+          ((~x2) & (x2 - 0x0101010101010101ULL));
+    if((low | del) & 0x8080808080808080ULL)
+      break;
+    p += 16;
+    n -= 16;
+  }
+  while(n >= 8) {
+    uint64_t w;
+    uint64_t low;
+    uint64_t x;
+    uint64_t del;
+    memcpy(&w, p, sizeof(w));
+    /* check for bytes <= control */
+    low = (~w) & (w - sub);
+    /* check for 0x7f (DEL) */
+    x = w ^ 0x7f7f7f7f7f7f7f7fULL;
+    del = (~x) & (x - 0x0101010101010101ULL);
+    if((low | del) & 0x8080808080808080ULL)
+      break;
+    p += 8;
+    n -= 8;
+  }
   while(n--) {
     if(*p <= control || *p == 127)
       return TRUE;
@@ -304,8 +374,17 @@ UNITTEST CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   *hostname_offset = 0;
   ptr = memchr(login, '@', len);
-  if(!ptr)
-    goto out;
+  if(!ptr) {
+    if(u->user)
+      curlx_safefree(u->user);
+    if(u->password) {
+      curlx_strzero(u->password);
+      curlx_safefree(u->password);
+    }
+    if(u->options)
+      curlx_safefree(u->options);
+    return CURLUE_OK;
+  }
 
   /* We will now try to extract the
    * possible login information in a string like:
@@ -387,13 +466,14 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
 {
   const char *portptr;
   const char *hostname = curlx_dyn_ptr(host);
+  size_t hlen = curlx_dyn_len(host);
   /*
    * Find the end of an IPv6 address on the ']' ending bracket.
    */
   u->portnum = 0;
   u->port_present = FALSE;
   if(hostname[0] == '[') {
-    portptr = memchr(hostname + 1, ']', curlx_dyn_len(host) - 1);
+    portptr = memchr(hostname + 1, ']', hlen - 1);
     if(!portptr)
       return CURLUE_BAD_IPV6;
     portptr++;
@@ -406,7 +486,7 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
       portptr = NULL;
   }
   else
-    portptr = memchr(hostname, ':', curlx_dyn_len(host));
+    portptr = memchr(hostname, ':', hlen);
 
   if(portptr) {
     curl_off_t port;
@@ -524,18 +604,37 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
 /* the input is a confirmed hostname, never an IPv6 address */
 CURLUcode Curl_hostname_check(const char *hostname, size_t hlen)
 {
-  size_t i;
-  for(i = 0; i < hlen; i++) {
-    if(invalid_host_char[(unsigned char)hostname[i]])
-      return CURLUE_BAD_HOSTNAME;
-  }
+  const unsigned char *h = (const unsigned char *)hostname;
+  size_t n = hlen;
   if((hlen >= 2) &&
      (hostname[hlen - 1] == '.') && (hostname[hlen - 2] == '.'))
     /* more than one trailing dot is not allowed */
     return CURLUE_BAD_HOSTNAME;
-  else if((hlen == 1) && (hostname[0] == '.'))
+  if((hlen == 1) && (hostname[0] == '.'))
     /* a single dot alone is not allowed */
     return CURLUE_BAD_HOSTNAME;
+
+  /* doing 8-byte and 4-byte checks makes a difference */
+  while(n >= 8) {
+    if(invalid_host_char[h[0]] | invalid_host_char[h[1]] |
+       invalid_host_char[h[2]] | invalid_host_char[h[3]] |
+       invalid_host_char[h[4]] | invalid_host_char[h[5]] |
+       invalid_host_char[h[6]] | invalid_host_char[h[7]])
+      return CURLUE_BAD_HOSTNAME;
+    h += 8;
+    n -= 8;
+  }
+  while(n >= 4) {
+    if(invalid_host_char[h[0]] | invalid_host_char[h[1]] |
+       invalid_host_char[h[2]] | invalid_host_char[h[3]])
+      return CURLUE_BAD_HOSTNAME;
+    h += 4;
+    n -= 4;
+  }
+  while(n--) {
+    if(invalid_host_char[*h++])
+      return CURLUE_BAD_HOSTNAME;
+  }
   return CURLUE_OK;
 }
 
@@ -680,8 +779,9 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
 static CURLUcode urldecode_host(struct dynbuf *host)
 {
   const char *per;
+  size_t hlen = curlx_dyn_len(host);
   const char *hostname = curlx_dyn_ptr(host);
-  per = memchr(hostname, '%', curlx_dyn_len(host));
+  per = memchr(hostname, '%', hlen);
   if(!per)
     /* nothing to decode */
     return CURLUE_OK;
@@ -739,11 +839,13 @@ static CURLUcode parse_authority(struct Curl_URL *u,
   else if(auth[offset] == '[')
     uc = ipv6_parse(u, curlx_dyn_ptr(host), curlx_dyn_len(host));
   else {
+    const char *hptr = curlx_dyn_ptr(host);
+    size_t hlen = curlx_dyn_len(host);
     /* ipv4_normalize() returns *NAME, *IPV4 or *ERROR */
-    int type = ipv4_normalize(host);
+    int type = ISDIGIT(hptr[0]) ? ipv4_normalize(host) : HOST_NAME;
 
     if(type == HOST_NAME)
-      uc = Curl_hostname_check(curlx_dyn_ptr(host), curlx_dyn_len(host));
+      uc = Curl_hostname_check(hptr, hlen);
     else if(type == HOST_ERROR)
       uc = CURLUE_OUT_OF_MEMORY;
   }
@@ -804,6 +906,12 @@ static bool needs_dedotdot(const char *p, size_t pn)
   if(!memchr(p, '.', pn) && !memchr(p, '%', pn))
     return FALSE;
   while(pn) {
+    while(pn && *p != '.' && *p != '%') {
+      p++;
+      pn--;
+    }
+    if(!pn)
+      break;
     if(is_dot(&p, &pn)) {
       /* "./" or dot before end of string */
       if(!pn || ISSLASH(*p))
@@ -1050,14 +1158,17 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
   if(schemelen) {
     int num_slashes = 0;
     const char *p = &url[schemelen + 1];
-    if(!Curl_getn_scheme(schemebuf, schemelen) &&
-       !(flags & CURLU_NON_SUPPORT_SCHEME))
+    if(!(flags & CURLU_NON_SUPPORT_SCHEME) &&
+       !Curl_getn_scheme(schemebuf, schemelen))
       return CURLUE_UNSUPPORTED_SCHEME;
 
     if(!ISSLASH(*p))
       /* less than one */
       return CURLUE_BAD_SLASHES;
-    if((flags & CURLU_NO_AUTHORITY)) {
+    if(p[0] == '/' && p[1] == '/' && p[2] != '/') {
+      p += 2;
+    }
+    else if((flags & CURLU_NO_AUTHORITY)) {
       while(ISSLASH(*p) && (num_slashes < 2)) {
         p++;
         num_slashes++;
@@ -1127,7 +1238,8 @@ static CURLUcode guess_scheme(CURLU *u, struct dynbuf *host)
 }
 
 static CURLUcode handle_fragment(CURLU *u, const char *fragment,
-                                 size_t fraglen, unsigned int flags)
+                                 size_t fraglen, unsigned int flags,
+                                 const bool badoctets_clean)
 {
   CURLUcode ures;
   u->fragment_present = TRUE;
@@ -1142,7 +1254,7 @@ static CURLUcode handle_fragment(CURLU *u, const char *fragment,
       u->fragment = curlx_dyn_ptr(&enc);
     }
     else {
-      if(badoctets(fragment, fraglen, flags))
+      if(!badoctets_clean && badoctets(fragment, fraglen, flags))
         return CURLUE_BAD_FRAGMENT;
       u->fragment = curlx_memdup0(fragment + 1, fraglen - 1);
       if(!u->fragment)
@@ -1153,7 +1265,8 @@ static CURLUcode handle_fragment(CURLU *u, const char *fragment,
 }
 
 static CURLUcode handle_query(CURLU *u, const char *query,
-                              size_t qlen, unsigned int flags)
+                              size_t qlen, unsigned int flags,
+                              const bool badoctets_clean)
 {
   u->query_present = TRUE;
   if(qlen > 1) {
@@ -1168,7 +1281,7 @@ static CURLUcode handle_query(CURLU *u, const char *query,
       u->query = curlx_dyn_ptr(&enc);
     }
     else {
-      if(badoctets(query, qlen, flags))
+      if(!badoctets_clean && badoctets(query, qlen, flags))
         return CURLUE_BAD_QUERY;
 
       u->query = curlx_memdup0(query + 1, qlen - 1);
@@ -1187,7 +1300,8 @@ static CURLUcode handle_query(CURLU *u, const char *query,
 
 static CURLUcode handle_path(CURLU *u, const char *path,
                              size_t pathlen, unsigned int flags,
-                             bool is_file)
+                             bool is_file,
+                             const bool badoctets_clean)
 {
   CURLUcode ures;
   if(pathlen && (flags & CURLU_URLENCODE)) {
@@ -1201,7 +1315,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
   }
 
   if(pathlen >= (size_t)(1 + !is_file)) {
-    if(badoctets(path, pathlen, flags))
+    if(!badoctets_clean && badoctets(path, pathlen, flags))
       return CURLUE_BAD_PATH;
 
     /* paths for file:// scheme can be one byte, others need to be two */
@@ -1235,11 +1349,12 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   const char *path;
   size_t pathlen;
   char schemebuf[MAX_SCHEME_LEN + 1];
-  size_t schemelen = 0;
+  size_t schemelen;
   size_t urllen;
   CURLUcode ures = CURLUE_OK;
   struct dynbuf host;
   bool is_file = FALSE;
+  bool badoctets_clean = FALSE;
 
   DEBUGASSERT(url);
 
@@ -1254,24 +1369,20 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
                                             CURLU_DEFAULT_SCHEME));
 
   /* handle the file: scheme */
-  if(schemelen == 4 && !memcmp(schemebuf, "file", 4)) {
+  if(schemelen == 4 && schemebuf[0] == 'f' && !memcmp(schemebuf, "file", 4)) {
     is_file = TRUE;
     ures = parse_file(url, urllen, u, &path, &pathlen);
   }
   else {
     const char *hostp = NULL;
-    const char *p;
     size_t hostlen;
     ures = parse_scheme(url, u, schemebuf, schemelen, flags, &hostp);
     if(ures)
       goto fail;
 
     /* find the end of the hostname + port number */
-    p = hostp;
-    while(*p && *p != '/' && *p != '?' && *p != '#')
-      p++;
-    hostlen = p - hostp;
-    path = p;
+    hostlen = strcspn(hostp, "/?#");
+    path = hostp + hostlen;
 
     /* this pathlen also contains the query and the fragment */
     pathlen = urllen - (path - url);
@@ -1289,12 +1400,19 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
       ures = CURLUE_NO_HOST;
   }
   if(!ures) {
+    const char *fragment;
+    if(pathlen && !(flags & CURLU_URLENCODE) &&
+       !badoctets(path, pathlen, flags))
+      /* there is bad octet in there, but we don't know in which component so
+         we just set the boolean for now */
+      badoctets_clean = TRUE;
+
     /* The path might at this point contain a fragment and/or a query to
        handle */
-    const char *fragment = memchr(path, '#', pathlen);
+    fragment = memchr(path, '#', pathlen);
     if(fragment) {
       size_t fraglen = pathlen - (fragment - path);
-      ures = handle_fragment(u, fragment, fraglen, flags);
+      ures = handle_fragment(u, fragment, fraglen, flags, badoctets_clean);
       /* after this, pathlen still contains the query */
       pathlen -= fraglen;
     }
@@ -1303,13 +1421,13 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     const char *query = memchr(path, '?', pathlen);
     if(query) {
       size_t qlen = pathlen - (query - path);
-      ures = handle_query(u, query, qlen, flags);
+      ures = handle_query(u, query, qlen, flags, badoctets_clean);
       pathlen -= qlen;
     }
   }
   if(!ures)
     /* the fragment and query parts are trimmed off from the path */
-    ures = handle_path(u, path, pathlen, flags, is_file);
+    ures = handle_path(u, path, pathlen, flags, is_file, badoctets_clean);
   if(!ures) {
     u->host = curlx_dyn_ptr(&host);
     return CURLUE_OK;
