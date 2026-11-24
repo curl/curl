@@ -1153,8 +1153,10 @@ void curl_easy_reset(CURL *curl)
      * just shove it through the calls, hoping for the best. */
     if(data->multi) {
       struct Curl_multi *multi = data->multi;
-      Curl_multi_remove_handle(multi, data);
-      Curl_multi_add_handle(multi, data);
+      /* Call these under API guards, so invoked callbacks that try to use
+       * the multi are properly blocked. */
+      curl_multi_remove_handle(multi, data);
+      curl_multi_add_handle(multi, data);
     }
 
     data->state.last_conn_id = -1; /* clear remembered connection id */
