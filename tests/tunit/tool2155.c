@@ -585,8 +585,6 @@ static CURLcode test_tool2155(const char *arg)
       fail("Error position mismatch");
     }
 
-
-
     glob_cleanup(&glob);
   }
 
