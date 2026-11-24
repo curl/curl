@@ -177,7 +177,7 @@ sub strip {
     my ($f) = @_;
     my $state = 0;
     my $flags = 0;
-    open(F, "<$f") || die "cannot open $f";
+    open(F, "<", $f) || die "cannot open $f";
     while(<F>) {
         my $l = $_;
         ($state, $flags, $line) = scanline(0, $state, $flags, $l);
