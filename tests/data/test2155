@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+tunittest
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+<name>
+URL globbing tests (tool_urlglob)
+</name>
+</client>
+
+<verify>
+<limits>
+Allocations: 1100
+</limits>
+</verify>
+</testcase>
