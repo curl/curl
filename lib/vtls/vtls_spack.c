@@ -312,6 +312,10 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
       result = spack_dec64(&val64, &buf, end);
       if(result)
         goto out;
+      if(val64 > (uint64_t)CURL_OFF_T_MAX) {
+        result = CURLE_READ_ERROR;
+        goto out;
+      }
       s->valid_until = (curl_off_t)val64;
       break;
     case CURL_SPACK_SECTRUST:
@@ -321,6 +325,11 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
       result = CURLE_READ_ERROR;
       goto out;
     }
+  }
+
+  if(!s->sdata || !s->sdata_len) {
+    result = CURLE_READ_ERROR;
+    goto out;
   }
 
 out:
