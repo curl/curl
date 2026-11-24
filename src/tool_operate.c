@@ -751,24 +751,24 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   *retryp = FALSE;
   *delay = 0; /* for no retry, keep it zero */
 
+  if(per->infdopen) {
+    curlx_close(per->infd);
+    per->infdopen = FALSE;
+  }
+
   if(!per->curl || !config)
     return result;
 
 #ifdef _WIN32
-  if(per->uploadfile) {
-    if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
+  if(per->uploadfile && !strcmp(per->uploadfile, ".") && per->infd > 0) {
 #ifndef CURL_WINDOWS_UWP
-      sclose(per->infd);
+    sclose(per->infd);
 #else
-      warnf("Closing per->infd != 0: FD == %d. "
-            "This behavior is only supported on desktop Windows", per->infd);
+    warnf("Closing per->infd != 0: FD == %d. "
+          "This behavior is only supported on desktop Windows", per->infd);
 #endif
-    }
   }
-  else
 #endif
-    if(per->infdopen)
-      curlx_close(per->infd);
 
   if(!per->skip) {
     result = post_check_result(per, result);
