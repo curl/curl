@@ -30,6 +30,33 @@
 #define T1678_FIRST_QUICTP_SIZE 127
 #define T1678_FIRST_ALPN_SIZE 10
 
+static CURLcode t1678_export_cb(CURL *handle,
+                                void *userptr,
+                                const char *session_key,
+                                const unsigned char *shmac,
+                                size_t shmac_len,
+                                const unsigned char *sdata,
+                                size_t sdata_len,
+                                curl_off_t valid_until,
+                                int ietf_tls_id,
+                                const char *alpn,
+                                size_t earlydata_max)
+{
+  size_t *exported = (size_t *)userptr;
+  (void)handle;
+  (void)session_key;
+  (void)shmac;
+  (void)shmac_len;
+  (void)sdata;
+  (void)sdata_len;
+  (void)valid_until;
+  (void)ietf_tls_id;
+  (void)alpn;
+  (void)earlydata_max;
+  (*exported)++;
+  return CURLE_OK;
+}
+
 static uint8_t *t1678_make_packet(size_t *packet_len)
 {
   const size_t t1678_total =
@@ -97,8 +124,16 @@ static uint8_t *t1678_make_packet(size_t *packet_len)
 
 static CURLcode test_lib1678(const char *URL)
 {
+  static const uint8_t no_ticket[] = { 0x01 };
+  static const uint8_t empty_ticket[] = { 0x01, 0x04, 0x00, 0x00 };
+  static const uint8_t neg_valid_until[] = {
+    0x01, 0x04, 0x00, 0x01, 'A',
+    0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  };
+  static const uint8_t shmac[64] = { 0 };
   uint8_t *packet;
   size_t packet_len;
+  size_t exported = 0;
   CURLSH *share = NULL;
   CURL *easy = NULL;
   CURLSHcode shrc;
@@ -156,6 +191,22 @@ static CURLcode test_lib1678(const char *URL)
     goto test_cleanup;
   }
 
+  if(curl_easy_ssls_import(easy, "example.test:443", NULL, 0, no_ticket,
+                           sizeof(no_ticket)) != CURLE_READ_ERROR) {
+    result = CURLE_READ_ERROR;
+    goto test_cleanup;
+  }
+  if(curl_easy_ssls_import(easy, "example.test:443", NULL, 0, empty_ticket,
+                           sizeof(empty_ticket)) != CURLE_READ_ERROR) {
+    result = CURLE_READ_ERROR;
+    goto test_cleanup;
+  }
+  if(curl_easy_ssls_import(easy, "example.test:443", NULL, 0, neg_valid_until,
+                           sizeof(neg_valid_until)) != CURLE_READ_ERROR) {
+    result = CURLE_READ_ERROR;
+    goto test_cleanup;
+  }
+
   for(i = 0; i < T1678_IMPORT_COUNT; ++i) {
     result = curl_easy_ssls_import(easy,
                                    "example.test:443",
@@ -170,6 +221,16 @@ static CURLcode test_lib1678(const char *URL)
                     curl_easy_strerror(result));
       break;
     }
+  }
+
+  if(!result) {
+    result = curl_easy_ssls_import(easy, NULL, shmac, sizeof(shmac),
+                                   packet, packet_len);
+  }
+  if(!result) {
+    result = curl_easy_ssls_export(easy, t1678_export_cb, &exported);
+    if(!result && !exported)
+      result = CURLE_READ_ERROR;
   }
 
 test_cleanup:
