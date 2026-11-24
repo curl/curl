@@ -724,15 +724,15 @@ static CURLcode post_close_output(struct per_transfer *per,
       else
         warnf("Skipping removal; not a regular file: %s", outs->filename);
     }
-  }
-
-  /* File time can only be set _after_ the file has been closed */
-  if(!result && config->remote_time && outs->regular_file && outs->filename) {
-    /* Ask libcurl if we got a remote file time */
-    curl_off_t filetime = -1;
-    curl_easy_getinfo(per->curl, CURLINFO_FILETIME_T, &filetime);
-    if(filetime != -1)
-      setfiletime(filetime, outs->filename);
+    /* File time can only be set _after_ the file has been closed */
+    else if(!result && config->remote_time && outs->regular_file &&
+            outs->filename) {
+      /* Ask libcurl if we got a remote file time */
+      curl_off_t filetime = -1;
+      curl_easy_getinfo(per->curl, CURLINFO_FILETIME_T, &filetime);
+      if(filetime != -1)
+        setfiletime(filetime, outs->filename);
+    }
   }
   return result;
 }

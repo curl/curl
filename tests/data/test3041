@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+followlocation
+-O
+-J
+--output-dir
+--remote-time
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 302 Found swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+Location: /existing%TESTNUMBER
+Content-Length: 0
+
+</data>
+<data1 crlf="headers" nocheck="yes">
+HTTP/1.1 304 Not Modified swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Connection: close
+
+</data1>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+-O -J -L -R must not change timestamp of existing file on 304
+</name>
+<file name="%LOGDIR/existing%TESTNUMBER">
+keep-me
+</file>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O -J -L -R --output-dir %LOGDIR
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /existing%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file name="%LOGDIR/existing%TESTNUMBER">
+keep-me
+</file>
+<postcheck>
+%PERL -e 'exit((stat("%LOGDIR/existing%TESTNUMBER"))[9] == 960898200)'
+</postcheck>
+</verify>
+</testcase>
