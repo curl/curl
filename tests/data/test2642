@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+HTTP/2
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+http
+http/2
+h2c
+</features>
+<name>
+HTTP/2 shutdown processes one receive per pass
+</name>
+</client>
+</testcase>

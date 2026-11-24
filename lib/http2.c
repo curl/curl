@@ -1969,6 +1969,13 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       return result;
     CURL_TRC_CF(data, cf, "[0] ingress: nw-in buffered %zu",
                 Curl_bufq_len(&ctx->inbufq));
+    if(ctx->sent_goaway) {
+      /* Buffered input needs another shutdown pass without a socket event. */
+      if(Curl_ngh2_session_want_read(&ctx->ngh2) &&
+         Curl_cf_def_data_pending(cf, data))
+        Curl_multi_mark_dirty(data);
+      break;
+    }
   }
 
   if(ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) {
