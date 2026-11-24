@@ -13,6 +13,7 @@ Protocol:
   - FILE
 See-also:
   - CURLOPT_HEADERFUNCTION (3)
+  - CURLOPT_HEADEREXTFUNCTION (3)
   - CURLOPT_HTTPHEADER (3)
 Added-in: 7.1
 ---
