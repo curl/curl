@@ -38,18 +38,18 @@
 #include <arpa/inet.h>
 #endif
 
-static int t465_cb_count = 0;
-static int t465_https_seen = 0;
+static int t2786_cb_count = 0;
+static int t2786_https_seen = 0;
 
-static int t465_resolver_start_cb(void *resolver_state, void *reserved,
+static int t2786_resolver_start_cb(void *resolver_state, void *reserved,
                                   void *userdata)
 {
   (void)reserved;
   (void)userdata;
-  t465_cb_count++;
+  t2786_cb_count++;
   if(resolver_state) {
     /* This is the HTTPS RR side-channel announce: veto it. */
-    t465_https_seen = 1;
+    t2786_https_seen = 1;
     return 1;
   }
   /* This is the regular A/AAAA announce: let it proceed. Should not
@@ -57,7 +57,7 @@ static int t465_resolver_start_cb(void *resolver_state, void *reserved,
   return 0;
 }
 
-static CURLcode test_lib465(const char *URL)
+static CURLcode test_lib2786(const char *URL)
 {
   CURL *curl = NULL;
   CURLcode result = CURLE_OK;
@@ -112,9 +112,9 @@ static CURLcode test_lib465(const char *URL)
     goto test_cleanup;
   }
 
-  easy_setopt(curl, CURLOPT_URL, "https://localhost/465");
+  easy_setopt(curl, CURLOPT_URL, "https://localhost/2786");
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, t465_resolver_start_cb);
+  easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, t2786_resolver_start_cb);
 
   /* Vetoing the HTTPS RR side-query is an explicit application abort of
    * that resolve and must fail the whole connection attempt before the
@@ -130,16 +130,16 @@ static CURLcode test_lib465(const char *URL)
   }
   result = CURLE_OK;
 
-  if(!t465_https_seen) {
+  if(!t2786_https_seen) {
     curl_mfprintf(stderr, "the HTTPS RR resolver-start announce never "
                   "happened, this test needs asyn-rr support\n");
     result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
-  if(t465_cb_count != 1) {
+  if(t2786_cb_count != 1) {
     curl_mfprintf(stderr, "Unexpected number of callbacks: %d, "
                   "the regular A/AAAA resolve should not have been "
-                  "attempted after the HTTPS RR veto\n", t465_cb_count);
+                  "attempted after the HTTPS RR veto\n", t2786_cb_count);
     result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
