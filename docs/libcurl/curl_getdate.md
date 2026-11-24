@@ -48,8 +48,8 @@ Can be specified several ways. Month names can only be three-letter English
 abbreviations, numbers can be zero-prefixed and the year may use 2 or 4
 digits. Examples: 06 Nov 1994, 06-Nov-94 and Nov-94 6.
 
-If the year appears to be below 100 (two-digit), any year after 70 is assumed
-to be 1900 + the given year. All others are 2000 + the given year.
+If the year appears to be below 100 (two-digit), any year 70 or later is
+assumed to be 1900 + the given year. All others are 2000 + the given year.
 
 ## time of the day items
 
