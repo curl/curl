@@ -854,12 +854,14 @@ CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable)
   return result;
 }
 
-CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
+CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable, bool flush)
 {
   CURLcode result = CURLE_OK;
   Curl_rlimit_block(&data->progress.dl.rlimit, enable, Curl_pgrs_now(data));
-  if(!enable && Curl_cwriter_is_paused(data))
-    result = Curl_cwriter_unpause(data);
+  if(enable)
+    data->req.writer.paused = TRUE;
+  else if(Curl_cwriter_is_paused(data))
+    result = Curl_cwriter_unpause(data, flush);
   Curl_conn_ev_data_pause(data, enable);
   Curl_pgrsRecvPause(data, enable);
   return result;
