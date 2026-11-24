@@ -994,6 +994,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     break;
 
   case MQTT_SUBACK:
+  case MQTT_SUBACK_COMING:
   case MQTT_PUBWAIT:
   case MQTT_PUB_REMAIN:
     result = mqtt_read_publish(data, done);
