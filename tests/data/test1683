@@ -5,6 +5,8 @@
 HTTP
 HTTP GET
 --no-clobber
+--retry
+--retry-all-errors
 </keywords>
 </info>
 
@@ -21,7 +23,7 @@ foo
 
 <client>
 <name>
-HTTP GET without clobber when 100 files already exist
+Retry when --no-clobber runs out of numbered filenames
 </name>
 <server>
 http
@@ -34,7 +36,7 @@ Debug
 CURL_MAX_CLOBBER=100
 </setenv>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/exist%TESTNUMBER --no-clobber
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/exist%TESTNUMBER --no-clobber --retry 1 --retry-all-errors -w '%{num_retries} %{filename_effective}\n'
 </command>
 <file name="%LOGDIR/exist%TESTNUMBER">
 to stay the same
@@ -48,6 +50,9 @@ to stay the same
 <errorcode>
 23
 </errorcode>
+<stdout mode="text">
+1 %LOGDIR/exist%TESTNUMBER
+</stdout>
 <file name="%LOGDIR/exist%TESTNUMBER">
 to stay the same
 </file>

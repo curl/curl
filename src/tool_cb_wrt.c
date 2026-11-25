@@ -76,6 +76,7 @@ bool tool_create_output_file(struct OutStruct *outs,
 {
   FILE *file = NULL;
   const char *fname = outs->filename;
+  char *newfile = NULL;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
   DEBUGASSERT(fname && *fname);
@@ -97,7 +98,6 @@ bool tool_create_output_file(struct OutStruct *outs,
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
       int next_num = 1;
       struct dynbuf fbuffer;
-      char *newfile;
       int max_num = MAX_CLOBBER_ATTEMPTS;
 #ifdef DEBUGBUILD
       char *p = curl_getenv("CURL_MAX_CLOBBER");
@@ -126,11 +126,7 @@ bool tool_create_output_file(struct OutStruct *outs,
           /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
-      newfile = curlx_dyn_ptr(&fbuffer); /* remember the new one */
-      if(newfile) {
-        outs->filename = newfile;
-        outs->alloc_filename = TRUE;
-      }
+      newfile = curlx_dyn_ptr(&fbuffer);
     }
     /* An else statement to not overwrite existing files and not retry with
        new numbered names (which would cover
@@ -148,7 +144,14 @@ bool tool_create_output_file(struct OutStruct *outs,
     char errbuf[STRERROR_LEN];
     warnf("Failed to open the file %s: %s", fname,
           curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    curlx_free(newfile);
     return FALSE;
+  }
+  if(newfile) {
+    if(outs->alloc_filename)
+      curlx_free(outs->filename);
+    outs->filename = newfile;
+    outs->alloc_filename = TRUE;
   }
   outs->regular_file = TRUE;
   outs->fopened = TRUE;
