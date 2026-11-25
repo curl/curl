@@ -11,6 +11,9 @@ libtest
 </reply>
 
 <client>
+<features>
+Mime
+</features>
 <server>
 smtp
 </server>
