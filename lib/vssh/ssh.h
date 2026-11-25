@@ -148,6 +148,8 @@ struct ssh_conn {
   char *passphrase;           /* strdup'ed pass-phrase to use or NULL */
   char *pub_key;              /* strdup'ed public key file */
   char *priv_key;             /* strdup'ed private key file */
+  char *hostkey_md5;          /* host-key pin for this session */
+  char *hostkey_sha256;
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
   struct curl_slist *quote_item; /* for the quote option */

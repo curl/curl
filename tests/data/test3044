@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SFTP
+server key check
+connection reuse
+</keywords>
+</info>
+
+<client>
+<server>
+sftp
+</server>
+<name>
+SFTP rejects a changed host-key pin after reusing a matching pin
+</name>
+<command>
+--insecure --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --next --hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -w "new=%{num_connects}\n" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --next --hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -w "new=%{num_connects}\n" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --next --hostpubsha256 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt
+</command>
+<file name="%LOGDIR/file%TESTNUMBER.txt">
+test
+</file>
+</client>
+
+<verify>
+<errorcode>
+60
+</errorcode>
+<stdout>
+test
+test
+new=1
+test
+new=0
+</stdout>
+</verify>
+</testcase>

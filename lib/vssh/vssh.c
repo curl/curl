@@ -366,6 +366,19 @@ CURLcode Curl_ssh_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
 {
   char *home = NULL;
+  const char *md5 = CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5);
+  const char *sha256 = CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256);
+
+  if(md5) {
+    sshc->hostkey_md5 = curlx_strdup(md5);
+    if(!sshc->hostkey_md5)
+      goto fail;
+  }
+  if(sha256) {
+    sshc->hostkey_sha256 = curlx_strdup(sha256);
+    if(!sshc->hostkey_sha256)
+      goto fail;
+  }
   if(data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) {
     const char *str;
 
@@ -450,6 +463,8 @@ fail:
   curlx_safefree(home);
   curlx_safefree(sshc->priv_key);
   curlx_safefree(sshc->pub_key);
+  curlx_safefree(sshc->hostkey_md5);
+  curlx_safefree(sshc->hostkey_sha256);
   return CURLE_OUT_OF_MEMORY;
 }
 

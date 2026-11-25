@@ -109,9 +109,9 @@ static CURLcode sftp_error_to_CURLE(int err)
 }
 
 /* Multiple options:
- * 1. CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256) is set
+ * 1. sshc->hostkey_sha256 is set
  *    with a SHA256 hash.
- * 2. CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5) is set
+ * 2. sshc->hostkey_md5 is set
  *    with an MD5 hash (90s style auth, not sure we should have it here)
  * 3. data->set.ssh_keyfunc callback is set. Then we do trust on first
  *    use. We even save on knownhosts if CURLKHSTAT_FINE_ADD_TO_FILE
@@ -143,9 +143,8 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
   if(rc != SSH_OK)
     return rc;
 
-  if(CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256)) {
-    const char *pubkey_sha256 =
-      CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256);
+  if(sshc->hostkey_sha256) {
+    const char *pubkey_sha256 = sshc->hostkey_sha256;
     char *fingerprint_b64 = NULL;
     size_t fingerprint_b64_len;
     size_t pub_pos = 0;
@@ -197,9 +196,8 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     goto cleanup;
   }
 
-  if(CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5)) {
-    const char *pubkey_md5 =
-      CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5);
+  if(sshc->hostkey_md5) {
+    const char *pubkey_md5 = sshc->hostkey_md5;
     char md5buffer[33];
     int i;
 
@@ -1964,6 +1962,8 @@ static void sshc_cleanup(struct ssh_conn *sshc)
     curlx_safefree(sshc->passphrase);
     curlx_safefree(sshc->pub_key);
     curlx_safefree(sshc->priv_key);
+    curlx_safefree(sshc->hostkey_md5);
+    curlx_safefree(sshc->hostkey_sha256);
     curlx_safefree(sshc->quote_path1);
     curlx_safefree(sshc->quote_path2);
     curlx_dyn_free(&sshc->readdir_buf);
