@@ -119,6 +119,25 @@ sub keywords {
     return undef;
 }
 
+# provided a test number, return the name it uses
+sub name {
+    my ($num) = @_;
+    if(open(my $fh, "<", "./data/test$num")) {
+        local $/;
+        my $c = <$fh>;
+        close($fh);
+
+        # Match and extract the <keywords> block
+        if ($c =~ /<name>\n(.*?)<\/name>/s) {
+            return split(/\n/, $1);
+        }
+    }
+    else {
+        print STDERR "cannot open test$num\n";
+    }
+    return undef;
+}
+
 # provided a test number, return the <tool> it uses
 sub tool {
     my ($num) = @_;
@@ -239,7 +258,7 @@ sub checkxml {
     return $bad;
 }
 
-my $error;
+my $error = 0;
 my @l;
 
 print "- Tests with source code in libtests/ have 'libtest' as <keyword>\n";
@@ -390,6 +409,16 @@ for my $t (@a) {
                 $error++;
             }
         }
+    }
+}
+
+print "- Verify that each name is no more than 70 characters\n";
+for my $t (@a) {
+    my @n = name($t);
+    my $l = length($n[0]);
+    if($l > 70) {
+        print "Test $t data/test$t has too long name, $l characters\n";
+        $error++;
     }
 }
 
