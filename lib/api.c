@@ -154,14 +154,12 @@ static bool eapi_in_readonly_cb(struct Curl_easy *data)
 
 static bool mapi_in_ntfy_cb(struct Curl_multi *multi)
 {
-  if(multi && multi->callstack.count) {
-    size_t i;
-    for(i = 0; i < multi->callstack.count; ++i) {
-      if(multi->callstack.calls[i] == CURL_CBAPI_FN_multi_ntfy_cb)
-        return TRUE;
-    }
-  }
-  return FALSE;
+  /* The exception only applies when the notify callback is
+   * the latest in the callstack, e.g. the application calls
+   * directly from it and not from some nested callback. */
+  return multi && multi->callstack.count &&
+    (multi->callstack.calls[multi->callstack.count - 1] ==
+     CURL_CBAPI_FN_multi_ntfy_cb);
 }
 
 bool Curl_api_multi_is_in_callback(struct Curl_multi *multi)
