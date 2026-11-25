@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SMTP
+libtest
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<features>
+Mime
+</features>
+<server>
+smtp
+</server>
+<name>
+SMTP with MIMEPOST and HTTPHEADER then duped handle
+</name>
+<stdin crlf="yes">
+From: different
+To: another
+
+body
+</stdin>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+MAIL FROM:%LTa@x%GT
+RCPT TO:%LTb@x%GT
+QUIT
+</protocol>
+<errorcode>
+55
+</errorcode>
+</verify>
+</testcase>
