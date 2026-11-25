@@ -43,6 +43,10 @@ typedef enum {
   PROXY_INSPECT_AUTH_RETRY  /* Retry with auth */
 } proxy_inspect_result;
 
+/* Snapshot the custom proxy authorization for connection matching. */
+CURLcode Curl_http_proxy_auth_setup(struct Curl_easy *data,
+                                    struct connectdata *conn);
+
 /* Create CONNECT or CONNECT-UDP request */
 CURLcode Curl_http_proxy_create_tunnel_request(
     struct httpreq **preq, struct Curl_cfilter *cf,

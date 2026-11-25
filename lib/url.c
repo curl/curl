@@ -510,6 +510,12 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_peer_unlink(&conn->socks_proxy.peer);
   Curl_creds_unlink(&conn->http_proxy.creds);
   Curl_creds_unlink(&conn->socks_proxy.creds);
+#ifndef CURL_DISABLE_HTTP
+  if(conn->proxy_auth_headers) {
+    curlx_strzero(conn->proxy_auth_headers);
+    curlx_free(conn->proxy_auth_headers);
+  }
+#endif
 #endif
   Curl_creds_unlink(&conn->creds);
   Curl_peer_unlink(&conn->creds_origin);
@@ -755,6 +761,11 @@ static bool url_match_proxy_use(struct connectdata *conn,
 
   if(!proxy_info_matches(&m->needle->http_proxy, &conn->http_proxy))
     return FALSE;
+
+#ifndef CURL_DISABLE_HTTP
+  if(Curl_timestrcmp(m->needle->proxy_auth_headers, conn->proxy_auth_headers))
+    return FALSE;
+#endif
 
   if(m->data->set.socks5_auth_only && !conn->bits.socks5_authenticated &&
      ((conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ||
@@ -2231,6 +2242,12 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
   if(result)
     goto out;
   DEBUGASSERT(needle);
+
+#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+  result = Curl_http_proxy_auth_setup(data, needle);
+  if(result)
+    goto out;
+#endif
 
   result = url_match_init(data, needle, &match);
   if(result)

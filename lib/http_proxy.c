@@ -83,6 +83,45 @@ static CURLcode prox_custom_ignore(void *user_data,
   return CURLE_OK;
 }
 
+static CURLcode proxy_collect_auth(void *ctx, struct Curl_str *name,
+                                   struct Curl_str *value,
+                                   const char *raw)
+{
+  struct dynbuf *auth = ctx;
+  (void)raw;
+  if(curlx_str_casecompare2(name, STRCONST("Proxy-Authorization"))) {
+    CURLcode result = curlx_dyn_addf(auth, "%zu:", curlx_strlen(value));
+    if(!result)
+      result = curlx_dyn_addn(auth, curlx_str(value), curlx_strlen(value));
+    return result;
+  }
+  return CURLE_OK;
+}
+
+CURLcode Curl_http_proxy_auth_setup(struct Curl_easy *data,
+                                    struct connectdata *conn)
+{
+  struct curl_slist *headers;
+  struct dynbuf auth;
+  CURLcode result = CURLE_OK;
+
+  if(!conn->http_proxy.peer || conn->bits.origin_is_proxy)
+    return CURLE_OK;
+
+  headers = data->set.sep_headers ? data->set.proxyheaders : data->set.headers;
+  curlx_dyn_init(&auth, DYN_HTTP_REQUEST);
+  /* An empty custom field can suppress libcurl's generated credentials. */
+  if(Curl_checkProxyheaders(data, conn, STRCONST("Proxy-Authorization")))
+    result = curlx_dyn_addn(&auth, STRCONST("!"));
+  if(!result)
+    result = Curl_dynhds_add_slist(NULL, headers, proxy_collect_auth, &auth);
+  if(result)
+    curlx_dyn_free(&auth);
+  else
+    conn->proxy_auth_headers = curlx_dyn_ptr(&auth);
+  return result;
+}
+
 static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   bool is_connect, int httpversion,
                                   struct dynhds *hds)

@@ -285,6 +285,9 @@ struct connectdata {
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
+#ifndef CURL_DISABLE_HTTP
+  char *proxy_auth_headers;
+#endif
 #endif
 
   /* Callbacks for send/recv, can be overwritten by protocol handlers.
