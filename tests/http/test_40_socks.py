@@ -134,7 +134,7 @@ class TestSocks:
             f'--{sproto}', f'127.0.0.1:{danted.port}'
         ])
         url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
-        r = curl.http_get(url=url)
+        r = curl.http_get(url=url, extra_args=xargs)
         r.check_exit_code(0)
 
     def dns_settings(self, dns_method, dnsd, path="/"):
