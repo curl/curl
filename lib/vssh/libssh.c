@@ -1335,13 +1335,21 @@ static int myssh_in_SFTP_CLOSE(struct Curl_easy *data,
                                struct ssh_conn *sshc,
                                struct SSHPROTO *sshp)
 {
+  int rc = SSH_OK;
   if(!sshp)
     return myssh_to_ERROR(data, sshc, CURLE_FAILED_INIT);
   if(sshc->sftp_file) {
-    sftp_close(sshc->sftp_file);
+    rc = sftp_close(sshc->sftp_file);
     sshc->sftp_file = NULL;
   }
   curlx_safefree(sshp->path);
+
+  if(rc != SSH_OK) {
+    failf(data, "Failed to close SFTP file: %s",
+          ssh_get_error(sshc->ssh_session));
+    return myssh_to_ERROR(data, sshc,
+                          sshc->actualcode ? sshc->actualcode : CURLE_SSH);
+  }
 
   CURL_TRC_SSH(data, "SFTP DONE done");
 
