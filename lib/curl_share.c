@@ -334,7 +334,7 @@ CURLSHcode curl_share_cleanup(CURLSH *sh)
   /* Check if we release the last reference here. This check is not
    * thread-safe, as the application might link the share after the
    * check again in another thread. */
-  Curl_refcount_incr(&share->ref_count);
+  (void)Curl_refcount_incr(&share->ref_count);
   n = Curl_refcount_decr(&share->ref_count);
   if(n > 1)
     return CURLSHE_IN_USE;
