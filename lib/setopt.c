@@ -2723,6 +2723,19 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
   return CURLE_OK;
 }
 
+/* Apply a new transfer speed limit. A paused transfer stays paused (the
+ * limiter is blocked); otherwise rate limiting starts afresh now, so the
+ * new rate does not inherit the time step and token count of an earlier
+ * transfer on the same handle. */
+static void setopt_rlimit(struct Curl_easy *data, struct Curl_rlimit *r,
+                          curl_off_t rate)
+{
+  /* use minimal burst rate of 32k. some protocol batch IO */
+  Curl_rlimit_change(r, rate, CURLMAX(rate, (32 * 1024)));
+  if(!Curl_rlimit_is_blocked(r))
+    Curl_rlimit_start(r, Curl_pgrs_now(data), -1);
+}
+
 static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
                             curl_off_t offt)
 {
@@ -2769,9 +2782,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_send_speed = offt;
-    /* use minimal burst rate of 32k. some protocol batch IO */
-    Curl_rlimit_change(&data->progress.ul.rlimit, offt,
-                     CURLMAX(offt, (32 * 1024)));
+    setopt_rlimit(data, &data->progress.ul.rlimit, offt);
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
@@ -2781,9 +2792,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_recv_speed = offt;
-    /* use minimal burst rate of 32k. some protocol batch IO */
-    Curl_rlimit_change(&data->progress.dl.rlimit, offt,
-                     CURLMAX(offt, (32 * 1024)));
+    setopt_rlimit(data, &data->progress.dl.rlimit, offt);
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*
