@@ -41,6 +41,7 @@
 typedef LONG volatile curl_refcount;
 
 #define Curl_refcount_init(c, v) (*(c) = (LONG)(v))
+#define Curl_refcount_get(c)     ((uint32_t)*(c))
 #define Curl_refcount_incr(c)    ((uint32_t)InterlockedIncrement(c))
 #define Curl_refcount_decr(c)    ((uint32_t)InterlockedDecrement(c))
 
@@ -50,6 +51,7 @@ typedef LONG volatile curl_refcount;
 typedef atomic_uint curl_refcount;
 
 #define Curl_refcount_init(c, v) atomic_init(c, v)
+#define Curl_refcount_get(c)     atomic_load_explicit(c, memory_order_relaxed)
 #define Curl_refcount_incr(c) \
   (atomic_fetch_add_explicit(c, 1U, memory_order_relaxed) + 1U)
 #define Curl_refcount_decr(c) \
@@ -60,6 +62,7 @@ typedef atomic_uint curl_refcount;
 typedef uint32_t curl_refcount;
 
 #define Curl_refcount_init(c, v) (*(c) = (v))
+uint32_t Curl_refcount_get(curl_refcount *c);
 uint32_t Curl_refcount_incr(curl_refcount *c);
 uint32_t Curl_refcount_decr(curl_refcount *c);
 
