@@ -1238,7 +1238,7 @@ do_connect:
     pxresult = socks5_connect(cf, ctx, data, &retry);
     if(pxresult && retry) {
       /* tear down the filters below and connect again to the socks proxy */
-      Curl_conn_cf_discard(&cf->next, data);
+      Curl_conn_cf_discard_chain(&cf->next, data);
       result = Curl_cf_ip_happy_insert_after(
         cf, data, ctx->peer, ctx->peer, TRNSPRT_TCP, NULL, TRNSPRT_TCP);
       if(!result) {
