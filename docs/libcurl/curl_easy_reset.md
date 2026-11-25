@@ -32,9 +32,9 @@ Re-initializes all options previously set on a specified curl handle to the
 default values. This puts back the handle to the same state as it was in when
 it was created with curl_easy_init(3).
 
-It does not change the following information kept in the handle: live
-connections, the Session ID cache, the DNS cache, the cookies, the shares or
-the alt-svc cache.
+It does not change the following information kept in the handle: the
+connection cache, the Session ID cache, the DNS cache, the cookies,
+the shares or the alt-svc cache.
 
 # %PROTOCOLS%
 

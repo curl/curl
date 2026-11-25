@@ -125,6 +125,8 @@ static CURLcode test_unit1607(const char *arg)
   struct Curl_easy *easy = NULL;
   struct curl_slist *list = NULL;
   struct t1607_key key;
+  curl_off_t xfer_id;
+  uint32_t mid;
 
   for(i = 0; i < CURL_ARRAYSIZE(tests); ++i) {
     size_t j;
@@ -257,7 +259,16 @@ static CURLcode test_unit1607(const char *arg)
     goto error;
   }
   curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
+  /* Make a check on reset handling while the easy is added to a multi */
+  fail_unless(easy->multi, "easy is not added to multi as expected");
+  xfer_id = easy->id;
+  mid = easy->mid;
+  fail_unless(mid != UINT32_MAX, "easy as no assigned mid");
   curl_easy_reset(easy);
+  fail_unless(easy->multi, "easy is no longer in multi after reset");
+  fail_unless(xfer_id != easy->id, "easy still has old id after reset");
+  fail_unless(mid != easy->mid, "easy still has old mid after reset");
+
   fail_unless(Curl_loadhostpairs(easy) == CURLE_OK, "load after reset");
   t1607_create_key(&key, "reset.example", 80, CURL_DNST_ADDR);
   fail_unless(!Curl_hash_pick(&multi->dnscache.entries, key.data, key.len),

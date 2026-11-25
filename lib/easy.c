@@ -1165,6 +1165,18 @@ void curl_easy_reset(CURL *curl)
   if(CURL_EAPI_ENTER(&guard, curl, easy_reset, NULL)) {
     struct Curl_easy *data = curl;
 
+    /* Resetting an easy handle still at a multi, removes it to clear
+     * any state and then adds it again, making it fresh.
+     * We have no way to return an error, so we close our eyes and
+     * just shove it through the calls, hoping for the best. */
+    if(data->multi) {
+      struct Curl_multi *multi = data->multi;
+      /* Call these under API guards, so invoked callbacks that try to use
+       * the multi are properly blocked. */
+      curl_multi_remove_handle(multi, data);
+      curl_multi_add_handle(multi, data);
+    }
+
     data->state.last_conn_id = -1; /* clear remembered connection id */
     data->state.last_cpid = UINT32_MAX;
     Curl_req_hard_reset(&data->req, data);
