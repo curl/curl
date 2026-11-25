@@ -229,8 +229,6 @@ unlock: cookie [Pigs in space]: 61
 lock:   share  [Pigs in space]: 18
 unlock: share  [Pigs in space]: 19
 SHARE_CLEANUP
-lock:   share  [Pigs in space]: 20
-unlock: share  [Pigs in space]: 21
 GLOBAL_CLEANUP
 </stdout>
 <file name="%LOGDIR/jar%TESTNUMBER" mode="text">
