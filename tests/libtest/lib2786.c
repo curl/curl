@@ -70,6 +70,13 @@ static CURLcode test_lib2786(const char *URL)
 
   (void)URL;
 
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+  global_inited = TRUE;
+
   dnssock = CURL_SOCKET(AF_INET, SOCK_DGRAM, 0);
   if(dnssock == CURL_SOCKET_BAD) {
     curl_mfprintf(stderr, "socket creation error\n");
@@ -99,12 +106,6 @@ static CURLcode test_lib2786(const char *URL)
   setenv("CURL_DNS_SERVER", envbuf, 1);
 #endif
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    curl_mfprintf(stderr, "curl_global_init() failed\n");
-    result = TEST_ERR_MAJOR_BAD;
-    goto test_cleanup;
-  }
-  global_inited = TRUE;
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
