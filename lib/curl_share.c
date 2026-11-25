@@ -37,6 +37,11 @@ static void share_destroy(struct Curl_share *share)
   if(!share)
     return;
 
+  /* make the share no longer usable in calls, in case the application
+   * keeps pointer copies or tries to use the share in callbacks invoked
+   * during its destruction. */
+  share->magic = 0;
+
   if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
     Curl_cpool_destroy(&share->cpool, share->admin);
   }
@@ -77,7 +82,7 @@ CURLSH *curl_share_init(void)
 #ifdef USE_MUTEX
     Curl_mutex_init(&share->lock);
 #endif
-    share->ref_count = 1;
+    Curl_refcount_init(&share->ref_count, 1);
     Curl_dnscache_init(&share->dnscache, 23);
     share->admin = curl_easy_init();
     if(!share->admin) {
@@ -93,35 +98,6 @@ CURLSH *curl_share_init(void)
 #endif
   }
   return share;
-}
-
-static uint32_t share_ref_inc(struct Curl_share *share)
-{
-  uint32_t n;
-#ifdef USE_MUTEX
-  Curl_mutex_acquire(&share->lock);
-  n = ++share->ref_count;
-  share->has_been_shared = TRUE;
-  Curl_mutex_release(&share->lock);
-#else
-  n = ++share->ref_count;
-  share->has_been_shared = TRUE;
-#endif
-  return n;
-}
-
-static uint32_t share_ref_dec(struct Curl_share *share)
-{
-  uint32_t n;
-#ifdef USE_MUTEX
-  Curl_mutex_acquire(&share->lock);
-  DEBUGASSERT(share->ref_count);
-  n = --share->ref_count;
-  Curl_mutex_release(&share->lock);
-#else
-  n = --share->ref_count;
-#endif
-  return n;
 }
 
 static bool share_has_been_shared(struct Curl_share *share)
@@ -160,34 +136,17 @@ static void share_lock_release(struct Curl_share *share,
   }
 }
 
-static bool share_in_use(struct Curl_share *share)
-{
-  bool in_use;
-#ifdef USE_MUTEX
-  Curl_mutex_acquire(&share->lock);
-  in_use = (share->ref_count > 1);
-  Curl_mutex_release(&share->lock);
-#else
-  bool locked = share_lock_acquire(share, NULL);
-  in_use = (share->ref_count > 1);
-  share_lock_release(share, NULL, locked);
-#endif
-  return in_use;
-}
-
-static void share_unlink(struct Curl_share **pshare,
-                         struct Curl_easy *data,
-                         bool locked)
+static uint32_t share_unlink(struct Curl_share **pshare)
 {
   struct Curl_share *share = *pshare;
   uint32_t n;
 
   *pshare = NULL;
-  n = share_ref_dec(share);
-  if(locked)
-    share_lock_release(share, data, locked);
+  n = Curl_refcount_decr(&share->ref_count);
+  DEBUGASSERT(n != UINT32_MAX); /* no underflow */
   if(!n)  /* last reference gone */
     share_destroy(share);
+  return n;
 }
 
 #undef curl_share_setopt
@@ -200,14 +159,21 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
   void *ptr;
   CURLSHcode res = CURLSHE_OK;
   struct Curl_share *share = sh;
+  uint32_t n;
 
   if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
 
-  if(share_in_use(share)) {
+  n = Curl_refcount_incr(&share->ref_count);
+  if(n == 1) {  /* We got a share with 0 refcount? */
+    res = CURLSHE_INVALID;
+    goto out;
+  }
+  else if(n > 2) {
     /* do not allow setting options while one or more handles are already
        using this share */
-    return CURLSHE_IN_USE;
+    res = CURLSHE_IN_USE;
+    goto out;
   }
 
   va_start(param, option);
@@ -351,23 +317,31 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     break;
   }
 
+out:
   va_end(param);
-
+  Curl_refcount_decr(&share->ref_count);
   return res;
 }
 
 CURLSHcode curl_share_cleanup(CURLSH *sh)
 {
   struct Curl_share *share = sh;
-  bool locked;
+  uint32_t n;
+
   if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
 
-  if(share_in_use(share))
+  /* Check if we release the last reference here. This check is not
+   * thread-safe, as the application might link the share after the
+   * check again in another thread. */
+  Curl_refcount_incr(&share->ref_count);
+  n = Curl_refcount_decr(&share->ref_count);
+  if(n > 1)
     return CURLSHE_IN_USE;
+  else if(!n)
+    return CURLSHE_INVALID;
 
-  locked = share_lock_acquire(share, NULL);
-  share_unlink(&share, NULL, locked);
+  share_unlink(&share);
   return CURLSHE_OK;
 }
 
@@ -376,7 +350,7 @@ CURLSHcode Curl_share_lock_share(struct Curl_share *share,
                                  curl_lock_data type,
                                  curl_lock_access accesstype)
 {
-  if(!share)
+  if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
 
   if(share->specifier & (unsigned int)(1 << type) &&
@@ -397,7 +371,7 @@ CURLSHcode Curl_share_unlock_share(struct Curl_share *share,
                                    struct Curl_easy *data,
                                    curl_lock_data type)
 {
-  if(!share)
+  if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
 
   if(share->specifier & (unsigned int)(1 << type) &&
@@ -417,8 +391,12 @@ CURLcode Curl_share_easy_unlink(struct Curl_easy *data)
   struct Curl_share *share = data->share;
 
   if(share) {
-    bool locked = share_lock_acquire(share, data);
+    bool locked;
 
+    if(!GOOD_SHARE_HANDLE(share))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    locked = share_lock_acquire(share, data);
     /* If share caches connections, detach any existing connection and
      * forget its identifier. */
     if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
@@ -442,7 +420,8 @@ CURLcode Curl_share_easy_unlink(struct Curl_easy *data)
       data->psl = data->multi ? &data->multi->psl : NULL;
 #endif
 
-    share_unlink(&data->share, data, locked);
+    share_lock_release(data->share, data, locked);
+    share_unlink(&data->share);
   }
   return CURLE_OK;
 }
@@ -450,46 +429,63 @@ CURLcode Curl_share_easy_unlink(struct Curl_easy *data)
 CURLcode Curl_share_easy_link(struct Curl_easy *data,
                               struct Curl_share *share)
 {
+  CURLcode result = CURLE_OK;
+  bool locked = FALSE;
+  uint32_t n;
+
   if(data->share) {
     DEBUGASSERT(0);
     return CURLE_FAILED_INIT;
   }
 
-  if(share) {
-    bool locked = share_lock_acquire(share, data);
+  if(!share)
+    return CURLE_OK;
+  else if(!GOOD_SHARE_HANDLE(share))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
-    /* Forget identifiers from the previously used connection cache. */
-    if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
-      data->state.last_conn_id = -1;
-      data->state.last_cpid = UINT32_MAX;
-    }
+  n = Curl_refcount_incr(&share->ref_count);
+  if(n == 1) { /* someone is using a share with 0 refcount */
+    DEBUGASSERT(0);
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
+  }
 
-    share_ref_inc(share);
-    data->share = share;
+  locked = share_lock_acquire(share, data);
+  /* Forget identifiers from the previously used connection cache. */
+  if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
+    data->state.last_conn_id = -1;
+    data->state.last_cpid = UINT32_MAX;
+  }
+
+  Curl_refcount_incr(&share->ref_count);
+  data->share = share;
+  share->has_been_shared = TRUE;
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
-    if(share->cookies) {
-      /* use shared cookie list, first free own one if any */
-      Curl_cookie_cleanup(data->cookies);
-      /* enable cookies since we now use a share that uses cookies! */
-      data->cookies = share->cookies;
-    }
+  if(share->cookies) {
+    /* use shared cookie list, first free own one if any */
+    Curl_cookie_cleanup(data->cookies);
+    /* enable cookies since we now use a share that uses cookies! */
+    data->cookies = share->cookies;
+  }
 #endif /* CURL_DISABLE_HTTP */
 #ifndef CURL_DISABLE_HSTS
-    if(share->hsts) {
-      /* first free the private one if any */
-      Curl_hsts_cleanup(&data->hsts);
-      data->hsts = share->hsts;
-    }
+  if(share->hsts) {
+    /* first free the private one if any */
+    Curl_hsts_cleanup(&data->hsts);
+    data->hsts = share->hsts;
+  }
 #endif
 #ifdef USE_LIBPSL
-    if(share->specifier & (1 << CURL_LOCK_DATA_PSL))
-      data->psl = &share->psl;
+  if(share->specifier & (1 << CURL_LOCK_DATA_PSL))
+    data->psl = &share->psl;
 #endif
 
-    /* check for host cache not needed,
-     * it will be done by curl_easy_perform */
-    share_lock_release(share, data, locked);
-  }
-  return CURLE_OK;
+  /* check for host cache not needed,
+   * it will be done by curl_easy_perform */
+  share_lock_release(share, data, locked);
+
+out:
+  Curl_refcount_decr(&share->ref_count);
+  return result;
 }
