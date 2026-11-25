@@ -62,7 +62,7 @@ int main(void)
   if(curl) {
     CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
-    curl_easy_setopt(curl, CURLOPT_MAIL_AUTH, "<secret@cave>");
+    curl_easy_setopt(curl, CURLOPT_MAIL_AUTH, "secret@cave");
     result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
