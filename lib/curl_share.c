@@ -164,17 +164,13 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
   if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
 
-  n = Curl_refcount_incr(&share->ref_count);
-  if(n == 1) {  /* We got a share with 0 refcount? */
-    res = CURLSHE_INVALID;
-    goto out;
-  }
-  else if(n > 2) {
+  n = Curl_refcount_get(&share->ref_count);
+  if(!n)  /* We got a share with 0 refcount? */
+    return CURLSHE_INVALID;
+  else if(n > 1)
     /* do not allow setting options while one or more handles are already
        using this share */
-    res = CURLSHE_IN_USE;
-    goto out;
-  }
+    return CURLSHE_IN_USE;
 
   va_start(param, option);
 
@@ -317,9 +313,7 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     break;
   }
 
-out:
   va_end(param);
-  Curl_refcount_decr(&share->ref_count);
   return res;
 }
 
