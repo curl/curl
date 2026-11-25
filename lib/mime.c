@@ -723,6 +723,9 @@ static size_t read_part_content(curl_mimepart *part, char *buffer,
     /* sz is already zero. */
   }
   else {
+    if(part->datasize != (curl_off_t)-1)
+      bufsize = curlx_sotouz_range(part->datasize - part->state.offset,
+                                  0, bufsize);
     switch(part->kind) {
     case MIMEKIND_MULTIPART:
       /*

@@ -59,6 +59,8 @@ static CURLcode test_unit3227(const char *arg)
   curl_mime *mime = NULL;
   curl_mimepart *part;
   char buffer;
+  char contents[32];
+  FILE *file;
 
   UNITTEST_BEGIN(t3227_setup())
 
@@ -128,6 +130,26 @@ static CURLcode test_unit3227(const char *arg)
   abort_unless(part->fp, "open write-only file");
   fail_unless(part->readfunc(&buffer, 1, 1, part->arg) == (size_t)-1,
               "file read error must not return EOF");
+
+  /* A growing file must not exceed its part's previously computed size. */
+  file = curlx_fopen(arg, FOPEN_WRITETEXT);
+  abort_unless(file, "open attachment");
+  fputs("first", file);
+  curlx_fclose(file);
+  part = curl_mime_addpart(mime);
+  abort_unless(part, "curl_mime_addpart()");
+  abort_unless(curl_mime_filedata(part, arg) == CURLE_OK,
+               "curl_mime_filedata()");
+  file = curlx_fopen(arg, FOPEN_APPENDTEXT);
+  abort_unless(file, "append to attachment");
+  fputs("unexpected extra data", file);
+  curlx_fclose(file);
+  part->flags |= MIME_BODY_ONLY;
+  fail_unless(Curl_mime_read(contents, 1, sizeof(contents), part) == 5,
+              "file part read beyond its declared size");
+  fail_unless(!memcmp(contents, "first", 5), "file part content differs");
+  fail_unless(Curl_mime_read(contents, 1, sizeof(contents), part) == 0,
+              "file part must end at its declared size");
 
   UNITTEST_END(t3227_stop(easy, mime))
 }
