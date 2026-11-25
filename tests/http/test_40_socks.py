@@ -109,3 +109,45 @@ class TestSocks:
             with open(curl.response_file(i)) as fr:
                 respdata = fr.readlines()
             assert respdata == indata
+
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'), reason="no IPv6")
+    def test_40_05_socks5_ipv6(self, env: Env, danted: Dante, httpd):
+        # our danted is configured to not connect via ipv6, so this must fail
+        sproto = 'socks5'
+        curl = CurlClient(env=env, socks_args=[
+            f'--{sproto}', f'127.0.0.1:{danted.port}'
+        ])
+        url = f'http://[::1]:{env.http_port}/data.json'
+        r = curl.http_get(url=url)
+        r.check_exit_code(97)  # CURLE_PROXY
+
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'), reason="no IPv6")
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('AsynchDNS'), reason="needs AsynchDNS")
+    def test_40_06_socks5_ipv_retry(self, env: Env, danted: Dante, httpd, dnsd):
+        # our danted is configured to not connect via ipv6, so the attempt on ::1
+        # will fail and the retry using 127.0.0.1 must succeed
+        sproto = 'socks5'
+        dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'])
+        run_env, xargs = self.dns_settings('DNS', dnsd)
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False, socks_args=[
+            f'--{sproto}', f'127.0.0.1:{danted.port}'
+        ])
+        url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
+        r = curl.http_get(url=url)
+        r.check_exit_code(0)
+
+    def dns_settings(self, dns_method, dnsd, path="/"):
+        xargs = []
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'all'
+        if dns_method == 'DoH':
+            if not Env.curl_can_doh():
+                pytest.skip(reason="curl built without DoH")
+            xargs = ['--doh-insecure', '--doh-url', f'http://127.0.0.1:{dnsd.port}{path}']
+        else:
+            if not Env.curl_override_dns():
+                pytest.skip(reason="no DNS override")
+            run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+            run_env['CURL_QUICK_EXIT'] = '1'
+        return run_env, xargs
