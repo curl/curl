@@ -459,7 +459,7 @@ CURLcode Curl_share_easy_link(struct Curl_easy *data,
   }
 
   /* increment again for the assignment into the easy */
-  Curl_refcount_incr(&share->ref_count);
+  (void)Curl_refcount_incr(&share->ref_count);
   data->share = share;
   share->has_been_shared = TRUE;
 
