@@ -1356,6 +1356,8 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
      * Set a list with HTTP headers to use (or replace internals with)
      */
     s->headers = slist;
+    if(data->set.mimepostp)
+      curl_mime_headers(data->set.mimepostp, NULL, 0);
     break;
 #endif
 #ifndef CURL_DISABLE_TELNET
