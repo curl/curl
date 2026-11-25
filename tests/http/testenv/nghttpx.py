@@ -111,14 +111,15 @@ class Nghttpx:
             return self.start()
         return True
 
-    def initial_start(self):
+    def initial_start(self) -> bool:
         self._rmf(self._pid_file)
         self._rmf(self._error_log)
         self._mkpath(self._run_dir)
         self._write_config()
+        return False
 
-    def start(self, wait_live=True):
-        pass
+    def start(self, wait_live=True) -> bool:
+        return False
 
     def stop(self, wait_dead=True):
         self._mkpath(self._tmp_dir)
@@ -255,7 +256,7 @@ class NghttpxQuic(Nghttpx):
         if self._process:
             self.stop()
         creds = self.env.get_credentials(self._cred_name)
-        assert creds  # convince pytype this is not None
+        assert creds and self._cmd  # convince pytype these are not None
         self._loaded_cred_name = self._cred_name
         args = [self._cmd, f'--frontend=*,{self._https_port};tls']
         if self.supports_h3():
@@ -322,7 +323,7 @@ class NghttpxTcp(Nghttpx):
         if self._process:
             self.stop()
         creds = self.env.get_credentials(self._cred_name)
-        assert creds  # convince pytype this is not None
+        assert creds and self._cmd  # convince pytype these are not None
         self._loaded_cred_name = self._cred_name
         args = [self._cmd, f'--frontend=*,{self._port};tls']
         args.extend([
@@ -381,7 +382,7 @@ class NghttpxFwd(Nghttpx):
         if self._process:
             self.stop()
         creds = self.env.get_credentials(self._cred_name)
-        assert creds  # convince pytype this is not None
+        assert creds and creds.pkey_file and creds.cert_file and self._cmd  # convince pytype
         self._loaded_cred_name = self._cred_name
         args = [
             self._cmd,

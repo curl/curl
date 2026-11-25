@@ -42,7 +42,7 @@ class MitmServerError(Exception):
 
 class MitmServer:
 
-    def __init__(self, name, env, dest_port, fwd_limit = 0):
+    def __init__(self, name, env, dest_port, fwd_limit=0):
         self.name = name
         self.env = env
         self.dest_port = dest_port
@@ -79,7 +79,7 @@ class MitmServer:
 
                 while not (swallowed and time.time() - client_last_heard > 1) and not self.abort:
                     readable, _, errors = select.select([client, server], [], [client, server], 0.2)
-                    if len(errors):
+                    if errors:
                         break
                     if client in readable:
                         data = client.recv(65536)

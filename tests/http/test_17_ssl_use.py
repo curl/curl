@@ -73,7 +73,7 @@ class TestSSLUse:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto)
-        assert r.json['HTTPS'] == 'on', f'{r.json}'
+        assert r.json and r.json['HTTPS'] == 'on', f'{r.json}'
         # LibreSSL does not support ClientHello extension "psk_key_exchange_mode".
         # Without that TLSv1.3 session resumption via pre-shared keys is not allowed.
         # OpenSSL 4.1 reacts to that in creating to SSL Session object on the server.

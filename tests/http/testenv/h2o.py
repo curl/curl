@@ -115,11 +115,12 @@ class H2o:
             return self._process.returncode is None
         return False
 
-    def initial_start(self):
+    def initial_start(self) -> bool:
         self._rmf(self._pid_file)
         self._rmf(self._error_log)
         self._mkpath(self._run_dir)
         self.write_config()
+        return False
 
     def start(self, wait_live=True):
         self._mkpath(self._tmp_dir)
@@ -128,6 +129,7 @@ class H2o:
             self.stop()
         self._loaded_cred_name = self._cred_name
         self.write_config()
+        assert self._cmd
         args = [self._cmd, "-c", self._conf_file]
         self._error_fd = open(self._stderr, "a")  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)

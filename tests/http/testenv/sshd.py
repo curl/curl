@@ -219,7 +219,7 @@ class Sshd:
                                   self.env.gen_root, max_tries=3)
 
     def start(self, wait_live=True):
-        assert self._port > 0
+        assert self._port > 0 and self._cmd
         self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()

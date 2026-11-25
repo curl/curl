@@ -252,10 +252,7 @@ class EnvConfig:
             ),
         ]
 
-        if "OPENSSL" in os.environ:
-            self.openssl = os.environ["OPENSSL"]
-        else:
-            self.openssl = "openssl"
+        self.openssl = os.environ.get("OPENSSL", "openssl")
         self.openssl_ech = False
         p = subprocess.run(
             args=[self.openssl, "version"], capture_output=True, text=True, check=False
@@ -753,7 +750,7 @@ class Env:
             Env.CONFIG = env_config
         self._verbose = pytestconfig.option.verbose if pytestconfig is not None else 0
         self._ca = None
-        self._test_timeout = 300.0 if self._verbose > 1 else 60.0  # seconds
+        self._test_timeout: Optional[float] = 300.0 if self._verbose > 1 else 60.0  # seconds
 
     def issue_certs(self):
         if self._ca is None:
@@ -767,16 +764,17 @@ class Env:
                 )
                 self._ca.issue_certs(self.CONFIG.cert_specs)
                 if self.have_openssl():
+                    assert self.openssl
                     self._ca.create_hashdir(self.openssl)
-                if self.have_openssl_ech():
-                    for domain in [self.domain1, self.domain2]:
-                        p = subprocess.run(args=[
-                            self.openssl, 'ech',
-                            '-out', os.path.join(ca_dir, f'{domain}.echconfig'),
-                            '-public_name', f'public.{domain}'
-                        ], capture_output=True, text=True, check=True)
-                        if p.returncode != 0:
-                            raise EnvError(f"Error generating ECHConfig for {domain}")
+                    if self.have_openssl_ech():
+                        for domain in [self.domain1, self.domain2]:
+                            p = subprocess.run(args=[
+                                self.openssl, 'ech',
+                                '-out', os.path.join(ca_dir, f'{domain}.echconfig'),
+                                '-public_name', f'public.{domain}'
+                            ], capture_output=True, text=True, check=True)
+                            if p.returncode != 0:
+                                raise EnvError(f"Error generating ECHConfig for {domain}")
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)

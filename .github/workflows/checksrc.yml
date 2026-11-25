@@ -105,7 +105,8 @@ jobs:
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           cd tests/http/
-          pyrefly check --python-version=3.8 --preset=basic --check-unannotated-defs --summary
+          pyrefly check --python-version=3.8 --preset=basic --check-unannotated-defs --summary \
+            --error bad-override,no-matching-overload,bad-function-definition,not-iterable,bad-assignment
 
       - name: filter off code from all C and H files
         run: |
