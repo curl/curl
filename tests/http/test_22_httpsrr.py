@@ -22,6 +22,7 @@
 #
 ###########################################################################
 #
+import contextlib
 import logging
 import os
 import socket
@@ -212,21 +213,19 @@ class TestHTTPSRR:
                     attempts.append(1)
                 first_attempt.set()
                 self.request.settimeout(2)
-                try:
-                    with context.wrap_socket(self.request, server_side=True) as conn:
-                        request = b''
-                        while b'\r\n\r\n' not in request and len(request) < 16384:
-                            data = conn.recv(4096)
-                            if not data:
-                                break
-                            request += data
-                        if request.startswith(b'GET ') and b'\r\n\r\n' in request:
-                            requests.append(conn.selected_alpn_protocol())
-                            conn.sendall(b'HTTP/1.1 200 OK\r\n'
-                                         b'Content-Length: 2\r\n'
-                                         b'Connection: close\r\n\r\nok')
-                except (OSError, ssl.SSLError):
-                    pass
+                with contextlib.suppress(OSError, ssl.SSLError), \
+                     context.wrap_socket(self.request, server_side=True) as conn:
+                    request = b''
+                    while b'\r\n\r\n' not in request and len(request) < 16384:
+                        data = conn.recv(4096)
+                        if not data:
+                            break
+                        request += data
+                    if request.startswith(b'GET ') and b'\r\n\r\n' in request:
+                        requests.append(conn.selected_alpn_protocol())
+                        conn.sendall(b'HTTP/1.1 200 OK\r\n'
+                                     b'Content-Length: 2\r\n'
+                                     b'Connection: close\r\n\r\nok')
 
         class DNSGate(socketserver.BaseRequestHandler):
             def handle(self):

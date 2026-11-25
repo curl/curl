@@ -29,7 +29,7 @@ import re
 import shutil
 import subprocess
 from datetime import datetime, timedelta, timezone
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -214,7 +214,7 @@ class Credentials:
         return self._combined_file
 
     @property
-    def hashdir(self) -> Optional[str]:
+    def hashdir(self) -> str:
         return os.path.join(self._store.path, 'hashdir')
 
     def get_first(self, name) -> Optional['Credentials']:
@@ -405,7 +405,7 @@ class TestCA:
         raise CertError(f"unrecognized certificate specification: {spec}")
 
     @staticmethod
-    def _make_x509_name(org_name: Optional[str] = None, common_name: Optional[str] = None, parent: x509.Name = None) -> x509.Name:
+    def _make_x509_name(org_name: Optional[str] = None, common_name: Optional[str] = None, parent: Optional[x509.Name] = None) -> x509.Name:
         name_pieces = []
         if org_name:
             oid = NameOID.ORGANIZATIONAL_UNIT_NAME if parent else NameOID.ORGANIZATION_NAME
@@ -420,7 +420,7 @@ class TestCA:
     def _make_csr(
             subject: x509.Name,
             pkey: Any,
-            issuer_subject: Optional[Credentials],
+            issuer_subject: Optional[Union[Credentials, x509.Name]],
             valid_from_delta: Optional[timedelta] = None,
             valid_until_delta: Optional[timedelta] = None
     ) -> x509.CertificateBuilder:

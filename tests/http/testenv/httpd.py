@@ -83,7 +83,6 @@ class Httpd:
         self._tmp_dir = os.path.join(self._apache_dir, 'tmp')
         self._basic_passwords = os.path.join(self._conf_dir, 'basic.passwords')
         self._digest_passwords = os.path.join(self._conf_dir, 'digest.passwords')
-        self._mods_dir = None
         self._auth_digest = True
         self._proxy_auth_basic = False
         # name used to lookup credentials for env.domain1

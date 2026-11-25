@@ -57,6 +57,7 @@ class TestGoAway:
         time.sleep(1.5)
         assert httpd.reload()
         t.join()
+        assert self.r
         r: ExecResult = self.r
         r.check_response(count=count, http_status=200)
         # reload will shut down the connection gracefully with GOAWAY
@@ -99,6 +100,7 @@ class TestGoAway:
         time.sleep(1.5)
         assert httpd.reload()
         t.join()
+        assert self.r
         r: ExecResult = self.r
         r.check_response(count=count, http_status=200, connect_count=2)
         # reload will shut down the connection gracefully

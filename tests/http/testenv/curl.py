@@ -1247,6 +1247,7 @@ class CurlClient:
     def _perf_collapse(self, perf: PerfProfile, file_err):
         if not os.path.exists(perf.file):
             raise EnvError(f'perf output file does not exist: {perf.file}')
+        assert self._fg_dir
         fg_collapse = os.path.join(self._fg_dir, 'stackcollapse-perf.pl')
         if not os.path.exists(fg_collapse):
             raise EnvError(f'FlameGraph script not found: {fg_collapse}')
@@ -1260,6 +1261,7 @@ class CurlClient:
     def _dtrace_collapse(self, dtrace: DTraceProfile, file_err):
         if not os.path.exists(dtrace.file):
             raise EnvError(f'dtrace output file does not exist: {dtrace.file}')
+        assert self._fg_dir
         fg_collapse = os.path.join(self._fg_dir, 'stackcollapse.pl')
         if not os.path.exists(fg_collapse):
             raise EnvError(f'FlameGraph script not found: {fg_collapse}')
@@ -1273,6 +1275,7 @@ class CurlClient:
     def _generate_flame(self, curl_args: List[str],
                         dtrace: Optional[DTraceProfile] = None,
                         perf: Optional[PerfProfile] = None):
+        assert self._fg_dir
         fg_gen_flame = os.path.join(self._fg_dir, 'flamegraph.pl')
         file_svg = os.path.join(self._run_dir, 'curl.flamegraph.svg')
         if not os.path.exists(fg_gen_flame):

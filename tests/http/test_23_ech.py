@@ -137,7 +137,7 @@ class TestECH:
             url1: ['--ech', 'false'],
             url2: ['--ech', 'true']
         })
-        r.check_exit_code(0), f'{r}'
+        r.check_exit_code(0)
         r.check_response(http_status=404, count=2, connect_count=2)
 
     def test_23_06_ech_conn_ech_config_reuse(self, env: Env, httpd, nghttpx_tcp):
@@ -150,7 +150,7 @@ class TestECH:
             url1: ['--ech', 'true'],
             url2: ['--ech', 'true', '--ech', f'ecl:{ech_config}']
         })
-        r.check_exit_code(0), f'{r}'
+        r.check_exit_code(0)
         r.check_response(http_status=404, count=2, connect_count=2)
 
     @pytest.mark.skipif(condition=not Env.curl_uses_lib('openssl'),
@@ -164,7 +164,7 @@ class TestECH:
             url1: ['--ech', 'true'],
             url2: ['--ech', 'true', '--ech', 'pn:innocent.invalid']
         })
-        r.check_exit_code(0), f'{r}'
+        r.check_exit_code(0)
         r.check_response(http_status=404, count=2, connect_count=2)
 
     def _get_ech_result(self, r):

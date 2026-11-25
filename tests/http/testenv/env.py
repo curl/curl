@@ -252,10 +252,7 @@ class EnvConfig:
             ),
         ]
 
-        if "OPENSSL" in os.environ:
-            self.openssl = os.environ["OPENSSL"]
-        else:
-            self.openssl = "openssl"
+        self.openssl = os.environ.get("OPENSSL", "openssl")
         self.openssl_ech = False
         p = subprocess.run(
             args=[self.openssl, "version"], capture_output=True, text=True, check=False
@@ -753,7 +750,7 @@ class Env:
             Env.CONFIG = env_config
         self._verbose = pytestconfig.option.verbose if pytestconfig is not None else 0
         self._ca = None
-        self._test_timeout = 300.0 if self._verbose > 1 else 60.0  # seconds
+        self._test_timeout: Optional[float] = 300.0 if self._verbose > 1 else 60.0  # seconds
 
     def issue_certs(self):
         if self._ca is None:
@@ -960,7 +957,7 @@ class Env:
         return self.CONFIG.curl
 
     @property
-    def openssl(self) -> Optional[str]:
+    def openssl(self) -> str:
         return self.CONFIG.openssl
 
     @property

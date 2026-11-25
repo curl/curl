@@ -87,7 +87,7 @@ class Card:
         if val is None or val < 0:
             return '--'
         if val >= (10 * 1024 * 1024):
-            return f'{(val / (1024 * 1024)):.3f} MB/s'
+            return f'{val / (1024 * 1024):.3f} MB/s'
         if val >= (10 * 1024):
             return f'{val / 1024:.3f} KB/s'
         return f'{val:.3f} B/s'
@@ -98,7 +98,7 @@ class Card:
             return '--'
         pct = ((val / limit) * 100) - 100
         if val >= (10 * 1024 * 1024):
-            return f'{(val / (1024 * 1024)):.3f} MB/s, {pct:+.1f}%'
+            return f'{val / (1024 * 1024):.3f} MB/s, {pct:+.1f}%'
         if val >= (10 * 1024):
             return f'{val / 1024:.3f} KB/s, {pct:+.1f}%'
         return f'{val:.3f} B/s, {pct:+.1f}%'
@@ -112,7 +112,7 @@ class Card:
         val = mean(samples) if samples else -1
         cell = {
             'val': val,
-            'sval': Card.fmt_mbs(val) if val >= 0 else '--',
+            'sval': cls.fmt_mbs(val) if val >= 0 else '--',
         }
         if profiles:
             cell['stats'] = RunProfile.AverageStats(profiles)
@@ -125,7 +125,7 @@ class Card:
         val = mean(samples) if samples else -1
         cell = {
             'val': val,
-            'sval': Card.fmt_speed_result(val, limit) if val >= 0 else '--',
+            'sval': cls.fmt_speed_result(val, limit) if val >= 0 else '--',
         }
         if profiles:
             cell['stats'] = RunProfile.AverageStats(profiles)
@@ -138,7 +138,7 @@ class Card:
         val = mean(samples) if samples else -1
         cell = {
             'val': val,
-            'sval': Card.fmt_reqs(val) if val >= 0 else '--',
+            'sval': cls.fmt_reqs(val) if val >= 0 else '--',
         }
         if profiles:
             cell['stats'] = RunProfile.AverageStats(profiles)
@@ -180,15 +180,15 @@ class Card:
             print(f'  {"Host":<17} {"Connect":>12} {"Handshake":>12} '
                   f'{"Connect":>12} {"Handshake":>12}     {"Errors":<20}')
             for key, val in score["handshakes"].items():
-                print(f'  {key:<17} {Card.fmt_ms(val["ipv4-connect"]):>12} '
-                      f'{Card.fmt_ms(val["ipv4-handshake"]):>12} '
-                      f'{Card.fmt_ms(val["ipv6-connect"]):>12} '
-                      f'{Card.fmt_ms(val["ipv6-handshake"]):>12}     '
+                print(f'  {key:<17} {cls.fmt_ms(val["ipv4-connect"]):>12} '
+                      f'{cls.fmt_ms(val["ipv4-handshake"]):>12} '
+                      f'{cls.fmt_ms(val["ipv6-connect"]):>12} '
+                      f'{cls.fmt_ms(val["ipv6-handshake"]):>12}     '
                       f'{"/".join(val["ipv4-errors"] + val["ipv6-errors"]):<20}'
                       )
         for name in ['downloads', 'uploads', 'requests']:
             if name in score:
-                Card.print_score_table(score[name])
+                cls.print_score_table(score[name])
 
     @classmethod
     def print_score_table(cls, score):
@@ -220,7 +220,7 @@ class Card:
                 if col_has_stats[idx]:
                     if 'stats' in cell:
                         s = f'[{cell["stats"]["cpu"]:>.1f}%' \
-                            f'/{Card.fmt_size(cell["stats"]["rss-max"])}]'
+                            f'/{cls.fmt_size(cell["stats"]["rss-max"])}]'
                     else:
                         s = ''
                     print(f' {s:<{statw}}', end='')
@@ -736,12 +736,12 @@ class ScoreRunner:
               uploads: Optional[List[int]] = None,
               upload_count: int = 50,
               req_count=5000,
-              request_parallels=None,
+              request_parallels: Optional[List[int]] = None,
               nsamples: int = 1,
               requests: bool = True):
         self.info(f"scoring {self.protocol} against {self.server_descr}\n")
 
-        score = {
+        score: dict[str, Any] = {
             'meta': {
                 'curl_version': self.env.curl_version(),
                 'curl_V': self.env.curl_fullname(),
@@ -831,9 +831,7 @@ def run_score(args, protocol):
     requests = True
     request_parallels = None
     if args.request_parallels:
-        request_parallels = []
-        for x in args.request_parallels:
-            request_parallels.extend([int(s) for s in x.split(',')])
+        request_parallels = [int(s) for x in args.request_parallels for s in x.split(',')]
 
     if args.downloads or args.uploads or args.requests or args.handshakes:
         handshakes = args.handshakes
@@ -1026,7 +1024,7 @@ def run_score(args, protocol):
             card.setup_resources(ftpserver.docs_dir, downloads)
             cards.append(card)
 
-        if not len(cards):
+        if not cards:
             raise ScoreCardError(f"no cards selected for {protocol}")
 
         if args.start_only:
