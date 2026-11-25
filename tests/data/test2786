@@ -12,6 +12,7 @@ libtest
 <features>
 Debug
 asyn-rr
+https
 </features>
 
 <name>
