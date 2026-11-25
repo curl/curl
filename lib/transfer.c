@@ -534,6 +534,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     Curl_initinfo(data); /* reset session-specific information "variables" */
     Curl_pgrsResetTransferSizes(data);
     Curl_pgrsStart(data, NULL);
+    /* Start rate limiting afresh: a handle reused for another transfer
+       must not carry over the time step and tokens of an earlier one */
+    Curl_rlimit_start(&data->progress.dl.rlimit, Curl_pgrs_now(data), -1);
+    Curl_rlimit_start(&data->progress.ul.rlimit, Curl_pgrs_now(data), -1);
 
     /* In case the handle is reused and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now
