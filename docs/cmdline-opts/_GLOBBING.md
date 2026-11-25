@@ -52,4 +52,7 @@ enclosed within angle brackets after the opening character. Examples:
 
 Setting the same glob name twice is an error.
 
+Starting in curl 8.25.0, ranges can be specified in the other direction, big
+to small, and then it iterates through the numbers or letters in that order.
+
 Switch off globbing with --globoff.

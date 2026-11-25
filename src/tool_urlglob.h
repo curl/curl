@@ -44,14 +44,14 @@ struct URLPattern {
       size_t palloc; /* elem entries allocated */
     } set;
     struct {
-      int min;
-      int max;
+      int start;
+      int stop;
       int letter;
-      unsigned char step;
+      int step;
     } ascii;
     struct {
-      curl_off_t min;
-      curl_off_t max;
+      curl_off_t start;
+      curl_off_t stop;
       curl_off_t idx;
       curl_off_t step;
       int npad;

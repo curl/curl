@@ -170,6 +170,52 @@ static const char * const exp_char_adjacent[] = {
   "ac", "ad", "bc", "bd", NULL
 };
 
+static const char * const exp_char_rev_basic[] = {
+  "http://example.com/c",
+  "http://example.com/b",
+  "http://example.com/a",
+  NULL
+};
+static const char * const exp_char_rev_end[] = {
+  "http://example.com/z",
+  "http://example.com/y",
+  "http://example.com/x",
+  NULL
+};
+static const char * const exp_char_rev_upper[] = {
+  "http://example.com/Z",
+  "http://example.com/Y",
+  "http://example.com/X",
+  NULL
+};
+static const char * const exp_char_rev_step_div[] = {
+  "http://example.com/g",
+  "http://example.com/e",
+  "http://example.com/c",
+  "http://example.com/a",
+  NULL
+};
+static const char * const exp_char_rev_step_nondiv[] = {
+  "http://example.com/f",
+  "http://example.com/d",
+  "http://example.com/b",
+  NULL
+};
+static const char * const exp_char_rev_step_span[] = {
+  "http://example.com/d",
+  "http://example.com/a",
+  NULL
+};
+static const char * const exp_char_rev_named[] = {
+  "http://example.com/r",
+  "http://example.com/q",
+  "http://example.com/p",
+  NULL
+};
+static const char * const exp_char_rev_adjacent[] = {
+  "bd", "bc", "ad", "ac", NULL
+};
+
 static const char * const exp_num_basic[] = {
   "http://example.com/0",
   "http://example.com/1",
@@ -254,6 +300,111 @@ static const char * const exp_num_large[] = {
   "http://example.com/10000000000",
   "http://example.com/10000000001",
   "http://example.com/10000000002",
+  NULL
+};
+
+static const char * const exp_num_rev_basic[] = {
+  "http://example.com/3",
+  "http://example.com/2",
+  "http://example.com/1",
+  "http://example.com/0",
+  NULL
+};
+static const char * const exp_num_rev_span_digits[] = {
+  "http://example.com/10",
+  "http://example.com/9",
+  "http://example.com/8",
+  NULL
+};
+static const char * const exp_num_rev_span_hundred[] = {
+  "http://example.com/101",
+  "http://example.com/100",
+  "http://example.com/99",
+  NULL
+};
+static const char * const exp_num_rev_step_div[] = {
+  "http://example.com/9",
+  "http://example.com/7",
+  "http://example.com/5",
+  "http://example.com/3",
+  "http://example.com/1",
+  NULL
+};
+static const char * const exp_num_rev_step_nondiv[] = {
+  "http://example.com/8",
+  "http://example.com/6",
+  "http://example.com/4",
+  "http://example.com/2",
+  NULL
+};
+static const char * const exp_num_rev_step_span[] = {
+  "http://example.com/5",
+  "http://example.com/1",
+  NULL
+};
+static const char * const exp_num_rev_pad2[] = {
+  "http://example.com/04",
+  "http://example.com/03",
+  "http://example.com/02",
+  "http://example.com/01",
+  NULL
+};
+static const char * const exp_num_rev_pad3[] = {
+  "http://example.com/003",
+  "http://example.com/002",
+  "http://example.com/001",
+  NULL
+};
+static const char * const exp_num_rev_pad3_zero[] = {
+  "http://example.com/002",
+  "http://example.com/001",
+  "http://example.com/000",
+  NULL
+};
+static const char * const exp_num_rev_pad_span[] = {
+  "http://example.com/11",
+  "http://example.com/10",
+  "http://example.com/09",
+  "http://example.com/08",
+  NULL
+};
+static const char * const exp_num_rev_pad_step[] = {
+  "http://example.com/007",
+  "http://example.com/004",
+  "http://example.com/001",
+  NULL
+};
+static const char * const exp_num_rev_named[] = {
+  "http://example.com/02",
+  "http://example.com/01",
+  NULL
+};
+static const char * const exp_num_rev_large[] = {
+  "http://example.com/10000000002",
+  "http://example.com/10000000001",
+  "http://example.com/10000000000",
+  NULL
+};
+
+static const char * const exp_combo_fwd_rev[] = {
+  "http://example.com/a/2",
+  "http://example.com/a/1",
+  "http://example.com/b/2",
+  "http://example.com/b/1",
+  NULL
+};
+static const char * const exp_combo_rev_rev[] = {
+  "http://example.com/b/2",
+  "http://example.com/b/1",
+  "http://example.com/a/2",
+  "http://example.com/a/1",
+  NULL
+};
+static const char * const exp_combo_set_rev[] = {
+  "http://example.com/cat/2",
+  "http://example.com/cat/1",
+  "http://example.com/dog/2",
+  "http://example.com/dog/1",
   NULL
 };
 
@@ -347,6 +498,16 @@ static const struct glob_expand_case expand_cases[] = {
   { "http://example.com/[<letter>p-r]", 3, exp_char_named },
   { "[a-b][c-d]", 4, exp_char_adjacent },
 
+  /* Reverse character ranges */
+  { "http://example.com/[c-a]", 3, exp_char_rev_basic },
+  { "http://example.com/[z-x]", 3, exp_char_rev_end },
+  { "http://example.com/[Z-X]", 3, exp_char_rev_upper },
+  { "http://example.com/[g-a:2]", 4, exp_char_rev_step_div },
+  { "http://example.com/[f-a:2]", 3, exp_char_rev_step_nondiv },
+  { "http://example.com/[d-a:3]", 2, exp_char_rev_step_span },
+  { "http://example.com/[<letter>r-p]", 3, exp_char_rev_named },
+  { "[b-a][d-c]", 4, exp_char_rev_adjacent },
+
   /* Numeric ranges */
   { "http://example.com/[0-3]", 4, exp_num_basic },
   { "http://example.com/[8-10]", 3, exp_num_span_digits },
@@ -363,11 +524,29 @@ static const struct glob_expand_case expand_cases[] = {
   { "http://example.com/[<num>01-02]", 2, exp_num_named },
   { "http://example.com/[10000000000-10000000002]", 3, exp_num_large },
 
+  /* Reverse numeric ranges */
+  { "http://example.com/[3-0]", 4, exp_num_rev_basic },
+  { "http://example.com/[10-8]", 3, exp_num_rev_span_digits },
+  { "http://example.com/[101-99]", 3, exp_num_rev_span_hundred },
+  { "http://example.com/[9-1:2]", 5, exp_num_rev_step_div },
+  { "http://example.com/[8-1:2]", 4, exp_num_rev_step_nondiv },
+  { "http://example.com/[5-1:4]", 2, exp_num_rev_step_span },
+  { "http://example.com/[04-01]", 4, exp_num_rev_pad2 },
+  { "http://example.com/[003-001]", 3, exp_num_rev_pad3 },
+  { "http://example.com/[002-000]", 3, exp_num_rev_pad3_zero },
+  { "http://example.com/[11-08]", 4, exp_num_rev_pad_span },
+  { "http://example.com/[007-001:3]", 3, exp_num_rev_pad_step },
+  { "http://example.com/[<num>02-01]", 2, exp_num_rev_named },
+  { "http://example.com/[10000000002-10000000000]", 3, exp_num_rev_large },
+
   /* Combinations */
   { "{http,https}://example.com/[1-2]", 4, exp_combo_proto_num },
   { "http://example.com/{cat,dog}/[a-b]/[1-2].txt", 8,
     exp_combo_set_char_num },
   { "{a,b}[1-2]{x,y}", 8, exp_combo_no_sep },
+  { "http://example.com/[a-b]/[2-1]", 4, exp_combo_fwd_rev },
+  { "http://example.com/[b-a]/[2-1]", 4, exp_combo_rev_rev },
+  { "http://example.com/{cat,dog}/[2-1]", 4, exp_combo_set_rev },
 
   /* Literals, IPv6, Escaped characters */
   { "http://example.com/index.html", 1, exp_lit_simple },
@@ -401,22 +580,28 @@ static const struct glob_error_case error_cases[] = {
   { "http://example.com/[1-10", CURLE_URL_MALFORMAT, "bad range", 25 },
   { "http://example.com/[a-", CURLE_URL_MALFORMAT, "bad range", 21 },
   { "http://example.com/[a-c", CURLE_URL_MALFORMAT, "bad range", 21 },
-  { "http://example.com/[z-a]", CURLE_URL_MALFORMAT, "bad range", 25 },
   { "http://example.com/[a-Z]", CURLE_URL_MALFORMAT, "bad range", 25 },
+  { "http://example.com/[Z-a]", CURLE_URL_MALFORMAT, "bad range", 25 },
   { "http://example.com/[A-z]", CURLE_URL_MALFORMAT, "bad range", 25 },
+  { "http://example.com/[z-A]", CURLE_URL_MALFORMAT, "bad range", 25 },
   { "http://example.com/[a-z:0]", CURLE_URL_MALFORMAT, "bad range", 27 },
+  { "http://example.com/[z-a:0]", CURLE_URL_MALFORMAT, "bad range", 27 },
   { "http://example.com/[a-c:5]", CURLE_URL_MALFORMAT, "bad range", 27 },
+  { "http://example.com/[c-a:5]", CURLE_URL_MALFORMAT, "bad range", 27 },
   { "http://example.com/[b-b:2]", CURLE_URL_MALFORMAT, "bad range", 27 },
 
   /* Numeric range errors */
-  { "http://example.com/[10-1]", CURLE_URL_MALFORMAT, "bad range", 26 },
   { "http://example.com/[1-10:0]", CURLE_URL_MALFORMAT, "bad range", 28 },
+  { "http://example.com/[10-1:0]", CURLE_URL_MALFORMAT, "bad range", 28 },
   { "http://example.com/[1-5:10]", CURLE_URL_MALFORMAT, "bad range", 28 },
+  { "http://example.com/[5-1:10]", CURLE_URL_MALFORMAT, "bad range", 28 },
   { "http://example.com/[3-3:2]", CURLE_URL_MALFORMAT, "bad range", 27 },
   { "http://example.com/[!-~]", CURLE_URL_MALFORMAT,
     "bad range specification", 21 },
   { "http://example.com/[#-&]", CURLE_URL_MALFORMAT,
     "bad range specification", 21 },
+  { "http://example.com/[9223372036854775808-0]", CURLE_URL_MALFORMAT,
+    "bad range", 21 },
 
   /* Named glob errors */
   { "http://example.com/{<id>a,b}/[<id>1-2]", CURLE_URL_MALFORMAT,
@@ -472,7 +657,13 @@ static const struct glob_match_case match_cases[] = {
 
   /* Literal URL without globbing */
   { "http://example.com/page.html", NULL,
-    "saved_#1.html", "saved_#1.html", CURLE_OK }
+    "saved_#1.html", "saved_#1.html", CURLE_OK },
+
+  /* Reverse range references */
+  { "http://example.com/[02-01]", NULL,
+    "file_#1.dat", "file_02.dat", CURLE_OK },
+  { "http://example.com/[<rev>3-1]", NULL,
+    "file_#<rev>.txt", "file_3.txt", CURLE_OK }
 };
 
 static CURLcode test_tool2155(const char *arg)
