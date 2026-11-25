@@ -1033,7 +1033,7 @@ static CURLproxycode socks5_connect(struct Curl_cfilter *cf,
   *pretry = FALSE;
 
 process_state:
-  CURL_TRC_CF(data, cf, "socks5_connect, state=%u", sx->state);
+  CURL_TRC_CF(data, cf, "socks5_connect, state=%d", (int)sx->state);
   switch(sx->state) {
   case SOCKS_ST_INIT:
     sx->version = 5;
