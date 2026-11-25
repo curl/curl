@@ -383,6 +383,7 @@ TESTCASES = \
   test379 \
   test380 \
   test381 \
+  test382 \
   test383 \
   test384 \
   test385 \
@@ -465,6 +466,7 @@ TESTCASES = \
   test462 \
   test463 \
   test464 \
+  test465 \
   test467 \
   test468 \
   test469 \
@@ -688,6 +690,7 @@ TESTCASES = \
   test691 \
   test692 \
   test693 \
+  test694 \
   test695 \
   test696 \
   test697 \
@@ -1582,11 +1585,10 @@ TESTCASES = \
   test1607 \
   test1608 \
   test1609 \
-  test1610 \
-  test1612 \
+  \
   test1613 \
   test1614 \
-  test1615 \
+  \
   test1616 \
   test1617 \
   test1618 \
@@ -1709,6 +1711,7 @@ TESTCASES = \
   test1800 \
   test1801 \
   test1802 \
+  test1816 \
   test1827 \
   test1847 \
   test1848 \
@@ -1740,6 +1743,7 @@ TESTCASES = \
   test1920 \
   test1921 \
   test1922 \
+  test1923 \
   \
   test1933 \
   test1934 \
@@ -1757,6 +1761,7 @@ TESTCASES = \
   test1946 \
   test1947 \
   test1948 \
+  test1949 \
   test1955 \
   test1956 \
   test1957 \
@@ -1883,6 +1888,8 @@ TESTCASES = \
   test2108 \
   test2109 \
   test2110 \
+  test2111 \
+  \
   test2113 \
   test2114 \
   test2115 \
@@ -1890,6 +1897,10 @@ TESTCASES = \
   test2117 \
   test2118 \
   test2119 \
+  test2120 \
+  test2121 \
+  \
+  test2155 \
   \
   test2173 \
   \
@@ -1969,6 +1980,7 @@ TESTCASES = \
   test2622 \
   test2640 \
   test2641 \
+  test2642 \
   test2700 \
   test2701 \
   test2702 \
@@ -1994,6 +2006,7 @@ TESTCASES = \
   test2722 \
   test2723 \
   test2724 \
+  test2785 \
   test2805 \
   test2824 \
   test2885 \
@@ -2048,6 +2061,8 @@ TESTCASES = \
   test3045 \
   test3046 \
   test3048 \
+  test3049 \
+  test3050 \
   \
   test3100 \
   test3101 \
@@ -2058,6 +2073,7 @@ TESTCASES = \
   test3106 \
   test3107 \
   test3109 \
+  test3150 \
   test3200 \
   test3201 \
   test3202 \
@@ -2109,8 +2125,10 @@ TESTCASES = \
   test3555 \
   test3595 \
   test3596 \
+  test3598 \
   test3611 \
   test3612 \
+  test3903 \
   test3980 \
   test3990 \
   test3991 \
@@ -2125,8 +2143,12 @@ TESTCASES = \
   test4644 \
   test4656 \
   test4657 \
+  test4658 \
+  test4702 \
   test4781 \
   test4782 \
+  test4997 \
+  test4998 \
   test5000 \
   test5001 \
   test5002 \
@@ -2158,7 +2180,13 @@ TESTCASES = \
   test5028 \
   test5029 \
   test5030 \
-  test5031
+  test5031 \
+  test5032 \
+  test5033 \
+  test5034 \
+  test5035 \
+  test5036 \
+  test5037
 
 EXTRA_DIST = \
   $(TESTCASES) \

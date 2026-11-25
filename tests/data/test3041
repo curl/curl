@@ -4,58 +4,66 @@
 <keywords>
 HTTP
 HTTP GET
-Content-Disposition
+followlocation
+-O
 -J
-trailer
+--output-dir
+--remote-time
 </keywords>
 </info>
 
 <reply>
-<data nocheck="yes">
-HTTP/1.1 200 OK%CR
-Transfer-Encoding: chunked%CR
-Trailer: Content-Disposition%CR
-Connection: close%CR
-%CR
-5%CR
-HELLO%CR
-0%CR
-Content-Disposition: attachment; filename="adv%TESTNUMBER"%CR
-%CR
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 302 Found swsbounce
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+Location: /existing%TESTNUMBER
+Content-Length: 0
+
 </data>
+<data1 crlf="headers" nocheck="yes">
+HTTP/1.1 304 Not Modified swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Connection: close
+
+</data1>
 </reply>
 
 <client>
 <server>
 http
 </server>
-<features>
-http
-</features>
 <name>
-HTTP GET -O -J, Content-Disposition as trailer must not clobber file
+-O -J -L -R must not change timestamp of existing file on 304
 </name>
-<file name="%LOGDIR/adv%TESTNUMBER">
-ORIGINAL-CONTENT-S2
+<file name="%LOGDIR/existing%TESTNUMBER">
+keep-me
 </file>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/adv%TESTNUMBER -O -J --output-dir %LOGDIR
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O -J -L -R --output-dir %LOGDIR
 </command>
 </client>
 
 <verify>
 <protocol crlf="headers">
-GET /adv%TESTNUMBER HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /existing%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<errorcode>
-23
-</errorcode>
-<file name="%LOGDIR/adv%TESTNUMBER">
-ORIGINAL-CONTENT-S2
+<file name="%LOGDIR/existing%TESTNUMBER">
+keep-me
 </file>
+<postcheck>
+%PERL -e 'exit((stat("%LOGDIR/existing%TESTNUMBER"))[9] == 960898200)'
+</postcheck>
 </verify>
 </testcase>

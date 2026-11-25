@@ -347,7 +347,7 @@ static bool is_outfile_auto_resumable(struct OperationConfig *config,
   return config->use_resume && config->resume_from_current &&
     config->resume_from >= 0 && outs->init == config->resume_from &&
     outs->bytes > 0 && outs->filename && outs->regular_file && outs->fopened &&
-    outs->stream && !ferror(outs->stream) &&
+    outs->stream && !ferror(outs->stream) && !config->encoding &&
     !config->customrequest && !per->uploadfile &&
     (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
      config->httpreq == TOOL_HTTPREQ_GET) &&
@@ -778,15 +778,15 @@ static CURLcode post_close_output(struct per_transfer *per,
       else
         warnf("Skipping removal; not a regular file: %s", outs->filename);
     }
-  }
-
-  /* File time can only be set _after_ the file has been closed */
-  if(!result && config->remote_time && outs->regular_file && outs->filename) {
-    /* Ask libcurl if we got a remote file time */
-    curl_off_t filetime = -1;
-    curl_easy_getinfo(per->curl, CURLINFO_FILETIME_T, &filetime);
-    if(filetime != -1)
-      setfiletime(filetime, outs->filename);
+    /* File time can only be set _after_ the file has been closed */
+    else if(!result && config->remote_time && outs->regular_file &&
+            outs->filename) {
+      /* Ask libcurl if we got a remote file time */
+      curl_off_t filetime = -1;
+      curl_easy_getinfo(per->curl, CURLINFO_FILETIME_T, &filetime);
+      if(filetime != -1)
+        setfiletime(filetime, outs->filename);
+    }
   }
   return result;
 }
@@ -1911,13 +1911,17 @@ static CURLcode parallel_event(struct parastate *s)
 
     if(!s->still_running && s->more_transfers) {
       curl_off_t nxfers;
+      CURLcode result_transfer;
       /* None are running, but there may be more ready to run. Try
        * to add more when possible. */
-      s->result = add_parallel_transfers(s->multi, s->share,
-                                         &s->more_transfers,
-                                         &s->added_transfers);
-      if(s->result)
+      result_transfer = add_parallel_transfers(s->multi, s->share,
+                                               &s->more_transfers,
+                                               &s->added_transfers);
+      if(result_transfer) {
+        if(!s->result)
+          s->result = result_transfer;
         break;
+      }
       if(s->more_transfers) {
         /* There are still more transfers, so not all were added. If we
          * did not add *any*, it means there is nothing to do until time
@@ -2136,11 +2140,15 @@ static CURLcode parallel_transfers(CURLSH *share)
         }
       }
       else if(s->more_transfers) {
-        s->result = add_parallel_transfers(s->multi, s->share,
-                                           &s->more_transfers,
-                                           &s->added_transfers);
-        if(s->result)
+        CURLcode result_transfer;
+        result_transfer = add_parallel_transfers(s->multi, s->share,
+                                                 &s->more_transfers,
+                                                 &s->added_transfers);
+        if(result_transfer) {
+          if(!s->result)
+            s->result = result_transfer;
           break;
+        }
       }
 
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
