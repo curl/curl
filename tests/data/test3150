@@ -38,7 +38,7 @@ ok
 http
 </server>
 <name>
-parallel transfers preserve failure exit code when more transfers remain
+parallel transfers keep failure exit code when more remain
 </name>
 <command option="no-output,no-include">
 --parallel --parallel-max 1 --fail -o %LOGDIR/out1-%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -o %LOGDIR/out2-%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 -o %LOGDIR/out3-%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003
