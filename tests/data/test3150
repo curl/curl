@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--parallel
+--fail
+</keywords>
+</info>
+
+<reply>
+<data1 crlf="headers" nocheck="yes">
+HTTP/1.1 404 Not Found
+Content-Length: 5
+Connection: close
+
+nope
+</data1>
+<data2 crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 3
+Connection: close
+
+ok
+</data2>
+<data3 crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 3
+Connection: close
+
+ok
+</data3>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+parallel transfers preserve failure exit code when more transfers remain
+</name>
+<command option="no-output,no-include">
+--parallel --parallel-max 1 --fail -o %LOGDIR/out1-%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -o %LOGDIR/out2-%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 -o %LOGDIR/out3-%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0003
+</command>
+</client>
+
+<verify>
+<errorcode>
+22
+</errorcode>
+<protocol crlf="headers">
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file1 name="%LOGDIR/out2-%TESTNUMBER">
+ok
+</file1>
+<file2 name="%LOGDIR/out3-%TESTNUMBER">
+ok
+</file2>
+</verify>
+</testcase>

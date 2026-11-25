@@ -403,6 +403,7 @@ static void headers_reset(struct Curl_easy *data)
 {
   Curl_llist_init(&data->state.httphdrs, NULL);
   data->state.nh_count = 0;
+  memset(data->state.headerout, 0, sizeof(data->state.headerout));
 }
 
 struct hds_cw_collect_ctx {

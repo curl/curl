@@ -52,7 +52,7 @@ physical line. Each line in the file has the following format:
 
 [host] is the domain name for the entry and the name is dot-prefixed if it is
 an entry valid for all subdomains to the name as well or only for the exact
-name.
+name. The [host] field, including any leading dot, must not exceed 2048 bytes.
 
 [stamp] is the time (in UTC) when the entry expires and it uses the format
 "YYYYMMDD HH:MM:SS".

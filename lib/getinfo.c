@@ -190,7 +190,9 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_RTSP_SESSION_ID:
 #ifndef CURL_DISABLE_RTSP
-    *param_charp = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
+    *param_charp = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID) ?
+      CURL_EASY_STR(data, STRING_RTSP_SESSION_ID) :
+      data->state.session_id;
 #else
     *param_charp = NULL;
 #endif
@@ -626,7 +628,7 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
     /* we are exposing a pointer to internal memory with unknown
      * lifetime here. */
     *tsip = tsi;
-    if(!Curl_conn_get_ssl_info(data, data->conn, FIRSTSOCKET, query, tsi)) {
+    if(!Curl_conn_get_ssl_info(data, data->conn, query, tsi)) {
       tsi->backend = Curl_ssl_backend();
       tsi->internals = NULL;
     }

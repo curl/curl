@@ -97,7 +97,7 @@ struct Curl_schannel_cred {
   CredHandle cred_handle;
   TCHAR *sni_hostname;
   HCERTSTORE client_cert_store;
-  int refcount;
+  LONG refcount; /* atomic, use Interlocked*() */
 };
 
 struct Curl_schannel_ctxt {
@@ -143,7 +143,7 @@ struct schannel_ssl_backend_data {
 };
 
 struct schannel_cert_share {
-  unsigned char CAinfo_blob_digest[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t CAinfo_blob_digest[CURL_SHA256_DIGEST_LENGTH];
   size_t CAinfo_blob_size;           /* CA info blob size */
   char *CAfile;                      /* CAfile path used to generate
                                         certificate store */

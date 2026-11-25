@@ -36,6 +36,7 @@ This IS the real page!
 !SSPI
 crypto
 digest
+md5
 </features>
 <server>
 http

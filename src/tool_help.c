@@ -399,8 +399,9 @@ void tool_list_engines(void)
 
   puts("Build-time engines:");
   if(engines) {
-    for(; engines; engines = engines->next)
-      curl_mprintf("  %s\n", engines->data);
+    const struct curl_slist *e;
+    for(e = engines; e; e = e->next)
+      curl_mprintf("  %s\n", e->data);
   }
   else {
     puts("  <none>");

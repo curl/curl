@@ -405,7 +405,8 @@ static CURLcode file_upload(struct Curl_easy *data,
     result = Curl_pgrsUpdate(data);
 
 out:
-  curlx_close(fd);
+  if(curlx_close(fd) && !result)
+    result = CURLE_WRITE_ERROR;
   Curl_multi_xfer_ulbuf_release(data, xfer_ulbuf);
 
   return result;
@@ -463,6 +464,158 @@ static CURLcode win32_file_list(struct Curl_easy *data, const char *path)
 }
 #endif
 
+static CURLcode file_list_dir(struct Curl_easy *data, const char *path)
+{
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+  return win32_file_list(data, path);
+#elif defined(HAVE_OPENDIR)
+  DIR *dir = opendir(path);
+  struct dirent *entry;
+  CURLcode result = CURLE_OK;
+
+  if(!dir)
+    return CURLE_READ_ERROR;
+
+  while((entry = readdir(dir))) {
+    if(entry->d_name[0] != '.') {
+      result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                 entry->d_name, strlen(entry->d_name));
+      if(result)
+        break;
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
+      if(result)
+        break;
+    }
+  }
+  closedir(dir);
+  return result;
+#else
+  (void)path;
+  failf(data, "Directory listing not yet implemented on this platform.");
+  return CURLE_READ_ERROR;
+#endif
+}
+
+static CURLcode file_check_eof(struct Curl_easy *data, int fd,
+                               const curlx_struct_stat *initial,
+                               curl_off_t expected_size)
+{
+  if(expected_size &&
+     ((curl_off_t)initial->st_size - data->state.resume_from >
+      data->progress.dl.cur_size)) {
+    curlx_struct_stat current;
+    /* Virtual files can report a size larger than their readable data. */
+    if(!curlx_fstat(fd, &current) && (current.st_size < initial->st_size)) {
+      failf(data, "File ended before the expected size");
+      return CURLE_PARTIAL_FILE;
+    }
+  }
+  return CURLE_OK;
+}
+
+static CURLcode file_send_headers(struct Curl_easy *data,
+                                  curl_off_t expected_size,
+                                  const curlx_struct_stat *statbuf)
+{
+  CURLcode result;
+  time_t filetime;
+  struct tm buffer;
+  const struct tm *tm = &buffer;
+  char header[80];
+  int headerlen;
+  static const char accept_ranges[] = { "Accept-ranges: bytes\r\n" };
+
+  if(expected_size >= 0) {
+    headerlen =
+      curl_msnprintf(header, sizeof(header),
+                     "Content-Length: %" FMT_OFF_T "\r\n", expected_size);
+    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+    if(result)
+      return result;
+
+    result = Curl_client_write(data, CLIENTWRITE_HEADER,
+                               accept_ranges, CURL_CSTRLEN(accept_ranges));
+    if(result)
+      return result;
+  }
+
+  filetime = (time_t)statbuf->st_mtime;
+  result = curlx_gmtime(filetime, &buffer);
+  if(result)
+    return result;
+
+  /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
+  headerlen =
+    curl_msnprintf(header, sizeof(header),
+                   "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                   Curl_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
+                   tm->tm_mday,
+                   Curl_month[tm->tm_mon],
+                   tm->tm_year + 1900,
+                   tm->tm_hour,
+                   tm->tm_min,
+                   tm->tm_sec);
+  result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+  if(!result)
+    /* end of headers */
+    result = Curl_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
+  if(result)
+    return result;
+
+  /* set the file size to make it available post transfer */
+  Curl_pgrsSetDownloadSize(data, expected_size);
+  return CURLE_OK;
+}
+
+static CURLcode file_read(struct Curl_easy *data, int fd,
+                          curl_off_t expected_size,
+                          bool size_known,
+                          const curlx_struct_stat *statbuf)
+{
+  char *xfer_buf;
+  size_t xfer_blen;
+  CURLcode result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
+  if(result)
+    return result;
+
+  while(!result) {
+    ssize_t nread;
+    /* Do not fill a whole buffer if we want less than all data */
+    size_t bytestoread;
+
+    if(size_known) {
+      bytestoread = (expected_size < (curl_off_t)(xfer_blen - 1)) ?
+        curlx_sotouz(expected_size) : (xfer_blen - 1);
+    }
+    else
+      bytestoread = xfer_blen - 1;
+
+    nread = read(fd, xfer_buf, bytestoread);
+    if(nread < 0)
+      result = CURLE_READ_ERROR;
+    else if(!nread && size_known)
+      result = file_check_eof(data, fd, statbuf, expected_size);
+
+    if(nread > 0)
+      xfer_buf[nread] = 0;
+
+    if(nread <= 0 || (size_known && (expected_size == 0)))
+      break;
+
+    if(size_known)
+      expected_size -= nread;
+
+    result = Curl_client_write(data, CLIENTWRITE_BODY, xfer_buf, nread);
+    if(result)
+      break;
+
+    result = Curl_pgrsCheck(data);
+  }
+
+  Curl_multi_xfer_buf_release(data, xfer_buf);
+  return result;
+}
+
 /*
  * file_do() is the protocol-specific function for the do-phase, separated
  * from the connect-phase above. Other protocols merely setup the transfer in
@@ -484,8 +637,6 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   bool size_known;
   bool fstated = FALSE;
   int fd;
-  char *xfer_buf;
-  size_t xfer_blen;
 
   *done = TRUE; /* unconditionally */
   if(!file)
@@ -513,52 +664,9 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     return CURLE_OK;
 
   if(fstated) {
-    time_t filetime;
-    struct tm buffer;
-    const struct tm *tm = &buffer;
-    char header[80];
-    int headerlen;
-    static const char accept_ranges[] = { "Accept-ranges: bytes\r\n" };
-    if(expected_size >= 0) {
-      headerlen =
-        curl_msnprintf(header, sizeof(header),
-                       "Content-Length: %" FMT_OFF_T "\r\n", expected_size);
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
-      if(result)
-        return result;
-
-      result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 accept_ranges, CURL_CSTRLEN(accept_ranges));
-      if(result != CURLE_OK)
-        return result;
-    }
-
-    filetime = (time_t)statbuf.st_mtime;
-    result = curlx_gmtime(filetime, &buffer);
-    if(result)
+    result = file_send_headers(data, expected_size, &statbuf);
+    if(result || data->req.no_body)
       return result;
-
-    /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-    headerlen =
-      curl_msnprintf(header, sizeof(header),
-                     "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-                     Curl_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
-                     tm->tm_mday,
-                     Curl_month[tm->tm_mon],
-                     tm->tm_year + 1900,
-                     tm->tm_hour,
-                     tm->tm_min,
-                     tm->tm_sec);
-    result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
-    if(!result)
-      /* end of headers */
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
-    if(result)
-      return result;
-    /* set the file size to make it available post transfer */
-    Curl_pgrsSetDownloadSize(data, expected_size);
-    if(data->req.no_body)
-      return CURLE_OK;
   }
 
   /* Check whether file range has been specified */
@@ -621,81 +729,14 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
-  if(result)
-    goto out;
-
-  if(!file->is_dir) {
-    while(!result) {
-      ssize_t nread;
-      /* Do not fill a whole buffer if we want less than all data */
-      size_t bytestoread;
-
-      if(size_known) {
-        bytestoread = (expected_size < (curl_off_t)(xfer_blen - 1)) ?
-          curlx_sotouz(expected_size) : (xfer_blen - 1);
-      }
-      else
-        bytestoread = xfer_blen - 1;
-
-      nread = read(fd, xfer_buf, bytestoread);
-
-      if(nread > 0)
-        xfer_buf[nread] = 0;
-
-      if(nread <= 0 || (size_known && (expected_size == 0)))
-        break;
-
-      if(size_known)
-        expected_size -= nread;
-
-      result = Curl_client_write(data, CLIENTWRITE_BODY, xfer_buf, nread);
-      if(result)
-        goto out;
-
-      result = Curl_pgrsCheck(data);
-      if(result)
-        goto out;
-    }
-  }
-  else {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-    result = win32_file_list(data, file->path);
-    if(result)
-      goto out;
-#elif defined(HAVE_OPENDIR)
-    DIR *dir = opendir(file->path);
-    struct dirent *entry;
-
-    if(!dir) {
-      result = CURLE_READ_ERROR;
-      goto out;
-    }
-    else {
-      while((entry = readdir(dir))) {
-        if(entry->d_name[0] != '.') {
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
-                   entry->d_name, strlen(entry->d_name));
-          if(result)
-            break;
-          result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
-          if(result)
-            break;
-        }
-      }
-      closedir(dir);
-    }
-#else
-    failf(data, "Directory listing not yet implemented on this platform.");
-    result = CURLE_READ_ERROR;
-#endif
-  }
+  if(!file->is_dir)
+    result = file_read(data, fd, expected_size, size_known, &statbuf);
+  else
+    result = file_list_dir(data, file->path);
 
   if(!result)
     result = Curl_pgrsUpdate(data);
 
-out:
-  Curl_multi_xfer_buf_release(data, xfer_buf);
   return result;
 }
 

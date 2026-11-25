@@ -81,7 +81,7 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
                                 struct easy_pollset *ps)
 {
   /* write mode */
-  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
+  return Curl_pollset_add_out(data, ps, data->conn->chain.sock);
 }
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
@@ -353,6 +353,8 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
 
   b->session_id = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
+  if(!b->session_id)
+    b->session_id = data->state.session_id;
 
   /* Stream URI. Default to server '*' if not specified */
   if(CURL_EASY_STR(data, STRING_RTSP_STREAM_URI))
@@ -397,7 +399,7 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
   }
 
   /* setup the authentication headers */
-  result = Curl_http_output_auth(data, conn, b->request, HTTPREQ_GET,
+  result = Curl_http_output_auth(data, conn, HTTPREQ_GET, b->request,
                                  b->stream_uri, NULL, FALSE);
   if(result)
     return result;
@@ -466,7 +468,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     goto out;
 
   if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
+    Curl_xfer_setup_recv(data, -1);
     goto out;
   }
 
@@ -548,7 +550,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       goto out;
   }
 
-  result = Curl_add_custom_headers(data, FALSE, HTTPVERSION, &req_buffer);
+  result = Curl_add_custom_headers(data, HTTPVERSION, &req_buffer);
   if(result)
     goto out;
 
@@ -561,7 +563,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
+  Curl_xfer_setup_sendrecv(data, -1);
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer, HTTPVERSION);
@@ -1017,9 +1019,12 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
       end++;
     idlen = end - start;
 
-    str = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
-    if(str) {
+    if(!data->state.session_id)
+      str = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
+    else
+      str = data->state.session_id;
 
+    if(str) {
       /* If the Session ID is set, then compare */
       if(strlen(str) != idlen ||
          strncmp(start, str, idlen)) {
@@ -1029,13 +1034,13 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
       }
     }
     else {
-      /* If the Session ID is not set, and we find it in a response, then set
-       * it.
-       * Copy the id substring into a new buffer */
+      /* If the Session ID is not set for the handle, and we find it in a
+       * response, then remember it.
+       */
       void *mem = curlx_memdup0(start, idlen);
-      if(!mem ||
-         CURL_EASY_STR_SETN(data, STRING_RTSP_SESSION_ID, mem))
+      if(!mem)
         return CURLE_OUT_OF_MEMORY;
+      data->state.session_id = mem;
       Curl_peer_link(&data->state.rtsp_session_origin, data->state.origin);
     }
   }

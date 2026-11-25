@@ -561,6 +561,7 @@ struct zstd_writer {
   struct Curl_cwriter super;
   ZSTD_DStream *zds; /* State structure for zstd. */
   char buffer[DECOMPRESS_BUFFER_SIZE];
+  BIT(incomplete);
 };
 
 #ifdef ZSTD_STATIC_LINKING_ONLY
@@ -633,17 +634,31 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
     if(ZSTD_isError(errorCode)) {
       return CURLE_BAD_CONTENT_ENCODING;
     }
+    zp->incomplete = (errorCode != 0);
     if(out.pos > 0) {
       result = Curl_cwriter_write(data, writer->next, type,
                                   zp->buffer, out.pos);
       if(result)
         break;
     }
-    if((in.pos == nbytes) && (out.pos < out.size))
+    /* Do not start another frame when the completed frame fills the output. */
+    if((in.pos == nbytes) && (!errorCode || (out.pos < out.size)))
       break;
   }
 
   return result;
+}
+
+static CURLcode zstd_do_flush(struct Curl_easy *data,
+                              struct Curl_cwriter *writer, bool eos)
+{
+  struct zstd_writer *zp = (struct zstd_writer *)writer;
+
+  if(eos && zp->incomplete) {
+    failf(data, "Zstd stream ended before completion");
+    return CURLE_BAD_CONTENT_ENCODING;
+  }
+  return Curl_cwriter_flush(data, writer->next, eos);
 }
 
 static void zstd_do_close(struct Curl_easy *data,
@@ -664,7 +679,7 @@ static const struct Curl_cwtype zstd_encoding = {
   CURL_CW_FLAG_BLOWUP,
   zstd_do_init,
   zstd_do_write,
-  Curl_cwriter_def_flush,
+  zstd_do_flush,
   zstd_do_close,
   sizeof(struct zstd_writer)
 };

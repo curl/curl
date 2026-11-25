@@ -27,6 +27,7 @@
 
 struct Curl_addrinfo;
 struct Curl_cfilter;
+struct Curl_cfchain;
 struct Curl_easy;
 struct connectdata;
 struct Curl_sockaddr_ex;
@@ -73,12 +74,11 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
  * used in happy eyeballing. Once selected for use, its `_active()`
  * method needs to be called.
  */
-CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_tcp_create(struct Curl_cfchain *chain,
                             struct Curl_easy *data,
                             struct Curl_peer *origin,
                             struct Curl_peer *peer,
                             uint8_t transport_peer,
-                            struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
                             struct Curl_peer *tunnel_peer,
                             uint8_t tunnel_transport);
@@ -90,12 +90,11 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
  * used in happy eyeballing. Once selected for use, its `_active()`
  * method needs to be called.
  */
-CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_udp_create(struct Curl_cfchain *chain,
                             struct Curl_easy *data,
                             struct Curl_peer *origin,
                             struct Curl_peer *peer,
                             uint8_t transport_peer,
-                            struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
                             struct Curl_peer *tunnel_peer,
                             uint8_t tunnel_transport);
@@ -107,12 +106,11 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
  * used in happy eyeballing. Once selected for use, its `_active()`
  * method needs to be called.
  */
-CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
+CURLcode Curl_cf_unix_create(struct Curl_cfchain *chain,
                              struct Curl_easy *data,
                              struct Curl_peer *origin,
                              struct Curl_peer *peer,
                              uint8_t transport_peer,
-                             struct connectdata *conn,
                              struct Curl_sockaddr_ex *addr,
                              struct Curl_peer *tunnel_peer,
                              uint8_t tunnel_transport);
@@ -121,16 +119,12 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
  * Creates a cfilter that keeps a listening socket.
  */
 CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int8_t sockindex,
+                                  struct Curl_cfchain *chain,
                                   curl_socket_t *s);
 
-/**
- * Return TRUE iff the last filter at `sockindex` was set via
- * Curl_conn_tcp_listen_set().
- */
-bool Curl_conn_is_tcp_listen(struct Curl_easy *data,
-                             int8_t sockindex);
+/* TRUE if the last filter in the chain was set via
+ * Curl_conn_tcp_listen_set(). */
+bool Curl_cfchain_is_tcp_listen(struct Curl_cfchain *chain);
 
 /**
  * Peek at the socket and remote ip/port the socket filter is using.

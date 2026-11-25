@@ -232,6 +232,9 @@ static CURLFORMcode formadd_check(struct FormInfo *first_form,
        ((form->flags & HTTPPOST_FILENAME) &&
         (form->flags & HTTPPOST_PTRCONTENTS)) ||
 
+       ((form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE)) &&
+        !Curl_bufref_ptr(&form->value)) ||
+
        (!form->buffer &&
         (form->flags & HTTPPOST_BUFFER) &&
         (form->flags & HTTPPOST_PTRBUFFER)) ||

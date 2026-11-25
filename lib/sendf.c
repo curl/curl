@@ -519,10 +519,11 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
   return NULL;
 }
 
-CURLcode Curl_cwriter_unpause(struct Curl_easy *data)
+CURLcode Curl_cwriter_unpause(struct Curl_easy *data, bool flush)
 {
   data->req.writer.paused = FALSE;
-  return Curl_cwriter_flush(data, data->req.writer.stack, FALSE);
+  return (flush && data->req.writer.stack) ?
+    Curl_cwriter_flush(data, data->req.writer.stack, FALSE) : CURLE_OK;
 }
 
 CURLcode Curl_creader_read(struct Curl_easy *data,
@@ -637,6 +638,7 @@ struct cr_in_ctx {
   BIT(errored);
   BIT(has_used_cb);
   BIT(is_paused);
+  BIT(use_fread);
 };
 
 static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
@@ -644,6 +646,7 @@ static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
   struct cr_in_ctx *ctx = reader->ctx;
   ctx->read_cb = data->state.fread_func;
   ctx->cb_user_data = data->state.in;
+  ctx->use_fread = !data->set.is_fread_set;
   ctx->total_len = -1;
   ctx->read_len = 0;
   return CURLE_OK;
@@ -683,6 +686,14 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     nread = ctx->read_cb(buf, 1, blen, ctx->cb_user_data);
     CURL_CBAPI_END(&guard);
     ctx->has_used_cb = TRUE;
+    if(ctx->use_fread && ferror((FILE *)ctx->cb_user_data)) {
+      failf(data, "Error reading upload data");
+      ctx->errored = TRUE;
+      ctx->error_result = CURLE_READ_ERROR;
+      *pnread = 0;
+      *peos = FALSE;
+      return CURLE_READ_ERROR;
+    }
   }
 
   switch(nread) {
@@ -1221,7 +1232,8 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
     data->req.reader_started = TRUE;
   }
 
-  if(Curl_rlimit_active(&data->progress.ul.rlimit)) {
+  if(Curl_rlimit_active(&data->progress.ul.rlimit) &&
+     !(data->conn->scheme->flags & PROTOPT_NONETWORK)) {
     curl_off_t ul_avail = Curl_rlimit_avail(&data->progress.ul.rlimit, NULL);
     if(ul_avail <= 0) {
       result = CURLE_OK;

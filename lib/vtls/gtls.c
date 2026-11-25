@@ -772,7 +772,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                     &sc_session);
   /* call took ownership of `sdata` and `qtp_clone` */
   if(!result && psession &&  /* return a duplicate if asked for and FTP */
-     (cf->conn->scheme->family == CURLPROTO_FTP))
+     (CF_CONN(cf)->scheme->family == CURLPROTO_FTP))
     result = Curl_ssl_session_dup(sc_session, &sc_dup);
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -1091,7 +1091,7 @@ static CURLcode gtls_apply_session(
       infof(data, "SSL reusing session with ALPN '%s'",
             scs->alpn ? scs->alpn : "-");
       if(conn_config->earlydata && scs->alpn &&
-         !cf->conn->bits.connect_only) {
+         !CF_CONN(cf)->bits.connect_only) {
         bool do_early_data = FALSE;
         if(sess_reuse_cb) {
           result = sess_reuse_cb(cf, data, alpns, scs, &do_early_data);
@@ -1131,11 +1131,11 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   DEBUGASSERT(gctx);
   Curl_alpn_copy(&alpns, alpns_requested);
 
-  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+  if(!CF_IS_PRIMARY(cf) && !(cf->cft->flags & CF_TYPE_PROXY)) {
     /* FTP is a bitch. On TLS secured transfers, it is a common server
      * option to require the client to use the SAME TLS session as on
      * the control connection or it fails the request. See #22225. */
-    scs = Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    scs = Curl_ssl_get_primary_session(data, cf->cft);
     if(scs) {
       result = gtls_apply_session(gctx, cf, data, peer, &alpns,
                                   sess_reuse_cb, scs, &gtls_session_setup);
@@ -1633,7 +1633,6 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   long * const certverifyresult = &ssl_config->certverifyresult;
 
-  (void)cf;
   /* This function returns the peer's raw certificate (chain) as sent by
      the peer. These certificates are in raw format (DER encoded for
      X.509). In case of a X.509 then a certificate list may be present. The
@@ -2238,28 +2237,6 @@ static CURLcode gtls_random(struct Curl_easy *data,
   return rc ? CURLE_FAILED_INIT : CURLE_OK;
 }
 
-static CURLcode gtls_sha256sum(const unsigned char *input,
-                               size_t len,
-                               unsigned char *sha256sum, /* output */
-                               size_t sha256len)
-{
-  struct sha256_ctx SHA256pw;
-  sha256_init(&SHA256pw);
-  do {
-    unsigned int ilen = (unsigned int)CURLMIN(len, UINT_MAX);
-    sha256_update(&SHA256pw, ilen, input);
-    len -= ilen;
-    input += ilen;
-  } while(len);
-#if NETTLE_VERSION_MAJOR >= 4
-  (void)sha256len;
-  sha256_digest(&SHA256pw, sha256sum);
-#else
-  sha256_digest(&SHA256pw, (unsigned int)sha256len, sha256sum);
-#endif
-  return CURLE_OK;
-}
-
 static bool gtls_cert_status_request(void)
 {
   return TRUE;
@@ -2303,7 +2280,6 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   gtls_close,                    /* close_one */
   NULL,                          /* close_all */
   NULL,                          /* engines_list */
-  gtls_sha256sum,                /* sha256sum */
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */
   NULL,                          /* get_channel_binding */

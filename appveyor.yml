@@ -65,7 +65,7 @@ environment:
       CMAKE_SHA256: 4c4840e2dc2bf82e8a16081ff506bba54f3a228b91ce36317129fed4035ef2e3
       CMAKE_GENERATOR: 'Visual Studio 11 2012'
       CMAKE_GENERATE: '-A Win32 -DUSE_WIN32_IDN=ON'
-      TFLAGS: '--min=1600'
+      TFLAGS: '--min=1340 !FTP'
 
     - job_name: 'CM VS2013, Debug, x64, Schannel, Shared'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
@@ -134,8 +134,13 @@ init:
   - ps: |
       # Prevent running browser updates during the CI job
       $ErrorActionPreference = 'SilentlyContinue'
-      Rename-Item -Verbose -LiteralPath 'C:\Program Files\Mozilla Firefox\firefox.exe' -NewName 'firefox.exe.bak'
+      Get-ChildItem -LiteralPath 'C:\Program Files\Mozilla Firefox' -Filter 'firefox.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Mozilla Firefox' -Filter 'firefox.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
+        Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
+      Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Google\Chrome\Application' -Filter 'chrmstp.exe' -File -Recurse |
         Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
       Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Microsoft\Edge\Application' -Filter 'setup.exe' -File -Recurse |
         Rename-Item -Verbose -NewName { $_.Name -replace '.exe','.exe.bak' }
@@ -218,6 +223,7 @@ init:
           $new = [regex]::Replace($old, $pattern1, '')
           $new = [regex]::Replace($new, $pattern2, '')
           if($old -cne $new) {
+            Rename-Item -Verbose -LiteralPath "$f" -NewName "$f.bak"
             [IO.File]::WriteAllText($f, $new)
           }
         }

@@ -38,18 +38,6 @@
 
 #include <time.h>
 
-#define HMAC_SHA256(k, kl, d, dl, o)                 \
-  do {                                               \
-    result = Curl_hmacit(&Curl_HMAC_SHA256,          \
-                         (const unsigned char *)(k), \
-                         kl,                         \
-                         (const unsigned char *)(d), \
-                         dl, o);                     \
-    if(result) {                                     \
-      goto fail;                                     \
-    }                                                \
-  } while(0)
-
 #define TIMESTAMP_SIZE 17
 
 /* hex-encoded with null-terminator */
@@ -200,16 +188,26 @@ static bool is_reserved_char(const char c)
 }
 
 static CURLcode uri_encode_path(struct Curl_str *original_path,
-                                struct dynbuf *new_path)
+                                struct dynbuf *new_path,
+                                bool double_encode)
 {
   const char *p = curlx_str(original_path);
+  size_t len = curlx_strlen(original_path);
   size_t i;
 
-  for(i = 0; i < curlx_strlen(original_path); i++) {
+  for(i = 0; i < len; i++) {
     /* Do not encode slashes or unreserved chars from RFC 3986 */
     CURLcode result = CURLE_OK;
-    unsigned char c = p[i];
-    if(is_reserved_char(c) || c == '/')
+    unsigned char c = (unsigned char)p[i];
+
+    if(!double_encode && (c == '%') && (i + 2 < len) &&
+       ISXDIGIT(p[i + 1]) && ISXDIGIT(p[i + 2])) {
+      /* Preserve already percent-encoded sequence when double encoding is
+         disabled */
+      result = curlx_dyn_addn(new_path, &p[i], 3);
+      i += 2;
+    }
+    else if(is_reserved_char(c) || c == '/')
       result = curlx_dyn_addn(new_path, &c, 1);
     else
       result = curlx_dyn_addf(new_path, "%%%02X", c);
@@ -622,8 +620,7 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
     else
       post_data_len = (size_t)data->set.postfieldsize;
   }
-  result = Curl_sha256it(sha_hash, (const unsigned char *)post_data,
-                         post_data_len);
+  result = Curl_sha256it(sha_hash, post_data, post_data_len);
   if(!result)
     sha256_to_hex(sha_hex, sha_hash);
   return result;
@@ -721,10 +718,7 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
   /* Normalized path will be either the same or shorter than the original
    * path, plus trailing slash */
 
-  if(do_uri_encode)
-    result = uri_encode_path(&original_path, new_path);
-  else
-    result = curlx_dyn_addn(new_path, q, len);
+  result = uri_encode_path(&original_path, new_path, do_uri_encode);
 
   if(!result && curlx_dyn_len(new_path) == 0)
     result = curlx_dyn_add(new_path, "/");
@@ -914,8 +908,8 @@ static CURLcode get_payload_hash(struct Curl_easy *data,
     CURLcode result;
     /* AWS S3 requires a x-amz-content-sha256 header, and supports special
      * values like UNSIGNED-PAYLOAD */
-    bool sign_as_s3 = curlx_str_casecompare(provider0, "aws") &&
-                      curlx_str_casecompare(service, "s3");
+    bool sign_as_s3 = curlx_str_casecompare2(provider0, STRCONST("aws")) &&
+                      curlx_str_casecompare2(service, STRCONST("s3"));
 
     if(sign_as_s3)
       result = calc_s3_payload_hash(data, httpreq, curlx_str(provider1),
@@ -1037,8 +1031,9 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
   char *request_type;
   char *credential_scope;
   char *str_to_sign;
-  unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t sha_hash[CURL_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
+  CURLcode result;
 
   request_type = curl_maprintf("%.*s4_request",
                                (int)curlx_strlen(provider0),
@@ -1061,11 +1056,12 @@ static CURLcode make_string_to_sign(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(Curl_sha256it(sha_hash, (const unsigned char *)canonical_request,
-                   strlen(canonical_request))) {
+  result = Curl_sha256it(sha_hash, canonical_request,
+                         strlen(canonical_request));
+  if(result) {
     curlx_free(request_type);
     curlx_free(credential_scope);
-    return CURLE_OUT_OF_MEMORY;
+    return result;
   }
 
   sha256_to_hex(sha_hex, sha_hash);
@@ -1117,11 +1113,16 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   const char *passwd = Curl_creds_passwd(data->state.creds);
   char *secret = NULL;
-  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
-  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  uint8_t sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  uint8_t sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   char sha_hex[SHA256_HEX_LENGTH];
   char *auth_headers = NULL;
-  char *user = curl_escape(Curl_creds_user(data->state.creds), 0);
+  char *user;
+
+  if(!request_type || !str_to_sign)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  user = curl_escape(Curl_creds_user(data->state.creds), 0);
   if(!user)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1132,15 +1133,26 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   /* make provider0 part done uppercase */
   Curl_strntoupper(secret, curlx_str(provider0), curlx_strlen(provider0));
 
-  HMAC_SHA256(secret, strlen(secret), date, strlen(date), sign0);
-  HMAC_SHA256(sign0, sizeof(sign0),
-              curlx_str(region), curlx_strlen(region), sign1);
-  HMAC_SHA256(sign1, sizeof(sign1),
-              curlx_str(service), curlx_strlen(service), sign0);
-  HMAC_SHA256(sign0, sizeof(sign0),
-              request_type, strlen(request_type), sign1);
-  HMAC_SHA256(sign1, sizeof(sign1),
-              str_to_sign, strlen(str_to_sign), sign0);
+  result = Curl_hmacit(&Curl_HMAC_SHA256, secret, strlen(secret),
+                       date, strlen(date), sign0);
+  if(result)
+    goto fail;
+  result = Curl_hmacit(&Curl_HMAC_SHA256, sign0, sizeof(sign0),
+                        curlx_str(region), curlx_strlen(region), sign1);
+  if(result)
+    goto fail;
+  result = Curl_hmacit(&Curl_HMAC_SHA256, sign1, sizeof(sign1),
+                       curlx_str(service), curlx_strlen(service), sign0);
+  if(result)
+    goto fail;
+  result = Curl_hmacit(&Curl_HMAC_SHA256, sign0, sizeof(sign0),
+                       request_type, strlen(request_type), sign1);
+  if(result)
+    goto fail;
+  result = Curl_hmacit(&Curl_HMAC_SHA256, sign1, sizeof(sign1),
+                       str_to_sign, strlen(str_to_sign), sign0);
+  if(result)
+    goto fail;
 
   sha256_to_hex(sha_hex, sign0);
 
@@ -1201,7 +1213,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   const char *method = NULL;
   const char *payload_hash = NULL;
   size_t payload_hash_len = 0;
-  unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
+  uint8_t sha_hash[CURL_SHA256_DIGEST_LENGTH];
   char sha_hex[SHA256_HEX_LENGTH];
   char content_sha256_hdr[CONTENT_SHA256_HDR_LEN + 2] = ""; /* add \r\n */
   char *canonical_request = NULL;

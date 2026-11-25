@@ -64,19 +64,13 @@ struct pollfd {
 #define POLLRDBAND POLLPRI
 #endif
 
-/* there are three CSELECT defines that are defined in the public header that
-   are exposed to users, but this *IN2 bit is only ever used internally and
-   therefore defined here */
-#define CURL_CSELECT_IN2 (CURL_CSELECT_ERR << 1)
-
-int Curl_socket_check(curl_socket_t readfd0,
-                      curl_socket_t readfd1,
+int Curl_socket_check(curl_socket_t readfd,
                       curl_socket_t writefd,
                       timediff_t timeout_ms);
 #define SOCKET_READABLE(x, z)                               \
-  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
+  Curl_socket_check(x, CURL_SOCKET_BAD, z)
 #define SOCKET_WRITABLE(x, z)                               \
-  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
+  Curl_socket_check(CURL_SOCKET_BAD, x, z)
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
 

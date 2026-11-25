@@ -81,7 +81,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const size_t thislen);
 
 CURLcode Curl_add_timecondition(struct Curl_easy *data, struct dynbuf *req);
-CURLcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
+CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  int httpversion, struct dynbuf *req);
 
 void Curl_http_to_fold(struct dynbuf *bf);
@@ -181,7 +181,7 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
  *
  * @param data all information about the current transfer
  * @param conn all information about the current connection
- * @param request pointer to the request keyword
+ * @param method pointer to the request method
  * @param httpreq is the request type
  * @param path pointer to the requested path
  * @param query pointer to the requested query or NULL
@@ -192,8 +192,8 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
  */
 CURLcode Curl_http_output_auth(struct Curl_easy *data,
                                struct connectdata *conn,
-                               const char *request,
                                Curl_HttpReq httpreq,
+                               const char *method,
                                const char *path,
                                const char *query,
                                bool is_connect);

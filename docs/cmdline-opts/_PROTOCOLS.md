@@ -23,10 +23,9 @@ Using the mail reading protocol, curl can download emails for you. With or
 without using TLS.
 ## LDAP(S)
 curl can do directory lookups for you, with or without TLS.
-## MQTT
-curl supports MQTT version 3. Downloading over MQTT equals subscribing to a
-topic while uploading/posting equals publishing on a topic. MQTT over TLS is not
-supported (yet).
+## MQTT(S)
+curl supports MQTT(S) version 3. Downloading over MQTT equals subscribing to a
+topic while uploading/posting equals publishing on a topic.
 ## POP3(S)
 Downloading from a pop3 server means getting an email. With or without using
 TLS.

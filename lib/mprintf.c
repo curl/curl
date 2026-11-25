@@ -307,6 +307,9 @@ static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
     case '8':
     case '9': {
       curl_off_t num;
+      if(flags & FLAGS_WIDTHPARAM)
+        /* a width cannot be both '*' and a number */
+        return PFMT_WIDTH;
       flags |= FLAGS_WIDTH;
       fmt--;
       if(curlx_str_number(&fmt, &num, INT_MAX))
@@ -914,11 +917,9 @@ static bool out_number(void *userp,
     --width;
   }
 
-  if(prec > 0) {
+  if(prec > 0)
+    /* the precision zeros are output right before the digits */
     width -= prec;
-    while(prec-- > 0 && w >= work)
-      *w-- = '0';
-  }
 
   if(is_alt && base == 16)
     width -= 2;
@@ -953,8 +954,9 @@ static bool out_number(void *userp,
     width = 0;
   }
 
-  /* Write the number. */
-  if(stream_run(userp, stream, streamn, (const unsigned char *)w + 1,
+  /* Write the precision zeros and the number. */
+  if(stream_pad(userp, stream, streamn, '0', prec, donep) ||
+     stream_run(userp, stream, streamn, (const unsigned char *)w + 1,
                 (size_t)(workend - w), donep))
     return TRUE;
 

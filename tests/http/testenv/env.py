@@ -180,6 +180,7 @@ class EnvConfig:
         self.curl_override_dns = 'override-dns: ON' in p.stdout
         self.curl_resolv_threaded = 'resolv-threaded: ON' in p.stdout
         self.curl_can_doh = 'DoH: ON' in p.stdout
+        self.curl_has_sha256 = 'sha256: ON' in p.stdout
 
         self.ports = {}
 
@@ -234,14 +235,20 @@ class EnvConfig:
                 ],
             ),
             CertificateSpec(
-                name='embedded-zero',
-                domains=[f'{self.domain1}\0actually.{self.domain2}'],
-                key_type='rsa2048',
+                name="embedded-zero",
+                domains=[f"{self.domain1}\0actually.{self.domain2}"],
+                key_type="rsa2048",
             ),
             CertificateSpec(
-                name='embedded-zero-wildcard',
-                domains=[f'*.{self.tld}\0actually.{self.domain2}'],
-                key_type='rsa2048',
+                name="embedded-zero-wildcard",
+                domains=[f"*.{self.tld}\0actually.{self.domain2}"],
+                key_type="rsa2048",
+            ),
+            CertificateSpec(
+                name="domain-in-common-name-only",
+                domains=[self.domain1],
+                key_type="rsa2048",
+                domain_in_common_name_only=True,
             ),
         ]
 
@@ -640,6 +647,10 @@ class Env:
         return cls.CONFIG.curl_can_doh
 
     @classmethod
+    def curl_has_sha256(cls) -> bool:
+        return cls.CONFIG.curl_has_sha256
+
+    @classmethod
     def curl_can_early_data(cls) -> bool:
         if cls.curl_uses_lib('gnutls'):
             return cls.curl_lib_version_at_least('gnutls', '3.7.2')
@@ -652,27 +663,30 @@ class Env:
     @classmethod
     def http_protos(cls) -> List[str]:
         # http protocols we can test
+        protos = ['http/1.1']
         if cls.have_h2_curl():
-            if cls.have_h3():
-                return ["http/1.1", "h2", "h3"]
-            return ["http/1.1", "h2"]
-        return ["http/1.1"]
+            protos.append('h2')
+        if cls.have_h3():
+            protos.append('h3')
+        return protos
 
     @classmethod
     def http_h1_h2_protos(cls) -> List[str]:
         # http 1+2 protocols we can test
+        protos = ['http/1.1']
         if cls.have_h2_curl():
-            return ["http/1.1", "h2"]
-        return ["http/1.1"]
+            protos.append('h2')
+        return protos
 
     @classmethod
     def http_mplx_protos(cls) -> List[str]:
         # http multiplexing protocols we can test
+        protos = []
         if cls.have_h2_curl():
-            if cls.have_h3():
-                return ["h2", "h3"]
-            return ["h2"]
-        return []
+            protos.append('h2')
+        if cls.have_h3():
+            protos.append('h3')
+        return protos
 
     @classmethod
     def have_h3(cls) -> bool:

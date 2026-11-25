@@ -95,7 +95,7 @@ static CURLcode sendf(struct Curl_easy *data,
 
 static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
 {
-  curl_socket_t sockfd = data->conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = data->conn->chain.sock;
   size_t bytes_written;
   size_t write_len;
   CURLcode result = CURLE_OK;
@@ -226,7 +226,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
+    Curl_xfer_setup_recv(data, -1);
   }
   else if(curl_strnequal(path, DICT_DEFINE, CURL_CSTRLEN(DICT_DEFINE)) ||
           curl_strnequal(path, DICT_DEFINE2, CURL_CSTRLEN(DICT_DEFINE2)) ||
@@ -267,7 +267,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
+    Curl_xfer_setup_recv(data, -1);
   }
   else {
 
@@ -289,7 +289,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
         goto error;
       }
 
-      Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
+      Curl_xfer_setup_recv(data, -1);
     }
   }
 

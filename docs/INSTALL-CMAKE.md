@@ -540,7 +540,6 @@ Available variables:
 - `HAVE_WOLFSSL_SET_QUIC_USE_LEGACY_CODEPOINT`:
                                             `wolfSSL_set_quic_use_legacy_codepoint` present in wolfSSL.
 - `HAVE_WOLFSSL_USEALPN`:                   `wolfSSL_UseALPN` present in wolfSSL.
-- `HAVE_WC_DES_ECBENCRYPT`:                 `wc_Des_EcbEncrypt` present in wolfSSL.
 
 For each of the above variables, if the variable is *defined* (either to `ON`
 or `OFF`), the symbol detection is skipped. If the variable is *not defined*,

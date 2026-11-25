@@ -111,13 +111,15 @@ static void mntfy_chunk_dispatch_all(struct Curl_multi *multi,
   while(multi->ntfy.ntfy_cb &&
         (chunk->r_offset < chunk->w_offset) && !multi->ntfy.failure) {
     e = &chunk->entries[chunk->r_offset];
-    data = e->mid ? Curl_multi_get_easy(multi, e->mid) : multi->admin;
-    /* only when notification has not been disabled in the meantime */
-    if(data && (multi->ntfy.flags & CURL_MNTFY_TYPE_FLAG(e->type))) {
-      /* this may cause new notifications to be added! */
-      CURL_TRC_M(multi->admin, "[NTFY] dispatch %u to xfer %u",
-                 e->type, e->mid);
-      multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
+    if(e->mid != UINT32_MAX) {
+      data = e->mid ? Curl_multi_get_easy(multi, e->mid) : multi->admin;
+      /* only when notification has not been disabled in the meantime */
+      if(data && (multi->ntfy.flags & CURL_MNTFY_TYPE_FLAG(e->type))) {
+        /* this may cause new notifications to be added! */
+        CURL_TRC_M(multi->admin, "[NTFY] dispatch %u to xfer %u",
+                   e->type, e->mid);
+        multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
+      }
     }
     /* once dispatched, safe to increment */
     chunk->r_offset++;
@@ -170,6 +172,24 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
     else
       multi->ntfy.failure = CURLM_OUT_OF_MEMORY;
     multi->ntfy.flags |= CURL_MNTFY_FLAG_HAS_ENTRIES;
+  }
+}
+
+void Curl_mntfy_remove(struct Curl_easy *data)
+{
+  struct Curl_multi *multi = data ? data->multi : NULL;
+  uint32_t mid = data ? data->mid : UINT32_MAX;
+  struct mntfy_chunk *chunk;
+  size_t i;
+
+  if(!multi || (mid == UINT32_MAX))
+    return;
+
+  for(chunk = multi->ntfy.head; chunk; chunk = chunk->next) {
+    for(i = chunk->r_offset; i < chunk->w_offset; ++i) {
+      if(chunk->entries[i].mid == mid)
+        chunk->entries[i].mid = UINT32_MAX;
+    }
   }
 }
 

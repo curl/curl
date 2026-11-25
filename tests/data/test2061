@@ -54,9 +54,10 @@ http
 !SSPI
 crypto
 digest
+sha256
 </features>
 <name>
-HTTP with RFC7616 SHA256 Digest authorization
+HTTP with RFC7616 SHA-256 Digest authorization
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest

@@ -127,4 +127,7 @@ A `Curl_peer` is not expected to be modified after it has been created.
 However, each `Curl_peer` has a reference counter. Code needs to use
 `Curl_peer_link()` and `Curl_peer_unlink()` to keep/release references.
 This makes it safe and cheap to keep references to peers in connections
-and filters.
+and filters. The counter is updated atomically: a transfer and the
+connections it used share peers, and after the transfer has been removed
+from its multi handle, the easy handle may be used in another thread while
+the multi handle still uses the connections.

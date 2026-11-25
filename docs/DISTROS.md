@@ -110,6 +110,13 @@ Issues and patches for this are managed in the main curl project.
 - curl patches: https://udd.debian.org/patches.cgi?src=curl
 - curl patches: https://salsa.debian.org/debian/curl (in debian/* branches, inside the folder debian/patches)
 
+## DragonFly BSD
+
+- curl: https://github.com/DragonFlyBSD/DPorts/tree/master/ftp/curl
+- curl: https://github.com/DragonFlyBSD/DeltaPorts/tree/master/ports/ftp/curl
+= curl issues: https://github.com/DragonFlyBSD/DPorts/issues?q=is%3Aissue+state%3Aopen+curl
+- curl patches: https://github.com/DragonFlyBSD/DPorts/tree/master/ftp/curl/files
+
 ## Fedora
 
 - curl: https://src.fedoraproject.org/rpms/curl
@@ -279,7 +286,7 @@ can also be used on other distributions
 
 ## SPACK
 
-- curl package source and patches: https://github.com/spack/spack/tree/develop/var/spack/repos/builtin/packages/curl
+- curl package source and patches: https://github.com/spack/spack-packages/tree/develop/repos/spack_repo/builtin/packages/curl
 
 ## vcpkg
 

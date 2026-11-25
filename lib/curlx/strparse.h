@@ -95,6 +95,8 @@ int curlx_str_newline(const char **linep);
 /* case insensitive compare that the parsed string matches the
    given string. */
 int curlx_str_casecompare(struct Curl_str *str, const char *check);
+int curlx_str_casecompare2(struct Curl_str *str,
+                           const char *check, size_t clen);
 int curlx_str_cmp(struct Curl_str *str, const char *check);
 
 int curlx_str_nudge(struct Curl_str *str, size_t num);

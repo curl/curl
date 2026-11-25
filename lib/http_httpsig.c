@@ -81,11 +81,10 @@ static enum httpsig_alg id_to_alg(uint8_t val)
 
 static CURLcode decode_hex_key(struct Curl_easy *data,
                                const char *hexstr,
-                               unsigned char **keyout,
-                               size_t *keylen)
+                               uint8_t **keyout, size_t *keylen)
 {
   size_t len, i;
-  unsigned char *keybuf;
+  uint8_t *keybuf;
 
   *keyout = NULL;
   *keylen = 0;
@@ -115,8 +114,8 @@ static CURLcode decode_hex_key(struct Curl_easy *data,
       curlx_free(keybuf);
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    keybuf[i / 2] = (unsigned char)((curlx_hexval(hexstr[i]) << 4) |
-                                     curlx_hexval(hexstr[i + 1]));
+    keybuf[i / 2] = (uint8_t)((curlx_hexval(hexstr[i]) << 4) |
+                               curlx_hexval(hexstr[i + 1]));
   }
 
   *keyout = keybuf;
@@ -491,26 +490,24 @@ static time_t httpsig_get_created(void)
 
 static CURLcode httpsig_sign_base(struct Curl_easy *data,
                                   enum httpsig_alg alg,
-                                  const unsigned char *keybuf,
-                                  size_t keylen,
+                                  const void *keybuf, size_t keylen,
                                   const struct dynbuf *sig_base,
-                                  unsigned char *raw_sig,
+                                  uint8_t *raw_sig,
                                   size_t *raw_sig_len)
 {
   CURLcode result;
 
   switch(alg) {
   case HTTPSIG_ALG_ED25519:
-    result = Curl_ed25519_sign(
-      keybuf, keylen,
-      (const unsigned char *)curlx_dyn_ptr(sig_base),
-      curlx_dyn_len(sig_base),
-      raw_sig, raw_sig_len);
+    result = Curl_ed25519_sign(keybuf, keylen,
+                               curlx_dyn_ptr(sig_base),
+                               curlx_dyn_len(sig_base),
+                               raw_sig, raw_sig_len);
     break;
   case HTTPSIG_ALG_HMAC_SHA256:
     result = Curl_hmacit(&Curl_HMAC_SHA256, keybuf, keylen,
-                         (const unsigned char *)curlx_dyn_ptr(sig_base),
-                         curlx_dyn_len(sig_base), raw_sig);
+                         curlx_dyn_ptr(sig_base), curlx_dyn_len(sig_base),
+                         raw_sig);
     if(!result)
       *raw_sig_len = CURL_SHA256_DIGEST_LENGTH;
     break;
@@ -546,9 +543,9 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   const char *authority;
   const char *components[HTTPSIG_MAX_COMPONENTS];
   size_t ncomp = 0;
-  unsigned char *keybuf = NULL;
+  uint8_t *keybuf = NULL;
   size_t keylen = 0;
-  unsigned char raw_sig[HTTPSIG_MAX_RAW_SIG];
+  uint8_t raw_sig[HTTPSIG_MAX_RAW_SIG];
   size_t raw_sig_len = 0;
   char *auth_headers = NULL;
   char *hdrs_copy = NULL;

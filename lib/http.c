@@ -235,13 +235,14 @@ char *Curl_copy_header_value(const char *header)
  * Returns CURLcode.
  */
 static CURLcode http_output_basic(struct Curl_easy *data,
-                                  struct connectdata *conn, bool proxy)
+                                  struct Curl_creds *creds,
+                                  const char *hd_name,
+                                  bool proxy)
 {
   size_t size = 0;
   char *authorization = NULL;
   char **p_hd;
   CURLcode result;
-  struct Curl_creds *creds = NULL;
   char *out;
 
   /* credentials are unique per transfer for HTTP, do not use the ones for the
@@ -249,15 +250,12 @@ static CURLcode http_output_basic(struct Curl_easy *data,
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
     p_hd = &data->req.hd_proxy_auth;
-    creds = conn->http_proxy.creds;
 #else
-    (void)conn;
     return CURLE_NOT_BUILT_IN;
 #endif
   }
   else {
     p_hd = &data->req.hd_auth;
-    creds = data->state.creds;
   }
 
   if(!creds) {
@@ -280,9 +278,7 @@ static CURLcode http_output_basic(struct Curl_easy *data,
   }
 
   curlx_free(*p_hd);
-  *p_hd = curl_maprintf("%sAuthorization: Basic %s\r\n",
-                        proxy ? "Proxy-" : "",
-                        authorization);
+  *p_hd = curl_maprintf("%s: Basic %s\r\n", hd_name, authorization);
   curlx_free(authorization);
   if(!*p_hd) {
     result = CURLE_OUT_OF_MEMORY;
@@ -297,30 +293,21 @@ fail:
 #endif
 
 #ifndef CURL_DISABLE_BEARER_AUTH
-/*
- * http_output_bearer() sets up an Authorization: header
- * for HTTP Bearer authentication.
- *
- * Returns CURLcode.
- */
+/* Sets up an Authorization: header for HTTP Bearer authentication. */
 static CURLcode http_output_bearer(struct Curl_easy *data)
 {
-  char **userp;
-  CURLcode result = CURLE_OK;
-
-  DEBUGASSERT(Curl_creds_has_oauth_bearer(data->state.creds));
-  userp = &data->req.hd_auth;
-  curlx_free(*userp);
-  *userp = curl_maprintf("Authorization: Bearer %s\r\n",
-                         Curl_creds_oauth_bearer(data->state.creds));
-
-  if(!*userp) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
+  curlx_free(data->req.hd_auth);
+  if(!Curl_creds_has_oauth_bearer(data->state.creds)) {
+    DEBUGASSERT(0); /* we should not have come here */
+    return CURLE_FAILED_INIT;
   }
+  data->req.hd_auth =
+    curl_maprintf("Authorization: Bearer %s\r\n",
+                  Curl_creds_oauth_bearer(data->state.creds));
 
-fail:
-  return result;
+  if(!data->req.hd_auth)
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
 }
 #endif
 
@@ -610,151 +597,120 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
 static CURLcode output_auth_headers(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     struct auth *authstatus,
-                                    const char *request,
+                                    const char *method,
                                     const char *path,
-                                    bool proxy)
+                                    bool proxy,
+                                    struct Curl_creds *creds,
+                                    const char *hd_name,
+                                    size_t hd_len,
+                                    const char **pauth_used)
 {
-  const char *auth = NULL;
   CURLcode result = CURLE_OK;
-  (void)conn;
 
-#ifdef CURL_DISABLE_DIGEST_AUTH
-  (void)request;
-  (void)path;
-#endif
+  *pauth_used = NULL;
+  switch(authstatus->picked) {
+
 #ifndef CURL_DISABLE_AWS
-  if((authstatus->picked == CURLAUTH_AWS_SIGV4) && !proxy) {
-    /* this method is never for proxy */
-    auth = "AWS_SIGV4";
-    result = Curl_output_aws_sigv4(data);
-    if(result)
-      return result;
-  }
-  else
-#endif
-#ifndef CURL_DISABLE_HTTPSIG
-  if((authstatus->picked == CURLAUTH_HTTPSIG) && !proxy) {
-    /* HTTPSIG uses its own configured key material rather than
-       data->state.creds. Do not let unrelated credentials from a
-       redirected URL bypass the cross-host auth boundary. */
-    if(Curl_auth_allowed_to_host(data)) {
-      auth = "HTTPSIG";
-      result = Curl_output_httpsig(data);
-      if(result)
-        return result;
+  case CURLAUTH_AWS_SIGV4:
+    if(!proxy) {
+      /* this method is never for proxy */
+      *pauth_used = "AWS_SIGV4";
+      result = Curl_output_aws_sigv4(data);
     }
-    else
-      authstatus->done = TRUE;
-  }
-  else
+    break;
 #endif
-#ifdef USE_SPNEGO
-  if(authstatus->picked == CURLAUTH_NEGOTIATE) {
-    if(
-#ifndef CURL_DISABLE_PROXY
-      (proxy && !Curl_checkProxyheaders(data, conn,
-                                        STRCONST("Proxy-authorization"))) ||
-#endif
-      (!proxy && !Curl_checkheaders(data, STRCONST("Authorization")) &&
-       Curl_auth_allowed_to_host(data))) {
-      auth = "Negotiate";
-      result = Curl_output_negotiate(data, conn, proxy);
-      if(result)
-        return result;
-    }
-    else
-      authstatus->done = TRUE;
-  }
-  else
-#endif
-#ifndef CURL_DISABLE_DIGEST_AUTH
-  if(authstatus->picked == CURLAUTH_DIGEST) {
-    auth = "Digest";
-    result = Curl_output_digest(data,
-                                proxy,
-                                (const unsigned char *)request,
-                                (const unsigned char *)path);
-    if(result)
-      return result;
-  }
-  else
-#endif
-#ifndef CURL_DISABLE_BASIC_AUTH
-  if(authstatus->picked == CURLAUTH_BASIC) {
-    /* Basic */
-    if(
-#ifndef CURL_DISABLE_PROXY
-       (proxy && conn->http_proxy.creds &&
-        Curl_creds_has_user_or_pass(conn->http_proxy.creds) &&
-        !Curl_checkProxyheaders(data, conn,
-                                STRCONST("Proxy-authorization"))) ||
-#endif
-       (!proxy && data->state.creds &&
-        Curl_creds_has_user_or_pass(data->state.creds) &&
-        !Curl_checkheaders(data, STRCONST("Authorization")))) {
-      auth = "Basic";
-      result = http_output_basic(data, conn, proxy);
-      if(result)
-        return result;
-    }
 
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLAUTH_HTTPSIG:
+    if(!proxy) {
+      /* HTTPSIG uses its own configured key material rather than
+         data->state.creds. Do not let unrelated credentials from a
+         redirected URL bypass the cross-host auth boundary. */
+      if(Curl_auth_allowed_to_host(data)) {
+        *pauth_used = "HTTPSIG";
+        result = Curl_output_httpsig(data);
+      }
+      else
+        authstatus->done = TRUE;
+    }
+    break;
+#endif
+
+#ifdef USE_SPNEGO
+  case CURLAUTH_NEGOTIATE:
+    if(
+#ifndef CURL_DISABLE_PROXY
+      (proxy && !Curl_checkProxyheaders(data, conn, hd_name, hd_len)) ||
+#endif
+      (!proxy && !Curl_checkheaders(data, hd_name, hd_len) &&
+       Curl_auth_allowed_to_host(data))) {
+      *pauth_used = "Negotiate";
+      result = Curl_output_negotiate(data, conn, hd_name, proxy);
+    }
+    else
+      authstatus->done = TRUE;
+    break;
+#endif
+
+#ifndef CURL_DISABLE_DIGEST_AUTH
+  case CURLAUTH_DIGEST:
+    *pauth_used = "Digest";
+    result = Curl_output_digest(data, creds, hd_name, proxy,
+                                (const unsigned char *)method,
+                                (const unsigned char *)path);
+    break;
+#endif
+
+#ifndef CURL_DISABLE_BASIC_AUTH
+  case CURLAUTH_BASIC:
+    if(creds && Curl_creds_has_user_or_pass(creds) && (
+#ifndef CURL_DISABLE_PROXY
+       (proxy && !Curl_checkProxyheaders(data, conn, hd_name, hd_len)) ||
+#endif
+       (!proxy && !Curl_checkheaders(data, hd_name, hd_len)))) {
+      *pauth_used = "Basic";
+      result = http_output_basic(data, creds, hd_name, proxy);
+      if(result)
+        return result;
+    }
     /* NOTE: this function should set 'done' TRUE, as the other auth
        functions work that way */
     authstatus->done = TRUE;
-  }
+    break;
 #endif
+
 #ifndef CURL_DISABLE_BEARER_AUTH
-  if(authstatus->picked == CURLAUTH_BEARER) {
-    /* Bearer */
-    if(!proxy && Curl_creds_has_oauth_bearer(data->state.creds) &&
-       !Curl_checkheaders(data, STRCONST("Authorization"))) {
-      auth = "Bearer";
+  case CURLAUTH_BEARER:
+    if(!proxy && Curl_creds_has_oauth_bearer(creds) &&
+       !Curl_checkheaders(data, hd_name, hd_len)) {
+      *pauth_used = "Bearer";
       result = http_output_bearer(data);
       if(result)
         return result;
     }
-
     /* NOTE: this function should set 'done' TRUE, as the other auth
        functions work that way */
     authstatus->done = TRUE;
-  }
+    break;
 #endif
 
-  if(auth) {
-#ifndef CURL_DISABLE_PROXY
-    if(proxy)
-      data->info.proxyauthpicked = authstatus->picked;
-    else
-      data->info.httpauthpicked = authstatus->picked;
-    infof(data, "%s auth using %s with user '%s'",
-          proxy ? "Proxy" : "Server", auth,
-          proxy ? (conn->http_proxy.creds ?
-                   conn->http_proxy.creds->user : "") :
-          (data->state.creds ?
-           data->state.creds->user : ""));
-#else
-    (void)proxy;
-    infof(data, "Server auth using %s with user '%s'",
-          auth, data->state.creds ?
-          data->state.creds->user : "");
+  default:
+    /* a pick we do not support? */
+    (void)conn;
+#ifdef CURL_DISABLE_DIGEST_AUTH
+    (void)method;
+    (void)path;
 #endif
-    authstatus->multipass = !authstatus->done;
-  }
-  else {
-    authstatus->multipass = FALSE;
-    if(proxy)
-      data->info.proxyauthpicked = 0;
-    else
-      data->info.httpauthpicked = 0;
-  }
+    break;
+  } /* end of switch */
 
   return result;
 }
 
 CURLcode Curl_http_output_auth(struct Curl_easy *data,
                                struct connectdata *conn,
-                               const char *request,
                                Curl_HttpReq httpreq,
+                               const char *method,
                                const char *path,
                                const char *query,
                                bool is_connect)
@@ -764,6 +720,7 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
   struct auth *authproxy;
   const char *path_and_query = path;
   char *tmp_str = NULL;
+  const char *auth_used;
 
   DEBUGASSERT(data);
   authhost = &data->state.authhost;
@@ -810,26 +767,47 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
     authproxy->picked = authproxy->want;
 
 #ifndef CURL_DISABLE_PROXY
-  /* Send proxy authentication header if needed */
+  /* Send proxy authentication header only with a forwarding proxy
+   * or when doing a CONNECT* request. */
   if(conn->bits.origin_is_proxy || is_connect) {
-    result = output_auth_headers(data, conn, authproxy, request,
-                                 path_and_query, TRUE);
+    result = output_auth_headers(data, conn, authproxy,
+                                 method, path_and_query,
+                                 TRUE, conn->http_proxy.creds,
+                                 STRCONST("Proxy-Authorization"),
+                                 &auth_used);
     if(result)
       goto out;
+    data->info.proxyauthpicked = auth_used ? authproxy->picked : 0;
+    authproxy->multipass = auth_used ? !authproxy->done : FALSE;
+    if(auth_used)
+      infof(data, "Proxy auth using %s with user '%s'", auth_used,
+            conn->http_proxy.creds ? conn->http_proxy.creds->user : "");
   }
   else
-#else
-  (void)is_connect;
-#endif /* CURL_DISABLE_PROXY */
-    /* we have no proxy so let's pretend we are done authenticating
-       with it */
     authproxy->done = TRUE;
+#else
+  /* no proxy, pretend we are done authenticating with it */
+  (void)is_connect;
+  authproxy->done = TRUE;
+#endif /* CURL_DISABLE_PROXY */
 
   /* Either we have credentials for the origin we talk to or
      performing authentication is allowed here */
-  if(data->state.creds || Curl_auth_allowed_to_host(data))
-    result = output_auth_headers(data, conn, authhost, request,
-                                 path_and_query, FALSE);
+  if(!is_connect &&
+     (data->state.creds || Curl_auth_allowed_to_host(data))) {
+    result = output_auth_headers(data, conn, authhost,
+                                 method, path_and_query,
+                                 FALSE, data->state.creds,
+                                 STRCONST("Authorization"),
+                                 &auth_used);
+    if(result)
+      goto out;
+    data->info.httpauthpicked = auth_used ? authhost->picked : 0;
+    authhost->multipass = auth_used ? !authhost->done : FALSE;
+    if(auth_used)
+      infof(data, "Server auth using %s with user '%s'", auth_used,
+            data->state.creds ? data->state.creds->user : "");
+  }
   else
     authhost->done = TRUE;
 
@@ -853,16 +831,16 @@ out:
 /* when disabled */
 CURLcode Curl_http_output_auth(struct Curl_easy *data,
                                struct connectdata *conn,
-                               const char *request,
                                Curl_HttpReq httpreq,
+                               const char *method,
                                const char *path,
                                const char *query,
                                bool is_connect)
 {
   (void)data;
   (void)conn;
-  (void)request;
   (void)httpreq;
+  (void)method;
   (void)path;
   (void)query;
   (void)is_connect;
@@ -927,19 +905,20 @@ static CURLcode auth_digest(struct Curl_easy *data,
     infof(data, "Ignoring duplicate digest auth header.");
   }
   else if(Curl_auth_is_digest_supported()) {
-    CURLcode result;
-
-    *availp |= CURLAUTH_DIGEST;
-    authp->avail |= CURLAUTH_DIGEST;
-
     /* We call this function on input Digest headers even if Digest
      * authentication is not activated yet, as we need to store the
      * incoming data from this header in case we are going to use
      * Digest */
-    result = Curl_input_digest(data, proxy, auth);
+    CURLcode result = Curl_input_digest(data, proxy, auth);
+    if(result == CURLE_OUT_OF_MEMORY)
+      return result;
+    if(result == CURLE_NOT_BUILT_IN) {
+      infof(data, "Ignoring unusable Digest algorithm.");
+      return CURLE_OK;
+    }
+    *availp |= CURLAUTH_DIGEST;
+    authp->avail |= CURLAUTH_DIGEST;
     if(result) {
-      if(result == CURLE_OUT_OF_MEMORY)
-        return result;
       infof(data, "Digest authentication problem, ignoring.");
       data->state.authproblem = TRUE;
     }
@@ -1588,7 +1567,7 @@ CURLcode Curl_http_doing_pollset(struct Curl_easy *data,
                                  struct easy_pollset *ps)
 {
   /* write mode */
-  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
+  return Curl_pollset_add_out(data, ps, data->conn->chain.sock);
 }
 
 CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
@@ -1598,12 +1577,12 @@ CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   if(CURL_REQ_WANT_RECV(data)) {
-    result = Curl_pollset_add_in(data, ps, conn->sock[FIRSTSOCKET]);
+    result = Curl_pollset_add_in(data, ps, conn->chain.sock);
   }
 
   /* on a "Expect: 100-continue" timed wait, do not poll for outgoing */
   if(!result && Curl_req_want_send(data) && !http_exp100_is_waiting(data)) {
-    result = Curl_pollset_add_out(data, ps, conn->sock[FIRSTSOCKET]);
+    result = Curl_pollset_add_out(data, ps, conn->chain.sock);
   }
   return result;
 }
@@ -1722,137 +1701,93 @@ static const char *get_http_string(int httpversion)
   }
 }
 
+struct http_custom_ctx {
+  struct Curl_easy *data;
+  struct dynbuf *req;
+  int httpversion;
+};
+
+static CURLcode http_custom_treat(void *user_data,
+                                  struct Curl_str *name,
+                                  struct Curl_str *value,
+                                  const char *orig_data)
+{
+  struct http_custom_ctx *x = user_data;
+  CURLcode result;
+
+  if(x->data->state.http_host &&
+     /* a Host: header was sent already, do not pass on any custom
+        Host: header as that will produce *two* in the same
+        request! */
+     curlx_str_casecompare2(name, STRCONST("Host")))
+    goto out;
+  else if(x->data->state.httpreq == HTTPREQ_POST_FORM &&
+          /* this header (extended by formdata.c) is sent later */
+          curlx_str_casecompare2(name, STRCONST("Content-Type")))
+    goto out;
+  else if(x->data->state.httpreq == HTTPREQ_POST_MIME &&
+          /* this header is sent later */
+          curlx_str_casecompare2(name, STRCONST("Content-Type")))
+    goto out;
+  else if(x->data->req.authneg &&
+          /* while doing auth neg, do not allow the custom length since
+             we will force length zero then */
+          curlx_str_casecompare2(name, STRCONST("Content-Length")))
+    goto out;
+  else if(curlx_str_casecompare2(name, STRCONST("Connection")))
+    /* Connection headers are handled specially */
+    goto out;
+  else if((x->httpversion >= 20) &&
+          curlx_str_casecompare2(name, STRCONST("Transfer-Encoding")))
+    /* HTTP/2 does not support chunked requests */
+    goto out;
+  else if((curlx_str_casecompare2(name, STRCONST("Authorization")) ||
+           curlx_str_casecompare2(name, STRCONST("Cookie"))) &&
+          /* be careful of sending this potentially sensitive header to
+             other hosts */
+          !Curl_auth_allowed_to_host(x->data))
+    goto out;
+
+  if(!curlx_strlen(value)) {
+    result = curlx_dyn_addn(x->req, curlx_str(name), curlx_strlen(name));
+    if(!result)
+      result = curlx_dyn_addn(x->req, STRCONST(":\r\n"));
+  }
+  else
+    result = curlx_dyn_addf(x->req, "%s\r\n", orig_data);
+
+  if(result)
+    return result;
+
+out:
+  return CURLE_AGAIN;
+}
+
 CURLcode Curl_add_custom_headers(struct Curl_easy *data,
-                                 bool is_connect, int httpversion,
+                                 int httpversion,
                                  struct dynbuf *req)
 {
   struct curl_slist *h[2];
-  struct curl_slist *headers;
-  int numlists = 1; /* by default */
+  struct http_custom_ctx custom_ctx;
+  int numlists = 0;
   int i;
 
+  h[numlists++] = data->set.headers;
 #ifndef CURL_DISABLE_PROXY
-  enum Curl_proxy_use proxy;
-
-  if(is_connect)
-    proxy = HEADER_CONNECT;
-  else
-    proxy = data->conn->bits.origin_is_proxy ? HEADER_PROXY : HEADER_SERVER;
-
-  switch(proxy) {
-  case HEADER_SERVER:
-    h[0] = data->set.headers;
-    break;
-  case HEADER_PROXY:
-    h[0] = data->set.headers;
-    if(data->set.sep_headers) {
-      h[1] = data->set.proxyheaders;
-      numlists++;
-    }
-    break;
-  case HEADER_CONNECT:
-    if(data->set.sep_headers)
-      h[0] = data->set.proxyheaders;
-    else
-      h[0] = data->set.headers;
-    break;
-  case HEADER_CONNECT_UDP:
-    if(data->set.sep_headers)
-      h[0] = data->set.proxyheaders;
-    else
-      h[0] = data->set.headers;
-    break;
-  }
-#else
-  (void)is_connect;
-  h[0] = data->set.headers;
+  if(data->conn->bits.origin_is_proxy &&
+     data->set.sep_headers)
+      h[numlists++] = data->set.proxyheaders;
 #endif
 
   /* loop through one or two lists */
+  custom_ctx.data = data;
+  custom_ctx.req = req;
+  custom_ctx.httpversion = httpversion;
   for(i = 0; i < numlists; i++) {
-    for(headers = h[i]; headers; headers = headers->next) {
-      CURLcode result = CURLE_OK;
-      bool blankheader = FALSE;
-      struct Curl_str name;
-      const char *p = headers->data;
-      const char *origp = p;
-      size_t hlen = strlen(origp);
-
-      /* explicitly asked to send header without content is done by a header
-         that ends with a semicolon, but there must be no colon present in the
-         name */
-      if(!curlx_str_until(&p, &name, hlen, ';') &&
-         !curlx_str_single(&p, ';') &&
-         !curlx_str_single(&p, '\0') &&
-         !memchr(curlx_str(&name), ':', curlx_strlen(&name)))
-        blankheader = TRUE;
-      else {
-        p = origp;
-        if(!curlx_str_until(&p, &name, hlen, ':') &&
-           !curlx_str_single(&p, ':')) {
-          struct Curl_str val;
-          curlx_str_untilnl(&p, &val, hlen);
-          curlx_str_trimblanks(&val);
-          if(!curlx_strlen(&val))
-            /* no content, do not send this */
-            continue;
-        }
-        else
-          /* no colon */
-          continue;
-      }
-
-      /* a field name is a token and carries no surrounding whitespace, so
-         trim the parsed name before matching. Otherwise `Authorization :`
-         (space before the colon) slips past the Authorization/Cookie check
-         below and gets forwarded to another host on a redirect. */
-      curlx_str_trimblanks(&name);
-
-      /* only send this if the contents was non-blank or done special */
-
-      if(data->state.http_host &&
-         /* a Host: header was sent already, do not pass on any custom
-            Host: header as that will produce *two* in the same
-            request! */
-         curlx_str_casecompare(&name, "Host"))
-        ;
-      else if(data->state.httpreq == HTTPREQ_POST_FORM &&
-              /* this header (extended by formdata.c) is sent later */
-              curlx_str_casecompare(&name, "Content-Type"))
-        ;
-      else if(data->state.httpreq == HTTPREQ_POST_MIME &&
-              /* this header is sent later */
-              curlx_str_casecompare(&name, "Content-Type"))
-        ;
-      else if(data->req.authneg &&
-              /* while doing auth neg, do not allow the custom length since
-                 we will force length zero then */
-              curlx_str_casecompare(&name, "Content-Length"))
-        ;
-      else if(curlx_str_casecompare(&name, "Connection"))
-        /* Connection headers are handled specially */
-        ;
-      else if((httpversion >= 20) &&
-              curlx_str_casecompare(&name, "Transfer-Encoding"))
-        /* HTTP/2 does not support chunked requests */
-        ;
-      else if((curlx_str_casecompare(&name, "Authorization") ||
-               curlx_str_casecompare(&name, "Cookie")) &&
-              /* be careful of sending this potentially sensitive header to
-                 other hosts */
-              !Curl_auth_allowed_to_host(data))
-        ;
-      else if(blankheader) {
-        result = curlx_dyn_addn(req, curlx_str(&name), curlx_strlen(&name));
-        if(!result)
-          result = curlx_dyn_addn(req, STRCONST(":\r\n"));
-      }
-      else
-        result = curlx_dyn_addf(req, "%s\r\n", origp);
-
-      if(result)
-        return result;
-    }
+    CURLcode result =
+      Curl_dynhds_add_slist(NULL, h[i], http_custom_treat, &custom_ctx);
+    if(result)
+      return result;
   }
 
   return CURLE_OK;
@@ -2254,9 +2189,9 @@ static CURLcode set_post_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
       curl_mime_headers(data->state.mimepost, data->set.headers, 0);
       result = Curl_mime_prepare_headers(data, data->state.mimepost, cthdr,
                                          NULL, MIMESTRATEGY_FORM);
+      curl_mime_headers(data->state.mimepost, NULL, 0);
       if(result)
         return result;
-      curl_mime_headers(data->state.mimepost, NULL, 0);
       result = Curl_creader_set_mime(data, data->state.mimepost);
       if(result)
         return result;
@@ -2797,14 +2732,12 @@ static CURLcode http_add_hd(struct Curl_easy *data,
                             http_hd_t id,
                             unsigned char httpversion,
                             const char *method,
+                            bool is_connect,
                             Curl_HttpReq httpreq)
 {
-  CURLcode result = CURLE_OK;
-#if !defined(CURL_DISABLE_ALTSVC) || \
-  !defined(CURL_DISABLE_PROXY) || \
-  !defined(CURL_DISABLE_WEBSOCKETS)
   struct connectdata *conn = data->conn;
-#endif
+  CURLcode result = CURLE_OK;
+
   switch(id) {
   case H1_HD_REQUEST:
     /* add the main request stuff */
@@ -2827,13 +2760,13 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   case H1_HD_PROXY_AUTH:
-    if(data->req.hd_proxy_auth)
+    if(data->req.hd_proxy_auth && (conn->bits.origin_is_proxy || is_connect))
       result = curlx_dyn_add(req, data->req.hd_proxy_auth);
     break;
 #endif
 
   case H1_HD_AUTH:
-    if(data->req.hd_auth)
+    if(data->req.hd_auth && !is_connect)
       result = curlx_dyn_add(req, data->req.hd_auth);
     break;
 
@@ -2882,7 +2815,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
   case H1_HD_PROXY_CONNECTION:
     if(conn->bits.origin_is_proxy &&
        !Curl_checkheaders(data, STRCONST("Proxy-Connection")) &&
-       !Curl_checkProxyheaders(data, data->conn, STRCONST("Proxy-Connection")))
+       !Curl_checkProxyheaders(data, conn, STRCONST("Proxy-Connection")))
       result = curlx_dyn_add(req, "Proxy-Connection: Keep-Alive\r\n");
     break;
 #endif
@@ -2901,7 +2834,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 #endif
 
   case H1_HD_UPGRADE:
-    if(!Curl_conn_is_ssl(data->conn, FIRSTSOCKET) && (httpversion < 20) &&
+    if(!Curl_conn_is_ssl(conn) && (httpversion < 20) &&
        (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
        data->state.http_neg.h2_upgrade) {
       /* append HTTP2 upgrade magic stuff to the HTTP request if it is not done
@@ -2923,7 +2856,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_CUSTOM:
-    result = Curl_add_custom_headers(data, FALSE, httpversion, req);
+    result = Curl_add_custom_headers(data, httpversion, req);
     break;
 
   case H1_HD_CONTENT:
@@ -2986,7 +2919,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   result = http_set_aptr_host(data);
   /* setup the authentication headers, how that method and host are known */
   if(!result)
-    result = Curl_http_output_auth(data, data->conn, method, httpreq,
+    result = Curl_http_output_auth(data, data->conn, httpreq, method,
                                    data->state.up.path,
                                    data->state.up.query, FALSE);
   /* Setup input reader, resume information and ranges */
@@ -3003,13 +2936,13 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* Add request line and all headers to `req` */
   for(hd_id = 0; hd_id <= H1_HD_LAST; ++hd_id) {
     result = http_add_hd(data, &req, (http_hd_t)hd_id,
-                         httpversion, method, httpreq);
+                         httpversion, method, FALSE, httpreq);
     if(result)
       goto out;
   }
 
   /* setup variables for the upcoming transfer and send */
-  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
+  Curl_xfer_setup_sendrecv(data, -1);
   result = Curl_req_send(data, &req, httpversion);
 
   if((httpversion >= 20) && data->req.upload_chunky)
@@ -3270,6 +3203,20 @@ static CURLcode http_header_c(struct Curl_easy *data,
         /* we asked for a resume and we got it */
         k->content_range = TRUE;
     }
+    else if(*ptr == '*' && ptr[1] == '/' && k->httpcode == 416 &&
+            data->state.resume_from && data->state.httpreq == HTTPREQ_GET) {
+      curl_off_t total;
+      ptr += 2;
+      if(!curlx_str_number(&ptr, &total, CURL_OFF_T_MAX)) {
+        while(ISBLANK(*ptr))
+          ptr++;
+        if((*ptr == '\r' || *ptr == '\n' || !*ptr) &&
+           total != data->state.resume_from) {
+          failf(data, "Cannot resume: remote file size differs from offset");
+          return CURLE_RANGE_ERROR;
+        }
+      }
+    }
     else if(k->httpcode < 300)
       data->state.resume_from = 0; /* get everything */
   }
@@ -3294,7 +3241,7 @@ static CURLcode http_header_l(struct Curl_easy *data,
       data->info.filetime = k->timeofdoc;
     return CURLE_OK;
   }
-  if(HD_IS(hd, hdlen, "Location:")) {
+  if(HD_IS(hd, hdlen, "Location:") && (k->httpcode/100 >= 2)) {
     /* this is the URL that the server advises us to use instead */
     char *location = Curl_copy_header_value(hd);
     if(!location)
@@ -3314,8 +3261,7 @@ static CURLcode http_header_l(struct Curl_easy *data,
       }
       data->req.location = location;
 
-      if((k->httpcode >= 300 && k->httpcode < 400) &&
-         data->set.http_follow_mode) {
+      if(data->set.http_follow_mode && (k->httpcode/100 == 3)) {
         CURLcode result;
         DEBUGASSERT(!data->req.newurl);
         data->req.newurl = curlx_strdup(data->req.location); /* clone */
@@ -3837,7 +3783,7 @@ static CURLcode http_on_101_upgrade(struct Curl_easy *data,
     /* Switch to HTTP/2, where we will get more responses. blen bytes in buf
      * are already h2 protocol bytes */
     infof(data, "Received 101, Switching to HTTP/2");
-    result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+    result = Curl_http2_upgrade(data, buf, blen);
     if(!result)
       *pconsumed += blen;
     return result;
@@ -4156,6 +4102,12 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     /* Empty header line means end of headers! */
     struct dynbuf last_header;
     size_t consumed;
+
+    if((hdlen != 1 || hd[0] != '\n') &&
+       (hdlen != 2 || hd[0] != '\r' || hd[1] != '\n')) {
+      failf(data, "Invalid header termination");
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
 
     curlx_dyn_init(&last_header, hdlen + 1);
     result = curlx_dyn_addn(&last_header, hd, hdlen);
@@ -4782,8 +4734,8 @@ void Curl_http_req_free(struct httpreq *req)
     curlx_free(req->scheme);
     curlx_free(req->authority);
     curlx_free(req->path);
-    Curl_dynhds_free(&req->headers);
-    Curl_dynhds_free(&req->trailers);
+    Curl_dynhds_cleanup(&req->headers);
+    Curl_dynhds_cleanup(&req->trailers);
     curlx_free(req);
   }
 }
@@ -4847,7 +4799,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
 {
   const char *scheme = NULL, *authority = NULL;
   struct dynhds_entry *e;
-  size_t i;
+  uint32_t i, nheaders;
   CURLcode result;
 
   DEBUGASSERT(req);
@@ -4893,8 +4845,12 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     result = Curl_dynhds_add(h2_headers, STRCONST(HTTP_PSEUDO_PATH),
                              req->path, strlen(req->path));
   }
-  for(i = 0; !result && i < Curl_dynhds_count(&req->headers); ++i) {
+
+  nheaders = Curl_dynhds_count(&req->headers);
+  for(i = 0; !result && (i < nheaders); ++i) {
     e = Curl_dynhds_getn(&req->headers, i);
+    if(!e)
+      break;
     /* "TE" is special in that it is only permissible when it
      * has only value "trailers". RFC 9113 ch. 8.2.2 */
     if(e->namelen == 2 && curl_strequal("TE", e->name)) {
@@ -4943,8 +4899,8 @@ void Curl_http_resp_free(struct http_resp *resp)
 {
   if(resp) {
     curlx_free(resp->description);
-    Curl_dynhds_free(&resp->headers);
-    Curl_dynhds_free(&resp->trailers);
+    Curl_dynhds_cleanup(&resp->headers);
+    Curl_dynhds_cleanup(&resp->trailers);
     if(resp->prev)
       Curl_http_resp_free(resp->prev);
     curlx_free(resp);

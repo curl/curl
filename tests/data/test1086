@@ -9,6 +9,7 @@ timeout
 SLOWDOWNDATA
 flaky
 timing-dependent
+killserver
 </keywords>
 </info>
 

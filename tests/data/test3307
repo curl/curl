@@ -15,7 +15,10 @@ TrackMemory
 !torture
 </features>
 <name>
-Reader stack cleanup after line-conversion allocation failure
+Reader file errors and cleanup after allocation failure
 </name>
+<command>
+%LOGDIR/read%TESTNUMBER
+</command>
 </client>
 </testcase>

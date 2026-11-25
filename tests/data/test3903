@@ -3,16 +3,17 @@
 <info>
 <keywords>
 unittest
-HMAC
+frzn_strs
 </keywords>
 </info>
 
 <client>
 <features>
 unittest
+Debug
 </features>
 <name>
-HMAC unit tests
+frozen strings unit tests
 </name>
 </client>
 </testcase>

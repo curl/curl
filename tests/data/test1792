@@ -9,6 +9,7 @@ RETR
 timeout
 STALLDATA
 timing-dependent
+killserver
 </keywords>
 </info>
 

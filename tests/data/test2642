@@ -3,16 +3,19 @@
 <info>
 <keywords>
 unittest
-SHA256
+HTTP/2
 </keywords>
 </info>
 
 <client>
 <features>
 unittest
+http
+http/2
+h2c
 </features>
 <name>
-SHA256 unit tests
+HTTP/2 shutdown processes one receive per pass
 </name>
 </client>
 </testcase>

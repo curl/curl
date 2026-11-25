@@ -99,10 +99,10 @@ struct pathcomp {
   int len;   /* length in bytes */
 };
 
-/* ftp_conn is used for struct connection-oriented data in the connectdata
-   struct */
-struct ftp_conn {
+/* cf_ftp_ctx is the FTP filter context struct */
+struct cf_ftp_ctx {
   struct pingpong pp;
+  struct Curl_cfchain chain_data; /* DATA connection filter chain */
   char *account;
   char *alternative_to_user;
   char *entrypath; /* the PWD reply when we logged on */
@@ -132,21 +132,17 @@ struct ftp_conn {
   BIT(dont_check);  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
                        read the line, ignore the result. */
-  BIT(ctl_valid);   /* Tells Curl_ftp_quit() whether or not to do anything. If
-                       the connection has timed out or been closed, this
-                       should be FALSE when it gets to Curl_ftp_quit() */
   BIT(cwddone);     /* if it has been determined that the proper CWD combo
                        already has been done */
   BIT(cwdfail);     /* set TRUE if a CWD command fails, as then we must prevent
                        caching the current directory */
   BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
-  BIT(shutdown);    /* connection is being shutdown, e.g. QUIT */
+  BIT(sent_quit);    /* QUIT has been dispatched */
+  BIT(data_shutdown); /* DATA connection is in shutdown */
 };
 
 /* meta key for storing `struct FTP` as easy meta data */
 #define CURL_META_FTP_EASY   "meta:proto:ftp:easy"
-/* meta key for storing `struct ftp_conn` as connection meta data */
-#define CURL_META_FTP_CONN   "meta:proto:ftp:conn"
 
 #endif /* CURL_DISABLE_FTP */
 

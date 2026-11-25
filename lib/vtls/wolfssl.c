@@ -442,7 +442,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                     &sc_session);
   sdata = NULL;  /* took ownership of sdata */
   if(!result && pscs &&  /* return a duplicate if asked for and FTP */
-     (cf->conn->scheme->family == CURLPROTO_FTP))
+     (CF_CONN(cf)->scheme->family == CURLPROTO_FTP))
     result = Curl_ssl_session_dup(sc_session, &sc_dup);
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -538,7 +538,7 @@ static bool wssl_apply_session(
               scs->alpn ? scs->alpn : "-");
         success = TRUE;
         if(conn_config->earlydata &&
-           !cf->conn->bits.connect_only &&
+           !CF_CONN(cf)->bits.connect_only &&
            !strcmp("TLSv1.3", wolfSSL_get_version(wss->ssl))) {
           bool do_early_data = FALSE;
           if(sess_reuse_cb) {
@@ -1177,11 +1177,11 @@ static CURLcode wssl_init_ssl_handle(
   (void)transport;
 #endif
 
-  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+  if(!CF_IS_PRIMARY(cf) && !(cf->cft->flags & CF_TYPE_PROXY)) {
     /* FTP is a bitch. On TLS secured transfers, it is a common server
      * option to require the client to use the SAME TLS session as on
      * the control connection or it fails the request. See #22225. */
-    scs = Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    scs = Curl_ssl_get_primary_session(data, cf->cft);
     if(scs) {
       session_applied = wssl_apply_session(cf, data, wctx, alpns,
                                            sess_reuse_cb, scs);
@@ -1274,7 +1274,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
   }
   else {
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex, peer->origin);
+      Curl_dns_cf_get_https(data, cf, peer->origin);
 
     if(Curl_httpsrr_is_for_peer(peer->origin, rinfo) && rinfo->echconfiglist) {
       const unsigned char *ecl = rinfo->echconfiglist;
@@ -1513,7 +1513,7 @@ static CURLcode wssl_connect_step1(struct Curl_cfilter *cf,
   }
 #else /* !USE_BIO_CHAIN */
   {
-    curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+    curl_socket_t sockfd = cf->chain->sock;
     if(sockfd > INT_MAX) {
       failf(data, "SSL: socket value too large");
       return CURLE_SSL_CONNECT_ERROR;
@@ -2129,8 +2129,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
     if(Curl_ssl_need_httpsrr(cf) &&
-       !Curl_conn_dns_resolved_https(data, cf->sockindex,
-                                     connssl->peer.peer)) {
+       !Curl_dns_cf_resolved_https(data, cf, connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
       return CURLE_OK;
     }
@@ -2240,27 +2239,6 @@ static CURLcode wssl_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode wssl_sha256sum(const unsigned char *input,
-                               size_t len,
-                               unsigned char *sha256sum /* output */,
-                               size_t unused)
-{
-  wc_Sha256 SHA256pw;
-  (void)unused;
-  if(wc_InitSha256(&SHA256pw))
-    return CURLE_FAILED_INIT;
-  do {
-    word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
-    if(wc_Sha256Update(&SHA256pw, input, ilen))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    len -= ilen;
-    input += ilen;
-  } while(len);
-  if(wc_Sha256Final(&SHA256pw, sha256sum))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  return CURLE_OK;
-}
-
 static void *wssl_get_internals(struct ssl_connect_data *connssl,
                                 CURLINFO info)
 {
@@ -2307,7 +2285,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wssl_close,                      /* close_one */
   NULL,                            /* close_all */
   NULL,                            /* engines_list */
-  wssl_sha256sum,                  /* sha256sum */
   wssl_recv,                       /* recv decrypted data */
   wssl_send,                       /* send data to encrypt */
   NULL,                            /* get_channel_binding */

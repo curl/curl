@@ -582,8 +582,6 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
   DEBUGASSERT(conn->cpid == UINT32_MAX);
   conn->created = *pnow;
   conn->connect_start_ms = -1;
-  conn->shutdown.start_ms[FIRSTSOCKET] =
-    conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
 
   CPOOL_LOCK(cpool, data);
   /* Find the bundle, should it exist, and check the limits */
@@ -1067,7 +1065,7 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
     healthy = Curl_conn_is_alive(admin, conn, &input_pending);
     Curl_detach_connection(admin);
     if(healthy && input_pending && !CONN_INUSE(conn) &&
-       !Curl_conn_is_multiplex(conn, FIRSTSOCKET)) {
+       !Curl_conn_is_multiplex(conn)) {
       /* Non-multiplexed connections without attached transfers should
        * not have input pending. The input might be a TLS Notify Close,
        * for all we know. */

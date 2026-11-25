@@ -32,8 +32,7 @@ between systems with different views on certain characters, such as newlines
 or similar.
 
 libcurl does not do a complete ASCII conversion when doing ASCII transfers
-over FTP. This is a known limitation/flaw that nobody has rectified. libcurl
-only sets the mode to ASCII and performs a standard transfer.
+over FTP. libcurl only sets the mode to ASCII and performs a standard transfer.
 
 # DEFAULT
 

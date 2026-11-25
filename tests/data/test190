@@ -5,6 +5,7 @@
 FTP
 timeout
 DELAY
+killserver
 </keywords>
 </info>
 

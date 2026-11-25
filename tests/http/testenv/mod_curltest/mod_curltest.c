@@ -292,7 +292,7 @@ static int curltest_tweak_handler(request_rec *r)
   apr_array_header_t *args = NULL;
   int http_status = 200;
   apr_status_t error = APR_SUCCESS, body_error = APR_SUCCESS;
-  int close_conn = 0, with_cl = 0;
+  int close_conn = 0, with_cl = 0, with_trailers = 0;
   int x_hd_len = 0, x_hd1_len = 0;
 
   if(strcmp(r->handler, "curltest-tweak")) {
@@ -393,6 +393,10 @@ static int curltest_tweak_handler(request_rec *r)
         with_cl = 1;
         continue;
       }
+      else if(!strcmp("trailers", arg)) {
+        with_trailers = 1;
+        continue;
+      }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
                     "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
@@ -438,6 +442,12 @@ static int curltest_tweak_handler(request_rec *r)
     memset(hd_val, 'Y', x_hd1_len);
     hd_val[x_hd1_len - 1] = 0;
     apr_table_setn(r->headers_out, "X-Mega-Header", hd_val);
+  }
+  if(with_trailers) {
+    /* fields a client must pass on as trailers, but never act upon */
+    apr_table_setn(r->headers_out, "Trailer", "Set-Cookie, Location");
+    apr_table_setn(r->trailers_out, "Set-Cookie", "tweak-trailer=1; path=/");
+    apr_table_setn(r->trailers_out, "Location", "/curltest/tweak/?trailer");
   }
 
   apr_table_setn(r->subprocess_env, "no-brotli", "1");

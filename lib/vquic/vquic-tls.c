@@ -220,7 +220,6 @@ void Curl_vquic_report_handshake(struct curl_tls_ctx *ctx,
 {
   (void)cf;
 #ifdef USE_OPENSSL
-  (void)cf;
   Curl_ossl_report_handshake(data, &ctx->ossl);
 #elif defined(USE_GNUTLS)
   Curl_gtls_report_handshake(data, &ctx->gtls);

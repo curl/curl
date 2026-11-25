@@ -11,10 +11,10 @@ libtest
 </info>
 <reply>
 
-<!-- Alternate the order that Basic and Digest headers appear in responses to
-ensure that the order does not matter. -->
+# Alternate the order that Basic and Digest headers appear in responses to
+# ensure that the order does not matter.
 
-<!-- First request has Basic auth, wrong password -->
+# First request has Basic auth, wrong password
 <data100 crlf="headers">
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
@@ -26,7 +26,7 @@ WWW-Authenticate: Basic realm="testrealm"
 This is a bad password page!
 </data100>
 
-<!-- Second request has Digest auth, right password -->
+# Second request has Digest auth, right password
 <data1200 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
@@ -36,7 +36,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1200>
 
-<!-- Third request has Basic auth, wrong password -->
+# Third request has Basic auth, wrong password
 <data300 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
@@ -48,7 +48,7 @@ WWW-Authenticate: Basic realm="testrealm"
 This is a bad password page!
 </data300>
 
-<!-- Fourth request has Digest auth, wrong password -->
+# Fourth request has Digest auth, wrong password
 <data1400 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
@@ -60,7 +60,7 @@ WWW-Authenticate: Basic realm="testrealm"
 This is a bad password page!
 </data1400>
 
-<!-- Fifth request has Digest auth, right password -->
+# Fifth request has Digest auth, right password
 <data1500 crlf="headers">
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
@@ -119,6 +119,7 @@ http
 !SSPI
 crypto
 digest
+md5
 </features>
 <tool>
 lib2023

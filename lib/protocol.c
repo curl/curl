@@ -435,130 +435,92 @@ const struct Curl_scheme Curl_scheme_wss = {
   PORT_HTTPS                            /* defport */
 };
 
+#define MKPROT(a,b,c,d) ((((uint32_t)(a))<<24) | (((uint32_t)(b))<<16) | \
+                         (((uint32_t)(c))<<8) | ((uint32_t)(d)))
+
+/* Since LWR() does a shortcut trick and just ORs 0x20, that works fine for
+   A-Z ascii letters but not for '3' as in pop3. Characters outside of the A-Z
+   range need extra validation. */
+#define LWR(x) ((x) | 0x20)
+
 static const struct Curl_scheme *two_letter_scheme(const char *scheme)
 {
-  if((Curl_raw_tolower(scheme[0]) == 'w') &&
-     (Curl_raw_tolower(scheme[1]) == 's'))
+  if(MKPROT(0, 0, LWR(scheme[0]), LWR(scheme[1])) == MKPROT(0, 0, 'w', 's'))
     return &Curl_scheme_ws;
   return NULL;
 }
 
 static const struct Curl_scheme *three_letter_scheme(const char *scheme)
 {
-  char s0 = Curl_raw_tolower(scheme[0]);
-  char s1 = Curl_raw_tolower(scheme[1]);
-  char s2 = Curl_raw_tolower(scheme[2]);
-  if(s0 == 'f') {
-    if(s1 == 't' && s2 == 'p')
-      return &Curl_scheme_ftp;
-  }
-  else if(s0 == 'w') {
-    if(s1 == 's' && s2 == 's')
-      return &Curl_scheme_wss;
-  }
-  else if(s0 == 's') {
-    if(s1 == 'c' && s2 == 'p')
-      return &Curl_scheme_scp;
+  uint32_t prot = MKPROT(0, LWR(scheme[0]), LWR(scheme[1]), LWR(scheme[2]));
+  switch(prot) {
+  case MKPROT(0, 'f', 't', 'p'):
+    return &Curl_scheme_ftp;
+  case MKPROT(0, 'w', 's', 's'):
+    return &Curl_scheme_wss;
+  case MKPROT(0, 's', 'c', 'p'):
+    return &Curl_scheme_scp;
   }
   return NULL;
 }
 
 static const struct Curl_scheme *four_letter_scheme(const char *scheme)
 {
-  char s0 = Curl_raw_tolower(scheme[0]);
-  char s1 = Curl_raw_tolower(scheme[1]);
-  char s2 = Curl_raw_tolower(scheme[2]);
-  char s3 = Curl_raw_tolower(scheme[3]);
-  if(s3 == 'p') {
-    if(s0 == 'h') {
-      if(s1 == 't' && s2 == 't')
-        return &Curl_scheme_http;
-    }
-    else if(s0 == 'i') {
-      if(s1 == 'm' && s2 == 'a')
-        return &Curl_scheme_imap;
-    }
-    else if(s0 == 'l') {
-      if(s1 == 'd' && s2 == 'a')
-        return &Curl_scheme_ldap;
-    }
-    else if(s0 == 'r') {
-      if(s1 == 't' && s2 == 's')
-        return &Curl_scheme_rtsp;
-    }
-    else if(s0 == 't') {
-      if(s1 == 'f' && s2 == 't')
-        return &Curl_scheme_tftp;
-    }
-    else if(s0 == 's') {
-      if(s1 == 'f' && s2 == 't')
-        return &Curl_scheme_sftp;
-      if(s1 == 'm' && s2 == 't')
-        return &Curl_scheme_smtp;
-    }
-  }
-  else if(s0 == 'f') {
-    if(s1 == 't' && s2 == 'p' && s3 == 's')
-      return &Curl_scheme_ftps;
-    if(s1 == 'i' && s2 == 'l' && s3 == 'e')
-      return &Curl_scheme_file;
-  }
-  else if(s0 == 'm') {
-    if(s1 == 'q' && s2 == 't' && s3 == 't')
-      return &Curl_scheme_mqtt;
-  }
-  else if(s0 == 'p') {
-    if(s1 == 'o' && s2 == 'p' && s3 == '3')
+  uint32_t prot = MKPROT(LWR(scheme[0]), LWR(scheme[1]), LWR(scheme[2]),
+                         LWR(scheme[3]));
+  switch(prot) {
+  case MKPROT('h', 't', 't', 'p'):
+    return &Curl_scheme_http;
+  case MKPROT('i', 'm', 'a', 'p'):
+    return &Curl_scheme_imap;
+  case MKPROT('l', 'd', 'a', 'p'):
+    return &Curl_scheme_ldap;
+  case MKPROT('r', 't', 's', 'p'):
+    return &Curl_scheme_rtsp;
+  case MKPROT('t', 'f', 't', 'p'):
+    return &Curl_scheme_tftp;
+  case MKPROT('s', 'f', 't', 'p'):
+    return &Curl_scheme_sftp;
+  case MKPROT('s', 'm', 't', 'p'):
+    return &Curl_scheme_smtp;
+  case MKPROT('f', 't', 'p', 's'):
+    return &Curl_scheme_ftps;
+  case MKPROT('f', 'i', 'l', 'e'):
+    return &Curl_scheme_file;
+  case MKPROT('m', 'q', 't', 't'):
+    return &Curl_scheme_mqtt;
+  case MKPROT('p', 'o', 'p', '3'):
+    if(scheme[3] == '3')
       return &Curl_scheme_pop3;
-  }
-  else if(s0 == 'd') {
-    if(s1 == 'i' && s2 == 'c' && s3 == 't')
-      return &Curl_scheme_dict;
+    break;
+  case MKPROT('d', 'i', 'c', 't'):
+    return &Curl_scheme_dict;
   }
   return NULL;
 }
 
 static const struct Curl_scheme *five_letter_scheme(const char *scheme)
 {
-  char s4 = Curl_raw_tolower(scheme[4]);
-  if(s4 == 's') {
-    char s0 = Curl_raw_tolower(scheme[0]);
-    char s1 = Curl_raw_tolower(scheme[1]);
-    char s2 = Curl_raw_tolower(scheme[2]);
-    char s3 = Curl_raw_tolower(scheme[3]);
-    if(s3 == 'p') {
-      switch(s0) {
-      case 'h':
-        if(s1 == 't' && s2 == 't')
-          return &Curl_scheme_https;
-        break;
-      case 'l':
-        if(s1 == 'd' && s2 == 'a')
-          return &Curl_scheme_ldaps;
-        break;
-      case 'i':
-        if(s1 == 'm' && s2 == 'a')
-          return &Curl_scheme_imaps;
-        break;
-      case 's':
-        if(s1 == 'm' && s2 == 't')
-          return &Curl_scheme_smtps;
-        break;
-      default:
-        break;
-      }
-    }
-    else if(s0 == 'p') {
-      if(s1 == 'o' && s2 == 'p' && s3 == '3')
+  if((scheme[4] | 0x20) == 's') {
+    uint32_t prot = MKPROT(LWR(scheme[0]), LWR(scheme[1]), LWR(scheme[2]),
+                           LWR(scheme[3]));
+    switch(prot) {
+    case MKPROT('h', 't', 't', 'p'):
+      return &Curl_scheme_https;
+    case MKPROT('l', 'd', 'a', 'p'):
+      return &Curl_scheme_ldaps;
+    case MKPROT('i', 'm', 'a', 'p'):
+      return &Curl_scheme_imaps;
+    case MKPROT('s', 'm', 't', 'p'):
+      return &Curl_scheme_smtps;
+    case MKPROT('p', 'o', 'p', '3'):
+      if(scheme[3] == '3')
         return &Curl_scheme_pop3s;
-    }
-    else if(s0 == 'm') {
-      if(s1 == 'q' && s2 == 't' && s3 == 't')
-        return &Curl_scheme_mqtts;
-    }
-    else if(s0 == 's') {
-      if(s1 == 'o' && s2 == 'c' && s3 == 'k')
-        return &Curl_scheme_socks;
+      break;
+    case MKPROT('m', 'q', 't', 't'):
+      return &Curl_scheme_mqtts;
+    case MKPROT('s', 'o', 'c', 'k'):
+      return &Curl_scheme_socks;
     }
   }
   return NULL;
@@ -566,8 +528,7 @@ static const struct Curl_scheme *five_letter_scheme(const char *scheme)
 
 static const struct Curl_scheme *six_letter_scheme(const char *scheme)
 {
-  char s0 = Curl_raw_tolower(scheme[0]);
-  switch(s0) {
+  switch(LWR(scheme[0])) {
   case 's':
     if(curl_strnequal("ocks4", &scheme[1], 5))
       return &Curl_scheme_socks4;
@@ -588,14 +549,14 @@ static const struct Curl_scheme *six_letter_scheme(const char *scheme)
 
 static const struct Curl_scheme *seven_letter_scheme(const char *scheme)
 {
-  char s0 = Curl_raw_tolower(scheme[0]);
-  if(s0 == 's') {
+  switch(LWR(scheme[0])) {
+  case 's':
     if(curl_strnequal("ocks4a", &scheme[1], 6))
       return &Curl_scheme_socks4a;
     if(curl_strnequal("ocks5h", &scheme[1], 6))
       return &Curl_scheme_socks5h;
-  }
-  else if(s0 == 'g') {
+    break;
+  case 'g':
     if(curl_strnequal("ophers", &scheme[1], 6))
       return &Curl_scheme_gophers;
   }
@@ -623,6 +584,7 @@ const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len)
   return parse[len - 2](scheme);
 }
 
+/* @unittest 1627 */
 const struct Curl_scheme *Curl_get_scheme(const char *scheme)
 {
   return Curl_getn_scheme(scheme, strlen(scheme));

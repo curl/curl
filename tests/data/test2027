@@ -10,18 +10,14 @@ libtest
 </info>
 <reply>
 
-<!--
+# Explanation for the duplicate 400 requests:
+#
+# libcurl does not detect that a given Digest password is wrong already on the
+# first 401 response (as the data400 gives). libcurl will instead consider the
+# new response as a duplicate and it sends another and detects the auth
+# problem on the second 401 response!
 
-Explanation for the duplicate 400 requests:
-
-libcurl does not detect that a given Digest password is wrong already on the
-first 401 response (as the data400 gives). libcurl will instead consider the
-new response as a duplicate and it sends another and detects the auth
-problem on the second 401 response!
-
--->
-
-<!-- First request has Digest auth, wrong password -->
+# First request has Digest auth, wrong password
 <data100 crlf="headers">
 HTTP/1.1 401 Need Digest auth
 Server: Microsoft-IIS/5.0
@@ -42,7 +38,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="2"
 This is a bad password page!
 </data1100>
 
-<!-- Second request has Digest auth, right password -->
+# Second request has Digest auth, right password
 <data200 crlf="headers">
 HTTP/1.1 401 Need Digest auth (2)
 Server: Microsoft-IIS/5.0
@@ -62,7 +58,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1200>
 
-<!-- Third request has Digest auth, wrong password -->
+# Third request has Digest auth, wrong password
 <data300 crlf="headers">
 HTTP/1.1 401 Need Digest auth (3)
 Server: Microsoft-IIS/5.0
@@ -83,7 +79,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="5"
 This is a bad password page!
 </data1300>
 
-<!-- Fourth request has Digest auth, wrong password -->
+# Fourth request has Digest auth, wrong password
 <data400 crlf="headers">
 HTTP/1.1 401 Need Digest auth (4)
 Server: Microsoft-IIS/5.0
@@ -104,7 +100,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="7"
 This is a bad password page!
 </data1400>
 
-<!-- Fifth request has Digest auth, right password -->
+# Fifth request has Digest auth, right password
 <data1500 crlf="headers">
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
@@ -178,6 +174,7 @@ http
 !SSPI
 crypto
 digest
+md5
 </features>
 <tool>
 lib2023

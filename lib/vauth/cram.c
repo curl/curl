@@ -28,7 +28,6 @@
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include "vauth/vauth.h"
-#include "curl_hmac.h"
 #include "curl_md5.h"
 
 /*
@@ -50,26 +49,36 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
                                            struct Curl_creds *creds,
                                            struct bufref *out)
 {
+#ifndef CURL_HAVE_MD5
+  (void)chlg;
+  (void)creds;
+  (void)out;
+  return CURLE_NOT_BUILT_IN;
+#else
   struct HMAC_context *ctxt;
-  unsigned char digest[MD5_DIGEST_LEN];
+  uint8_t digest[CURL_MD5_DIGEST_LEN];
   char *response;
   const char *user = Curl_creds_user(creds);
   const char *passwd = Curl_creds_passwd(creds);
+  CURLcode hok;
 
   /* Compute the digest using the password as the key */
-  ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
-                        (const unsigned char *)passwd,
-                        curlx_uztoui(strlen(passwd)));
+  ctxt = Curl_HMAC_init(&Curl_HMAC_MD5, passwd, strlen(passwd));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
+  hok = CURLE_OK;
+
   /* Update the digest with the given challenge */
   if(Curl_bufref_len(chlg))
-    Curl_HMAC_update(ctxt, Curl_bufref_uptr(chlg),
-                     curlx_uztoui(Curl_bufref_len(chlg)));
+    hok |= Curl_HMAC_update(ctxt,
+    Curl_bufref_uptr(chlg), Curl_bufref_len(chlg));
 
   /* Finalise the digest */
-  Curl_HMAC_final(ctxt, digest);
+  hok |= Curl_HMAC_final(ctxt, digest);
+
+  if(hok)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* Generate the response */
   response = curl_maprintf(
@@ -82,6 +91,7 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
 
   Curl_bufref_set(out, response, strlen(response), curl_free);
   return CURLE_OK;
+#endif
 }
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH */

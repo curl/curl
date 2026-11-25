@@ -30,7 +30,7 @@ When used in FTP, the FTP server response lines are considered being "headers"
 and thus are saved there.
 
 When used on a FILE URL, curl outputs the file size and last modification
-time only.
+time.
 
 Starting in curl 8.11.0, using the --create-dirs option can also create
 missing directory components for the path provided in --dump-header.

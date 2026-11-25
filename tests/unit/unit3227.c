@@ -58,6 +58,7 @@ static CURLcode test_unit3227(const char *arg)
   CURL *easy = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
+  char buffer;
 
   UNITTEST_BEGIN(t3227_setup())
 
@@ -117,6 +118,16 @@ static CURLcode test_unit3227(const char *arg)
                                         MIMESTRATEGY_FORM) == CURLE_OK,
               "CRLF filename rejected for form");
   fail_if(headers_have_ctrl(part), "form header split despite encoding");
+
+  /* A failed file read must not be mistaken for an empty attachment. */
+  part = curl_mime_addpart(mime);
+  abort_unless(part, "curl_mime_addpart()");
+  abort_unless(curl_mime_filedata(part, arg) == CURLE_OK,
+               "curl_mime_filedata()");
+  part->fp = curlx_fopen(arg, FOPEN_WRITETEXT);
+  abort_unless(part->fp, "open write-only file");
+  fail_unless(part->readfunc(&buffer, 1, 1, part->arg) == (size_t)-1,
+              "file read error must not return EOF");
 
   UNITTEST_END(t3227_stop(easy, mime))
 }

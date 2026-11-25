@@ -54,6 +54,7 @@ http
 !SSPI
 crypto
 digest
+sha256
 </features>
 <name>
 HTTP with RFC7616 Digest, bad password, SHA-256 and userhash

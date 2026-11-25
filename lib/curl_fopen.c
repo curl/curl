@@ -92,7 +92,8 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   *tempname = NULL;
 
 #ifndef _WIN32
-  *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
+  /* Preserve existing contents until the temporary file replaces them. */
+  *fh = curlx_fopen(filename, FOPEN_APPENDTEXT);
   if(!*fh)
     goto fail;
   if(curlx_fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
@@ -135,9 +136,9 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     curlx_struct_stat nsb;
     if((curlx_fstat(fd, &nsb) != -1) &&
        (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
-      /* if the user and group are the same, clone the original mode */
-      if(fchmod(fd, (mode_t)sb.st_mode) == -1)
-        goto fail;
+      /* if the user and group are the same, clone the original mode. Failure
+         is ignored as it then just leaves it at the default 0600 */
+      (void)fchmod(fd, (mode_t)sb.st_mode);
     }
   }
 #endif

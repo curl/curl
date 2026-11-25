@@ -2,18 +2,22 @@
 <testcase>
 <info>
 <keywords>
-unittest
-SHA-512/256
+tunittest
 </keywords>
 </info>
 
 <client>
 <features>
 unittest
-sha512-256
 </features>
 <name>
-SHA-512/256 unit tests
+URL globbing tests (tool_urlglob)
 </name>
 </client>
+
+<verify>
+<limits>
+Allocations: 1100
+</limits>
+</verify>
 </testcase>

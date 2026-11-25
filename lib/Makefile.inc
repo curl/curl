@@ -146,6 +146,7 @@ LIB_VQUIC_CFILES =          \
   vquic/cf-ngtcp2-cmn.c     \
   vquic/cf-ngtcp2-proxy.c   \
   vquic/cf-quiche.c         \
+  vquic/ngtcp2_shim.c       \
   vquic/vquic.c             \
   vquic/vquic-tls.c
 
@@ -156,6 +157,7 @@ LIB_VQUIC_HFILES =          \
   vquic/cf-ngtcp2-cmn.h     \
   vquic/cf-ngtcp2-proxy.h   \
   vquic/cf-quiche.h         \
+  vquic/ngtcp2_shim.h       \
   vquic/vquic.h             \
   vquic/vquic_int.h         \
   vquic/vquic-tls.h
@@ -198,6 +200,7 @@ LIB_CFILES =         \
   curl_gssapi.c      \
   curl_memrchr.c     \
   curl_range.c       \
+  curl_refcount.c    \
   curl_sasl.c        \
   curl_sha512_256.c  \
   curl_share.c       \
@@ -216,6 +219,7 @@ LIB_CFILES =         \
   file.c             \
   fileinfo.c         \
   formdata.c         \
+  frzn_strs.c        \
   ftp.c              \
   ftplistparser.c    \
   getenv.c           \
@@ -329,6 +333,7 @@ LIB_HFILES =         \
   curl_memrchr.h     \
   curl_printf.h      \
   curl_range.h       \
+  curl_refcount.h    \
   curl_sasl.h        \
   curl_setup.h       \
   curl_sha256.h      \
@@ -349,6 +354,7 @@ LIB_HFILES =         \
   file.h             \
   fileinfo.h         \
   formdata.h         \
+  frzn_strs.h        \
   ftp.h              \
   ftp-int.h          \
   ftplistparser.h    \

@@ -13,6 +13,7 @@ See-also:
   - verbose
   - parallel-max
   - parallel-immediate
+  - fail-early
 Example:
   - --parallel $URL -o file1 $URL -o file2
 ---
@@ -30,3 +31,8 @@ transfers in a single line.
 
 The maximum amount of concurrent transfers is set with --parallel-max and it
 defaults to 50.
+
+When one or more parallel transfers fail, curl continues performing the
+remaining transfers (unless --fail-early is used) and exits with the error
+code of the first failed transfer. This differs from serial transfers, where
+the exit code is determined by the last transfer unless --fail-early is used.

@@ -1102,7 +1102,6 @@ if(USE_WOLFSSL)
   curl_openssl_check_exists("wolfSSL_UseALPN" HAVE_WOLFSSL_USEALPN)
   curl_openssl_check_exists("wolfSSL_BIO_new" HAVE_WOLFSSL_BIO_NEW)
   curl_openssl_check_exists("wolfSSL_BIO_set_shutdown" HAVE_WOLFSSL_BIO_SET_SHUTDOWN)
-  curl_openssl_check_exists("wc_Des_EcbEncrypt" HAVE_WC_DES_ECBENCRYPT)
 endif()
 
 if(USE_OPENSSL)
@@ -1509,6 +1508,7 @@ if(_curl_ca_bundle_supported)
 
     if(_curl_ca_bundle_autodetect)
       foreach(_search_ca_bundle_path IN ITEMS
+          "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
           "/etc/ssl/certs/ca-certificates.crt"
           "/etc/pki/tls/certs/ca-bundle.crt"
           "/usr/share/ssl/certs/ca-bundle.crt"
@@ -1887,19 +1887,12 @@ if(WIN32)
   if(NOT WINDOWS_STORE)
     list(APPEND CURL_NETWORK_AND_TIME_LIBS "iphlpapi")  # for if_nametoindex()
   endif()
-  list(APPEND CURL_LIBS "bcrypt")  # for BCryptGenRandom()
+  # for BCryptCloseAlgorithmProvider(), BCryptCreateHash(), BCryptDestroyHash(), BCryptFinishHash(),
+  #     BCryptGenRandom(), BCryptGetProperty(), BCryptHashData(), BCryptOpenAlgorithmProvider()
+  list(APPEND CURL_LIBS "bcrypt")
 
-  # We use crypto functions that are not available for UWP apps
-  if(NOT WINDOWS_STORE)
-    set(USE_WIN32_CRYPTO ON)
-  endif()
-
-  # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
-  if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    # for CryptAcquireContext(), CryptCreateHash(), CryptDestroyHash(), CryptGetHashParam(), CryptHashData(),
-    #     CryptReleaseContext() in NTLM, md4, md5, sha256, Schannel
-    # for CryptDestroyKey(), CryptEncrypt(), CryptImportKey() in NTLM
-    list(APPEND CURL_LIBS "advapi32")
+  # Link required libraries for cert/crypto functions
+  if(NOT WINDOWS_STORE OR USE_SCHANNEL)
     # for Cert*() in openssl.c Native CA, Schannel
     # for CryptDecodeObjectEx(), CryptQueryObject(), CryptStringToBinary(), PFXImportCertStore() in Schannel
     list(APPEND CURL_LIBS "crypt32")

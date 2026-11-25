@@ -163,6 +163,8 @@ void Curl_freeset(struct Curl_easy *data)
     curlx_safefree(data->set.blobs[j]);
   }
 
+  Curl_frzn_strs_safefree(&data->set.resolve);
+  Curl_frzn_strs_safefree(&data->set.connect_to);
   Curl_bufref_free(&data->state.referer);
   Curl_bufref_free(&data->state.url);
 
@@ -281,6 +283,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
 #ifndef CURL_DISABLE_HTTP
   curlx_safefree(data->state.rangeline);
   curlx_safefree(data->state.http_host);
+#endif
+#ifndef CURL_DISABLE_RTSP
+  curlx_safefree(data->state.session_id);
 #endif
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(data->req.cookiehost);
@@ -492,17 +497,13 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 {
-  int8_t i;
-
   DEBUGASSERT(conn);
 
   if(conn->scheme && conn->scheme->run->disconnect &&
      !conn->bits.shutdown_handler)
     conn->scheme->run->disconnect(data, conn, TRUE);
 
-  for(i = 0; i < (int8_t)CURL_ARRAYSIZE(conn->cfilter); ++i) {
-    Curl_conn_cf_discard_all(data, conn, i);
-  }
+  Curl_cfchain_cleanup(&conn->chain, data);
 
 #ifndef CURL_DISABLE_PROXY
   Curl_peer_unlink(&conn->http_proxy.peer);
@@ -648,8 +649,7 @@ static bool url_match_connect_config(struct connectdata *conn,
 static bool url_match_fully_connected(struct connectdata *conn,
                                       struct url_conn_match *m)
 {
-  if(!Curl_conn_is_connected(conn, FIRSTSOCKET) ||
-     conn->bits.upgrade_in_progress) {
+  if(!Curl_conn_is_connected(conn) || conn->bits.upgrade_in_progress) {
     /* Not yet connected, or a protocol upgrade is in progress. The later
      * happens for HTTP/2 Upgrade: requests that need a response. */
     if(m->may_multiplex) {
@@ -706,7 +706,7 @@ static bool url_match_multiplex_limits(struct connectdata *conn,
       return FALSE;
     }
     if(conn->attached_xfers >=
-       Curl_conn_get_max_concurrent(m->data, conn, FIRSTSOCKET)) {
+       Curl_conn_get_max_concurrent(m->data, conn)) {
       infof(m->data, "connection #%" FMT_OFF_T "reached "
             "MAX_CONCURRENT_STREAMS(%u), skip",
             conn->connection_id, conn->attached_xfers);
@@ -723,10 +723,10 @@ static bool url_match_ssl_use(struct connectdata *conn,
 {
   if(m->needle->scheme->flags & PROTOPT_SSL) {
     /* We are looking for SSL, if `conn` does not do it, not a match. */
-    if(!Curl_conn_is_ssl(conn, FIRSTSOCKET))
+    if(!Curl_conn_is_ssl(conn))
       return FALSE;
   }
-  else if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  else if(Curl_conn_is_ssl(conn)) {
     /* If the protocol does not allow reuse of SSL connections OR
        is of another protocol family, not a match. */
     if(!(m->needle->scheme->flags & PROTOPT_SSL_REUSE) ||
@@ -858,7 +858,7 @@ static bool url_match_proto_config(struct connectdata *conn,
 #endif
 #ifndef CURL_DISABLE_FTP
   else if(get_protocol_family(m->needle->scheme) & PROTO_FAMILY_FTP) {
-    if(!Curl_ftp_conns_match(m->needle, conn))
+    if(!Curl_ftp_conn_matches(m->data, conn))
       return FALSE;
   }
 #endif
@@ -1086,16 +1086,11 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
     return NULL;
 
   /* and we setup a few fields in case we end up actually using this struct */
-  conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
-  conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
-  conn->recv_idx = 0; /* default for receiving transfer data */
-  conn->send_idx = 0; /* default for sending transfer data */
+  Curl_cfchain_init(&conn->chain, conn, TRUE);
   conn->connection_id = -1;    /* no ID */
   conn->cpid = UINT32_MAX;  /* not in connection pool yet */
   conn->attached_xfers = 0;
   conn->connect_start_ms = -1;
-  conn->shutdown.start_ms[FIRSTSOCKET] =
-    conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
 
 #ifndef CURL_DISABLE_FTP
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
@@ -1496,7 +1491,7 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   }
 
   /* Now create the destination name */
-  peer = Curl_conn_get_destination(conn, FIRSTSOCKET);
+  peer = Curl_conn_get_destination(conn);
   if(!peer)
     return CURLE_FAILED_INIT;
 
@@ -1521,7 +1516,7 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   if(data->set.scope_id)
     conn->scope_id = data->set.scope_id;
   else {
-    peer = Curl_conn_get_first_peer(conn, FIRSTSOCKET);
+    peer = Curl_conn_get_first_peer(conn);
     if(!peer)
       return CURLE_FAILED_INIT;
     conn->scope_id = peer->scopeid;
@@ -1722,17 +1717,20 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct Curl_peer *origin = conn->origin;
   struct Curl_peer *via_peer = NULL;
-  struct curl_slist *conn_to_entry = data->set.connect_to;
+  struct Curl_frzn_strs *cto_strs = data->set.connect_to;
+  const char *s;
+  size_t i;
 
   DEBUGASSERT(!conn->via_peer);
   Curl_peer_unlink(&conn->via_peer);
 
-  while(conn_to_entry && !via_peer) {
-    result = parse_connect_to_string(data, origin, conn_to_entry->data,
-                                     &via_peer);
+  for(i = 0; (i < Curl_frzn_strs_count(cto_strs)) && !via_peer; ++i) {
+    s = Curl_frzn_strs_get_str(cto_strs, i);
+    if(!s)
+      continue;
+    result = parse_connect_to_string(data, origin, s, &via_peer);
     if(result)
       return result;
-    conn_to_entry = conn_to_entry->next;
   }
 
 #ifndef CURL_DISABLE_ALTSVC
@@ -1995,13 +1993,11 @@ static CURLcode url_create_needle(struct Curl_easy *data,
 
   if(network_scheme) {
     /* Setup callbacks for network connections */
-    needle->recv[FIRSTSOCKET] = Curl_cf_recv;
-    needle->send[FIRSTSOCKET] = Curl_cf_send;
-    needle->recv[SECONDARYSOCKET] = Curl_cf_recv;
-    needle->send[SECONDARYSOCKET] = Curl_cf_send;
+    needle->do_recv = Curl_cf_recv;
+    needle->do_send = Curl_cf_send;
     needle->bits.tcp_fastopen = data->set.tcp_fastopen;
 #ifdef USE_UNIX_SOCKETS
-    if(Curl_conn_get_first_peer(needle, FIRSTSOCKET)->unix_socket)
+    if(Curl_conn_get_first_peer(needle)->unix_socket)
       needle->transport_wanted = TRNSPRT_UNIX;
 #endif
   }
@@ -2294,7 +2290,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       struct connectdata *conn = data->conn;
       VERBOSE(bool tls_upgraded =
         (!(needle->origin->scheme->flags & PROTOPT_SSL) &&
-         Curl_conn_is_ssl(conn, FIRSTSOCKET)));
+         Curl_conn_is_ssl(conn)));
 
       DEBUGASSERT(conn);
       conn->bits.reuse = TRUE;
@@ -2438,7 +2434,8 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
     *pconnected = TRUE;
   }
   else {
-    result = Curl_conn_setup(data, conn, FIRSTSOCKET, CURL_CF_SSL_DEFAULT);
+    result = Curl_conn_setup(data, conn, &conn->chain,
+                             CURL_CF_SSL_DEFAULT);
     if(!result)
       result = Curl_headers_init(data);
     CURL_TRC_M(data, "Curl_conn_setup() -> %d", (int)result);

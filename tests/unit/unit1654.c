@@ -310,6 +310,24 @@ static CURLcode test_unit1654(const char *arg)
                 "cross-ALPN replacement changed other origins");
   }
 
+  /* Duplicating a handle must preserve read-only and protocol restrictions. */
+  {
+    const long flags = CURLALTSVC_READONLYFILE | CURLALTSVC_H1;
+    struct Curl_easy *dup;
+
+    result = curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, flags);
+    fail_if(result, "setting alt-svc flags failed");
+    if(result)
+      goto fail;
+    dup = curl_easy_duphandle(curl);
+    fail_if(!dup, "curl_easy_duphandle failed");
+    if(!dup)
+      goto fail;
+    fail_unless(dup->asi && dup->asi->flags == flags,
+                "duplicated handle lost alt-svc flags");
+    curl_easy_cleanup(dup);
+  }
+
 fail:
   curl_easy_cleanup(curl);
   Curl_altsvc_cleanup(&asi);

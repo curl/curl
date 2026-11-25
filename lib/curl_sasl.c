@@ -311,7 +311,12 @@ static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
   if((sctx->enabledmechs & SASL_MECH_GSSAPI) &&
      Curl_auth_is_gssapi_supported() &&
-     Curl_auth_user_contains_domain(sctx->conn->creds)) {
+     Curl_auth_user_contains_domain(sctx->conn->creds)
+#ifndef USE_WINDOWS_SSPI
+     && (!Curl_creds_has_passwd(sctx->conn->creds) ||
+         sctx->sasl->prefmech == SASL_MECH_GSSAPI)
+#endif
+    ) {
     const char *service = Curl_creds_has_sasl_service(sctx->conn->creds) ?
       Curl_creds_sasl_service(sctx->conn->creds) : sctx->sasl->params->service;
 
@@ -405,7 +410,7 @@ static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
      (sctx->enabledmechs & SASL_MECH_OAUTHBEARER)) {
     const char *hostname;
     int port;
-    Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
+    Curl_conn_get_current_host(data, &hostname, &port);
 
     sctx->mech = SASL_MECH_STRING_OAUTHBEARER;
     sctx->state1 = SASL_OAUTH2;
@@ -550,7 +555,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   int port;
   struct bufref serverdata;
 
-  Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
+  Curl_conn_get_current_host(data, &hostname, &port);
   Curl_bufref_init(&serverdata);
   Curl_bufref_init(&resp);
   *progress = SASL_INPROGRESS;

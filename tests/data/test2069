@@ -51,6 +51,7 @@ http
 !SSPI
 crypto
 digest
+sha256
 </features>
 <name>
 HTTP POST Digest with SHA-256, userhash and set Content-Length header

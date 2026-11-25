@@ -33,7 +33,9 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 
 /* this is for creating Negotiate header output */
 CURLcode Curl_output_negotiate(struct Curl_easy *data,
-                               struct connectdata *conn, bool proxy);
+                               struct connectdata *conn,
+                               const char *hd_name,
+                               bool proxy);
 
 #endif
 

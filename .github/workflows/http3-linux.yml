@@ -40,19 +40,19 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc
   AWSLC_VERSION: 5.13.0
   # renovate: datasource=github-tags depName=google/boringssl
-  BORINGSSL_VERSION: 0.20261020.0
+  BORINGSSL_VERSION: 0.20261105.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver-coerced extractVersion=^nettle_?(?<version>.+)_release_.+$
   NETTLE_VERSION: '4.0'
   # renovate: datasource=github-tags depName=gnutls/gnutls
-  GNUTLS_VERSION: 3.8.13
+  GNUTLS_VERSION: 3.8.14
   # renovate: datasource=github-tags depName=libressl/portable
-  LIBRESSL_VERSION: 4.4.0
+  LIBRESSL_VERSION: 4.4.1
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>.+)$
   OPENSSL_VERSION: 4.1.0
   # renovate: datasource=github-releases depName=openssl/openssl extractVersion=^openssl-(?<version>3\.5\..+)$
   OPENSSL_PREV_VERSION: 3.5.9
   # renovate: datasource=github-tags depName=cloudflare/quiche
-  QUICHE_VERSION: 0.30.0
+  QUICHE_VERSION: 0.30.1
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl extractVersion=^v?(?<version>.+)-stable$
   WOLFSSL_VERSION: 5.9.4
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3
@@ -230,7 +230,7 @@ jobs:
             libev-dev
             libuv1-dev
             libc-ares-dev
-            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
+            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-dev
 
       - name: 'build awslc'
         if: ${{ !steps.cache1-awslc.outputs.cache-hit }}
@@ -277,8 +277,7 @@ jobs:
             "https://www.gnupg.org/ftp/gcrypt/gnutls/v${GNUTLS_VERSION%.*}/gnutls-${GNUTLS_VERSION}.tar.xz" --output pkg.bin
           sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin
           cd "gnutls-${GNUTLS_VERSION}"
-          autoreconf -fi
-          # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
+          # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-dev
           ./configure --disable-dependency-tracking --prefix=/home/runner/pkg/gnutls \
             PKG_CONFIG_PATH=/home/runner/pkg/nettle/lib/pkgconfig \
             LDFLAGS=-Wl,-rpath,/home/runner/pkg/nettle/lib \
@@ -470,7 +469,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'gnutls'
-            install_packages: libp11-kit-dev libssh-dev
+            install_packages: libp11-kit-dev libtasn1-dev libssh-dev
             install_steps: skipall
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/gnutls/lib -Wl,-rpath,/home/runner/pkg/nettle/lib -Wl,-rpath,/home/runner/pkg/ngtcp2/lib
             PKG_CONFIG_PATH: /home/runner/pkg/nettle/lib/pkgconfig:/home/runner/pkg/gnutls/lib/pkgconfig:/home/runner/pkg/nghttp3/lib/pkgconfig:/home/runner/pkg/nghttp2/lib/pkgconfig
@@ -479,7 +478,7 @@ jobs:
 
           - name: 'gnutls'
             tflags: '--min=1900'
-            install_packages: libp11-kit-dev libssh-dev
+            install_packages: libp11-kit-dev libtasn1-dev libssh-dev
             LDFLAGS: -Wl,-rpath,/home/runner/pkg/gnutls/lib
             PKG_CONFIG_PATH: "\
               /home/runner/pkg/nettle/lib/pkgconfig:\

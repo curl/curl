@@ -299,7 +299,6 @@ static CURLcode test_unit1694(const char *arg)
 
     /* Initialize the outputs in case any subsequent test paths
      * skip any writes to these values */
-    easy->result = CURLE_UNSUPPORTED_PROTOCOL;
     easy->state.resume_from = -7;
     easy->req.maxdownload = -8;
 

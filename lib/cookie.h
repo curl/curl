@@ -38,7 +38,7 @@ struct Cookie {
   unsigned int creationtime;      /* time when the cookie was written */
   BIT(tailmatch);                 /* tail-match the domain name */
   BIT(secure);                    /* the 'secure' keyword was used */
-  BIT(livecookie);                /* updated from server, not a stored file */
+  BIT(livecookie);                /* from a server or API, not a stored file */
   BIT(httponly);                  /* the httponly directive is present */
   BIT(prefix_secure);             /* secure prefix is set */
   BIT(prefix_host);               /* host prefix is set */
@@ -114,7 +114,7 @@ bool Curl_secure_context(struct Curl_easy *data, const char *host,
  */
 
 #define COOKIE_HTTPHEADER (1<<0) /* if HTTP header-style line */
-#define COOKIE_LIVE       (1<<1) /* from a live server */
+#define COOKIE_LIVE       (1<<1) /* from a server or API */
 #define COOKIE_SECURE     (1<<2) /* connection is over secure origin */
 #define COOKIE_NOPSL      (1<<3) /* skip PSL check */
 #define COOKIE_NOSESSION  (1<<6) /* drop session cookies */

@@ -31,7 +31,7 @@ especially marked as such. Disable the use of terminal escape codes with
 `--no-` prefix to disable it.)
 
 When used on a FILE URL, curl includes the file size and last modification
-time only.
+time.
 
 To view the request headers, consider the --verbose option.
 

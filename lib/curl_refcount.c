@@ -21,41 +21,39 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "unitcheck.h"
-#include "curl_hmac.h"
-#include "curl_md5.h"
+#include "curl_setup.h"
 
-static CURLcode test_unit1612(const char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
+#include "curl_refcount.h"
 
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#if !defined(_WIN32) && !(defined(HAVE_ATOMIC) && defined(HAVE_STDATOMIC_H))
 
-  static const char password[] = "Pa55worD";
-  static const char string1[] = "1";
-  static const char string2[] = "hello-you-fool";
-  unsigned char output[HMAC_MD5_LENGTH];
+#include "easy_lock.h"
 
-  Curl_hmacit(&Curl_HMAC_MD5,
-              (const unsigned char *)password, strlen(password),
-              (const unsigned char *)string1, strlen(string1),
-              output);
-
-  verify_memory(output,
-                "\xd1\x29\x75\x43\x58\xdc\xab\x78\xdf\xcd\x7f\x2b\x29\x31\x13"
-                "\x37",
-                HMAC_MD5_LENGTH);
-
-  Curl_hmacit(&Curl_HMAC_MD5,
-              (const unsigned char *)password, strlen(password),
-              (const unsigned char *)string2, strlen(string2),
-              output);
-
-  verify_memory(output,
-                "\x75\xf1\xa7\xb9\xf5\x40\xe5\xa4\x98\x83\x9f\x64\x5a\x27\x6d"
-                "\xd0",
-                HMAC_MD5_LENGTH);
+#ifdef GLOBAL_INIT_IS_THREADSAFE
+static curl_simple_lock s_refcount_lock = CURL_SIMPLE_LOCK_INIT;
+#define refcount_lock()   curl_simple_lock_lock(&s_refcount_lock)
+#define refcount_unlock() curl_simple_lock_unlock(&s_refcount_lock)
+#else
+#define refcount_lock()   Curl_nop_stmt
+#define refcount_unlock() Curl_nop_stmt
 #endif
 
-  UNITTEST_END_SIMPLE
+uint32_t Curl_refcount_incr(curl_refcount *c)
+{
+  uint32_t value;
+  refcount_lock();
+  value = ++(*c);
+  refcount_unlock();
+  return value;
 }
+
+uint32_t Curl_refcount_decr(curl_refcount *c)
+{
+  uint32_t value;
+  refcount_lock();
+  value = --(*c);
+  refcount_unlock();
+  return value;
+}
+
+#endif

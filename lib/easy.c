@@ -927,7 +927,12 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 
   /* Copy src->set into dst->set first, then deal with the strings
      afterwards */
-  dst->set = src->set;
+  dst->set = src->set; /* this is yikes! */
+
+  /* clear frozen strings from copy */
+  dst->set.resolve = NULL;
+  dst->set.connect_to = NULL;
+
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   dst->set.mimepostp = NULL;
 #endif
@@ -937,6 +942,18 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
   memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
+
+  /* duplicate frozen strings */
+  if(src->set.resolve) {
+    dst->set.resolve = Curl_frzn_strs_dup(src->set.resolve);
+    if(!dst->set.resolve)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  if(src->set.connect_to) {
+    dst->set.connect_to = Curl_frzn_strs_dup(src->set.connect_to);
+    if(!dst->set.connect_to)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   /* duplicate all strings */
   result = Curl_u8_strset_copy(&dst->set.strings, &src->set.strings);
@@ -978,9 +995,6 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
       return result;
   }
 #endif
-
-  if(src->set.resolve)
-    dst->state.resolve = dst->set.resolve;
 
   return result;
 }
@@ -1041,8 +1055,18 @@ CURL *curl_easy_duphandle(CURL *curl)
     if(dupset(outcurl, data))
       goto fail;
 
+    /* The DNS cache of the dup might be different from the original.
+     * Better be safe than sorry. */
+    outcurl->state.resolve_loaded = FALSE;
+
     outcurl->progress.hide     = data->progress.hide;
     outcurl->progress.callback = data->progress.callback;
+    Curl_rlimit_change(&outcurl->progress.ul.rlimit,
+                        data->progress.ul.rlimit.rate_per_sec,
+                        data->progress.ul.rlimit.burst_per_sec);
+    Curl_rlimit_change(&outcurl->progress.dl.rlimit,
+                        data->progress.dl.rlimit.rate_per_sec,
+                        data->progress.dl.rlimit.burst_per_sec);
 
 #ifndef CURL_DISABLE_COOKIES
     outcurl->state.cookielist = NULL;
@@ -1083,6 +1107,7 @@ CURL *curl_easy_duphandle(CURL *curl)
       outcurl->asi = Curl_altsvc_init();
       if(!outcurl->asi)
         goto fail;
+      outcurl->asi->flags = data->asi->flags;
       str = CURL_EASY_STR(outcurl, STRING_ALTSVC);
       if(str)
         (void)Curl_altsvc_load(outcurl->asi, str);
@@ -1094,6 +1119,7 @@ CURL *curl_easy_duphandle(CURL *curl)
       outcurl->hsts = Curl_hsts_init();
       if(!outcurl->hsts)
         goto fail;
+      outcurl->hsts->flags = data->hsts->flags;
       str = CURL_EASY_STR(outcurl, STRING_HSTS);
       if(str)
         (void)Curl_hsts_loadfile(outcurl, outcurl->hsts, str);
@@ -1150,7 +1176,8 @@ void curl_easy_reset(CURL *curl)
     Curl_freeset(data);
     memset(&data->set, 0, sizeof(struct UserDefined));
     Curl_init_userdefined(data);
-    data->state.resolve = NULL;
+    data->state.resolve_loaded = FALSE;
+    data->state.still_connecting = FALSE;
 
     /* zero out Progress data: */
     memset(&data->progress, 0, sizeof(struct Progress));
@@ -1166,6 +1193,9 @@ void curl_easy_reset(CURL *curl)
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
     Curl_http_auth_cleanup_digest(data);
+#endif
+#ifndef CURL_DISABLE_RTSP
+    curlx_safefree(data->state.session_id);
 #endif
     data->master_mid = UINT32_MAX;
   }
@@ -1217,7 +1247,8 @@ CURLcode curl_easy_pause(CURL *curl, int action)
     if(recv_paused != recv_paused_new) {
       changed = TRUE;
       result = Curl_1st_fatal(
-        result, Curl_xfer_pause_recv(data, recv_paused_new));
+        result, Curl_xfer_pause_recv(data, recv_paused_new,
+                                     !Curl_api_is_in_callback(data)));
     }
 
     /* If not completely pausing both directions, run again in any case. */
@@ -1288,7 +1319,7 @@ CURLcode Curl_easy_recv(struct Curl_easy *data,
     Curl_attach_connection(data, c, TRUE);
 
   *n = 0;
-  return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
+  return Curl_conn_recv(data, buffer, buflen, n);
 }
 
 CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
@@ -1350,7 +1381,7 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
     Curl_attach_connection(data, c, TRUE);
 
   sigpipe_ignore(data, &sigpipe_ctx);
-  result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, FALSE, n);
+  result = Curl_conn_send(data, buffer, buflen, FALSE, n);
   sigpipe_restore(&sigpipe_ctx);
 
   if(result && result != CURLE_AGAIN)

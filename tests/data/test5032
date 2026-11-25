@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP CONNECT
+HTTP proxy
+timeout
+</keywords>
+</info>
+
+<reply>
+# 407 body that never ends. The CONNECT read must still honor --max-time.
+<connect crlf="headers">
+HTTP/1.1 407 Proxy Authentication Required
+Content-Length: 1000000000
+
+</connect>
+<servercmd>
+stream
+</servercmd>
+</reply>
+
+ <client>
+<server>
+http
+</server>
+<features>
+proxy
+</features>
+<name>
+HTTP proxy CONNECT honors the timeout while a 407 body keeps arriving
+</name>
+<command>
+http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxytunnel --max-time 2
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+CONNECT test.remote.haxx.se.%TESTNUMBER:8990 HTTP/1.1
+Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</protocol>
+<errorcode>
+28
+</errorcode>
+</verify>
+</testcase>

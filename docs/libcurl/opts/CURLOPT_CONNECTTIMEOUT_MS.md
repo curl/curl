@@ -57,6 +57,20 @@ This option may cause libcurl to use the SIGALRM signal to timeout system
 calls on builds not using asynch DNS. In Unix-like systems, this might cause
 signals to be used unless CURLOPT_NOSIGNAL(3) is set.
 
+## Connection Phase
+
+This includes the operations to establish the connection to a server, including
+DNS resolve and proxies, plus any negotiation before the transfer can start.
+
+For several protocols, this includes the authentication, but for HTTP it does
+not. HTTP is a request based protocol and authentication happens when the
+transfer starts. In FTP, for example, the authentication is part of the
+connect phase, because FTP authorization is part of the connection setup.
+
+WebSocket is a hybrid, using HTTP requests to establish a new connection that
+then no longer is HTTP. Since curl 8.24.0, the HTTP request to negotiate a
+WebSocket connection is part of the connect phase as well.
+
 # DEFAULT
 
 300000

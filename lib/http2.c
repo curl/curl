@@ -163,7 +163,7 @@ static void h2_stream_ctx_free(struct h2_stream_ctx *stream)
 {
   Curl_bufq_free(&stream->sendbuf);
   Curl_h1_req_parse_free(&stream->h1);
-  Curl_dynhds_free(&stream->resp_trailers);
+  Curl_dynhds_cleanup(&stream->resp_trailers);
   free_push_headers(stream);
   curlx_free(stream);
 }
@@ -392,7 +392,6 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream;
 
-  (void)cf;
   DEBUGASSERT(data);
 
   if(!data)
@@ -541,7 +540,7 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
        GOAWAY frame has been received or when the limit of stream
        identifiers has been reached. */
     CURL_TRC_M(data, "http/2: No new requests allowed");
-    connclose(cf->conn);
+    connclose(CF_CONN(cf));
   }
 
   return CURLE_OK;
@@ -735,6 +734,8 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
     Curl_peer_link(&second->state.initial_origin, data->state.initial_origin);
     if(data->share)
       (void)Curl_share_easy_link(second, data->share);
+    /* Never retry this request should it fail */
+    second->set.never_retry = TRUE;
     /* copy a range of options from the parent handle */
     second->set.fwrite_func = data->set.fwrite_func;
     second->set.out = data->set.out;
@@ -896,7 +897,7 @@ static int push_promise(struct Curl_cfilter *cf,
     /* approved, add to the multi handle for processing. This
      * assigns newhandle->mid. For the new `mid` we assign the
      * h2_stream instance and remember the stream_id already known. */
-    mresult = Curl_multi_add_perform(data->multi, newhandle, cf->conn);
+    mresult = Curl_multi_add_perform(data->multi, newhandle, CF_CONN(cf));
     if(mresult) {
       infof(data, "failed to add handle to multi");
       discard_newhandle(cf, newhandle);
@@ -1721,12 +1722,15 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
   CURLcode result;
 
   *pnlen = 0;
+  if(stream->close_handled)
+    return CURLE_OK;
+
   if(stream->reset) {
     if(stream->error == NGHTTP2_REFUSED_STREAM) {
       infof(data, "HTTP/2 stream %d refused by server, try again on a new "
                   "connection", stream->id);
-      connclose(cf->conn); /* do not use this anymore */
-      data->state.refused_stream = TRUE;
+      connclose(CF_CONN(cf)); /* do not use this anymore */
+      data->req.refused_stream = TRUE;
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
     else if(stream->resp_hds_complete && data->req.no_body) {
@@ -1752,11 +1756,11 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
   if(Curl_dynhds_count(&stream->resp_trailers)) {
     struct dynhds_entry *e;
     struct dynbuf dbuf;
-    size_t i;
+    uint32_t i, ntrailers = Curl_dynhds_count(&stream->resp_trailers);
 
     result = CURLE_OK;
     curlx_dyn_init(&dbuf, DYN_TRAILERS);
-    for(i = 0; i < Curl_dynhds_count(&stream->resp_trailers); ++i) {
+    for(i = 0; !result && (i < ntrailers); ++i) {
       e = Curl_dynhds_getn(&stream->resp_trailers, i);
       if(!e)
         break;
@@ -1775,7 +1779,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
         break;
       result = Curl_bump_headersize(data, curlx_dyn_len(&dbuf), FALSE);
       if(result)
-        return result;
+        break;
     }
     curlx_dyn_free(&dbuf);
     if(result)
@@ -1862,7 +1866,7 @@ out:
   /* Defer flushing during the connect phase so that the SETTINGS and
    * other initial frames are sent together with the first request.
    * Unless we are 'connect_only' where the request will never come. */
-  if(!cf->connected && !cf->conn->bits.connect_only)
+  if(!cf->connected && !CF_CONN(cf)->bits.connect_only)
     return CURLE_OK;
   return nw_out_flush(cf, data);
 }
@@ -1965,12 +1969,19 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       return result;
     CURL_TRC_CF(data, cf, "[0] ingress: nw-in buffered %zu",
                 Curl_bufq_len(&ctx->inbufq));
+    if(ctx->sent_goaway) {
+      /* Buffered input needs another shutdown pass without a socket event. */
+      if(Curl_ngh2_session_want_read(&ctx->ngh2) &&
+         Curl_cf_def_data_pending(cf, data))
+        Curl_multi_mark_dirty(data);
+      break;
+    }
   }
 
   if(ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) {
     CURL_TRC_CF(data, cf, "server closed %s",
                 ctx->rcvd_goaway ? "with GOAWAY" : "abruptly");
-    connclose(cf->conn);
+    connclose(CF_CONN(cf));
   }
 
   CURL_TRC_CF(data, cf, "[0] ingress: done");
@@ -2235,7 +2246,7 @@ out:
               stream ? stream->id : -1, (int)result, *pnwritten);
   curlx_safefree(nva);
   *pstream = stream;
-  Curl_dynhds_free(&h2_headers);
+  Curl_dynhds_cleanup(&h2_headers);
   return result;
 }
 
@@ -2384,7 +2395,7 @@ static CURLcode cf_h2_adjust_pollset(struct Curl_cfilter *cf,
   if(!Curl_ngh2_valid(&ctx->ngh2))
     return CURLE_OK;
 
-  sock = Curl_conn_cf_get_socket(cf, data);
+  sock = cf->chain->sock;
   Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
   if(want_recv || want_send) {
     struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
@@ -2707,10 +2718,8 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
     http2_data_done(cf, data);
     break;
   case CF_CTRL_CONN_INFO_UPDATE:
-    if(!cf->sockindex && cf->connected) {
-      cf->conn->httpversion_seen = 20;
-      Curl_conn_set_multiplex(cf->conn);
-    }
+    if(cf->connected)
+      Curl_conn_set_multiplex(cf->chain, 20);
     break;
   default:
     break;
@@ -2775,7 +2784,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     if(!Curl_ngh2_valid(&ctx->ngh2) ||
        !Curl_ngh2_session_check_request_allowed(&ctx->ngh2)) {
       /* the limit is what we have in use right now */
-      effective_max = cf->conn->attached_xfers;
+      effective_max = CF_CONN(cf)->attached_xfers;
     }
     else {
       effective_max = ctx->max_concurrent_streams;
@@ -2810,7 +2819,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_nghttp2 = {
   "HTTP/2",
-  CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
+  CF_TYPE_MULTIPLEX | CF_TYPE_HTTP | CF_TYPE_SAFE_EOS,
   CURL_LOG_LVL_NONE,
   cf_h2_destroy,
   cf_h2_connect,
@@ -2826,16 +2835,13 @@ struct Curl_cftype Curl_cft_nghttp2 = {
 };
 
 static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
-                                  struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int8_t sockindex,
+                                  struct Curl_cfchain *chain,
                                   bool via_h1_upgrade)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_h2_ctx *ctx;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(data->conn);
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
@@ -2846,7 +2852,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
     goto out;
 
   ctx = NULL;
-  Curl_conn_cf_add(data, conn, sockindex, cf);
+  Curl_cfchain_add(chain, cf);
 
 out:
   if(result)
@@ -2905,16 +2911,16 @@ CURLcode Curl_http2_switch_at(struct Curl_easy *data, struct Curl_cfilter *cf)
 }
 
 CURLcode Curl_http2_upgrade(struct Curl_easy *data,
-                            struct connectdata *conn, int8_t sockindex,
                             const char *mem, size_t nread)
 {
+  struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf;
   struct cf_h2_ctx *ctx;
   CURLcode result;
 
   DEBUGASSERT(Curl_conn_http_version(data, conn) < 20);
 
-  result = http2_cfilter_add(&cf, data, conn, sockindex, TRUE);
+  result = http2_cfilter_add(&cf, &conn->chain, TRUE);
   if(result)
     return result;
   CURL_TRC_CF(data, cf, "upgrading connection to HTTP/2");
@@ -2962,7 +2968,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
 bool Curl_h2_http_1_1_error(struct Curl_easy *data)
 {
   if(Curl_conn_http_version(data, data->conn) == 20) {
-    int err = Curl_conn_get_stream_error(data, data->conn, FIRSTSOCKET);
+    int err = Curl_conn_get_stream_error(data, data->conn);
     return err == NGHTTP2_HTTP_1_1_REQUIRED;
   }
   return FALSE;

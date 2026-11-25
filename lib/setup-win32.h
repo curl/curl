@@ -83,6 +83,39 @@
 #  include <tchar.h>
 #endif
 
+#ifdef USE_WIN32_CRYPTO
+#include <wincrypt.h>
+/* If <wincrypt.h> is included directly, or indirectly via <schannel.h>,
+ * <winldap.h>, <iphlpapi.h>, or something else, <wincrypt.h> does this:
+ *   #define X509_NAME  ((LPCSTR)7)
+ *
+ * In AWS-LC/BoringSSL's <openssl/base.h> there is:
+ *  typedef struct X509_name_st X509_NAME;
+ *  etc.
+ *
+ * The redefined symbols break these OpenSSL headers when included after
+ * <wincrypt.h>.
+ * The workaround is to undefine those defines here (and only here).
+ *
+ * For unity builds it may need to be repeated elsewhere too, e.g. in ldap.c,
+ * to apply to other sources using OpenSSL includes. Each compilation unit
+ * needs undefine them between the first <wincrypt.h> include and the first
+ * OpenSSL include.
+ *
+ * OpenSSL does this in <openssl/ssl.h> and <openssl/x509v3.h>, but it
+ * also does the #undef by including <openssl/ossl_typ.h>. <3.1.0 only does
+ * it on the first include.
+ *
+ * LibreSSL automatically undefines these symbols before using them.
+ */
+#undef X509_NAME
+#undef X509_EXTENSIONS
+#undef PKCS7_ISSUER_AND_SERIAL
+#undef PKCS7_SIGNER_INFO
+#undef OCSP_REQUEST
+#undef OCSP_RESPONSE
+#endif /* USE_WIN32_CRYPTO */
+
 /*
  * Define _WIN32_WINNT_[OS] symbols because not all Windows build systems have
  * those symbols to compare against, and even those that do may be missing

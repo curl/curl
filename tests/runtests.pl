@@ -2543,13 +2543,13 @@ while(@ARGV) {
         # run time statistics needs Time::HiRes
         if($Time::HiRes::VERSION) {
             # presize hashes appropriately to hold an entire test run
-            keys(%timeprepini) = 2000;
-            keys(%timesrvrini) = 2000;
-            keys(%timesrvrend) = 2000;
-            keys(%timetoolini) = 2000;
-            keys(%timetoolend) = 2000;
-            keys(%timesrvrlog) = 2000;
-            keys(%timevrfyend) = 2000;
+            keys(%timeprepini) = 2500;
+            keys(%timesrvrini) = 2500;
+            keys(%timesrvrend) = 2500;
+            keys(%timetoolini) = 2500;
+            keys(%timetoolend) = 2500;
+            keys(%timesrvrlog) = 2500;
+            keys(%timevrfyend) = 2500;
             $timestats = 1;
             $fullstats = 0;
         }
@@ -2558,13 +2558,13 @@ while(@ARGV) {
         # run time statistics needs Time::HiRes
         if($Time::HiRes::VERSION) {
             # presize hashes appropriately to hold an entire test run
-            keys(%timeprepini) = 2000;
-            keys(%timesrvrini) = 2000;
-            keys(%timesrvrend) = 2000;
-            keys(%timetoolini) = 2000;
-            keys(%timetoolend) = 2000;
-            keys(%timesrvrlog) = 2000;
-            keys(%timevrfyend) = 2000;
+            keys(%timeprepini) = 2500;
+            keys(%timesrvrini) = 2500;
+            keys(%timesrvrend) = 2500;
+            keys(%timetoolini) = 2500;
+            keys(%timetoolend) = 2500;
+            keys(%timesrvrlog) = 2500;
+            keys(%timevrfyend) = 2500;
             $timestats = 1;
             $fullstats = 1;
         }

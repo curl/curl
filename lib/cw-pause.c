@@ -143,6 +143,8 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
         ctx->tail = NULL;
       cw_pause_buf_free(first);
     }
+    if(result)
+      return result;
   }
 
   if(!result)

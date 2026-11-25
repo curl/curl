@@ -33,6 +33,7 @@ imap
 <features>
 crypto
 digest
+md5
 </features>
 <name>
 IMAP CRAM-MD5 authentication

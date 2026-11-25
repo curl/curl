@@ -164,12 +164,11 @@ static CURLcode cf_test_adjust_pollset(struct Curl_cfilter *cf,
   return Curl_pollset_set(data, ps, ctx->idx, TRUE, TRUE);
 }
 
-static CURLcode cf_test_create(struct Curl_cfilter **pcf,
+static CURLcode cf_test_create(struct Curl_cfchain *chain,
                                struct Curl_easy *data,
                                struct Curl_peer *origin,
                                struct Curl_peer *peer,
                                uint8_t transport_peer,
-                               struct connectdata *conn,
                                struct Curl_sockaddr_ex *addr,
                                struct Curl_peer *tunnel_peer,
                                uint8_t transport_above)
@@ -199,7 +198,6 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)origin;
   (void)peer;
-  (void)conn;
   (void)tunnel_peer;
   (void)transport_above;
   ctx = curlx_calloc(1, sizeof(*ctx));
@@ -241,10 +239,10 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   if(result)
     goto out;
 
+  Curl_cfchain_add(chain, cf);
   Curl_expire(data, ctx->fail_delay_ms, EXPIRE_TIMEOUT);
 
 out:
-  *pcf = (!result) ? cf : NULL;
   if(result) {
     curlx_free(cf);
     curlx_free(ctx);

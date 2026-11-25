@@ -1049,7 +1049,7 @@ init_config_builder_ech(struct Curl_easy *data,
   else {
     const struct ssl_connect_data *connssl = cf->ctx;
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex, connssl->peer.origin);
+      Curl_dns_cf_get_https(data, cf, connssl->peer.origin);
 
     if(!Curl_httpsrr_is_for_peer(connssl->peer.origin, rinfo) ||
        !rinfo->echconfiglist) {
@@ -1229,8 +1229,7 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
     if(Curl_ssl_need_httpsrr(cf) &&
-       !Curl_conn_dns_resolved_https(data, cf->sockindex,
-                                     connssl->peer.peer)) {
+       !Curl_dns_cf_resolved_https(data, cf, connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
       return CURLE_OK;
     }
@@ -1517,7 +1516,6 @@ const struct Curl_ssl Curl_ssl_rustls = {
   cr_close,                        /* close_one */
   NULL,                            /* close_all */
   NULL,                            /* engines_list */
-  NULL,                            /* sha256sum */
   cr_recv,                         /* recv decrypted data */
   cr_send,                         /* send data to encrypt */
   NULL,                            /* get_channel_binding */

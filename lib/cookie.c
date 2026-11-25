@@ -922,14 +922,14 @@ static bool is_public_suffix(struct Curl_easy *data,
   return FALSE;
 }
 
-/* returns TRUE when the cookie is accepted, and sets '*creationtime' to the
-   time the replaced cookie used (or 0 if not replaced) */
+/* returns TRUE when the cookie is accepted, and sets '*replacep' to the
+   cookie to replace (or NULL if not replaced) */
 static bool cookie_accept(struct Curl_easy *data,
                           const struct tempcookie *co,
                           const struct CookieInfo *ci,
                           const size_t myhash,
                           const int flags,
-                          unsigned int *creationtime)
+                          struct Cookie **replacep)
 {
   bool replace_old = FALSE;
   struct Curl_llist_node *replace_n = NULL;
@@ -1023,19 +1023,7 @@ static bool cookie_accept(struct Curl_easy *data,
       }
     }
   }
-  if(replace_n) {
-    struct Cookie *repl = Curl_node_elem(replace_n);
-
-    *creationtime = repl->creationtime;
-
-    /* unlink the old */
-    Curl_node_remove(replace_n);
-
-    /* free the old cookie */
-    curlx_free(repl);
-  }
-  else
-    *creationtime = 0;
+  *replacep = replace_n ? Curl_node_elem(replace_n) : NULL;
   return TRUE;
 }
 
@@ -1109,6 +1097,7 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
 {
   struct tempcookie cookie;
   struct Cookie *real;
+  struct Cookie *replace = NULL;
   size_t myhash;
   CURLcode result;
   unsigned int replacetime = 0;
@@ -1171,7 +1160,7 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
 
   myhash = iponly ? 0 : cookiehash(&cookie.domain);
   if(!cookie_accept(data, &cookie, ci, myhash, flags |
-                    (ci->running ? COOKIE_LIVE : 0), &replacetime))
+                    (ci->running ? COOKIE_LIVE : 0), &replace))
     return result;
 
   /* clone the temp cookie into a real one */
@@ -1179,7 +1168,13 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   if(!real)
     return CURLE_OUT_OF_MEMORY;
 
-  real->livecookie = ci->running;
+  if(replace) {
+    replacetime = replace->creationtime;
+    Curl_node_remove(&replace->node);
+    curlx_free(replace);
+  }
+
+  real->livecookie = ci->running || (flags & COOKIE_LIVE);
 
   /* use the time from the cookie this replaces, or get a new one */
   real->creationtime = replacetime ? replacetime : ++ci->lastct;
@@ -1410,17 +1405,11 @@ static int cookie_sort_ct(const void *p1, const void *p2)
   return (c2->creationtime > c1->creationtime) ? 1 : -1;
 }
 
-#ifdef CURL_DISABLE_PROXY
-#define IS_PROXIED(d) 0
-#else
-#define IS_PROXIED(d) !!CURL_EASY_STR(d, STRING_PROXY)
-#endif
-
 bool Curl_secure_context(struct Curl_easy *data, const char *host,
                          const size_t hlen)
 {
   return Curl_xfer_is_secure(data) ||
-    (!IS_PROXIED(data) &&
+    (!data->info.used_proxy &&
      (((hlen == 9) && (curl_strnequal("localhost", host, 9))) ||
       ((hlen == 9) && !memcmp(host, "127.0.0.1", 9)) ||
       ((hlen == 3) && !memcmp(host, "::1", 3))));
@@ -1512,7 +1501,7 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
     }
   }
 
-  if(matches) {
+  if(matches > 1) {
 #define NUM_ON_STACK 16
 
     /*
@@ -1737,9 +1726,19 @@ static CURLcode cookie_output(struct Curl_easy *data,
     curlx_free(array);
   }
 
+  /* Catch buffered and earlier write errors before publishing the jar. */
+  if(fflush(out) || ferror(out)) {
+    result = CURLE_WRITE_ERROR;
+    goto error;
+  }
+
   if(!use_stdout) {
-    curlx_fclose(out);
+    int close_result = curlx_fclose(out);
     out = NULL;
+    if(close_result) {
+      result = CURLE_WRITE_ERROR;
+      goto error;
+    }
     if(tempstore && curlx_rename(tempstore, filename)) {
       result = CURLE_WRITE_ERROR;
       goto error;

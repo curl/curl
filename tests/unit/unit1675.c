@@ -207,8 +207,13 @@ static CURLcode test_unit1675(const char *arg)
     static const struct ipv6_test tests[] = {
       { "[::1]", "[::1]", NULL },
       { "[fe80::1%eth0]", "[fe80::1]", "eth0" },
+      { "[fe80:0:0::1%eth0]", "[fe80::1]", "eth0" },
+      { "[ac1d:ba17:cafe:deb7:ea57:face:f157:51de%ethethethethet0]",
+        "[ac1d:ba17:cafe:deb7:ea57:face:f157:51de]", "ethethethethet0" },
       { "[fe80::1%25eth0]", "[fe80::1]", "25eth0" },
       { "[::1", NULL, NULL }, /* missing bracket */
+      { "[::1@", NULL, NULL }, /* wrong closing character */
+      { "[fe80::1%eth0]@example.com]", NULL, NULL }, /* trailing data */
       { "[]", NULL, NULL }, /* empty */
     };
 
@@ -241,7 +246,6 @@ static CURLcode test_unit1675(const char *arg)
                       tests[i].in);
         fails++;
       }
-      curlx_free(u.host);
       curlx_free(u.zoneid);
     }
     abort_if(fails, "ipv6_parse tests failed");

@@ -197,7 +197,7 @@ struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
 /**
  * Unpause client writer and flush any buffered date to the client.
  */
-CURLcode Curl_cwriter_unpause(struct Curl_easy *data);
+CURLcode Curl_cwriter_unpause(struct Curl_easy *data, bool flush);
 
 /**
  * Default implementations for do_init, do_write, do_close that

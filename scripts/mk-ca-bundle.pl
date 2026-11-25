@@ -438,7 +438,9 @@ print CRT <<EOT;
 ## Conversion done with mk-ca-bundle.pl version $version.
 ## SHA256: $newhash
 ##
-
+## This file is subject to the terms of the Mozilla Public License, v. 2.0.
+## https://mozilla.org/MPL/2.0/
+##
 EOT
 
 report "Processing '$txt' ...";

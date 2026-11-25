@@ -1227,6 +1227,7 @@ static CURLcode setopt_long_misc(struct Curl_easy *data, CURLoption option,
         if(!data->hsts)
           return CURLE_OUT_OF_MEMORY;
       }
+      data->hsts->flags = (unsigned int)arg;
     }
     else if(!data->share || !data->share->hsts) {
       /* throw away the HSTS cache unless shared */
@@ -1343,8 +1344,11 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
      * This API can remove any entry from the DNS cache, but only entries
      * that are not actually in use right now will be pruned immediately.
      */
-    s->resolve = slist;
-    data->state.resolve = s->resolve;
+    Curl_frzn_strs_safefree(&s->resolve);
+    s->resolve = Curl_frzn_strs_from_slist(slist);
+    data->state.resolve_loaded = FALSE;
+    if(slist && !s->resolve)
+      result = CURLE_OUT_OF_MEMORY;
     break;
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MIME)
   case CURLOPT_HTTPHEADER:
@@ -1369,7 +1373,10 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
     break;
 #endif
   case CURLOPT_CONNECT_TO:
-    s->connect_to = slist;
+    Curl_frzn_strs_safefree(&s->connect_to);
+    s->connect_to = Curl_frzn_strs_from_slist(slist);
+    if(slist && !s->connect_to)
+      result = CURLE_OUT_OF_MEMORY;
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
@@ -1536,11 +1543,12 @@ static CURLcode cookielist(struct Curl_easy *data, const char *ptr)
       result = Curl_cookie_add(data, data->cookies, ptr + 11,
                                NULL, NULL,
                                COOKIE_HTTPHEADER | COOKIE_SECURE |
-                               COOKIE_NOPSL);
+                               COOKIE_NOPSL | COOKIE_LIVE);
     else
       /* Netscape format line */
       result = Curl_cookie_add(data, data->cookies, ptr, NULL,
-                               NULL, COOKIE_SECURE | COOKIE_NOPSL);
+                               NULL, COOKIE_SECURE | COOKIE_NOPSL |
+                               COOKIE_LIVE);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
   return result;
@@ -2408,8 +2416,12 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
     return Curl_setstropt(data, STRING_SASL_AUTHZID, ptr);
 #ifndef CURL_DISABLE_RTSP
   case CURLOPT_RTSP_SESSION_ID:
-    Curl_peer_unlink(&data->state.rtsp_session_origin);
-    return Curl_setstropt(data, STRING_RTSP_SESSION_ID, ptr);
+    result = Curl_setstropt(data, STRING_RTSP_SESSION_ID, ptr);
+    if(!result) {
+      curlx_safefree(data->state.session_id);
+      Curl_peer_unlink(&data->state.rtsp_session_origin);
+    }
+    return result;
   case CURLOPT_RTSP_STREAM_URI:
     return Curl_setstropt(data, STRING_RTSP_STREAM_URI, ptr);
   case CURLOPT_RTSP_TRANSPORT:

@@ -28,6 +28,7 @@ imap
 Debug
 crypto
 digest
+md5
 </features>
 <name>
 IMAP DIGEST-MD5 graceful cancellation

@@ -5,6 +5,7 @@
 FTP
 timeout
 multi_socket
+killserver
 libtest
 </keywords>
 </info>

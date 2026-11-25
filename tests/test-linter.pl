@@ -212,6 +212,10 @@ sub checkxml {
                 print "data/test$num has superfluous comment: '$_'\n";
                 $bad = 1;
             }
+            if(/^<!--/) {
+                print "data/test$num: uses `<!--` comment, replace with `#`.\n";
+                $bad = 1;
+            }
         }
         close($fh);
 

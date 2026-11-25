@@ -24,5 +24,14 @@ This option accepts decimal values (added in 7.32.0). The decimal value needs
 to be provided using a dot (.) as decimal separator - not the local version
 even if it might be using another separator.
 
-The connection phase is considered complete when the DNS lookup and requested
-TCP, TLS or QUIC handshakes are done.
+The connection phase is usually considered complete when the DNS lookup
+and requested TCP, TLS or QUIC handshakes are done.
+
+For several protocols, this includes the authentication, but for HTTP it does
+not. HTTP is a request based protocol and authentication happens when the
+transfer starts. In FTP however, the authentication is part of the
+connect phase, because FTP authorization is part of the connection setup.
+
+WebSocket is a hybrid, using HTTP requests to establish a new connection that
+then no longer is HTTP. Since curl 8.24.0, the HTTP request to negotiate a
+WebSocket connection is part of the connect phase as well.

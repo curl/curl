@@ -202,9 +202,8 @@ static CURLcode cw_out_cb_write(struct Curl_easy *data,
       failf(data, "Write callback asked for PAUSE when not supported");
       return CURLE_WRITE_ERROR;
     }
-    data->req.writer.paused = TRUE;
     CURL_TRC_WRITE(data, "[OUT] PAUSE requested by client");
-    result = Curl_xfer_pause_recv(data, TRUE);
+    result = Curl_xfer_pause_recv(data, TRUE, FALSE);
     return result ? result : CURLE_AGAIN;
   }
   else if(nwritten == CURL_WRITEFUNC_ERROR) {
@@ -247,8 +246,10 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   *pconsumed = 0;
   if(otype == CW_OUT_BODY_0LEN) {
     DEBUGASSERT(!blen);
-    return cw_out_cb_write(data, wcb, wcb_data, otype,
-                           buf, blen, &nwritten);
+    if(!data->req.writer.paused) {
+      return cw_out_cb_write(data, wcb, wcb_data, otype,
+                             buf, blen, &nwritten);
+    }
   }
   else {
     while(blen && !data->req.writer.paused) {
@@ -332,11 +333,8 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
       return result;
     ctx->buffered_len -= blen_before - curlx_dyn_len(&cwbuf->b);
 
-    if(curlx_dyn_len(&cwbuf->b)) {
-      /* could not write it all, paused again? */
-      DEBUGASSERT(data->req.writer.paused);
+    if(data->req.writer.paused || curlx_dyn_len(&cwbuf->b))
       return CURLE_OK;
-    }
 
     ctx->buf = cwbuf->next;
     if(!ctx->buf)
@@ -413,8 +411,9 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
     if(result && (result != CURLE_AGAIN))
       return result;
     result = CURLE_OK;
-    if(consumed < blen) {
-      /* did not write all, append the rest */
+    if((consumed < blen) ||
+       ((otype == CW_OUT_BODY_0LEN && data->req.writer.paused))) {
+      /* did not write all or paused, append the rest */
       result = cw_out_append(ctx, data, otype,
                              buf + consumed, blen - consumed);
       if(result)

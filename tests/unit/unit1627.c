@@ -114,6 +114,8 @@ static CURLcode test_unit1627(const char *arg)
     "pop33", "pop3ss", "rtspp", "scpp", "sftpp", "smbb", "smbss", "smtpp",
     "smtpss", "telnett", "tftpp", "wsw", "wsss",
 
+    "pop\x13", "pop\x13s",
+
     "DIC", "FIL", "FT", "TPS", "GOPHE", "OPHER", "HTT", "TTPS",
     "IMA", "APS", "LDA", "APS", "MQT", "TTS", "POP", "P3S",
     "RTS", "SC", "SFT", "SM", "BS", "SMT", "TPS",

@@ -25,10 +25,11 @@
 
 #include "dynhds.h"
 #include "strcase.h"
+#include "curlx/strparse.h"
 
-static struct dynhds_entry *entry_new(const char *name, size_t namelen,
-                                      const char *value, size_t valuelen,
-                                      int opts)
+static struct dynhds_entry *entry_new(const char *name, uint32_t namelen,
+                                      const char *value, uint32_t valuelen,
+                                      uint8_t opts)
 {
   struct dynhds_entry *e;
   char *p;
@@ -57,30 +58,15 @@ static void entry_free(struct dynhds_entry *e)
   curlx_free(e);
 }
 
-void Curl_dynhds_init(struct dynhds *dynhds, size_t max_entries,
-                      size_t max_strs_size)
+void Curl_dynhds_init(struct dynhds *dynhds, uint32_t max_entries,
+                      uint32_t max_strs_size)
 {
   DEBUGASSERT(dynhds);
-  DEBUGASSERT(max_strs_size);
   dynhds->hds = NULL;
   dynhds->hds_len = dynhds->hds_allc = dynhds->strs_len = 0;
-  dynhds->max_entries = max_entries;
-  dynhds->max_strs_size = max_strs_size;
+  dynhds->max_entries = max_entries ? max_entries : UINT32_MAX;
+  dynhds->max_strs_size = max_strs_size ? max_strs_size : UINT32_MAX;
   dynhds->opts = 0;
-}
-
-void Curl_dynhds_free(struct dynhds *dynhds)
-{
-  DEBUGASSERT(dynhds);
-  if(dynhds->hds && dynhds->hds_len) {
-    size_t i;
-    DEBUGASSERT(dynhds->hds);
-    for(i = 0; i < dynhds->hds_len; ++i) {
-      entry_free(dynhds->hds[i]);
-    }
-  }
-  curlx_safefree(dynhds->hds);
-  dynhds->hds_len = dynhds->hds_allc = dynhds->strs_len = 0;
 }
 
 void Curl_dynhds_reset(struct dynhds *dynhds)
@@ -97,17 +83,25 @@ void Curl_dynhds_reset(struct dynhds *dynhds)
   dynhds->hds_len = dynhds->strs_len = 0;
 }
 
-size_t Curl_dynhds_count(struct dynhds *dynhds)
+void Curl_dynhds_cleanup(struct dynhds *dynhds)
+{
+  DEBUGASSERT(dynhds);
+  Curl_dynhds_reset(dynhds);
+  curlx_safefree(dynhds->hds);
+  dynhds->hds_allc = 0;
+}
+
+uint32_t Curl_dynhds_count(struct dynhds *dynhds)
 {
   return dynhds->hds_len;
 }
 
-void Curl_dynhds_set_opts(struct dynhds *dynhds, int opts)
+void Curl_dynhds_set_opts(struct dynhds *dynhds, uint8_t opts)
 {
   dynhds->opts = opts;
 }
 
-struct dynhds_entry *Curl_dynhds_getn(struct dynhds *dynhds, size_t n)
+struct dynhds_entry *Curl_dynhds_getn(struct dynhds *dynhds, uint32_t n)
 {
   DEBUGASSERT(dynhds);
   return (n < dynhds->hds_len) ? dynhds->hds[n] : NULL;
@@ -137,30 +131,43 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
 {
   struct dynhds_entry *entry = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  uint32_t nlen, vlen;
 
   /* Accept NULL value with length 0, name must have length */
   if(!dynhds || !name || !namelen || (!value && valuelen)) {
     DEBUGASSERT(0);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
+  if((namelen > UINT32_MAX) || (valuelen > UINT32_MAX))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  nlen = (uint32_t)namelen;
+  vlen = (uint32_t)valuelen;
+
   /* Does the new header fit into the limits? */
-  if((dynhds->max_entries && (dynhds->hds_len >= dynhds->max_entries)) ||
-     (dynhds->max_strs_size - dynhds->strs_len < namelen) ||
-     (dynhds->max_strs_size - dynhds->strs_len - namelen < valuelen))
+  if((dynhds->hds_len >= dynhds->max_entries) ||
+     (dynhds->max_strs_size - dynhds->strs_len < nlen) ||
+     (dynhds->max_strs_size - dynhds->strs_len - nlen < vlen))
     return CURLE_OUT_OF_MEMORY;
 
-  entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
+  entry = entry_new(name, nlen, value, vlen, dynhds->opts);
   if(!entry)
     goto out;
 
-  if(dynhds->hds_len + 1 >= dynhds->hds_allc) {
-    size_t nallc = dynhds->hds_allc ? dynhds->hds_allc * 2 : 16;
+  if((dynhds->hds_allc - dynhds->hds_len) < 1) {
     struct dynhds_entry **nhds;
+    uint32_t nhds_allc;
 
-    if(dynhds->max_entries && nallc > dynhds->max_entries)
-      nallc = dynhds->max_entries;
+    /* start with room for 16 headers, then double, add max 512 new ones
+     * or what the limit still allows. */
+    if(dynhds->hds_allc) {
+      uint32_t max_grow =
+        CURLMIN(dynhds->max_entries - dynhds->hds_allc, 512);
+      nhds_allc = dynhds->hds_allc + CURLMIN(dynhds->hds_allc, max_grow);
+    }
+    else
+      nhds_allc = 16;
 
-    nhds = curlx_calloc(nallc, sizeof(struct dynhds_entry *));
+    nhds = curlx_calloc(nhds_allc, sizeof(struct dynhds_entry *));
     if(!nhds)
       goto out;
     if(dynhds->hds) {
@@ -169,11 +176,11 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
       curlx_safefree(dynhds->hds);
     }
     dynhds->hds = nhds;
-    dynhds->hds_allc = nallc;
+    dynhds->hds_allc = nhds_allc;
   }
   dynhds->hds[dynhds->hds_len++] = entry;
   entry = NULL;
-  dynhds->strs_len += namelen + valuelen;
+  dynhds->strs_len += nlen + vlen;
   result = CURLE_OK;
 
 out:
@@ -372,6 +379,72 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
   }
 
   return result;
+}
+
+CURLcode Curl_dynhds_add_slist(struct dynhds *dynhds,
+                               struct curl_slist *headers,
+                               Curl_dynhds_hd_cb *hd_cb,
+                               void *user_data)
+{
+  CURLcode result;
+
+  for(; headers; headers = headers->next) {
+    struct Curl_str name, value;
+    const char *ptr = headers->data;
+    size_t hlen = strlen(headers->data);
+
+    value.str = NULL;
+    value.len = 0;
+    /* There are 2 quirks in place for custom headers:
+     * 1. setting only 'name:' to suppress a header from being sent
+     * 2. setting only 'name;' to send an empty (illegal) header
+     */
+    if(!curlx_str_until(&ptr, &name, hlen, ';') &&
+       !curlx_str_single(&ptr, ';') &&
+       !curlx_str_single(&ptr, '\0') &&
+       !memchr(curlx_str(&name), ':', curlx_strlen(&name))) {
+      /* quirk #2, send an empty header */
+      value.str = "";
+      value.len = 0;
+    }
+    else {
+      ptr = headers->data;
+      if(!curlx_str_until(&ptr, &name, hlen, ':') &&
+         !curlx_str_single(&ptr, ':')) {
+        curlx_str_untilnl(&ptr, &value, hlen);
+        curlx_str_trimblanks(&value);
+        if(!curlx_strlen(&value))
+          /* quirk #1, do not send this */
+          continue;
+      }
+      else
+        /* no colon */
+        continue;
+    }
+
+    DEBUGASSERT(curlx_strlen(&name) && value.str);
+    /* trim surrounding whitespace so a padded field name to
+     * prevent the name form passing checks */
+    curlx_str_trimblanks(&name);
+    if(!curlx_strlen(&name))
+      continue;
+
+    if(hd_cb) {
+      result = hd_cb(user_data, &name, &value, headers->data);
+      if(result == CURLE_AGAIN)
+        continue;
+      else if(result)
+        return result;
+    }
+
+    if(dynhds) {
+      result = Curl_dynhds_add(dynhds, curlx_str(&name), curlx_strlen(&name),
+                               curlx_str(&value), curlx_strlen(&value));
+      if(result)
+        return result;
+    }
+  }
+  return CURLE_OK;
 }
 
 #ifdef USE_NGHTTP2

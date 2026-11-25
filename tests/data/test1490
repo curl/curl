@@ -13,10 +13,10 @@ FILE
 file
 </server>
 <name>
-"upload" with file:// overwriting existing
+file:// upload overwrites existing file despite a speed limit
 </name>
 <command option="no-include">
-file://localhost%FILE_PWD/%LOGDIR/result%TESTNUMBER.txt -T %LOGDIR/upload%TESTNUMBER.txt
+file://localhost%FILE_PWD/%LOGDIR/result%TESTNUMBER.txt -T %LOGDIR/upload%TESTNUMBER.txt --limit-rate 1
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER.txt">
 data

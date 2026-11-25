@@ -932,6 +932,15 @@ static int test_width_precision(void)
   if(rc != 325)
     errors++;
 
+  /* integer precision is not limited to the size of the work buffer */
+  rc = curl_msnprintf(larger, sizeof(larger), "%.400d", 7);
+  if(rc != 400 || strspn(larger, "0") != 399 || strcmp(&larger[399], "7"))
+    errors++;
+  rc = curl_msnprintf(larger, sizeof(larger), "%410.400x", 0xab);
+  if(rc != 410 || strspn(larger, " ") != 10 ||
+     strspn(&larger[10], "0") != 398 || strcmp(&larger[408], "ab"))
+    errors++;
+
   return errors;
 }
 
@@ -1047,6 +1056,18 @@ static int test_weird_arguments(void)
   }
 
   errors += string_check(buf, "");
+
+  /* a '*' width followed by digits is invalid */
+  rc = curl_msnprintf(buf, sizeof(buf), "%*128d", 1, 2);
+  if(rc) {
+    curl_mprintf("curl_mprintf() returned %d and not 0\n", rc);
+    errors++;
+  }
+  rc = curl_msnprintf(buf, sizeof(buf), "%*2147483647d", 1, 2);
+  if(rc) {
+    curl_mprintf("curl_mprintf() returned %d and not 0\n", rc);
+    errors++;
+  }
 
   errors += test_width_precision();
 

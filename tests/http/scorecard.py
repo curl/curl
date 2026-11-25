@@ -44,6 +44,7 @@ from testenv import (
     LocalClient,
     NghttpxQuic,
     RunProfile,
+    VsFTPD,
     WsServer,
 )
 
@@ -236,6 +237,7 @@ class ScoreRunner:
                  protocol: str,
                  server_descr: str,
                  server_port: int,
+                 domain: str,
                  verbose: int,
                  curl_verbose: int,
                  download_parallel: int = 0,
@@ -252,6 +254,7 @@ class ScoreRunner:
         self.server_descr = server_descr
         self.server_addr = server_addr
         self.server_port = server_port
+        self._domain = domain
         self._silent_curl = not curl_verbose
         self._download_parallel = download_parallel
         self._upload_parallel = upload_parallel
@@ -266,6 +269,9 @@ class ScoreRunner:
         elif self.protocol == 'ws':
             self._scheme = 'ws'
             self._alpn_proto = 'http/1.1'
+        elif self.protocol in ['ftp', 'ftps']:
+            self._scheme = protocol
+            self._alpn_proto = None
         else:
             raise ScoreCardError(f'unknown protocol {self.protocol}')
         if self._limit_rate:
@@ -357,7 +363,12 @@ class ScoreRunner:
             error += f'exit={r.exit_code} '
         if r.exit_code != 0 or len(r.stats) != count:
             error += f'stats={len(r.stats)}/{count} '
-        exp_resp = 101 if self.protocol == 'ws' else 200
+        if self.protocol in ['ftp', 'ftps']:
+            exp_resp = 226
+        elif self.protocol == 'ws':
+            exp_resp = 101
+        else:
+            exp_resp = 200
         fails = [s for s in r.stats if s['response_code'] != exp_resp]
         if len(fails) > 0:
             error += f'{len(fails)} failed, {fails}'
@@ -472,9 +483,9 @@ class ScoreRunner:
             }]
             self.info(f'{row[0]["sval"]} downloads...')
             if self.protocol == 'ws':
-                url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/{row[0]["sval"]}'
+                url = f'{self._scheme}://{self._domain}:{self.server_port}/{row[0]["sval"]}'
             else:
-                url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/score{row[0]["sval"]}.data'
+                url = f'{self._scheme}://{self._domain}:{self.server_port}/score{row[0]["sval"]}.data'
             if 'single' in cols:
                 row.append(self.dl_single(url=url, nsamples=nsamples))
             if count > 1:
@@ -505,7 +516,11 @@ class ScoreRunner:
             error += f'exit={r.exit_code} '
         if r.exit_code != 0 or len(r.stats) != count:
             error += f'stats={len(r.stats)}/{count} '
-        fails = [s for s in r.stats if s['response_code'] != 200]
+        if self.protocol in ['ftp', 'ftps']:
+            exp_resp = 226
+        else:
+            exp_resp = 200
+        fails = [s for s in r.stats if s['response_code'] != exp_resp]
         if len(fails) > 0:
             error += f'{len(fails)} failed'
         for f in fails:
@@ -530,6 +545,10 @@ class ScoreRunner:
             return r
 
         curl = self.mk_curl_client()
+        if self.protocol in ['ftp', 'ftps']:
+            return curl.ftp_upload(urls=[url], fupload=f'{fpath}',
+                                   with_stats=True, with_profile=True)
+
         return curl.http_put(urls=[url], fdata=fpath, alpn_proto=self._alpn_proto,
                              with_headers=False, with_profile=True,
                              suppress_cl=self.suppress_cl,
@@ -555,7 +574,10 @@ class ScoreRunner:
         samples = []
         errors = []
         profiles = []
-        url = f'{url}?id=[0-{count - 1}]'
+        if self.protocol in ['ftp', 'ftps']:
+            url = f'{url}upload-serial-{fsize}-[0-{count - 1}]'
+        else:
+            url = f'{url}?id=[0-{count - 1}]'
         self.info('serial...')
         for _ in range(nsamples):
             r = self.ul_run(url, count, fsize, fpath)
@@ -573,7 +595,10 @@ class ScoreRunner:
         errors = []
         profiles = []
         max_parallel = self._upload_parallel if self._upload_parallel > 0 else count
-        url = f'{url}?id=[0-{count - 1}]'
+        if self.protocol in ['ftp', 'ftps']:
+            url = f'{url}upload-parallel-{fsize}-[0-{count - 1}]'
+        else:
+            url = f'{url}?id=[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(nsamples):
             r = self.ul_run(url, count, fsize, fpath, xargs=[
@@ -608,10 +633,12 @@ class ScoreRunner:
                 'sval': Card.fmt_size(fsize)
             }]
             self.info(f'{row[0]["sval"]} uploads...')
-            url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/curltest/put'
+            if self._scheme in ['ftp', 'ftps']:
+                url = f'{self._scheme}://{self._domain}:{self.server_port}/'
+            else:
+                url = f'{self._scheme}://{self._domain}:{self.server_port}/curltest/put'
             fname = f'upload{row[0]["sval"]}.data'
-            fpath = self._make_docs_file(docs_dir=self.env.gen_dir,
-                                         fname=fname, fsize=fsize)
+            fpath = self._make_docs_file(docs_dir=self.env.gen_dir, fname=fname, fsize=fsize)
             if run_single:
                 row.append(self.ul_single(url=url, fsize=fsize, fpath=fpath, nsamples=nsamples))
             if run_serial:
@@ -654,18 +681,22 @@ class ScoreRunner:
             if r.exit_code != 0:
                 errors.append(f'exit={r.exit_code}')
             else:
+                if self.protocol in ['ftp', 'ftps']:
+                    exp_resp = 226
+                else:
+                    exp_resp = 200
                 samples.append(count / r.duration.total_seconds())
-                non_200s = 0
+                failures = 0
                 for line in r.stdout.splitlines():
-                    if not line.startswith('200,'):
-                        non_200s += 1
-                if non_200s > 0:
-                    errors.append(f'responses != 200: {non_200s}')
+                    if not line.startswith(f'{exp_resp},'):
+                        failures += 1
+                if failures > 0:
+                    errors.append(f'responses != {exp_resp}: {failures}')
             profiles.append(r.profile)
         return Card.mk_reqs_cell(samples, profiles, errors)
 
     def requests(self, count: int, meta: Dict[str, Any]) -> Dict[str, Any]:
-        url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/reqs10.data'
+        url = f'{self._scheme}://{self._domain}:{self.server_port}/reqs10.data'
         fsize = 10 * 1024
         cols = ['size', 'total']
         rows = []
@@ -746,6 +777,9 @@ class ScoreRunner:
         elif self.protocol == 'ws':
             score['meta']['protocol'] = 'ws'
             score['meta']['implementation'] = 'native'
+        elif self.protocol in ['ftp', 'ftps']:
+            score['meta']['protocol'] = self.protocol
+            score['meta']['implementation'] = 'vsftpd'
         else:
             raise ScoreCardError(f"unknown protocol: {self.protocol}")
 
@@ -765,14 +799,17 @@ class ScoreRunner:
                                             meta=score['meta'])
         if requests:
             if request_parallels is None:
-                request_parallels = [1, 6, 25, 50, 100, 300]
+                if self.protocol in ['ftp', 'ftps']:
+                    request_parallels = [1, 6, 25, 50]
+                else:
+                    request_parallels = [1, 6, 25, 50, 100, 300]
             score['meta']['request_parallels'] = request_parallels
             score['requests'] = self.requests(count=req_count, meta=score['meta'])
         return score
 
 
 def run_score(args, protocol):
-    if protocol not in ['http/1.1', 'h1', 'h2', 'h3', 'ws']:
+    if protocol not in ['http/1.1', 'h1', 'h2', 'h3', 'ws', 'ftp', 'ftps']:
         sys.stderr.write(f'ERROR: protocol "{protocol}" not known to scorecard\n')
         sys.exit(1)
     if protocol == 'h1':
@@ -819,6 +856,7 @@ def run_score(args, protocol):
         test_httpd = args.httpd
         test_h2o = args.h2o
     test_ws = protocol == 'ws'
+    test_ftp = protocol in ['ftp', 'ftps']
 
     sockd = None
     socks_args = None
@@ -838,6 +876,7 @@ def run_score(args, protocol):
     caddy = None
     h2o = None
     wsserver = None
+    ftpserver = None
     try:
         cards = []
 
@@ -854,6 +893,7 @@ def run_score(args, protocol):
                                server_descr=f'Server at {args.remote}',
                                server_addr=remote_addr,
                                server_port=remote_port,
+                               domain=env.domain1,
                                verbose=args.verbose,
                                curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
@@ -884,6 +924,7 @@ def run_score(args, protocol):
                                protocol=protocol,
                                server_descr=server_descr,
                                server_port=server_port,
+                               domain=env.domain1,
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
                                upload_parallel=args.upload_parallel,
@@ -905,6 +946,7 @@ def run_score(args, protocol):
                                protocol=protocol,
                                server_descr=server_descr,
                                server_port=server_port,
+                               domain=env.domain1,
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
                                upload_parallel=args.upload_parallel,
@@ -933,6 +975,7 @@ def run_score(args, protocol):
                                protocol=protocol,
                                server_descr=server_descr,
                                server_port=server_port,
+                               domain=env.domain1,
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
                                upload_parallel=args.upload_parallel,
@@ -946,12 +989,13 @@ def run_score(args, protocol):
             wsname = 'ws_echo' if args.uploads else 'ws_dl'
             wsserver = WsServer(env=env, name=wsname)
             wsserver.startup()
-            server_descr = 'WsServer/echo'
+            server_descr = f'WsServer/{wsname}'
             server_port = wsserver.port
             card = ScoreRunner(env=env,
                                protocol=protocol,
                                server_descr=server_descr,
                                server_port=server_port,
+                               domain=env.domain1,
                                verbose=args.verbose,
                                curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
@@ -959,6 +1003,27 @@ def run_score(args, protocol):
                                with_flame=args.flame,
                                socks_args=socks_args,
                                limit_rate=args.limit_rate)
+            cards.append(card)
+
+        if test_ftp:
+            ftpserver = VsFTPD(env=env, with_ssl=protocol == 'ftps', ssl_implicit=protocol == 'ftps')
+            ftpserver.clear_docs()
+            ftpserver.initial_start()
+            server_descr = f'{ftpserver.name}'
+            server_port = ftpserver.port
+            card = ScoreRunner(env=env,
+                               protocol=protocol,
+                               server_descr=server_descr,
+                               server_port=server_port,
+                               domain=env.ftp_domain,
+                               verbose=args.verbose,
+                               curl_verbose=args.curl_verbose,
+                               download_parallel=args.download_parallel,
+                               upload_parallel=args.upload_parallel,
+                               with_flame=args.flame,
+                               socks_args=socks_args,
+                               limit_rate=args.limit_rate)
+            card.setup_resources(ftpserver.docs_dir, downloads)
             cards.append(card)
 
         if not len(cards):
@@ -1006,6 +1071,8 @@ def run_score(args, protocol):
             sockd.stop()
         if wsserver:
             wsserver.shutdown()
+        if ftpserver:
+            ftpserver.stop()
     return rv
 
 

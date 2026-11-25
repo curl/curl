@@ -29,13 +29,6 @@
 
 #include "urldata.h"
 
-enum Curl_proxy_use {
-  HEADER_SERVER,  /* direct to server */
-  HEADER_PROXY,   /* regular request to proxy */
-  HEADER_CONNECT, /* sending CONNECT to a proxy */
-  HEADER_CONNECT_UDP /* sending CONNECT-UDP to a proxy */
-};
-
 /* HTTP version for proxy tunnel request creation */
 typedef enum {
   PROXY_HTTP_V1 = 1,

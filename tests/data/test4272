@@ -15,6 +15,15 @@ Content-Length: 1
 
 A
 </data>
+# A zstd frame containing a raw block for "hello world", cut after "hello".
+# Content-Length matches the encoded bytes so HTTP framing is complete.
+<data1 crlf="headers" nonewline="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Content-Encoding: zstd
+Content-Length: 14
+
+%hex[%28%b5%2f%fd%20%0b%59%00%00%68%65%6c%6c%6f]hex%
+</data1>
 </reply>
 
 <client>
@@ -25,10 +34,13 @@ libz
 http
 </server>
 <name>
-HTTP GET invalid/incomplete gzip compressed content
+HTTP GET incomplete gzip and zstd compressed content
 </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed --remove-on-error -o %LOGDIR/decoded%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed --remove-on-error -o %LOGDIR/decoded%TESTNUMBER -w '%{exitcode}\n'
+%if zstd
+--next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 --compressed --remove-on-error -o %LOGDIR/decoded%TESTNUMBER-zstd -w '%{exitcode}\n'
+%endif
 </command>
 </client>
 
@@ -43,10 +55,27 @@ User-Agent: curl/%VERSION
 Accept: */*
 Accept-Encoding: xxx
 
+%if zstd
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+%endif
 </protocol>
 <notexists>
 %LOGDIR/decoded%TESTNUMBER
+%if zstd
+%LOGDIR/decoded%TESTNUMBER-zstd
+%endif
 </notexists>
+<stdout mode="text">
+61
+%if zstd
+61
+%endif
+</stdout>
 <errorcode>
 61
 </errorcode>
