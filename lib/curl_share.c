@@ -443,6 +443,7 @@ CURLcode Curl_share_easy_link(struct Curl_easy *data,
   else if(!GOOD_SHARE_HANDLE(share))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  /* increment ref count while we use this share */
   n = Curl_refcount_incr(&share->ref_count);
   if(n == 1) { /* someone is using a share with 0 refcount */
     DEBUGASSERT(0);
@@ -457,6 +458,7 @@ CURLcode Curl_share_easy_link(struct Curl_easy *data,
     data->state.last_cpid = UINT32_MAX;
   }
 
+  /* increment again for the assignment into the easy */
   Curl_refcount_incr(&share->ref_count);
   data->share = share;
   share->has_been_shared = TRUE;
@@ -486,6 +488,7 @@ CURLcode Curl_share_easy_link(struct Curl_easy *data,
   share_lock_release(share, data, locked);
 
 out:
-  Curl_refcount_decr(&share->ref_count);
+  /* give up our use of the share */
+  share_unlink(&share);
   return result;
 }
