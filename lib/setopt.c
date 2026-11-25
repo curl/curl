@@ -1429,7 +1429,7 @@ static CURLcode setopt_share(struct Curl_easy *data, struct Curl_share *set)
   else {
     /* disconnect from old share, if any and possible */
     result = Curl_share_easy_unlink(data);
-    if(!result && GOOD_SHARE_HANDLE(set))
+    if(!result)
       /* use new share if it set */
       result = Curl_share_easy_link(data, set);
   }
