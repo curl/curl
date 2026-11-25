@@ -433,6 +433,16 @@ UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
     case '\0':
       break;
     case '\\':
+#ifdef _WIN32
+      /* On Windows, leading double backslashes indicate a UNC path,
+         not an escaped backslash */
+      if((param_place == cert_parameter) && (param_place[1] == '\\')) {
+        *certname_place++ = '\\';
+        *certname_place++ = '\\';
+        param_place += 2;
+        break;
+      }
+#endif
       param_place++;
       switch(*param_place) {
       case '\0':
@@ -467,6 +477,16 @@ UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
            first character is an alphabetic letter:
 
            this is a drive letter colon */
+        *certname_place++ = ':';
+        param_place++;
+        break;
+      }
+      if((param_place > cert_parameter + 1) &&
+         (param_place[1] == '\\' || param_place[1] == '/') &&
+         ISALPHA(param_place[-1]) &&
+         (param_place[-2] == '\\' || param_place[-2] == '/')) {
+        /* drive letter colon in extended-length or device path
+           (e.g. \\?\c:\) */
         *certname_place++ = ':';
         param_place++;
         break;

@@ -66,6 +66,10 @@ static CURLcode test_tool1394(const char *arg)
     {"c:\\foo:bar\\\\",        "c:\\foo",            "bar\\\\"},
     {"c:\\foo:bar:",           "c:\\foo",            "bar:"},
     {"c:\\foo\\::bar\\:",      "c:\\foo:",           "bar\\:"},
+    {"\\\\srv\\share\\cert.pem", "\\\\srv\\share\\cert.pem", NULL},
+    {"\\\\srv\\share\\cert.pem:pass", "\\\\srv\\share\\cert.pem", "pass"},
+    {"\\\\?\\c:\\foo\\cert.pem", "\\\\?\\c:\\foo\\cert.pem", NULL},
+    {"\\\\?\\c:\\foo\\cert.pem:pass", "\\\\?\\c:\\foo\\cert.pem", "pass"},
 #endif
     {NULL, NULL, NULL}
   };
