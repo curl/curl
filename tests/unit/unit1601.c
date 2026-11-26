@@ -192,6 +192,21 @@ static CURLcode test_unit1601(const char *arg)
     verify_memory(output, "\xe4\x81\x63\x53\xab\xc6\x8c\x34\xd4\xa8\xe5\xc8"
                   "\xf3\x1d\x12\xbd\xaf\xd6\x58\x73\x11\xe9\xe6\xf9\x93\x2e"
                   "\x0a\xba\x69\x49\x63\x8c", CURL_SHA256_DIGEST_LENGTH);
+
+    /* RFC 4231 test case 6 exercises the long-key scratch digest. */
+    {
+      uint8_t key[131];
+      CURLcode result;
+      memset(key, 0xaa, sizeof(key));
+      result = Curl_hmacit(&Curl_HMAC_SHA256, key, sizeof(key),
+                           STRCONST("Test Using Larger Than Block-Size Key - "
+                                    "Hash Key First"), output);
+      fail_unless(result == CURLE_OK, "long-key HMAC failed");
+      verify_memory(output, "\x60\xe4\x31\x59\x1e\xe0\xb6\x7f\x0d\x8a\x26"
+                    "\xaa\xcb\xf5\xb7\x7f\x8e\x0b\xc6\x21\x37\x28"
+                    "\xc5\x14\x05\x46\x04\x0f\x0e\xe3\x7f\x54",
+                    CURL_SHA256_DIGEST_LENGTH);
+    }
   }
 #endif
 #endif /* feature using HMAC */
