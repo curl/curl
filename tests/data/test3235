@@ -16,6 +16,7 @@ Server: RTSPD/libcurl-test
 CSeq: 1
 Transport: RTP/AVP/TCP;unicast;interleaved=0-1
 Content-Length: 2
+Connection: close
 Curl-Private: swsclose
 
 %hex[%24%00%4e%20]hex%%repeat[20000 x A]%x
@@ -27,6 +28,7 @@ Server: RTSPD/libcurl-test
 CSeq: 2
 Transport: RTP/AVP/TCP;unicast;interleaved=0-1
 Content-Length: 2
+Connection: close
 Curl-Private: swsclose
 
 %hex[%24%00%4e%20]hex%%repeat[20000 x A]%x
@@ -38,6 +40,7 @@ Server: RTSPD/libcurl-test
 CSeq: 3
 Transport: RTP/AVP/TCP;unicast;interleaved=0-1
 Content-Length: 2
+Connection: close
 Curl-Private: swsclose
 
 %hex[%24%00%4e%20]hex%%repeat[20000 x A]%x
@@ -49,6 +52,7 @@ Server: RTSPD/libcurl-test
 CSeq: 4
 Transport: RTP/AVP/TCP;unicast;interleaved=0-1
 Content-Length: 2
+Connection: close
 Curl-Private: swsclose
 
 %hex[%24%00%4e%20]hex%%repeat[20000 x A]%x
@@ -60,6 +64,7 @@ Server: RTSPD/libcurl-test
 CSeq: 5
 Transport: RTP/AVP/TCP;unicast;interleaved=0-1
 Content-Length: 2
+Connection: close
 Curl-Private: swsclose
 
 %hex[%24%00%02%58]hex%%repeat[600 x B]%%hex[%24%00%02%58]hex%%repeat[600 x C]%x
@@ -80,7 +85,7 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 
 <verify>
 <stdout>
-case1: calls=3 max=16384 total=20006 bad=0 delivered=20006 dl=20006
+case1: rtp_calls=2 max=16384 total=20006 bad=0 delivered=20006 dl=20006
 case2: rtp_calls=1 rtp_max=20004 rtp_total=20004 body=2 delivered=20006 dl=20006
 case3: result=63 total=0
 case4: result=63 rtp_total=0 body=0

@@ -25,6 +25,7 @@
 
 struct t3235_stats {
   size_t calls;
+  size_t rtp_calls;
   size_t max_call;
   size_t total;
   int check_limit;
@@ -63,6 +64,8 @@ static size_t t3235_write_cb(char *ptr, size_t size, size_t nmemb,
       }
     }
   }
+  if(st->total < 20004)
+    st->rtp_calls++;
   st->calls++;
   if(n > st->max_call)
     st->max_call = n;
@@ -131,9 +134,9 @@ static CURLcode test_lib3235(const char *URL)
   if(result)
     goto test_cleanup;
 
-  curl_mprintf("case1: calls=%zu max=%zu total=%zu bad=%d delivered=%"
+  curl_mprintf("case1: rtp_calls=%zu max=%zu total=%zu bad=%d delivered=%"
                CURL_FORMAT_CURL_OFF_T " dl=%" CURL_FORMAT_CURL_OFF_T "\n",
-               body_st.calls, body_st.max_call, body_st.total,
+               body_st.rtp_calls, body_st.max_call, body_st.total,
                body_st.bad_data, delivered, dl);
 
   /* Case 2: with CURLOPT_INTERLEAVEFUNCTION set, the full 20004-byte block
