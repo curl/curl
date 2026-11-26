@@ -856,7 +856,9 @@ static CURLproxycode socks5_resolving(struct socks_ctx *sx,
   if(sx->ip_version != CURL_IPRESOLVE_V4)
     ai = Curl_dns_cf_get_ai(data, cf, sx->dest, AF_INET6, 0);
 #endif
-  if(!ai && (sx->ip_version != CURL_IPRESOLVE_V6))
+  if(!ai && ((sx->ip_version != CURL_IPRESOLVE_V6) ||
+             (!sx->socks5_addr_retried &&
+              Curl_is_ipv4addr(sx->dest->hostname))))
     ai = Curl_dns_cf_get_ai(data, cf, sx->dest, AF_INET, 0);
 
   if(!ai) {
@@ -1156,17 +1158,21 @@ process_state:
   case SOCKS5_ST_RESP1_RECV: {
     int sx_code;
     presult = socks5_recv_resp1(sx, cf, data, &sx_code, &done);
-    if(presult == CURLPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED) {
-      /* Socks proxy could not initiate a connection with the passed
+    if((presult == CURLPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED) &&
+       sx->resolve_local && !sx->socks5_addr_retried &&
+       !Curl_is_ipaddr(sx->dest->hostname) &&
+       (sx->ip_version == CURL_IPRESOLVE_WHATEVER)) {
+      /* Socks5 proxy could not initiate a connection with the passed
        * ip family. Is there an alternative? */
-      if(!sx->socks5_addr_retried &&
-         (sx->ip_version == CURL_IPRESOLVE_WHATEVER)) {
-        sx->socks5_addr_retried = TRUE;
-        sx->ip_version = (sx->ipv_used == CURL_IPRESOLVE_V6) ?
-                         CURL_IPRESOLVE_V4 : CURL_IPRESOLVE_V6;
+      uint8_t alt_ipv = (sx->ipv_used == CURL_IPRESOLVE_V6) ?
+                        CURL_IPRESOLVE_V4 : CURL_IPRESOLVE_V6;
+      if(Curl_dns_cf_get_ai(data, cf, sx->dest,
+         (alt_ipv == CURL_IPRESOLVE_V6) ? AF_INET6 : AF_INET, 0)) {
         CURL_TRC_CF(data, cf, "proxy does not support %s, "
                     "trying the other one",
-                    (sx->ip_version == CURL_IPRESOLVE_V4) ? "ipv6" : "ipv4");
+                    (alt_ipv == CURL_IPRESOLVE_V4) ? "ipv6" : "ipv4");
+        sx->socks5_addr_retried = TRUE;
+        sx->ip_version = alt_ipv;
         *pretry = TRUE;
         sxstate(sx, cf, data, SOCKS_ST_INIT);
         return presult;
@@ -1240,7 +1246,9 @@ do_connect:
       /* tear down the filters below and connect again to the socks proxy */
       Curl_conn_cf_discard_chain(&cf->next, data);
       result = Curl_cf_ip_happy_insert_after(
-        cf, data, ctx->peer, ctx->peer, TRNSPRT_TCP, NULL, TRNSPRT_TCP);
+        cf, data, ctx->peer, ctx->peer,
+        ctx->peer->unix_socket ? TRNSPRT_UNIX : TRNSPRT_TCP,
+        NULL, TRNSPRT_TCP);
       if(!result) {
         CURL_TRC_CF(data, cf, "opening new connection for retry");
         goto do_connect;
