@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Content-Disposition
+-J
+--retry
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 503 Service Unavailable swsbounce
+Retry-After: 1
+Content-Length: 0
+Connection: close
+
+</data>
+<data1 nocheck="yes">
+HTTP/1.1 200 OK
+Content-Disposition: attachment; filename="victim%TESTNUMBER"
+Content-Length: 5
+Connection: close
+
+HELLO
+</data1>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+HTTP GET -O -J --retry, Content-Disposition on retry must not clobber
+</name>
+<file name="%LOGDIR/victim%TESTNUMBER">
+ORIGINAL-CONTENT-S1
+</file>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/victim%TESTNUMBER -O -J --retry 3 --output-dir %LOGDIR
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /victim%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /victim%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+23
+</errorcode>
+<file name="%LOGDIR/victim%TESTNUMBER">
+ORIGINAL-CONTENT-S1
+</file>
+</verify>
+</testcase>
