@@ -237,6 +237,7 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   curlx_free(per->uploadfile);
   curlx_free(per->outfile);
   curlx_free(per->url);
+  curlx_free(per->etag);
   curl_easy_cleanup(per->curl);
   curlx_free(per);
 
@@ -737,6 +738,38 @@ static CURLcode post_close_output(struct per_transfer *per,
   return result;
 }
 
+static CURLcode post_etag_save(struct per_transfer *per)
+{
+  struct OutStruct *etag_save = &per->etag_save;
+
+  if(per->etag && etag_save->stream) {
+    size_t etag_length = strlen(per->etag);
+
+    if(etag_save->regular_file) {
+      curlx_struct_stat file;
+      int fd = fileno(etag_save->stream);
+
+      /* Truncate regular files to avoid stale etag content */
+      if((fd != -1) &&
+         !curlx_fstat(fd, &file) &&
+         S_ISREG(file.st_mode) &&
+         toolx_ftruncate(fd, 0)) {
+        errorf("Failed writing etag");
+        return CURLE_WRITE_ERROR;
+      }
+    }
+
+    if((fwrite(per->etag, 1, etag_length, etag_save->stream) !=
+        etag_length) ||
+       (fputc('\n', etag_save->stream) == EOF) ||
+       fflush(etag_save->stream)) {
+      errorf("Failed writing etag");
+      return CURLE_WRITE_ERROR;
+    }
+  }
+  return CURLE_OK;
+}
+
 /*
  * Call this after a transfer has completed.
  */
@@ -781,8 +814,10 @@ static CURLcode post_per_transfer(struct per_transfer *per,
         (curlx_timediff_ms(curlx_now(), per->retrystart) <
          config->retry_maxtime_ms))) {
       result = retrycheck(config, per, result, retryp, delay);
-      if(!result && *retryp)
+      if(!result && *retryp) {
+        curlx_safefree(per->etag);
         return CURLE_OK; /* retry! */
+      }
     }
 
     if((global->progressmode == CURL_PROGRESS_BAR) &&
@@ -792,6 +827,9 @@ static CURLcode post_per_transfer(struct per_transfer *per,
       fputs("\n", per->progressbar.out);
 
     result = post_close_output(per, result);
+    /* only save the etag once the transfer has completed without error */
+    if(!result)
+      result = post_etag_save(per);
   }
   /* Write the --write-out data before cleanup but after result is final */
   if(config->writeout)
@@ -809,6 +847,8 @@ static CURLcode post_per_transfer(struct per_transfer *per,
 
   if(per->etag_save.alloc_filename)
     curlx_safefree(per->etag_save.filename);
+
+  curlx_safefree(per->etag);
 
   if(outs->alloc_filename)
     curlx_safefree(outs->filename);

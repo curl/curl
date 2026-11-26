@@ -52,6 +52,7 @@ struct per_transfer {
   struct OutStruct outs;
   struct OutStruct heads;
   struct OutStruct etag_save;
+  char *etag;
   struct HdrCbData hdrcbdata;
   long num_headers;
   time_t startat; /* when doing parallel transfers, this is a retry transfer
