@@ -764,16 +764,17 @@ class Env:
                 )
                 self._ca.issue_certs(self.CONFIG.cert_specs)
                 if self.have_openssl():
+                    assert self.openssl
                     self._ca.create_hashdir(self.openssl)
-                if self.have_openssl_ech():
-                    for domain in [self.domain1, self.domain2]:
-                        p = subprocess.run(args=[
-                            self.openssl, 'ech',
-                            '-out', os.path.join(ca_dir, f'{domain}.echconfig'),
-                            '-public_name', f'public.{domain}'
-                        ], capture_output=True, text=True, check=True)
-                        if p.returncode != 0:
-                            raise EnvError(f"Error generating ECHConfig for {domain}")
+                    if self.have_openssl_ech():
+                        for domain in [self.domain1, self.domain2]:
+                            p = subprocess.run(args=[
+                                self.openssl, 'ech',
+                                '-out', os.path.join(ca_dir, f'{domain}.echconfig'),
+                                '-public_name', f'public.{domain}'
+                            ], capture_output=True, text=True, check=True)
+                            if p.returncode != 0:
+                                raise EnvError(f"Error generating ECHConfig for {domain}")
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)
@@ -957,7 +958,7 @@ class Env:
         return self.CONFIG.curl
 
     @property
-    def openssl(self) -> str:
+    def openssl(self) -> Optional[str]:
         return self.CONFIG.openssl
 
     @property
