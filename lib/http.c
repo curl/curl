@@ -1590,28 +1590,11 @@ CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
 static CURLcode http_write_header(struct Curl_easy *data,
                                   const char *hd, size_t hdlen)
 {
-  CURLcode result;
-  int writetype;
-
-  /* now, only output this if the header AND body are requested:
-   */
-  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
-
-  writetype = CLIENTWRITE_HEADER |
+  int writetype = CLIENTWRITE_HEADER |
     ((data->req.httpcode / 100 == 1) ? CLIENTWRITE_1XX : 0);
 
-  result = Curl_client_write(data, writetype, hd, hdlen);
-  if(result)
-    return result;
-
-  result = Curl_bump_headersize(data, hdlen, FALSE);
-  if(result)
-    return result;
-
-  data->req.deductheadercount = (100 <= data->req.httpcode &&
-                                 199 >= data->req.httpcode) ?
-    data->req.headerbytecount : 0;
-  return result;
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
+  return Curl_client_write(data, writetype, hd, hdlen);
 }
 
 /*
@@ -3717,33 +3700,6 @@ CURLcode Curl_verify_header(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_bump_headersize(struct Curl_easy *data,
-                              size_t delta,
-                              bool connect_only)
-{
-  size_t bad = 0;
-  unsigned int max = MAX_HTTP_RESP_HEADER_SIZE;
-  if(delta < MAX_HTTP_RESP_HEADER_SIZE) {
-    data->info.header_size += (unsigned int)delta;
-    data->req.allheadercount += (unsigned int)delta;
-    if(!connect_only)
-      data->req.headerbytecount += (unsigned int)delta;
-    if(data->req.allheadercount > max)
-      bad = data->req.allheadercount;
-    else if(data->info.header_size > (max * 20)) {
-      bad = data->info.header_size;
-      max *= 20;
-    }
-  }
-  else
-    bad = data->req.allheadercount + delta;
-  if(bad) {
-    failf(data, "Too large response headers: %zu > %u", bad, max);
-    return CURLE_RECV_ERROR;
-  }
-  return CURLE_OK;
-}
-
 /*
  * Handle a 101 Switching Protocols response. Performs the actual protocol
  * upgrade to HTTP/2 or WebSocket based on what was requested.
@@ -4251,15 +4207,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
 
   if(k->httpcode / 100 == 1)
     writetype |= CLIENTWRITE_1XX;
-  result = Curl_client_write(data, writetype, hd, hdlen);
-  if(result)
-    return result;
-
-  result = Curl_bump_headersize(data, hdlen, FALSE);
-  if(result)
-    return result;
-
-  return CURLE_OK;
+  return Curl_client_write(data, writetype, hd, hdlen);
 }
 
 /* remove trailing CRLF then all trailing whitespace */

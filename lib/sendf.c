@@ -35,6 +35,7 @@
 #include "connect.h"
 #include "cw-out.h"
 #include "cw-pause.h"
+#include "http.h"
 #include "multiif.h"
 #include "progress.h"
 
@@ -160,7 +161,53 @@ struct cw_download_ctx {
   struct Curl_cwriter super;
   BIT(started_response);
   BIT(started_body);
+  BIT(limit_hds);
 };
+
+static CURLcode cw_download_init(struct Curl_easy *data,
+                                 struct Curl_cwriter *writer)
+{
+  struct cw_download_ctx *ctx = writer->ctx;
+  ctx->limit_hds = data->conn &&
+    (data->conn->scheme->protocol & (PROTO_FAMILY_HTTP|CURLPROTO_RTSP));
+  return CURLE_OK;
+}
+
+#ifndef CURL_DISABLE_HTTP
+static CURLcode cw_download_limit_hds(struct Curl_easy *data,
+                                      int type,
+                                      size_t add_len,
+                                      bool connect_only)
+{
+  const unsigned int max = MAX_HTTP_RESP_HEADER_SIZE;
+
+  if(add_len > max) {
+    failf(data, "Too large, single response header: %zu > %u", add_len, max);
+    return CURLE_RECV_ERROR;
+  }
+
+  data->info.header_size += (unsigned int)add_len;
+  data->req.allheadercount += (unsigned int)add_len;
+  if(!connect_only)
+    data->req.headerbytecount += (unsigned int)add_len;
+  if(data->req.allheadercount > max) {
+    failf(data, "Too large response headers: %u > %u",
+          data->req.allheadercount, max);
+    return CURLE_RECV_ERROR;
+  }
+  else if(data->info.header_size > (max * 20)) {
+    failf(data, "Too large response headers: %u > %u",
+          data->info.header_size, max * 20);
+    return CURLE_RECV_ERROR;
+  }
+
+  /* Interim response headers do not really count when we need
+   * to decide if the server send us a response */
+  data->req.deductheadercount = (type & CLIENTWRITE_1XX) ?
+                                data->req.headerbytecount : 0;
+  return CURLE_OK;
+}
+#endif
 
 /* Download client writer in phase CURL_CW_PROTOCOL that
  * sees the "real" download body data. */
@@ -171,7 +218,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   struct cw_download_ctx *ctx = writer->ctx;
   CURLcode result;
   size_t nwrite, excess_len = 0;
-  bool is_connect = !!(type & CLIENTWRITE_CONNECT);
+  bool is_connect = (type & CLIENTWRITE_CONNECT);
 
   if(!ctx->started_response &&
      !(type & CLIENTWRITE_CONNECT) &&
@@ -181,6 +228,13 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   }
 
   if(!(type & CLIENTWRITE_BODY)) {
+#ifndef CURL_DISABLE_HTTP
+    if((type & CLIENTWRITE_HEADER) && (ctx->limit_hds || is_connect)) {
+      result = cw_download_limit_hds(data, type, nbytes, is_connect);
+      if(result)
+        return result;
+    }
+#endif
     if(is_connect && data->set.suppress_connect_headers)
       return CURLE_OK;
 #ifdef DEBUGBUILD
@@ -292,7 +346,7 @@ static const struct Curl_cwtype cw_download = {
   "protocol",
   NULL,
   0,
-  Curl_cwriter_def_init,
+  cw_download_init,
   cw_download_write,
   Curl_cwriter_def_flush,
   Curl_cwriter_def_close,
