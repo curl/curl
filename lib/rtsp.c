@@ -617,44 +617,12 @@ static CURLcode rtp_write_body_junk(struct Curl_easy *data,
 static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
                                  size_t len)
 {
-  struct Curl_mapi_guard guard;
-  size_t wrote;
-  curl_write_callback writeit;
-  void *user_ptr;
-
-  if(len == 0) {
+  if(!len) {
     failf(data, "Cannot write a 0 size RTP packet.");
     return CURLE_WRITE_ERROR;
   }
 
-  /* If the user has configured CURLOPT_INTERLEAVEFUNCTION then use that
-     function and any configured CURLOPT_INTERLEAVEDATA to write out the RTP
-     data. Otherwise, use the CURLOPT_WRITEFUNCTION with the CURLOPT_WRITEDATA
-     pointer to write out the RTP data. */
-  if(data->set.fwrite_rtp) {
-    writeit = data->set.fwrite_rtp;
-    user_ptr = data->set.rtp_out;
-  }
-  else {
-    writeit = data->set.fwrite_func;
-    user_ptr = data->set.out;
-  }
-
-  CURL_CBAPI_START(&guard, data, easy_fwrite_rtp);
-  wrote = writeit((char *)CURL_UNCONST(ptr), 1, len, user_ptr);
-  CURL_CBAPI_END(&guard);
-
-  if(wrote == CURL_WRITEFUNC_PAUSE) {
-    failf(data, "Cannot pause RTP");
-    return CURLE_WRITE_ERROR;
-  }
-
-  if(wrote != len) {
-    failf(data, "Failed writing RTP data");
-    return CURLE_WRITE_ERROR;
-  }
-
-  return CURLE_OK;
+  return Curl_client_write(data, CLIENTWRITE_INTERLEAVE, ptr, len);
 }
 
 static CURLcode rtsp_filter_rtp(struct Curl_easy *data,

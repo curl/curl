@@ -67,6 +67,9 @@ typedef enum {
   CW_OUT_NONE,
   CW_OUT_BODY,
   CW_OUT_BODY_0LEN,
+#ifndef CURL_DISABLE_RTSP
+  CW_OUT_INTERLEAVE,
+#endif
   CW_OUT_HDS
 } cw_out_type;
 
@@ -156,6 +159,21 @@ static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
      * to the client as it comes without delay */
     *pmin_write = 0;
     break;
+#ifndef CURL_DISABLE_RTSP
+  case CW_OUT_INTERLEAVE:
+    if(data->set.fwrite_rtp) {
+      *pwcb = data->set.fwrite_rtp;
+      *pwcb_data = data->set.rtp_out;
+      *pmax_write = 0; /* deliver complete $ block in one call */
+    }
+    else {
+      *pwcb = data->set.fwrite_func;
+      *pwcb_data = data->set.out;
+      *pmax_write = CURL_MAX_WRITE_SIZE;
+    }
+    *pmin_write = 0;
+    break;
+#endif
   case CW_OUT_HDS:
     *pwcb = data->set.fwrite_header ? data->set.fwrite_header :
              (data->set.writeheader ? data->set.fwrite_func : NULL);
@@ -170,6 +188,22 @@ static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
     *pmin_write = 0;
   }
 }
+
+#ifdef CURLVERBOSE
+static const char *cw_out_type_name(cw_out_type otype)
+{
+  switch(otype) {
+  case CW_OUT_HDS:
+    return "header";
+#ifndef CURL_DISABLE_RTSP
+  case CW_OUT_INTERLEAVE:
+    return "interleave";
+#endif
+  default:
+    return "body";
+  }
+}
+#endif
 
 static CURLcode cw_out_cb_write(struct Curl_easy *data,
                                 curl_write_callback wcb,
@@ -192,7 +226,7 @@ static CURLcode cw_out_cb_write(struct Curl_easy *data,
     CURL_CBAPI_END(&guard);
   }
   CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes, type=%x -> %zu",
-                 blen, (otype == CW_OUT_HDS) ? "header" : "body",
+                 blen, cw_out_type_name(otype),
                  (unsigned int)otype, nwritten);
   if(nwritten == CURL_WRITEFUNC_PAUSE) {
     if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
@@ -258,12 +292,16 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       wlen = max_write ? CURLMIN(blen, max_write) : blen;
       if(otype == CW_OUT_BODY)
         result = Curl_pgrs_deliver_check(data, wlen);
+#ifndef CURL_DISABLE_RTSP
+      else if(otype == CW_OUT_INTERLEAVE)
+        result = Curl_pgrs_deliver_check(data, blen);
+#endif
       if(!result)
         result = cw_out_cb_write(data, wcb, wcb_data, otype,
                                  buf, wlen, &nwritten);
       if(result)
         return result;
-      if(otype == CW_OUT_BODY)
+      if(otype != CW_OUT_HDS)
         Curl_pgrs_deliver_inc(data, nwritten);
       *pconsumed += nwritten;
       blen -= nwritten;
@@ -359,9 +397,9 @@ static CURLcode cw_out_append(struct cw_out_ctx *ctx,
   }
 
   /* if we do not have a buffer, or it is of another type, make a new one
-   * and append it at the tail. For CW_OUT_HDS always make a new one, so
-   * we "replay" headers exactly as they came in */
-  if(!ctx->tail || (ctx->tail->type != otype) || (otype == CW_OUT_HDS)) {
+   * and append it at the tail. For non-body writes always make a new one,
+   * so we "replay" headers and interleaved blocks as they came in */
+  if(!ctx->tail || (ctx->tail->type != otype) || (otype != CW_OUT_BODY)) {
     struct cw_out_buf *cwbuf = cw_out_buf_create(otype);
     if(!cwbuf)
       return CURLE_OUT_OF_MEMORY;
@@ -453,6 +491,15 @@ static CURLcode cw_out_write(struct Curl_easy *data,
     if(result)
       return result;
   }
+
+#ifndef CURL_DISABLE_RTSP
+  if(type & CLIENTWRITE_INTERLEAVE) {
+    result = cw_out_do_write(ctx, data, CW_OUT_INTERLEAVE, flush_all,
+                             buf, blen);
+    if(result)
+      return result;
+  }
+#endif
 
   return CURLE_OK;
 }

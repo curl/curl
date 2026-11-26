@@ -120,7 +120,6 @@ cbapi_fn_props[CURL_CBAPI_FN_LAST - CURL_CBAPI_FN_START] = {
   { CURL_CBAPI_FN_easy_fread_func,            0 },
   { CURL_CBAPI_FN_easy_fsockopt,              0 },
   { CURL_CBAPI_FN_easy_fsslctx,               0 },
-  { CURL_CBAPI_FN_easy_fwrite_rtp,            0 },
   { CURL_CBAPI_FN_easy_fxferinfo,             0 },
   { CURL_CBAPI_FN_easy_ioctl_func,            0 },
   { CURL_CBAPI_FN_easy_resolver_start,        0 },

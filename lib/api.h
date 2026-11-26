@@ -117,7 +117,6 @@ typedef enum {
   CURL_CBAPI_FN_easy_fread_func,
   CURL_CBAPI_FN_easy_fsockopt,
   CURL_CBAPI_FN_easy_fsslctx,
-  CURL_CBAPI_FN_easy_fwrite_rtp,
   CURL_CBAPI_FN_easy_fxferinfo,
   CURL_CBAPI_FN_easy_ioctl_func,
   CURL_CBAPI_FN_easy_resolver_start,
