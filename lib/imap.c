@@ -104,6 +104,8 @@ struct imap_conn {
   struct pingpong pp;
   struct SASL sasl;           /* SASL-related parameters */
   char *mailbox;              /* The last selected mailbox */
+  curl_off_t literal_bytes;   /* Bytes of an in-progress literal left to
+                                 consume as content, not as protocol */
   imapstate state;            /* Always use imap.c:state() to change state! */
   unsigned int mb_uidvalidity; /* UIDVALIDITY parsed from select response */
   char resptag[5];            /* Response tag to wait for */
@@ -115,6 +117,7 @@ struct imap_conn {
   BIT(login_disabled);        /* LOGIN command disabled by server */
   BIT(ir_supported);          /* Initial response supported by server */
   BIT(mb_uidvalidity_set);
+  BIT(literal_cont);          /* Response continues after a literal */
 };
 
 /* This IMAP struct is used in the Curl_easy. All IMAP data that is
@@ -248,6 +251,29 @@ static const char *imap_find_literal(const char *line, size_t len)
   return NULL;
 }
 
+/*
+ * Returns the size of the '{size}' literal declared in an untagged response
+ * line, if it declares one. Those bytes follow the line and are content, so
+ * they must be consumed as such rather than parsed as further responses.
+ */
+static bool imap_literal_size(const char *line, size_t len, curl_off_t *size)
+{
+  const char *cr = memchr(line, '\r', len);
+  size_t line_len = cr ? (size_t)(cr - line) : len;
+  const char *ptr = imap_find_literal(line, line_len);
+
+  if(ptr) {
+    curl_off_t num = 0;
+    ptr++;
+    if(!curlx_str_number(&ptr, &num, CURL_OFF_T_MAX) &&
+       !curlx_str_single(&ptr, '}')) {
+      *size = num;
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
 /***********************************************************************
  *
  * imap_matchresp()
@@ -308,6 +334,33 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
   DEBUGASSERT(imap);
   if(!imapc || !imap)
     return FALSE;
+
+  if(imapc->literal_bytes > 0 || imapc->literal_cont) {
+    /* Inside a literal. Its bytes are content and cannot end the response, no
+       matter what they look like: the '{size}' count is wire framing. Without
+       this, a line in a fetched message that happens to match the response tag
+       ends the request early, and the rest of the literal is then read as the
+       response to whatever is sent next on this connection. */
+    curl_off_t used = ((curl_off_t)len < imapc->literal_bytes) ?
+      (curl_off_t)len : imapc->literal_bytes;
+    curl_off_t size;
+
+    imapc->literal_bytes -= used;
+
+    /* Still inside the literal, or it ended exactly at the end of this line:
+       either way the response continues after it, on the next line. */
+    if(imapc->literal_bytes || ((size_t)used == len))
+      return FALSE;
+
+    /* What follows the literal is the rest of the response line that declared
+       it, and may declare the next literal of a multi-literal response. */
+    imapc->literal_cont = FALSE;
+    if(imap_literal_size(line + used, len - (size_t)used, &size)) {
+      imapc->literal_bytes = size;
+      imapc->literal_cont = TRUE;
+    }
+    return FALSE;
+  }
 
   /* Do we have a tagged command response? */
   id = imapc->resptag;
@@ -488,6 +541,12 @@ static void imap_state(struct Curl_easy *data,
 #else
   (void)data;
 #endif
+  if(imapc->state != newstate) {
+    /* a literal is only ever consumed within a single state, so this cannot
+       leak a count into the next request on a reused connection */
+    imapc->literal_bytes = 0;
+    imapc->literal_cont = FALSE;
+  }
   imapc->state = newstate;
 }
 
@@ -1227,7 +1286,14 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
   (void)instate;
 
   if(imapcode == '*' && is_custom_fetch_listing(imap)) {
-    /* custom FETCH or UID FETCH for listing is not handled here */
+    /* The response itself is not handled here, but a literal it declares still
+       has to be framed, so that the content is consumed as content instead of
+       being parsed as further responses. */
+    curl_off_t size;
+    if(imap_literal_size(line, len, &size)) {
+      imapc->literal_bytes = size;
+      imapc->literal_cont = TRUE;
+    }
   }
   else if(imapcode == '*') {
     /* Check if this response contains a literal (e.g. FETCH responses with
