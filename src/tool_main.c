@@ -137,6 +137,70 @@ static void memory_tracking_init(void)
 #  define memory_tracking_init() tool_nop_stmt
 #endif
 
+#ifdef _UNICODE
+static bool dump_args(int argc, wchar_t *argv[])
+#else
+static bool dump_args(int argc, char *argv[])
+#endif
+{
+#ifdef _WIN32
+  bool console;
+  intptr_t fhnd;
+  CONSOLE_SCREEN_BUFFER_INFO console_info;
+#endif
+  int i;
+  const char **darg = curlx_malloc(sizeof(*darg) * argc);
+  if(!darg)
+    return false;
+#ifdef _WIN32
+  fhnd = _get_osfhandle(STDOUT_FILENO);
+  console = isatty(STDOUT_FILENO) &&
+    GetConsoleScreenBufferInfo((HANDLE)fhnd, &console_info);
+  (void)console;
+#endif
+  curl_mprintf("\n");
+  for(i = 0; i < argc; ++i) {
+    /* In Windows Unicode builds convert_tchar_to_UTF8 converts Unicode UTF-16
+       to UTF-8. However in Windows non-Unicode builds no conversion takes
+       place and the arguments remain encoded in the current ANSI codepage. */
+    darg[i] = convert_tchar_to_UTF8(argv[i]);
+#if defined(_WIN32) && defined(_UNICODE)
+    /* If the output is to the Windows console in a Windows Unicode build then
+       print the original UTF-16 encoded Unicode arguments instead of UTF-8.
+       This is due to console compatibility displaying Unicode chars in
+       anything other than UTF-16 encoding. */
+    if(console && darg[i]) {
+      DWORD chars_written;
+      curl_mprintf("argv[%d]: ", i);
+      fflush(stdout);
+      WriteConsoleW((HANDLE)fhnd, argv[i], (DWORD)wcslen(argv[i]),
+                    &chars_written, NULL);
+      curl_mprintf("\n");
+    }
+    else
+#endif
+      curl_mprintf("argv[%d]: %s\n", i, darg[i] ? darg[i] : "(FAILED)");
+  }
+  curl_mprintf("\n");
+  for(i = 0; i < argc; ++i) {
+    const char *c;
+    curl_mprintf("argv[%d](hex): ", i);
+    for(c = darg[i]; c && *c; ++c)
+      curl_mprintf("%02X", (unsigned char)*c);
+    curl_mprintf("\n");
+    unicodefree(CURL_UNCONST(darg[i]));
+  }
+#if defined(_WIN32) && defined(_UNICODE)
+  curl_mprintf("\nWindows Unicode build. The hex is encoded in UTF-8.\n");
+#else
+  curl_mprintf("\nWindows non-Unicode build. "
+               "The hex is encoded in the current ANSI codepage.\n");
+#endif
+  curl_mprintf("\n");
+  curlx_free(CURL_UNCONST(darg));
+  return true;
+}
+
 /*
  * curl tool main function.
  */
@@ -157,6 +221,15 @@ int main(int argc, char *argv[])
   CURL_MSVC_CRTDBG_INIT();
 
   tool_init_stderr();
+
+  /* Undocumented diagnostic option to list the command line arguments. This is
+     purposely pre-init. */
+#ifdef _UNICODE
+  if(argc >= 2 && !wcscmp(argv[1], _TEXT("--dump-args")))
+#else
+  if(argc >= 2 && !strcmp(argv[1], "--dump-args"))
+#endif
+    return dump_args(argc, argv) ? 0 : 1;
 
 #ifdef _WIN32
   /* Undocumented diagnostic option to list the full paths of all loaded
