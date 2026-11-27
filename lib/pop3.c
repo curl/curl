@@ -1082,7 +1082,6 @@ static CURLcode pop3_write(struct Curl_easy *data, const char *str,
   bool strip_dot = FALSE;
   size_t last = 0;
   size_t i;
-  (void)is_eos;
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
@@ -1190,6 +1189,11 @@ static CURLcode pop3_write(struct Curl_easy *data, const char *str,
     pop3c->eob = 0;
 
     return result;
+  }
+
+  if(is_eos) {
+    failf(data, "POP3 response ended before the end-of-body marker");
+    return CURLE_PARTIAL_FILE;
   }
 
   if(pop3c->eob)
