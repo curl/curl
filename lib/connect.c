@@ -142,8 +142,12 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
     /* ongoing connect of filters, pbly FTP second socket */
     ctimeleft_ms = connect_left_ms(data, pnow);
   }
-  else if(!data->set.timeout || data->set.connect_only) {
-    return 0; /* no timeout in place or checked, return "no limit" */
+  else if(!data->set.timeout ||
+          (data->set.connect_only && (data->mstate >= MSTATE_DONE))) {
+    /* no timeout in place or checked, return "no limit". A connect-only
+       transfer is not limited once the application has the connection, but
+       a WebSocket one still sends its upgrade request before that. */
+    return 0;
   }
 
   if(data->set.timeout) {
