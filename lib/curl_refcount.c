@@ -38,6 +38,15 @@ static curl_simple_lock s_refcount_lock = CURL_SIMPLE_LOCK_INIT;
 #define refcount_unlock() Curl_nop_stmt
 #endif
 
+uint32_t Curl_refcount_get(curl_refcount *c)
+{
+  uint32_t value;
+  refcount_lock();
+  value = *c;
+  refcount_unlock();
+  return value;
+}
+
 uint32_t Curl_refcount_incr(curl_refcount *c)
 {
   uint32_t value;

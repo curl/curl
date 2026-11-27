@@ -25,6 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#include "curl_refcount.h"
 #include "curl_threads.h"
 #include "cookie.h"
 #include "psl.h"
@@ -45,7 +46,7 @@ struct Curl_share {
   unsigned int magic; /* CURL_GOOD_SHARE */
   unsigned int specifier;
 
-  uint32_t ref_count;
+  curl_refcount ref_count;
 #ifdef USE_MUTEX
    /* do `ref_count` and `has_been_shared` checks using this mutex. */
   curl_mutex_t lock;
