@@ -45,6 +45,19 @@ static const uint8_t hmac_opad = 0x5C;
 /* Some hash contexts need 16-byte alignment, e.g. wolfSSL on 64-bit CPUs */
 #define HMAC_CTXT_OFFSET ((sizeof(struct HMAC_context) + 15) & ~(size_t)15)
 
+static size_t hmac_context_size(const struct HMAC_params *hashparams)
+{
+  return HMAC_CTXT_OFFSET + 2 * (size_t)hashparams->ctxtsize +
+    hashparams->digest_len;
+}
+
+static void hmac_free(struct HMAC_context *ctxt)
+{
+  /* The two hash states and the scratch digest can contain key material. */
+  curlx_memzero(ctxt, hmac_context_size(ctxt->hash));
+  curlx_free(ctxt);
+}
+
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
                                     const void *key, size_t key_len)
 {
@@ -58,8 +71,7 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   bool hashctxt2_initialized;
 
   /* Create HMAC context. */
-  i = HMAC_CTXT_OFFSET + (2 * hashparams->ctxtsize) + hashparams->digest_len;
-  ctxt = curlx_malloc(i);
+  ctxt = curlx_malloc(hmac_context_size(hashparams));
   if(!ctxt)
     return ctxt;
 
@@ -118,7 +130,7 @@ fail:
   if(hashctxt2_initialized)
     hashparams->hfinal((uint8_t *)ctxt->hashctxt2 + hashparams->ctxtsize,
                        ctxt->hashctxt2);
-  curlx_free(ctxt);
+  hmac_free(ctxt);
   return NULL;
 }
 
@@ -144,7 +156,7 @@ CURLcode Curl_HMAC_final(struct HMAC_context *ctxt, uint8_t *mac)
     hok |= hashparams->hupdate(ctxt->hashctxt2, mac, hashparams->digest_len);
   hok |= hashparams->hfinal(mac, ctxt->hashctxt2);
 
-  curlx_free(ctxt);
+  hmac_free(ctxt);
   return hok ? CURLE_BAD_FUNCTION_ARGUMENT : hok;
 }
 
