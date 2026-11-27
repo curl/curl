@@ -32,11 +32,25 @@ static size_t t1558_truncate(char *ptr, size_t size, size_t nmemb, void *userp)
   return curlx_fclose(file) ? CURL_WRITEFUNC_ERROR : size * nmemb;
 }
 
+static size_t t1558_slow_write(char *ptr, size_t size, size_t nmemb,
+                              void *userp)
+{
+  int *calls = userp;
+  (void)ptr;
+  if((*calls)++)
+    return CURL_WRITEFUNC_ERROR;
+  curlx_wait_ms(200);
+  return size * nmemb;
+}
+
 static CURLcode test_lib1558(const char *URL)
 {
   CURLcode result = CURLE_OK;
   CURL *curl = NULL;
   long protocol = 0;
+  FILE *file;
+  size_t i;
+  int calls = 0;
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
@@ -57,6 +71,30 @@ static CURLcode test_lib1558(const char *URL)
   }
 
   curl_mprintf("Protocol: %lx\n", (unsigned long)protocol);
+
+  /* The file transfer loop must enforce the overall timeout too. */
+  file = curlx_fopen(libtest_arg2, FOPEN_APPENDTEXT);
+  if(!file) {
+    result = TEST_ERR_FAILURE;
+    goto test_cleanup;
+  }
+  for(i = 0; i < 32768; i++)
+    fputc('x', file);
+  curlx_fclose(file);
+  easy_setopt(curl, CURLOPT_BUFFERSIZE, 1024L);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1558_slow_write);
+  easy_setopt(curl, CURLOPT_WRITEDATA, &calls);
+  easy_setopt(curl, CURLOPT_TIMEOUT_MS, 100L);
+  result = curl_easy_perform(curl);
+  if(result != CURLE_OPERATION_TIMEDOUT) {
+    curl_mfprintf(stderr, "file timeout returned %d, expected TIMEDOUT\n",
+                  (int)result);
+    result = TEST_ERR_FAILURE;
+    goto test_cleanup;
+  }
+  easy_setopt(curl, CURLOPT_TIMEOUT_MS, 0L);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
+  easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
 
   /* Shrink the source after its size was determined, before reading it. */
   easy_setopt(curl, CURLOPT_HEADERFUNCTION, t1558_truncate);

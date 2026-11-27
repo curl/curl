@@ -52,6 +52,7 @@
 #endif
 
 #include "progress.h"
+#include "connect.h"
 #include "sendf.h"
 #include "curl_trc.h"
 #include "escape.h"
@@ -400,6 +401,10 @@ static CURLcode file_upload(struct Curl_easy *data,
     Curl_pgrs_upload_inc(data, nwritten);
 
     result = Curl_pgrsCheck(data);
+    if(!result && Curl_timeleft_ms(data) < 0) {
+      failf(data, "File transfer timed out");
+      result = CURLE_OPERATION_TIMEDOUT;
+    }
   }
   if(!result)
     result = Curl_pgrsUpdate(data);
@@ -610,6 +615,10 @@ static CURLcode file_read(struct Curl_easy *data, int fd,
       break;
 
     result = Curl_pgrsCheck(data);
+    if(!result && Curl_timeleft_ms(data) < 0) {
+      failf(data, "File transfer timed out");
+      result = CURLE_OPERATION_TIMEDOUT;
+    }
   }
 
   Curl_multi_xfer_buf_release(data, xfer_buf);

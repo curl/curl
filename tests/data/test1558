@@ -18,7 +18,7 @@ file
 </features>
 
 <name>
-CURLINFO_PROTOCOL and premature EOF for file:// transfers
+file:// protocol info, timeout and premature EOF
 </name>
 <command>
 file://%FILE_PWD/%LOGDIR/data%TESTNUMBER %LOGDIR/data%TESTNUMBER
