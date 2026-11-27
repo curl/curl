@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+DNS
+HTTPS RR
+libtest
+</keywords>
+</info>
+
+<client>
+<features>
+Debug
+asyn-rr
+https
+</features>
+
+<name>
+HTTPS RR resolve aborted by callback returns CURLE_ABORTED_BY_CALLBACK
+</name>
+</client>
+
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>
