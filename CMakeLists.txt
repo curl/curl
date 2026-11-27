@@ -720,12 +720,19 @@ if(CURL_DEFAULT_SSL_BACKEND)
   set(_valid_default_ssl_backend FALSE)
 endif()
 
+set(CURL_USE_SCHANNEL_MOCKUP OFF CACHE STRING "Use Schannel mockup library (OFF, ON, or path to mockup)")
+
 if(WIN32)
   cmake_dependent_option(CURL_USE_SCHANNEL "Enable Windows native SSL/TLS (Schannel)" OFF CURL_ENABLE_SSL OFF)
   option(CURL_WINDOWS_SSPI "Enable SSPI on Windows" ${CURL_USE_SCHANNEL})
 else()
-  set(CURL_USE_SCHANNEL OFF)
-  set(CURL_WINDOWS_SSPI OFF)
+  if(CURL_USE_SCHANNEL_MOCKUP)
+    set(CURL_USE_SCHANNEL ON)
+    set(CURL_WINDOWS_SSPI ON)
+  else()
+    set(CURL_USE_SCHANNEL OFF)
+    set(CURL_WINDOWS_SSPI OFF)
+  endif()
 endif()
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
@@ -766,6 +773,47 @@ if(CURL_USE_SCHANNEL)
   set(_ssl_enabled ON)
   set(USE_SCHANNEL ON)  # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON)  # CURL_USE_SCHANNEL requires CURL_WINDOWS_SSPI
+
+  if(CURL_USE_SCHANNEL_MOCKUP)
+    if(CURL_USE_SCHANNEL_MOCKUP STREQUAL "ON" OR
+       CURL_USE_SCHANNEL_MOCKUP STREQUAL "yes" OR
+       CURL_USE_SCHANNEL_MOCKUP STREQUAL "TRUE" OR
+       CURL_USE_SCHANNEL_MOCKUP STREQUAL "1")
+      set(_mockup_dir "${PROJECT_SOURCE_DIR}/tests/schannel-mockup")
+    else()
+      set(_mockup_dir "${CURL_USE_SCHANNEL_MOCKUP}")
+    endif()
+
+    find_path(SCHANNEL_MOCKUP_INCLUDE_DIR
+      NAMES "schannel.h" "sspi.h"
+      HINTS "${_mockup_dir}/include" "${_mockup_dir}"
+      NO_DEFAULT_PATH
+    )
+    if(NOT SCHANNEL_MOCKUP_INCLUDE_DIR)
+      find_path(SCHANNEL_MOCKUP_INCLUDE_DIR NAMES "schannel.h" "sspi.h")
+    endif()
+
+    find_library(SCHANNEL_MOCKUP_LIBRARY
+      NAMES schannelmockup
+      HINTS "${_mockup_dir}/lib" "${_mockup_dir}/build" "${_mockup_dir}/.libs" "${_mockup_dir}"
+      NO_DEFAULT_PATH
+    )
+    if(NOT SCHANNEL_MOCKUP_LIBRARY)
+      find_library(SCHANNEL_MOCKUP_LIBRARY NAMES schannelmockup)
+    endif()
+
+    if(NOT SCHANNEL_MOCKUP_INCLUDE_DIR)
+      message(FATAL_ERROR "Schannel mockup headers not found in ${_mockup_dir}")
+    endif()
+    if(NOT SCHANNEL_MOCKUP_LIBRARY)
+      message(FATAL_ERROR "Schannel mockup library not found in ${_mockup_dir}")
+    endif()
+
+    set(USE_SCHANNEL_MOCKUP ON)
+    include_directories(SYSTEM "${SCHANNEL_MOCKUP_INCLUDE_DIR}")
+    list(APPEND CURL_LIBS "${SCHANNEL_MOCKUP_LIBRARY}")
+    message(STATUS "Found Schannel mockup: ${SCHANNEL_MOCKUP_LIBRARY} (${SCHANNEL_MOCKUP_INCLUDE_DIR})")
+  endif()
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "schannel")
     set(_valid_default_ssl_backend TRUE)
@@ -1892,13 +1940,15 @@ if(WIN32)
   list(APPEND CURL_LIBS "bcrypt")
 
   # Link required libraries for cert/crypto functions
-  if(NOT WINDOWS_STORE OR USE_SCHANNEL)
-    # for Cert*() in openssl.c Native CA, Schannel
-    # for CryptDecodeObjectEx(), CryptQueryObject(), CryptStringToBinary(), PFXImportCertStore() in Schannel
-    list(APPEND CURL_LIBS "crypt32")
-  endif()
-  if(USE_WINDOWS_SSPI)
-    list(APPEND CURL_LIBS "secur32")  # for InitSecurityInterface()
+  if(NOT USE_SCHANNEL_MOCKUP)
+    if(NOT WINDOWS_STORE OR USE_SCHANNEL)
+      # for Cert*() in openssl.c Native CA, Schannel
+      # for CryptDecodeObjectEx(), CryptQueryObject(), CryptStringToBinary(), PFXImportCertStore() in Schannel
+      list(APPEND CURL_LIBS "crypt32")
+    endif()
+    if(USE_WINDOWS_SSPI)
+      list(APPEND CURL_LIBS "secur32")  # for InitSecurityInterface()
+    endif()
   endif()
 endif()
 
@@ -2103,7 +2153,11 @@ message(STATUS "Features: ${SUPPORT_FEATURES}")
 
 # Clear list and collect SSL backends
 set(_items "")
-curl_add_if("Schannel"      _ssl_enabled AND USE_SCHANNEL)
+if(USE_SCHANNEL_MOCKUP)
+  curl_add_if("Schannel (Mockup)" _ssl_enabled AND USE_SCHANNEL)
+else()
+  curl_add_if("Schannel"          _ssl_enabled AND USE_SCHANNEL)
+endif()
 curl_add_if("${_openssl}"   _ssl_enabled AND USE_OPENSSL)
 curl_add_if("mbedTLS"       _ssl_enabled AND USE_MBEDTLS)
 curl_add_if("wolfSSL"       _ssl_enabled AND USE_WOLFSSL)

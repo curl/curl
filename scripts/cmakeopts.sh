@@ -17,7 +17,7 @@ while read -r opt; do
   fi
 done < <(
   {
-    git grep -o -E 'option\([A-Z][A-Z0-9_]+' ':!tests/cmake' |
+    git grep -o -E 'option\([A-Z][A-Z0-9_]+' ':!tests/cmake' ':!tests/schannel-mockup' |
       grep -i cmake |
       sed -E -e 's/^.+://g' -e 's/option\(//g'
 

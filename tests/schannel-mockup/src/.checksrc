@@ -1,0 +1,10 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+allowfunc calloc
+allowfunc malloc
+allowfunc strdup
+allowfunc free
+allowfunc inet_pton
+allowfunc snprintf
+disable TYPEDEFSTRUCT
