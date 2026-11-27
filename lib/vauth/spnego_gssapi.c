@@ -367,6 +367,7 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   nego->havenoauthpersist = FALSE;
   nego->havenegdata = FALSE;
   nego->havemultiplerequests = FALSE;
+  nego->nego2 = FALSE;
 }
 
 #if defined(CURL_HAVE_DIAG) && defined(__APPLE__) && !defined(HAVE_GSSAPPLE)

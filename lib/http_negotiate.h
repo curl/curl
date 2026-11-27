@@ -29,7 +29,7 @@
 
 /* this is for Negotiate header input */
 CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
-                              bool proxy, const char *header);
+                              bool proxy, bool nego2, const char *header);
 
 /* this is for creating Negotiate header output */
 CURLcode Curl_output_negotiate(struct Curl_easy *data,
