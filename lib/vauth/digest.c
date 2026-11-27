@@ -645,30 +645,38 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         if(!digest->algorithm)
           return CURLE_OUT_OF_MEMORY;
 
-        if(curl_strequal(content, "MD5-sess"))
+        if(curl_strequal(content, "MD5-sess")) {
 #ifdef CURL_HAVE_MD5
           digest->algo = ALGO_MD5SESS;
 #else
+          Curl_auth_digest_cleanup(digest);
           return CURLE_NOT_BUILT_IN;
 #endif
-        else if(curl_strequal(content, "MD5"))
+        }
+        else if(curl_strequal(content, "MD5")) {
 #ifdef CURL_HAVE_MD5
           digest->algo = ALGO_MD5;
 #else
+          Curl_auth_digest_cleanup(digest);
           return CURLE_NOT_BUILT_IN;
 #endif
-        else if(curl_strequal(content, "SHA-256"))
+        }
+        else if(curl_strequal(content, "SHA-256")) {
 #ifdef CURL_HAVE_SHA256
           digest->algo = ALGO_SHA256;
 #else
+          Curl_auth_digest_cleanup(digest);
           return CURLE_NOT_BUILT_IN;
 #endif
-        else if(curl_strequal(content, "SHA-256-SESS"))
+        }
+        else if(curl_strequal(content, "SHA-256-SESS")) {
 #ifdef CURL_HAVE_SHA256
           digest->algo = ALGO_SHA256SESS;
 #else
+          Curl_auth_digest_cleanup(digest);
           return CURLE_NOT_BUILT_IN;
 #endif
+        }
         else if(curl_strequal(content, "SHA-512-256")) {
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256;

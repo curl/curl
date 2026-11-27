@@ -327,6 +327,7 @@ TESTS_C = \
   lib2700.c \
   lib2805.c \
   lib2924.c \
+  lib2968.c \
   lib3010.c \
   lib3025.c \
   lib3026.c \
