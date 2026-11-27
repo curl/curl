@@ -513,9 +513,11 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(!result && data->set.resolve && !data->state.resolve_loaded)
     result = Curl_loadhostpairs(data);
 
+#ifndef CURL_DISABLE_HSTS
   if(!result)
     /* If there is a list of hsts files to read */
-    result = Curl_hsts_loadfiles(data);
+    result = Curl_hsts_loadfiles(data, data->set.hsts_files);
+#endif
 
   if(!result) {
     /* Allow data->set.use_port to set which port to use. This needs to be

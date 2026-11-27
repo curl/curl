@@ -126,7 +126,7 @@ struct smtp_conn {
 struct SMTP {
   curl_pp_transfer transfer;
   char *custom;            /* Custom Request */
-  struct curl_slist *rcpt; /* Recipient list */
+  size_t rcpt_idx;         /* index of data->set.mail_rcpt to process */
   int rcpt_last_error;     /* The last error received for RCPT TO command */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
@@ -837,9 +837,11 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
                                      struct smtp_conn *smtpc,
                                      struct SMTP *smtp)
 {
+  const char *rcpt =
+    Curl_frzn_strs_get_str(data->set.mail_rcpt, smtp->rcpt_idx);
   CURLcode result = CURLE_OK;
 
-  if(smtp->rcpt) {
+  if(rcpt) {
     /* We notify the server we are sending UTF-8 data if a) it supports the
        SMTPUTF8 extension and b) The mailbox contains UTF-8 characters, in
        either the local address or hostname parts. This is regardless of
@@ -853,8 +855,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
 
       /* Parse the mailbox to verify into the local address and hostname
          parts, converting the hostname to an IDN A-label if necessary */
-      result = smtp_parse_address(data, smtp->rcpt->data,
-                                  &address, &host, &suffix);
+      result = smtp_parse_address(data, rcpt, &address, &host, &suffix);
       if(result)
         return result;
 
@@ -883,8 +884,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
 
       /* Send the custom recipient based command such as the EXPN command */
       result = Curl_pp_sendf(data, &smtpc->pp,
-                             "%s %s%s", smtp->custom,
-                             smtp->rcpt->data,
+                             "%s %s%s", smtp->custom, rcpt,
                              utf8 ? " SMTPUTF8" : "");
     }
   }
@@ -907,8 +907,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
  * Sends an MAIL command to initiate the upload of a message.
  */
 static CURLcode smtp_perform_mail(struct Curl_easy *data,
-                                  struct smtp_conn *smtpc,
-                                  struct SMTP *smtp)
+                                  struct smtp_conn *smtpc)
 {
   char *from = NULL;
   char *auth = NULL;
@@ -1050,14 +1049,14 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
      any there do, as we need to correctly identify our support for SMTPUTF8
      in the envelope, as per RFC-6531 sect. 3.4 */
   if(smtpc->utf8_supported && !utf8) {
-    struct curl_slist *rcpt = smtp->rcpt;
-
-    while(rcpt && !utf8) {
+    size_t i;
+    for(i = 0; i < Curl_frzn_strs_count(data->set.mail_rcpt); ++i) {
+      const char *rcpt = Curl_frzn_strs_get_str(data->set.mail_rcpt, i);
       /* Does the hostname contain non-ASCII characters? */
-      if(!Curl_is_ASCII_name(rcpt->data))
+      if(rcpt && !Curl_is_ASCII_name(rcpt)) {
         utf8 = TRUE;
-
-      rcpt = rcpt->next;
+        break;
+      }
     }
   }
 
@@ -1099,15 +1098,18 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data,
                                      struct smtp_conn *smtpc,
                                      struct SMTP *smtp)
 {
+  const char *rcpt =
+    Curl_frzn_strs_get_str(data->set.mail_rcpt, smtp->rcpt_idx);
   CURLcode result = CURLE_OK;
   char *address = NULL;
   struct hostname host = { NULL, NULL, NULL, NULL };
   const char *suffix = "";
 
+  if(!rcpt)
+    return CURLE_FAILED_INIT;
   /* Parse the recipient mailbox into the local address and hostname parts,
      converting the hostname to an IDN A-label if necessary */
-  result = smtp_parse_address(data, smtp->rcpt->data,
-                              &address, &host, &suffix);
+  result = smtp_parse_address(data, rcpt, &address, &host, &suffix);
   if(result)
     return result;
 
@@ -1349,14 +1351,16 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data,
                                         int smtpcode,
                                         smtpstate instate)
 {
+  const char *rcpt =
+    Curl_frzn_strs_get_str(data->set.mail_rcpt, smtp->rcpt_idx);
   CURLcode result = CURLE_OK;
   const char *line = curlx_dyn_ptr(&smtpc->pp.recvbuf);
   size_t len = smtpc->pp.nfinal;
 
   (void)instate;
 
-  if((smtp->rcpt && smtpcode / 100 != 2 && smtpcode != 553 && smtpcode != 1) ||
-     (!smtp->rcpt && smtpcode / 100 != 2 && smtpcode != 1)) {
+  if((rcpt && smtpcode / 100 != 2 && smtpcode != 553 && smtpcode != 1) ||
+     (!rcpt && smtpcode / 100 != 2 && smtpcode != 1)) {
     failf(data, "Command failed: %d", smtpcode);
     result = CURLE_WEIRD_SERVER_REPLY;
   }
@@ -1365,10 +1369,10 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data,
       result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
 
     if(!result && (smtpcode != 1)) {
-      if(smtp->rcpt) {
-        smtp->rcpt = smtp->rcpt->next;
+      if(rcpt) {
+        smtp->rcpt_idx++;
 
-        if(smtp->rcpt) {
+        if(smtp->rcpt_idx < Curl_frzn_strs_count(data->set.mail_rcpt)) {
           /* Send the next command */
           result = smtp_perform_command(data, smtpc, smtp);
         }
@@ -1441,11 +1445,12 @@ static CURLcode smtp_state_rcpt_resp(struct Curl_easy *data,
   }
 
   if(!is_smtp_blocking_err) {
-    smtp->rcpt = smtp->rcpt->next;
+    smtp->rcpt_idx++;
 
-    if(smtp->rcpt)
+    if(smtp->rcpt_idx < Curl_frzn_strs_count(data->set.mail_rcpt)) {
       /* Send the next RCPT TO command */
       result = smtp_perform_rcpt_to(data, smtpc, smtp);
+    }
     else {
       /* We were not able to issue a successful RCPT TO command while going
          over recipients (potentially multiple). Sending back last error. */
@@ -1781,7 +1786,7 @@ static CURLcode smtp_perform(struct Curl_easy *data,
   *dophase_done = FALSE; /* not done yet */
 
   /* Store the first recipient (or NULL if not specified) */
-  smtp->rcpt = data->set.mail_rcpt;
+  smtp->rcpt_idx = 0;
 
   /* Track of whether we have successfully sent at least one RCPT TO command */
   smtp->rcpt_had_ok = FALSE;
@@ -1797,7 +1802,7 @@ static CURLcode smtp_perform(struct Curl_easy *data,
   /* Start the first command in the DO phase */
   if((data->state.upload || IS_MIME_POST(data)) && data->set.mail_rcpt)
     /* MAIL transfer */
-    result = smtp_perform_mail(data, smtpc, smtp);
+    result = smtp_perform_mail(data, smtpc);
   else
     /* SMTP based command (VRFY, EXPN, NOOP, RSET or HELP) */
     result = smtp_perform_command(data, smtpc, smtp);

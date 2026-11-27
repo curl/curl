@@ -2966,9 +2966,10 @@ typedef enum {
 } statusline;
 
 /* Check a string for a prefix. Check no more than 'len' bytes */
-static bool checkprefixmax(const char *prefix, const char *buffer, size_t len)
+static bool checkprefixmax(const char *prefix, size_t plen,
+                           const char *buffer, size_t blen)
 {
-  size_t ch = CURLMIN(strlen(prefix), len);
+  size_t ch = CURLMIN(plen, blen);
   return curl_strnequal(prefix, buffer, ch);
 }
 
@@ -2980,19 +2981,19 @@ static bool checkprefixmax(const char *prefix, const char *buffer, size_t len)
 static statusline checkhttpprefix(struct Curl_easy *data,
                                   const char *s, size_t len)
 {
-  struct curl_slist *head = data->set.http200aliases;
   statusline rc = STATUS_BAD;
   statusline onmatch = len >= 5 ? STATUS_DONE : STATUS_UNKNOWN;
+  size_t i;
 
-  while(head) {
-    if(checkprefixmax(head->data, s, len)) {
+  for(i = 0; i < Curl_frzn_strs_count(data->set.http200aliases); ++i) {
+    struct Curl_str *alias = Curl_frzn_strs_get(data->set.http200aliases, i);
+    if(alias && checkprefixmax(alias->str, alias->len, s, len)) {
       rc = onmatch;
       break;
     }
-    head = head->next;
   }
 
-  if((rc != STATUS_DONE) && checkprefixmax("HTTP/", s, len))
+  if((rc != STATUS_DONE) && checkprefixmax(STRCONST("HTTP/"), s, len))
     rc = onmatch;
 
   return rc;
@@ -3005,7 +3006,7 @@ static statusline checkrtspprefix(struct Curl_easy *data,
   statusline status = STATUS_BAD;
   statusline onmatch = len >= 5 ? STATUS_DONE : STATUS_UNKNOWN;
   (void)data;
-  if(checkprefixmax("RTSP/", s, len))
+  if(checkprefixmax(STRCONST("RTSP/"), s, len))
     status = onmatch;
 
   return status;

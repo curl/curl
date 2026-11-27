@@ -785,16 +785,15 @@ static CURLcode sftp_quote(struct Curl_easy *data,
                            struct ssh_conn *sshc,
                            struct SSHPROTO *sshp)
 {
+  const char *cmd = Curl_frzn_strs_get_str(sshc->quote_items, sshc->quote_idx);
   const char *cp;
   CURLcode result = CURLE_OK;
 
   /*
    * Support some of the "FTP" commands
-   *
-   * 'sshc->quote_item' is already verified to be non-NULL before it
-   * switched to this state.
    */
-  const char *cmd = sshc->quote_item->data;
+  if(!cmd)
+    return CURLE_FAILED_INIT;
   sshc->acceptfail = FALSE;
 
   /* if a command starts with an asterisk, which a legal SFTP command never
@@ -1148,14 +1147,15 @@ static CURLcode sftp_quote_stat(struct Curl_easy *data,
                                 struct SSHPROTO *sshp,
                                 bool *blockp)
 {
-  const char *cmd = sshc->quote_item->data;
+  const char *cmd = Curl_frzn_strs_get_str(sshc->quote_items, sshc->quote_idx);
   sshc->acceptfail = FALSE;
 
   /* if a command starts with an asterisk, which a legal SFTP command never
      can, the command is allowed to fail without it causing any aborts or
      cancels etc. It causes libcurl to act as if the command is
      successful, whatever the server responds. */
-
+  if(!cmd)
+    return CURLE_FAILED_INIT;
   if(cmd[0] == '*') {
     cmd++;
     sshc->acceptfail = TRUE;
@@ -1858,7 +1858,10 @@ static CURLcode ssh_state_sftp_quote_init(struct Curl_easy *data,
 
   if(data->set.quote) {
     infof(data, "SSH: sending quote commands");
-    sshc->quote_item = data->set.quote;
+    sshc->quote_items = Curl_frzn_strs_dup(data->set.quote);
+    sshc->quote_idx = 0;
+    if(!sshc->quote_items)
+      return CURLE_OUT_OF_MEMORY;
     myssh_to(data, sshc, SSH_SFTP_QUOTE);
   }
   else {
@@ -1872,7 +1875,11 @@ static CURLcode ssh_state_sftp_postquote_init(struct Curl_easy *data,
 {
   if(data->set.postquote) {
     infof(data, "SSH: sending quote commands");
-    sshc->quote_item = data->set.postquote;
+    Curl_frzn_strs_safefree(&sshc->quote_items);
+    sshc->quote_idx = 0;
+    sshc->quote_items = Curl_frzn_strs_dup(data->set.postquote);
+    if(!sshc->quote_items)
+      return CURLE_OUT_OF_MEMORY;
     myssh_to(data, sshc, SSH_SFTP_QUOTE);
   }
   else {
@@ -1905,9 +1912,9 @@ static CURLcode ssh_state_sftp_next_quote(struct Curl_easy *data,
   curlx_safefree(sshc->quote_path1);
   curlx_safefree(sshc->quote_path2);
 
-  sshc->quote_item = sshc->quote_item->next;
+  sshc->quote_idx++;
 
-  if(sshc->quote_item) {
+  if(sshc->quote_idx < Curl_frzn_strs_count(sshc->quote_items)) {
     myssh_to(data, sshc, SSH_SFTP_QUOTE);
   }
   else {
@@ -2590,6 +2597,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
   DEBUGASSERT(!sshc->kh);
   DEBUGASSERT(!sshc->ssh_agent);
 
+  Curl_frzn_strs_safefree(&sshc->quote_items);
   curlx_safefree(sshc->passphrase);
   curlx_safefree(sshc->pub_key);
   curlx_safefree(sshc->priv_key);

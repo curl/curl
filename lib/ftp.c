@@ -1828,22 +1828,22 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
                                 bool init,
                                 ftpstate instate)
 {
+  struct Curl_frzn_strs *fstrs = NULL;
   CURLcode result = CURLE_OK;
   bool quote = FALSE;
-  struct curl_slist *item;
 
   switch(instate) {
   case FTP_QUOTE:
   default:
-    item = data->set.quote;
+    fstrs = data->set.quote;
     break;
   case FTP_RETR_PREQUOTE:
   case FTP_STOR_PREQUOTE:
   case FTP_LIST_PREQUOTE:
-    item = data->set.prequote;
+    fstrs = data->set.prequote;
     break;
   case FTP_POSTQUOTE:
-    item = data->set.postquote;
+    fstrs = data->set.postquote;
     break;
   }
 
@@ -1858,16 +1858,9 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
   else
     ftpc->count1++;
 
-  if(item) {
-    int i = 0;
-
-    /* Skip count1 items in the linked list */
-    while((i < ftpc->count1) && item) {
-      item = item->next;
-      i++;
-    }
-    if(item) {
-      const char *cmd = item->data;
+  if(fstrs && (ftpc->count1 >= 0)) {
+    const char *cmd = Curl_frzn_strs_get_str(fstrs, (size_t)ftpc->count1);
+    if(cmd) {
       if(cmd[0] == '*') {
         cmd++;
         ftpc->count2 = 1; /* the sent command is allowed to fail */
@@ -3488,16 +3481,15 @@ static CURLcode ftp_multi_statemach(struct Curl_easy *data,
  */
 static CURLcode ftp_sendquote(struct Curl_easy *data,
                               struct cf_ftp_ctx *ftpc,
-                              struct curl_slist *quote)
+                              struct Curl_frzn_strs *quote)
 {
-  struct curl_slist *item;
   struct pingpong *pp = &ftpc->pp;
+  size_t i;
 
-  item = quote;
-  while(item) {
-    if(item->data) {
+  for(i = 0; i < Curl_frzn_strs_count(quote); ++i) {
+    const char *cmd = Curl_frzn_strs_get_str(quote, i);
+    if(cmd) {
       size_t nread;
-      const char *cmd = item->data;
       bool acceptfail = FALSE;
       CURLcode result;
       int ftpcode = 0;
@@ -3525,8 +3517,6 @@ static CURLcode ftp_sendquote(struct Curl_easy *data,
         return CURLE_QUOTE_ERROR;
       }
     }
-
-    item = item->next;
   }
 
   return CURLE_OK;
