@@ -122,8 +122,8 @@ static struct Curl_frzn_strs *frzn_strs_dup(struct Curl_frzn_strs *src,
                               Curl_frzn_strs_get_len(src, i));
   }
   if(opt_str) {
-    cdest = frzn_strs_copy_in(cdest, fstrs, n_src,
-                              opt_str, strlen(opt_str));
+    frzn_strs_copy_in(cdest, fstrs, n_src,
+                      opt_str, strlen(opt_str));
   }
 
   return fstrs;
