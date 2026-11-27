@@ -150,7 +150,8 @@ struct ssh_conn {
   char *priv_key;             /* strdup'ed private key file */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
-  struct curl_slist *quote_item; /* for the quote option */
+  struct Curl_frzn_strs *quote_items; /* for the quote option */
+  size_t quote_idx;           /* current index of used quote item */
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
 

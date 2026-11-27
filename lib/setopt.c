@@ -1233,8 +1233,7 @@ static CURLcode setopt_long_misc(struct Curl_easy *data, CURLoption option,
       /* throw away the HSTS cache unless shared */
       Curl_hsts_cleanup(&data->hsts);
       /* flush all the entries */
-      curl_slist_free_all(data->state.hstslist);
-      data->state.hstslist = NULL;
+      Curl_frzn_strs_safefree(&data->set.hsts_files);
     }
     else
       /* detach from shared HSTS cache without freeing it */
@@ -1307,27 +1306,33 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
     /*
      * Set a list of aliases for HTTP 200 in response header
      */
-    s->http200aliases = slist;
+    Curl_frzn_strs_safefree(&s->http200aliases);
+    s->http200aliases = Curl_frzn_strs_from_slist(slist);
+    if(slist && !s->http200aliases)
+      result = CURLE_OUT_OF_MEMORY;
     break;
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   case CURLOPT_POSTQUOTE:
-    /*
-     * List of RAW FTP commands to use after a transfer
-     */
-    s->postquote = slist;
+    /* List of RAW FTP commands to use after a transfer */
+    Curl_frzn_strs_safefree(&s->postquote);
+    s->postquote = Curl_frzn_strs_from_slist(slist);
+    if(slist && !s->postquote)
+      result = CURLE_OUT_OF_MEMORY;
     break;
   case CURLOPT_PREQUOTE:
-    /*
-     * List of RAW FTP commands to use prior to RETR (Wesley Laxton)
-     */
-    s->prequote = slist;
+    /* List of RAW FTP commands to use prior to RETR (Wesley Laxton) */
+    Curl_frzn_strs_safefree(&s->prequote);
+    s->prequote = Curl_frzn_strs_from_slist(slist);
+    if(slist && !s->prequote)
+      result = CURLE_OUT_OF_MEMORY;
     break;
   case CURLOPT_QUOTE:
-    /*
-     * List of RAW FTP commands to use before a transfer
-     */
-    s->quote = slist;
+    /* List of RAW FTP commands to use before a transfer */
+    Curl_frzn_strs_safefree(&s->quote);
+    s->quote = Curl_frzn_strs_from_slist(slist);
+    if(slist && !s->quote)
+      result = CURLE_OUT_OF_MEMORY;
     break;
 #endif
   case CURLOPT_RESOLVE:
@@ -1364,16 +1369,20 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
 #endif
 #ifndef CURL_DISABLE_TELNET
   case CURLOPT_TELNETOPTIONS:
-    /*
-     * Set a linked list of telnet options
-     */
-    s->telnet_options = slist;
+    /* Set a linked list of telnet options */
+    Curl_frzn_strs_safefree(&s->telnet_options);
+    s->telnet_options = Curl_frzn_strs_from_slist(slist);
+    if(slist && !s->telnet_options)
+      result = CURLE_OUT_OF_MEMORY;
     break;
 #endif
 #ifndef CURL_DISABLE_SMTP
   case CURLOPT_MAIL_RCPT:
     /* Set the list of mail recipients */
-    s->mail_rcpt = slist;
+    Curl_frzn_strs_safefree(&s->mail_rcpt);
+    s->mail_rcpt = Curl_frzn_strs_from_slist(slist);
+    if(slist && !s->mail_rcpt)
+      result = CURLE_OUT_OF_MEMORY;
     break;
 #endif
   case CURLOPT_CONNECT_TO:
@@ -2448,38 +2457,34 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
   case CURLOPT_HSTSWRITEDATA:
     s->hsts_write_userp = ptr;
     break;
-  case CURLOPT_HSTS: {
-    struct curl_slist *h;
+  case CURLOPT_HSTS:
     if(!data->hsts) {
       data->hsts = Curl_hsts_init();
       if(!data->hsts)
         return CURLE_OUT_OF_MEMORY;
     }
     if(ptr) {
+      struct Curl_frzn_strs *nfiles;
       result = Curl_setstropt(data, STRING_HSTS, ptr);
       if(result)
         return result;
       /* this needs to build a list of filenames to read from, so that it can
          read them later, as we might get a shared HSTS handle to load them
          into */
-      h = curl_slist_append(data->state.hstslist, ptr);
-      if(!h) {
-        curl_slist_free_all(data->state.hstslist);
-        data->state.hstslist = NULL;
+      nfiles = Curl_frzn_strs_add(data->set.hsts_files, ptr);
+      Curl_frzn_strs_safefree(&data->set.hsts_files);
+      if(!nfiles)
         return CURLE_OUT_OF_MEMORY;
-      }
-      data->state.hstslist = h; /* store the list for later use */
+      data->set.hsts_files = nfiles;
     }
     else {
       /* clear the list of HSTS files */
-      curl_slist_free_all(data->state.hstslist);
-      data->state.hstslist = NULL;
+      Curl_frzn_strs_safefree(&data->set.hsts_files);
       if(!data->share || !data->share->hsts)
         /* throw away the HSTS cache unless shared */
         Curl_hsts_cleanup(&data->hsts);
     }
     break;
-  }
 #endif /* !CURL_DISABLE_HSTS */
 #ifndef CURL_DISABLE_ALTSVC
   case CURLOPT_ALTSVC:

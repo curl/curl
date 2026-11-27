@@ -511,10 +511,6 @@ struct UrlState {
 
   struct curltime keeps_speed; /* for the progress meter really */
   struct dynbuf headerb; /* buffer to store headers in */
-#ifndef CURL_DISABLE_HSTS
-  struct curl_slist *hstslist; /* list of HSTS files set by
-                                  curl_easy_setopt(HSTS) calls */
-#endif
 
   int os_errno;  /* filled in with errno whenever an error occurs */
   int requests; /* request counter: redirects + authentication retakes */
@@ -854,12 +850,19 @@ struct UserDefined {
   curl_mimepart *mimepostp;  /* MIME/POST data. */
 #endif
 #ifndef CURL_DISABLE_TELNET
-  struct curl_slist *telnet_options; /* linked list of telnet options */
+  struct Curl_frzn_strs *telnet_options; /* list of telnet options */
 #endif
   struct Curl_frzn_strs *resolve; /* list of names to add/remove from
                                      DNS cache */
   struct Curl_frzn_strs *connect_to; /* list of host:port mappings to override
                                         the hostname and port to connect to */
+#ifndef CURL_DISABLE_HSTS
+  struct Curl_frzn_strs *hsts_files; /* list of HSTS files set by
+                                        curl_easy_setopt(HSTS) calls */
+#endif
+#ifndef CURL_DISABLE_HTTP
+  struct Curl_frzn_strs *http200aliases; /* list of aliases for http200 */
+#endif
   time_t timevalue;       /* what time to compare with */
   struct ssl_easy_config ssl;  /* user defined SSL stuff */
   curl_ssl_ctx_callback ssl_fsslctx; /* function to initialize SSL ctx */
@@ -878,17 +881,17 @@ struct UserDefined {
   uint32_t upload_buffer_size; /* size of upload buffer to use, keep it >=
                                   CURL_MAX_WRITE_SIZE */
   void *private_data; /* application-private data */
-#ifndef CURL_DISABLE_HTTP
-  struct curl_slist *http200aliases; /* linked list of aliases for http200 */
-#endif
   curl_off_t max_filesize; /* Maximum file size to download */
 #ifndef CURL_DISABLE_FTP
   timediff_t accepttimeout;   /* in milliseconds, 0 means no timeout */
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
-  struct curl_slist *quote;     /* after connection is established */
-  struct curl_slist *postquote; /* after the transfer */
-  struct curl_slist *prequote; /* before the transfer, after type */
+  struct Curl_frzn_strs *quote;     /* after connection is established */
+  struct Curl_frzn_strs *postquote; /* after the transfer */
+  struct Curl_frzn_strs *prequote;  /* before the transfer, after type */
+#endif
+#ifndef CURL_DISABLE_SMTP
+  struct Curl_frzn_strs *mail_rcpt; /* list of mail recipients */
 #endif
 #ifdef USE_LIBSSH2
   curl_sshhostkeycallback ssh_hostkeyfunc; /* hostkey check callback */
@@ -936,9 +939,6 @@ struct UserDefined {
 #ifndef CURL_DISABLE_HTTP
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
-#endif
-#ifndef CURL_DISABLE_SMTP
-  struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 #endif
   int ssl_ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
 

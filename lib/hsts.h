@@ -26,6 +26,7 @@
 #include "curl_setup.h"
 
 struct hsts;
+struct Curl_frzn_strs;
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
 #include "llist.h"
@@ -63,7 +64,8 @@ CURLcode Curl_hsts_loadfile(struct Curl_easy *data,
                             struct hsts *h, const char *file);
 CURLcode Curl_hsts_loadcb(struct Curl_easy *data,
                           struct hsts *h);
-CURLcode Curl_hsts_loadfiles(struct Curl_easy *data);
+CURLcode Curl_hsts_loadfiles(struct Curl_easy *data,
+                             struct Curl_frzn_strs *files);
 
 bool Curl_hsts_applies(struct hsts *h, const struct Curl_peer *dest);
 
@@ -71,6 +73,6 @@ bool Curl_hsts_applies(struct hsts *h, const struct Curl_peer *dest);
 #define Curl_hsts_cleanup(x)
 #define Curl_hsts_loadcb(x, y) CURLE_OK
 #define Curl_hsts_save(x, y, z)
-#define Curl_hsts_loadfiles(x) CURLE_OK
+#define Curl_hsts_loadfiles(x, y) CURLE_OK
 #endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */
 #endif /* HEADER_CURL_HSTS_H */

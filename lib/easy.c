@@ -920,6 +920,17 @@ CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
   return result;
 }
 
+static CURLcode dup_frzn_strs(struct Curl_frzn_strs **pdest,
+                              struct Curl_frzn_strs *src)
+{
+  if(src) {
+    *pdest = Curl_frzn_strs_dup(src);
+    if(!*pdest)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
+}
+
 static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 {
   CURLcode result = CURLE_OK;
@@ -944,16 +955,26 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
 
   /* duplicate frozen strings */
-  if(src->set.resolve) {
-    dst->set.resolve = Curl_frzn_strs_dup(src->set.resolve);
-    if(!dst->set.resolve)
-      return CURLE_OUT_OF_MEMORY;
-  }
-  if(src->set.connect_to) {
-    dst->set.connect_to = Curl_frzn_strs_dup(src->set.connect_to);
-    if(!dst->set.connect_to)
-      return CURLE_OUT_OF_MEMORY;
-  }
+  if(dup_frzn_strs(&dst->set.resolve, src->set.resolve) ||
+#ifndef CURL_DISABLE_HSTS
+     dup_frzn_strs(&dst->set.hsts_files, src->set.hsts_files) ||
+#endif
+#ifndef CURL_DISABLE_TELNET
+     dup_frzn_strs(&dst->set.telnet_options, src->set.telnet_options) ||
+#endif
+#ifndef CURL_DISABLE_HTTP
+     dup_frzn_strs(&dst->set.http200aliases, src->set.http200aliases) ||
+#endif
+#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
+     dup_frzn_strs(&dst->set.quote, src->set.quote) ||
+     dup_frzn_strs(&dst->set.postquote, src->set.postquote) ||
+     dup_frzn_strs(&dst->set.prequote, src->set.prequote) ||
+#endif
+#ifndef CURL_DISABLE_SMTP
+     dup_frzn_strs(&dst->set.mail_rcpt, src->set.mail_rcpt) ||
+#endif
+     dup_frzn_strs(&dst->set.connect_to, src->set.connect_to))
+    return CURLE_OUT_OF_MEMORY;
 
   /* duplicate all strings */
   result = Curl_u8_strset_copy(&dst->set.strings, &src->set.strings);

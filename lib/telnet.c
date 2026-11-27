@@ -828,9 +828,9 @@ static bool str_is_nonascii(const char *str)
 static CURLcode check_telnet_options(struct Curl_easy *data,
                                      struct TELNET *tn)
 {
-  struct curl_slist *head;
-  struct curl_slist *beg;
+  struct curl_slist *tvars = NULL;
   CURLcode result = CURLE_OK;
+  size_t i;
 
   /* Add the username as an environment variable if it
      was given on the command line */
@@ -842,24 +842,26 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
     }
     curl_msnprintf(buffer, sizeof(buffer), "USER,%s",
                    Curl_creds_user(data->conn->creds));
-    beg = curl_slist_append(tn->telnet_vars, buffer);
-    if(!beg) {
+    tvars = curl_slist_append(tn->telnet_vars, buffer);
+    if(!tvars) {
       curl_slist_free_all(tn->telnet_vars);
       tn->telnet_vars = NULL;
       return CURLE_OUT_OF_MEMORY;
     }
-    tn->telnet_vars = beg;
+    tn->telnet_vars = tvars;
     tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
   }
 
-  for(head = data->set.telnet_options; head && !result; head = head->next) {
-    size_t olen;
-    const char *option = head->data;
-    const char *arg;
-    const char *sep = strchr(option, '=');
+  for(i = 0; i < Curl_frzn_strs_count(data->set.telnet_options); ++i) {
+    const char *option = Curl_frzn_strs_get_str(data->set.telnet_options, i);
+    const char *sep;
+
+    if(!option)
+      continue;
+    sep = strchr(option, '=');
     if(sep) {
-      olen = sep - option;
-      arg = ++sep;
+      size_t olen = sep - option;
+      const char *arg = ++sep;
       if(str_is_nonascii(arg))
         continue;
       switch(olen) {
@@ -886,12 +888,12 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
       case 7:
         /* Environment variable */
         if(curl_strnequal(option, "NEW_ENV", 7)) {
-          beg = curl_slist_append(tn->telnet_vars, arg);
-          if(!beg) {
+          tvars = curl_slist_append(tn->telnet_vars, arg);
+          if(!tvars) {
             result = CURLE_OUT_OF_MEMORY;
             break;
           }
-          tn->telnet_vars = beg;
+          tn->telnet_vars = tvars;
           tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
         }
         else
@@ -907,7 +909,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
           if(curlx_str_number(&p, &x, 0xffff) ||
              curlx_str_single(&p, 'x') ||
              curlx_str_number(&p, &y, 0xffff)) {
-            failf(data, "Syntax error in telnet option: %s", head->data);
+            failf(data, "Syntax error in telnet option: %s", option);
             result = CURLE_SETOPT_OPTION_SYNTAX;
           }
           else {
@@ -935,13 +937,13 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
           result = CURLE_UNKNOWN_OPTION;
         break;
       default:
-        failf(data, "Unknown telnet option %s", head->data);
+        failf(data, "Unknown telnet option %s", option);
         result = CURLE_UNKNOWN_OPTION;
         break;
       }
     }
     else {
-      failf(data, "Syntax error in telnet option: %s", head->data);
+      failf(data, "Syntax error in telnet option: %s", option);
       result = CURLE_SETOPT_OPTION_SYNTAX;
     }
   }

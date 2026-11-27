@@ -38,11 +38,11 @@ struct Curl_frzn_strs {
   ((fstrs) ? (fstrs)->n : 0)
 
 #define Curl_frzn_strs_get(fstrs, idx) \
-  (((idx) < (fstrs)->n) ? &(fstrs)->strs[(idx)] : NULL)
+  ((fstrs) && ((idx) < (fstrs)->n) ? &(fstrs)->strs[(idx)] : NULL)
 #define Curl_frzn_strs_get_str(fstrs, idx) \
-  (((idx) < (fstrs)->n) ? (fstrs)->strs[(idx)].str : NULL)
+  ((fstrs) && ((idx) < (fstrs)->n) ? (fstrs)->strs[(idx)].str : NULL)
 #define Curl_frzn_strs_get_len(fstrs, idx) \
-  (((idx) < (fstrs)->n) ? (fstrs)->strs[(idx)].len : 0)
+  ((fstrs) && ((idx) < (fstrs)->n) ? (fstrs)->strs[(idx)].len : 0)
 
 void Curl_frzn_strs_free(struct Curl_frzn_strs *fstrs);
 void Curl_frzn_strs_safefree(struct Curl_frzn_strs **pfstrs);
@@ -51,5 +51,7 @@ struct Curl_frzn_strs *Curl_frzn_strs_from_slist(struct curl_slist *src);
 
 struct Curl_frzn_strs *Curl_frzn_strs_dup(struct Curl_frzn_strs *src);
 
+struct Curl_frzn_strs *Curl_frzn_strs_add(struct Curl_frzn_strs *src,
+                                          const char *str);
 
 #endif /* HEADER_CURL_FRZN_STRS_H */

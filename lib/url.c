@@ -165,6 +165,23 @@ void Curl_freeset(struct Curl_easy *data)
 
   Curl_frzn_strs_safefree(&data->set.resolve);
   Curl_frzn_strs_safefree(&data->set.connect_to);
+#ifndef CURL_DISABLE_HSTS
+  Curl_frzn_strs_safefree(&data->set.hsts_files);
+#endif
+#ifndef CURL_DISABLE_TELNET
+#endif
+#ifndef CURL_DISABLE_HTTP
+  Curl_frzn_strs_safefree(&data->set.http200aliases);
+#endif
+#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
+  Curl_frzn_strs_safefree(&data->set.quote);
+  Curl_frzn_strs_safefree(&data->set.postquote);
+  Curl_frzn_strs_safefree(&data->set.prequote);
+#endif
+#ifndef CURL_DISABLE_SMTP
+  Curl_frzn_strs_safefree(&data->set.mail_rcpt);
+#endif
+
   Curl_bufref_free(&data->state.referer);
   Curl_bufref_free(&data->state.url);
 
@@ -264,7 +281,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_hsts_save(data, data->hsts, CURL_EASY_STR(data, STRING_HSTS));
   if(!data->share || !data->share->hsts)
     Curl_hsts_cleanup(&data->hsts);
-  curl_slist_free_all(data->state.hstslist); /* clean up list */
 #endif
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);

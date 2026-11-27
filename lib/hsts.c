@@ -617,18 +617,20 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
   return CURLE_OK;
 }
 
-CURLcode Curl_hsts_loadfiles(struct Curl_easy *data)
+CURLcode Curl_hsts_loadfiles(struct Curl_easy *data,
+                             struct Curl_frzn_strs *files)
 {
   CURLcode result = CURLE_OK;
-  struct curl_slist *l = data->state.hstslist;
-  if(l) {
+  size_t i;
+  if(Curl_frzn_strs_count(files)) {
     Curl_share_lock(data, CURL_LOCK_DATA_HSTS, CURL_LOCK_ACCESS_SINGLE);
-
-    while(l) {
-      result = Curl_hsts_loadfile(data, data->hsts, l->data);
-      if(result)
-        break;
-      l = l->next;
+    for(i = 0; i < Curl_frzn_strs_count(files); ++i) {
+      const char *filepath = Curl_frzn_strs_get_str(files, i);
+      if(filepath) {
+        result = Curl_hsts_loadfile(data, data->hsts, filepath);
+        if(result)
+          break;
+      }
     }
     Curl_share_unlock(data, CURL_LOCK_DATA_HSTS);
   }
