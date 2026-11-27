@@ -2217,10 +2217,21 @@ static CURLcode ssh_state_sftp_readdir_init(struct Curl_easy *data,
       return CURLE_AGAIN;
 
     sftperr = libssh2_sftp_last_error(sshc->sftp_session);
-    failf(data, "Could not open directory for reading: %s",
-          sftp_libssh2_strerror(sftperr));
-    myssh_to(data, sshc, SSH_SFTP_CLOSE);
-    return sftp_libssh2_error_to_CURLE(sftperr);
+        if(!sshc->secondCreateDirs &&
+           ((sftperr == LIBSSH2_FX_NO_SUCH_FILE) ||
+            (sftperr == LIBSSH2_FX_FAILURE) ||
+            (sftperr == LIBSSH2_FX_NO_SUCH_PATH)) &&
+           data->set.ftp_create_missing_dirs &&
+           (strlen(sshp->path) > 1)) {
+          /* try to create the path remotely */
+          sshc->secondCreateDirs = 1;
+          myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS_INIT);
+          return CURLE_OK;
+        }
+        failf(data, "Could not open directory for reading: %s",
+              sftp_libssh2_strerror(sftperr));
+        myssh_to(data, sshc, SSH_SFTP_CLOSE);
+        return sftp_libssh2_error_to_CURLE(sftperr);
   }
   myssh_to(data, sshc, SSH_SFTP_READDIR);
   return CURLE_OK;
@@ -2695,7 +2706,10 @@ static CURLcode ssh_state_sftp_create_dirs(struct Curl_easy *data,
     myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS_MKDIR);
     return CURLE_OK;
   }
-  myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
+  if(data->state.upload)
+    myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
+    else
+      myssh_to(data, sshc, SSH_SFTP_READDIR_INIT);
   return CURLE_OK;
 }
 
