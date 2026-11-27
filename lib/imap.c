@@ -1177,19 +1177,67 @@ static CURLcode imap_state_login_resp(struct Curl_easy *data,
 /* Detect IMAP listings vs. downloading a single email */
 static bool is_custom_fetch_listing_match(const char *params)
 {
+  bool isList = FALSE;
+
   /* match " 1:* (FLAGS ..." or " 1,2,3 (FLAGS ..." */
   if(*params++ != ' ')
     return FALSE;
 
-  while(ISDIGIT(*params)) {
-    params++;
-    if(*params == 0)
+  while(*params != ' ') {
+    if(ISDIGIT(*params)) {
+      params++;
+    }
+    else if(*params == ':') {
+      params++;
+      isList = TRUE;
+    }
+    else if(*params == ',') {
+      params++;
+      isList = TRUE;
+    }
+    else if(*params == '*') {
+      params++;
+    }
+    else
       return FALSE;
   }
-  if(*params == ':')
+  if(*params == ' ') {
+    params++;
+  }
+
+  /* query of multiple bodies */
+  if(curl_strnequal(params, "BODY", 4)) {
+    return FALSE;
+  }
+  if(curl_strnequal(params, "RFC822", 6)) {
+    return FALSE;
+  }
+  if(curl_strnequal(params, "ALL", 3)) {
+    return FALSE;
+  }
+  if(curl_strnequal(params, "FULL", 4)) {
     return TRUE;
-  if(*params == ',')
+  }
+  if(curl_strnequal(params, "FAST", 4)) {
     return TRUE;
+  }
+
+  /* query of list with various fields */
+  if(*params == '(') {
+    const char *p = params + 1;
+    /* skip UID prefix */
+    if(curl_strnequal(p, "UID ", 4)) {
+      p += 4;
+    }
+    if(curl_strnequal(p, "BODY", 4)) {
+      return FALSE;
+    }
+    if(curl_strnequal(p, "RFC822", 6)) {
+      return FALSE;
+    }
+    return isList;
+  }
+
   return FALSE;
 }
 
