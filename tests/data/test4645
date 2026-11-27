@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-O
+-J
+--no-clobber
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Content-Disposition: attachment; filename="dl%TESTNUMBER.txt"
+Content-Length: 12
+Connection: close
+
+new content
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+--no-clobber with an existing Content-Disposition filename
+</name>
+<file name="%LOGDIR/dl%TESTNUMBER.txt">
+original content
+</file>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O -J --no-clobber --output-dir %LOGDIR -w '%{filename_effective}\n'
+</command>
+</client>
+
+<verify>
+<file name="%LOGDIR/dl%TESTNUMBER.txt">
+original content
+</file>
+<file1 name="%LOGDIR/dl%TESTNUMBER-1.txt">
+new content
+</file1>
+<stdout mode="text">
+%LOGDIR/dl%TESTNUMBER-1.txt
+</stdout>
+</verify>
+</testcase>
