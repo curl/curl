@@ -689,23 +689,21 @@ static void output_header(struct per_transfer *per,
         size_t indno = 0;
         bool output = FALSE;
         do {
-          if(CURLHE_OK == curl_easy_header(per->curl, hname, indno,
-                                           CURLH_HEADER, reqno,
-                                           &header)) {
+          CURLHcode hcode = curl_easy_header(per->curl, hname, indno,
+                                             CURLH_HEADER, reqno, &header);
+          if(hcode == CURLHE_OK) {
             if(output)
               /* output separator */
               separator(sep, seplen, stream);
             fputs(header->value, stream);
             output = TRUE;
+            if(++indno < header->amount)
+              continue;
           }
-          else
+          else if(hcode != CURLHE_MISSING)
             break;
-          if((header->index + 1) < header->amount)
-            indno++;
-          else {
-            ++reqno;
-            indno = 0;
-          }
+          ++reqno;
+          indno = 0;
         } while(1);
       }
       else {

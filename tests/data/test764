@@ -20,17 +20,24 @@ Accept-Ranges: bytes
 This: one
 This: two
 Content-Length: 6
-Location: %TESTNUMBER0002
+Location: %TESTNUMBER0001
 Content-Type: text/html
 Funny-head: yesyes
 
 -foo-
 </data>
+<data1 nocheck="yes">
+HTTP/1.1 302 Redirect
+Location: %TESTNUMBER0002
+Content-Length: 0
+
+</data1>
 <data2 nocheck="yes">
 HTTP/1.1 200 Not a redirect
 Accept-Ranges: bytes
 This: three
 This: four
+Link: %LT/next%GT
 Content-Length: 6
 Funny-head: yesyes
 
@@ -47,16 +54,18 @@ headers-api
 http
 </server>
 <name>
--w with multiple header output
+-w with multiple header output across redirects
 </name>
 <command option="no-output">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -L -w '%header{this:all:***}\n' -o %LOGDIR/%TESTNUMBER.out
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -L -w '%header{this:all:***}\nlink=[%header{link:all:***}]\nmissing=[%header{missing:all:***}]\n' -o %LOGDIR/%TESTNUMBER.out
 </command>
 </client>
 
 <verify>
 <stdout mode="text">
 one***two***three***four
+link=[%LT/next%GT]
+missing=[]
 </stdout>
 </verify>
 </testcase>
