@@ -34,6 +34,7 @@
 
 #include "urldata.h"
 #include "bufq.h"
+#include "cf-ip-happy.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "select.h"
@@ -97,15 +98,17 @@ static const char * const cf_socks_statename[] = {
 struct socks_ctx {
   enum socks_state_t state;
   struct bufq iobuf;
+  struct Curl_peer *peer;
   struct Curl_peer *dest;
   struct Curl_creds *creds;
   CURLproxycode presult;
-  uint32_t resolv_id;
   uint8_t ip_version;
+  uint8_t ipv_used;
   uint8_t proxy_type;
   unsigned char version;
   BIT(resolve_local);
   BIT(socks4a);
+  BIT(socks5_addr_retried);
 };
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -334,6 +337,7 @@ static CURLproxycode socks4_resolving(struct socks_ctx *sx,
     struct sockaddr_in *saddr_in;
     char ipbuf[64];
 
+    sx->ipv_used = CURL_IPRESOLVE_V4;
     Curl_printable_address(ai, ipbuf, sizeof(ipbuf));
     CURL_TRC_CF(data, cf, "SOCKS4 connect to IPv4 %s (locally resolved)",
                 ipbuf);
@@ -849,10 +853,12 @@ static CURLproxycode socks5_resolving(struct socks_ctx *sx,
   }
 
 #ifdef USE_IPV6
-  if(data->set.ipver != CURL_IPRESOLVE_V4)
+  if(sx->ip_version != CURL_IPRESOLVE_V4)
     ai = Curl_dns_cf_get_ai(data, cf, sx->dest, AF_INET6, 0);
 #endif
-  if(!ai)
+  if(!ai && ((sx->ip_version != CURL_IPRESOLVE_V6) ||
+             (!sx->socks5_addr_retried &&
+              Curl_is_ipv4addr(sx->dest->hostname))))
     ai = Curl_dns_cf_get_ai(data, cf, sx->dest, AF_INET, 0);
 
   if(!ai) {
@@ -872,6 +878,7 @@ static CURLproxycode socks5_resolving(struct socks_ctx *sx,
     destination = (const unsigned char *)&saddr_in->sin_addr.s_addr;
     CURL_TRC_CF(data, cf, "SOCKS5 connect to %s:%u (locally resolved)",
                 dest, sx->dest->port);
+    sx->ipv_used = CURL_IPRESOLVE_V4;
   }
 #ifdef USE_IPV6
   else if(ai->ai_family == AF_INET6) {
@@ -882,6 +889,7 @@ static CURLproxycode socks5_resolving(struct socks_ctx *sx,
     destination = (const unsigned char *)&saddr_in6->sin6_addr.s6_addr;
     CURL_TRC_CF(data, cf, "SOCKS5 connect to [%s]:%u (locally resolved)",
                 dest, sx->dest->port);
+    sx->ipv_used = CURL_IPRESOLVE_V6;
   }
 #endif
 
@@ -919,12 +927,14 @@ out:
 static CURLproxycode socks5_recv_resp1(struct socks_ctx *sx,
                                        struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
+                                       int *sx_code,
                                        bool *done)
 {
   const unsigned char *resp;
   size_t rlen, resp_len = 8; /* minimum response length */
   CURLproxycode presult;
 
+  *sx_code = 0;
   presult = socks_recv(sx, cf, data, resp_len, done);
   if(presult)
     return presult;
@@ -952,31 +962,10 @@ static CURLproxycode socks5_recv_resp1(struct socks_ctx *sx,
      o IPv6 address: 0x04, BND.ADDR = 16-byte
    */
   if(resp[0] != 5) { /* version */
-    failf(data, "SOCKS5 reply has wrong version, version should be 5.");
+    failf(data, "SOCKS5 reply has version %d, version should be 5.", resp[0]);
     return CURLPX_BAD_VERSION;
   }
-  else if(resp[1]) { /* Anything besides 0 is an error */
-    CURLproxycode rc = CURLPX_REPLY_UNASSIGNED;
-    int code = resp[1];
-    failf(data, "cannot complete SOCKS5 connection to %s. (%d)",
-          sx->dest->hostname, code);
-    if(code < 9) {
-      /* RFC 1928 section 6 lists: */
-      static const CURLproxycode lookup[] = {
-        CURLPX_OK,
-        CURLPX_REPLY_GENERAL_SERVER_FAILURE,
-        CURLPX_REPLY_NOT_ALLOWED,
-        CURLPX_REPLY_NETWORK_UNREACHABLE,
-        CURLPX_REPLY_HOST_UNREACHABLE,
-        CURLPX_REPLY_CONNECTION_REFUSED,
-        CURLPX_REPLY_TTL_EXPIRED,
-        CURLPX_REPLY_COMMAND_NOT_SUPPORTED,
-        CURLPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED,
-      };
-      rc = lookup[code];
-    }
-    return rc;
-  }
+  *sx_code = resp[1];
 
   /* Calculate real packet size */
   switch(resp[3]) {
@@ -1005,7 +994,28 @@ static CURLproxycode socks5_recv_resp1(struct socks_ctx *sx,
     failf(data, "SOCKS5 response is incomplete.");
     return CURLPX_RECV_CONNECT;
   }
+
   /* got it all */
+  if(*sx_code) { /* Anything besides 0 is an error */
+    CURLproxycode rc = CURLPX_REPLY_UNASSIGNED;
+    CURL_TRC_CF(data, cf, "proxy replied with code=%d", *sx_code);
+    if(*sx_code < 9) {
+      /* RFC 1928 section 6 lists: */
+      static const CURLproxycode lookup[] = {
+        CURLPX_OK,
+        CURLPX_REPLY_GENERAL_SERVER_FAILURE,
+        CURLPX_REPLY_NOT_ALLOWED,
+        CURLPX_REPLY_NETWORK_UNREACHABLE,
+        CURLPX_REPLY_HOST_UNREACHABLE,
+        CURLPX_REPLY_CONNECTION_REFUSED,
+        CURLPX_REPLY_TTL_EXPIRED,
+        CURLPX_REPLY_COMMAND_NOT_SUPPORTED,
+        CURLPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED,
+      };
+      rc = lookup[*sx_code];
+    }
+    return rc;
+  }
   *done = TRUE;
   return CURLPX_OK;
 }
@@ -1016,15 +1026,20 @@ static CURLproxycode socks5_recv_resp1(struct socks_ctx *sx,
  */
 static CURLproxycode socks5_connect(struct Curl_cfilter *cf,
                                     struct socks_ctx *sx,
-                                    struct Curl_easy *data)
+                                    struct Curl_easy *data,
+                                    bool *pretry)
 {
   CURLproxycode presult;
   bool done;
 
+  *pretry = FALSE;
+
 process_state:
+  CURL_TRC_CF(data, cf, "socks5_connect, state=%d", (int)sx->state);
   switch(sx->state) {
   case SOCKS_ST_INIT:
     sx->version = 5;
+    Curl_bufq_reset(&sx->iobuf);
     sxstate(sx, cf, data, SOCKS5_ST_START);
     FALLTHROUGH();
 
@@ -1140,15 +1155,40 @@ process_state:
     sxstate(sx, cf, data, SOCKS5_ST_RESP1_RECV);
     FALLTHROUGH();
 
-  case SOCKS5_ST_RESP1_RECV:
-    presult = socks5_recv_resp1(sx, cf, data, &done);
-    if(presult)
+  case SOCKS5_ST_RESP1_RECV: {
+    int sx_code;
+    presult = socks5_recv_resp1(sx, cf, data, &sx_code, &done);
+    if((presult == CURLPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED) &&
+       sx->resolve_local && !sx->socks5_addr_retried &&
+       !Curl_is_ipaddr(sx->dest->hostname) &&
+       (sx->ip_version == CURL_IPRESOLVE_WHATEVER)) {
+      /* Socks5 proxy could not initiate a connection with the passed
+       * ip family. Is there an alternative? */
+      uint8_t alt_ipv = (sx->ipv_used == CURL_IPRESOLVE_V6) ?
+                        CURL_IPRESOLVE_V4 : CURL_IPRESOLVE_V6;
+      if(Curl_dns_cf_get_ai(data, cf, sx->dest,
+         (alt_ipv == CURL_IPRESOLVE_V6) ? AF_INET6 : AF_INET, 0)) {
+        CURL_TRC_CF(data, cf, "proxy does not support %s, "
+                    "trying the other one",
+                    (alt_ipv == CURL_IPRESOLVE_V4) ? "ipv6" : "ipv4");
+        sx->socks5_addr_retried = TRUE;
+        sx->ip_version = alt_ipv;
+        *pretry = TRUE;
+        sxstate(sx, cf, data, SOCKS_ST_INIT);
+        return presult;
+      }
+    }
+    if(presult) {
+      failf(data, "cannot complete SOCKS5 connection to %s. (%d)",
+            sx->dest->hostname, sx_code);
       return socks_failed(sx, cf, data, presult);
+    }
     if(!done)
       return CURLPX_OK;
     CURL_TRC_CF(data, cf, "SOCKS5 request granted.");
     sxstate(sx, cf, data, SOCKS_ST_SUCCESS);
     FALLTHROUGH();
+  }
 
   case SOCKS_ST_SUCCESS:
     return CURLPX_OK;
@@ -1166,6 +1206,7 @@ process_state:
 static void socks_proxy_ctx_free(struct socks_ctx *ctx)
 {
   if(ctx) {
+    Curl_peer_unlink(&ctx->peer);
     Curl_peer_unlink(&ctx->dest);
     Curl_creds_unlink(&ctx->creds);
     Curl_bufq_free(&ctx->iobuf);
@@ -1185,12 +1226,14 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   struct socks_ctx *ctx = cf->ctx;
   CURLproxycode pxresult = CURLPX_OK;
   CURLcode result;
+  bool retry = FALSE;
 
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
   }
 
+do_connect:
   result = cf->next->cft->do_connect(cf->next, data, done);
   if(result || !*done)
     return result;
@@ -1198,7 +1241,19 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   switch(ctx->proxy_type) {
   case CURLPROXY_SOCKS5:
   case CURLPROXY_SOCKS5_HOSTNAME:
-    pxresult = socks5_connect(cf, ctx, data);
+    pxresult = socks5_connect(cf, ctx, data, &retry);
+    if(pxresult && retry) {
+      /* tear down the filters below and connect again to the socks proxy */
+      Curl_conn_cf_discard_chain(&cf->next, data);
+      result = Curl_cf_ip_happy_insert_after(
+        cf, data, ctx->peer, ctx->peer,
+        ctx->peer->unix_socket ? TRNSPRT_UNIX : TRNSPRT_TCP,
+        NULL, TRNSPRT_TCP);
+      if(!result) {
+        CURL_TRC_CF(data, cf, "opening new connection for retry");
+        goto do_connect;
+      }
+    }
     break;
 
   case CURLPROXY_SOCKS4:
@@ -1328,6 +1383,7 @@ struct Curl_cftype Curl_cft_socks_proxy = {
 
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
                                           struct Curl_easy *data,
+                                          struct Curl_peer *peer,
                                           struct Curl_peer *dest,
                                           uint8_t ip_version,
                                           uint8_t proxy_type,
@@ -1365,6 +1421,7 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  Curl_peer_link(&ctx->peer, peer);
   Curl_peer_link(&ctx->dest, dest);
   ctx->ip_version = ip_version;
   ctx->proxy_type = proxy_type;
