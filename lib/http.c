@@ -3403,7 +3403,10 @@ static CURLcode http_header_s(struct Curl_easy *data,
 #endif
 
 #ifndef CURL_DISABLE_COOKIES
-  v = (data->cookies && data->state.cookie_engine) ?
+  /* Ignore Set-Cookie on 1xx, same as Location. A 103 can otherwise
+     store a cookie the final response never sent. */
+  v = (data->cookies && data->state.cookie_engine &&
+       (data->req.httpcode/100 >= 2)) ?
     HD_VAL(hd, hdlen, "Set-Cookie:") : NULL;
   if(v) {
     /* If there is a custom-set Host: name, use it here, or else use
