@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+ETag
+retry
+--etag-compare
+--etag-save
+--retry-all-errors
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes" crlf="headers">
+HTTP/1.1 200 OK swsclose swsbounce
+ETag: "failed"
+Content-Length: 100
+Connection: close
+
+partial
+</data>
+<data1 nocheck="yes" crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 5
+Connection: close
+
+done
+</data1>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+--etag-save discards ETag from failed attempt on retry
+</name>
+<file name="%LOGDIR/etag%TESTNUMBER">
+"old"
+</file>
+<command option="no-output,no-include">
+--retry 1 --retry-delay 0 --retry-all-errors http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER --etag-save %LOGDIR/etag%TESTNUMBER -o %LOGDIR/out%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+If-None-Match: "old"
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+If-None-Match: "old"
+
+</protocol>
+<file1 name="%LOGDIR/out%TESTNUMBER">
+done
+</file1>
+<file2 name="%LOGDIR/etag%TESTNUMBER">
+"old"
+</file2>
+</verify>
+</testcase>

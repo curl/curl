@@ -56,7 +56,6 @@ Accept: */*
 original
 </file1>
 <file2 name="%LOGDIR/etag%TESTNUMBER">
-"tag%TESTNUMBER"
 </file2>
 </verify>
 </testcase>

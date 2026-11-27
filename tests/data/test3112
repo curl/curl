@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+ETag
+followlocation
+--etag-save
+--fail-with-body
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes" crlf="headers">
+HTTP/1.1 301 Moved Permanently
+Location: /%TESTNUMBER0002
+ETag: "redirect"
+Content-Length: 0
+
+</data>
+<data2 nocheck="yes" crlf="headers">
+HTTP/1.1 404 Not Found
+Content-Length: 5
+Connection: close
+
+nope
+</data2>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+--etag-save skips redirect ETag when final response fails
+</name>
+<file name="%LOGDIR/etag%TESTNUMBER">
+"old"
+</file>
+<command option="no-output,no-include">
+-L --fail-with-body http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save %LOGDIR/etag%TESTNUMBER -o %LOGDIR/out%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+22
+</errorcode>
+<file1 name="%LOGDIR/out%TESTNUMBER">
+nope
+</file1>
+<file2 name="%LOGDIR/etag%TESTNUMBER">
+"old"
+</file2>
+</verify>
+</testcase>
