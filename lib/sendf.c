@@ -180,6 +180,19 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     ctx->started_response = TRUE;
   }
 
+  if(type & CLIENTWRITE_INTERLEAVE) {
+    if(!ctx->started_body) {
+      Curl_rlimit_start(&data->progress.dl.rlimit, Curl_pgrs_now(data), -1);
+      ctx->started_body = TRUE;
+    }
+    result = Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+    CURL_TRC_WRITE(data, "download_write rtp(type=%x, blen=%zu) -> %d",
+                   (unsigned int)type, nbytes, (int)result);
+    if(!result && nbytes)
+      Curl_pgrs_download_inc(data, nbytes);
+    return result;
+  }
+
   if(!(type & CLIENTWRITE_BODY)) {
     if(is_connect && data->set.suppress_connect_headers)
       return CURLE_OK;
@@ -370,14 +383,17 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
   CURLcode result;
 
   /* it is one of those, at least */
-  DEBUGASSERT(type &
-              (CLIENTWRITE_BODY | CLIENTWRITE_HEADER | CLIENTWRITE_INFO));
+  DEBUGASSERT(type & (CLIENTWRITE_BODY | CLIENTWRITE_HEADER |
+                      CLIENTWRITE_INFO | CLIENTWRITE_INTERLEAVE));
   /* BODY is only BODY (with optional EOS) */
   DEBUGASSERT(!(type & CLIENTWRITE_BODY) ||
               ((type & ~(CLIENTWRITE_BODY | CLIENTWRITE_EOS)) == 0));
   /* INFO is only INFO (with optional EOS) */
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) ||
               ((type & ~(CLIENTWRITE_INFO | CLIENTWRITE_EOS)) == 0));
+  /* INTERLEAVE is only INTERLEAVE */
+  DEBUGASSERT(!(type & CLIENTWRITE_INTERLEAVE) ||
+              ((type & ~CLIENTWRITE_INTERLEAVE) == 0));
 
   if(!data->req.writer.stack) {
     result = do_init_writer_stack(data);

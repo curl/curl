@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+RTSP
+RTP
+CURLOPT_MAXFILESIZE
+libtest
+</keywords>
+</info>
+
+<reply>
+<data1 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1
+Content-Length: 2
+Connection: close
+Curl-Private: swsclose
+
+%hex[%24%00%4e%20]hex%%repeat[20000 x A]%x
+</data1>
+
+<data2 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 2
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1
+Content-Length: 2
+Connection: close
+Curl-Private: swsclose
+
+%hex[%24%00%4e%20]hex%%repeat[20000 x A]%x
+</data2>
+
+<data3 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 3
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1
+Content-Length: 2
+Connection: close
+Curl-Private: swsclose
+
+%hex[%24%00%4e%20]hex%%repeat[20000 x A]%x
+</data3>
+
+<data4 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 4
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1
+Content-Length: 2
+Connection: close
+Curl-Private: swsclose
+
+%hex[%24%00%4e%20]hex%%repeat[20000 x A]%x
+</data4>
+
+<data5 crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 5
+Transport: RTP/AVP/TCP;unicast;interleaved=0-1
+Content-Length: 2
+Connection: close
+Curl-Private: swsclose
+
+%hex[%24%00%02%58]hex%%repeat[600 x B]%%hex[%24%00%02%58]hex%%repeat[600 x C]%x
+</data5>
+</reply>
+
+<client>
+<server>
+rtsp
+</server>
+<name>
+RTSP interleaved data write size and max filesize limits
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<stdout>
+case1: rtp_calls=2 max=16384 total=20006 bad=0 delivered=20006 dl=20006
+case2: rtp_calls=1 rtp_max=20004 rtp_total=20004 body=2 delivered=20006 dl=20006
+case3: result=63 total=0
+case4: result=63 rtp_total=0 body=0
+case5: result=63 calls=1 total=604 delivered=604 dl=604
+</stdout>
+</verify>
+</testcase>
