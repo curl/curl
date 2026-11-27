@@ -35,9 +35,36 @@ fi
 export CURL_CI=appveyor
 verbose=''
 
+if [ -n "${REVERT_PATCH:-}" ]; then
+  curl -LO https://github.com/curl/curl/commit/eed87d833d25ce747b0fca8093a7548d8a525433.diff
+  curl -LO https://github.com/curl/curl/commit/13fce6c1d55c6fd3f8ad6c6208cfe90897d91613.diff
+  curl -LO https://github.com/curl/curl/commit/12938b611c5c0e99b38ebfdbea5e13a50bd4db24.diff
+  curl -LO https://github.com/curl/curl/commit/123c11cbace41021968ec5bfff894a3dae281022.diff
+  patch -p1 -R -i eed87d833d25ce747b0fca8093a7548d8a525433.diff
+  patch -p1 -R -i 13fce6c1d55c6fd3f8ad6c6208cfe90897d91613.diff
+  patch -p1 -R -i 12938b611c5c0e99b38ebfdbea5e13a50bd4db24.diff
+  patch -p1 -R -i 123c11cbace41021968ec5bfff894a3dae281022.diff
+fi
+
+echo '----------------'
+find /usr -name HiRes.pm || true
+echo '----------------'
+grep -F 'VERSION' /usr/lib/perl5/core_perl/Time/HiRes.pm || true
+echo '----------------'
+head -n 30 /usr/lib/perl5/core_perl/Time/Changes || true
+echo '----------------'
+
 # build
 
 if [ -n "${CMAKE_GENERATOR:-}" ]; then
+
+  if [ -n "${UPLOAD_MSYS:-}" ]; then
+    archive='msys.zip'
+    find /c/msys64 > files.tmp
+    echo 'Creating artifact (MSYS2)'
+    time tar --create --no-recursion --files-from files.tmp | xz > "${archive}"
+    appveyor PushArtifact "${archive}" &
+  fi
 
   PRJ_CFG='Debug'
   [[ "${APPVEYOR_JOB_NAME}" = *'Release'* ]] && PRJ_CFG='Release'
@@ -172,16 +199,18 @@ if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* 
 
     unset APPVEYOR_API_URL  # disable updating the 'Tests' counter via the API to save CI time
     if [ -n "${RUN_TESTS_VIA_CMAKE:-}" ]; then  # just to document the differences
-      export TFLAGS="-j10 ${TFLAGS:-}"
+      export TFLAGS="-j0 ${TFLAGS:-}"
+      TFLAGS="!killserver ${TFLAGS:-}"  # skip slow/CPU-intensive test
       time cmake --build _bld --config "${PRJ_CFG}" --target test-ci
     else
       export CURL_DIRSUFFIX="${PRJ_CFG}"
       TFLAGS="!1119 !1167 ${TFLAGS:-}"  # skip tests that need a configured cl.exe
+      TFLAGS="!killserver ${TFLAGS:-}"  # skip slow/CPU-intensive test
       (
         cd _bld/tests
         # This command must use the same Perl as detected in the CMake configuration step.
         # shellcheck disable=SC2086
-        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent -r --retry=5 -j10 --buildinfo ${TFLAGS}
+        time ../../tests/runtests.pl -a -p ~flaky ~timing-dependent -r --retry=5 -j0 --buildinfo ${TFLAGS}
       )
     fi
   else

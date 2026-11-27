@@ -523,7 +523,8 @@ sub senddata {
             # pause between each byte
             for(split(//, $l)) {
                 sockfiltsecondary $_;
-                Time::HiRes::sleep($datadelay);
+                #Time::HiRes::sleep($datadelay);
+                Win32::Sleep($datadelay * 1000);
             }
         }
     }
