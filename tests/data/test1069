@@ -21,7 +21,7 @@ HTTP 1.0 PUT from stdin with no content length
 <command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T - -0
 </command>
-<stdin>
+<stdin pipe="yes">
 this data cannot be sent
 </stdin>
 </client>

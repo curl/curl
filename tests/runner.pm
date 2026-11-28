@@ -961,6 +961,7 @@ sub singletest_run {
     }
 
     my @stdintest = getpart("client", "stdin");
+    my $stdinpipe = "";
 
     if(@stdintest) {
         my $stdinfile = "$LOGDIR/stdin-for-$testnum";
@@ -977,7 +978,14 @@ sub singletest_run {
 
         writearray($stdinfile, \@stdintest);
 
-        $cmdargs .= " <$stdinfile";
+        if($hash{'pipe'} && !$gdbthis) {
+            # pass the data through a pipe, so that stdin is not a regular
+            # file and its size is unknown to the tool
+            $stdinpipe = "cat $stdinfile | ";
+        }
+        else {
+            $cmdargs .= " <$stdinfile";
+        }
     }
 
     if(!$tool) {
@@ -1007,6 +1015,7 @@ sub singletest_run {
     }
     $CMDLINE .= "$cmdargs $redirstdout" .
         " 2> " . stderrfilename($LOGDIR, $testnum);
+    $CMDLINE = $stdinpipe . $CMDLINE;
 
     if($verbose) {
         logmsg "$CMDLINE\n";

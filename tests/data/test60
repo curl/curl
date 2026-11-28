@@ -29,7 +29,7 @@ HTTP PUT from stdin with wrong content-length
 <command>
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T - -H "Content-Length: 1"
 </command>
-<stdin>
+<stdin pipe="yes">
 more than one byte
 </stdin>
 </client>
