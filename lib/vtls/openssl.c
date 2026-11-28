@@ -5202,7 +5202,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
                           size_t *pnread)
 {
   char error_buffer[256];
-  unsigned long sslerror;
+  sslerr_t sslerror;
   int buffsize;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
@@ -5248,6 +5248,17 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
         goto out;
       }
       sslerror = ERR_get_error();
+#ifdef SSL_R_UNEXPECTED_EOF_WHILE_READING
+      if((err == SSL_ERROR_SSL) && (ERR_GET_LIB(sslerror) == ERR_LIB_SSL) &&
+         (ERR_GET_REASON(sslerror) == SSL_R_UNEXPECTED_EOF_WHILE_READING)) {
+        ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
+        infof(data, OSSL_PACKAGE " SSL_read: %s", error_buffer);
+        failf(data, "Unexpected TLS EOF (missing close_notify)");
+        result = CURLE_RECV_ERROR;
+        goto out;
+      }
+#endif
+
       if((nread < 0) || sslerror) {
         /* If the return code was negative or there actually is an error in the
            queue */
