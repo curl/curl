@@ -21,14 +21,24 @@ CUSTOMREQUEST
 smtp
 </server>
 <name>
-SMTP mailing list EXPN (CUSTOMREQUEST)
+SMTP mailing list EXPN (CUSTOMREQUEST), then a recipient with CRLF
 </name>
+# read the second recipient from a config file so the raw CR LF reaches
+# curl intact regardless of how the platform passes command line arguments
+<file name="%LOGDIR/test%TESTNUMBER.config">
+mail-rcpt = "list\r\nRSET"
+</file>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN --next smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X EXPN -K %LOGDIR/test%TESTNUMBER.config
 </command>
 </client>
 
 <verify>
+# 43 - CURLE_BAD_FUNCTION_ARGUMENT
+<errorcode>
+43
+</errorcode>
+# the injected RSET command must never reach the server
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 EXPN Friends
