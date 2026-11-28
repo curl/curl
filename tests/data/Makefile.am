@@ -588,6 +588,7 @@ TESTCASES = \
   test587 \
   test588 \
   test589 \
+  test590 \
   test591 \
   test592 \
   test593 \
@@ -1745,6 +1746,8 @@ TESTCASES = \
   test1921 \
   test1922 \
   test1923 \
+  test1924 \
+  test1925 \
   \
   test1933 \
   test1934 \

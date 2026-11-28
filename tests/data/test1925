@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+WebSockets
+multi
+libtest
+timeout
+</keywords>
+</info>
+
+<reply>
+<data nocheck="yes">
+</data>
+<servercmd>
+idle
+</servercmd>
+</reply>
+
+<client>
+<features>
+ws
+</features>
+<server>
+http
+</server>
+<name>
+WebSockets: connect timeout with receiving paused, no Upgrade response
+</name>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<stdout>
+transfer done: 28
+</stdout>
+</verify>
+</testcase>
