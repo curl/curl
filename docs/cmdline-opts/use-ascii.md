@@ -21,3 +21,6 @@ Enable ASCII transfer mode. For FTP, this can also be enforced by using a URL
 that ends with `;type=A`. For TFTP, this can also be enforced by using a URL
 that ends with `;mode=netascii`. This option causes data sent to stdout to be
 in text mode for Win32 systems.
+
+On systems other than Windows, TFTP uploads in this mode are sent as
+`netascii`: each `LF` is sent as `CR LF` and each `CR` as `CR NUL`.

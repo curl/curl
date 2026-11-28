@@ -627,6 +627,7 @@ struct UrlState {
   BIT(cookie_engine);
 #endif
   BIT(prefer_ascii);   /* ASCII rather than binary */
+  BIT(netascii);       /* ASCII uploads use TFTP netascii line ends */
 #ifdef CURL_LIST_ONLY_PROTOCOL
   BIT(list_only);      /* list directory contents */
 #endif

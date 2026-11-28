@@ -657,6 +657,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
   struct Curl_easy *data = state->data;
   const struct Curl_sockaddr_ex *remote_addr = NULL;
   CURLcode result = CURLE_OK;
+  curl_off_t upload_size = -1;
 
   /* Set ASCII mode if -B flag was used */
   if(data->state.prefer_ascii)
@@ -677,8 +678,15 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
     if(data->state.upload) {
       /* If we are uploading, send a WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
-      if(data->state.infilesize != -1)
-        Curl_pgrsSetUploadSize(data, data->state.infilesize);
+      if(!data->req.reader.stack) {
+        result = Curl_creader_set_fread(data, data->state.infilesize);
+        if(result)
+          return result;
+      }
+      /* unknown when line ends get converted */
+      upload_size = Curl_creader_total_length(data);
+      if(upload_size != -1)
+        Curl_pgrsSetUploadSize(data, upload_size);
     }
     else {
       /* If we are downloading, send an RRQ */
@@ -713,8 +721,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
       char buf[64];
       /* add tsize option */
       curl_msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
-                     data->state.upload && (data->state.infilesize != -1) ?
-                     data->state.infilesize : 0);
+                     (upload_size != -1) ? upload_size : 0);
 
       result = tftp_option_add(state, &sbytes, sbytes, TFTP_OPTION_TSIZE);
       if(result == CURLE_OK)
@@ -1333,6 +1340,7 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
     data->state.prefer_ascii = FALSE;
     path[len - 11] = 0; /* cut it there */
   }
+  data->state.netascii = data->state.prefer_ascii;
 
   return CURLE_OK;
 }
